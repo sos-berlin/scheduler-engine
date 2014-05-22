@@ -2,28 +2,25 @@ package com.sos.scheduler.engine.plugins.jetty.cpp
 
 import CppServletIT._
 import com.google.common.io.Files
-import com.google.inject.Injector
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
-import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
-import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
+import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
+import com.sos.scheduler.engine.plugins.jetty.test.{JettyPluginJerseyTester, JettyPluginTests}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.{Client, ClientResponse, UniformInterfaceException}
 import java.io.File
-import java.net.URI
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
 import javax.ws.rs.core.Response.Status._
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class CppServletIT extends FunSuite with ScalaSchedulerTest {
+final class CppServletIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester {
 
   private lazy val httpDirectory = testDirectory
 
@@ -35,40 +32,39 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
   for (testConf <- TestConf(newAuthentifyingClient(), withGzip = false) ::
                    //TestConf(newAuthentifyingClient(filters=Iterable(new GZIPContentEncodingFilter(false))), withGzip = true) ::
                    Nil) {
-    lazy val resource = cppResource(injector, testConf.client)
+    //lazy val resource = cppResource(injector, testConf.client)
 
-    test("Kommando ueber POST "+testConf) {
-      val result = stringFromResponse(resource.`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[ClientResponse], "<show_state/>"))
+    s"Kommando ueber POST $testConf" in {
+      val result = stringFromResponse(webResource.path("/jobscheduler/engine-cpp").`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[ClientResponse], "<show_state/>"))
       result should include ("<state")
     }
 
-    test("Kommando ueber POST ohne Authentifizierung "+testConf) {
+    s"Kommando ueber POST ohne Authentifizierung $testConf" in {
       val webClient = Client.create()
-      val x = intercept[UniformInterfaceException] {
-        cppResource(injector, webClient).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
-      }
+      intercept[UniformInterfaceException] {
+        webClient.resource(s"http://$host:$port/jobscheduler/engine-cpp").`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
+      } .getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
       webClient.destroy()
-      x.getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
     }
 
-    test("Kommando ueber GET "+testConf) {
-      val result = stringFromResponse(resource.path("<show_state/>").accept(TEXT_XML_TYPE).get(classOf[ClientResponse]))
+    s"Kommando ueber GET $testConf" in {
+      val result = stringFromResponse(get[ClientResponse]("/jobscheduler/engine-cpp/%3Cshow_state/%3E", Accept = List(TEXT_XML_TYPE)))
       result should include ("<state")
     }
 
-    test("Alle Bitmuster "+testConf) {
+    s"Alle Bitmuster $testConf" in {
       val bytes = (0 to 255 map { _.toByte }).toArray
       val filename = "test.txt"
       Files.write(bytes, new File(httpDirectory, filename))
-      val response = checkedResponse(resource.path(filename).get(classOf[ClientResponse]))
+      val response = checkedResponse(get[ClientResponse](s"/jobscheduler/engine-cpp/$filename"))
       response.getEntity(classOf[Array[Byte]]) should equal(bytes)
     }
 
-    test("show_log?task=... "+testConf) {
+    s"show_log?task=... $testConf" in {
       val eventPipe = controller.newEventPipe()
       scheduler.executeXml(<order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}/>)
       val taskId = eventPipe.nextWithCondition { e: TaskStartedEvent => e.jobPath == orderJobPath } .taskId
-      val result = stringFromResponse(resource.path("show_log").queryParam("task", taskId.string).accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
+      val result = stringFromResponse(get[ClientResponse](s"/jobscheduler/engine-cpp/show_log?task=${taskId.string}", Accept = List(TEXT_HTML_TYPE)))
       result should include ("SCHEDULER-918  state=closed")
       result should include ("SCHEDULER-962") // "Protocol ends in ..."
       result.trim should endWith("</html>")
@@ -89,12 +85,6 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
 
 private object CppServletIT {
   private val orderKey = aJobChainPath.orderKey("1")
-
-  private def cppResource(injector: Injector, client: Client) =
-    client.resource(cppContextUri(injector))
-
-  private def cppContextUri(injector: Injector) =
-    new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + cppPrefixPath)
 
   private case class TestConf(client: Client, withGzip: Boolean) {
     override def toString = if (withGzip) "compressed with gzip" else ""

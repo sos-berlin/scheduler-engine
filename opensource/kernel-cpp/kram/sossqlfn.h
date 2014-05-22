@@ -1,4 +1,4 @@
-// sossqlfn.h                                       ©1996 SOS GmbH Berlin
+// sossqlfn.h                                       Â©1996 SOS GmbH Berlin
 
 #ifndef __SOSSQLFN_H
 

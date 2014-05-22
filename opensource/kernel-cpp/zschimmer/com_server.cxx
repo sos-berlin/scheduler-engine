@@ -153,7 +153,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
     Variant             vargs [ max_com_method_params ];
 
     // Muss auf double ausgerichtet sein!
-    void*               args  [ max_com_method_params * sizeof(VARIANT)/sizeof(void*) + 1 ];    // Einer mehr für die Rückgabe
+    void*               args  [ max_com_method_params * sizeof(VARIANT)/sizeof(void*) + 1 ];    // Einer mehr fÃ¼r die RÃ¼ckgabe
     void**              a     = args;
 
     // Muss auf double ausgerichtet sein!
@@ -185,7 +185,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
     }
     
 
-    // PROTOKOLLIEREN UND PRÜFEN
+    // PROTOKOLLIEREN UND PRÃœFEN
 
 
     if( !m->_method )
@@ -222,7 +222,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
          && dispparams->rgdispidNamedArgs[0] == DISPID_PROPERTYPUT ) ;  //ok
         else 
         {
-            //jz 13.10.04  Sollten hier nicht auch mehrere Parameter möglich sein: obj.prop(47) = 23?
+            //jz 13.10.04  Sollten hier nicht auch mehrere Parameter mÃ¶glich sein: obj.prop(47) = 23?
             Z_LOG2( "com.invoke", "Com_invoke: DISPATCH_PROPERTYPUT, but not cNamedArgs == 1 or rgdispidNamedArgs[0] == DISPID_PROPERTYPUT\n" );
             return DISP_E_BADPARAMCOUNT;
         }
@@ -267,7 +267,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
             if( safearray_vartype != ( t & ~VT_ARRAY ) ) 
             {
                 Z_LOG2( "com.invoke", "safearray_vartype=" << vartype_name( safearray_vartype ) << " != t=" << vartype_name( t ) << "\n" );
-                return DISP_E_TYPEMISMATCH;       // VT_ARRAY und VT_TYPEMASK müssen gleich sein
+                return DISP_E_TYPEMISMATCH;       // VT_ARRAY und VT_TYPEMASK mÃ¼ssen gleich sein
             }
 
             *a++ = V_ARRAY(p);
@@ -280,7 +280,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
         }
         else
         {   
-            if( ( t & ~VT_BYREF ) != p->vt )    // Typ ändern?
+            if( ( t & ~VT_BYREF ) != p->vt )    // Typ Ã¤ndern?
             {
                 hr = VariantChangeType( &vargs[i], p, lcid, t & ~VT_BYREF );
                 if( FAILED(hr) ) { 
@@ -370,7 +370,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
     DEBUG_PRINTF( ")" );
 
 
-    for(; i < max_com_method_params; i++ )      // Mit Default-Parametern auffüllen
+    for(; i < max_com_method_params; i++ )      // Mit Default-Parametern auffÃ¼llen
     {
         VARTYPE t = m->_types[i];
 
@@ -380,7 +380,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
         else
         if( t & VT_BYREF  )               *a++ = (void*)NULL;
         else
-        switch( t )             // Standard-Defaultwerte (nicht änderbar):
+        switch( t )             // Standard-Defaultwerte (nicht Ã¤nderbar):
         {
             case VT_I4:         *a++ = (void*)(int32)   0;      break;
             case VT_INT:        *a++ = (void*)(int)     0;      break;
@@ -426,7 +426,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
 
     hr = (idispatch->*f)( args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);
 
-    /* SAFEARRAY Vartype prüfen, noch nicht fertig. Auf Null-Rückgabe und Null-Result-Parameter achten
+    /* SAFEARRAY Vartype prÃ¼fen, noch nicht fertig. Auf Null-RÃ¼ckgabe und Null-Result-Parameter achten
     if( m->_result_type & VT_ARRAY )
     {
         VARTYPE vt = 0;

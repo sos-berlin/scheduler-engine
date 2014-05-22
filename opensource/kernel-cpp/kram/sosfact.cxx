@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosfact"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 
@@ -163,7 +163,7 @@ Sos_object_ptr Sos_factory_agent::request_create( Sos_object* sender, const Sos_
         Sos_object_descr::Subtype_code subtype_code;
 
         if ( type_name_length == 1 ) type_name_length = 0; // zur Erkennung von DOS-Laufwerksbuchstaben
-                                                           // d.h. File-Typen müssen mindestens 2-buchstabig sein!
+                                                           // d.h. File-Typen mÃ¼ssen mindestens 2-buchstabig sein!
         if( !type_name_length || empty( c_str( name ) + type_name_length ) ) {   // Nur Dateiname?
             type_name = "file";                                 // Default-Objekttyp
             name = type_name + " " + name;

@@ -217,11 +217,11 @@ bool Folder::adjust_with_directory( Directory* directory )
                 }
                 else
                 {
-                    // Hier abhängige Dateien (die keine Objekte sind) prüfen, nur für live/, nicht für cache!
+                    // Hier abhÃ¤ngige Dateien (die keine Objekte sind) prÃ¼fen, nur fÃ¼r live/, nicht fÃ¼r cache!
                     // Pfad im zentralen Register nachsehen, 
                     // Objekt ermitteln
                     // Wenn Zeitstempel des Pfads im Objekt verschieden ist:
-                    //      Objekt ersetzen:  object->reread();     load_from_xml(), set_replacement(), später ersetzen. Aber mehrfache Ersetzung vermeiden, also nur signalisieren.
+                    //      Objekt ersetzen:  object->reread();     load_from_xml(), set_replacement(), spÃ¤ter ersetzen. Aber mehrfache Ersetzung vermeiden, also nur signalisieren.
                     //folder_subsystem()->Included_files()->check_file( Absolute_path( folder_path, name ), directory_entry->_file_info );
 
                     name = object_name_of_filename( filename );
@@ -254,7 +254,7 @@ bool Folder::adjust_with_directory( Directory* directory )
     catch( exception& x ) 
     {
         log()->error( message_string( "SCHEDULER-431", x ) );
-        //? Fehler merken für <show_state>, oder was machen wir mit dem Fehler? Später wiederholen
+        //? Fehler merken fÃ¼r <show_state>, oder was machen wir mit dem Fehler? SpÃ¤ter wiederholen
     }
 
 
@@ -270,10 +270,10 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
     xml::Element_ptr result = dom_document.createElement( "folder" );
     fill_file_based_dom_element( result, show_what );
 
-    // Auswerten des flags für die Auflösung der Ordnerstrukur (no_subfolders)
+    // Auswerten des flags fÃ¼r die AuflÃ¶sung der Ordnerstrukur (no_subfolders)
     if ( !show_what.is_set(show_no_subfolders_flag) ) {                                                           // JS-506
 
-        // JS-506: Das flag show_no_subfolders_flag wird nur intern verwendet. Es ergänzt die Struktur show_what.
+        // JS-506: Das flag show_no_subfolders_flag wird nur intern verwendet. Es ergÃ¤nzt die Struktur show_what.
         Show_what myShowWhat = show_what;
         if (show_what.is_set( show_no_subfolders ) )
            myShowWhat |= show_no_subfolders_flag;

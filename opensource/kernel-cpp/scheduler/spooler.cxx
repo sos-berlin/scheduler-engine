@@ -53,37 +53,37 @@ namespace scheduler {
 
 
 const char*                     default_factory_ini                 = "factory.ini";
-const int                       max_open_log_files                  = 50;               // Anzahl der offenzuhaltenden Log-Dateien. Wenn's mehr wird, wird die älteste geschlossen.
-const int                       windows_maxstdio                    = 2048;             // Anzahl stdio-Handles für Windows
-const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
+const int                       max_open_log_files                  = 50;               // Anzahl der offenzuhaltenden Log-Dateien. Wenn's mehr wird, wird die Ã¤lteste geschlossen.
+const int                       windows_maxstdio                    = 2048;             // Anzahl stdio-Handles fÃ¼r Windows
+const string                    new_suffix                          = "~new";           // Suffix fÃ¼r den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
-const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+const double                    renew_wait_time                     = 30;               // Wartezeit fÃ¼r BrÃ¼ckenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 
-const Duration                  before_suspend_wait_time            = Duration(5);      // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie möglich)
-const Duration                  inhibit_suspend_wait_time           = Duration(10*60);  // Nur Suspend, wenn Wartezeit länger ist
+const Duration                  before_suspend_wait_time            = Duration(5);      // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie mÃ¶glich)
+const Duration                  inhibit_suspend_wait_time           = Duration(10*60);  // Nur Suspend, wenn Wartezeit lÃ¤nger ist
 const Duration                  show_message_after_seconds          = Duration(15*60);  // Nach dieser Wartezeit eine Meldung ausgeben
 const Duration                  show_message_after_seconds_debug    = Duration(60);     // Nach dieser Wartezeit eine Meldung ausgeben
 
-const int                       nothing_done_max                    = 10;  //2+1;        // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
-                                                                                        // +1 für Job::start_when_directory_changed() unter Windows
+const int                       nothing_done_max                    = 10;  //2+1;        // Ein Ã¼berflÃ¼ssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
+                                                                                        // +1 fÃ¼r Job::start_when_directory_changed() unter Windows
 const double                    nichts_getan_bremse                 = 1.0;              // Wartezeit in nichts_getan(), Meldung SCHEDULER-261
 #ifdef Z_DEBUG
-    const int                   scheduler_261_second                = 5;                // Nach sovielen leeren Schleifendurchläufen SCHEDULER-261 wiederholen
-    const int                   scheduler_261_intervall             = 10;               // Meldung SCHEDULER-261 wiederholen (s.a. nichts_getan_bremse), sonst unterdrücken
+    const int                   scheduler_261_second                = 5;                // Nach sovielen leeren SchleifendurchlÃ¤ufen SCHEDULER-261 wiederholen
+    const int                   scheduler_261_intervall             = 10;               // Meldung SCHEDULER-261 wiederholen (s.a. nichts_getan_bremse), sonst unterdrÃ¼cken
 #else
-    const int                   scheduler_261_second                = 10;               // Nach sovielen leeren Schleifendurchläufen SCHEDULER-261 wiederholen
+    const int                   scheduler_261_second                = 10;               // Nach sovielen leeren SchleifendurchlÃ¤ufen SCHEDULER-261 wiederholen
     const int                   scheduler_261_intervall             = 1000;             // ca. 20 Minuten
 #endif
 
 const int                       kill_timeout_1                      = 10;               // < kill_timeout_total
 const int                       kill_timeout_total                  = 30;               // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 
-const int                       tcp_restart_close_delay             = 3;                // Wartezeit, damit der Browser nicht hängenbleibt.
-                                                                                        // Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloß?
-                                                                                        // Client (Internet Explorer) bekommt so Gelegenheit, selbst die Verbindung zu schließen.
+const int                       tcp_restart_close_delay             = 3;                // Wartezeit, damit der Browser nicht hÃ¤ngenbleibt.
+                                                                                        // Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloÃŸ?
+                                                                                        // Client (Internet Explorer) bekommt so Gelegenheit, selbst die Verbindung zu schlieÃŸen.
                                                                                         // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
 
-const int                       const_order_id_length_max           = 250;              // Die Datenbankspalte _muss_ so groß sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
+const int                       const_order_id_length_max           = 250;              // Die Datenbankspalte _muss_ so groÃŸ sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
 const Duration                  delete_temporary_files_delay        = Duration(2);                                
 const Duration                  delete_temporary_files_retry        = Duration(0.1);                              
@@ -91,10 +91,10 @@ const Duration                  delete_temporary_files_retry        = Duration(0
 const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
 
-volatile int                    ctrl_c_pressed                      = 0;                // Tatsächliches Signal ist in last_signal
+volatile int                    ctrl_c_pressed                      = 0;                // TatsÃ¤chliches Signal ist in last_signal
 volatile int                    ctrl_c_pressed_handled              = 0;
 #ifndef Z_WINDOWS
-    volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
+    volatile int                last_signal                         = 0;                // Signal fÃ¼r ctrl_c_pressed
 #endif
 
 #ifdef Z_HPUX
@@ -103,7 +103,7 @@ volatile int                    ctrl_c_pressed_handled              = 0;
 
 static Spooler*                 spooler_ptr                         = NULL;
 
-const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
+const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge fÃ¼r die ${...}-Ersetzung
 
 //-------------------------------------------------------------------------------------------------
 
@@ -509,7 +509,7 @@ static void set_ctrl_c_handler( bool on )
 
         ::signal( SIGINT , on? ctrl_c_handler : SIG_DFL );      // Ctrl-C
         ::signal( SIGTERM, on? ctrl_c_handler : SIG_DFL );      // Normales kill 
-        ::signal( SIGUSR1, on? ctrl_c_handler : SIG_DFL );      // Log erweitern oder zurücknehmen
+        ::signal( SIGUSR1, on? ctrl_c_handler : SIG_DFL );      // Log erweitern oder zurÃ¼cknehmen
 
 #   endif
 }
@@ -555,7 +555,7 @@ static void be_daemon()
             
                  // 2008-06-12 Besser: Warten, bis der Daemon ein Okay gegeben oder sich beendet hat.
                  // Wann ist es Okay? Nach der Datenbank, vor dem TCP-Port? 
-                 // Oder doch besser nach dem Port, also bei s_waiting_for_activation? Das wäre am saubersten.
+                 // Oder doch besser nach dem Port, also bei s_waiting_for_activation? Das wÃ¤re am saubersten.
 
                  //fprintf( stderr, "Daemon gestartet. pid=%d\n", pid ); 
                  //fflush( stderr );
@@ -605,10 +605,10 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
             }
 
             Z_FOR_EACH(Task_set, _spooler->_task_subsystem->_task_set, t ) {
-                (*t)->cmd_end( Task::end_kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
+                (*t)->cmd_end( Task::end_kill_immediately );      // Wirkt erst beim nÃ¤chsten Task::do_something()
             }
 
-            //_spooler->kill_all_processes();           Es reicht, wenn die Tasks gekillt werden. Die killen dann ihre abhängigigen Prozesse.
+            //_spooler->kill_all_processes();           Es reicht, wenn die Tasks gekillt werden. Die killen dann ihre abhÃ¤ngigigen Prozesse.
 
             set_async_next_gmtime( _timeout_at + kill_timeout_1 );
 
@@ -620,9 +620,9 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
         case s_killing_1:
         {
             int count = int_cast(_spooler->_task_subsystem->_task_set.size());
-            _spooler->_log->warn( message_string( "SCHEDULER-254", count, kill_timeout_1, kill_timeout_total ) );    // $1 Tasks haben sich nicht beendet trotz kill vor $2. Die $3s lange Nachfrist läuft weiter</title>
+            _spooler->_log->warn( message_string( "SCHEDULER-254", count, kill_timeout_1, kill_timeout_total ) );    // $1 Tasks haben sich nicht beendet trotz kill vor $2. Die $3s lange Nachfrist lÃ¤uft weiter</title>
             //_spooler->_log->warn( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_1 << "s."
-            //                     " Die " << kill_timeout_total << "s lange Nachfrist läuft weiter" );
+            //                     " Die " << kill_timeout_total << "s lange Nachfrist lÃ¤uft weiter" );
 
             Z_FOR_EACH(Task_set, _spooler->_task_subsystem->_task_set, t) {
                 _spooler->_log->warn( S() << "    " << (*t)->obj_name() );
@@ -711,7 +711,7 @@ Spooler::Spooler(jobject java_main_context)
     _pid          = getpid();
     _tcp_port     = 0;
     _udp_port     = 0;
-  //_priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
+  //_priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle PrioritÃ¤t der Jobs
     _com_log      = new Com_log( _log );
     _com_spooler  = new Com_spooler( this );
     _variables    = new Com_variable_set();
@@ -750,7 +750,7 @@ const Settings* Spooler::settings() const {
 void Spooler::check_licence() 
 {
     /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
-    if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+    if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // FrÃ¼h prÃ¼fen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
     _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
     if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed (licence key for agent is required. sales@sos-berlin.com).\n" );
     if ( Log_ptr::is_demo_version() )  
@@ -779,7 +779,7 @@ void Spooler::close()
     release_com_objects(); // falls noch jemand eine Referenz darauf hat
 
     //update_console_title( 0 );
-    // _log offenhalten, weil es noch vom Destruktor genutzt werden könnte.
+    // _log offenhalten, weil es noch vom Destruktor genutzt werden kÃ¶nnte.
 }
 
 //---------------------------------------------------------------------Spooler::release_com_objects
@@ -806,6 +806,7 @@ string Spooler::name() const
 }
 
 //-------------------------------------------------------------------------Spooler::truncate_head
+
 string Spooler::truncate_head(const string& str)
 {
 	int max_length = _spooler->settings()->_max_length_of_blob_entry;
@@ -821,7 +822,6 @@ string Spooler::truncate_head(const string& str)
 		return msg + str.substr( min(tail_start,str.length()) );
 	}
 }
-
 
 //--------------------------------------------------------------------------Spooler::security_level
 
@@ -914,8 +914,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
 //#   ifdef Z_UNIX
 //    {
-//        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben.
-//        // Das war nur ein Gerücht.
+//        // Offene file descriptors ermitteln. Zum Debuggen, weil das GerÃ¼cht geht, Dateien wÃ¼rden offen bleiben.
+//        // Das war nur ein GerÃ¼cht.
 //        S s;
 //        int n = sysconf( _SC_OPEN_MAX );
 //        for( int fd = 0; fd < n; fd++ )  if( fcntl( fd, F_GETFD ) != -1  ||  errno != EBADF )  s << ' ' << fd;
@@ -1055,7 +1055,7 @@ void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_ev
 }
 
 //-----------------------------------------------------------------Spooler::register_process_handle
-// registrierung aller Kindprozesse (wird beim beenden benötigt)
+// registrierung aller Kindprozesse (wird beim beenden benÃ¶tigt)
 void Spooler::register_process_handle( Process_handle p )
 {
 #   ifdef _DEBUG
@@ -1308,9 +1308,9 @@ void Spooler::send_cmd()
 {
     xml::Document_ptr xml_doc;
     try {
-        xml_doc.load_xml_bytes( _send_cmd_xml_bytes );      // Haben wir ein gültiges XML-Dokument?
+        xml_doc.load_xml_bytes( _send_cmd_xml_bytes );      // Haben wir ein gÃ¼ltiges XML-Dokument?
     } catch (exception& x) {
-        _spooler->log()->error(x.what());       // Log ist möglicherweise noch nicht geöffnet
+        _spooler->log()->error(x.what());       // Log ist mÃ¶glicherweise noch nicht geÃ¶ffnet
         throw;
     }
 
@@ -1436,7 +1436,7 @@ void Spooler::read_ini_file()
     _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
     _mail_on_delay_after_error   = read_profile_yes_no_last_both( _factory_ini, "spooler", "mail_on_delay_after_error"  , _mail_on_delay_after_error   );
 
-    _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
+    _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafÃ¼r
 
     _mail_defaults.set( "queue_dir", subst_env( read_profile_string( _factory_ini, "spooler", "mail_queue_dir"   , "-" ) ) );
     _mail_defaults.set( "queue_only",           read_profile_bool  ( _factory_ini, "spooler", "mail_queue_only", false )? "1" : "0" );
@@ -1478,7 +1478,7 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
-            if( opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur für Joacim Zschimmer
+            if( opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur fÃ¼r Joacim Zschimmer
             else
             if( opt.with_value( "pid-file"         ) )  _pid_filename = opt.value();
             else
@@ -1492,7 +1492,7 @@ void Spooler::read_command_line_arguments()
              || opt.param(1)                         )  _configuration_file_path = opt.value();
             else
             if( opt.param()  &&  opt.value().find('=') != string::npos ) {  // 1. Parameter ist _configuration_file_path, die folgenden sind Parameter name=wert
-                // Nicht offiziell. Verbessert werden könnte, dass <params> diese Werte nicht überschreibt, sondern umgekehrt den Default vorgibt.
+                // Nicht offiziell. Verbessert werden kÃ¶nnte, dass <params> diese Werte nicht Ã¼berschreibt, sondern umgekehrt den Default vorgibt.
                 // Sollte vielleicht auch mit -config funktionieren. Jetzt muss die Konfigurationsdatei als 1. Parameter (ohne -config=) angegeben werden.
                 string value = opt.value();
                 size_t eq = value.find( '=' );
@@ -1505,7 +1505,7 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else
-            if( opt.flag      ( 'e', "log-to-stderr" ) )  _log_to_stderr = opt.set();   // Nur für Joacim Zschimmer
+            if( opt.flag      ( 'e', "log-to-stderr" ) )  _log_to_stderr = opt.set();   // Nur fÃ¼r Joacim Zschimmer
             else
             if( opt.with_value( "stderr-level"     ) )  _log_to_stderr = true,  _log_to_stderr_level = make_log_level( opt.value() );
             else
@@ -1702,7 +1702,7 @@ void Spooler::load()
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
     modifiable_settings()->set_from_variables(*_variables);
-    _settings->freeze(); // Von Scheduler.java befüllt
+    _settings->freeze(); // Von Scheduler.java befÃ¼llt
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
@@ -1738,7 +1738,7 @@ void Spooler::read_xml_configuration()
     assert(!_config_element_to_load);
 
     Command_processor cp ( this, Security::seclev_all );
-    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht.
+    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch lÃ¤uft der Scheduler nicht.
                                             // database.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
@@ -1759,7 +1759,7 @@ void Spooler::read_xml_configuration()
 
 void Spooler::new_subsystems()
 {
-    // nicht die Reihenfolge ändern !!!!!!
+    // nicht die Reihenfolge Ã¤ndern !!!!!!
     _event_subsystem            = new_event_subsystem( this );
     _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
     _folder_subsystem           = new_folder_subsystem( this );
@@ -1780,8 +1780,8 @@ void Spooler::new_subsystems()
 
 void Spooler::destroy_subsystems()
 {
-    // In der Reihenfolge der Abhängigkeiten löschen:
-    // nicht die Reihenfolge ändern !!!!!!
+    // In der Reihenfolge der AbhÃ¤ngigkeiten lÃ¶schen:
+    // nicht die Reihenfolge Ã¤ndern !!!!!!
     _standing_order_subsystem   = NULL;
     _order_subsystem            = NULL;
     _task_subsystem             = NULL;
@@ -1814,9 +1814,9 @@ void Spooler::initialize_subsystems()
 }
 
 //---------------------------------------------Spooler::initialize_subsystems_after_base_processing
-// Nachdem load_config() die <base> ausgeführt hat.
+// Nachdem load_config() die <base> ausgefÃ¼hrt hat.
 // <base> erlaubt mehrere mischende set_dom() aufs selbe File_based und muss vor der Initialisierung gelaufen sein.
-// Andererseits müssen einige andere Subsysteme bereits vorher initialisiert sein.
+// Andererseits mÃ¼ssen einige andere Subsysteme bereits vorher initialisiert sein.
 
 void Spooler::initialize_subsystems_after_base_processing()
 {
@@ -1839,7 +1839,7 @@ void Spooler::load_subsystems()
 
     _schedule_subsystem        ->switch_subsystem_state( subsys_loaded );
     _lock_subsystem            ->switch_subsystem_state( subsys_loaded );
-    _job_subsystem             ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
+    _job_subsystem             ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geÃ¶ffnet sein
     _order_subsystem           ->switch_subsystem_state( subsys_loaded );
     _standing_order_subsystem  ->switch_subsystem_state( subsys_loaded );
     _scheduler_script_subsystem->switch_subsystem_state( subsys_loaded );
@@ -1867,14 +1867,14 @@ void Spooler::activate_subsystems()
     _job_subsystem           ->switch_subsystem_state( subsys_active );
     _order_subsystem         ->switch_subsystem_state( subsys_active );
     _standing_order_subsystem->switch_subsystem_state( subsys_active );
-    _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es Ã¶ffnet schon -log-dir-Dateien (das ist nicht gut fÃ¼r -send-cmd=)
 }
 
 //-------------------------------------------------------------------------Spooler::stop_subsystems
 
 void Spooler::stop_subsystems()
 {
-    _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schlieÃŸen kÃ¶nnen.
     _web_services              ->switch_subsystem_state( subsys_stopped );
     _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
     _order_subsystem           ->switch_subsystem_state( subsys_stopped );
@@ -2011,7 +2011,7 @@ void Spooler::start()
 
 
     set_ctrl_c_handler( false );
-    set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
+    set_ctrl_c_handler( true );       // Falls Java (Ã¼ber Dateityp jdbc) gestartet worden ist und den Signal-Handler verÃ¤ndert hat
     setmaxstdio();
 
 #   ifdef Z_WINDOWS
@@ -2049,7 +2049,7 @@ void Spooler::activate()
 
 void Spooler::execute_config_commands()
 
-// <commands> aus <config> ausführen:
+// <commands> aus <config> ausfÃ¼hren:
 
 {
     if( _commands_document )
@@ -2155,7 +2155,7 @@ string Spooler::db_cluster_member_id()
 }
 
 //-------------------------------------------------------------------Spooler::distributed_member_id
-// Liefert Member-ID nur für verteilten Scheduler,
+// Liefert Member-ID nur fÃ¼r verteilten Scheduler,
 // nicht aber im Backup-Betrieb.
 
 string Spooler::distributed_member_id()
@@ -2205,7 +2205,7 @@ void Spooler::stop( const exception* )
     bool restart = _shutdown_cmd == sc_terminate_and_restart 
                 || _shutdown_cmd == sc_let_run_terminate_and_restart;
 
-    if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes( kill_task_subsystem );   // Übriggebliebene Prozesse killen
+    if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes( kill_task_subsystem );   // Ãœbriggebliebene Prozesse killen
     stop_cluster();
     stop_subsystems();
 
@@ -2263,7 +2263,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
 
         // Wenn's ein System-Ereignis ist, das, jedenfalls unter Windows, immer wieder signalisiert wird,
         // dann kommen die anderen Ereignisse, insbesondere der TCP-Verbindungen, nicht zum Zuge.
-        // Gut wäre, in einer Schleife alle Ereignisse zu prüfen und dann Event::_signaled zu setzen.
+        // Gut wÃ¤re, in einer Schleife alle Ereignisse zu prÃ¼fen und dann Event::_signaled zu setzen.
         // Aber das ganze sollte nicht vorkommen.
     }
 
@@ -2397,7 +2397,7 @@ void Spooler::run()
 
     //---------------------------------------------------------------------------------------------
 
-    while(1)  // Die große Hauptschleife
+    while(1)  // Die groÃŸe Hauptschleife
     {
         Time    wait_until        = Time::never;
         Object* wait_until_object = NULL;    
@@ -2468,7 +2468,7 @@ void Spooler::run()
         {
             Wait_handles wait_handles ( this );
 
-            // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
+            // TCP- und UDP-HANDLES EINSAMMELN, fÃ¼r spooler_communication.cxx
             vector<System_event*> events;
             _connection_manager->get_events( &events );  // JS-471 TCP und UDP-Verbindungen am Anfang der Handles
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
@@ -2596,7 +2596,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
                     signaled = wait_handles->wait_until( min( now + before_suspend_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
                     if( !signaled )   // Nichts passiert?
                     {
-                        if( IsSystemResumeAutomatic() )   // Benutzer schläft noch?
+                        if( IsSystemResumeAutomatic() )   // Benutzer schlÃ¤ft noch?
                         {
                             suspend_machine();
                         }
@@ -2609,7 +2609,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
     }
 
 
-//#   ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
+//#   ifndef Z_UNIX   // Unter Unix mit VerzeichnisÃ¼berwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
 //        if( !signaled  &&  !_cluster  &&  !_print_time_every_second )
 //        {
 //            Time first_wait_until = _base_log.last_time() + ( _log->log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
@@ -2659,7 +2659,7 @@ bool Spooler::run_continue( const Time& now )
 }
 
 //----------------------------------------------------------------------------------Spooler::signal
-// Thread-fähig
+// Thread-fÃ¤hig
 void Spooler::signal()       
 { 
     _scheduler_event.signal(""); 
@@ -2707,10 +2707,10 @@ bool Spooler::assert_is_still_active( const string& debug_function, const string
 
 bool Spooler::check_is_active( Transaction* outer_transaction )
 
-// Kann nach jeder vermutlich längeren Operation aufgerufen werden, vor allem bei externer Software: Datenbank, eMail, xslt etc.
+// Kann nach jeder vermutlich lÃ¤ngeren Operation aufgerufen werden, vor allem bei externer Software: Datenbank, eMail, xslt etc.
 
 {
-    // Wir sind mitten in irgendeiner Verarbeitung. Also nur bestimmte Sachen verändern!
+    // Wir sind mitten in irgendeiner Verarbeitung. Also nur bestimmte Sachen verÃ¤ndern!
 
     bool result = true;
 
@@ -2729,11 +2729,11 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
 
                 _cluster->show_active_schedulers( outer_transaction );
 
-                //_cluster offen lassen, damit belegte Aufträge freigegeben werden können.
-                // Außerdem sind wir mitten in irgendeiner Verarbeitung, da sollten wir _cluster weder schließen noch entfernen
+                //_cluster offen lassen, damit belegte AuftrÃ¤ge freigegeben werden kÃ¶nnen.
+                // AuÃŸerdem sind wir mitten in irgendeiner Verarbeitung, da sollten wir _cluster weder schlieÃŸen noch entfernen
 
                 //_cluster->close();     // Scheduler-Mitglieds-Eintrag entfernen
-                //_cluster = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
+                //_cluster = NULL;       // aber Eintrag fÃ¼r verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
 
                 cmd_terminate( false, INT_MAX, cluster::continue_exclusive_any );
                 result = false;
@@ -2887,7 +2887,7 @@ void Spooler::suspend_machine()
         int error = GetLastError();
         if( !ok  &&  error == ERROR_PRIVILEGE_NOT_HELD )
         {
-            // Erlaubnis für SetSystemPowerState() einholen
+            // Erlaubnis fÃ¼r SetSystemPowerState() einholen
         
             windows::Handle process_token;
 
@@ -3065,7 +3065,7 @@ void Spooler::abort_immediately( bool restart, const string& message_text )
 
      //?_communication.finish_responses( 5.0 );
         _communication.close( restart? tcp_restart_close_delay : 0 );    // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden. 
-                                            // close(), damit offene HTTP-Logs ordentlich schließen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
+                                            // close(), damit offene HTTP-Logs ordentlich schlieÃŸen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
     } 
     catch( ... ) {}
 
@@ -3077,7 +3077,7 @@ void Spooler::abort_immediately( bool restart, const string& message_text )
 
 void Spooler::abort_now( bool restart )
 {
-    // So schnell wie möglich abbrechen!
+    // So schnell wie mÃ¶glich abbrechen!
 
     int exit_code = 99;
 
@@ -3144,7 +3144,7 @@ void Spooler::kill_all_processes( Kill_all_processs_option option )
     {
         _task_subsystem->end_all_tasks( Task::end_kill_immediately );
 
-        // Auf "ps -ef" warten, bevor Spooler::kill_all_processes() ausgeführt wird. Dann kann ps den Prozess und seine Nachfahren zeigen
+        // Auf "ps -ef" warten, bevor Spooler::kill_all_processes() ausgefÃ¼hrt wird. Dann kann ps den Prozess und seine Nachfahren zeigen
         sleep( 0.5 );  
     }
 
@@ -3288,13 +3288,13 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     if( !_config_element_to_load )  z::throw_xc( "SCHEDULER-116", _spooler_id );
 
     assign_stdout();
-    //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
-    //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
+    //Erst muss noch _config_commands_element ausgefÃ¼hrt werden: _config_element_to_load = NULL;
+    //Erst muss noch _config_commands_element ausgefÃ¼hrt werden: _config_document_to_load = NULL;
 
     // Nachdem argv und profile gelesen sind und config geladen ist:
 
     _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
-    _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
+    _log->init( this );                              // Neue Einstellungen Ã¼bernehmen: Default fÃ¼r from_name
 
 
     if( _send_cmd_xml_bytes != "" ) { 
@@ -3630,12 +3630,14 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         }
         catch(exception& x)
         {
-            //my_spooler._log ist vielleicht noch nicht geöffnet oder schon geschlossen
+            //my_spooler._log ist vielleicht noch nicht geÃ¶ffnet oder schon geschlossen
             my_spooler._log->error( x.what() );
             my_spooler._log->error( message_string( "SCHEDULER-331" ) );
+            if (!java_main_context) {
             string line = S() << "Error " << x.what();
-            if (java_main_context || !isatty(fileno(stderr)))  cerr << line << "\n" << flush;
+                if (!isatty(fileno(stderr)))  cerr << line << "\n" << flush;
             else show_msg( line );     // Fehlermeldung vor ~Spooler ausgeben
+            }
 
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
             if (java_main_context)  throw;
@@ -3664,7 +3666,7 @@ Object_server::Object_server()
 int object_server( int argc, char** argv )
 {
 #   ifdef Z_WINDOWS
-        SetConsoleCtrlHandler( NULL, true );    // Wir sind ein Kind-Prozess und Ctrl-C soll ignoriert werden (darum kümmert sich der Hauptprozess, wie unter Unix)
+        SetConsoleCtrlHandler( NULL, true );    // Wir sind ein Kind-Prozess und Ctrl-C soll ignoriert werden (darum kÃ¼mmert sich der Hauptprozess, wie unter Unix)
 #    else
         ::signal( SIGINT, SIG_IGN );            // Ctrl-C ignorieren
 #   endif
@@ -3709,7 +3711,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 #   ifdef Z_DEBUG
         set_log_category_default ( "java.stackTrace"     , true );
 #   endif
-    set_log_category_default ( "log4j.*"             , true );      // Fürs Loggen aus Java
+    set_log_category_default ( "log4j.*"             , true );      // FÃ¼rs Loggen aus Java
     set_log_category_default ( "scheduler"           , true );
   //set_log_category_default ( "scheduler.*"         , true );
     set_log_category_explicit( "scheduler.wait"      );
@@ -3729,7 +3731,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     string  pid_filename;
 
 #   ifdef Z_WINDOWS
-        SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
+        SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (auÃŸer beim Absturz)
         #if defined Z_DEBUG
             windows::create_mini_dump_on_unhandled_exception();
         #endif
@@ -3767,10 +3769,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             relevant_arg_count++;
 
 #           ifdef Z_WINDOWS
-                if( opt.flag( "debug-break"        ) )  assert( !( opt.flag( "debug-break" ) && opt.set() ) );   // Lässt Windows eine Diagbox zeigen
+                if( opt.flag( "debug-break"        ) )  assert( !( opt.flag( "debug-break" ) && opt.set() ) );   // LÃ¤sst Windows eine Diagbox zeigen
                 else
 #           endif
-            if( opt.with_value( "scheduler" ) )     // Stichwort für scheduler_client
+            if( opt.with_value( "scheduler" ) )     // Stichwort fÃ¼r scheduler_client
             {
                 is_scheduler_client = true;
                 break;  // scheduler_client wertet argc und argv erneut aus, deshalb brechen wir hier ab.
@@ -3788,7 +3790,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             else
             if( opt.flag      ( 'O', "object-server" ) )  is_object_server = true;
             else
-            if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
+            if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar fÃ¼r ps Ã¼bergeben kann (fÃ¼r -object-server)
             else
             if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string );
             else
@@ -3826,7 +3828,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
             else
             {
-                // Hier Optionen, die für install-service relevant sind.
+                // Hier Optionen, die fÃ¼r install-service relevant sind.
                 if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
                 else
                 if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if (chdir(dir.c_str())) throw_errno(errno, "chdir", dir.c_str()); }
@@ -3867,8 +3869,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             }
         }
 
-        java_options += " "+ subst_env(read_profile_string(factory_ini, "java", "options"));
-        java_classpath = java_classpath + Z_PATH_SEPARATOR + subst_env(read_profile_string(factory_ini, "java", "class_path"));
+        java_options = subst_env(read_profile_string(factory_ini, "java", "options")) + " " + java_options;
+        java_classpath = subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath;
         
         if( send_cmd != "" )  is_service = false;
 
@@ -3988,8 +3990,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     {
         Z_LOG2( "scheduler", x.what() << "\n" );
         if( is_service )  scheduler::send_error_email( x, argc, argv, parameter_line );
+        if (java_main_context) throw;
         cerr << x << "\n";
-        if (java_main_context)  throw;
         ret = 1;
     }
     catch( const _com_error& x )
@@ -3997,14 +3999,14 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         string what = string_from_ole( x.Description() );
         Z_LOG2( "scheduler", what << "\n" );
         if( is_service )  scheduler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
+        if (java_main_context) throw;
         cerr << what << "\n";
-        if (java_main_context)  throw;
         ret = 1;
     }
 
     if (is_object_server) {
         //#ifdef Z_WINDOWS
-        //    //JS-709: Visual Studio 2010, Windows 2003, Dienst unter nicht-SYSTEM-Konto: API-Prozess bleibt bei bloßem return oder exit() hängen.
+        //    //JS-709: Visual Studio 2010, Windows 2003, Dienst unter nicht-SYSTEM-Konto: API-Prozess bleibt bei bloÃŸem return oder exit() hÃ¤ngen.
         //    log_stop();
         //    _flushall();
         //    _exit(ret);  
@@ -4020,7 +4022,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
 static ptr<javabridge::Vm> start_java(const string& options, const string& class_path) {
     ptr<javabridge::Vm> java_vm = get_java_vm(false);
-    java_vm->set_destroy_vm(false);   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
+    java_vm->set_destroy_vm(false);   //  Nicht DestroyJavaVM() rufen, denn das hÃ¤ngt manchmal (auch fÃ¼r Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
     java_vm->set_options(options);
     java_vm->prepend_class_path(class_path);
     ::sos::scheduler::init_java_vm(java_vm);
@@ -4048,8 +4050,8 @@ int sos_main( int argc, char** argv )
 #   ifdef SCHEDULER_WITH_HOSTJAVA
 
         // Wegen Hostware ~Sos_static?
-        // HP-UX und eingebundenes Hostjava: Irgendein atexit() stürzt in InterlockedIncrement() (AddRef()?") ab.
-        // Deshalb beenden wir den Scheduler hier mit _exit(), schließen aber alle Dateien vorher
+        // HP-UX und eingebundenes Hostjava: Irgendein atexit() stÃ¼rzt in InterlockedIncrement() (AddRef()?") ab.
+        // Deshalb beenden wir den Scheduler hier mit _exit(), schlieÃŸen aber alle Dateien vorher
 
         Z_LOG2( "scheduler", "_exit(" << ret << ") for Hostjava\n" );
 

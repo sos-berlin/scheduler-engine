@@ -50,7 +50,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
         string text;
 
         if( int n = node.line_number() ) 
-            if( linenr_base < n )  linenr_base = n;     // libxml2 liefert bei Textknoten keine neue Zeilennummer, deshalb zählen wir selbst.
+            if( linenr_base < n )  linenr_base = n;     // libxml2 liefert bei Textknoten keine neue Zeilennummer, deshalb zÃ¤hlen wir selbst.
 
         switch( node.nodeType() )
         {
@@ -73,7 +73,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                 const char* p = text.c_str();   
                 while( *p  &&  isspace( (unsigned char)*p ) )  p++;     // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
 
-                if( *p )    // Nur nicht leeren Text berücksichtigen
+                if( *p )    // Nur nicht leeren Text berÃ¼cksichtigen
                 {
                     xml::Element_ptr e = dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
                     e.setAttribute( "linenr", linenr_base );
@@ -120,7 +120,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 
 xml::Document_ptr Text_with_includes::includes_resolved() const
 {
-    // Löst die <include> auf und macht sie zu <source_part>
+    // LÃ¶st die <include> auf und macht sie zu <source_part>
 
     xml::Document_ptr result = xml::Document_ptr::from_xml_string(_xml_string);
 
@@ -263,9 +263,9 @@ void Module::set_priority( const string& priority )
     if( priority != "" )
     {
 #       ifdef Z_WINDOWS
-            windows::priority_class_from_string( priority );    // Prüfen
+            windows::priority_class_from_string( priority );    // PrÃ¼fen
 #        else
-            posix::priority_from_string( priority );            // Prüfen
+            posix::priority_from_string( priority );            // PrÃ¼fen
 #       endif
     }
 
@@ -287,7 +287,7 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
 
 //------------------------------------------------------------------------------Module::set_process
 // <process> hat kein <script>, deshalb dieser Aufruf
-// Besser wäre, <process> durch <script language="shell"> zu ersetzen
+// Besser wÃ¤re, <process> durch <script language="shell"> zu ersetzen
 
 void Module::set_process()
 {
@@ -323,7 +323,7 @@ void Module::set_dom( const xml::Element_ptr& element )
       #ifdef Z_WINDOWS        
         string code_page_string = lcase( element.getAttribute( "encoding" ) );
         
-        // Das XML-Schema scheduler.xsd schränkt die Codierungen auf die bekannten ein.
+        // Das XML-Schema scheduler.xsd schrÃ¤nkt die Codierungen auf die bekannten ein.
 
         if( lcase( code_page_string ) ==          "oem"         )  _encoding_code_page = CP_OEMCP;
         else
@@ -398,8 +398,8 @@ void Module::init()
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
             if (string_begins_with(_language, "javax.script:") || string_begins_with(_language, "java:")) {
-                // "javax.script:rhino" für Java-Methoden-Schnittstelle, z.B. spooler_task.set_exit_code( 0 );
-                // "java:rhino" für Beans-Schnittstelle (Property-Schnittstelle), z.B. spooler_task.exit_code = 0;
+                // "javax.script:rhino" fÃ¼r Java-Methoden-Schnittstelle, z.B. spooler_task.set_exit_code( 0 );
+                // "java:rhino" fÃ¼r Beans-Schnittstelle (Property-Schnittstelle), z.B. spooler_task.exit_code = 0;
                 Z_LOG2("scheduler", "Using java interface for scripting language " << _language << "\n");
                 _kind = kind_scripting_engine_java;
             }
@@ -425,7 +425,7 @@ void Module::init()
 
         case kind_java:                 break;
 
-// JS-498: Vorhandensein von Scriptcode prüfen
+// JS-498: Vorhandensein von Scriptcode prÃ¼fen
         case kind_scripting_engine_java: break;
         
         case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
@@ -474,7 +474,7 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.is_empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.is_empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht Ã¼ber Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }
@@ -483,10 +483,8 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
     {
         case kind_java:              
         {
-            if( _spooler )  if( !_spooler->java_subsystem()->java_vm()  ||  !_spooler->java_subsystem()->java_vm()->running() )  z::throw_xc( "SCHEDULER-177" );
-
             _java_vm = get_java_vm( false );
-            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
+            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hÃ¤ngt manchmal
 
             if( !_java_vm->running() )
             {
@@ -498,13 +496,11 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
             break;
         }
 
-        // JS-498: neue Instanz für java-script via Java-Interface 
+        // JS-498: neue Instanz fÃ¼r java-script via Java-Interface 
         case kind_scripting_engine_java:
         {
-            if( _spooler )  if( !_spooler->java_subsystem()->java_vm()  ||  !_spooler->java_subsystem()->java_vm()->running() )  z::throw_xc( "SCHEDULER-177" );
-
             _java_vm = get_java_vm( false );
-            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
+            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hÃ¤ngt manchmal
 
             if( !_java_vm->running() )
             {
@@ -546,15 +542,8 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
             break;
         }
 
-        case kind_internal:
-        {
-            ptr<Internal_module_instance> p = Z_NEW( Internal_module_instance( this ) );
-            result = +p;
-            break;
-        }
-
         default:                     
-            z::throw_xc( "SCHEDULER-173" );
+            z::throw_xc( "SCHEDULER-173", as_int(kind));
     }
 
     result->_kind = kind;
@@ -587,10 +576,10 @@ Process_class* Module::process_class_or_null() const
 
 Process_class* Module::process_class() const
 { 
-    //kind_process darf das (für remote_scheduler)  if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
+    //kind_process darf das (fÃ¼r remote_scheduler)  if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
 
-    // Für kind_process (ohne kind_remote) wird die Prozessklasse nicht wirklich benutzt, d.h. das Prozesslimit wirkt nicht.
-    // Besser wäre das Limit zu berücksichtigen (über Dummy-Process?).
+    // FÃ¼r kind_process (ohne kind_remote) wird die Prozessklasse nicht wirklich benutzt, d.h. das Prozesslimit wirkt nicht.
+    // Besser wÃ¤re das Limit zu berÃ¼cksichtigen (Ã¼ber Dummy-Process?).
 
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
@@ -743,10 +732,10 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     _com_task->set_task( task );
 
     _task_id = task->id();
-    //_title = task->obj_name();          // Titel für Prozess
+    //_title = task->obj_name();          // Titel fÃ¼r Prozess
     _monitor_instances.attach_task( task, log );
 
-    _has_order = task->order() != NULL;      // Rückgabe von Auftragsparametern über Datei ermöglichen
+    _has_order = task->order() != NULL;      // RÃ¼ckgabe von Auftragsparametern Ã¼ber Datei ermÃ¶glichen
 
     fill_process_environment();
 }
@@ -758,11 +747,11 @@ void Module_instance::fill_process_environment()
     //if( _module->kind() == Module::kind_process )
     //{
     //    fill_process_environment_with_params();
-    //    // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausführen.
+    //    // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausfÃ¼hren.
     //}
 
 
-    // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
+    // Environment, eigentlich nur bei einem Prozess nÃ¶tig, also nicht bei <process_classes ignore="yes"> und <monitor>)
     if( _task->environment_or_null() )  _process_environment->merge( _task->environment_or_null() );
 
 
@@ -860,7 +849,7 @@ bool Module_instance::try_to_get_process()
         if( _module->_process_class_path.empty()  
             &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
         {
-            // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+            // Namenlose Prozessklasse nicht bekannt? Dann temporÃ¤re Prozessklasse verwenden
             _process = _spooler->process_class_subsystem()->new_temporary_process(_remote_scheduler);
         }
         else
@@ -879,7 +868,7 @@ bool Module_instance::try_to_get_process()
         }
 
         // _process wird nur von Remote_module_instance_procy benutzt. 
-        // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
+        // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prÃ¼fen.
     }
 
     return true;
@@ -913,7 +902,7 @@ Variant Module_instance::call_if_exists( const string& name, const Variant& para
 void Module_instance::close()
 {
     Async_operation* op = close__start();
-    if( !op->async_finished() )  _log.warn( message_string( "SCHEDULER-293" ) );        // "Warten auf Schließen der Modulinstanz ..."
+    if( !op->async_finished() )  _log.warn( message_string( "SCHEDULER-293" ) );        // "Warten auf SchlieÃŸen der Modulinstanz ..."
     close__end();
 }
 
@@ -1076,7 +1065,6 @@ Variant Module_instance::step__end()
 Async_operation* Module_instance::call__start( const string& method )
 {
     _call_method = method;
-    _sync_operation = Z_NEW(Sync_operation);
     _sync_operation = Z_NEW(Sync_operation);
     return _sync_operation;
 }

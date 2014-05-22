@@ -7,7 +7,6 @@ import java.io.File
 import java.nio.charset.Charset
 import scala.xml._
 
-
 /** Visual Studio 2008 project file *.vcproj. Austausch der Namen der generierten C++-Dateien. */
 class VcprojFile(file: File, newPaths: List[String]) {
   private val encoding = Charset.forName("Windows-1252")      // Besser: Dem Original-Dokument entnehmen
@@ -51,6 +50,6 @@ object VcprojFile {
     val projectFilename = dir.getName + ".vcproj"   // "scheduler/scheduler.vcproj"
     val projectFile = new File(dir, projectFilename)
     if (projectFile.exists)
-      new VcprojFile(projectFile, modules map { _.sourceCodeFile.path } toList).store()
+      new VcprojFile(projectFile, (modules map { _.sourceCodeFile.path }).toList).store()
   }
 }

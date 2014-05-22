@@ -12,7 +12,7 @@
 
 
 //#define MODULE_NAME "sossqlfn"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include <stdio.h>
@@ -35,7 +35,7 @@ namespace sos {
 void format( Area* buffer, double a, const char* form, char decimal_symbol );  // area.h
 
 //-------------------------------------------------------------------------------------sql_char
-// char( int )  liefert das ASCII-Zeichen für int (0..255)
+// char( int )  liefert das ASCII-Zeichen fÃ¼r int (0..255)
 
 void SOS_FUNC sql_char( Dyn_obj* result, const Sos_dyn_obj_array& params )
 {
@@ -120,7 +120,7 @@ void SOS_FUNC sql_empty( Dyn_obj* result, const Sos_dyn_obj_array& params )
 //-----------------------------------------------------------------------------------sql_length
 
 void SOS_FUNC sql_length( Dyn_obj* result, const Sos_dyn_obj_array& params )
-// length( a ) = Länge in Zeihchen der Textdarstellung von a ohne hängende Blanks
+// length( a ) = LÃ¤nge in Zeihchen der Textdarstellung von a ohne hÃ¤ngende Blanks
 
 {
     Dynamic_area buffer;
@@ -190,9 +190,9 @@ void SOS_FUNC sql_to_date( Dyn_obj* result, const Sos_dyn_obj_array& params )
             int date_size = 0;
             const char* p = c_str( pattern );
             while(1) {
-                if( *p == 'y'  ||  *p == 'm'  ||  *p == 'd' )  p++;  // yy, mm, dd zählen
+                if( *p == 'y'  ||  *p == 'm'  ||  *p == 'd' )  p++;  // yy, mm, dd zÃ¤hlen
                 else
-                if( sos_isdigit( *p ) )  ;//ok  Schwelle für Jahrhundertwechsel, zählt nicht
+                if( sos_isdigit( *p ) )  ;//ok  Schwelle fÃ¼r Jahrhundertwechsel, zÃ¤hlt nicht
                 else { date_size = 0; break; }  // Alles andere ohne Vornullen
                 p++;
             }
@@ -230,9 +230,9 @@ void SOS_FUNC sql_to_timestamp( Dyn_obj* result, const Sos_dyn_obj_array& params
             int date_size = 0;
             const char* p = c_str( pattern );
             while(1) {
-                if( *p == 'y'  ||  *p == 'm'  ||  *p == 'd' )  p++;  // yy, mm, dd zählen
+                if( *p == 'y'  ||  *p == 'm'  ||  *p == 'd' )  p++;  // yy, mm, dd zÃ¤hlen
                 else
-                if( sos_isdigit( *p ) )  ;//ok  Schwelle für Jahrhundertwechsel, zählt nicht
+                if( sos_isdigit( *p ) )  ;//ok  Schwelle fÃ¼r Jahrhundertwechsel, zÃ¤hlt nicht
                 else { date_size = 0; break; }  // Alles andere ohne Vornullen
                 p++;
             }
@@ -341,7 +341,7 @@ void SOS_FUNC sql_rtrim( Dyn_obj* result, const Sos_dyn_obj_array& params )
 }
 
 //-----------------------------------------------------------------------------------sql_upper
-// upper(string) setzt kleine Buchstaben in große um (auch Umlaute etc.)
+// upper(string) setzt kleine Buchstaben in groÃŸe um (auch Umlaute etc.)
 
 void SOS_FUNC sql_upper( Dyn_obj* result, const Sos_dyn_obj_array& params )
 {
@@ -362,7 +362,7 @@ void SOS_FUNC sql_upper( Dyn_obj* result, const Sos_dyn_obj_array& params )
 }
 
 //-----------------------------------------------------------------------------------sql_lower
-// upper(string) setzt große Buchstaben in kleine um (auch Umlaute etc.)
+// upper(string) setzt groÃŸe Buchstaben in kleine um (auch Umlaute etc.)
 
 void SOS_FUNC sql_lower( Dyn_obj* result, const Sos_dyn_obj_array& params )
 {
@@ -461,7 +461,7 @@ void SOS_FUNC sql_instr( Dyn_obj* result, const Sos_dyn_obj_array& params )
 
 //-----------------------------------------------------------------------------------sql_locate
 // locate( such, string [,anfang ] ) liefert Position oder 0
-// sql_instr() ist Kopie mit vertauschten Parametern. SYNCHRON ÄNDERN!
+// sql_instr() ist Kopie mit vertauschten Parametern. SYNCHRON Ã„NDERN!
 
 void SOS_FUNC sql_locate( Dyn_obj* result, const Sos_dyn_obj_array& params )
 {
@@ -800,7 +800,7 @@ Function	Description
 
 CHAR(code)
 (ODBC 1.0)
-	Returns the character that has the ASCII code value specified by code. The value of code should be between 0 and 255; otherwise, the return value is data source–dependent.
+	Returns the character that has the ASCII code value specified by code. The value of code should be between 0 and 255; otherwise, the return value is data sourceÂ–dependent.
 
 *CHAR_LENGTH(string_exp)
 (ODBC 3.0)	Returns the length in characters of the string expression, if the string expression is of a character data type; otherwise, returns the length in bytes of the string expression (the smallest integer not less than the number of bits divided by 8). (This function is the same as the CHARACTER_LENGTH function.)
@@ -855,7 +855,7 @@ RTRIM(string_exp)
 (ODBC 1.0)	Returns the characters of string_exp with trailing blanks removed.
 
 *SOUNDEX(string_exp) 
-(ODBC 2.0)	Returns a data source–dependent character string representing the sound of the words in string_exp. For example, SQL Server returns a 4-digit SOUNDEX code; Oracle returns a phonetic representation of each word.
+(ODBC 2.0)	Returns a data sourceÂ–dependent character string representing the sound of the words in string_exp. For example, SQL Server returns a 4-digit SOUNDEX code; Oracle returns a phonetic representation of each word.
 
 *SPACE(count) 
 (ODBC 2.0)	Returns a character string consisting of count spaces.
@@ -927,7 +927,7 @@ Numerische Funktionen:
 (ODBC 2.0)	Returns numeric_exp rounded to integer_exp places right of the decimal point. If integer_exp is negative, numeric_exp is rounded to |integer_exp| places to the left of the decimal point.
 
 *SIGN(numeric_exp) 
-(ODBC 1.0)	Returns an indicator of the sign of numeric_exp. If numeric_exp is less than zero, –1 is returned. If numeric_exp equals zero, 0 is returned. If numeric_exp is greater than zero, 1 is returned.
+(ODBC 1.0)	Returns an indicator of the sign of numeric_exp. If numeric_exp is less than zero, Â–1 is returned. If numeric_exp equals zero, 0 is returned. If numeric_exp is greater than zero, 1 is returned.
 
 *SIN(float_exp) 
 (ODBC 1.0)	Returns the sine of float_exp, where float_exp is an angle expressed in radians.
@@ -963,16 +963,16 @@ precision)]
 (ODBC 1.0)	Returns the current local time.
 
 *DAYNAME(date_exp) 
-(ODBC 2.0)	Returns a character string containing the data source–specific name of the day (for example, Sunday, through Saturday or Sun. through Sat. for a data source that uses English, or Sonntag through Samstag for a data source that uses German) for the day portion of date_exp.
+(ODBC 2.0)	Returns a character string containing the data sourceÂ–specific name of the day (for example, Sunday, through Saturday or Sun. through Sat. for a data source that uses English, or Sonntag through Samstag for a data source that uses German) for the day portion of date_exp.
 
 *DAYOFMONTH(date_exp) 
-(ODBC 1.0)	Returns the day of the month based on the month field in date_exp as an integer value in the range of 1–31.
+(ODBC 1.0)	Returns the day of the month based on the month field in date_exp as an integer value in the range of 1Â–31.
 
 *DAYOFWEEK(date_exp) 
-(ODBC 1.0)	Returns the day of the week based on the week field in date_exp as an integer value in the range of 1–7, where 1 represents Sunday.
+(ODBC 1.0)	Returns the day of the week based on the week field in date_exp as an integer value in the range of 1Â–7, where 1 represents Sunday.
 
 *DAYOFYEAR(date_exp) 
-(ODBC 1.0)	Returns the day of the year based on the year field in date_exp as an integer value in the range of 1–366.
+(ODBC 1.0)	Returns the day of the year based on the year field in date_exp as an integer value in the range of 1Â–366.
 
 *EXTRACT(extract-field FROM extract-source)
 (ODBC 3.0)	Returns the extract-field portion of the extract-source. The extract-source argument is a datetime or interval expression. The extract-field argument can be one of the following keywords:YEAR
@@ -988,25 +988,25 @@ precision)]
 *SECONDThe precision of the returned value is implementation-defined. The scale is 0 unless SECOND is specified, in which case the scale is not less than the fractional seconds precision of the extract-source field.
 
 *HOUR(time_exp) 
-(ODBC 1.0)	Returns the hour based on the hour field in time_exp as an integer value in the range of 0 –23.
+(ODBC 1.0)	Returns the hour based on the hour field in time_exp as an integer value in the range of 0 Â–23.
 
 *MINUTE(time_exp) 
-(ODBC 1.0)	Returns the minute based on the minute field in time_exp as an integer value in the range of 0 –59.
+(ODBC 1.0)	Returns the minute based on the minute field in time_exp as an integer value in the range of 0 Â–59.
 
 *MONTH(date_exp) 
-(ODBC 1.0)	Returns the month based on the month field in date_exp as an integer value in the range of 1–12.
+(ODBC 1.0)	Returns the month based on the month field in date_exp as an integer value in the range of 1Â–12.
 
 *MONTHNAME(date_exp) 
-(ODBC 2.0)	Returns a character string containing the data source–specific name of the month (for example, January through December or Jan. through Dec. for a data source that uses English, or Januar through Dezember for a data source that uses German) for the month portion of date_exp.
+(ODBC 2.0)	Returns a character string containing the data sourceÂ–specific name of the month (for example, January through December or Jan. through Dec. for a data source that uses English, or Januar through Dezember for a data source that uses German) for the month portion of date_exp.
 
 *NOW( ) 
 (ODBC 1.0)	Returns current date and time as a timestamp value.
 
 *QUARTER(date_exp)
-(ODBC 1.0)	Returns the quarter in date_exp as an integer value in the range of 1– 4, where 1 represents January 1 through March 31.
+(ODBC 1.0)	Returns the quarter in date_exp as an integer value in the range of 1Â– 4, where 1 represents January 1 through March 31.
 
 *SECOND(time_exp) 
-(ODBC 1.0)	Returns the second based on the second field in time_exp as an integer value in the range of 0 –59.
+(ODBC 1.0)	Returns the second based on the second field in time_exp as an integer value in the range of 0 Â–59.
 
 *TIMESTAMPADD(interval, integer_exp, timestamp_exp) 
 (ODBC 2.0)	Returns the timestamp calculated by adding integer_exp intervals of type interval to timestamp_exp. Valid values of interval are the following keywords:SQL_TSI_FRAC_SECOND
@@ -1052,10 +1052,10 @@ TIMESTAMPDIFF(SQL_TSI_YEAR,
 FROM EMPLOYEESIf either timestamp expression is a time value and interval specifies days, weeks, months, quarters, or years, the date portion of that timestamp is set to the current date before calculating the difference between the timestamps.If either timestamp expression is a date value and interval specifies fractional seconds, seconds, minutes, or hours, the time portion of that timestamp is set to 0 before calculating the difference between the timestamps.An application determines which intervals a data source supports by calling SQLGetInfo with the SQL_TIMEDATE_DIFF_INTERVALS option.
 
 *WEEK(date_exp) 
-(ODBC 1.0)	Returns the week of the year based on the week field in date_exp as an integer value in the range of 1–53.
+(ODBC 1.0)	Returns the week of the year based on the week field in date_exp as an integer value in the range of 1Â–53.
 
 *YEAR(date_exp) 
-(ODBC 1.0)	Returns the year based on the year field in date_exp as an integer value. The range is data source–dependent.
+(ODBC 1.0)	Returns the year based on the year field in date_exp as an integer value. The range is data sourceÂ–dependent.
 
 
 System-Funktionen:

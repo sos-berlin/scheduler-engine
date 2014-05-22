@@ -82,7 +82,7 @@ Event_manager::~Event_manager()
 
 void Event_manager::add_event_operation( Event_operation* op )
 {
-    _event_operation_list_modified = true;  // Für async_continue(), iteriert über _socket_operation_map.
+    _event_operation_list_modified = true;  // FÃ¼r async_continue(), iteriert Ã¼ber _socket_operation_map.
 
     _event_operation_list.push_back( op );
     //if( op->_write_socket != SOCKET_ERROR )  _socket_operation_map[ op->_write_socket ] = op;
@@ -93,7 +93,7 @@ void Event_manager::add_event_operation( Event_operation* op )
 
 void Event_manager::remove_event_operation( Event_operation* op )
 {
-    _event_operation_list_modified = true;  // Für async_continue(), iteriert über _socket_operation_map.
+    _event_operation_list_modified = true;  // FÃ¼r async_continue(), iteriert Ã¼ber _socket_operation_map.
 
     Z_FOR_EACH( Event_operation_list, _event_operation_list, o )
     {

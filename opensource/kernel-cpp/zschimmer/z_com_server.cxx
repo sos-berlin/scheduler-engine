@@ -1,7 +1,6 @@
 // $Id: z_com_server.cxx 13682 2008-09-29 15:44:28Z jz $
 
 #include "zschimmer.h"
-//#include <stdio.h>
 #include "com_server.h"
 #include "log.h"
 
@@ -38,19 +37,6 @@ void set_com_context( const Com_context* c )
     if( c != &com_context )  static_com_context_ptr = c;
 }
 
-//------------------------------------------------Idispatch_base_implementation::QueryInterface
-/*
-#ifdef SYSTEM_HAS_COM
-
-STDMETHODIMP Idispatch_base_implementation::QueryInterface( const IID& iid, void** result )
-{
-    Z_IMPLEMENT_QUERY_INTERFACE( static_cast<ISupportErrorInfo*>( this ), iid, ISupportErrorInfo, result );
-
-    return Object::QueryInterface( iid, result );
-}
-
-#endif
-*/
 //--------------------------------------------------------------------------------Set_excepinfo
 
 HRESULT Set_excepinfo( const exception& x, const string& function )
@@ -69,35 +55,7 @@ HRESULT Set_excepinfo( const exception& x, const string& function )
         }
 #   endif
 
-
-/*
-#   ifdef DYNAMIC_CAST_CRASHES
-        int EINFACHERE_FEHLERBEHANDLUNG_WEGEN_ABSTURZ_IN__DYNAMIC_CAST;	// gcc 3.2.3, bei Hostjava File->open( "-out mail ..." );
-#    else
-        const Xc* xc = dynamic_cast< const Xc* >( &x );
-        if( xc )  return set_excepinfo( *xc, function );
-#   endif
-*/
-
-/*
-    string source = _com_class_descriptor? _com_class_descriptor->name() : "";
-    if( function  &&  *function )  
-    {
-        if( !source.empty() )  source += "::";
-        source += function;
-    }
-*/
-
-    HRESULT hr = Set_excepinfo( x.what(), function );
-
-/*
-#   ifndef DYNAMIC_CAST_CRASHES
-        const Com_exception* com_xc = dynamic_cast< const Com_exception* >( &x );
-        if( com_xc )  hr = com_xc->_hresult;        // Eigener Fehlertext geht verloren.
-#   endif
-*/
-
-    return hr;
+    return Set_excepinfo( x.what(), function );
 }
 
 //--------------------------------------------------------------------------------Set_excepinfo
@@ -112,39 +70,8 @@ HRESULT Set_excepinfo( const _com_error& x, const string& )
 HRESULT Set_excepinfo( const char* descr, const string& source )
 {
     return Com_set_error( descr, source );
-
-  //  string description = descr? rtrim(descr) : "";
-
-  //  Z_LOG( "Set_excepinfo(\"" << source << "\",\"" << description << ")\n" );
-
-  //  HRESULT                 hr;
-  //  ptr<ICreateErrorInfo>   create_error_info;
-  //  ptr<IErrorInfo>         error_info;
-
-  //  hr = CreateErrorInfo( create_error_info.pp() );
-  //  if( FAILED( hr ) )  return hr;
-
-  ////if( _com_class_descriptor )
-  ////create_error_info->SetGUID       ( _com_class_descriptor->iid() );
-
-  //  create_error_info->SetSource     ( Bstr( source      ) );
-  //  create_error_info->SetDescription( Bstr( string(description) + ", in " + source ) );
-
-  //  hr = create_error_info->QueryInterface( IID_IErrorInfo, error_info.void_pp() );
-  //  if( SUCCEEDED(hr) && error_info )  SetErrorInfo( 0, error_info );
-
-  //  return DISP_E_EXCEPTION;
 }
 
-//-------------------------------------------------------------------------Typelib_ref::Typelib_ref
-/*
-Typelib_ref::Typelib_ref() //, const char* version )
-:
-    _zero_(this+1)
-    //_version_string(version)
-{
-}
-*/
 //--------------------------------------------------------------------Typelib_ref::Get_class_object
 
 HRESULT Typelib_ref::Get_class_object( const CLSID& clsid, const IID& iid, void** result )
@@ -318,14 +245,6 @@ Com_class_descriptor::Com_class_descriptor( Typelib_ref* typelib_ref, const CLSI
     _creatable = c == creatable;
 }
 
-//-------------------------------------------------------------Com_class_descriptor::add_to_typelib
-/*
-void Com_class_descriptor::add_to_typelib( Typelib_ref* typelib_ref )
-{
-    _next = typelib_ref->_class_descriptor_list;
-    typelib_ref->_class_descriptor_list = this;
-}
-*/
 //--------------------------------------------------------------Com_class_descriptor::Load_typeinfo
 #ifdef Z_WINDOWS
 
@@ -424,7 +343,7 @@ HRESULT Com_class_descriptor::Create_instance( IUnknown* outer, const IID& iid, 
     else
     {
         //return E_NOINTERFACE;
-        // Vielleicht liefert QueryInterface() das gewünschte Interface. Sonst wird das Objekt umsonst angelegt und wieder verworfen.
+        // Vielleicht liefert QueryInterface() das gewÃ¼nschte Interface. Sonst wird das Objekt umsonst angelegt und wieder verworfen.
 
         ptr<IUnknown> iunknown;
         void*         void_ptr = NULL;
@@ -482,14 +401,6 @@ STDMETHODIMP Module_interface::put_Log_context( Log_context** log_context )
     return S_OK;
 }
 
-//----------------------------------------------------Module_interface::Set_stream_and_system_mutex
-/*
-STDMETHODIMP Module_interface::Set_stream_and_system_mutex( ostream** os, System_mutex* m )
-{
-    Log_ptr::set_stream_and_system_mutex( os, m );
-    return S_OK;
-}
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace com

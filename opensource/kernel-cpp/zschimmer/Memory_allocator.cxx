@@ -16,7 +16,7 @@ bool Memory_allocator::static_debug_memory = false;
 const char* environment_variable_name = "SOS_SCHEDULER_DEBUG_MEMORY";
 
 /////////////////////////////////////////
-// Stürzt am Ende ab, weil Memory_allocator::_mutex und ::_map zerstört sind, wenn noch ein z_free() aufgerufen wird.
+// StÃ¼rzt am Ende ab, weil Memory_allocator::_mutex und ::_map zerstÃ¶rt sind, wenn noch ein z_free() aufgerufen wird.
 // Also nur zum Debuggen verwenden.
 /////////////////////////////////////////
 

@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.data.log;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sos.scheduler.engine.data.event.AbstractEvent;
 import com.sos.scheduler.engine.data.message.MessageCode;
 import scala.Option;
@@ -24,7 +26,8 @@ public class LogEvent extends AbstractEvent {
         return code == null? Option.<MessageCode>apply(null) : Option.apply(new MessageCode(code));
     }
 
-    @Nullable public final String getCodeOrNull() {
+    @JsonIgnore @Nullable
+    public final String getCodeOrNull() {
         return messageCodeFromLineOrNull(line);
     }
 
@@ -32,11 +35,8 @@ public class LogEvent extends AbstractEvent {
         return level;
     }
 
+    @JsonGetter
     public final String message() {
-        return line;
-    }
-
-    public final String getLine() {
         return line;
     }
 

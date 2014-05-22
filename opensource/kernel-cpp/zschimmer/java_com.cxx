@@ -78,7 +78,7 @@ void Com_env::jstring_to_bstr( const jstring& jstr, BSTR* bstr )
 //--------------------------------------------------------------------Com_env::jobject_from_variant
 
 // Soll nur von Java aufgerufen werden oder von etwas was einen Lokal frame benutzt
-// Im Fehlerfall müssen Loale Referenzen freigeben weden z.B. mit Local_frame
+// Im Fehlerfall mÃ¼ssen Loale Referenzen freigeben weden z.B. mit Local_frame
 jobject Com_env::jobject_from_variant( const VARIANT& v, Java_idispatch_container* java_idispatch_container )
 {
     Env     env = jni_env();
@@ -239,7 +239,7 @@ jobject Com_env::jobject_from_variant( const VARIANT& v, Java_idispatch_containe
 
                 ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( idispatch, java_idispatch_container != NULL, java_class_name_ptr ) );
 
-                if( java_idispatch_container )      // Für den Scheduler (s. spooler_module_java.cxx)
+                if( java_idispatch_container )      // FÃ¼r den Scheduler (s. spooler_module_java.cxx)
                 {
                     java_idispatch_container->add_object( java_idispatch );        // Lebensdauer nur bis Ende des Aufrufs der Java-Methode, s. Java_module_instance::call()
                 }
@@ -686,13 +686,13 @@ Java_idispatch::Java_idispatch( IDispatch* idispatch, bool is_owner, const char*
 
     if( is_owner )  
     {
-        _global_jobject = jo;           // C++-Java_idispatch ist Eigentümer von Java-Idispatch
+        _global_jobject = jo;           // C++-Java_idispatch ist EigentÃ¼mer von Java-Idispatch
         _jobject        = _global_jobject;
     }
     else
     {
         _jobject = jo;
-        idispatch->AddRef();            // Java-Idispatch ist Eigentümer von COM-IDispatch
+        idispatch->AddRef();            // Java-Idispatch ist EigentÃ¼mer von COM-IDispatch
     }
 
     e->DeleteLocalRef( subclass );

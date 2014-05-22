@@ -61,15 +61,15 @@ namespace sos {
 //----------------------------------------------------------------------------------------const
 
 #if defined SYSTEM_WIN16
-    const uint default_buffer_size = 16*1024;        // Puffergrˆﬂe
+    const uint default_buffer_size = 16*1024;        // Puffergr√∂√üe
 #elif defined SYSTEM_WIN32
     // Windows 95 Systemsteuerung, Leistungsmerkmale, Dateisysteme:
     // Windows liest voraus, wenn das Programm in Schritten zu max. 64KB sequentiell liest.
     // Optimal sind offenbar 16KB zum Lesen und zum Schreiben (jedenfalls bei Joacims PC)
-    // 64KB bringt wenig mehr, dar¸ber wird's wieder langsamer (wg. malloc)
-    const uint default_buffer_size = 16*1024;       // Puffergrˆﬂe
+    // 64KB bringt wenig mehr, dar√ºber wird's wieder langsamer (wg. malloc)
+    const uint default_buffer_size = 16*1024;       // Puffergr√∂√üe
 #else
-    const uint default_buffer_size = 16*1024;       // Puffergrˆﬂe
+    const uint default_buffer_size = 16*1024;       // Puffergr√∂√üe
 #endif
 
 const int std_write_buffer_size = 1024;      // Gilt, wenn !_write_buffered
@@ -119,7 +119,7 @@ struct Std_file : Abs_file
     Fill_zero                  _zero_;
     File_handle                _file;
     bool                       _dont_close;
-    int                        _column;                 // F¸r Tabulator-Expansion
+    int                        _column;                 // F√ºr Tabulator-Expansion
     size_t                     _pos;                    // == tell( _file )
     size_t                     _record_pos;             // Position des zuletzt gelesenen Satzes
     Bool                       _nl;                     // Datei mit Newline (LF oder CR/LF)
@@ -266,7 +266,7 @@ void Std_file::open( const char* filename, Open_mode open_mode )
     char                fn [ _MAX_PATH + 1 ];
     Sos_option_iterator opt ( filename );
 
-#   if defined SYSTEM_WIN  // Unter Unix benutzt read_profile_bool Std_File, was zur Rekursion f¸hrt
+#   if defined SYSTEM_WIN  // Unter Unix benutzt read_profile_bool Std_File, was zur Rekursion f√ºhrt
         static Bool log_read = false;
         if( !log_read ) {
             log_read = true;
@@ -290,9 +290,9 @@ void Std_file::open( const char* filename, Open_mode open_mode )
         else
         if( opt.flag      ( "unix"           ) )  { _nl_string = "\n"; }
         else
-        if( opt.flag      ( "b"              ) )  { _nl = false; _write_buffered = true; if( open_mode & in )  _fixed_length = 4096; }  // bin‰r gepuffert
+        if( opt.flag      ( "b"              ) )  { _nl = false; _write_buffered = true; if( open_mode & in )  _fixed_length = 4096; }  // bin√§r gepuffert
         else
-        if( opt.with_value( "b"              ) )  { _nl = false; _write_buffered = true; _write_buffer_size = opt.as_uintK(); if( open_mode & in )  _fixed_length = opt.as_uintK(); }  // bin‰r gepuffert
+        if( opt.with_value( "b"              ) )  { _nl = false; _write_buffered = true; _write_buffer_size = opt.as_uintK(); if( open_mode & in )  _fixed_length = opt.as_uintK(); }  // bin√§r gepuffert
         else
         if( opt.with_value( "buffer-size"    ) )  _max_buffer_size = opt.as_uintK();
         else
@@ -372,7 +372,7 @@ void Std_file::open( const char* filename, Open_mode open_mode )
 #if 0
         // js: am 4.8.98 ausgebaut
         char* ptr = strchr( fn, ' ');
-        if ( ptr ) { // Test auf nocrlf (muss genau Åbereinstimmen)
+        if ( ptr ) { // Test auf nocrlf (muss genau ¬Åbereinstimmen)
             char* ptr2 = strchr( ptr, 'n' );
             if (!ptr2) ptr2 = strchr( ptr, 'N' );
             if (ptr2) {
@@ -452,7 +452,7 @@ void Std_file::close( Close_mode )
 {
     if( _file != -1 )
     {
-        if( _write_buffer_filled )   flush_write_buffer();  // Bei Exception schlieﬂt ~Std_file() die Datei
+        if( _write_buffer_filled )   flush_write_buffer();  // Bei Exception schlie√üt ~Std_file() die Datei
 
         if( !_dont_close ) {   // nicht stdin, stdout oder stderr
             if( _log )  LOG( "close(" << _file << ")\n" );
@@ -504,11 +504,11 @@ void Std_file::get_record( Area& area )
         }
 
         _pos += len;
-        area.length( len );       // Der letzte Satz kann k¸rzer sein!
+        area.length( len );       // Der letzte Satz kann k√ºrzer sein!
     }
     else
     {
-        int  len_count     = 3;   // _sam3: Soviele L‰ngenbytes noch zu lesen
+        int  len_count     = 3;   // _sam3: Soviele L√§ngenbytes noch zu lesen
         int  rest_length   = 0;   // _sam3
 
         _record_pos = _read_ptr? _buffer_pos + ( _read_ptr - _buffer.char_ptr() )
@@ -556,7 +556,7 @@ void Std_file::get_record( Area& area )
                 _read_end = _read_ptr + len;
             }
 
-            if( _sam3 ) {   // 3 Bytes Satzl‰ngenfeld (little endian)
+            if( _sam3 ) {   // 3 Bytes Satzl√§ngenfeld (little endian)
                 while( len_count  &&  _read_ptr < _read_end ) {
                     rest_length += (int4)*(Byte*)_read_ptr++ << ( --len_count * 8 );
                 }
@@ -590,7 +590,7 @@ void Std_file::get_record( Area& area )
                     memset( area.char_ptr() + area.length(), ' ', n - area.length() );
                     area.length( n );
 
-                    p = p2 + 1;  // \t ¸berspringen
+                    p = p2 + 1;  // \t √ºberspringen
                     if( p == z )  break;
                 }
 
@@ -600,7 +600,7 @@ void Std_file::get_record( Area& area )
         }
 
         if( !_sam3 && _record_end_char == '\n' ) {
-            if( _read_ptr && *_read_ptr == _record_end_char )  _read_ptr++;  // '\n' ¸berspringen
+            if( _read_ptr && *_read_ptr == _record_end_char )  _read_ptr++;  // '\n' √ºberspringen
 
             if( area.length() > 0  &&  area.char_ptr()[ area.length() - 1 ] == '\r' ) {
                 area.length( area.length() - 1 );
@@ -940,7 +940,7 @@ void norm_filename ( char* input_name,
 Bool is_filename( const char* filename )
 {
     // filename ist ein Dateiname, wenn keine Blanks drin sind.
-    // (Man kˆnnte auf Anf¸hrungszeichen pr¸fen).
+    // (Man k√∂nnte auf Anf√ºhrungszeichen pr√ºfen).
 
     uint len = length_without_trailing_spaces( filename );      // Blanks am Ende ignorieren
 
@@ -1033,8 +1033,8 @@ void make_path( const Sos_string& path_par )
 #   endif
 
     // Auf Unix scheint es eine Fehlermeldung zu geben (nicht EEXIST), wenn ein mit mkdir anzulegendes Verzeichnis bereits da ist,
-    // aber man kein Schreibrecht hat, weil es jemand anderem gehˆrt.
-    // Besser w‰re also, erstmal mit stat() zu pr¸fen, ob es existiert.
+    // aber man kein Schreibrecht hat, weil es jemand anderem geh√∂rt.
+    // Besser w√§re also, erstmal mit stat() zu pr√ºfen, ob es existiert.
 /* Z.B. so:
 #   ifdef Z_WINDOWS    
 

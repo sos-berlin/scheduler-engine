@@ -1,7 +1,7 @@
 // $Id: spooler_idl.h 13921 2010-07-01 13:04:12Z jz $
 
 
-/*  Ersatz für spooler.odl für Systeme ohne COM. 
+/*  Ersatz fÃ¼r spooler.odl fÃ¼r Systeme ohne COM. 
     2002 Zschimmer GmbH
 */
 
@@ -246,7 +246,7 @@ struct Itask : IDispatch
     DEFINE_UUIDOF( Itask )
 
   //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
-    virtual HRESULT     put_Error                       ( VARIANT* error_text )                 = 0;       // Für PerlScript, das einen Fehlertext nicht durchreicht
+    virtual HRESULT     put_Error                       ( VARIANT* error_text )                 = 0;       // FÃ¼r PerlScript, das einen Fehlertext nicht durchreicht
     virtual HRESULT     get_Error                       ( Ierror** result )                     = 0;
     virtual HRESULT     get_Job                         ( Ijob** job )                          = 0;
     virtual HRESULT     get_Params                      ( Ivariable_set** parameters )          = 0;
@@ -401,7 +401,7 @@ struct Ilog : IDispatch
     virtual HRESULT         Debug                   ( BSTR line ) = 0;
     
     virtual HRESULT         Info                    ( BSTR line ) = 0;
-    virtual HRESULT         Msg                     ( BSTR line ) = 0;     // Zur Kompatibilität, wie info()
+    virtual HRESULT         Msg                     ( BSTR line ) = 0;     // Zur KompatibilitÃ¤t, wie info()
     virtual HRESULT         Warn                    ( BSTR line ) = 0;
     virtual HRESULT         Error                   ( BSTR line ) = 0;
     virtual HRESULT         Log                     ( Log_level, BSTR line ) = 0;
@@ -586,6 +586,8 @@ struct Ijob_chain : IDispatch
 
     virtual HRESULT     put_Title                   ( BSTR )                                        = 0;
     virtual HRESULT     get_Title                   ( BSTR* )                                       = 0;
+
+    virtual HRESULT     get_Path                    ( BSTR* )                                       = 0;
 };
 
 //----------------------------------------------------------------------------------Order_queue
@@ -732,7 +734,7 @@ DEFINE_GUID(   IID_Ixslt_stylesheet, 0xfeee47ac, 0x6c1b, 0x11d8, 0x81, 0x03, 0x0
 
 struct Ixslt_stylesheet : IDispatch
 {
-    virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;        // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+    virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;        // Damit java_class_name Ã¼ber IDispatch, statt Ã¼ber Ihas_java_class_name gerufen werden kann
     virtual HRESULT         Close                   ()                                              = 0;
     virtual HRESULT         Load_xml                ( BSTR Xml, Ixslt_stylesheet** )                = 0;
     virtual HRESULT         Load_file               ( BSTR Filename, Ixslt_stylesheet** )           = 0;

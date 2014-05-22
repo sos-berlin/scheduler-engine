@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.google.common.io.ByteStreams.copy
-import com.google.common.io.Closeables.closeQuietly
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFileEncoding
 import java.io._
 import java.util.concurrent.atomic.AtomicBoolean
@@ -28,7 +27,7 @@ final class FileServletAsyncOperation(request: HttpServletRequest, response: Htt
 
   def close() {
     //TODO Sicherstellen, dass close() aufgerufen wird!
-    closeQuietly(in)
+    in.close()
   }
 
   def continue() {

@@ -264,17 +264,17 @@ bool Socket_operation::try_set_keepalive( bool b )
     {
         Z_LOG2( "socket.setsockopt", "setsockopt(" << _write_socket << ",SOL_SOCKET,SO_KEEPALIVE," << value << ")\n" );
         int ret = ::setsockopt( _write_socket, SOL_SOCKET, SO_KEEPALIVE, (const char*)&value, sizeof value );
-        if( ret == -1 )  ok = false;    // Nichts run, was socket_errno() ändern könnte! Kein Z_LOG!
+        if( ret == -1 )  ok = false;    // Nichts run, was socket_errno() Ã¤ndern kÃ¶nnte! Kein Z_LOG!
     }
 
     if( ok  &&  _read_socket != SOCKET_ERROR )
     {
         Z_LOG2( "socket.setsockopt", "setsockopt(" << _read_socket << ",SOL_SOCKET,SO_KEEPALIVE," << value << ")\n" );
         int ret = ::setsockopt( _read_socket, SOL_SOCKET, SO_KEEPALIVE, (const char*)&value, sizeof value );
-        if( ret == -1 )  ok = false;    // Nichts run, was socket_errno() ändern könnte! Kein Z_LOG!
+        if( ret == -1 )  ok = false;    // Nichts run, was socket_errno() Ã¤ndern kÃ¶nnte! Kein Z_LOG!
     }
 
-    // Nichts run, was socket_errno() ändern könnte! Kein Z_LOG!
+    // Nichts run, was socket_errno() Ã¤ndern kÃ¶nnte! Kein Z_LOG!
 
     return ok;
 }
@@ -286,8 +286,8 @@ void Socket_operation::set_linger( bool on, int seconds )
     struct linger l; 
     
     l.l_onoff  = on;        // 0: Kein Linger, 1: Linger (mit l_linger)
-    l.l_linger = seconds;   // Sekunden. 0: Sofort schließen (schickt RST, Verbindungsabbruch?)
-                            // >0: Bei Scheduler-Restart kann der Browser hängen. Windows schließt die Verbindung manchmal nie, obwohl Prozess längst beendet ist.
+    l.l_linger = seconds;   // Sekunden. 0: Sofort schlieÃŸen (schickt RST, Verbindungsabbruch?)
+                            // >0: Bei Scheduler-Restart kann der Browser hÃ¤ngen. Windows schlieÃŸt die Verbindung manchmal nie, obwohl Prozess lÃ¤ngst beendet ist.
 
     if( _read_socket != SOCKET_ERROR )
     {
@@ -606,7 +606,7 @@ bool Buffered_socket_operation::connect__continue()
 
     Z_LOG2( "socket.connect", "connect(" << _write_socket << ',' << _peer_host_and_port << "): connected!\n" );
 
-    socket_expect_signals( sig_read | sig_write | sig_except ); // Siehe auch connect__start() (könnte zusammengefasst werden)
+    socket_expect_signals( sig_read | sig_write | sig_except ); // Siehe auch connect__start() (kÃ¶nnte zusammengefasst werden)
 
     set_socket_event_name( "connected" );
     set_state( s_ready );
@@ -793,8 +793,8 @@ int Socket_wait::wait( double seconds )
         // Timeout
         if( !polling )  return 0;
 
-        // Das war für Spooler::Directory_watcher gedacht, ist aber inzwischen in Spooler::Job selbst realisiert
-        // (über _directory_watcher_next_time). 
+        // Das war fÃ¼r Spooler::Directory_watcher gedacht, ist aber inzwischen in Spooler::Job selbst realisiert
+        // (Ã¼ber _directory_watcher_next_time). 
         // Denn diese Stelle wirkt nur, wenn der Scheduler sekundenlang nichts zu tun hat.
         // Am besten sei Directory_watcher eine Async_operation. Joacim 31.12.2003
 
@@ -972,7 +972,7 @@ bool Event_manager::async_continue_selected( Operation_is_ok* operation_is_ok, d
                     if( ( !operation_is_ok || (*operation_is_ok)( op ) ) ) { // &&  op->async_signaled() )  
                         something_done2 |= op->async_continue();
                         something_done |= something_done2;
-                        if( _event_operation_list_modified )  break;    // iterator ist ungültig.
+                        if( _event_operation_list_modified )  break;    // iterator ist ungÃ¼ltig.
                     }
                 }
 
@@ -985,8 +985,8 @@ bool Event_manager::async_continue_selected( Operation_is_ok* operation_is_ok, d
             sleep( short_sleep? 0.1 : 1.0 );
             // Besser sollte hier mit select() (bzw. MsgWaitForMultipleObjects()) gewartet werden. Ist aber zu aufwendig.
             // Deshalb ist oben der Aufruf von async_continue_selected() durch dessen Implementierung ersetzt,
-            // bei der async_signaled() nicht abgefragt wird. Also werden alle Operationen ausgeführt, denn sie werden nicht signalisiert 
-            // (jedenfalls nicht in Unix, denn hier fehlt das select, was die fdset-Bits setzen würde).
+            // bei der async_signaled() nicht abgefragt wird. Also werden alle Operationen ausgefÃ¼hrt, denn sie werden nicht signalisiert 
+            // (jedenfalls nicht in Unix, denn hier fehlt das select, was die fdset-Bits setzen wÃ¼rde).
         }
 
         TIMEOUT: ;
@@ -1011,7 +1011,7 @@ bool Event_manager::async_continue_selected_( Operation_is_ok* operation_is_ok )
                 something_done |= op->async_continue( Async_operation::cont_signaled );
             }
 
-            if( _event_operation_list_modified )  break;    // iterator ist ungültig.
+            if( _event_operation_list_modified )  break;    // iterator ist ungÃ¼ltig.
         }
     }
     while( _event_operation_list_modified );
@@ -1204,11 +1204,11 @@ void Socket_manager::print_file_to_event_map(ostream* s) {
 #endif
 //-------------------------------------------------------------------Socket_manager::bind_free_port
 // Used_ports: Es gibt unter Windows interne Firewalls, die Verbindungsaufbau zu einem Port
-// verweigern, der bereits für eine andere Verbindung belegt ist, obwohl bind() und listen() möglich waren.
+// verweigern, der bereits fÃ¼r eine andere Verbindung belegt ist, obwohl bind() und listen() mÃ¶glich waren.
 // Zone Labs Integrity Agent Version 5.1.556.199, TrueVector security engine version 5.1.556.199, Driver version 5.1.556.199 
 
-// Das ist keine zuverlässige Implementierung, denn ein Port kann von einer anderen Anwendung in Gebrauch sein,
-// was wir hier nicht bemerken würden.
+// Das ist keine zuverlÃ¤ssige Implementierung, denn ein Port kann von einer anderen Anwendung in Gebrauch sein,
+// was wir hier nicht bemerken wÃ¼rden.
 
 int Socket_manager::Used_ports::bind_free_port( SOCKET s, sockaddr_in* address )
 {

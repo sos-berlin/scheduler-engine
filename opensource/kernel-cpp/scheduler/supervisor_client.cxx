@@ -87,8 +87,11 @@ struct Abstract_connector : Async_operation, Scheduler_object
         xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
         xml_writer->set_attribute_optional("cluster_member_id", _spooler->cluster_member_id());
 
-        if (_spooler->_udp_port)
+        if (_spooler->_udp_port) {
             xml_writer->set_attribute("udp_port", _spooler->_udp_port);
+            if (!_spooler->_ip_address.is_empty())
+                xml_writer->set_attribute("ip", _spooler->_ip_address.ip_string());
+        }
 
         xml_writer->set_attribute("version", _spooler->_version);
         xml_writer->set_attribute("interval", _polling_interval.seconds());
@@ -138,7 +141,7 @@ struct Abstract_connector : Async_operation, Scheduler_object
         if (xml::Element_ptr directory_element = response_document.select_node("/spooler/answer/configuration.directory")) {
             _supervisor_client->set_using_central_configuration();
             update_directory_structure(root_path, directory_element);
-            _spooler->folder_subsystem()->handle_folders();     // cache-Verzeichnis würde reichen
+            _spooler->folder_subsystem()->handle_folders();     // cache-Verzeichnis wÃ¼rde reichen
         } 
     }
 
@@ -190,9 +193,9 @@ struct Abstract_connector : Async_operation, Scheduler_object
                     log()->info(message_string("SCHEDULER-701", path, last_write_time.as_string(_spooler->_time_zone_name)));
 
                     File_path temporary_path = file_path + "~";
-                    //if( temporary_path.exists() )  temporary_path.unlink();     // Löschen, damit Dateirechte gesetzt werden können (Datei sollte nicht vorhanden sein)
+                    //if( temporary_path.exists() )  temporary_path.unlink();     // LÃ¶schen, damit Dateirechte gesetzt werden kÃ¶nnen (Datei sollte nicht vorhanden sein)
 
-                    File file(temporary_path, "wb"); //, 0400 );                   // Nur lesbar, damit keiner versehentlich die Datei ändert
+                    File file(temporary_path, "wb"); //, 0400 );                   // Nur lesbar, damit keiner versehentlich die Datei Ã¤ndert
                     file.print(content);
                     file.close();
 

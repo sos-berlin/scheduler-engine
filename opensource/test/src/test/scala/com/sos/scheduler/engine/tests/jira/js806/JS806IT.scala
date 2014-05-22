@@ -56,7 +56,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.nextKeyed[OrderStepEndedEvent](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={changedTitle}><run_time/></order>
-      eventPipe.nextWithCondition[LogEvent] { e => Option(e.getCodeOrNull) == Some("SCHEDULER-892") }   // This Standing_order is going to be replaced due to changed configuration file ...
+      eventPipe.nextWithCondition[LogEvent] { _.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
       scheduler executeXml <job_chain_node.modify job_chain={suspendJobChainPath.string} state="200" action="process"/>
       eventPipe.nextKeyed[OrderFinishedEvent](myOrderKey)
       eventPipe.nextKeyed[FileBasedActivatedEvent](myOrderKey)

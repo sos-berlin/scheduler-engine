@@ -12,15 +12,6 @@ import org.joda.time.Instant
 @ForCpp trait UnmodifiableOrder
 extends EventSource {
 
-  @Deprecated final def getKey = key
-  @Deprecated final def getId = id
-  @Deprecated final def getState = state
-  @Deprecated final def getEndState = endState
-  @Deprecated final def getTitle = title
-  @Deprecated final def getJobChain = jobChain
-  @Deprecated final def getParameters = parameters
-  @Deprecated final def getLog = log
-
   def key: OrderKey
 
   def id: OrderId

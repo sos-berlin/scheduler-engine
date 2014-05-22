@@ -1,6 +1,6 @@
-// $Id: zschimmer.cxx 14110 2010-10-27 12:58:32Z jz $        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: zschimmer.cxx 14110 2010-10-27 12:58:32Z jz $        Â© 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
-// §1693
+// Â§1693
 
 #include "zschimmer.h"
 #include "log.h"
@@ -25,7 +25,7 @@
 #endif
 
 #ifdef __GNUC__
-#   include <cxxabi.h>                  // für abi::__cxa_demangle()
+#   include <cxxabi.h>                  // fÃ¼r abi::__cxa_demangle()
 #endif
 
 #ifdef SYSTEM_HPUX
@@ -82,11 +82,11 @@ static Message_code_text error_codes[] =
     { "WINSOCK-10004", "WSAEINTR - Interrupted function call" },                // A blocking operation was interrupted by a call to WSACancelBlockingCall.  
     { "WINSOCK-10013", "WSAEACCES - Permission denied" },                       // An attempt was made to access a socket in a way forbidden by its access permissions. An example is using a broadcast address for sendto without broadcast permission being set using setsockopt(SO_BROADCAST).  Another possible reason for the WSAEACCES error is that when the bind function is called (on Windows NT 4 SP4 or later), another application, service, or kernel mode driver is bound to the same address with exclusive access. Such exclusive access is a new feature of Windows NT 4 SP4 and later, and is implemented by using the SO_EXCLUSIVEADDRUSE option.
     { "WINSOCK-10014", "WSAEFAULT - Bad address" },                             // The system detected an invalid pointer address in attempting to use a pointer argument of a call. This error occurs if an application passes an invalid pointer value, or if the length of the buffer is too small. For instance, if the length of an argument, which is a sockaddr structure, is smaller than the sizeof(sockaddr).  
-    { "WINSOCK-10022", "WSAEINVAL - Invalid argument" },                        // Some invalid argument was supplied (for example, specifying an invalid level to the setsockopt function). In some instances, it also refers to the current state of the socket—for instance, calling accept on a socket that is not listening.  
+    { "WINSOCK-10022", "WSAEINVAL - Invalid argument" },                        // Some invalid argument was supplied (for example, specifying an invalid level to the setsockopt function). In some instances, it also refers to the current state of the socketÂ—for instance, calling accept on a socket that is not listening.  
     { "WINSOCK-10024", "WSAEMFILE - Too many open files" },                     // Too many open sockets. Each implementation may have a maximum number of socket handles available, either globally, per process, or per thread.  
     { "WINSOCK-10035", "WSAEWOULDBLOCK - Resource temporarily unavailable" },   // This error is returned from operations on nonblocking sockets that cannot be completed immediately, for example recv when no data is queued to be read from the socket. It is a nonfatal error, and the operation should be retried later. It is normal for WSAEWOULDBLOCK to be reported as the result from calling connect on a nonblocking SOCK_STREAM socket, since some time must elapse for the connection to be established.  
-    { "WINSOCK-10036", "WSAEINPROGRESS - Operation now in progress" },          // A blocking operation is currently executing. Windows Sockets only allows a single blocking operation—per- task or thread—to be outstanding, and if any other function call is made (whether or not it references that or any other socket) the function fails with the WSAEINPROGRESS error.  
-    { "WINSOCK-10037", "WSAEALREADY - Operation already in progress" },         // An operation was attempted on a nonblocking socket with an operation already in progress—that is, calling connect a second time on a nonblocking socket that is already connecting, or canceling an asynchronous request (WSAAsyncGetXbyY) that has already been canceled or completed.  
+    { "WINSOCK-10036", "WSAEINPROGRESS - Operation now in progress" },          // A blocking operation is currently executing. Windows Sockets only allows a single blocking operationÂ—per- task or threadÂ—to be outstanding, and if any other function call is made (whether or not it references that or any other socket) the function fails with the WSAEINPROGRESS error.  
+    { "WINSOCK-10037", "WSAEALREADY - Operation already in progress" },         // An operation was attempted on a nonblocking socket with an operation already in progressÂ—that is, calling connect a second time on a nonblocking socket that is already connecting, or canceling an asynchronous request (WSAAsyncGetXbyY) that has already been canceled or completed.  
     { "WINSOCK-10038", "WSAENOTSOCK - Socket operation on nonsocket" },         // An operation was attempted on something that is not a socket. Either the socket handle parameter did not reference a valid socket, or for select, a member of an fd_set was not valid.  
     { "WINSOCK-10039", "WSAEDESTADDRREQ - Destination address required" },      // A required address was omitted from an operation on a socket. For example, this error is returned if sendto is called with the remote address of ADDR_ANY.  
     { "WINSOCK-10040", "WSAEMSGSIZE - Message too long" },                      // A message sent on a datagram socket was larger than the internal message buffer or some other network limit, or the buffer used to receive a datagram was smaller than the datagram itself.  
@@ -97,7 +97,7 @@ static Message_code_text error_codes[] =
     { "WINSOCK-10045", "WSAEOPNOTSUPP - Operation not supported" },             // The attempted operation is not supported for the type of object referenced. Usually this occurs when a socket descriptor to a socket that cannot support this operation is trying to accept a connection on a datagram socket.  
     { "WINSOCK-10046", "WSAEPFNOSUPPORT - Protocol family not supported" },     // The protocol family has not been configured into the system or no implementation for it exists. This message has a slightly different meaning from WSAEAFNOSUPPORT. However, it is interchangeable in most cases, and all Windows Sockets functions that return one of these messages also specify WSAEAFNOSUPPORT.  
     { "WINSOCK-10047", "WSAEAFNOSUPPORT - Address family not supported by protocol family" },  // An address incompatible with the requested protocol was used. All sockets are created with an associated address family (that is, AF_INET for Internet Protocols) and a generic protocol type (that is, SOCK_STREAM). This error is returned if an incorrect protocol is explicitly requested in the socket call, or if an address of the wrong family is used for a socket, for example, in sendto.  
-    { "WINSOCK-10048", "WSAEADDRINUSE - Address already in use" },              // Typically, only one usage of each socket address (protocol/IP address/port) is permitted. This error occurs if an application attempts to bind a socket to an IP address/port that has already been used for an existing socket, or a socket that was not closed properly, or one that is still in the process of closing. For server applications that need to bind multiple sockets to the same port number, consider using setsockopt (SO_REUSEADDR). Client applications usually need not call bind at all—connect chooses an unused port automatically. When bind is called with a wildcard address (involving ADDR_ANY), a WSAEADDRINUSE error could be delayed until the specific address is committed. This could happen with a call to another function later, including connect, listen, WSAConnect, or WSAJoinLeaf.  
+    { "WINSOCK-10048", "WSAEADDRINUSE - Address already in use" },              // Typically, only one usage of each socket address (protocol/IP address/port) is permitted. This error occurs if an application attempts to bind a socket to an IP address/port that has already been used for an existing socket, or a socket that was not closed properly, or one that is still in the process of closing. For server applications that need to bind multiple sockets to the same port number, consider using setsockopt (SO_REUSEADDR). Client applications usually need not call bind at allÂ—connect chooses an unused port automatically. When bind is called with a wildcard address (involving ADDR_ANY), a WSAEADDRINUSE error could be delayed until the specific address is committed. This could happen with a call to another function later, including connect, listen, WSAConnect, or WSAJoinLeaf.  
     { "WINSOCK-10049", "WSAEADDRNOTAVAIL - Cannot assign requested address" },  // The requested address is not valid in its context. This normally results from an attempt to bind to an address that is not valid for the local computer. This can also result from connect, sendto, WSAConnect, WSAJoinLeaf, or WSASendTo when the remote address or port is not valid for a remote computer (for example, address or port 0).  
     { "WINSOCK-10050", "WSAENETDOWN - Network is down" },                       // A socket operation encountered a dead network. This could indicate a serious failure of the network system (that is, the protocol stack that the Windows Sockets DLL runs over), the network interface, or the local network itself.  
     { "WINSOCK-10051", "WSAENETUNREACH - Network is unreachable" },             // A socket operation was attempted to an unreachable network. This usually means the local software knows no route to reach the remote host.  
@@ -106,10 +106,10 @@ static Message_code_text error_codes[] =
     { "WINSOCK-10054", "WSAECONNRESET - Connection reset by peer" },            // An existing connection was forcibly closed by the remote host. This normally results if the peer application on the remote host is suddenly stopped, the host is rebooted, the host or remote network interface is disabled, or the remote host uses a hard close (see setsockopt for more information on the SO_LINGER option on the remote socket). This error may also result if a connection was broken due to keep-alive activity detecting a failure while one or more operations are in progress. Operations that were in progress fail with WSAENETRESET. Subsequent operations fail with WSAECONNRESET.  
     { "WINSOCK-10055", "WSAENOBUFS - No buffer space available" },              // An operation on a socket could not be performed because the system lacked sufficient buffer space or because a queue was full.  
     { "WINSOCK-10056", "WSAEISCONN - Socket is already connected" },            // A connect request was made on an already-connected socket. Some implementations also return this error if sendto is called on a connected SOCK_DGRAM socket (for SOCK_STREAM sockets, the to parameter in sendto is ignored) although other implementations treat this as a legal occurrence.  
-    { "WINSOCK-10057", "WSAENOTCONN - Socket is not connected" },               // A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using sendto) no address was supplied. Any other type of operation might also return this error—for example, setsockopt setting SO_KEEPALIVE if the connection has been reset.  
+    { "WINSOCK-10057", "WSAENOTCONN - Socket is not connected" },               // A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using sendto) no address was supplied. Any other type of operation might also return this errorÂ—for example, setsockopt setting SO_KEEPALIVE if the connection has been reset.  
     { "WINSOCK-10058", "Socket is not connected - Cannot send after socket shutdown" },         // A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call. By calling shutdown a partial close of a socket is requested, which is a signal that sending or receiving, or both have been discontinued.  
     { "WINSOCK-10060", "Socket is not connected - Connection timed out" },      // A connection attempt failed because the connected party did not properly respond after a period of time, or the established connection failed because the connected host has failed to respond.  
-    { "WINSOCK-10061", "Socket is not connected - Connection refused" },        // No connection could be made because the target computer actively refused it. This usually results from trying to connect to a service that is inactive on the foreign host—that is, one with no server application running.  
+    { "WINSOCK-10061", "Socket is not connected - Connection refused" },        // No connection could be made because the target computer actively refused it. This usually results from trying to connect to a service that is inactive on the foreign hostÂ—that is, one with no server application running.  
     { "WINSOCK-10064", "Socket is not connected - Host is down" },              // A socket operation failed because the destination host is down. A socket operation encountered a dead host. Networking activity on the local host has not been initiated. These conditions are more likely to be indicated by the error WSAETIMEDOUT.  
     { "WINSOCK-10065", "Socket is not connected - No route to host" },          // A socket operation was attempted to an unreachable host. See WSAENETUNREACH.  
     { "WINSOCK-10067", "Socket is not connected - Too many processes" },        // A Windows Sockets implementation may have a limit on the number of applications that can use it simultaneously. WSAStartup may fail with this error if the limit has been reached.  
@@ -125,7 +125,7 @@ static Message_code_text error_codes[] =
     { "WINSOCK-11001", "Socket is not connected - Host not found" },                // No such host is known. The name is not an official host name or alias, or it cannot be found in the database(s) being queried. This error may also be returned for protocol and service queries, and means that the specified name could not be found in the relevant database.  
     { "WINSOCK-11002", "Socket is not connected - Nonauthoritative host not found" },           // This is usually a temporary error during host name resolution and means that the local server did not receive a response from an authoritative server. A retry at some time later may be successful.  
     { "WINSOCK-11003", "Socket is not connected - This is a nonrecoverable error" },            // This indicates some sort of nonrecoverable error occurred during a database lookup. This may be because the database files (for example, BSD-compatible HOSTS, SERVICES, or PROTOCOLS files) could not be found, or a DNS request was returned by the server with a severe error.  
-    { "WINSOCK-11004", "Socket is not connected - Valid name, no data record of requested type" },          // The requested name is valid and was found in the database, but it does not have the correct associated data being resolved for. The usual example for this is a host name-to-address translation attempt (using gethostbyname or WSAAsyncGetHostByName) which uses the DNS (Domain Name Server). An MX record is returned but no A record—indicating the host itself exists, but is not directly reachable.  
+    { "WINSOCK-11004", "Socket is not connected - Valid name, no data record of requested type" },          // The requested name is valid and was found in the database, but it does not have the correct associated data being resolved for. The usual example for this is a host name-to-address translation attempt (using gethostbyname or WSAAsyncGetHostByName) which uses the DNS (Domain Name Server). An MX record is returned but no A recordÂ—indicating the host itself exists, but is not directly reachable.  
     { NULL }
 };
 
@@ -142,7 +142,7 @@ Zschimmer_static::Zschimmer_static()
     _valid(true)
 { 
 
-/*  Ist leider zu spät. Die Umgebungsvariable muss schon bei Programmstart gesetzt sein.
+/*  Ist leider zu spÃ¤t. Die Umgebungsvariable muss schon bei Programmstart gesetzt sein.
 #   if defined __GNUC__ && defined _DEBUG
 
         // Recent versions of Linux libc (later than 5.4.23) and GNU libc (2.x) include a malloc implementation which is tunable via environment variables.  When
@@ -184,10 +184,10 @@ void zschimmer_init()
     }
 
 #   ifndef Z_WINDOWS
-        main_pid = getpid();        // Das funktioniert, wenn wir gerade im Hauptthread sind. (Für pthreads)
+        main_pid = getpid();        // Das funktioniert, wenn wir gerade im Hauptthread sind. (FÃ¼r pthreads)
 #   endif
 
-    // "all" soll diese Kategorien nicht einschließen, die müssten extra angeführt werden:
+    // "all" soll diese Kategorien nicht einschlieÃŸen, die mÃ¼ssten extra angefÃ¼hrt werden:
     set_log_category_explicit( "async"               );
     set_log_category_explicit( "developer"           );
     set_log_category_explicit( "function"            );
@@ -225,7 +225,7 @@ void add_message_code_texts( Message_code_text* e )
             {
                 for( Message_code_text* e = d; e->_code; e++ )
                 {
-                    strcmp( e->_code, ".........." );     // Prüfen, ob Liste mit leerem Eintrag abgeschlossen ist.
+                    strcmp( e->_code, ".........." );     // PrÃ¼fen, ob Liste mit leerem Eintrag abgeschlossen ist.
                 }
             }
 #       endif
@@ -278,7 +278,7 @@ void _assert_ptr( const void* p, uint length, const char* info )
 //    long i = InterlockedDecrement( &_reference_count );
 //    if( i == 0 )
 //    {
-//        AddRef();       // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete führt. 10.6.04
+//        AddRef();       // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete fÃ¼hrt. 10.6.04
 //        delete this;
 //    }
 //
@@ -293,8 +293,8 @@ ULONG AddRef_Release_counter::call_Release()
 
     if( i == 0 ) 
     { 
-        call_AddRef();       // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete führt. 10.6.04
-        // Aufrufer muss delete ausführen!
+        call_AddRef();       // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete fÃ¼hrt. 10.6.04
+        // Aufrufer muss delete ausfÃ¼hren!
     }  
     
     return i; 
@@ -307,7 +307,7 @@ long Object::obj_remove_ref()
     long i = InterlockedDecrement( &_obj_ref_count );
     if( i == 0 )
     {
-        obj_add_ref();    // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete führt. 10.6.04
+        obj_add_ref();    // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete fÃ¼hrt. 10.6.04
         delete this;
     }
 
@@ -338,7 +338,7 @@ STDMETHODIMP Object::QueryInterface( const IID& iid, void** result )
 STDMETHODIMP Object::GetTypeInfoCount( UINT* result )
 {
     if( !result )              return E_INVALIDARG;
-    if( (size_t)result == 1 )  return E_NOTIMPL;    //??? VBScript übergibt im separaten Prozess eine 1 als Pointer, in Verbindung mit einem Iterator (NewEnum spooler_task.params)!
+    if( (size_t)result == 1 )  return E_NOTIMPL;    //??? VBScript Ã¼bergibt im separaten Prozess eine 1 als Pointer, in Verbindung mit einem Iterator (NewEnum spooler_task.params)!
 
     *result = 0;
     return S_OK;
@@ -381,7 +381,7 @@ Smart_ptr::Smart_ptr( const IUnknown* p )
 
 void Smart_ptr::_assign( IUnknown* src )
 {
-    IUnknown* p = copy( src );     // falls Smart_pointer = Object*, damit ref_count nicht vorübergehend 0 wird
+    IUnknown* p = copy( src );     // falls Smart_pointer = Object*, damit ref_count nicht vorÃ¼bergehend 0 wird
     inline_del();
     _ptr = p;
 }
@@ -465,14 +465,14 @@ string quoted_command_parameter( const string& command_parameter )
 }
 */
 //-----------------------------------------------------------------quoted_windows_process_parameter
-// Für CreateProcess()
+// FÃ¼r CreateProcess()
 
 string quoted_windows_process_parameter( const string& command_parameter )
 {
     if( command_parameter.find(' ') == string::npos 
      && command_parameter.find('"') != string::npos )  return command_parameter;
 
-    return quoted_string( command_parameter, '"', '\0' );   // '"' im String ist nicht möglich
+    return quoted_string( command_parameter, '"', '\0' );   // '"' im String ist nicht mÃ¶glich
 }
 
 //-----------------------------------------------------------------quoted_windows_command_parameter
@@ -518,7 +518,7 @@ string quoted_string( const char* text, char quote1, char quote2, size_t len )
 {
     // SQL: quote1 == '"', quote2 == '"'   oder
     // C:   quote1 == '"', quote2 == '\\'
-    // Windows Kommandozeile: quote1 == '"', quote2 == '\0'   ==> '"' im String ist nicht zugelassen und führt zu Exception
+    // Windows Kommandozeile: quote1 == '"', quote2 == '\0'   ==> '"' im String ist nicht zugelassen und fÃ¼hrt zu Exception
 
     string      result;
     const char* p      = text;
@@ -626,7 +626,7 @@ int z_snprintf( char* buffer, uint buffer_size, const char* format, ... )
         buffer[ buffer_size - 1 ] = '\0';
 #   endif
 
-    // Besser keine Exception auslösen bei ret=-1. Lieber eine eigene Funktion schreiben  z_snprintf_x
+    // Besser keine Exception auslÃ¶sen bei ret=-1. Lieber eine eigene Funktion schreiben  z_snprintf_x
 
     return result;
 }
@@ -683,8 +683,8 @@ size_t length_without_trailing_char( const char* text, size_t len, char c )
     return p - text;
 
 /* SOS
-    // Der String wird Wortweise (int32) geprüft.
-    // Dabei werden bis drei Bytes vor dem String gelesen, die müssen aber zugreifbar sein, weil sie im selben Speicherwort liegen.
+    // Der String wird Wortweise (int32) geprÃ¼ft.
+    // Dabei werden bis drei Bytes vor dem String gelesen, die mÃ¼ssen aber zugreifbar sein, weil sie im selben Speicherwort liegen.
 
     int32 cccc;
 
@@ -702,7 +702,7 @@ size_t length_without_trailing_char( const char* text, size_t len, char c )
         {
             // p ist ausgerichtet, p >= text
             const char* text0 = (const char*)( (size_t)text & (size_t)~3 );  // Auf int32-Grenze abrunden
-            if( *(int32*)text0 == cccc )       // (p0 < text) muss geprüft werden?
+            if( *(int32*)text0 == cccc )       // (p0 < text) muss geprÃ¼ft werden?
             {
                 p -= 4;
                 while( p > text  &&  *(int32*)p == cccc )  p -= 4;
@@ -775,7 +775,7 @@ uint64 as_uint64( const char* str )
     return n;
 
   OVERFLW:
-  	throw_overflow( "Z-4002", "uint64", str );
+    throw_overflow( "Z-4002", "uint64", str );
     return 0;
 }
 
@@ -908,8 +908,8 @@ bool as_bool( const char* str )
 
 int int_cast(size_t n)
 {
-    if (n > (size_t)INT_MAX) {  // size_t ist unsigned, < 0 brauchen wir nicht zu prüfen.
-        string s = (S() << "size_t(" << (long)n << ")").to_string();    // long, damit unmögliche negative Zahl -1 nicht als 18446744073709551613 ausgegeben wird. 
+    if (n > (size_t)INT_MAX) {  // size_t ist unsigned, < 0 brauchen wir nicht zu prÃ¼fen.
+        string s = (S() << "size_t(" << (long)n << ")").to_string();    // long, damit unmÃ¶gliche negative Zahl -1 nicht als 18446744073709551613 ausgegeben wird. 
         //assert(!"int_cast(): size_t out of int range");   // DebugBreak()
         throw_overflow("Z-4002", "int", s.c_str());
     }
@@ -988,10 +988,10 @@ void Rotating_bar::operator()()
 
 string subst_env( const string& value, const Get_string_by_name_interface* get_string_by_name )
 {
-    if( !strchr( value.c_str(), '$' ) )  return value;      // Abkürzung
+    if( !strchr( value.c_str(), '$' ) )  return value;      // AbkÃ¼rzung
 
 
-    //? Für Windows auch: "${registry:HKEY_LOCAL_MACHINE\\software\\JavaSoft\\Java Runtime Environment\\${registry:[CurrentVersion]}\\RuntimeLib}"
+    //? FÃ¼r Windows auch: "${registry:HKEY_LOCAL_MACHINE\\software\\JavaSoft\\Java Runtime Environment\\${registry:[CurrentVersion]}\\RuntimeLib}"
 
     string      result;
     const char* p0 = value.c_str();
@@ -1016,7 +1016,7 @@ string subst_env( const string& value, const Get_string_by_name_interface* get_s
             {
                 p++;
                 size_t e = value.find( '}', p - p0 );
-                if( e == string::npos ) { p -= 2; break; }    // Fehler: Schließende Klammer
+                if( e == string::npos ) { p -= 2; break; }    // Fehler: SchlieÃŸende Klammer
                 name.assign( p, e - ( p - p0 ) );
                 p = p0 + e + 1;
             }
@@ -1048,7 +1048,7 @@ string subst_env( const string& value, const Get_string_by_name_interface* get_s
             result += *p++;
     }
 
-    result.append( p, value.length() - ( p - p0 ) );  // Rest anhängen
+    result.append( p, value.length() - ( p - p0 ) );  // Rest anhÃ¤ngen
 
     return result;
 }
@@ -1139,7 +1139,7 @@ double double_from_localtime()
 {
 #   if defined Z_LINUX
 
-        // Linux füllt nicht time_b::dstflag
+        // Linux fÃ¼llt nicht time_b::dstflag
 
         timeval  tv;
         tm       local_tm;
@@ -1365,7 +1365,7 @@ int current_timezone()
 {
 #   if defined SYSTEM_LINUX
 
-        // Linux füllt nicht time_b::dstflag
+        // Linux fÃ¼llt nicht time_b::dstflag
 
         timeval  tv;
         tm       local_tm;
@@ -1469,7 +1469,7 @@ void set_environment_variable( const string& name, const string& value )
         BOOL ok = SetEnvironmentVariable( name.c_str(), value.c_str() );
         if( !ok )  throw_mswin( "SetEnvironmentVariable", name );
 
-        int errn = _putenv_s( name.c_str(), value.c_str() );    // Nur für getenv()
+        int errn = _putenv_s( name.c_str(), value.c_str() );    // Nur fÃ¼r getenv()
         if( errn )  throw_errno( errn, "_putenv_s", name.c_str() );
 
 #   elif defined Z_HPUX || defined Z_SOLARIS || defined Z_AIX
@@ -1597,7 +1597,7 @@ string complete_computer_name()
             if( err )  throw_errno( errno, "getdomainname" );
 
             if( buffer[0]  &&  strcmp( buffer, "(none)" ) != 0 )  result << "." << buffer;
-#	endif
+#       endif
 
         return result;
 
@@ -1751,7 +1751,7 @@ string z_function( const char* pretty_function_name )
         const char* p_end = strchr( pretty_function_name, '(' );   // Parameterliste abschneiden
         if( !p_end )  p_end = pretty_function_name + strlen( pretty_function_name );
         const char* p = p_end;
-        while( p > pretty_function_name  &&  p[-1] != ' ' )  p--;   // Rückgabetyp und static usw. abschneiden
+        while( p > pretty_function_name  &&  p[-1] != ' ' )  p--;   // RÃ¼ckgabetyp und static usw. abschneiden
         result.reserve( p_end - p + 2 );
         result = string( p, p_end - p );
         //result.append( "()" );

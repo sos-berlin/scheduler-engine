@@ -4,14 +4,12 @@ import SchedulePeriodXMLParser._
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.TimeOfDay
 import com.sos.scheduler.engine.newkernel.utils.StringConverters._
-import javax.xml.stream.XMLEventReader
 import org.joda.time.Duration.standardSeconds
 import scala.collection.mutable
 
-class SchedulePeriodXMLParser(eventReader: XMLEventReader) {
-  private val eventIterator = new ScalaXMLEventReader(eventReader)
+class SchedulePeriodXMLParser(eventReader: ScalaXMLEventReader) {
 
-  import eventIterator._
+  import eventReader._
 
   def parse(): OldPeriod =
     parseElement("period") {
@@ -30,7 +28,7 @@ object SchedulePeriodXMLParser {
     case ("once", s) => builder.once = stringToBoolean(s)
   }
 
-  def parseSchedulePeriodSeq(eventReader: XMLEventReader): PeriodSeq = {
+  def parseSchedulePeriodSeq(eventReader: ScalaXMLEventReader): PeriodSeq = {
     val buffer = mutable.Buffer[OldPeriod]()
     val periodParser = new SchedulePeriodXMLParser(eventReader)
     while (eventReader.peek.isStartElement) {

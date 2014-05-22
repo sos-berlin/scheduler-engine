@@ -36,7 +36,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
     /*+ Erzeugt eine neue Task mit Parametern und reiht sie in die Task-Warteschlange des Jobs ein.
      * 
      * <p>
-     * Die Parameter stehen der Task mit {@link Task#params()} zur Verf�gung.
+     * Die Parameter stehen der Task mit {@link Task#params()} zur Verfügung.
      * <p>
      * Zwei besondere Parameter können angegeben werden:
      * <p>
@@ -72,7 +72,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
 
     
     
-    /*+ Startet eine Task des Jobs, wenn nicht schon eine läuft und &lt;run_time> dies zul�sst.
+    /*+ Startet eine Task des Jobs, wenn nicht schon eine läuft und &lt;run_time> dies zulässt.
      * <p><br/><b>Beispiel</b>
      * <pre>
      *      spooler.job( "job_a" ).wake();
@@ -87,15 +87,15 @@ public class Job extends Idispatch implements HasBean<JobBean>
     
     
     
-    /*+ Lässt eine Task starten, sobald sich ein Verzeichnis �ndert.
+    /*+ Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
      * 
      * <p>
-     * Wenn keine Task des Jobs l�uft und sich das Verzeichnis ge�ndert hat 
+     * Wenn keine Task des Jobs läuft und sich das Verzeichnis geändert hat
      * (eine Datei hinzukommt, umbenannt oder entfernt wird), 
      * startet der Scheduler innerhalb der &lt;run_time> eine Task.
      * <p>
      * Um mehrere Verzeichnisse zu überwachen, kann der Aufruf wiederholt werden.
-     * Ein Aufruf mit einem bereits angegebenen Verzeichnis erneuert die �berwachung. 
+     * Ein Aufruf mit einem bereits angegebenen Verzeichnis erneuert die Überwachung.
      * <p>
      * Der Aufruf kann im Startskript oder in spooler_init() des Jobs codiert werden.
      * Wenn er in spooler_init() ist, muss der Job zu Beginn einmal starten, damit er wirksam wird.
@@ -111,7 +111,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
     
     public void             start_when_directory_changed( String directory_name )                           { com_call( "start_when_directory_changed", directory_name ); }
 
-    /*+ L�sst eine Task starten, sobald sich ein Verzeichnis �ndert.
+    /*+ Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
     * @see #start_when_directory_changed( String )
     */
     public void             start_when_directory_changed( java.io.File directory_name )                     { com_call( "start_when_directory_changed", directory_name.toString() ); }
@@ -133,13 +133,13 @@ public class Job extends Idispatch implements HasBean<JobBean>
     public void             start_when_directory_changed( String directory_name, String filename_pattern )  { com_call( "start_when_directory_changed", directory_name, filename_pattern ); }
 
     
-    /*+ Lässt eine Task starten, sobald sich ein Verzeichnis �ndert.
+    /*+ Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
     * @see #start_when_directory_changed( String, String )
     */
     public void             start_when_directory_changed( java.io.File directory_name, String filename_pattern )  { com_call( "start_when_directory_changed", directory_name.toString(), filename_pattern ); }
 
 
-    /*+ Nimmt alle Aufrufe von start_when_directory_changed() zur�ck.
+    /*+ Nimmt alle Aufrufe von start_when_directory_changed() zurück.
      *
      */
     public void             clear_when_directory_changed()                          {                     com_call( "clear_when_directory_changed"  ); }
@@ -179,7 +179,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
     
     
     
-    /*+ Setzt für die Status-Anzeige einen Text (für die HTML-Oberfl�che).
+    /*+ Setzt für die Status-Anzeige einen Text (für die HTML-Oberfläche).
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -251,7 +251,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
     public void         set_delay_after_error   ( int error_steps, double seconds ) {                     com_call( ">delay_after_error", new Integer(error_steps), new Double(seconds)   ); }
     
     
-    /*+ Wie {@link #set_delay_after_error(int,double)}, "HH:MM:SS" und "STOP" k�nnen angegeben werden.
+    /*+ Wie {@link #set_delay_after_error(int,double)}, "HH:MM:SS" und "STOP" können angegeben werden.
      * 
      * <p>
      * Normalerweise stoppt der Scheduler einen Job, der einen Fehler liefert. 
@@ -286,7 +286,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
     public void         set_delay_after_error   ( int error_steps, String hhmm_ss ) {                     com_call( ">delay_after_error", error_steps, hhmm_ss   ); }
     
     
-    /*+ Nimmt alle Aufrufe von set_delay_after_error() zur�ck. 
+    /*+ Nimmt alle Aufrufe von set_delay_after_error() zurück.
      */
     public void             clear_delay_after_error()                               {                     com_call( "clear_delay_after_error"       ); }
     
@@ -307,7 +307,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
       * <p>
       * Wenn keine Task des Jobs läuft, entfernt remove() den Job sofort.
       * <p>
-      * Auftragsjobs ( &lt;job order="yes">) k�nnen nicht entfernt werden.
+      * Auftragsjobs ( &lt;job order="yes">) können nicht entfernt werden.
      */
     public void             remove              ()                                  {                     com_call( "remove"                        ); }
 

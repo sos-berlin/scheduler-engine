@@ -19,7 +19,7 @@ namespace xml {
 #if !defined Z_WINDOWS
     const int NODE_ELEMENT = 1;
     const int NODE_ATTRIBUTE = 2;
-    const int NODE_TEXT	= 3;
+    const int NODE_TEXT = 3;
     const int NODE_CDATA_SECTION = 4;
     const int NODE_ENTITY_REFERENCE = 5;
     const int NODE_ENTITY = 6;
@@ -29,7 +29,7 @@ namespace xml {
     const int NODE_DOCUMENT_TYPE = 10;
     const int NODE_DOCUMENT_FRAGMENT = 11;
     const int NODE_NOTATION = 12;
-#endif	
+#endif
 
 //--------------------------------------------------------------------------------name_of_node_type
 
@@ -655,16 +655,16 @@ string Element_ptr::trimmed_text() const
 
     const char* p0 = text.c_str();
     const char* p  = p0;
-    while( *p == ' ' || *p == '\t' )  p++;            // Leerzeichen hinter <tag> löschen
-    if( *p == '\r' )  p++;              // Ersten Zeilenwechsel löschen
+    while( *p == ' ' || *p == '\t' )  p++;            // Leerzeichen hinter <tag> lÃ¶schen
+    if( *p == '\r' )  p++;              // Ersten Zeilenwechsel lÃ¶schen
     if( *p == '\n' )  p++;
 
     const char* p_end = p0 + text.length();
-    while( p_end > p0  &&  ( p_end[-1] == ' ' || p_end[-1] == '\t' ) )  p_end--;    // Leerzeichen vor </tag> löschen
-    if( p_end > p0  &&  p_end[-1] == '\n' )  p_end--;                           // Letzten Zeilenwechsel löschen
+    while( p_end > p0  &&  ( p_end[-1] == ' ' || p_end[-1] == '\t' ) )  p_end--;    // Leerzeichen vor </tag> lÃ¶schen
+    if( p_end > p0  &&  p_end[-1] == '\n' )  p_end--;                           // Letzten Zeilenwechsel lÃ¶schen
     if( p_end > p0  &&  p_end[-1] == '\r' )  p_end--;
 
-    //while( p_end > p  &&  isspace( (uchar)p_end[-1] ) )  p_end--;        // Alle Leerzeichen und Blanks etc. am Ende löschen
+    //while( p_end > p  &&  isspace( (uchar)p_end[-1] ) )  p_end--;        // Alle Leerzeichen und Blanks etc. am Ende lÃ¶schen
 
     text.erase( p_end - p0 );
     text.erase( 0, p - p0 );

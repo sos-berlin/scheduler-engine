@@ -30,8 +30,8 @@ using namespace zschimmer::windows;
 static const char               std_service_name[]          = "sos_scheduler";    // Windows 2000 Service
 static const char               std_service_display_name[]  = "SOS Scheduler";    // Gezeigter Name
 static const int                terminate_timeout           = 30;
-static const int                stop_timeout                = terminate_timeout + 5;        // Zeit lassen, um Datenbank zu schließen, dann abort_now() per Thread
-static const int                pending_timeout             = 60;
+static const int                stop_timeout                = terminate_timeout + 5;        // Zeit lassen, um Datenbank zu schlieÃŸen, dann abort_now() per Thread
+static const int                pending_timeout             = 15;
 
 static Spooler* static_service_spooler = NULL;
 
@@ -71,7 +71,7 @@ struct My_scheduler_service {
     int                        _process_argc;
     char**                     _process_argv;
 
-    // Zustände SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht länger als pending_timeout Sekunden:
+    // ZustÃ¤nde SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht lÃ¤nger als pending_timeout Sekunden:
     Thread_semaphore           _set_service_lock;
     Thread_semaphore           _ServiceMain_lock;
     Handle                     _pending_watchdog_signal;
@@ -327,7 +327,7 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
     THREAD_LOCK( _set_service_lock )
     {
         DWORD stop_pending = _service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
-                                          : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopf "beenden" frei bleiben. Deshalb paused.
+                                          : SERVICE_RUNNING;        // Wenn Spooler Ã¼ber TCP beendet wird, soll der Diensteknopf "beenden" frei bleiben. Deshalb paused.
 
         service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
@@ -335,7 +335,7 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
                                                     : !static_service_spooler                                       ? SERVICE_STOPPED 
                                                     : static_service_spooler->state() == Spooler::s_stopped         ? SERVICE_STOPPED       //SetServiceStatus() ruft exit()!
                                                     : static_service_spooler->state() == Spooler::s_starting        ? SERVICE_START_PENDING
-                                                    : static_service_spooler->state() == Spooler::s_waiting_for_activation? SERVICE_RUNNING       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
+                                                    : static_service_spooler->state() == Spooler::s_waiting_for_activation? SERVICE_RUNNING       // START_PENDING blockiert BedienknÃ¶pfe der Dienstesteuerung (Windows XP)
                                                     : static_service_spooler->state() == Spooler::s_stopping        ? stop_pending
                                                     : static_service_spooler->state() == Spooler::s_stopping_let_run? stop_pending
                                                     : static_service_spooler->state() == Spooler::s_running         ? SERVICE_RUNNING
@@ -345,16 +345,16 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
                                                     | SERVICE_ACCEPT_PAUSE_CONTINUE 
                                                     | SERVICE_ACCEPT_SHUTDOWN
                                                     | SERVICE_ACCEPT_POWEREVENT;
-                                 // Nicht für NT 4: | SERVICE_ACCEPT_PARAMCHANGE; 
+                                 // Nicht fÃ¼r NT 4: | SERVICE_ACCEPT_PARAMCHANGE; 
     
         service_status.dwWin32ExitCode              = spooler_error? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR;              
         service_status.dwServiceSpecificExitCode    = spooler_error; 
         service_status.dwCheckPoint                 = 0; 
-        service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 :         // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
+        service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 :         // 10s erlauben fÃ¼r den Start (wenn es ein Startskript mit DB-Verbindung gibt)
                                                       service_status.dwCurrentState == SERVICE_STOP_PENDING ? stop_timeout*1000 
                                                                                                             : 0;
 
-        // Nicht zu lange im Zustand xx_PENDING bleiben, weil die Knöpfe in der Diensteverwaltung gesperrt sind:
+        // Nicht zu lange im Zustand xx_PENDING bleiben, weil die KnÃ¶pfe in der Diensteverwaltung gesperrt sind:
         if( service_status.dwCurrentState == SERVICE_START_PENDING )
         {
             if( _pending_timed_out )     // Uhr abgelaufen?
@@ -389,7 +389,7 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
 
     if( service_status.dwCurrentState == SERVICE_STOPPED )
     {
-        _service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
+        _service_status_handle = NULL;  // Sonst beim nÃ¤chsten Mal: Fehler MSWIN-00000006  Das Handle ist ungÃ¼ltig. [SetServiceStatus] [SERVICE_STOPPED]
         if( _service_stop )  start_self_destruction();
     }
 }
@@ -460,7 +460,7 @@ uint My_scheduler_service::self_destruction_thread(void*) {
 /*      Lieber kein Log, denn das hat eine Sempahore.
         try 
         { 
-            Z_LOG2( "scheduler.service", "... Selbstzerstörung. Weil der Scheduler nicht zum Ende kommt, wird der Prozess jetzt abgebrochen\n" ); 
+            Z_LOG2( "scheduler.service", "... SelbstzerstÃ¶rung. Weil der Scheduler nicht zum Ende kommt, wird der Prozess jetzt abgebrochen\n" ); 
 
             //BOOL ok = TerminateThread( _thread_handle, 999 );
             //if( ok )  sos_sleep( 3 );
@@ -598,7 +598,7 @@ DWORD My_scheduler_service::handle( DWORD dwControl, DWORD event, void* event_da
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
                 // Wir haben nicht mehr als 20s: Das ist eigentlich zu kurz. STOP_PENDING gibt eine kleine Gnadenfrist. 2006-06-19
                 _pending_timed_out = false;
-                static_service_spooler->cmd_terminate( false, terminate_timeout );   // Shutdown des Clusters  (nicht mehr: // Kein shutdown des Clusters, ein anderer Rechner soll übernehmen.)
+                static_service_spooler->cmd_terminate( false, terminate_timeout );   // Shutdown des Clusters  (nicht mehr: // Kein shutdown des Clusters, ein anderer Rechner soll Ã¼bernehmen.)
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;
@@ -628,7 +628,7 @@ DWORD My_scheduler_service::handle( DWORD dwControl, DWORD event, void* event_da
                     {
                         case PBT_APMQUERYSUSPEND:
                         {
-                            // Das verhindert das Schlafenlegen durch den Benutzer (ist das gut? Ein Kennzeichen im System Tray wäre gut)
+                            // Das verhindert das Schlafenlegen durch den Benutzer (ist das gut? Ein Kennzeichen im System Tray wÃ¤re gut)
                             result = static_service_spooler->is_machine_suspendable()? NO_ERROR : BROADCAST_QUERY_DENY;
                             break;
                         }
@@ -716,7 +716,7 @@ uint My_scheduler_service::service_thread(void* param)
         {
             start_self_destruction();
 
-            set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
+            set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die DiensteknÃ¶pfe frei, falls der Spooler beim eMail-Versand hÃ¤ngt.
             event_log( x, p->_argc, p->_argv, &spooler );
           //set_service_status( 2 );
             Z_LOG2("scheduler", x.what() );
@@ -786,7 +786,7 @@ void My_scheduler_service::service_main(DWORD argc, char** argv)
 
             if( _terminate_immediately )  { Z_LOG2( "scheduler.service", "TerminateProcess()\n" ); TerminateProcess( GetCurrentProcess(), 1 ); }   // Gesetzt vom self_destruction_thread
 
-            TerminateThread( _thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
+            TerminateThread( _thread_handle, 999 );   // Sollte nicht nÃ¶tig sein. NÃ¼tzt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch lÃ¤uft.
         
             Z_LOG2( "scheduler.service", "ServiceMain ok\n" );
         }
@@ -828,7 +828,7 @@ int My_scheduler_service::spooler_service( const string& service_name, int argc,
 
         Z_LOG2( "scheduler.service", "StartServiceCtrlDispatcher() OK\n" );
 
-        THREAD_LOCK( _ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
+        THREAD_LOCK( _ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu frÃ¼h gerufen)
 
         _spooler_service_name = "";
     }

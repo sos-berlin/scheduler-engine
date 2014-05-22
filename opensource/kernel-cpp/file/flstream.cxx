@@ -1,5 +1,5 @@
 //#define MODULE_NAME "flstream"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "¬©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "precomp.h"
@@ -116,7 +116,7 @@ int _Cdecl Any_file_streambuf::overflow( int b )
         if( pptr() > pbase() )  _write_buffer.length( pptr() - _write_buffer.char_ptr() );
 
         if( b != EOF ) {
-            if( !_write_buffer.size() )  _write_buffer.allocate_min( 128+1 );  // Nicht zu groﬂ wegen memmove()
+            if( !_write_buffer.size() )  _write_buffer.allocate_min( 128+1 );  // Nicht zu gro√ü wegen memmove()
             _write_buffer += (char)b;
         }
 

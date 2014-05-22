@@ -12,7 +12,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 {
     Fill_zero                  _zero_;
 
-    Z_GNU_ONLY(                 Task_subsystem              (); )                                   // Für gcc 3.2.1
+    Z_GNU_ONLY(                 Task_subsystem              (); )                                   // FÃ¼r gcc 3.2.1
                                 Task_subsystem              ( Spooler* );
                                ~Task_subsystem              ();
 
@@ -49,7 +49,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
     bool                        try_to_free_process         ( Job*, Process_class*, const Time& now );
     void                        end_all_tasks               ( Task::End_mode = Task::end_normal );
 
-    // Für andere Threads:
+    // FÃ¼r andere Threads:
     bool                        is_ready_for_termination    ();
     void                        signal                      ( const string& signal_name )           { if( _event )  _event->signal(signal_name); }
 
@@ -75,7 +75,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 
     long32                     _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik
-    long32                     _step_count;                 // Seit Spooler-Start ausgeführte Schritte
+    long32                     _step_count;                 // Seit Spooler-Start ausgefÃ¼hrte Schritte
     long32                     _task_count;                 // Seit Spooler-Start gestartetet Tasks
 
     int                        _started_tasks_count;

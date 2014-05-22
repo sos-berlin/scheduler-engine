@@ -26,8 +26,8 @@ struct Sos_option_iterator;
 
 
 //--------------------------------------------------------------------------Sos_database_static
-// Oberklasse für die statischen Daten der Datenbankdateitypen.
-// Für jeden Datenbankdateityp gibt es genau ein Exemplar (z.B: Odbc_static).
+// Oberklasse fÃ¼r die statischen Daten der Datenbankdateitypen.
+// FÃ¼r jeden Datenbankdateityp gibt es genau ein Exemplar (z.B: Odbc_static).
 
 struct Sos_database_static : Sos_self_deleting
 {
@@ -39,20 +39,20 @@ struct Sos_database_static : Sos_self_deleting
 
     Sos_string                 _dbms_name;
 
-    Sos_string                 _default_db_name;             // Für Sos_database_session
-    Sos_string                 _default_user;                // Für Sos_database_session
-    Sos_string                 _default_password;            // Für Sos_database_session
-    int                        _default_transaction_timeout; // Für Sos_database_session
+    Sos_string                 _default_db_name;             // FÃ¼r Sos_database_session
+    Sos_string                 _default_user;                // FÃ¼r Sos_database_session
+    Sos_string                 _default_password;            // FÃ¼r Sos_database_session
+    int                        _default_transaction_timeout; // FÃ¼r Sos_database_session
 
-    Bool                       _debug;                  // Protokoll und vielleicht zusätzliche Prüfungen
-    Bool                       _multiple_sessions;      // Für jeden Client eine eigene Session
+    Bool                       _debug;                  // Protokoll und vielleicht zusÃ¤tzliche PrÃ¼fungen
+    Bool                       _multiple_sessions;      // FÃ¼r jeden Client eine eigene Session
     Bool                       _keep_sessions_open;
-    Sos_string                 _first_cmds;             // Erste auszuführende Kommandos
+    Sos_string                 _first_cmds;             // Erste auszufÃ¼hrende Kommandos
     Sos_simple_array<Sos_database_session*> _session_array;
 };
 
 //-------------------------------------------------------------------------Sos_database_session
-// Verbindung zu einer Datenbank mit eigener, unabhängiger Transaktionsverwaltung.
+// Verbindung zu einer Datenbank mit eigener, unabhÃ¤ngiger Transaktionsverwaltung.
 
 struct Sos_database_session : Sos_self_deleting
 {
@@ -92,7 +92,7 @@ struct Sos_database_session : Sos_self_deleting
 
   public:
 
-    void                        check_transaction       ();   // Exception, wenn Transaktion ungültig geworden ist (timeout)
+    void                        check_transaction       ();   // Exception, wenn Transaktion ungÃ¼ltig geworden ist (timeout)
 
     virtual Bool               _equal_session           ( Sos_database_file* );
     virtual void               _open                    ( Sos_database_file* ) = 0;
@@ -109,7 +109,7 @@ struct Sos_database_session : Sos_self_deleting
 
     Fill_zero                  _zero_;
     Sos_client*                _client;
-    int                        _array_index;            // für Sos_client::_session_array[]
+    int                        _array_index;            // fÃ¼r Sos_client::_session_array[]
     Sos_database_static*       _static;
     Sos_database_file*         _current_file;           // evtl. 0
     Sos_limited_text<30>       _cmd;                    // SQL-Anweisungswort bei execute_direct()
@@ -147,7 +147,7 @@ struct Sos_database_session : Sos_self_deleting
 
 
 //-----------
-// Oberklasse für einen Datenbankdateityp.
+// Oberklasse fÃ¼r einen Datenbankdateityp.
 
 struct Sos_database_file : Abs_file
 {
@@ -177,7 +177,7 @@ struct Sos_database_file : Abs_file
     Sos_ptr<Sos_database_session> _session;             // aktuelle Verbindung
     Sos_ptr<Sos_database_static>  _static;
 
-    // Zwischenpuffer für Verbindungsdaten:
+    // Zwischenpuffer fÃ¼r Verbindungsdaten:
     string                     _connection_id;          // Name, um getrennte Verbindungen zur selben Datenbank zu unterscheiden
     Sos_string                 _db_name;                // Datenbankname (x:orasrv, DSN SAB etc.)
     Sos_string                 _qualifier;              // Von ODBC

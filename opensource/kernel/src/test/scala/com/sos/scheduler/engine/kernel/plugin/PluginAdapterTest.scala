@@ -7,8 +7,6 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.kernel.scheduler.PrefixLogMock
 import java.lang.RuntimeException
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.startsWith
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
@@ -25,10 +23,16 @@ final class PluginAdapterTest extends FunSuite {
     pluginAdapter.initialize(injector, log)
   }
 
+  test("prepare") {
+    pluginAdapter should not be 'prepared
+    pluginAdapter.prepare()
+    pluginAdapter shouldBe 'prepared
+  }
+
   test("activate") {
     pluginAdapter should not be 'active
     pluginAdapter.activate()
-    pluginAdapter should be ('active)
+    pluginAdapter shouldBe 'active
   }
 
   test("activate error") {
@@ -37,15 +41,15 @@ final class PluginAdapterTest extends FunSuite {
   }
 
   test("tryActivate") {
-    pluginAdapter should be ('active)
+    pluginAdapter shouldBe 'active
     pluginAdapter.tryActivate()
-    pluginAdapter should be ('active)
+    pluginAdapter shouldBe 'active
     errorPluginInstanceAdapter.tryActivate()
     errorPluginInstanceAdapter should not be 'active
   }
 
   test("tryClose") {
-    pluginAdapter should be ('active)
+    pluginAdapter shouldBe 'active
     pluginAdapter.tryClose()
     pluginAdapter should not be 'active
     errorPluginInstanceAdapter should not be 'active
@@ -59,13 +63,12 @@ final class PluginAdapterTest extends FunSuite {
   }
 
   test("toString") {
-    assertThat(pluginAdapter.toString, startsWith("Plugin "))
+    pluginAdapter.toString should startWith ("Plugin ")
   }
 }
 
 private object PluginAdapterTest {
-  val logger = Logger(getClass)
-  val pluginConfiguration = new PluginConfiguration(classOf[MockPlugin].getName, ActivationMode.activateOnStart, None)
-  val errorPluginConfiguration = new PluginConfiguration(classOf[ErrorMockPlugin].getName, ActivationMode.activateOnStart, None)
+  private val logger = Logger(getClass)
+  private val pluginConfiguration = new PluginConfiguration(classOf[MockPlugin].getName, ActivationMode.activateOnStart, None)
+  private val errorPluginConfiguration = new PluginConfiguration(classOf[ErrorMockPlugin].getName, ActivationMode.activateOnStart, None)
 }
-

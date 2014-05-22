@@ -1,6 +1,6 @@
 // $Id: z_com.cxx 13870 2010-06-03 15:29:33Z jz $
 
-// §1719
+// Â§1719
 
 
 #include "zschimmer.h"
@@ -113,7 +113,7 @@ struct Vartype_name
 };
 
 
-// Tabelle nicht ändern, die Namen werden von Variables.xml benutzt und stehen in XML-Dokumenten.
+// Tabelle nicht Ã¤ndern, die Namen werden von Variables.xml benutzt und stehen in XML-Dokumenten.
 const Vartype_name vartype_names[] =
 {
     { VT_EMPTY           , "VT_EMPTY"           },
@@ -239,7 +239,7 @@ IUnknown* com_create_instance( const CLSID& clsid, const IID& iid, IUnknown* out
 
     if( !was_loaded )
     {
-        // JavaVM etc. übergeben
+        // JavaVM etc. Ã¼bergeben
         ptr<Imodule_interface2> module_interface;
         void*                   void_ptr        = NULL;
 
@@ -332,7 +332,7 @@ Com_exception::Com_exception( HRESULT hresult, const string& function, const cha
             description = string_from_bstr( description_bstr );
 
 
-            // Prüfen, ob description mit einem Fehlercode anfängt: (s.a. kram/com_simple_standards.cxx)
+            // PrÃ¼fen, ob description mit einem Fehlercode anfÃ¤ngt: (s.a. kram/com_simple_standards.cxx)
             // Hostware: XXX-XXX-X9A
             // Rapid:    D999
             Regex regex = "^((([A-Z]+-)+[0-9A-Z]+)|(D[0-9]{3}))( | *$)";       
@@ -450,7 +450,7 @@ HRESULT Com_set_error( const Xc& x, const char* method )
     string what = x.what();
     hr = com_set_error( x.name(), what.c_str(), method );
 
-    //Als hr sollte DISP_E_EXCEPTION zurückgegeben werden, denn sonst verschwindet der Fehlertext (mit Einfügungen) oder manchmal sogar der ganze Fehler (in JScript) jz 24.6.01
+    //Als hr sollte DISP_E_EXCEPTION zurÃ¼ckgegeben werden, denn sonst verschwindet der Fehlertext (mit EinfÃ¼gungen) oder manchmal sogar der ganze Fehler (in JScript) jz 24.6.01
     //if( strncmp( x.code(), "MSWIN-", 6 ) == 0 )  try{  hr = hex_as_int32( x.code() + 6 );  }catch(const Xc&){}
     //if( strcmp( x.name(), "OLE" ) == 0  &&  FAILED( ((Ole_error*)&x)->_hresult ) )  hr = ((Ole_error*)&x)->_hresult;
 
@@ -681,8 +681,8 @@ HRESULT Olechar_to_string( const OLECHAR* olechar, int len, string* result )  th
     }
     else
     {
-        int flags = WC_NO_BEST_FIT_CHARS;       // Das wirkt nicht wie gewünscht. Man muss user_default_char setzen und eine eigene Fehlermeldung erzeugen,
-                                                // um auf nicht erlaubte Zeichen zu prüfen.
+        int flags = WC_NO_BEST_FIT_CHARS;       // Das wirkt nicht wie gewÃ¼nscht. Man muss user_default_char setzen und eine eigene Fehlermeldung erzeugen,
+                                                // um auf nicht erlaubte Zeichen zu prÃ¼fen.
 
 #       ifdef Z_WINDOWS
             if( !is_windows2000_or_more() )  flags &= ~WC_NO_BEST_FIT_CHARS;
@@ -1663,9 +1663,9 @@ Bstr::Bstr( const Bstr& s )
 Bstr::~Bstr()
 { 
     if (_bstr) {
-        // SysFreeString() setzt GetLastError() zurück (obwohl nicht bei Microsoft dokumentiert).
-        // Wir retten den Fehlercode für Aufrufe der Form: WindowsSystemCall(Bstr(name)).
-        // ~Bstr belässt dann den Fehlercode von WindowsSystemCall.
+        // SysFreeString() setzt GetLastError() zurÃ¼ck (obwohl nicht bei Microsoft dokumentiert).
+        // Wir retten den Fehlercode fÃ¼r Aufrufe der Form: WindowsSystemCall(Bstr(name)).
+        // ~Bstr belÃ¤sst dann den Fehlercode von WindowsSystemCall.
 
         DWORD e = GetLastError();
         SysFreeString(_bstr); 
@@ -2492,7 +2492,7 @@ Locked_any_safearray::Locked_any_safearray( SAFEARRAY* safearray, VARENUM expect
 
     if( _count > 0 )
     {
-        if( vartype() != expected_vartype )     // vartype() nur gültig, wenn count > 0
+        if( vartype() != expected_vartype )     // vartype() nur gÃ¼ltig, wenn count > 0
         {
             SafeArrayUnlock( _safearray ), _safearray = NULL;
             throw_xc( "Z-COM-001", vartype_name( vartype() ), vartype_name( expected_vartype ) );
@@ -2712,7 +2712,7 @@ HRESULT Idispatch_dispids::Get_dispid( const Bstr& name, DISPID* result )
         hr = _idispatch->GetIDsOfNames( IID_NULL, const_cast<OLECHAR**>( &name._bstr ), 1, STANDARD_LCID, result );
         if( FAILED(hr) )  return hr;
 
-        //_map.insert( it, Map::value_type( name, result ) );       Nicht für __GNUC__
+        //_map.insert( it, Map::value_type( name, result ) );       Nicht fÃ¼r __GNUC__
         _map[ name ] = *result;
     }
 

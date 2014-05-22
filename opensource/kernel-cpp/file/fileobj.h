@@ -1,4 +1,4 @@
-// fileobj.h                    © 1995 SOS GmbH Berlin
+// fileobj.h                    Â© 1995 SOS GmbH Berlin
 
 #ifndef __FILEOBJ_H
 #define __FILEOBJ_H
@@ -33,7 +33,7 @@ struct Get_direct_msg : Get_msg
     const Const_area_handle&    key                     () const  { return _key; }  
     uint4                      _position;       // -1, oder seek()-Wert oder Satznummer
     Const_area_handle          _key;
-    int4                       _record_count;   // Geschätzte Anzahl erwarteter Sätze
+    int4                       _record_count;   // GeschÃ¤tzte Anzahl erwarteter SÃ¤tze
 };
 
 typedef Get_direct_msg T_get_direct_msg;

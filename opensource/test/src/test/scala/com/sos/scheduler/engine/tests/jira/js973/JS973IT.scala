@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
 import JS973IT._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -12,15 +13,18 @@ import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
 import com.sos.scheduler.engine.main.CppBinary
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT.OrderFinishedWithResultEvent
 import java.io.File
-import org.scalatest.FunSuite
+import java.nio.file.Files
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import scala.concurrent.Await
+import com.sos.scheduler.engine.data.message.MessageCode
 
-final class JS973IT extends FunSuite with ScalaSchedulerTest {
+final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val aSlave = newSlave()
   private lazy val bSlave = newSlave()
@@ -39,27 +43,27 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
     slaves foreach { _.close() }
   }
 
-  test(s"Without parameter $remoteSchedulerParameterName runs job in our scheduler") {
+  s"Without parameter $remoteSchedulerParameterName runs job in our scheduler" in {
     testOrderWithRemoteScheduler(shellJobChainPath, None, "**")
   }
 
-  test(s"Empty parameter $remoteSchedulerParameterName runs job in our scheduler") {
+  s"Empty parameter $remoteSchedulerParameterName runs job in our scheduler" in {
     testOrderWithRemoteScheduler(shellJobChainPath, Some(SchedulerAddress("")), "**")
   }
 
-  test(s"Order parameter $remoteSchedulerParameterName selects a remote scheduler") {
+  s"Order parameter $remoteSchedulerParameterName selects a remote scheduler" in {
     testOrderWithRemoteScheduler(shellJobChainPath, aSlave)
   }
 
-  test(s"Task runs on remote_scheduler of process_class") {
+  s"Task runs on remote_scheduler of process_class" in {
     testOrderWithRemoteScheduler(processClassJobChainPath, None, processClassSlave.expectedResult)
   }
 
-  test(s"Order parameter $remoteSchedulerParameterName overrides remote scheduler of process class") {
+  s"Order parameter $remoteSchedulerParameterName overrides remote scheduler of process class" in {
     testOrderWithRemoteScheduler(processClassJobChainPath, aSlave)
   }
 
-  test("Shell with monitor") {
+  "Shell with monitor" in {
     testOrderWithRemoteScheduler(shellWithMonitorJobChainPath, aSlave)
   }
 
@@ -77,12 +81,29 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
 //    eventPipe.close()
 //  }
 
-  test(s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job") {
-    testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = "Z-4003")
+  s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job" in {
+    testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = MessageCode("Z-4003"))
   }
 
-  test("Not for API jobs") {
-    testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = "SCHEDULER-484")
+  "Not for API jobs" in {
+    testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = MessageCode("SCHEDULER-484"))
+  }
+
+  "File_order_sink_module::create_instance_impl" in {
+    val fileOrdersDir = Files.createTempDirectory("test")
+    val orderFile = fileOrdersDir.toFile / "test.txt"
+    orderFile.write("test")
+    val jobChainPath = JobChainPath("/test-file-order")
+    val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
+    controller.getEventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+      scheduler executeXml
+        <job_chain name={jobChainPath.name}>
+          <file_order_source directory={fileOrdersDir.toString} regex="^test\.txt$"/>
+          <job_chain_node state="100" job="test-a"/>
+          <file_order_sink state="end" remove="yes"/>
+        </job_chain>
+    }
+    Files.delete(fileOrdersDir)
   }
 
   //test("Not in a cluster") {}
@@ -131,22 +152,22 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
     eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey } .result should startWith (expectedResult)
   }
 
-  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: String) {
+  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: MessageCode) {
     val eventPipe = controller.newEventPipe()
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
       val firstJobPath = instance[OrderSubsystem].jobChain(jobChainPath).jobNodes.head.jobPath
-      instance[JobSubsystem].job(firstJobPath).state should equal (JobState.pending)
+      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
-      eventPipe.nextAny[ErrorLogEvent].getCodeOrNull should equal (expectedErrorCode)
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition should equal (OrderStateTransition.keepState)
-      instance[JobSubsystem].job(firstJobPath).state should equal (JobState.stopped)
+      eventPipe.nextAny[ErrorLogEvent].codeOption shouldEqual Some(expectedErrorCode)
+      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual OrderStateTransition.keepState
+      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.stopped
     }
   }
 
   @HotEventHandler
   def handle(e: OrderFinishedEvent, o: UnmodifiableOrder) {
-    controller.getEventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.getParameters(resultVariableName)))
+    controller.getEventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.parameters(resultVariableName)))
   }
 
   private val orderIdGenerator = (1 to Int.MaxValue).iterator map { i => new OrderId(i.toString) }
@@ -156,10 +177,10 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS973IT {
-  private val shellJobChainPath = JobChainPath.of("/test-shell")
-  private val shellWithMonitorJobChainPath = JobChainPath.of("/test-shell-with-monitor")
-  private val apiJobChainPath = JobChainPath.of("/test-api")
-  private val processClassJobChainPath = JobChainPath.of("/test-processClass")
+  private val shellJobChainPath = JobChainPath("/test-shell")
+  private val shellWithMonitorJobChainPath = JobChainPath("/test-shell-with-monitor")
+  private val apiJobChainPath = JobChainPath("/test-api")
+  private val processClassJobChainPath = JobChainPath("/test-processClass")
   private val testVariableName = "TEST_WHICH_SCHEDULER"
   private val resultVariableName = "result"
   private val extraSchedulerTimeout = 60.s

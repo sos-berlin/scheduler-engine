@@ -77,8 +77,8 @@ struct Zlib_file : Abs_file
     int                            _method;
     Bool                           _deflate;
     Bool                           _gzip;               // gzip-Kopf verwenden
-    Bool                           _auto;               // Prüfen, ob gzip-Kopf da ist, sonst: _do_nothing;
-    Bool                           _do_nothing;         // Daten nicht anrühren, sondern durchlassen (nur bei -auto oder -deflate-only)
+    Bool                           _auto;               // PrÃ¼fen, ob gzip-Kopf da ist, sonst: _do_nothing;
+    Bool                           _do_nothing;         // Daten nicht anrÃ¼hren, sondern durchlassen (nur bei -auto oder -deflate-only)
     Bool                           _writing;
     Bool                           _eof;
 };
@@ -190,17 +190,17 @@ void Zlib_file::start()
         int len = 0;
 
         if( _gzip ) {
-            _buffer.allocate_min( _block_size );  // read_header() muss dann nicht so pingelig auf Satzende prüfen
+            _buffer.allocate_min( _block_size );  // read_header() muss dann nicht so pingelig auf Satzende prÃ¼fen
             
             if( _file.eof() )  
             {   
                 _eof = true;                    // Datei ist leer
-                _do_nothing = true;             // zlib nicht schließen (ist auch nicht gestartet)
+                _do_nothing = true;             // zlib nicht schlieÃŸen (ist auch nicht gestartet)
                 return; 
             }
 
             _file.get( _buffer );
-            len = read_header();                       // Header muss vollständig im ersten Satz sein!
+            len = read_header();                       // Header muss vollstÃ¤ndig im ersten Satz sein!
             if( _do_nothing )  return;
         }
 
@@ -355,7 +355,7 @@ void Zlib_file::close( Close_mode close_mode )
         }
         else
         {
-            // _crc und _z_total_in prüfen. 
+            // _crc und _z_total_in prÃ¼fen. 
             // Die acht Bytes stehen in _z_stream und _file.get()
         }
     }

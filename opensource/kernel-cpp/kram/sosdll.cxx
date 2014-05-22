@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosdll"
-//#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "../kram/sysdep.h"
@@ -76,7 +76,7 @@ Sos_dll::~Sos_dll()
                 LOG( "FreeLibrary ok\n" );;
             } else {
                 try { 
-                    throw_mswin_error( "FreeLibrary" );   // Fürs Log
+                    throw_mswin_error( "FreeLibrary" );   // FÃ¼rs Log
                 }
                 catch( const Xc& ) {}
             }

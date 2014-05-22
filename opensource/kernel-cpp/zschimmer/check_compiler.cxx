@@ -103,13 +103,13 @@ bool check_compiler( ostream* log )
     *log << "get_temp_path() => " << file::get_temp_path() << "\n";
 
 
-    // Prüfen, ob string(NULL,0) exeception "attempt to create string with null pointer" auslöst.
+    // PrÃ¼fen, ob string(NULL,0) exeception "attempt to create string with null pointer" auslÃ¶st.
 
     try
     {
 //#     if _MSC_VER != 1400 || !defined( _DEBUG )  // Visual Studio 2005 bricht bei _DEBUG ab.
-        // Microsoft Visual Studio 2005     (8.0.50727.42)  ändern: vc/include/xstring, Zeile 2013 auskommentieren: //_DEBUG_POINTER(_Ptr);
-        // Microsoft Visual Studio 2005 SP1 (8.0.50727.762) ändern: vc/include/xstring, Zeile 2051 auskommentieren: //_DEBUG_POINTER(_Ptr);
+        // Microsoft Visual Studio 2005     (8.0.50727.42)  Ã¤ndern: vc/include/xstring, Zeile 2013 auskommentieren: //_DEBUG_POINTER(_Ptr);
+        // Microsoft Visual Studio 2005 SP1 (8.0.50727.762) Ã¤ndern: vc/include/xstring, Zeile 2051 auskommentieren: //_DEBUG_POINTER(_Ptr);
         string a ( (const char*)NULL, (string::size_type)0 );
 //#     endif
         //*log << "string(NULL,0) funktioniert!\n";

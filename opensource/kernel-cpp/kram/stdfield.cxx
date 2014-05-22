@@ -11,7 +11,7 @@
 #include "precomp.h"
 
 //#define MODULE_NAME "stdfield"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 //#pragma implementation
@@ -56,8 +56,8 @@ namespace sos {
     const int double_alignment = sizeof (double);
 #endif
 
-int64   as_int64( const char* );  // Gehört nach sosstrg0.h
-uint64 as_uint64( const char* );  // Gehört nach sosstrg0.h
+int64   as_int64( const char* );  // GehÃ¶rt nach sosstrg0.h
+uint64 as_uint64( const char* );  // GehÃ¶rt nach sosstrg0.h
 
 //---------------------------------------------------------------------------------------static
 
@@ -91,7 +91,7 @@ Big_int_type&               big_int_type = int32_type;
 
 
 
-// Prozessorabhängigkeiten:
+// ProzessorabhÃ¤ngigkeiten:
 //#if defined SYSTEM_INTEL || defined SYSTEM_SOLARIS  
 #   ifdef SYSTEM_WIN16
       //Int_type            int2_type;
@@ -193,8 +193,8 @@ SOS_INIT( bool )
     Bool_type::_type_info._std_type      = std_type_bool;   // std_type_integer  16.11.97
     Bool_type::_type_info._name          = "bool";
     Bool_type::_type_info._max_size      = sizeof(Bool);
-    Bool_type::_type_info._max_precision = 1;  // oder 5 für "false" und "true" ?
-    Bool_type::_type_info._display_size  = 1;  // oder 5 für "false" und "true" ?
+    Bool_type::_type_info._max_precision = 1;  // oder 5 fÃ¼r "false" und "true" ?
+    Bool_type::_type_info._display_size  = 1;  // oder 5 fÃ¼r "false" und "true" ?
     Bool_type::_type_info.normalize();
 }
 
@@ -819,9 +819,9 @@ void Scaled_uint64_type::read_text( Byte* p, const char* t, const Text_format& f
             s--;
         }
 
-        while( *q == '0' )  q++;        // Überflüssige Nullen hinter dem Komma
+        while( *q == '0' )  q++;        // ÃœberflÃ¼ssige Nullen hinter dem Komma
 
-        while( s > 0 ) {                // Fehlende Nullen auffüllen
+        while( s > 0 ) {                // Fehlende Nullen auffÃ¼llen
             *b++ = '0';     
             s--;
         }
@@ -1210,13 +1210,13 @@ void Xlat_text_type::read_text( Byte* ptr, const char* text, const Text_format& 
 {
     uint len = strlen( text );
 
-    if( len > _field_size ) {                               // zu groß
+    if( len > _field_size ) {                               // zu groÃŸ
         len = length_without_trailing_spaces( text, len );
         if( len > _field_size )  throw_xc( "SOS-1221", this, text );
     }
 
     xlat( ptr, text, len, read_table() );
-    memset( ptr + len, 0x40, _field_size - len );  // Auffüllen
+    memset( ptr + len, 0x40, _field_size - len );  // AuffÃ¼llen
 }
 
 //-----------------------------------------------------------------Xlat_text_type::_get_param
@@ -1273,13 +1273,13 @@ void Text_type::read_text( Byte* ptr, const char* text, const Text_format& ) con
 {
     uint len = strlen( text );
 
-    if( len > _field_size ) {                               // zu groß
+    if( len > _field_size ) {                               // zu groÃŸ
         len = length_without_trailing_spaces( text, len );
         if( len > _field_size )  throw_xc( "SOS-1221", this, text );
     }
 
     memcpy( ptr, text, len );
-    memset( ptr + len, ' ', _field_size - len );  // Auffüllen
+    memset( ptr + len, ' ', _field_size - len );  // AuffÃ¼llen
 }
 
 //--------------------------------------------------------------------------Text_type::set_null
@@ -1388,7 +1388,7 @@ void String0_type::read_text( Byte* ptr, const char* text, const Text_format& ) 
     if( len >= _field_size )  throw_xc( "SOS-1221", this, text );
 
     memcpy( ptr, text, len + 1 );
-    //memset( ptr + len, '\0', _field_size - len );  // Auffüllen
+    //memset( ptr + len, '\0', _field_size - len );  // AuffÃ¼llen
     //if( len < _field_size )*/  ptr[ len ] = '\0';
 }
 
@@ -1456,13 +1456,13 @@ void Binary_type::read_text( Byte* ptr, const char* text, const Text_format& ) c
 {
     int len = length( text );
 
-    if( len > _field_size ) {                               // zu groß
+    if( len > _field_size ) {                               // zu groÃŸ
         len = length_without_trailing_spaces( text, _field_size );
         if( len > _field_size )  throw_xc( "SOS-1221", this, text );
     }
 
     memcpy( ptr, text, len );
-    memset( ptr + len, ' ', _field_size - len );  // Auffüllen
+    memset( ptr + len, ' ', _field_size - len );  // AuffÃ¼llen
 }
 */
 //------------------------------------------------------------------------Area_type::_type_info

@@ -4,14 +4,14 @@
                                                             Joacim Zschimmer
 
 Hilfsfunktionen, implementiert mit StarView. Ohne Sos_application.
-Versuch, alle Aufrufe von StarView hier und in sossv.cpp zu konzentrieren, so daß alle
+Versuch, alle Aufrufe von StarView hier und in sossv.cpp zu konzentrieren, so daÃŸ alle
 anderen Module frei von StarView sind.
 
 */
 #include "../kram/sosstrng.h"
 #include "../kram/sysdep.h"
 
-#undef cerr   // sysdep.h soll cerr nur für win16 sperren
+#undef cerr   // sysdep.h soll cerr nur fÃ¼r win16 sperren
 
 #include "../kram/sos.h"
 #include "../kram/log.h"
@@ -69,7 +69,7 @@ extern void show_msg( const char* text_ptr )
                     m = "SOS";
                 }
 
-                // MessageBox bricht nur an Blanks um. Also Blanks einfügen:
+                // MessageBox bricht nur an Blanks um. Also Blanks einfÃ¼gen:
 
                 {
                     const char* p = text_ptr;

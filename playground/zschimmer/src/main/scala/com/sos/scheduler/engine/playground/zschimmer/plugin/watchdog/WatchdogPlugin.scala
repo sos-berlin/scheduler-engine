@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.plugin.Plugin
+import com.sos.scheduler.engine.kernel.plugin.{Plugins, AbstractPlugin}
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
 import com.sos.scheduler.engine.playground.zschimmer.{XMLs, Timer}
 import java.util.concurrent.TimeUnit
@@ -21,22 +21,22 @@ import scala.concurrent.duration.Duration
 final class WatchdogPlugin @Inject private(
   scheduler: Scheduler,
   private implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
-  @Named(Plugin.configurationXMLName) confElement: Element)
-extends Plugin {
+  @Named(Plugins.configurationXMLName) confElement: Element)
+extends AbstractPlugin {
 
   private val elem = XMLs.fromJavaDom(confElement).asInstanceOf[xml.Elem]
   private val configuration = Configuration(elem)
   private val thread1 = new Thread1
 
-  def activate() {
+  override def onActivate() {
     thread1.start()
   }
 
-  def close() {
+  override def close() {
     interruptAndJoinThread(thread1)
   }
 
-  def xmlState =
+  override def xmlState =
     "<watchdogPlugin/>"
 
   private class Thread1 extends Thread {

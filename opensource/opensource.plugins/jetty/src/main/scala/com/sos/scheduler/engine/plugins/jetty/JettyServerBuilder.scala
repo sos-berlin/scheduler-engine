@@ -13,6 +13,7 @@ import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.webapp.{WebXmlConfiguration, WebAppContext}
 import org.eclipse.jetty.xml.XmlConfiguration
+import scala.language.reflectiveCalls
 
 object JettyServerBuilder {
   def newJettyServer(config: JettyConfiguration) = {
@@ -22,12 +23,16 @@ object JettyServerBuilder {
         case None => new ServletContextHandler
       }
       (webAppContext: { def setContextPath(p: String) }).setContextPath(config.contextPath)
-
-      def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
-        webAppContext.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
+      for (modify <- config.servletContextHandlerModifiers) {
+        modify(webAppContext)
       }
-
-      addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
+      if (config.gzip) {
+        def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
+          webAppContext.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
+        }
+        //Funktioniert nicht mit Spray (wegen async?)
+        addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
+      }
       // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
       webAppContext.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
       if (!servletContextHandlerHasWebXml(webAppContext)) {
@@ -40,6 +45,7 @@ object JettyServerBuilder {
 
     def newWebAppContext(c: WebAppContextConfiguration) = {
       val webAppContext = new WebAppContext
+      webAppContext.setThrowUnavailableOnStartupException(true)
       webAppContext.setResourceBase(c.resourceBaseURL.toExternalForm)
       for (f <- c.webXMLFileOption) webAppContext.setDescriptor(f.getPath)
       new WebXmlConfiguration().configure(webAppContext)

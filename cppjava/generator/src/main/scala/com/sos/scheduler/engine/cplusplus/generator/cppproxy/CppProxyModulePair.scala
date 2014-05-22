@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
+import CppProxyModulePair._
 import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.JavaOnlyInterface
 import java.lang.reflect.Member
 import java.lang.reflect.Modifier
-import CppProxyModulePair._
+import scala.language.existentials
 
 class CppProxyModulePair(val interface: Class[_]) {
     require(interface.isInterface, "Not an interface: " + interface)

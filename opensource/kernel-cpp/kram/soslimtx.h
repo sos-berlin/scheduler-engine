@@ -101,8 +101,8 @@ struct Sos_limited_text : String0_area
     Sos_limited_text<SIZE>&     operator =              ( const Const_area& str )               { assign( str ); return *this; }
     Sos_limited_text<SIZE>&     operator =              ( const char* str )                     { assign( str ); return *this; }
 
-    static int                  size                    ()                                      { return SIZE; }   // Für RECORD_TYPE_ADD_LIMTEXT
-    static int                  static_size             ()                                      { return SIZE; }   // Für RECORD_TYPE_ADD_LIMTEXT
+    static int                  size                    ()                                      { return SIZE; }   // FÃ¼r RECORD_TYPE_ADD_LIMTEXT
+    static int                  static_size             ()                                      { return SIZE; }   // FÃ¼r RECORD_TYPE_ADD_LIMTEXT
 
 //private:
     friend struct               Sos_limited_text_type;

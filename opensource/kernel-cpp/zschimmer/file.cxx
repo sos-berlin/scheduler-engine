@@ -184,7 +184,7 @@ string File_base::read_all()
 int64 File_base::length()
 { 
     assert( opened() );  
-    return z_filelength( file_no(), _path );    // _path nur für Fehlermeldung
+    return z_filelength( file_no(), _path );    // _path nur fÃ¼r Fehlermeldung
 }
 
 //---------------------------------------------------------------------------------------File::File
@@ -381,7 +381,7 @@ void File::open_temporary( int flags, const string& a_name )
         create_temporary( 0, a_name );
         
         int oflag = _O_SHORT_LIVED;
-        if(    flags & open_unlink        )  oflag |= O_TEMPORARY;      // close() löscht die Datei
+        if(    flags & open_unlink        )  oflag |= O_TEMPORARY;      // close() lÃ¶scht die Datei
         if( !( flags & open_inheritable ) )  oflag |= O_NOINHERIT;      // Nicht an Prozesse vererben (machen wir zum Default, nur Windows)
 
         Z_LOG( "sopen(\"" << _path << "\")\n" );
@@ -398,7 +398,7 @@ void File::open_temporary( int flags, const string& a_name )
             _path += ".XXXXXX";
 
             Z_LOG( "mkstemp(\"" << _path << "\")  " );
-            _file = mkstemp( (char*)_path.c_str() );        // Öffnet die Datei
+            _file = mkstemp( (char*)_path.c_str() );        // Ã–ffnet die Datei
             if( _file == -1 )  throw_errno( errno, "mkstemp", _path.c_str() );
             Z_LOG( "=> " << _file << ' ' << _path << "\n" );
 
@@ -437,7 +437,7 @@ void File::open_temporary( int flags, const string& a_name )
         if( flags & open_unlink )
         {
             Z_LOG( "unlink(\"" << _path << "\")\n" );
-            int ret = unlink( _path.c_str() );                    // Namen sofort wieder löschen
+            int ret = unlink( _path.c_str() );                    // Namen sofort wieder lÃ¶schen
             if( ret == -1 )  _last_errno = errno, throw_errno( _last_errno, "unlink", _path.c_str() );
         }
 
@@ -988,7 +988,7 @@ void Stream_file::syncdata()
 //int64 Stream_file::length()
 //{ 
 //    assert( opened() );  
-//    return z_filelength( file_no(), _path );    // _path nur für Fehlermeldung
+//    return z_filelength( file_no(), _path );    // _path nur fÃ¼r Fehlermeldung
 //}
 //
 //-----------------------------------------------------------------------------Stream_file::file_no
@@ -1008,8 +1008,8 @@ void Stream_file::throw_error( const string& operation )
 
 //-------------------------------------------------------------------------------------------------
 /*
-    Für eine Klasse, die zeilenweise liest:
-    (Line_reader, oder wie heißt die entsprechende Klasse in Java?)
+    FÃ¼r eine Klasse, die zeilenweise liest:
+    (Line_reader, oder wie heiÃŸt die entsprechende Klasse in Java?)
 
     string line;
     line.reserve( 1000 );
@@ -1224,7 +1224,7 @@ string get_temp_path()
 }
 
 //----------------------------------------------------------------------------directory_of_path
-// Liefert alles außer dem Datennamen und Schrägstrich
+// Liefert alles auÃŸer dem Datennamen und SchrÃ¤gstrich
 
 string directory_of_path( const string& path )
 {

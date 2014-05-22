@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
-import com.sos.scheduler.engine.kernel.plugin.Plugin;
+import com.sos.scheduler.engine.kernel.plugin.Plugins;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 
@@ -50,7 +50,7 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
             SchedulerConfiguration c,
             PrefixLog prefixLog,
             SchedulerConfiguration configuration,
-            @Named(Plugin.configurationXMLName) Element pluginElement) {
+            @Named(Plugins.configurationXMLName) Element pluginElement) {
         this.schedulerConfiguration = c;
         this.configuration = configuration;
 		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", ActiveMQConfiguration.vmProviderUrl);
@@ -76,8 +76,7 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
     }
 
 	@Override
-	public void activate() {
-		super.activate();
+	public void onActivate() {
 		connector.start();
 	}
 

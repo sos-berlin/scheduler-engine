@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.xml
 
 import CppXmlSchemaValidatorTest._
-import com.google.common.io.Closeables.closeQuietly
 import com.google.common.io.Resources.getResource
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import java.net.URL
 import javax.xml.XMLConstants._
 import javax.xml.parsers.DocumentBuilderFactory
@@ -41,9 +41,9 @@ class CppXmlSchemaValidatorTest extends FunSpec {
     }
 
     def validate(u: URL) {
-      val in = u.openStream()
-      try validator.validate(new StreamSource(in))
-      finally closeQuietly(in)
+      autoClosing(u.openStream()) { in ⇒
+        validator.validate(new StreamSource(in))
+      }
     }
   }
 }

@@ -40,7 +40,7 @@ struct Log_categories_content
             e_standard,
             e_implicit,         // z.B. "a.b": a => a.b, a schaltet auch a.b an.
             e_explicit,         // z.B. "a.b": a.* schaltet nicht a.b an. a.b muss explizit gesetzt werden. Ebenso bei "all" (="*")
-            e_derived           // Abgeleiteter, automatisch generierter Eintrag, zum schnelleren Nachschlagen und für fehlende Eltern
+            e_derived           // Abgeleiteter, automatisch generierter Eintrag, zum schnelleren Nachschlagen und fÃ¼r fehlende Eltern
         };
 
         static string           type_name                   ( Type );
@@ -56,7 +56,7 @@ struct Log_categories_content
         int64                  _used_counter;
         int64                  _denied_counter;
 
-        bool                   _children_too;               // Benutzer hat gesetzt, z.B. "a.*": alle Kinder, außer e_explicit, setzen
+        bool                   _children_too;               // Benutzer hat gesetzt, z.B. "a.*": alle Kinder, auÃŸer e_explicit, setzen
         bool                   _children_too_derived;
         bool                   _has_default;                // Default des Programms 
         bool                   _default_value;
@@ -97,8 +97,8 @@ struct Log_categories : Log_categories_content
     bool                        is_set                      ( const char* name );
     bool                        is_set_cached               ( Cached_log_category* );
 
-    void                    set_all                         ( bool all )                                { _really_all = all;           _modified_counter++; }   // Für asynchrone Aufrufe (Signal-Handler)
-    void                        toggle_all                  ()                                          { _really_all = !_really_all;  _modified_counter++; }   // Für asynchrone Aufrufe (Signal-Handler)
+    void                    set_all                         ( bool all )                                { _really_all = all;           _modified_counter++; }   // FÃ¼r asynchrone Aufrufe (Signal-Handler)
+    void                        toggle_all                  ()                                          { _really_all = !_really_all;  _modified_counter++; }   // FÃ¼r asynchrone Aufrufe (Signal-Handler)
 
     int                         modified_counter            () const                                    { return _modified_counter; }
     bool                        is_set                      ( Cached_log_category* c )                  { if( c->_last_modified_counter != _modified_counter )  is_set_cached( c );  

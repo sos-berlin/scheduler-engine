@@ -76,8 +76,8 @@ struct Sos_array : Sos_array_base
             void                add                     ( const T& );
     T&                          operator[]              ( int4 ) const;
     T*                          elem_ptr                ( int4 i ) const            { return &(*this)[ i ]; }
-    T*                          checked_elem_ptr        ( int4 i ) const;           // Index wird geprüft, nicht ptr
-  //T                           pop                     ()                          { T o = *last_elem(); last_index( last_index() - 1 ); return o; }  // Benötigt operator=
+    T*                          checked_elem_ptr        ( int4 i ) const;           // Index wird geprÃ¼ft, nicht ptr
+  //T                           pop                     ()                          { T o = *last_elem(); last_index( last_index() - 1 ); return o; }  // BenÃ¶tigt operator=
   //Iterator                    iterator                ()                          { return Iterator( this ); }
 
   protected:
@@ -121,8 +121,8 @@ struct Sos_simple_array : Sos_array< T >
 template< class T >
 struct Sos_simple_ptr_array : Sos_simple_array< Sos_ptr< T > >
 {
-    // Diese Klasse könnte size(int) und ~Sos_simple_ptr_array für alle Sos_ptr<T>
-    // einmal implementieren, so dass nicht für jedes T der gleiche Code generiert wird.
+    // Diese Klasse kÃ¶nnte size(int) und ~Sos_simple_ptr_array fÃ¼r alle Sos_ptr<T>
+    // einmal implementieren, so dass nicht fÃ¼r jedes T der gleiche Code generiert wird.
 };
 
 //------------------------------------------------------------------Sos_simple_auto_ptr_array<>
@@ -233,7 +233,7 @@ int index( const Sos_simple_array<TYPE>& a, const TYPE& e ) {
 #endif
 
 //-------------------------------------------------------------------------------------destruct
-// Gehört nach sos.h
+// GehÃ¶rt nach sos.h
 
 template< class TYPE >
 inline void destruct( TYPE* p )

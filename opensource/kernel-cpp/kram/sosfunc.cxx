@@ -1,5 +1,5 @@
 //#define MODULE_NAME "sossql3"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "precomp.h"

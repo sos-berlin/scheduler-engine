@@ -53,7 +53,7 @@ struct Chunk_reader : Object, javabridge::has_proxy<Chunk_reader>
     virtual bool                next_chunk_is_ready         ()                                      = 0;
     virtual int                 get_next_chunk_size         ()                                      = 0;
     virtual string              read_from_chunk             ( int size )                            = 0;
-    virtual string              html_insertion              ()                                      { return ""; }      // Irgendeine HTML-Einfügung, z.B. <hr/>
+    virtual string              html_insertion              ()                                      { return ""; }      // Irgendeine HTML-EinfÃ¼gung, z.B. <hr/>
 
 
     Fill_zero                  _zero_;
@@ -185,7 +185,7 @@ struct Html_chunk_reader : Chunk_reader_filter
     string                     _chunk;
     bool                       _chunk_filled;
 
-    int                        _in_span;                    // Wir müssen am Zeilenende soviele </span> schreiben
+    int                        _in_span;                    // Wir mÃ¼ssen am Zeilenende soviele </span> schreiben
     bool                       _at_begin_of_line;
 
     string                     _line;                       
@@ -468,8 +468,8 @@ struct Operation : Communication::Operation
     virtual bool                async_finished_             () const                                { return _response  &&  _response->is_ready(); }
     virtual string              async_state_text_           () const;
 
-    void                        link_order                  ( Order* );                             // Für Web_service_operation::begin()
-    void                        unlink_order                ();                                     // Für Order::close()
+    void                        link_order                  ( Order* );                             // FÃ¼r Web_service_operation::begin()
+    void                        unlink_order                ();                                     // FÃ¼r Order::close()
     void                        on_first_order_processing   ( Task* );
 
     bool                        response_is_complete        ();

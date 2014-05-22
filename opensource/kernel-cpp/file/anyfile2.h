@@ -78,7 +78,7 @@ struct Any_file_obj : Sos_object, File_base//: Abs_file
     static void                 default_type            ( const char* new_type );
     static const char*          default_type            ();
 
-    File_spec                  _spec;   // nur die Dateitypen dürfen zugreifen!
+    File_spec                  _spec;   // nur die Dateitypen dÃ¼rfen zugreifen!
     int4                        record_count            () const                                { return _record_count; }
 
             void                put                     ( const Const_area& area )                        { put_record( area ); }
@@ -138,8 +138,8 @@ struct Any_file_obj : Sos_object, File_base//: Abs_file
 
     Bool                       _next_record_read;
     Dynamic_area               _record;
-    Sos_ptr<Record_type>       _param_record_type;      // Für Any_file::set_parameter(int,Dyn_obj)
-    Dynamic_area               _param_record;           // Für Any_file::set_parameter(int,Dyn_obj)
+    Sos_ptr<Record_type>       _param_record_type;      // FÃ¼r Any_file::set_parameter(int,Dyn_obj)
+    Dynamic_area               _param_record;           // FÃ¼r Any_file::set_parameter(int,Dyn_obj)
 
     const static char          _default_type[max_typename];
 };

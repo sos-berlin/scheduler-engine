@@ -1,8 +1,8 @@
 // $Id: sosscrpt.cxx 13691 2008-09-30 20:42:20Z jz $
 
-// §1826
+// Â§1826
 
-// Klasse Script_site für IActiveScript (Microsoft Scripting Engine)
+// Klasse Script_site fÃ¼r IActiveScript (Microsoft Scripting Engine)
 
 #include "precomp.h"
 
@@ -65,7 +65,7 @@ Script_site::~Script_site()
 
 void Script_site::clear()
 { 
-/*  Stürzt manchmal ab, also lassen wir das. jz 21.2.01
+/*  StÃ¼rzt manchmal ab, also lassen wir das. jz 21.2.01
 
     if( scripting_engine_factory_map_used ) 
     {
@@ -123,7 +123,7 @@ STDMETHODIMP_( HRESULT ) Script_site::OnScriptError( IActiveScriptError *pscript
     
     if( stricmp( c_str( source ), "msg" ) == 0 ) 
     {
-        _script_exception = new Xc( "", descr.c_str() );  // Nur Meldung zeigen, sonst nix, für Document Factory
+        _script_exception = new Xc( "", descr.c_str() );  // Nur Meldung zeigen, sonst nix, fÃ¼r Document Factory
         _script_exception->set_name( "MSG" );   // Wird in Basic zu Source
     } 
     else 
@@ -206,7 +206,7 @@ void Script_site::init_engine()
 
     #ifdef Z_WINDOWS
     if( stricmp( _engine_name.c_str(), "spidermonkey" ) == 0 
-     || stricmp( _engine_name.c_str(), "javascript"   ) == 0 )   // Für Microsoft's Javascript nehmen wir "JScript"
+     || stricmp( _engine_name.c_str(), "javascript"   ) == 0 )   // FÃ¼r Microsoft's Javascript nehmen wir "JScript"
     {
         _script_parse = static_cast<IActiveScriptParse*>( com_create_instance( CLSID_Spidermonkey, IID_IActiveScriptParse, NULL, "spidermonkey" ) );
     }
@@ -354,7 +354,7 @@ Variant Script_site::parse( const string& script_text, Scripttext_flags flags, i
     SOS_DELETE( _script_exception );
 
     Bstr script_text_bstr = script_text;
-    if( !script_text_bstr )  throw_xc( "EMPTY-SCRIPT", __FUNCTION__ );      // Sonst stürzt ParseScriptText() ab.
+    if( !script_text_bstr )  throw_xc( "EMPTY-SCRIPT", __FUNCTION__ );      // Sonst stÃ¼rzt ParseScriptText() ab.
 
     hr = _script_parse->ParseScriptText( script_text_bstr,
                                          NULL, 
@@ -363,7 +363,7 @@ Variant Script_site::parse( const string& script_text, Scripttext_flags flags, i
                                          0, 
                                          linenr,
                                          flags,   // SCRIPTTEXT_ISVISIBLE, 
-                                         &result,  // Nur für SCRIPTTEXT_ISEXPRESSION
+                                         &result,  // Nur fÃ¼r SCRIPTTEXT_ISEXPRESSION
                                          &excep
                                        );
 

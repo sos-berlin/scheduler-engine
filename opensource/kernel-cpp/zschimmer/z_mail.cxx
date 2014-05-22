@@ -69,7 +69,7 @@ string Email_address::email_address() const
     {
         S result;
 
-        result << '"' << _name << '"';     // Fehlt: '"' im Namen berücksichtigen!
+        result << '"' << _name << '"';     // Fehlt: '"' im Namen berÃ¼cksichtigen!
         result << " <" << _address << '>';
 
         return result;

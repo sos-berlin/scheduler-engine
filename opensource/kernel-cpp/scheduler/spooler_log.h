@@ -48,7 +48,7 @@ struct Log
     int                        _file;
     int                        _err_no;
   //string                     _log_line;
-    string                     _log_buffer;                 // Bis Ausgabedatei geöffnet ist
+    string                     _log_buffer;                 // Bis Ausgabedatei geÃ¶ffnet ist
     Time                       _last_time;
 };
 
@@ -59,7 +59,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     Fill_zero _zero_;
 
 
-                                Prefix_log                  ( int );                            // Für Spooler
+                                Prefix_log                  ( int );                            // FÃ¼r Spooler
                                 Prefix_log                  ( Scheduler_object* );
                                ~Prefix_log                  ();
 
@@ -68,8 +68,8 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        open_dont_cache             ();
     void                        close                       ();
     void                        finish_log                  ();
-    void                        close_file                  ();     // Nicht öffentlich
-    void                        try_reopen_file             ();     // Nicht öffentlich
+    void                        close_file                  ();     // Nicht Ã¶ffentlich
+    void                        try_reopen_file             ();     // Nicht Ã¶ffentlich
     void                        remove_file                 ();
     bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        is_active                   () const                            { return _started && !_is_finished; }
@@ -164,7 +164,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        write                       ( const char*, int );
 
     friend struct               Log;
-    friend struct               Task;                       // Für _mail_on_error etc.
+    friend struct               Task;                       // FÃ¼r _mail_on_error etc.
 
 
     PrefixLogJ                 _typed_java_sister;
@@ -184,7 +184,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     Last                       _last;
 
     string                     _title;
-    File_path                  _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
+    File_path                  _filename;                   // Name einer zusÃ¤tzlichen Log-Datei (fÃ¼r die Tasks)
     File_path                  _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben ?ffnen
     bool                       _append_for_cache;           // Datei zum Fortschreiben ?ffnen
@@ -204,7 +204,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     First_and_last             _mail_on_delay_after_error;
     bool                       _mail_it;
     ptr<Com_mail>              _mail;
-    string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
+    string                     _mail_section;               // Name des Abschnitts in factory.ini fÃ¼r eMail-Einstellungen
 
     Duration                   _collect_within;             // eMails innerhalb dieser Frist sammeln, solange Job keinen Fehler macht
     Time                       _last_send;                  // Beginn dieser Frist
@@ -214,7 +214,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     Mail_defaults              _mail_defaults;
 
     bool                       _is_logging_continuing;
-    string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
+    string                     _log_buffer;                 // FÃ¼r Jobprotokollausgaben bis open(), also vor dem Jobstart
     bool                       _log_buffer_is_full;
 
     bool                       _remove_after_close;

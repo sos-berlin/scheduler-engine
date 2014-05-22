@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
+import FileUtil._
 import com.google.common.io.Files
 import java.io._
 import java.nio.charset.Charset
@@ -9,14 +10,11 @@ import org.junit._
 
 final class FileUtilTest {
 
-  import FileUtil._
-
   @Test def testDeleteFile() {
     val file = File.createTempFile("test", "tmp")
     deleteFile(file)
     assert(!file.exists)
   }
-
 
   @Test def testDeleteFile_directory() {
     val file = File.createTempFile("test", "tmp")
@@ -31,7 +29,6 @@ final class FileUtilTest {
 
     assert(!file.exists)    // Alles aufgeräumt?
   }
-
 
   @Test def testWritingFileIfDifferent() {
     val file = File.createTempFile("test","tmp")
@@ -51,7 +48,7 @@ final class FileUtilTest {
       subDirs foreach { d => new File(dir, d).mkdir() }
       paths foreach { p => Files.touch(new File(dir, p)) }
       assertEquals(paths.toSet, listFilePathsRecursive(dir).toSet)
-      assertEquals(paths filter { !_.endsWith("ignore") } toSet, listFilePathsRecursiveFiltered(dir){_.getName != "ignore"} toSet)
+      assertEquals((paths filterNot { _ endsWith "ignore" }).toSet, listFilePathsRecursiveFiltered(dir){ _.getName != "ignore" } .toSet)
     }
     finally FileUtils.deleteDirectory(dir)
   }

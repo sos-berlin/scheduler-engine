@@ -12,11 +12,14 @@ final class ProcessClassSubsystem @Inject private(
   protected[this] val cppProxy: Process_class_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem{
-  type MySubsystem = ProcessClassSubsystem
-  type MyFileBased = ProcessClass
-  type MyFile_basedC = Process_classC
+  type ThisSubsystem = ProcessClassSubsystem
+  type ThisFileBased = ProcessClass
+  type ThisFile_basedC = Process_classC
 
-  val companion = ProcessClassSubsystem
+  val description = ProcessClassSubsystem
 }
 
-object ProcessClassSubsystem extends FileBasedSubsystem.Companion[ProcessClassSubsystem, ProcessClassPath, ProcessClass](FileBasedType.processClass, ProcessClassPath.apply)
+object ProcessClassSubsystem extends FileBasedSubsystem.AbstractDesription[ProcessClassSubsystem, ProcessClassPath, ProcessClass] {
+  val fileBasedType = FileBasedType.processClass
+  val stringToPath = ProcessClassPath.apply _
+}

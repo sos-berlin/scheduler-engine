@@ -1,11 +1,11 @@
 /**
  * \file spooler_time.h
- * \brief Funktionalitäten für das Arbeiten mit Zeitangaben
+ * \brief FunktionalitÃ¤ten fÃ¼r das Arbeiten mit Zeitangaben
  * \detail
  *
  * \author JZ
  * <div class="sos_branding">
- *    <p>© 2010 SOS GmbH - Berlin (<a style="color:silver" href="http://www.sos-berlin.com">http://www.sos-berlin.com</a>)</p>
+ *    <p>Â© 2010 SOS GmbH - Berlin (<a style="color:silver" href="http://www.sos-berlin.com">http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 
@@ -43,12 +43,12 @@ typedef javaproxy::com::sos::scheduler::engine::kernel::time::TimeZones TimeZone
 
 //-------------------------------------------------------------------------------------------------
 /*!
- * \brief Funktionalitäten für das Arbeiten mit Zeitangaben
+ * \brief FunktionalitÃ¤ten fÃ¼r das Arbeiten mit Zeitangaben
  * \detail
  *
  * \author dev-team
  * <div class="sos_branding">
- *    <p>© 2010 SOS GmbH - Berlin (<a style="color:silver" href="http://www.sos-berlin.com">http://www.sos-berlin.com</a>)</p>
+ *    <p>Â© 2010 SOS GmbH - Berlin (<a style="color:silver" href="http://www.sos-berlin.com">http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 //-------------------------------------------------------------------------------------------------
@@ -220,7 +220,7 @@ Duration Time::operator - ( const Time& t ) const
 /*!
 * \brief Jobstartzeit ermitteln
 * \details
-* Folgende Angaben für den Start eines Jobs sind zugelassen:
+* Folgende Angaben fÃ¼r den Start eines Jobs sind zugelassen:
 * - yyyy-mm-dd HH:MM[:SS]
 * - now+SS
 * - now+MM:SS
@@ -276,7 +276,7 @@ void Time::set( double t )
 
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
-        if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
+        if( _time == 0 )  _time_as_string.clear();   // FÃ¼r static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
                     else  _time_as_string = _time == never_double? time::never_name
                                                                  : utc_string();
 #   endif
@@ -486,7 +486,7 @@ Time Time::now()
 //{
 //#   if defined SYSTEM_LINUX
 //
-//        // Linux füllt nicht time_b::dstflag
+//        // Linux fÃ¼llt nicht time_b::dstflag
 //
 //        timeval  tv;
 //        tm       local_tm;

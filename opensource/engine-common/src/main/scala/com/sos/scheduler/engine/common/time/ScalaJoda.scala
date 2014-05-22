@@ -6,6 +6,7 @@ import org.joda.time._
 import org.joda.time.base.AbstractInstant
 import scala.annotation.tailrec
 import scala.concurrent.duration.FiniteDuration
+import scala.language.implicitConversions
 import scala.math.abs
 
 object ScalaJoda {

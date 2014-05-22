@@ -2085,7 +2085,7 @@ void Order::set_state1( const State& order_state )
         State       previous_state = _state;
         Node*       node           = NULL;
         
-        if( !order_state.is_empty() )
+        if( !(order_state.is_empty() || order_state.is_missing()) )
         {
             node = _job_chain->referenced_node_from_state( order_state );
             if( node != _job_chain->node_from_state( order_state ) )  _log->info( message_string( "SCHEDULER-859", node->order_state().as_string(), order_state ) );

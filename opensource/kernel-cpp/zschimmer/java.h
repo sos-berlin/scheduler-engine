@@ -98,7 +98,7 @@ struct Env
     jclass                      get_spooler_idispatch_class_if_is_instance_of( jobject );
 
 
-    // Einige Java-Methoden mit Fehlerpr�fung:
+    // Einige Java-Methoden mit Fehlerprüfung:
     jclass                      find_class                  ( const string& name );
     jfieldID                    get_field_id                ( jclass cls, const string& name, const string& signature );
     jmethodID                   get_method_id               ( jclass cls, const string& name, const string& signature ) { return get_method_id( cls, name.c_str(), signature.c_str() ); }
@@ -166,8 +166,8 @@ struct Jobject : Jvalue
 
     jobject                     take                        ()                                      { jobject result = _jvalue.l;  _jvalue.l = NULL;  return result; }
 
-    virtual void                assign                      ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ung�ltig!
-    virtual void                assign_add_ref              ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ung�ltig!
+    virtual void                assign                      ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ungültig!
+    virtual void                assign_add_ref              ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ungültig!
     virtual jclass              get_jclass                  ()                                      = 0;
 
     jobject                     j                           () const                                { return get_jobject(); }
@@ -460,7 +460,7 @@ struct Statistics {
 };
 
 //-----------------------------------------------------------------------------------------------Vm
-// F�r dieselbe JavaVM k�nnen mehrere VM vorhanden sein, f�r jede DLL eine.
+// Für dieselbe JavaVM können mehrere VM vorhanden sein, für jede DLL eine.
 // Neben dem Hauptprogram zurzeit hostole.dll, spidermonkey.dll, hostjava.dll.
 
 struct Vm : Object              // Java virtual machine
@@ -517,7 +517,7 @@ struct Vm : Object              // Java virtual machine
     };
 
                                 Vm                          ( bool do_start = true );
-                                Vm                          ( JavaVM* );                            // Vorhandene JVM verwenden (f�r natives Module)
+                                Vm                          ( JavaVM* );                            // Vorhandene JVM verwenden (für natives Module)
                                ~Vm                          ();
 
 
@@ -547,7 +547,7 @@ struct Vm : Object              // Java virtual machine
 
     void                    set_destroy_vm                  ( bool );
 
-    void                    set_sos_initialized             ( bool b = true )                       { _sos_initialized = b; }       // F�r kram/sos_java.h
+    void                    set_sos_initialized             ( bool b = true )                       { _sos_initialized = b; }       // Für kram/sos_java.h
     bool                        sos_initialized             () const                                { return _sos_initialized; }
 
     void                        init                        ();
@@ -583,9 +583,9 @@ struct Vm : Object              // Java virtual machine
 
 
     Fill_zero                  _zero_;
-    bool                       _foreign;                    // JVM ist von au�en (f�r Hostjava)
+    bool                       _foreign;                    // JVM ist von außen (für Hostjava)
     bool                       _vm_requested;
-    bool                       _dont_destroy;               // DestroyJavaVM() nicht rufen (h�ngt manchmal)
+    bool                       _dont_destroy;               // DestroyJavaVM() nicht rufen (hängt manchmal)
     bool                       _debug;
     bool                       _debug_options_set;
     bool                       _sos_initialized;
@@ -597,7 +597,7 @@ struct Vm : Object              // Java virtual machine
 
     string                     _filename;                   // Dateiname der Java-VM
     string                     _class_path;
-    string                     _last_expanded_class_path;   // F�r expand_class_path()
+    string                     _last_expanded_class_path;   // Für expand_class_path()
     string                     _complete_class_path;
     string                     _javac_filename;
     string                     _work_dir;

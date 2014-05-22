@@ -1,40 +1,60 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import JettyPlugin._
-import com.sos.scheduler.engine.kernel.plugin.{Plugin, UseGuiceModule, AbstractPlugin}
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.kernel.plugin.{ExtensionRegister, Plugins, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
+import java.net.BindException
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
-import java.net.BindException
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule])
 final class JettyPlugin @Inject private(
-    @Named(Plugin.configurationXMLName) pluginElement: Element,
+    @Named(Plugins.configurationXMLName) pluginElement: Element,
     schedulerConfiguration: SchedulerConfiguration)
-extends AbstractPlugin {
+extends AbstractPlugin
+with ExtensionRegister[JettyPluginExtension] {
 
-  private val webServer = new WebServer(myJettyConfiguration)
+  private var webServer: WebServer = null
 
-  private def myJettyConfiguration = {
-    val c = SchedulerConfigurationAdapter.jettyConfiguration(pluginElement, schedulerConfiguration)
-    c.copy(handlers = newRootContextHandler() +: c.handlers)
+  override def onActivate() {
+    webServer = new WebServer(myJettyConfiguration)
+    val portNumbersString = webServer.portNumbers mkString " "
+    if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")
+    try {
+      webServer.start()
+    }
+    catch {
+      case e: BindException if portNumbersString.nonEmpty ⇒
+        throw new RuntimeException(s"$e (TCP port $portNumbersString?})", e)
+    }
   }
 
-  override def activate() {
-    try webServer.start()
-    catch { case e: BindException if myJettyConfiguration.portOption.isDefined ⇒ throw new RuntimeException(s"$e (TCP port ${myJettyConfiguration.portOption.get}?})", e) }
+  private def myJettyConfiguration = {
+    val conf = SchedulerConfigurationAdapter.jettyConfiguration(pluginElement, schedulerConfiguration)
+    conf.copy(
+      handlers = newRootContextHandler() +: conf.handlers,
+      servletContextHandlerModifiers = extensions map { _.modifyServletContextHandler })
   }
 
   override def close() {
-    webServer.close()
+    if (webServer != null)
+      webServer.close()
+  }
+
+  def portNumber: Int = {
+    if (webServer == null) throw new IllegalStateException()
+    webServer.portNumbers.headOption getOrElse sys.error("JettyPlugin has no TCP port configured")
   }
 }
 
 object JettyPlugin {
+  private val logger = Logger(getClass)
+
   private def newRootContextHandler() = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
     result.setContextPath("/")

@@ -1,4 +1,4 @@
-// sosobj.h                                                © 1995 SOS GmbH Berlin
+// sosobj.h                                                Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSOBJ_H
 #define __SOSOBJ_H
@@ -105,7 +105,7 @@ struct Sos_object : Sos_self_deleting
     friend        void          reply_error_msg         ( Sos_object*, Sos_object*, const Xc& );
     friend inline void          reply                   ( Reply_msg* );
     friend void                 request                 ( Request_msg* );
-    friend struct               Sos_proxy;              // ~Sos_proxy setzt _obj_ref_count vorübergehend hoch
+    friend struct               Sos_proxy;              // ~Sos_proxy setzt _obj_ref_count vorÃ¼bergehend hoch
     friend struct               Sos_msg_queue;
     friend struct               Sos_object_register;
 
@@ -113,9 +113,9 @@ struct Sos_object : Sos_self_deleting
     void                       _reply_msg               ( Reply_msg* );
 
   //Sos_object_register*       _object_register_ptr;
-  //int4                       _obj_index;              // Index in der Tabelle für global bekannte Objekte oder 0
+  //int4                       _obj_index;              // Index in der Tabelle fÃ¼r global bekannte Objekte oder 0
 
-    static Bool                _busy;                   // für obj_request() und obj_busy()
+    static Bool                _busy;                   // fÃ¼r obj_request() und obj_busy()
 
     Sos_object*                _owner;
 };

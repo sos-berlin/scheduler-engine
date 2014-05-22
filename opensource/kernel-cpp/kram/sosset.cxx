@@ -127,7 +127,7 @@ void Bit_set::exclude( uint4 elem, uint4 count )
 int4 Bit_set::scan( int4 start, Bool value )  const
 {
     int4 i;
-# if 0                  // Arbeitet wortweise, mu· aber noch getestet werden:
+# if 0                  // Arbeitet wortweise, mu√° aber noch getestet werden:
     int not_value_8 = value - 1;
 
     for( i = start; i & ~((int4)-1 << (8*sizeof(int))); i++ ) {

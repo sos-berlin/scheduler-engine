@@ -158,7 +158,7 @@ int Task_subsystem::count_tasks_exist( ) const
 {
     int result = 0;
 
-    // TODO ggf. bestimmte Status nicht z‰hlen
+    // TODO ggf. bestimmte Status nicht z√§hlen
     FOR_EACH_TASK_CONST ( it, task )
         result++;
 
@@ -284,7 +284,7 @@ void Task::close()
         }
 
         _closed = true;
-        _history.end();    // DB-Operation, kann Exception auslˆsen
+        _history.end();    // DB-Operation, kann Exception ausl√∂sen
     }
 
     if( _lock_holder )  
@@ -496,7 +496,7 @@ void Task::cmd_end( End_mode end_mode )
 
     if( _state == s_none ) {
         if( _job )  _job->kill_queued_task( _id );
-        // this ist hier mˆglicherweise ung¸ltig!
+        // this ist hier m√∂glicherweise ung√ºltig!
     }
     else
         _call_register.call<End_task_call>();
@@ -628,7 +628,7 @@ void Task::set_error( const _com_error& x )
  * \brief Status zum Setzen vormerken
  * \detail 
  * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
- * Merkt bei laufender Operation einen Status zum Setzen vor. L‰uft keine Operation (z.B. spooler.process)
+ * Merkt bei laufender Operation einen Status zum Setzen vor. L√§uft keine Operation (z.B. spooler.process)
  * wird der Status via set_state_direct() sofort gesetzt.
  * \version 2.1.1 - 2010-04-29
  *
@@ -640,7 +640,7 @@ void Task::set_state( State new_state )
     _enqueued_state = new_state;
 
     if( _operation ) {
-        // Verzˆgern bis Operation fertig ist. Siehe Aufruf von set_enqueued_state()
+        // Verz√∂gern bis Operation fertig ist. Siehe Aufruf von set_enqueued_state()
     }
     else {
         set_enqueued_state();
@@ -654,7 +654,7 @@ void Task::set_state( State new_state )
  * \brief Status zum Setzen vormerken
  * \detail 
  * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
- * Setzt einen bereits vorgemerketer Status f¸r eine Task endg¸ltig. Ist kein Status zum Setzen vorgemerkt, bleibt der 
+ * Setzt einen bereits vorgemerketer Status f√ºr eine Task endg√ºltig. Ist kein Status zum Setzen vorgemerkt, bleibt der 
  * Aufruf ohne Wirkung.
  * \version 2.1.1 - 2010-04-29
  *
@@ -865,7 +865,7 @@ void Task::delay_until_locks_available()
     // Sicherstellen, dass try_hold_lock() ohne Erfolg aufgerufen worden ist
     // begin__start() erneut aufrufen mit dem Parameter, dass der letzte Aufruf (spooler_init, spooler_open) wiederholt werden soll.
     // Wie stellen wir sicher, dass wir nicht im Konstruktor sind? Wiederholen wir die Konstruktion? In Module_instance::begin__end
-    // Oder Exception erst bei der Wiederholung, etwas sp‰t, aber es gen¸gt.
+    // Oder Exception erst bei der Wiederholung, etwas sp√§t, aber es gen√ºgt.
 
     _delay_until_locks_available = true;
 }
@@ -924,17 +924,17 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 //    if( _operation )
 //    {
 //        if( _operation->async_finished() ) {
-//            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
+//            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l√§uft)
 //        } else {
 //            Duration t = _timeout;
 //            result = t.is_eternal()? Time::never 
-//                                   : _last_operation_time + t;     // _timeout sollte nicht zu groﬂ sein
+//                                   : _last_operation_time + t;     // _timeout sollte nicht zu gro√ü sein
 //        }                 
 //    }
 //    else
 //    if( _state == s_running_process  &&  !_timeout.is_eternal() )
 //    {
-//        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groﬂ sein
+//        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu gro√ü sein
 //    }
 //    else
 //    {
@@ -1165,7 +1165,7 @@ void Task::remove_pid( int pid )
 void Task::add_subprocess( int pid, const Duration& timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
-    Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameter¸bergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
+    Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameter√ºbergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
     
     if( !_module_instance->is_remote_host() ) {
         Time timeout_at = timeout.is_eternal()? Time::never : Time::now() + timeout;
@@ -1221,8 +1221,8 @@ void Task::Registered_pid::try_kill()
             _task->log()->warn( message_string( "SCHEDULER-849", _pid ) );
             // Asynchron <remote_scheduler.subprocess.kill task="..." pid="..."/>
             // ohne Ende abzuwarten?
-            // Operation f¸r solche asynchronen XML-Befehle mit Warteschlange
-            // spooler_communication.cxx muss mehrere XML-Dokumente aufeinander empfangen und trennen kˆnnen.
+            // Operation f√ºr solche asynchronen XML-Befehle mit Warteschlange
+            // spooler_communication.cxx muss mehrere XML-Dokumente aufeinander empfangen und trennen k√∂nnen.
         } else {
             try {
 #               ifdef Z_UNIX
@@ -1234,7 +1234,7 @@ void Task::Registered_pid::try_kill()
                 _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
             }
             catch( exception& x ) {
-                _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " l‰sst sich nicht abbrechen: " << x
+                _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " l√§sst sich nicht abbrechen: " << x
             }
         }
         _killed = true;
@@ -1299,14 +1299,14 @@ bool Task::do_something()
     something_done |= check_subprocess_timeout( now );
 
     if( _operation &&  !_operation->async_finished() ) {
-        // Die Operation tut was und wir wollen pr¸fen, ob sie es solange darf
+        // Die Operation tut was und wir wollen pr√ºfen, ob sie es solange darf
         something_done |= check_timeout( now );
-        something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running pr¸fen?
+        something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running pr√ºfen?
     } else {
         // Periode endet?
         if( !_operation ) {
             something_done |= check_timeout( now );
-            something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running pr¸fen?
+            something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running pr√ºfen?
 
             if( _state == s_running
              || _state == s_running_process
@@ -1344,7 +1344,7 @@ bool Task::do_something()
                         if( _state < s_ending  &&  _end ) {     // Task beenden?
                             if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 ) {  // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
                                 if( !_scheduler_815_logged ) {
-                                    _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuf¸hren
+                                    _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuf√ºhren
                                     _scheduler_815_logged = true;
                                 }
                             }
@@ -1359,7 +1359,7 @@ bool Task::do_something()
                         }
                     }
 
-                    switch( _state ) { // n‰chster Status
+                    switch( _state ) { // n√§chster Status
                         case s_loading: {
                             bool ok = load();
                             if( ok )  set_state_direct( s_waiting_for_process );
@@ -1539,8 +1539,8 @@ bool Task::do_something()
 
                         case s_running_waiting_for_order: {
                             if( fetch_and_occupy_order( now, state_name() ) ) {
-                                set_state_direct( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch gepr¸ft)
-                                loop = true;                // _order wird in step__end() wieder abger‰umt
+                                set_state_direct( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch gepr√ºft)
+                                loop = true;                // _order wird in step__end() wieder abger√§umt
                             }
                             else
                             if( now >= _idle_timeout_at ) {
@@ -1702,13 +1702,13 @@ bool Task::do_something()
                                         set_state_texts_from_stdout( process_module_instance->get_first_line_as_state_text() );
 
                                         if( _order ) {
-                                            //Process_module_instance::attach_task() hat tempor‰re Datei zur R¸ckgabe der Auftragsparameter geˆffnet
+                                            //Process_module_instance::attach_task() hat tempor√§re Datei zur R√ºckgabe der Auftragsparameter ge√∂ffnet
                                             process_module_instance->fetch_parameters_from_process( _order->params() );
                                             if( !has_error() ) {
                                                 postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
                                                                                                              : Order::post_error   );       
                                             }
-                                            else {}     // detach_order_after_error() wird sich drum k¸mmern.
+                                            else {}     // detach_order_after_error() wird sich drum k√ºmmern.
                                         }
                                         else
                                            process_module_instance->fetch_parameters_from_process( _params );
@@ -1739,17 +1739,17 @@ bool Task::do_something()
                                 ok = false;
                                 Time now = Time::now();
 
-                                if (!_trying_deleting_files_until  ||  now >= _call_register.at<Try_deleting_files_call>()) {     // do_something() wird zu oft gerufen, deshalb pr¸fen, ob_next_time erreicht ist.
+                                if (!_trying_deleting_files_until  ||  now >= _call_register.at<Try_deleting_files_call>()) {     // do_something() wird zu oft gerufen, deshalb pr√ºfen, ob_next_time erreicht ist.
                                     // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. Das soll kein Task-Problem sein!
                                     // Siehe auch ~Process_module_instance
                                     Has_log* my_log = NULL; //_trying_deleting_files_until? NULL : _job->log();
 
-                                    // Folgendes kˆnnte zusammengefasst werden mit Remote_task_close_command_response::async_continue_() als eigene Async_operation
+                                    // Folgendes k√∂nnte zusammengefasst werden mit Remote_task_close_command_response::async_continue_() als eigene Async_operation
 
                                     ok = _module_instance->try_delete_files( my_log );
                                     if (ok) {
                                         if( _trying_deleting_files_until.not_zero() )  
-                                            _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht lˆschbar gewesen ist
+                                            _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht l√∂schbar gewesen ist
                                     } else {
                                         if (!_trying_deleting_files_until) {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
@@ -1798,7 +1798,7 @@ bool Task::do_something()
                     if( _operation ) {
                         loop |= _operation->async_finished();   // Falls Sync_operation
                     } else {
-                        set_enqueued_state();   // Wegen _operation verzˆgerten Zustand setzen
+                        set_enqueued_state();   // Wegen _operation verz√∂gerten Zustand setzen
 
                         if( (!ok || has_error() || _killed) && _state < s_ending )  
                              set_state_direct( s_ending ), loop = true;
@@ -1846,7 +1846,7 @@ bool Task::do_something()
 
         if( !something_done )    // Obwohl _next_time erreicht, ist nichts getan?
         {
-            // Das kann bei s_running_waiting_for_order passieren, wenn zun‰chst ein Auftrag da ist (=> _next_time = 0),
+            // Das kann bei s_running_waiting_for_order passieren, wenn zun√§chst ein Auftrag da ist (=> _next_time = 0),
             // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
 
             set_state_direct( state() );  // _next_time neu setzen
@@ -1927,7 +1927,7 @@ bool Task::step__end()
         }
 
         if( _job->is_order_controlled() )  
-            continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state_direct(), ß1495 )
+            continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state_direct(), ¬ß1495 )
 
         count_step();
 
@@ -1953,7 +1953,7 @@ bool Task::step__end()
 
 void Task::count_step()
 {
-    if( has_step_count()  ||  _step_count == 0 ) {      // Bei kind_process nur einen Schritt z‰hlen
+    if( has_step_count()  ||  _step_count == 0 ) {      // Bei kind_process nur einen Schritt z√§hlen
         _spooler->_task_subsystem->count_step();        // Siehe auch remote_process_step__end()
         _job->count_step();
         _step_count++;
@@ -1964,8 +1964,8 @@ void Task::count_step()
 
 string Task::remote_process_step__end()
 {
-    // Das kˆnnte mit der Endebehandlung einer Process_module_instance, also ohne kind_remote, zusammengefasst werden.
-    // Dazu sollte f¸r beide Verfahren eine gemeinsame Oberklasse gebildet werden, mit einem Proxy f¸r kind_remote als Unterklasse.
+    // Das k√∂nnte mit der Endebehandlung einer Process_module_instance, also ohne kind_remote, zusammengefasst werden.
+    // Dazu sollte f√ºr beide Verfahren eine gemeinsame Oberklasse gebildet werden, mit einem Proxy f√ºr kind_remote als Unterklasse.
 
     string result;
 
@@ -2071,7 +2071,7 @@ void Task::close_operation() {
 //---------------------------------------------------------------------Task::fetch_and_occupy_order
 
 Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
-// Wird auch von Job gerufen, wenn ein neuer Auftrag zum Start einer neuen Task f¸hrt
+// Wird auch von Job gerufen, wenn ein neuer Auftrag zum Start einer neuen Task f√ºhrt
 {
     assert( !_operation );
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
@@ -2152,9 +2152,9 @@ void Task::finish()
 {
     _job->init_start_when_directory_changed( this );
     process_on_exit_commands();
-    if( _order ) {   // Auftrag nicht verarbeitet? spooler_process() nicht ausgef¸hrt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
+    if( _order ) {   // Auftrag nicht verarbeitet? spooler_process() nicht ausgef√ºhrt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
         if( !has_error()  &&  _spooler->state() != Spooler::s_stopping )  set_error( Xc( "SCHEDULER-226" ) );
-        detach_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzˆgert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
+        detach_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verz√∂gert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
     if( has_error()  &&  _job->repeat().is_zero()  &&  _job->_delay_after_error.empty() ) {
@@ -2165,7 +2165,7 @@ void Task::finish()
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }
 
-    // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzˆgern?
+    // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verz√∂gern?
 
     if( has_error()  &&  _job->_delay_after_error.size() > 0 ) {
         InterlockedIncrement( &_job->_error_steps );
@@ -2462,7 +2462,7 @@ bool Task::do_load()
     Host_and_port remote_scheduler = read_remote_scheduler_parameter();
     
     if (ptr<Module_instance> module_instance = _job->create_module_instance(remote_scheduler)) {
-        module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (f¸r shell-Kommando ps)
+        module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (f√ºr shell-Kommando ps)
 
         _module_instance = module_instance;
         _module_instance->attach_task( this, _log );
@@ -2489,7 +2489,7 @@ Host_and_port Task::read_remote_scheduler_parameter() {
     Host_and_port remote_scheduler = _order? _order->params()->get_string("scheduler.remote_scheduler") : "";
     if (remote_scheduler) {
         if (_spooler->is_cluster())  z::throw_xc("SCHEDULER-483");
-        if (_job->module()->kind() != Module::kind_process)  z::throw_xc("SCHEDULER-484");   // Ein API-Prozess kann mehrere Order nacheinander ausf¸hren. Die Tasks kˆnnten dann f¸r jeden Order wechseln.
+        if (_job->module()->kind() != Module::kind_process)  z::throw_xc("SCHEDULER-484");   // Ein API-Prozess kann mehrere Order nacheinander ausf√ºhren. Die Tasks k√∂nnten dann f√ºr jeden Order wechseln.
     }
     return remote_scheduler;
 }

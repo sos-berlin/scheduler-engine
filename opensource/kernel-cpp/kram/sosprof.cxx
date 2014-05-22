@@ -35,7 +35,7 @@
 namespace sos {
 
 /* s. sosstat.h
-enum Profile_source         // Gelesene Quellen des Dateinamens für sos.ini. Gibt auch die Priorität an. Niedrige Priorität kann höhere nicht überschreiben.
+enum Profile_source         // Gelesene Quellen des Dateinamens fÃ¼r sos.ini. Gibt auch die PrioritÃ¤t an. Niedrige PrioritÃ¤t kann hÃ¶here nicht Ã¼berschreiben.
 {
     source_default      = 0x01,     // "sos.ini"
     source_environment  = 0x02,     // SOS_INI
@@ -125,7 +125,7 @@ void write_profile_string( const Sos_string& str, const char* filename, const ch
 
 Bool read_profile_bool( const char* filename, const char* group_name, const char* entry_name, Bool def )
 {
-    //char buf[20];     // Führt in Solaris zum Absturz (Exception und assertion)
+    //char buf[20];     // FÃ¼hrt in Solaris zum Absturz (Exception und assertion)
     //Area area( buf, sizeof buf );
     //area.length(0);
     Sos_limited_text<50> buffer;
@@ -169,7 +169,7 @@ static string read_registry( const string& filename, bool is_sos_ini )
     if( ( ( (uint)LOBYTE(version) << 8 ) | (uint)HIBYTE(version) ) >= 0x351 )
     {
         const char* key_name = "SOFTWARE\\SOS Software";
-        const char* key_name_old = "SOFTWARE\\SOS Software\\sos.ini";   // Zur Kompatibilität
+        const char* key_name_old = "SOFTWARE\\SOS Software\\sos.ini";   // Zur KompatibilitÃ¤t
         Bool        found = false;
 
         char        sos_ini_old [ _MAX_PATH ];
@@ -189,7 +189,7 @@ static string read_registry( const string& filename, bool is_sos_ini )
         DWORD reg_type;
         ret = RegQueryValueEx( sos_ini_key, c_str(filename), NULL, &reg_type, (unsigned char*)sos_ini, &sos_ini_len );
         
-        // TODO: reg_type überprüfen
+        // TODO: reg_type Ã¼berprÃ¼fen
         RegCloseKey( sos_ini_key );
 
         if ( ret != ERROR_SUCCESS ) goto OLD_REG;
@@ -197,7 +197,7 @@ static string read_registry( const string& filename, bool is_sos_ini )
         return sos_ini;
 
 
-        OLD_REG: // alter Schlüsselstil mit Standardwert wird aus Kompatibilität noch unterstützt
+        OLD_REG: // alter SchlÃ¼sselstil mit Standardwert wird aus KompatibilitÃ¤t noch unterstÃ¼tzt
         if( !found  &&  is_sos_ini )
         {
             ret = RegOpenKey( HKEY_LOCAL_MACHINE, key_name_old, &sos_ini_key_old );
@@ -211,17 +211,17 @@ static string read_registry( const string& filename, bool is_sos_ini )
 
             if ( found ) {
                 // TODO: Konflikt melden!
-                //sos_ini_msg_  = "sos.ini Warnung: Doppelte Einträge in der Registrierung gefunden! Die Werteversion wird bevorzugt: ";
+                //sos_ini_msg_  = "sos.ini Warnung: Doppelte EintrÃ¤ge in der Registrierung gefunden! Die Werteversion wird bevorzugt: ";
                 //sos_ini_msg_ += sos_ini;
             } else {
                 // TODO: Benutzung des alten Stils melden!
-                //sos_ini_msg_  = "sos.ini Warnung: Die veraltete Schlüsselversion wird verwendet: ";
+                //sos_ini_msg_  = "sos.ini Warnung: Die veraltete SchlÃ¼sselversion wird verwendet: ";
                 //sos_ini_msg_ += sos_ini;
                 //sos_static_ptr()->_profile = sos_ini_old;
             }
 
             RETURN_SOS_INI:
-            // Überprüfen, ob Datei existiert bzw. lesbar ist
+            // ÃœberprÃ¼fen, ob Datei existiert bzw. lesbar ist
             // if ( !file_exists(found?sos_ini:sos_ini_old) ) throw_xc( "SOS-1009", found?sos_ini:sos_ini_old );
             
             return found? sos_ini : sos_ini_old;
@@ -510,7 +510,7 @@ void Sos_profile_file::make_type()
     offset = (long)&o->_entry;
     t->add_field( +string0_type, "entry", offset, -1, 0 );
 
-    //_key_pos und _key_len nicht setzen, denn die Sätze sind nicht geordnet!
+    //_key_pos und _key_len nicht setzen, denn die SÃ¤tze sind nicht geordnet!
     //_key_pos = offset;
     //_key_len = string0_type->field_size();
 
@@ -750,7 +750,7 @@ int static my_GetPrivateProfileString( const char* section, const char* key, con
     if( !section || !section[0] )  throw_xc( "SOS-1443", key );
 
     result[0] = '\0';
-    string default_string = ltrim(deflt);  // Für Windows 95
+    string default_string = ltrim(deflt);  // FÃ¼r Windows 95
     int len = GetPrivateProfileString( !section || section[0] == '\0'? NULL : section, 
                                        !key     || key    [0] == '\0'? NULL : key, 
                                        default_string.c_str(), result, size, ini_file );
@@ -797,7 +797,7 @@ Bool read_profile_entry( Area* value_ptr, const char* fn, const char* group_name
             value_ptr->allocate_min( value_ptr->length() + 1 );
             value_ptr->char_ptr()[ value_ptr->length() ] = '\0';
         }
-        // entweder auf  sos_init_parameters zurückführen oder selba nach sos.ini suchen ...
+        // entweder auf  sos_init_parameters zurÃ¼ckfÃ¼hren oder selba nach sos.ini suchen ...
 
         int len = my_GetPrivateProfileString( group_name, entry_name, deflt,
                                               buffer.char_ptr(), buffer.size(),
@@ -908,7 +908,7 @@ try {
 
     filename = ini_filename( filename_? filename_ : "" );
 
-    // unter Unix evtl. auch ~/.sosrc o.ä. (Environment-Variable SOSINI=xxxx ?)
+    // unter Unix evtl. auch ~/.sosrc o.Ã¤. (Environment-Variable SOSINI=xxxx ?)
     //if( !empty( filename ) )
     if( strchr( filename.c_str(), '/' ) )
     {
@@ -984,9 +984,9 @@ try {
                 f.get( &line );  line += '\0';
                 char* p = line.char_ptr();
 
-                while( *p == ' ' )  p++;     // Blanks überspringen
+                while( *p == ' ' )  p++;     // Blanks Ã¼berspringen
                 
-                if( *p == '[' )  break;      // Nächster Abschnitt beginnt?
+                if( *p == '[' )  break;      // NÃ¤chster Abschnitt beginnt?
 
                 if( isalnum( *p ) ) {
                     char* q = strchr( p, '=' );

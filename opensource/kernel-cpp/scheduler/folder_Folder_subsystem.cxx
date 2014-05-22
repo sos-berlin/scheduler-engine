@@ -41,8 +41,8 @@ void Folder_subsystem::close()
 
     if( _root_folder )  
     {
-        //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger k�nnen also ung�ltig sein:  _root_folder->remove_all_file_baseds();
-        //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger k�nnen also ung�ltig sein:  remove_file_based( _root_folder );
+        //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger können also ungültig sein:  _root_folder->remove_all_file_baseds();
+        //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger können also ungültig sein:  remove_file_based( _root_folder );
         _root_folder = NULL;
     }
 }
@@ -115,7 +115,7 @@ bool Folder_subsystem::subsystem_activate()
     if( result )
     {
         _subsystem_state = subsys_active;
-        file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, au�er f�r jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
+        file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, außer für jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
         handle_folders();
     }
 
@@ -204,10 +204,10 @@ bool Folder_subsystem::handle_folders(const Duration& minimum_age, bool update_n
                 Directory* cache_dir = _configurations[ confdir_cache ]._directory_observer->directory_tree()->root_directory();
 
                 // Die Dateien aus dem Cache lassen wir nicht altern.
-                // a) �berfl�ssig, weil der Scheduler selbst die Dateien erzeugt hat, sie werden nicht gleichzeitig geschrieben und gelesen
-                // b) damit beim Start des Scheduler die vorrangigen cache-Dateien sofort gelesen werden (sonst w�rde in den ersten zwei Sekunden nur das live-Verzeichnis gelten)
+                // a) überflüssig, weil der Scheduler selbst die Dateien erzeugt hat, sie werden nicht gleichzeitig geschrieben und gelesen
+                // b) damit beim Start des Scheduler die vorrangigen cache-Dateien sofort gelesen werden (sonst würde in den ersten zwei Sekunden nur das live-Verzeichnis gelten)
 
-                cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht �berwacht wird (!is_watched() weil kein activate())
+                cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht überwacht wird (!is_watched() weil kein activate())
                 if( _configurations[ confdir_local ]._directory_observer )  directory = merged_cache_and_local_directories();
                                                                       else  directory = cache_dir;
             }
@@ -228,7 +228,7 @@ bool Folder_subsystem::handle_folders(const Duration& minimum_age, bool update_n
 
 void Folder_subsystem::set_signaled( const string& text )
 { 
-    // Besser: nur den Verzeichnisbaum signalisieren. Die Verzeichnisse m�ssen nicht neu gelesen werden.
+    // Besser: nur den Verzeichnisbaum signalisieren. Die Verzeichnisse müssen nicht neu gelesen werden.
     if( _configurations[ confdir_local ]._directory_observer )  _configurations[ confdir_local ]._directory_observer->set_signaled( text );
     if( _configurations[ confdir_cache ]._directory_observer )  _configurations[ confdir_cache ]._directory_observer->set_signaled( text );
 }
@@ -286,8 +286,8 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
         if( subsystem != this  &&    // Folder_subsystem kennt xml_element_name() nicht
             subsystem->xml_element_name() == element_name )
         {
-            // Attribute sollen gel�scht werden, also Element klonen
-            // (Mit gel�schten Attributen kann die Datei umbenannt werden, ohne dass die Attribute angepasst werden m�ssten.)
+            // Attribute sollen gelöscht werden, also Element klonen
+            // (Mit gelöschten Attributen kann die Datei umbenannt werden, ohne dass die Attribute angepasst werden müssten.)
             xml::Document_ptr clone;
             clone.create();
             clone.importAndAppendChild(element);

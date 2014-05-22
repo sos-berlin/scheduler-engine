@@ -9,7 +9,7 @@
 #endif
 
 #if !defined __SOSLIMTX_H
-#   include "soslimtx.h"       // für Ebcdic_date
+#   include "soslimtx.h"       // fÃ¼r Ebcdic_date
 #endif
 
 namespace sos
@@ -34,7 +34,7 @@ const int default_schwellenjahr = 100;      // 0: yy-->19yy,  100: yy-->20yy
 Bool schaltjahr( int );
 
 
-enum Sos_date_kind      // Art der Datumsbestandteile für automatische Erkennung
+enum Sos_date_kind      // Art der Datumsbestandteile fÃ¼r automatische Erkennung
 {
     kind_none  = 0,
     kind_year  = 1,
@@ -75,7 +75,7 @@ struct Sos_optional_date_time
     void                        read_text               ( const char*, const char* format = "" );
     void                        read_text               ( const string& str, const char* format = "" ) { read_text( str.c_str(), format ); }
 
-    void                        day_of_year             ( int );    // year() muß gesetzt sein!
+    void                        day_of_year             ( int );    // year() muÃŸ gesetzt sein!
     int                         day_of_year             () const;
     int4                        day_count               () const;    // Anzahl der Tage seit day_count( 0 )
     void                        day_count               ( int4 );    // Anzahl der Tage seit day_count( 0 ) setzen
@@ -239,13 +239,13 @@ struct Sos_optional_date_time_type : Field_type
        doy  Tag des Jahres 1..365/366
        //mon  jan feb mar apr may jun jul aug sep oct nov dec
        //MON  JAN FEB MAR APR MAY JUN JUL AUF SEP OCT NOV DEC
-       //mnt  Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez
-       //Mnt  JAN FEB MÄR APR MAI JUN JUL AUF SEP OKT NOV DEZ
+       //mnt  Jan Feb MÃ¤r Apr Mai Jun Jul Aug Sep Okt Nov Dez
+       //Mnt  JAN FEB MÃ„R APR MAI JUN JUL AUF SEP OKT NOV DEZ
        //month  january february march april may june july august september october november december
        //MONTH  JANUARY FEBRUARY MARCH APIRL MAY JUNE JULY AUGUST SEPTEMBER OCTOBER NOVEMBER DECEMBER
-       //monat  Januar Februar März April Mai Juni Juli August September Oktober November Dezember
-       //MONAT  JANUAR FEBRUAR MÄRZ APRIL MAI JUNI JULI AUGUST SEPTEMBER OKTOBER NOVEMBER DEZEMBER
-       alle anderen Zeichen werden beim Lesen geprüft bzw. geschrieben.
+       //monat  Januar Februar MÃ¤rz April Mai Juni Juli August September Oktober November Dezember
+       //MONAT  JANUAR FEBRUAR MÃ„RZ APRIL MAI JUNI JULI AUGUST SEPTEMBER OKTOBER NOVEMBER DEZEMBER
+       alle anderen Zeichen werden beim Lesen geprÃ¼ft bzw. geschrieben.
     */
 
     DECLARE_PUBLIC_MEMBER( Sos_limited_text<30>, format )
@@ -314,7 +314,7 @@ struct As_date_time_type : Field_subtype
     void                       _get_param               ( Type_param* ) const;
 
     Sos_optional_date_time_type _date_type_with_format;
-    Bool                       _truncate_at_blank;      // Special flag für js odbcfile, um Zeit herauszufiltern. hm!
+    Bool                       _truncate_at_blank;      // Special flag fÃ¼r js odbcfile, um Zeit herauszufiltern. hm!
     Bool                       _date_only;
 };
 

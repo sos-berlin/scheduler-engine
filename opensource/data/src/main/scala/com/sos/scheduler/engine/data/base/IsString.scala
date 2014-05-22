@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.base
 
 import javax.annotation.Nullable
+import scala.language.implicitConversions
 import spray.json.{JsonFormat, JsString, JsonWriter, JsValue}
 
 //@JsonSerialize(using = classOf[IsStringSerializer])

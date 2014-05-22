@@ -175,8 +175,8 @@ Abs_file::~Abs_file()
 void Abs_file::insert_filter( const char* filename, Open_mode open_mode )
 {
     // Dateityp ermitteln und Filter_file (erbt von Abs_file) anlegen.
-    // prepare_open() und open() aufrufen, um Schalter auswerten zu können.
-    // pipe darf nicht angegeben werden, denn die Datei ist ja schon geöffnet.
+    // prepare_open() und open() aufrufen, um Schalter auswerten zu kÃ¶nnen.
+    // pipe darf nicht angegeben werden, denn die Datei ist ja schon geÃ¶ffnet.
 
     Sos_ptr<Any_file_obj> f = SOS_NEW_PTR( Any_file_obj );
     f->filter_open( filename, open_mode, _any_file_ptr->_handle_ptr );
@@ -316,7 +316,7 @@ void Abs_file::rewind( Key::Number key_number )
 
     if( key_len == 0 )  throw_xc( "SOS-1350" );
 
-    char key [ 2 * file_max_key_length ];       // Für Leasy (Eichenauer) doppelt
+    char key [ 2 * file_max_key_length ];       // FÃ¼r Leasy (Eichenauer) doppelt
     memset( key, 0, key_len );
     set( Key( Const_area( key, key_len ), key_number ));
 }

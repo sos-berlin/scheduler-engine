@@ -6,7 +6,7 @@
 
 /*
     static_jvm liegt in einem eigenen Modul, damit java.cxx nicht eingebunden werden muss,
-    nur weil irgendwo geprüft wird, ob JavaVM* da ist (für z_com.cxx beim Durchreichen der JavaVM).
+    nur weil irgendwo geprÃ¼ft wird, ob JavaVM* da ist (fÃ¼r z_com.cxx beim Durchreichen der JavaVM).
 */
 
 namespace zschimmer {

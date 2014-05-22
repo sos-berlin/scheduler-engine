@@ -8,62 +8,62 @@ import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 
-class JniModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature], javaClassFullName: String) extends CppModule {
-    import JniModule._
+final class JniModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature], javaClassFullName: String) extends CppModule {
+  import JniModule._
 
-    val interface = config.interface
-    val className = CppName(config.className)
-    val name = namePrefix + className.simpleNames.mkString("__")
-    val subdirectory = config.directory
-    val include = config.includeOption
-    
-    val hasProxyClassName = "has_proxy< " + className + " >"
+  val interface = config.interface
+  val className = CppName(config.className)
+  val name = namePrefix + className.simpleNames.mkString("__")
+  val subdirectory = config.directory
+  val include = config.includeOption
 
-    lazy val headerCodeOption = None
-    
-    lazy val sourceCodeOption = Some {
-        val jniMethods = procedureSignatures map { new JniMethod(this, _) }
+  val hasProxyClassName = "has_proxy< " + className + " >"
 
-        def proxyClassFactoryDefinition = JavaBridge.namespace.nestedCode {
-            "    template<> const class_factory<Proxy_class> " + hasProxyClassName + "::proxy_class_factory(" + quoted(javaClassFullName)+ ");\n"
-        }
+  lazy val headerCodeOption = None
 
-        def cppNativeMethodImplementation = jniMethods map { _.nativeImplementation } mkString "\n"
+  lazy val sourceCodeOption = Some {
+    val jniMethods = procedureSignatures map { new JniMethod(this, _) }
 
-        def cppRegisterNativesDefinition = if (jniMethods.isEmpty) ""  else
-            "const static JNINativeMethod native_methods[] = {\n" +
-            (jniMethods map { "    " + _.registerNativeArrayEntry }).mkString("", ",\n", "\n") +
-            "};\n"
-
-        def cppRegisterNativesFunction = {
-            def declaration = "template<> void " + hasProxyClassName + "::register_cpp_proxy_class_in_java()"
-            def body =
-                "        Env env;\n" +
-               s"        Class* cls = $hasProxyClassName::proxy_class_factory.clas();\n" +
-               s"        int ret = env->RegisterNatives(*cls, native_methods, ${jniMethods.size});\n" +
-             s"""        if (ret < 0)  env.throw_java("RegisterNatives", "$javaClassFullName");""" + "\n"
-
-            JavaBridge.namespace.nestedCode(
-                "    " + declaration + " {\n" +
-                body ? jniMethods.nonEmpty +
-                "    }\n")
-        }
-
-        ((config.includeOption ++ Configuration.cppStandardIncludes) map Cpp.includeQuoted).mkString + "\n" +
-        (Configuration.cppStandardUsingNamespaces map { _.usingCode }).mkString + "\n" +
-        proxyClassFactoryDefinition + "\n" +
-        cppNativeMethodImplementation + "\n" +
-        cppRegisterNativesDefinition + "\n" +
-        cppRegisterNativesFunction
+    def proxyClassFactoryDefinition = JavaBridge.namespace.nestedCode {
+      "    template<> const class_factory<Proxy_class> " + hasProxyClassName + "::proxy_class_factory(" + quoted(javaClassFullName) + ");\n"
     }
 
-    def registerCode = hasProxyClassName + "::register_cpp_proxy_class_in_java();"
+    def cppNativeMethodImplementation = jniMethods map {_.nativeImplementation} mkString "\n"
+
+    def cppRegisterNativesDefinition = if (jniMethods.isEmpty) ""
+    else
+      "const static JNINativeMethod native_methods[] = {\n" +
+      (jniMethods map { "    " + _.registerNativeArrayEntry }).mkString("", ",\n", "\n") +
+      "};\n"
+
+    def cppRegisterNativesFunction = {
+      def declaration = "template<> void " + hasProxyClassName + "::register_cpp_proxy_class_in_java()"
+      def body =
+        "        Env env;\n" +
+        s"        Class* cls = $hasProxyClassName::proxy_class_factory.clas();\n" +
+        s"        int ret = env->RegisterNatives(*cls, native_methods, ${jniMethods.size});\n" +
+        s"""        if (ret < 0)  env.throw_java("RegisterNatives", "$javaClassFullName");""" + "\n"
+
+      JavaBridge.namespace.nestedCode(
+        "    " + declaration + " {\n" +
+        body ? jniMethods.nonEmpty +
+        "    }\n")
+    }
+
+    ((config.includeOption ++ Configuration.cppStandardIncludes) map Cpp.includeQuoted).mkString + "\n" +
+      (Configuration.cppStandardUsingNamespaces map { _.usingCode }).mkString + "\n" +
+      proxyClassFactoryDefinition + "\n" +
+      cppNativeMethodImplementation + "\n" +
+      cppRegisterNativesDefinition + "\n" +
+      cppRegisterNativesFunction
+  }
+
+  def registerCode = hasProxyClassName + "::register_cpp_proxy_class_in_java();"
 }
 
-
 object JniModule extends ModuleKind[JniModule] {
-    val namePrefix = "jni__"
+  val namePrefix = "jni__"
 
-    def fileIsGeneratedAndCanBeDeleted(filename: String) =
-        (filename startsWith namePrefix)  &&  CppModule.fileIsGeneratedAndCanBeDeleted(filename)
+  def fileIsGeneratedAndCanBeDeleted(filename: String) =
+  (filename startsWith namePrefix) && CppModule.fileIsGeneratedAndCanBeDeleted(filename)
 }

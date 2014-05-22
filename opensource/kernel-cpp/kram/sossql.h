@@ -1,4 +1,4 @@
-// sossql.h                             ©1996 SOS GmbH Berlin
+// sossql.h                             Â©1996 SOS GmbH Berlin
 
 #ifndef __SOSSQL_H
 #define __SOSSQL_H
@@ -6,8 +6,8 @@
 namespace sos
 {
 
-const int  max_orderby_params            = 1000; //20;     // Sollte für alle Fälle reichen
-const int  max_groupby_params            = 1000; //20;     // Sollte für alle Fälle reichen
+const int  max_orderby_params            = 1000; //20;     // Sollte fÃ¼r alle FÃ¤lle reichen
+const int  max_groupby_params            = 1000; //20;     // Sollte fÃ¼r alle FÃ¤lle reichen
 const int  sql_max_tables_per_select     = 100;
 const char sql_identifier_quote_char     = '"';  //'`';
 const char sql_identifier_quote_string[] = "\""; //"`";   // sql_identifier_quote_char als String

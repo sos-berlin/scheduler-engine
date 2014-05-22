@@ -16,7 +16,7 @@ namespace sos
 
 int4 copy_file( const char* source_name, const char* dest_name, long count = -1, long skip = 0 );
 int4 copy_file( const Sos_string& source_name, const Sos_string& dest_name, long count = -1, long skip = 0 );
-// Liefern die Anzahl der Sätze
+// Liefern die Anzahl der SÃ¤tze
 
 //struct Any_base
 //{
@@ -58,7 +58,7 @@ struct Any_file : Sos_self_deleting, File_base
     void                        bind_parameter          ( int i/*1..n*/, Dyn_obj* );
     void                        open                    ();
     void                        close                   ( Close_mode close_mode = close_normal );
-    void                        destroy                 ();                                         // Löscht Any_file_obj
+    void                        destroy                 ();                                         // LÃ¶scht Any_file_obj
     void                        execute                 ();
 /*
     static void                 erase                   ( const char* filename ) {

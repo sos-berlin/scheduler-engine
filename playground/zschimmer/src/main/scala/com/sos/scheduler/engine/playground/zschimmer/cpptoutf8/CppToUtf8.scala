@@ -16,9 +16,9 @@ private object CppToUtf8 {
 
   private val extensions = immutable.Seq(".cxx", ".c", ".h", ".odl")
   private val logger = Logger(getClass)
-  val lineEndCommentStart = "//".getBytes(US_ASCII)
-  val commentStart = "/*".getBytes(US_ASCII)
-  val commentEnd = "*/".getBytes(US_ASCII)
+  private val lineEndCommentStart = "//".getBytes(US_ASCII)
+  private val commentStart = "/*".getBytes(US_ASCII)
+  private val commentEnd = "*/".getBytes(US_ASCII)
 
   def convertFileOrDirectory(file: File) {
     if (file.isDirectory) {
@@ -33,16 +33,15 @@ private object CppToUtf8 {
         if (converted) logger.info(file.toString)
       }
       catch {
-        case e: Exception => logger.error(s"$file: $e")
+        case e: Exception ⇒ logger.error(s"$file: $e")
       }
     }
   }
 
-  def convertFile(file: File): Boolean = {
-    writingFileIfDifferent(file, UTF_8) { writer =>
+  def convertFile(file: File): Boolean =
+    writingFileIfDifferent(file, UTF_8) { writer ⇒
       convertBytes(file.contentBytes, writer)
     }
-  }
 
   private[cpptoutf8] def convertBytes(bytes: Seq[Byte], writer: Writer) {
     for (part <- inputStreamToParts(bytes))
@@ -55,40 +54,37 @@ private object CppToUtf8 {
       var inComment = false
       var inLineEndComment = false
 
-      def hasNext =
-        index < bytes.size
+      def hasNext = index < bytes.size
 
       def next() = {
         if (inLineEndComment) {
           val end = bytes.indexOf('\n', index) match {
-            case -1 => bytes.length
-            case i => i + 1
+            case -1 ⇒ bytes.length
+            case i ⇒ i + 1
           }
           val result = ConvertablePart(bytes.slice(index, end))
           index = end
           inLineEndComment = false
           result
-        }
-        else
+        } else
         if (inComment) {
           val end = bytes.indexOfSlice(commentEnd, index) match {
-            case -1 => bytes.length
-            case i => i + commentEnd.length
+            case -1 ⇒ bytes.length
+            case i ⇒ i + commentEnd.length
           }
           val result = ConvertablePart(bytes.slice(index, end))
           index = end
           inComment = false
           result
-        }
-        else {
+        } else {
           val (i, c) = index to bytes.length - 2 collectFirst {
-            case i: Int if bytes(i) == '/' && (bytes(i+1) == '/' || bytes(i+1) == '*') =>
+            case i: Int if bytes(i) == '/' && (bytes(i+1) == '/' || bytes(i+1) == '*') ⇒
               i -> bytes(i+1)
           } getOrElse bytes.length -> '!'
           c match {
-            case '/' => inLineEndComment = true
-            case '*' => inComment = true
-            case '!' =>
+            case '/' ⇒ inLineEndComment = true
+            case '*' ⇒ inComment = true
+            case '!' ⇒
           }
           val result = InconvertablePart(bytes.slice(index, i))
           index = i
@@ -99,11 +95,8 @@ private object CppToUtf8 {
 
   private trait Part {
     val bytes: Seq[Byte]
-
     def convertToString: String
-
-    override def toString =
-      convertToString
+    override def toString = convertToString
   }
 
   private case class InconvertablePart(bytes: Seq[Byte]) extends Part {
@@ -123,16 +116,16 @@ private object CppToUtf8 {
 
     @tailrec def f(): String =
       utf8Decoder.decode(byteBuffer, charBuffer, false) match {
-//        case coderResult if coderResult.isMalformed || coderResult.isUnmappable =>
+//        case coderResult if coderResult.isMalformed || coderResult.isUnmappable ⇒
 //          for (i <- -coderResult.length until 0)
 //            charBuffer.put(bytes(byteBuffer.position + i).toChar)
 //          f()
-        case _ if byteBuffer.hasRemaining =>
+        case _ if byteBuffer.hasRemaining ⇒
           charBuffer.put((byteBuffer.get() & 0xFF).toChar)
           f()
-        case CoderResult.UNDERFLOW if !byteBuffer.hasRemaining =>
+        case CoderResult.UNDERFLOW if !byteBuffer.hasRemaining ⇒
           new String(charBuffer.array(), 0, charBuffer.position)
-        case coderResult =>
+        case coderResult ⇒
           coderResult.throwException().asInstanceOf[Nothing]
       }
     f()

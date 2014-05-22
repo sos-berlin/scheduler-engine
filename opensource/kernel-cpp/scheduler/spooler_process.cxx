@@ -139,7 +139,7 @@ bool Process::continue_close_operation( Process::Close_operation* op )
                 process->close__end();
                 process->_close_operation = NULL;
                 op->_hold_self = NULL;
-                // this ist jetzt ungültig!
+                // this ist jetzt ungÃ¼ltig!
             }
 
             something_done = true;
@@ -317,7 +317,7 @@ void Process::close_async()
 
             try
             {
-                kill();     // Nicht bei _async_remote_operation aufrufen, dass eine TCP-Nachricht starten würde
+                kill();     // Nicht bei _async_remote_operation aufrufen, dass eine TCP-Nachricht starten wÃ¼rde
             }
             catch( exception& x ) { _log->warn( x.what() ); }
         }
@@ -429,7 +429,7 @@ void Process::start_local_process()
     object_server::Parameters                            parameters;
 
     if( !_spooler->_sos_ini.empty() )
-    parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
+    parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (fÃ¼r sos_main0()).
 
     if( !_spooler->_factory_ini.empty() )
     parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
@@ -449,7 +449,7 @@ void Process::start_local_process()
 
     parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
 
-    connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
+    connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger Ã¼bernimmt stdout): 
     fill_connection( connection );
 
     #ifdef Z_HPUX
@@ -505,10 +505,10 @@ void Process::fill_connection( object_server::Connection* connection )
             _spooler->java_subsystem()->java_vm()->class_path());
         stdin_xml_writer.set_attribute_optional( "javac"                 , _spooler->java_subsystem()->java_vm()->javac_filename() );
         stdin_xml_writer.set_attribute_optional( "java_work_dir"         , _spooler->java_work_dir() );
-        stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
-        stdin_xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
-        stdin_xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
-        stdin_xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
+        stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // FÃ¼r Com_spooler_proxy::get_Directory
+        stdin_xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // FÃ¼r Com_spooler_proxy::get_Log_dir
+        stdin_xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // FÃ¼r Com_spooler_proxy::get_Include_path
+        stdin_xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // FÃ¼r Com_spooler_proxy::get_Ini_path
 
         if( object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>( connection ) )
         {
@@ -715,7 +715,7 @@ bool Process::kill()
         if( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) )
         {
             if( pid_t pid = this->pid() )
-                try_kill_process_immediately( pid );   // Für kind_remote kind_process (Process_module_instance)
+                try_kill_process_immediately( pid );   // FÃ¼r kind_remote kind_process (Process_module_instance)
         }
     }
 
@@ -945,7 +945,7 @@ void Process_class_configuration::set_dom( const xml::Element_ptr& e )
     if( !e.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", e.nodeName() );
 
     string name = e.getAttribute( "name" );
-    if( name != "" )  set_name( name );         // Leere Name steht für die Default-Prozessklasse
+    if( name != "" )  set_name( name );         // Leere Name steht fÃ¼r die Default-Prozessklasse
 
     set_max_processes   ( (int)e.uint_getAttribute( "max_processes"   , _max_processes ) );
     set_remote_scheduler(      e.     getAttribute( "remote_scheduler", _remote_scheduler.as_string() ) );
@@ -1058,7 +1058,7 @@ void Process_class::set_configuration( const Process_class_configuration& config
     check_max_processes   ( configuration.max_processes() );
     check_remote_scheduler( configuration.remote_scheduler() );
 
-    // Jetzt ändern. Es sollte keine Exception auftreten.
+    // Jetzt Ã¤ndern. Es sollte keine Exception auftreten.
     set_max_processes   ( configuration.max_processes() );
     set_remote_scheduler( configuration.remote_scheduler() );
 }
@@ -1138,11 +1138,13 @@ void Process_class::check_max_processes( int ) const
 
 void Process_class::set_max_processes( int max_processes )
 {
-    // Keine Exception bei Aufruf aus set_configuration() auslösen!
+    // Keine Exception bei Aufruf aus set_configuration() auslÃ¶sen!
 
     if( _process_set.size() > max_processes )  log()->warn( message_string( "SCHEDULER-419", max_processes, _process_set.size() ) );
 
     _max_processes = max_processes;
+
+    notify_a_process_is_idle();
 }
 
 //------------------------------------------------------------Process_class::check_remote_scheduler
@@ -1174,7 +1176,7 @@ void Process_class::remove_process( Process* process )
     if( is_to_be_removed()  &&  can_be_removed_now() )
     {
         remove();
-        // this ist ungültig!
+        // this ist ungÃ¼ltig!
     }
     else
     if( !_waiting_jobs.empty() )
@@ -1195,7 +1197,7 @@ Process* Process_class::new_process(const Host_and_port& remote_scheduler)
     Host_and_port r = remote_scheduler.is_empty()? _remote_scheduler : remote_scheduler;
     process = Z_NEW( Process(_spooler, r));        
 
-    process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
+    process->set_temporary( true );      // ZunÃ¤chst nach der Task beenden. (Problem mit Java, 1.9.03)
 
     add_process( process );
 
@@ -1206,7 +1208,7 @@ Process* Process_class::new_process(const Host_and_port& remote_scheduler)
 
 Process* Process_class::select_process_if_available(const Host_and_port& remote_scheduler)
 {
-    if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
+    if (!is_to_be_removed()  &&                                    // remove_process() kÃ¶nnte sonst Process_class lÃ¶schen.
         file_based_state() == File_based::s_active &&
         _process_set.size() < _max_processes
          && _spooler->_process_count < scheduler::max_processes)
@@ -1469,7 +1471,7 @@ STDMETHODIMP Process_class_subsystem::Create_process_class( spooler_com::Iproces
     try
     {
         ptr<Process_class> process_class = Z_NEW( Process_class( spooler() ) );
-        //nicht nötig  process_class->set_folder_path( root_path );
+        //nicht nÃ¶tig  process_class->set_folder_path( root_path );
         *result = process_class.take();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }

@@ -118,7 +118,7 @@ void Delegated_log::log2( Log_level level, const string& prefix, const string& l
     }
     else
     {
-        // Möglicherweise ist this == null.
+        // MÃ¶glicherweise ist this == null.
 
         Z_LOG( line << '\n' );
         string p = prefix == ""? "" : "(" + prefix + ") ";

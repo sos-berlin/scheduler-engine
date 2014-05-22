@@ -20,7 +20,7 @@ Security::Level Security::level( const in_addr& host )
         it = _host_map.find( net );
         if( it != _host_map.end() )  return it->second;
 
-        it = _host_map.find( Ip_address( 0 ) );                 // host="0.0.0.0" gilt für alle übrigen Hosts
+        it = _host_map.find( Ip_address( 0 ) );                 // host="0.0.0.0" gilt fÃ¼r alle Ã¼brigen Hosts
         if( it != _host_map.end() )  return it->second;
     }
     

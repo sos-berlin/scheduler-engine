@@ -17,15 +17,18 @@ final class StandingOrderSubsystem @Inject private(
   orderStoreProvider: Provider[HibernateOrderStore])
 extends FileBasedSubsystem {
 
-  type MySubsystem = StandingOrderSubsystem
-  type MyFileBased = Order
-  type MyFile_basedC = OrderC
+  type ThisSubsystem = StandingOrderSubsystem
+  type ThisFileBased = Order
+  type ThisFile_basedC = OrderC
 
-  val companion = StandingOrderSubsystem
+  val description = StandingOrderSubsystem
 
   private[order] lazy val entityManagerFactory = entityManagerFactoryProvider.get
   private[order] lazy val orderStore = orderStoreProvider.get
 }
 
 
-object StandingOrderSubsystem extends FileBasedSubsystem.Companion[StandingOrderSubsystem, OrderKey, Order](FileBasedType.order, OrderKey.apply)
+object StandingOrderSubsystem extends FileBasedSubsystem.AbstractDesription[StandingOrderSubsystem, OrderKey, Order] {
+  val fileBasedType = FileBasedType.order
+  val stringToPath = { o: String ⇒ OrderKey(o) }
+}

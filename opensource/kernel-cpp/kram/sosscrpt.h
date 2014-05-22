@@ -91,7 +91,7 @@ struct Script_site : IActiveScriptSite
     Xc*                        _script_exception;
     Obj_map                    _obj_map;
     bool                       _init_engine_called;
-    std::map<string,bool>      _names;                  // Optimierung für name_exists()
+    std::map<string,bool>      _names;                  // Optimierung fÃ¼r name_exists()
 };
 
 

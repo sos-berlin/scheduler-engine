@@ -15,11 +15,11 @@ final class FolderSubsystem @Inject private(
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
-  type MySubsystem = FolderSubsystem
-  type MyFileBased = Folder
-  type MyFile_basedC = FolderC
+  type ThisSubsystem = FolderSubsystem
+  type ThisFileBased = Folder
+  type ThisFile_basedC = FolderC
 
-  val companion = FolderSubsystem
+  val description = FolderSubsystem
 
   def names(path: AbsolutePath, typeName: String): immutable.Seq[String] = {
     val cppTypeName = typeName.replaceAll("([A-Z])", "_$1").toLowerCase
@@ -34,4 +34,7 @@ extends FileBasedSubsystem {
 }
 
 
-object FolderSubsystem extends FileBasedSubsystem.Companion[FolderSubsystem, FolderPath, Folder](FileBasedType.folder, FolderPath.apply)
+object FolderSubsystem extends FileBasedSubsystem.AbstractDesription[FolderSubsystem, FolderPath, Folder] {
+  val fileBasedType = FileBasedType.folder
+  val stringToPath = FolderPath.apply _
+}

@@ -6,7 +6,7 @@
 namespace zschimmer {
 
 //---------------------------------------------------------------------------------------Mutex_base
-// AUFBAU NICHT ÄNDERN, wird mit zur Laufzeit nachgeladenem Modul ausgetauscht!
+// AUFBAU NICHT Ã„NDERN, wird mit zur Laufzeit nachgeladenem Modul ausgetauscht!
 
 struct Mutex_base
 {

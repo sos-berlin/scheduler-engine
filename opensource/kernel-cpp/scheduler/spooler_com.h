@@ -101,7 +101,7 @@ struct Com_variable: spooler_com::Ivariable,
                      spooler_com::Ihas_java_class_name, 
                      Sos_ole_object
 {
-    Z_GNU_ONLY(                 Com_variable                ();  )                                  // F�r gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Com_variable                ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_variable                ( const BSTR name, const VARIANT& );
                                 Com_variable                ( const Com_variable& );
 
@@ -380,7 +380,7 @@ struct Com_job : spooler_com::Ijob,
                  spooler_com::Ihas_java_class_name, 
                  Sos_ole_object               
 {
-    Z_GNU_ONLY(                 Com_job                     ();  )                                  // F�r gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_job                     ( Standard_job* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
@@ -547,7 +547,7 @@ struct Com_spooler : spooler_com::Ispooler,
                      z::com::object_server::Ihas_reference_with_properties,
                      Sos_ole_object               
 {
-                                Com_spooler                 ();                                     // F�r gcc 3.2. Nicht implementiert.
+                                Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
                                 Com_spooler                 ( Spooler* ); 
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
@@ -703,6 +703,8 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     STDMETHODIMP            put_Title                   ( BSTR );
     STDMETHODIMP            get_Title                   ( BSTR* );
+
+    STDMETHODIMP            get_Path                    (BSTR*);
 
     STDMETHODIMP            get_States                  ( SAFEARRAY** result );
     

@@ -1,6 +1,6 @@
 // $Id: scheduler_client.cxx 13860 2010-05-06 13:08:55Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
-#include "spooler.h"        // Das ist für vorkompilierte Header, sonst sind wir unabhängig von spooler.h
+#include "spooler.h"        // Das ist fÃ¼r vorkompilierte Header, sonst sind wir unabhÃ¤ngig von spooler.h
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/log.h"
 #include "../zschimmer/argv.h"
@@ -161,7 +161,7 @@ struct Client
                 {
                     const char* end = strchr( p, quote );
                     if( !end )  end = response.c_str() + response.length();
-                    cerr << string( p, end - p ) << "\n";               // Die Entitäten sollten ersetzt werden!
+                    cerr << string( p, end - p ) << "\n";               // Die EntitÃ¤ten sollten ersetzt werden!
                 }
             }
 
@@ -178,7 +178,7 @@ struct Client
             const char* arg         = argv[i];
             string      log_dummy;
 
-            // Die Optionen hier müssen auch von spooler_main() in spooler.cxx geprüft werden:
+            // Die Optionen hier mÃ¼ssen auch von spooler_main() in spooler.cxx geprÃ¼ft werden:
 
             if( strcmp( arg, "-debug-break" ) == 0 );
             else
@@ -253,7 +253,7 @@ struct Client
     Variables_list _variables;
 
     File                       _stdin;
-    Socket_manager             _socket_manager;      // Für WSAStartup
+    Socket_manager             _socket_manager;      // FÃ¼r WSAStartup
     Socket_stream              _socket_stream;
     ptr<xml::Xml_writer>       _xml_writer;
 };

@@ -27,7 +27,7 @@ void Mutex_guard::enter_( Mutex* m, const char* function, const char* file, int 
 
     if( !m->_dont_log )
     {
-        if( do_log_state != static_log_categories.modified_counter() )     // Eine Ver‰nderung der static_log_categories bemerken wir.
+        if( do_log_state != static_log_categories.modified_counter() )     // Eine Ver√§nderung der static_log_categories bemerken wir.
         {                                                           // Damit kann Mutex vor dem ersten Setzen der Log_categories verwendet werden.
             recursive++;
             if( recursive == 1 )

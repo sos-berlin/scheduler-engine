@@ -3,5 +3,5 @@
     stop_on_error="no"
 >
     <description>TEST-DESCRIPTION mit Ümläüten</description>
-    <script java_class="com.sos.scheduler.engine.plugins.jetty.tests.commons.TestJob"/>
+    <script java_class="com.sos.scheduler.engine.plugins.jetty.test.TestJob"/>
 </job>

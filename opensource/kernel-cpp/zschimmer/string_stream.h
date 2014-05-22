@@ -18,7 +18,7 @@ struct String_stream : std::ostringstream
   //template< typename TYPE >
   //String_stream( const TYPE& first )
   //{ 
-  //    //error C4717: Rekursiv für alle Steuerelementpfade. Die Funktion verursacht einen Stapelüberlauf zur Laufzeit.
+  //    //error C4717: Rekursiv fÃ¼r alle Steuerelementpfade. Die Funktion verursacht einen StapelÃ¼berlauf zur Laufzeit.
   //    *static_cast<std::ostringstream*>( this ) << first; 
   //}
 
@@ -35,7 +35,7 @@ struct String_stream : std::ostringstream
     template< typename TYPE >
     void append( const TYPE& value )
     { 
-        using namespace com;    // Für VARIANT und BSTR
+        using namespace com;    // FÃ¼r VARIANT und BSTR
         
         *static_cast<std::ostringstream*>( this ) << value;
     }
@@ -51,7 +51,7 @@ struct String_stream : std::ostringstream
     template< typename TYPE >
     String_stream& operator<< ( const TYPE& value )
     { 
-        using namespace com;    // Für VARIANT und BSTR
+        using namespace com;    // FÃ¼r VARIANT und BSTR
         
         append( value );
         return *this; 

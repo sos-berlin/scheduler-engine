@@ -10,7 +10,7 @@ namespace posix {
 
 //-------------------------------------------------------------------------------------------------
 
-/* Nicht geprüft
+/* Nicht geprÃ¼ft
 struct Simple_directory_reader
 {
                                 Simple_directory_reader     ()                                      : _handle(NULL) {}

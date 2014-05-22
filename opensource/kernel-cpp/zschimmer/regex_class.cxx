@@ -40,7 +40,7 @@ Regex_submatches Regex::match_subresults( const string& str ) const
     if( error ) 
     {
         if( error != REG_NOMATCH 
-         && error != 17          // Das ist für regexec() von Apache 2 unter Linux, das statt regexec() aus libc() eingebunden wird. jz 2004-10-15
+         && error != 17          // Das ist fÃ¼r regexec() von Apache 2 unter Linux, das statt regexec() aus libc() eingebunden wird. jz 2004-10-15
                                  )  throw_error( error, str );
         //int REGEX_17_FUER_APACHE;
     }
@@ -68,7 +68,7 @@ Regex_match Regex::match( const char* str ) const
     int error = regexec( &_regex, str, 1, &result._match, 0 );
     
     if( error  &&  error != REG_NOMATCH 
-               &&  error != 17          // Das ist für regexec() von Apache 2 unter Linux, das statt regexec() aus libc() eingebunden wird. jz 2004-10-15
+               &&  error != 17          // Das ist fÃ¼r regexec() von Apache 2 unter Linux, das statt regexec() aus libc() eingebunden wird. jz 2004-10-15
                                         )  throw_error( error, str );
         //int REGEX_17_FUER_APACHE;
 

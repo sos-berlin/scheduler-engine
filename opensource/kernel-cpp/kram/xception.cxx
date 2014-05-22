@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>                  // für throw_errno()
+#include <errno.h>                  // fÃ¼r throw_errno()
 #include <ctype.h>
 #include <time.h>
 
@@ -279,7 +279,7 @@ THROW_NONE
 */
     //jzappend( h, s.pcount() );
     append( h, x );
-#undef MAX_HEX_CNT  // Ob Jörg schon von was von "const" gehört hat? jz
+#undef MAX_HEX_CNT  // Ob JÃ¶rg schon von was von "const" gehÃ¶rt hat? jz
 }
 
 //-----------------------------------------------------------------------Msg_insertions::append
@@ -573,7 +573,7 @@ THROW_NONE
 
     Sos_limited_text<32> error_code = code();
     Bool found = false;
-    uint set   = ~0u << max_msg_insertions;        // nicht ausgegebene Einfügungen sind 0-Bits
+    uint set   = ~0u << max_msg_insertions;        // nicht ausgegebene EinfÃ¼gungen sind 0-Bits
     const Soserror_text* t = NULL;
 
     if( strncmp( code(), "ERRNO-", 6 ) == 0 )
@@ -649,7 +649,7 @@ THROW_NONE
             }
             *s << *p++;
         }
-                                            // Nicht benutzte Einfügungen der Meldung anhängen:
+                                            // Nicht benutzte EinfÃ¼gungen der Meldung anhÃ¤ngen:
     }
 
 ENDE:

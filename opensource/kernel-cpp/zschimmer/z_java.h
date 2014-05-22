@@ -3,7 +3,7 @@
 #ifndef __Z_JAVA_H
 #define __Z_JAVA_H
 
-// Include-Path für jni.h (z.B.):
+// Include-Path fÃ¼r jni.h (z.B.):
 // c:\Programme\Borland\jbuilder5\jdk1.3\include
 // c:\Programme\Borland\jbuilder5\jdk1.3\include\win32
 #include <jni.h>

@@ -23,9 +23,9 @@ import static org.junit.Assert.fail;
 
 public final class JS644v3IT extends SchedulerTest {
     private static final Logger logger = LoggerFactory.getLogger(JS644v3IT.class);
-    private static final JobChainPath lowerCaseJobChainPath = JobChainPath.of("/lowerCase");
-    private static final JobChainPath upperCaseJobChainPath = JobChainPath.of("/upperCase");
-    private static final JobPath jobPath = JobPath.of("/a");
+    private static final JobChainPath lowerCaseJobChainPath = new JobChainPath("/lowerCase");
+    private static final JobChainPath upperCaseJobChainPath = new JobChainPath("/upperCase");
+    private static final JobPath jobPath = new JobPath("/a");
     private static final Duration orderTimeout = Duration.standardSeconds(10);
 
     private final Gate<Boolean> lowerCaseGate = new Gate<Boolean>(lowerCaseJobChainPath.toString());

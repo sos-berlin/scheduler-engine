@@ -80,7 +80,7 @@ HRESULT Com_register_class( const string& module_filename, const GUID& typelib_i
             Registry_key classname_key ( HKEY_CLASSES_ROOT, class_name, KEY_WRITE, Registry_key::create );
 
             if( !title.empty() )  classname_key.set_value( "", title );
-            classname_key.set_subkey( "CLSID"         , string_from_guid( clsid ) );        // Für Windows 2000 SP4 nötig
+            classname_key.set_subkey( "CLSID"         , string_from_guid( clsid ) );        // FÃ¼r Windows 2000 SP4 nÃ¶tig
             classname_key.set_subkey( "NotInsertable" , "" );
             classname_key.set_subkey( "CurVer"        , class_name_with_version );
         }

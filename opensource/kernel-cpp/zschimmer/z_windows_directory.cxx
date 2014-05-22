@@ -19,7 +19,7 @@ void Simple_directory_reader::open( const string& path, Flags flags, const strin
 { 
     //string path_pattern = path + "/" + pattern;
     // Windows vergleicht nur die ersten drei Zeichen der Erweiterung. *.jar liefert also auch x.jar~
-    // Also machen wir das mit regulären Ausdrücken
+    // Also machen wir das mit regulÃ¤ren AusdrÃ¼cken
 
     S regex_pattern;
 

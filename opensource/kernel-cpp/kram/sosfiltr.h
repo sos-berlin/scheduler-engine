@@ -1,4 +1,4 @@
-// sosobj.h                                                © 1995 SOS GmbH Berlin
+// sosobj.h                                                Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSFILTR_H
 #define __SOSFILTR_H

@@ -96,7 +96,7 @@ struct Fast_mutex_guard : Non_cloneable
 };
 
 //-----------------------------------------------------------------------------------Mutex_releaser
-// Gibt gesperrtes Mutex vorübergehen frei, also das Gegenteil von Mutex_guard.
+// Gibt gesperrtes Mutex vorÃ¼bergehen frei, also das Gegenteil von Mutex_guard.
 
 struct Mutex_releaser : Non_cloneable
 {
@@ -119,7 +119,7 @@ struct Mutex_releaser : Non_cloneable
 #else
 #   ifdef __GNUC__
 #       define Z_MUTEX( MUTEX )                                                                         \
-            for( zschimmer::Mutex_guard __guard__ ( &MUTEX, "", __FILE__, __LINE__ ); __guard__; __guard__.leave() )   // mit Z_FUNCTION stürzt gcc 3.3.1 ab.
+            for( zschimmer::Mutex_guard __guard__ ( &MUTEX, "", __FILE__, __LINE__ ); __guard__; __guard__.leave() )   // mit Z_FUNCTION stÃ¼rzt gcc 3.3.1 ab.
 #   else
 #       define Z_MUTEX( MUTEX )                                                                         \
             for( zschimmer::Mutex_guard __guard__ ( &MUTEX, __FUNCTION__, __FILE__, __LINE__ ); __guard__; __guard__.leave() )

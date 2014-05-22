@@ -33,7 +33,7 @@ class OrderKeyAndState {
 
     static OrderKeyAndState of(String jobChainPath, String orderId, String orderState) {
         return new OrderKeyAndState(
-                new OrderKey(JobChainPath.of(jobChainPath), new OrderId(orderId)),
+                new OrderKey(new JobChainPath(jobChainPath), new OrderId(orderId)),
                 new OrderState(orderState));
     }
 }

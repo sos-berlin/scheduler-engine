@@ -1,7 +1,7 @@
 //#include "../kram/optimize.h"
 #include "precomp.h"
 //#define MODULE_NAME "sosfiltr"
-//#define COPYRIGHT   "© SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "../kram/sos.h"
@@ -18,9 +18,9 @@ namespace sos {
 Sos_msg_filter::~Sos_msg_filter()
 {
     //delete _obj_read_blocker_ptr;
-    // Muß wohl in jeder erbenden Klasse geschehen:
+    // MuÃŸ wohl in jeder erbenden Klasse geschehen:
     _obj_output_ptr.del();      // vor ~_obj_reverse_filter
-    _obj_reverse_filter.del();  // Verweis auf *_obj_reverse_filter löschen vor ~_obj_reverse_filter
+    _obj_reverse_filter.del();  // Verweis auf *_obj_reverse_filter lÃ¶schen vor ~_obj_reverse_filter
 }
 
 //--------------------------------------------------------------Sos_msg_filter::_obj_output_ptr

@@ -10,8 +10,8 @@ namespace zschimmer {
 
 //---------------------------------------------------------------------------------------Event_base
 /*
-    Bei den Events könnte besser getrennt werden, welche Methoden eine Systemfunktion aufrufen
-    und welche Methoden nur das Flag _signaled ändern. 
+    Bei den Events kÃ¶nnte besser getrennt werden, welche Methoden eine Systemfunktion aufrufen
+    und welche Methoden nur das Flag _signaled Ã¤ndern. 
 */
 
 struct Event_base : Object//, Has_set_signaled
@@ -30,7 +30,7 @@ struct Event_base : Object//, Has_set_signaled
     virtual bool                valid                       () const = 0;
   //virtual void            set_signal                      () = 0;
     virtual void                signal                      ( const string& name ) = 0;
-    virtual bool                signaled                    ()                                      { return _signaled; }   // Nicht const, kann Zustand ändern
+    virtual bool                signaled                    ()                                      { return _signaled; }   // Nicht const, kann Zustand Ã¤ndern
     bool                        signaled_flag               () const                                { return _signaled; }   // const
     void                    set_signaled                    ( bool b = true )                       { _signaled = b; }
     void                    set_signaled                    ( const string& name )                  { _signaled = true; _signal_name = name; }
@@ -42,7 +42,7 @@ struct Event_base : Object//, Has_set_signaled
     void                    set_waiting_thread_id           ( Thread_id id )                        { _waiting_thread_id = id; }  // Wenn nur dieser Thread wartet
 
     virtual bool                wait                        ( double seconds ) = 0;
-    bool                        wait_until_localtime        ( double local_time );                  // Berücksichtigt Sommerzeitumstellung
+    bool                        wait_until_localtime        ( double local_time );                  // BerÃ¼cksichtigt Sommerzeitumstellung
     bool                        wait_until_gmtime           ( double gm_time );
     virtual string              as_text                     () const;
     friend ostream&             operator <<                 ( ostream& s, const Event_base& e )     { s << e.as_text(); return s; }

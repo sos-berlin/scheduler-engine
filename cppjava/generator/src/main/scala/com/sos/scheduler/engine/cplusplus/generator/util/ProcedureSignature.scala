@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.cplusplus.generator.util
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppThreadSafe
 import java.lang.reflect._
+import scala.language.existentials
 
 case class ProcedureSignature(
   name: String,

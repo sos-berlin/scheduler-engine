@@ -184,7 +184,7 @@ bool Async_operation::async_continue( Continue_flags flags )
 
     if( !_child  &&  something_done  &&  _parent  &&  async_finished() )
     {
-        // Wie haben zwei Verfahren, ein altes (für com_remote.cxx) und ein neues
+        // Wie haben zwei Verfahren, ein altes (fÃ¼r com_remote.cxx) und ein neues
         // 
         // _child != NULL: 
         // Die Vater-Operation ruft die Kind-Operation auf. Wenn diese finshed ist, wird die Vater-Operation fortgesetzt. Das passiert oben.
@@ -321,7 +321,7 @@ bool Async_operation::set_async_warning_issued()
 
 void Async_manager::add_operation( Async_operation* operation )
 {
-    if( operation->async_next_gmtime() == 0 )   // Sofort ausführen?
+    if( operation->async_next_gmtime() == 0 )   // Sofort ausfÃ¼hren?
     {
         //_signaled_operations_queue.push_back( operation );
         _timed_operations_queue.push_front( operation );
@@ -402,7 +402,7 @@ bool Async_manager::async_continue_selected( Operation_is_ok* operation_is_ok )
     */
 
     //Damit verhungern Operation am Ende der _timed_operations_queue:
-    //int max_operations = 10;    // Damit auch der Scheduler mal rankommt (könnte als Parameter übergeben werden) Es gibt Operationen, die immer wieder neue aktivieren 2007-01-10
+    //int max_operations = 10;    // Damit auch der Scheduler mal rankommt (kÃ¶nnte als Parameter Ã¼bergeben werden) Es gibt Operationen, die immer wieder neue aktivieren 2007-01-10
     //int operation_count = 0;
 
     if( !_timed_operations_queue.empty()  &&  (*_timed_operations_queue.begin())->async_next_gmtime() < double_time_max )
@@ -430,9 +430,9 @@ bool Async_manager::async_continue_selected( Operation_is_ok* operation_is_ok )
 
                 if( operation_is_ok == NULL  ||  (*operation_is_ok)( op ) )
                 {
-                    //op->set_async_next_gmtime( double_time_max );     Stört unseren Iterator
+                    //op->set_async_next_gmtime( double_time_max );     StÃ¶rt unseren Iterator
                     op->_next_gmtime = double_time_max;
-                    _timed_operations_queue.push_back( op );       // Ans Ende hängen, ohne unseren Iterator it über _timed_operations zu stören
+                    _timed_operations_queue.push_back( op );       // Ans Ende hÃ¤ngen, ohne unseren Iterator it Ã¼ber _timed_operations zu stÃ¶ren
                     it = _timed_operations_queue.erase( it );
 
                     if( !dont_repeat_this_operation )  dont_repeat_this_operation = op;
@@ -441,7 +441,7 @@ bool Async_manager::async_continue_selected( Operation_is_ok* operation_is_ok )
                     something_done |= my_something_done;
                     //if( my_something_done  &&  operation_count++ == max_operations )  break;
 
-                    if( _timed_operations_queue_modified )  break;      // Iterator ist ungültig?
+                    if( _timed_operations_queue_modified )  break;      // Iterator ist ungÃ¼ltig?
                 }
                 else
                     it++;

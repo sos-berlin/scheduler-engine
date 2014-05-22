@@ -2,7 +2,7 @@
 
 #include "../generated/mavenSettings.h"
 
-#define VER_COPYRIGHT           "" //"©1998 Netscape Corp., ©2000-2004 Software- und Organisations-Service GmbH"
+#define VER_COPYRIGHT           "" //"Â©1998 Netscape Corp., Â©2000-2004 Software- und Organisations-Service GmbH"
 
 #define VER_FILEDESC_STR        "Spidermonkey JavaScript 1.7.0"
 

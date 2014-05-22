@@ -20,12 +20,10 @@ class PluginAdapter(configuration: PluginConfiguration) {
 
   private var _log: PrefixLog = null
   @Nullable private var _pluginInstance: Plugin = null
-  private var _isActive: Boolean = false
 
 
   private[plugin] final def tryClose() {
     for (o <- Option(_pluginInstance)) {
-      _isActive = false
       try o.close()
       catch {
         case NonFatal(t) => logThrowable(t)
@@ -44,6 +42,17 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
+  private[plugin] final def prepare() {
+    try {
+      if (pluginInstance.isPrepared) throw new IllegalStateException(s"$this is already prepared")
+      _pluginInstance.prepare()
+      if (!_pluginInstance.isPrepared) throw new IllegalStateException(s"$this: prepare() did not result in isPrepared")
+    }
+    catch {
+      case x: Exception ⇒ throw new RuntimeException(s"$this cannot be prepared: $x", x)
+    }
+  }
+
   private[plugin] final def tryActivate() {
     try activate()
     catch {
@@ -54,9 +63,9 @@ class PluginAdapter(configuration: PluginConfiguration) {
   private[plugin] final def activate() {
     _log = log
     try {
-      if (_isActive) throw new IllegalStateException(s"$this is already active")
+      if (pluginInstance.isActive) throw new IllegalStateException(s"$this is already active")
       pluginInstance.activate()
-      _isActive = true
+      if (!_pluginInstance.isActive) throw new IllegalStateException(s"$this: prepare() did not result in isPrepared")
     }
     catch {
       case x: Exception => throw new RuntimeException(s"$this cannot be activated: $x", x)
@@ -69,14 +78,14 @@ class PluginAdapter(configuration: PluginConfiguration) {
   private[plugin] final def xmlState: String = {
     try pluginInstance.xmlState
     catch {
-      case x: Exception => return "<ERROR text=" + xmlQuoted(x.toString) + "/>"
+      case x: Exception ⇒ "<ERROR text=" + xmlQuoted(x.toString) + "/>"
     }
   }
 
   private[plugin] final def commandDispatcher =
     pluginInstance match {
-      case o: HasCommandHandlers => new CommandDispatcher(o.commandHandlers)
-      case _ => throw new SchedulerException("Plugin is not a " + classOf[HasCommandHandlers].getSimpleName)
+      case o: HasCommandHandlers ⇒ new CommandDispatcher(o.commandHandlers)
+      case _ ⇒ throw new SchedulerException("Plugin is not a " + classOf[HasCommandHandlers].getSimpleName)
     }
 
   private def logThrowable(t: Throwable) {
@@ -85,31 +94,30 @@ class PluginAdapter(configuration: PluginConfiguration) {
 
   private[plugin] def pluginInstance =
     _pluginInstance match {
-      case null => throw new IllegalStateException("PluginAdapter not initialized")
-      case o => o
+      case null ⇒ throw new IllegalStateException("PluginAdapter not initialized")
+      case o ⇒ o
     }
 
   private def log =
     _log match {
-      case null => throw new IllegalStateException("PluginAdapter not initialized")
-      case o => o
+      case null ⇒ throw new IllegalStateException("PluginAdapter not initialized")
+      case o ⇒ o
     }
 
-  private[plugin] def isActive =
-    _isActive
+  private[plugin] def isPrepared = pluginInstance.isPrepared
 
-  override def toString: String =
-    "Plugin " + pluginClassName
+  private[plugin] def isActive = pluginInstance.isActive
 
-  private[plugin] final def pluginClassName: String =
-    configuration.className
+  override def toString = s"Plugin $pluginClassName"
+
+  private[plugin] final def pluginClassName: String = configuration.className
 }
 
 object PluginAdapter {
   private def newPluginInstanceByDI(injector: Injector, c: Class[_ <: Plugin], configElement: Element): Plugin = {
     val module = new AbstractModule {
       protected def configure() {
-        bind(classOf[Element]) annotatedWith(Names.named(Plugin.configurationXMLName)) toInstance configElement
+        bind(classOf[Element]) annotatedWith Names.named(Plugins.configurationXMLName) toInstance configElement
       }
     }
     injector.createChildInjector(module).getInstance(c)

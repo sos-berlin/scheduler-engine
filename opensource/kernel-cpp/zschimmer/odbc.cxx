@@ -1,12 +1,8 @@
-// zschimmer.cxx                                    © 2000 Joacim Zschimmer
+// zschimmer.cxx                                    Â© 2000 Joacim Zschimmer
 // $Id: odbc.cxx 11394 2005-04-03 08:30:29Z jz $
 
 #include "zschimmer.h"
 #include "regex_class.h"
-
-#ifdef Z_BORLAND
-#	pragma package(smart_init)
-#endif
 
 #include <stdio.h>
 

@@ -30,14 +30,14 @@ static bool is_absolute_path( const string& path )
 //    {
 //        if( i > 0  &&  path[ i-1 ] == '/'  &&  path[ i ] == '/' )  
 //        {
-//            // Doppelten Schrägstrich unterdrücken
+//            // Doppelten SchrÃ¤gstrich unterdrÃ¼cken
 //        }
 //        else
 //            result += path[i];
 //    }
 //
 //
-//    // Hier können "." und "xx/.." gekürzt werden
+//    // Hier kÃ¶nnen "." und "xx/.." gekÃ¼rzt werden
 //
 //    return result;
 //}
@@ -77,7 +77,7 @@ static string simplified_dot_dot_path( const string& path )
                 if( p == part_list.begin() )
                 {
                     if( is_absolute )  z::throw_xc( "SCHEDULER-461", path );
-                    p++;  // Relativer Pfad darf überschüssige ".." haben. Also stehen lassen
+                    p++;  // Relativer Pfad darf Ã¼berschÃ¼ssige ".." haben. Also stehen lassen
                 }
                 else
                 {
@@ -154,8 +154,8 @@ void Path::set_path( const string& path )
 { 
     *static_cast<string*>( this ) = simplified_path( path );
 
-    // Bei relativem Pfad könnte die Auflösung der ".." verschoben werden. Dann nur simplified_double_slash_path().
-    // Verknüpfungen im Dateisystem werden nicht berücksichtigt.
+    // Bei relativem Pfad kÃ¶nnte die AuflÃ¶sung der ".." verschoben werden. Dann nur simplified_double_slash_path().
+    // VerknÃ¼pfungen im Dateisystem werden nicht berÃ¼cksichtigt.
 }
 
 //--------------------------------------------------------------------------------Path::is_absolute
@@ -178,11 +178,11 @@ bool Path::is_root() const
 //{
 //    const char* p = c_str();
 //    
-//    if( *p == '/' )  p++;           // Erstes '/' zählt nicht
+//    if( *p == '/' )  p++;           // Erstes '/' zÃ¤hlt nicht
 //
 //    while( *p )
 //    {
-//        if( p[0] == '/'  &&  p[1] )  // Letztes '/' zählt nicht
+//        if( p[0] == '/'  &&  p[1] )  // Letztes '/' zÃ¤hlt nicht
 //        {
 //            depth++;
 //            assert( p[1] != '/' );

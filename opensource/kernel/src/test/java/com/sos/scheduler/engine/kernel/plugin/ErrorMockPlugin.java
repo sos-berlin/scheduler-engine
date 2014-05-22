@@ -1,8 +1,12 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 
-public class ErrorMockPlugin implements Plugin {
-    @Override public void activate() {
+public class ErrorMockPlugin extends AbstractPlugin {
+    @Override public void onPrepare() {
+        throw new RuntimeException("prepare");
+    }
+
+    @Override public void onActivate() {
         throw new RuntimeException("activate");
     }
 
@@ -11,6 +15,6 @@ public class ErrorMockPlugin implements Plugin {
     }
 
     @Override public String xmlState() {
-        throw new RuntimeException("getXmlState");
+        throw new RuntimeException("xmlState");
     }
 }

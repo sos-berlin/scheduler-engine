@@ -1,7 +1,7 @@
 /* sossock.h                                    (c) SOS GmbH Berlin
                                                     Joacim Zschimmer
 
-   Klasse Sos_socket für Sockets für BSD und Windows winsock.dll.
+   Klasse Sos_socket fÃ¼r Sockets fÃ¼r BSD und Windows winsock.dll.
 */
 
 #ifndef __SOSSOCK_H

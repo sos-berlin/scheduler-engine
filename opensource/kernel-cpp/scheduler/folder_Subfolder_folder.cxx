@@ -70,8 +70,8 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         }
         else
         {
-            // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
-            // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
+            // Verzeichnis ist gelÃ¶scht, aber es leben vielleicht noch Objekte, die gelÃ¶scht werden mÃ¼ssen.
+            // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() lÃ¶schen
             something_changed = subfolder->adjust_with_directory( NULL );    
         }
     }

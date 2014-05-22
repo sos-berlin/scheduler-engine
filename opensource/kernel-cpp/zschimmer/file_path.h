@@ -17,7 +17,7 @@ namespace file {
 
 //-------------------------------------------------------------------------------------------------
 
-//std::list<string>               simplified_path_part_list   ( const std::list<string>& part_list );      // Kürzt "xx/.."
+//std::list<string>               simplified_path_part_list   ( const std::list<string>& part_list );      // KÃ¼rzt "xx/.."
 bool                            is_directory_separator      ( char );
 
 //-----------------------------------------------------------------------------------------File_path
@@ -112,7 +112,7 @@ struct File_info : Object
 
     Fill_zero                  _zero_;
     
-    // Speicher kompakt füllen (für 300.000 File_info's). 
+    // Speicher kompakt fÃ¼llen (fÃ¼r 300.000 File_info's). 
     // Position 9
     char                       _create_time_filled          : 1;
     char                       _last_access_time_filled     : 1;
@@ -136,11 +136,11 @@ struct File_info : Object
 //------------------------------------------------------------------------------------mini_string<>
 #if 0
 
-// Weitere Ersparnis mit File_info_ptr statt ptr<File_info>. Damit entfällt die vtbl. refcnt kann short sein. Oder Byte (mit assert).
+// Weitere Ersparnis mit File_info_ptr statt ptr<File_info>. Damit entfÃ¤llt die vtbl. refcnt kann short sein. Oder Byte (mit assert).
 // bool in drei Bits zusammenfassen: int _create_time_filled:1;
-// Mit mini_string<27> wären das 32 Bytes statt jetzt 52
-// Nur für einen Thread!
-// Für eine handvoll weniger Pointer
+// Mit mini_string<27> wÃ¤ren das 32 Bytes statt jetzt 52
+// Nur fÃ¼r einen Thread!
+// FÃ¼r eine handvoll weniger Pointer
 // Auf Fill_zero verzichten (-1 Byte)
 // Mit dieser Technik kann mini_string 5 Bytes kleiner werden: 1+1+4+4=10 oder (64bit) 1+1+8+4=14
 
@@ -153,7 +153,7 @@ struct simple_single_thread_object< class CLASS >
 }
 
 
-// Speicherverwaltung für Objekte gleicher Größe braucht weniger Platz für die Verwaltung, bei großen Seiten
+// Speicherverwaltung fÃ¼r Objekte gleicher GrÃ¶ÃŸe braucht weniger Platz fÃ¼r die Verwaltung, bei groÃŸen Seiten
 // Kann in Memory mapped files gehalten werden.
 
 struct page< class OBJECT, uint PAGE_SIZE >
@@ -168,7 +168,7 @@ struct Pages
 };
 
 
-//Etwas Sparsamer als File_path (28 Bytes brutto, 16 (-1?) Byte netto für internen String
+//Etwas Sparsamer als File_path (28 Bytes brutto, 16 (-1?) Byte netto fÃ¼r internen String
 
 template< uint SIZE >   // Empfehlung: SIZE >= sizeof (void*) + sizeof (int) + 1, 32bit: mini_string<9>, 64bit: mini_string<13>, besser aufgerundet: <16>, <24>
 struct mini_string : simple_single_thread_object< mini_string< SIZE> >
@@ -189,7 +189,7 @@ struct mini_string : simple_single_thread_object< mini_string< SIZE> >
     union
     {
         Allocated_string  _allocated_string;
-        char              _chars            [ SIZE-1 ];     // Ein Zeichen weniger für _is_local_string, damit SIZE auf Wortgrenze liegen kann 
+        char              _chars            [ SIZE-1 ];     // Ein Zeichen weniger fÃ¼r _is_local_string, damit SIZE auf Wortgrenze liegen kann 
     };
 
     bool    _is_local_string;

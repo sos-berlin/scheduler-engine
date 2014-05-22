@@ -2,9 +2,9 @@
 /*
     Hier sind implementiert
 
-    Com_log                     COM-H�lle f�r Task_log
-    Com_task                    COM-H�lle f�r Task
-    Com_spooler                 COM-H�lle f�r Spooler
+    Com_log                     COM-Hülle für Task_log
+    Com_task                    COM-Hülle für Task
+    Com_spooler                 COM-Hülle für Spooler
 */
 
 
@@ -279,7 +279,7 @@ xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const 
      || value.vt == VT_R8       
      || value.vt == VT_CY       
      || value.vt == VT_DATE     
-  // || value.vt == VT_BSTR          // VT_BSTR m�ssen wir nicht besonders kennzeichnen. Das ist Default.
+  // || value.vt == VT_BSTR          // VT_BSTR müssen wir nicht besonders kennzeichnen. Das ist Default.
   // || value.vt == VT_DISPATCH 
      || value.vt == VT_ERROR    
      || value.vt == VT_BOOL     
@@ -309,7 +309,7 @@ xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const 
     }
 */
     if( vt != (VARTYPE)-1 )  result.setAttribute( "vt", vt );
-                       else  {} // Andere Typen sind nicht r�ckkonvertierbar. Die werden dann zum String.  
+                       else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
 
 
     return result;
@@ -609,8 +609,8 @@ void Com_variable_set::merge( const Ivariable_set* other )
 
 STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
 {
-    // Vorsicht mit _map.erase(): Ein Iterator auf das gel�schte Element wird ung�ltig. 
-    // Com_variable_set_enumerator m�sste dann ung�ltig werden. Aber wir benutzen erase() nicht.
+    // Vorsicht mit _map.erase(): Ein Iterator auf das gelöschte Element wird ungültig. 
+    // Com_variable_set_enumerator müsste dann ungültig werden. Aber wir benutzen erase() nicht.
 
     HRESULT hr = NOERROR;
 
@@ -997,7 +997,7 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
                 }
             }
 
-            p[ -1 ] = '\0';      // Letztes Semikolon �berschreiben, ist schon au�erhalb des Strings
+            p[ -1 ] = '\0';      // Letztes Semikolon überschreiben, ist schon außerhalb des Strings
             assert( p == *result + length + 1 );
         }
     }
@@ -2221,12 +2221,12 @@ STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
 
 STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
 
-// eMail von P�schel, 2008-02-24 17:12
-// R�ckgabewert: liefert den Pfad des Jobs relativ zum Live-Directory. Der Pfad beginnt mit  einem "/", alle Bestandteile eines Pfads sind durch "/" getrennt
+// eMail von Püschel, 2008-02-24 17:12
+// Rückgabewert: liefert den Pfad des Jobs relativ zum Live-Directory. Der Pfad beginnt mit  einem "/", alle Bestandteile eines Pfads sind durch "/" getrennt
 // Beispiele: 
-// - f�r einen Job c:\scheduler\config\live\somewhere\excel\sample.job.xml wird "/somewhere/excel" zur�ckgeliefert 
-// - f�r einen Job c:\scheduler\config\live\sample.xml wird "/"  zur�ckgeliefert 
-// - f�r einen Job au�erhalb des Live-Verzeichnisses wird "" (Leerstring) zur�ckgeliefert
+// - für einen Job c:\scheduler\config\live\somewhere\excel\sample.job.xml wird "/somewhere/excel" zurückgeliefert 
+// - für einen Job c:\scheduler\config\live\sample.xml wird "/"  zurückgeliefert 
+// - für einen Job außerhalb des Live-Verzeichnisses wird "" (Leerstring) zurückgeliefert
 // - die Methode liefert nicht null
 
 {
@@ -2237,7 +2237,7 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
         hr = String_to_bstr( _job->has_base_file() && 
-                             _job->configuration_origin() == confdir_local?  // Siehe P�schels eMail vom 2008-02-24 17:12
+                             _job->configuration_origin() == confdir_local?  // Siehe Püschels eMail vom 2008-02-24 17:12
                                 _job->folder_path() 
                               : Absolute_path(), result );
 
@@ -3057,9 +3057,9 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
 {
     HRESULT hr = S_OK;
 
-    // F�r <monitor>: Wenn spooler_process() eine Exception liefert, f�ngt der Scheduler sie zun�chst ab,
+    // Für <monitor>: Wenn spooler_process() eine Exception liefert, fängt der Scheduler sie zunächst ab,
     // meldet sie mit dieser Methode und ruft dann spooler_process_after().
-    // Ohne <monitor> wird die Exception wie �blich geliefert.
+    // Ohne <monitor> wird die Exception wie üblich geliefert.
     
     try
     {
@@ -3121,7 +3121,7 @@ STDMETHODIMP Com_task::get_Web_service_or_null( Iweb_service** result )
 }
 
 //-------------------------------------------------------------------------Com_task::get_Params_xml
-// F�r Process_module_instance::fill_process_environment_with_params()
+// Für Process_module_instance::fill_process_environment_with_params()
 
 STDMETHODIMP Com_task::get_Params_xml( BSTR* result )
 {
@@ -3139,7 +3139,7 @@ STDMETHODIMP Com_task::get_Params_xml( BSTR* result )
 }
 
 //-------------------------------------------------------------------------Com_task::put_Params_xml
-// F�r Process_module_instance::fill_process_environment_with_params()
+// Für Process_module_instance::fill_process_environment_with_params()
 
 STDMETHODIMP Com_task::put_Params_xml( BSTR xml_bstr )
 {
@@ -3157,7 +3157,7 @@ STDMETHODIMP Com_task::put_Params_xml( BSTR xml_bstr )
 }
 
 //-------------------------------------------------------------------Com_task::get_Order_params_xml
-// F�r Process_module_instance::fill_process_environment_with_params()
+// Für Process_module_instance::fill_process_environment_with_params()
 
 STDMETHODIMP Com_task::get_Order_params_xml( BSTR* result )
 {
@@ -3175,7 +3175,7 @@ STDMETHODIMP Com_task::get_Order_params_xml( BSTR* result )
 }
 
 //-------------------------------------------------------------------Com_task::put_Order_params_xml
-// F�r Process_module_instance::fill_process_environment_with_params()
+// Für Process_module_instance::fill_process_environment_with_params()
 
 STDMETHODIMP Com_task::put_Order_params_xml( BSTR xml_bstr )
 {
@@ -4305,7 +4305,8 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     , 13, "Remove"                    , (Com_method_ptr)&Com_job_chain::Remove             , VT_EMPTY      },
     { DISPATCH_PROPERTYPUT, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_BSTR },
-    { DISPATCH_PROPERTYGET, 15, "States"                    , (Com_method_ptr)&Com_job_chain::get_States         , (VARENUM)(VT_BSTR|VT_ARRAY) },
+    { DISPATCH_PROPERTYGET, 15, "Path"                      , (Com_method_ptr)&Com_job_chain::get_Path           , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 16, "States"                    , (Com_method_ptr)&Com_job_chain::get_States         , (VARENUM)(VT_BSTR|VT_ARRAY) },
     {}
 };
 
@@ -4465,7 +4466,7 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
         Order* order = dynamic_cast<Order*>( &*iorder );
         if( !order )  return E_INVALIDARG;
 
-        // Einstieg nur �ber Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         order->place_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
         //dynamic_cast<Job_chain*>( this )->add_order( order );
         
@@ -4496,7 +4497,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
         Order* order = dynamic_cast<Order*>( &*iorder );
         if( !order )  return E_INVALIDARG;
 
-        // Einstieg nur �ber Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         order->place_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -4523,7 +4524,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
         Order* order = dynamic_cast<Order*>( &*iorder );
         if( !order )  return E_INVALIDARG;
 
-        // Einstieg nur �ber Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         *result = order->try_place_in_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;  
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -4679,6 +4680,25 @@ STDMETHODIMP Com_job_chain::get_Title( BSTR* result )
     return hr;
 }
 
+//--------------------------------------------------------------------------Com_job_chain::get_Path
+
+STDMETHODIMP Com_job_chain::get_Path(BSTR* result)
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if (!_job_chain)  return E_POINTER;
+
+        hr = String_to_bstr(_job_chain->path().to_string(), result);
+    }
+    catch (const exception&  x)  { hr = Set_excepinfo(x, Z_FUNCTION); }
+    catch (const _com_error& x)  { hr = Set_excepinfo(x, Z_FUNCTION); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_job_chain::get_States
 
 STDMETHODIMP Com_job_chain::get_States(SAFEARRAY** result)
 {

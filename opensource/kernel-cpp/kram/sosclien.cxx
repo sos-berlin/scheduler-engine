@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosstat"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "../kram/sos.h"

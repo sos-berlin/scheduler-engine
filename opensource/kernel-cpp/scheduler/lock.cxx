@@ -133,7 +133,7 @@ STDMETHODIMP Lock_subsystem::Create_lock( spooler_com::Ilock** result )
     try
     {
         ptr<Lock> lock = Z_NEW( Lock( this ) );
-        //nicht nˆtig  lock->set_folder_path( root_path );
+        //nicht n√∂tig  lock->set_folder_path( root_path );
         *result = lock.take();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
@@ -250,7 +250,7 @@ void Lock::close()
     //Z_FOR_EACH( Use_set, _use_set, u )
     //{
     //    Use* use = *u;
-    //    use->disconnect();        Nicht nˆtig
+    //    use->disconnect();        Nicht n√∂tig
     //}
 
     _use_set.clear();
@@ -365,6 +365,7 @@ void Lock::set_max_non_exclusive( int max_non_exclusive )
             log()->warn( message_string( "SCHEDULER-887", max_non_exclusive, string_from_holders() ) );
 
         _config._max_non_exclusive = max_non_exclusive;
+        notify_waiting_requestor();
     }
 }
 
@@ -388,7 +389,7 @@ bool Lock::is_free_for( const Use* lock_use, Holder* requesting_holder ) const
 
     if( !free  &&  
         requesting_holder  &&  
-        _holder_map.find( requesting_holder ) != _holder_map.end() )    // requesting_holder h‰lt die Sperre bereits?
+        _holder_map.find( requesting_holder ) != _holder_map.end() )    // requesting_holder h√§lt die Sperre bereits?
     {
         free = lock_use->lock_mode() == lk_non_exclusive  ||  _holder_map.size() == 1;
     }
@@ -435,17 +436,17 @@ bool Lock::require_lock_for( Holder* holder, Use* lock_use )
         {
             assert( _holder_map.size() == 1 );
             _lock_mode = lk_exclusive;   
-            is_freshly_required = true;      // Holder hat seine Haltung von lk_non_exclusive auf lk_exclusive erhˆht
+            is_freshly_required = true;      // Holder hat seine Haltung von lk_non_exclusive auf lk_exclusive erh√∂ht
         }
         else
-            is_freshly_required = false;     // Holder hat nix ver‰ndert
+            is_freshly_required = false;     // Holder hat nix ver√§ndert
     }
     else
     {
         _holder_map[ holder ] = Use_set();
         h = _holder_map.find( holder );
         _lock_mode = lock_use->lock_mode();
-        is_freshly_required = true;      // Holder h‰lt die Sperre neu oder mit strengerem Lock_mode
+        is_freshly_required = true;      // Holder h√§lt die Sperre neu oder mit strengerem Lock_mode
     }
 
     h->second.insert( lock_use );
@@ -475,7 +476,7 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
 
             if( h->second.empty() )  
             {
-                _holder_map.erase( h );    // Das ist der Normalfall: Der Holder h‰lt die Sperre nur einmal und wird jetzt entfernt
+                _holder_map.erase( h );    // Das ist der Normalfall: Der Holder h√§lt die Sperre nur einmal und wird jetzt entfernt
                 is_released = true;
             }
             else
@@ -504,34 +505,7 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
                     holder->log()->info( message_string( "SCHEDULER-856", obj_name() ) );
                 }
 
-
-                // Wartenden Requestor benachrichtigen
-
-                Requestor* next_requestor = NULL; 
-
-                if( !_waiting_queues[ lk_exclusive ].empty() )  
-                {
-                    next_requestor = ( *_waiting_queues[ lk_exclusive ].begin() ) -> requestor();
-                }
-                else
-                if( !_waiting_queues[ lk_non_exclusive ].empty() )  
-                {
-                    next_requestor = ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> requestor();
-                }
-
-                if( next_requestor  &&  next_requestor->locks_are_available() )     // Der Requestor kann auch die anderen Sperren belegen?
-                {
-                    try
-                    {
-                        next_requestor->on_locks_are_available();  
-                    }
-                    catch( exception& x ) 
-                    { 
-                        next_requestor->log()->error( S() << x << ", in on_lock_are_available()" );
-                    }
-                }
-
-
+                notify_waiting_requestor();
                 check_for_replacing_or_removing();
             }
         }
@@ -542,6 +516,35 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
     //  Z_DEBUG_ONLY( assert( !"Unbekannter Holder" ) );
 
     return is_released;
+}
+
+
+
+void Lock::notify_waiting_requestor()
+{
+    Requestor* next_requestor = NULL;
+
+    if (!_waiting_queues[lk_exclusive].empty())
+    {
+        next_requestor = (*_waiting_queues[lk_exclusive].begin())->requestor();
+    }
+    else
+    if (!_waiting_queues[lk_non_exclusive].empty())
+    {
+        next_requestor = (*_waiting_queues[lk_non_exclusive].begin())->requestor();
+    }
+
+    if (next_requestor  &&  next_requestor->locks_are_available())     // Der Requestor kann auch die anderen Sperren belegen?
+    {
+        try
+        {
+            next_requestor->on_locks_are_available();
+        }
+        catch (exception& x)
+        {
+            next_requestor->log()->error(S() << x << ", in on_lock_are_available()");
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------Lock::is_held_by
@@ -618,14 +621,14 @@ void Lock::dequeue_lock_use( Use* lock_use )
 
 int Lock::count_non_exclusive_holders() const
 { 
-    // Mehrfaches kl_exclusive wird toleriert, mehrfaches lk_non_exclusive z‰hlt aber? Das ist vielleicht inkonsequent. 
-    // Alse z‰hlen wir doppelte Haltungen nicht.
+    // Mehrfaches kl_exclusive wird toleriert, mehrfaches lk_non_exclusive z√§hlt aber? Das ist vielleicht inkonsequent. 
+    // Alse z√§hlen wir doppelte Haltungen nicht.
     // Das erfordert weitere Behandlung in is_free_for() und assert() in require_lock_for():
     //int result = 0;
 
     //if( _lock_mode == lk_non_exclusive )
     //{
-    //    Z_FOR_EACH_CONST( Holder_map, _holder_map, it )  result += it->second;      // Mehrfache Haltungen desselben Holder z‰hlen mehrfach
+    //    Z_FOR_EACH_CONST( Holder_map, _holder_map, it )  result += it->second;      // Mehrfache Haltungen desselben Holder z√§hlen mehrfach
     //}
 
     //return result;
@@ -1386,7 +1389,7 @@ bool Holder::try_hold( Use* lock_use )
 
 void Holder::hold_lock( Use* lock_use )
 {
-    lock_use->lock()->require_lock_for( this, lock_use );      // false, wenn Holder bereits die Sperre mit gleichen oder schw‰cheren Lock_mode h‰lt
+    lock_use->lock()->require_lock_for( this, lock_use );      // false, wenn Holder bereits die Sperre mit gleichen oder schw√§cheren Lock_mode h√§lt
 }
 
 //------------------------------------------------------------------------------Holder::dom_element

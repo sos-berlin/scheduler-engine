@@ -35,7 +35,7 @@ static MEMORYSTATUSEX get_memory_status()
 
 static void set_result( VARIANT* result, uint64 value )
 {
-    // Windows lässt ein VT_I8 verschwinden (jedenfalls JScript)
+    // Windows lÃ¤sst ein VT_I8 verschwinden (jedenfalls JScript)
     //result->vt = VT_I8;
     //V_I8( result ) = (int64)value;
 

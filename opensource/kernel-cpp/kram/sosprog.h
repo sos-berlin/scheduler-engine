@@ -1,4 +1,4 @@
-// sosprog.h                                   ©1996 SOS GmbH Berlin
+// sosprog.h                                   Â©1996 SOS GmbH Berlin
 //                                             Joacim Zschimmer
 
 #ifndef __SOSPROG_H

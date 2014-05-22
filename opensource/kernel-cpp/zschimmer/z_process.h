@@ -71,7 +71,7 @@ struct Process_base : Object
     Fill_zero                  _zero_;
     int                        _pid;
     bool                       _terminated;
-    string                     _command_line;               // Fürs Log
+    string                     _command_line;               // FÃ¼rs Log
     string                     _stdout_path;
     string                     _stderr_path;
     Environment                _environment;

@@ -27,8 +27,8 @@ import static org.hamcrest.Matchers.equalTo;
 
 /** JS-655  "JobScheduler does not start when a webservice entry is assigned to a job chain coming from hot folder" */
 public final class JS655IT extends SchedulerTest {
-    private static final JobChainPath initialJobChainPath = JobChainPath.of("/myJobChain");
-    private static final JobChainPath rightJobChainPath = JobChainPath.of("/myLazyJobChain");
+    private static final JobChainPath initialJobChainPath = new JobChainPath("/myJobChain");
+    private static final JobChainPath rightJobChainPath = new JobChainPath("/myLazyJobChain");
 
     private final WebResource webResource;
     enum M { jobChainActivated, jobChainRemoved, terminated }

@@ -14,7 +14,7 @@ extern const Absolute_path      file_order_sink_job_path;
 
 //-------------------------------------------------------------------------------------------------
 
-void                            init_file_order_sink    ( Scheduler* );                             // Könnte ein Subsystem sein
+void                            init_file_order_sink    ( Scheduler* );                             // KÃ¶nnte ein Subsystem sein
 
 //------------------------------------------------------------Directory_file_order_source_interface
 

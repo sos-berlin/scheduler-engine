@@ -25,9 +25,9 @@ struct Sos_option_iterator
 
     void                        log                     ( Bool val = true )                     { _log = val; }
     Bool                        flag                    ( const char* str );
-    Bool                        with_value              ( const char* ); // hier können Exceptions auftreten (Flag erkannt, aber kein Value!)
+    Bool                        with_value              ( const char* ); // hier kÃ¶nnen Exceptions auftreten (Flag erkannt, aber kein Value!)
     Bool                        param                   ( int nummer = -1 );
-    void                        skip_param              ();                                     // Um Programmdateinamen zu überspringen
+    void                        skip_param              ();                                     // Um Programmdateinamen zu Ã¼berspringen
     Bool                        pipe                    ();
 
     Bool                        set                     ()                                      { return _set; }
@@ -69,7 +69,7 @@ struct Sos_option_iterator
     Sos_string                 _string;
     const char*                _ptr;
     const char*                _rest_ptr;
-    const char*                _parameter_start;        // Für complete_parameter()
+    const char*                _parameter_start;        // FÃ¼r complete_parameter()
 
     Bool                       _use_argv;
     int                        _argc;
@@ -139,7 +139,7 @@ max_params( int ) erlaubt die Einstellung der maximal erwarteten Stellungsparame
 
 struct Sos_token_iterator
 {
-                // String muß die Lebensdauer von Sos_token_iterator haben!
+                // String muÃŸ die Lebensdauer von Sos_token_iterator haben!
                 Sos_token_iterator( const Const_area& area, const char sep='\t' );
                 Sos_token_iterator( const char*, const char sep='\t' );
                 Sos_token_iterator( const Sos_string&, const char sep='\t' );

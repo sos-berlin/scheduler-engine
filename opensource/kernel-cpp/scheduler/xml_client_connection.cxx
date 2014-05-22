@@ -93,7 +93,7 @@ xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
 
         string xml_bytes = _received_data.to_string();
         _received_data.clear();
-        if (!xml_bytes.empty() && *xml_bytes.rbegin() == '\0')  xml_bytes.erase(xml_bytes.length() - 1);   // '\0' am Ende abschneiden (kennzeichnet das Ende der Übertragung)
+        if (!xml_bytes.empty() && *xml_bytes.rbegin() == '\0')  xml_bytes.erase(xml_bytes.length() - 1);   // '\0' am Ende abschneiden (kennzeichnet das Ende der Ãœbertragung)
         result.load_xml_bytes(xml_bytes);
         DOM_FOR_EACH_ELEMENT( result.documentElement(), e1 )
             if( e1.nodeName_is( "answer" ) )

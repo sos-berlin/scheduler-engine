@@ -1,4 +1,4 @@
-// zschimmer.h                                      ©2000 Joacim Zschimmer
+// zschimmer.h                                      Â©2000 Joacim Zschimmer
 // $Id: system.h 14140 2010-11-25 20:47:07Z jz $
 
 #ifndef __ZSCHIMMER_SYSTEM_H
@@ -30,19 +30,19 @@
 
 #if defined _MSC_VER
 
-#define _CRT_NONSTDC_NO_DEPRECATE   // open() (statt _open()) etc. soll nicht bemängelt werden.
+#define _CRT_NONSTDC_NO_DEPRECATE   // open() (statt _open()) etc. soll nicht bemÃ¤ngelt werden.
 
 #   pragma warning( disable:4010 )   // warning C4010: single-line comment contains line-continuation character
 #   pragma warning( disable:4065 )   // warning C4065: switch statement contains 'default' but no 'case' labels
 #   pragma warning( disable:4097 )   // warning C4097: typedef-name 'Base_class' used as synonym for class-name 'Field_descr::Sos_self_deleting'
 #   pragma warning( disable:4127 )   // warning C4127: Bedingter Ausdruck ist konstant.   while(1)
 #   pragma warning( error  :4150 )   // warning C4150: deletion of pointer to incomplete type 'Soscopy_dialog'; no destructor called
-#   pragma warning( error  :4172 )   // warning C4172: Adresse einer lokalen Variablen oder eines temporären Werts wird zurückgegeben
-#   pragma warning( error  :4190 )   // warning C4190: 'sos_new_ptr' has C-linkage specified, but returns UDT 'Sos_ptr<struct Hostapi>' which is incompatible with C.  SOS_NEW() liefert gelöschtes Objekt!
+#   pragma warning( error  :4172 )   // warning C4172: Adresse einer lokalen Variablen oder eines temporÃ¤ren Werts wird zurÃ¼ckgegeben
+#   pragma warning( error  :4190 )   // warning C4190: 'sos_new_ptr' has C-linkage specified, but returns UDT 'Sos_ptr<struct Hostapi>' which is incompatible with C.  SOS_NEW() liefert gelÃ¶schtes Objekt!
 #   pragma warning( disable:4237 )   // warning C4237: nonstandard extension used : 'false' keyword is reserved for future use
 #   pragma warning( disable:4355 )   // warning C4355: 'this' : used in base member initializer list
 #   pragma warning( error  :4307 )   // warning C4307: '*' : integral constant overflow
-#   pragma warning( disable:4503 )   // warning C4503: 'std::vector<_Ty,_Ax>::_Insert_n': Die Länge des ergänzten Namens wurde überschritten. Der Name wurde gekürzt.
+#   pragma warning( disable:4503 )   // warning C4503: 'std::vector<_Ty,_Ax>::_Insert_n': Die LÃ¤nge des ergÃ¤nzten Namens wurde Ã¼berschritten. Der Name wurde gekÃ¼rzt.
 #   pragma warning( 3      :4505 )   // Nichtreferenzierte lokale Funktion wurde entfernt
 //# pragma warning( disable:4510 )   // warning C4510: 'Store_msg' : default constructor could not be generated
 #   pragma warning( disable:4511 )   // warning C4511: Kopierkonstruktor konnte nicht generiert werden
@@ -51,12 +51,12 @@
 #   pragma warning( disable:4702 )   // warning C4702: Unerreichbarer Code
 #   pragma warning( error  :4706 )   // warning C4706: Zuweisung in bedingtem Ausdruck
 #   pragma warning( disable:4711 )   // warning C4711: function 'ff' selected for automatic inline expansion
-#   pragma warning( error  :4715 )   // errorg  C4715: Nicht alle Steuerelementpfade geben einen Wert zurück
+#   pragma warning( error  :4715 )   // errorg  C4715: Nicht alle Steuerelementpfade geben einen Wert zurÃ¼ck
 #   pragma warning( disable:4786 )   // Bezeichner wurde auf '255' Zeichen in den Debug-Informationen reduziert
-#   pragma warning( disable:4675 )   // warning C4675: 'size_t zschimmer::com::hash_value(const zschimmer::com::Bstr &)': aufgelöste Überladung wurde mit argumentbezogener Suche gefunden
-#   pragma warning( error  :4717 )   // warning C4717: Rekursiv für alle Steuerelementpfade. Die Funktion verursacht einen Stapelüberlauf zur Laufzeit.
+#   pragma warning( disable:4675 )   // warning C4675: 'size_t zschimmer::com::hash_value(const zschimmer::com::Bstr &)': aufgelÃ¶ste Ãœberladung wurde mit argumentbezogener Suche gefunden
+#   pragma warning( error  :4717 )   // warning C4717: Rekursiv fÃ¼r alle Steuerelementpfade. Die Funktion verursacht einen StapelÃ¼berlauf zur Laufzeit.
 #   pragma warning( error  :4800 )   // warning C4800: Variable wird auf booleschen Wert ('True' oder 'False') gesetzt (Auswirkungen auf Leistungsverhalten moeglich)
-#   pragma warning( error  :4927 )   // warning C4927: Unzulässige Konvertierung. Mehrere benutzerdefinierte Konvertierungen wurden implizit übernommen.
+#   pragma warning( error  :4927 )   // warning C4927: UnzulÃ¤ssige Konvertierung. Mehrere benutzerdefinierte Konvertierungen wurden implizit Ã¼bernommen.
 
 #endif
 
@@ -76,10 +76,10 @@
 
 #ifdef __GNUC__ 
 #   include <sys/types.h>               // uint etc.
-#   include <typeinfo>                  // Für typeid
+#   include <typeinfo>                  // FÃ¼r typeid
 #endif
 
-//-----------------------------------------------------------------------------Systemanhängigkeiten
+//-----------------------------------------------------------------------------SystemanhÃ¤ngigkeiten
 
 #if defined _MSC_VER
 
@@ -93,7 +93,7 @@
 #   define __declspec_uuid(UUID)        __declspec( uuid(UUID) )
 
 #   ifdef _WIN64
-#       define Z_WIN64      // Zusätzlich zu Z_WIN32
+#       define Z_WIN64      // ZusÃ¤tzlich zu Z_WIN32
 #       define Z_64
 #   endif
 
@@ -103,7 +103,7 @@
 #   define __GNUC_VERSION__             ( __GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__ )       // 3.2.1 => 30201
 
 #   define Z_UNIX
-#   if defined __LP64__	
+#   if defined __LP64__
 #       define Z_64
 #   endif
 #   define Z_GNU_ONLY( statement )      statement
@@ -114,7 +114,7 @@
 #       define Z_DEPRECATED 
 #   endif
 //# define Z_PURE                       __attribute__(( pure ))         // Echt funktional, liefert bei gleichen Argumenten dasselbe Ergebnis, darf globale Variablen lesen
-//# define Z_FUNCTIONAL                 __attribute__(( pure ))         // Echt funktional, liefert bei gleichen Argumenten dasselbe Ergebnis, liest nur Argumente, völlig unabhängig von globalen Variablen
+//# define Z_FUNCTIONAL                 __attribute__(( pure ))         // Echt funktional, liefert bei gleichen Argumenten dasselbe Ergebnis, liest nur Argumente, vÃ¶llig unabhÃ¤ngig von globalen Variablen
 //# define Z_GNU_PRINT( FORMAT, ... )   do { fprintf( stderr, "%s: ", Z_FUNCTION  ); fprintf( stderr, FORMAT, __VA_ARGS__ ); } while(0)
 #   define Z_INIT_FIRST                 __attribute__((init_priority(101)));
 
@@ -356,7 +356,7 @@ typedef unsigned long           ulong32;
 #endif
 
 //-----------------------------------------------------------------------------------string::string
-// gcc 3.2 löst bei string( NULL, 0 )  exception aus. Das wollen wir nicht.
+// gcc 3.2 lÃ¶st bei string( NULL, 0 )  exception aus. Das wollen wir nicht.
 
 #if defined __GNUC__ && __GNUC_VERSION_ < 30202  // Bis gcc 3.2.1:
     inline std::string          make_string                 ( const char* s, size_t len )           { return std::string( s? s : "", len ); }
@@ -407,7 +407,7 @@ inline const void*              memrchr                     ( const void* s, cha
 #endif
 
 #ifdef __GNUC__
-#   if __GNUC_VERSION__ >= 40500  // gcc 4.5.0, setzt -std=c++0x oder -std=c++11 voraus. Sonst ältere gcc-Version verwenden!
+#   if __GNUC_VERSION__ >= 40500  // gcc 4.5.0, setzt -std=c++0x oder -std=c++11 voraus. Sonst Ã¤ltere gcc-Version verwenden!
 #       define Z_HAS_MOVE_CONSTRUCTOR
 #   endif
 #   if __GNUC_VERSION__ >= 40700  // gcc 4.7 soll override kennen

@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosmain0"
-//#define COPYRIGHT   "©1997 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1997 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "../kram/sysdep.h"
@@ -152,7 +152,7 @@ int sos_main0( int argc, char** argv )
     }
 #endif
 
-#if !defined _MSC_VER       // Für MSVC++ ist auch ein Absturz eine Exception
+#if !defined _MSC_VER       // FÃ¼r MSVC++ ist auch ein Absturz eine Exception
     catch( ... )
     {
 #		 if defined SYSTEM_GNU

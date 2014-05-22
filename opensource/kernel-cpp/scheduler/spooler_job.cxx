@@ -26,7 +26,7 @@ using job_chain::Job_node;
 //--------------------------------------------------------------------------------------------const
 
 const Duration max_task_time_out           = Duration(365*24*3600);
-const Duration directory_watcher_intervall = Duration(10.0);          // Nur für Unix (Windows gibt ein asynchrones Signal)
+const Duration directory_watcher_intervall = Duration(10.0);          // Nur fÃ¼r Unix (Windows gibt ein asynchrones Signal)
 const bool   Job::force_start_default      = true;
 
 //--------------------------------------------------------------------------------------------Calls
@@ -234,7 +234,7 @@ bool Job_subsystem_impl::subsystem_initialize()
 
 bool Job_subsystem_impl::subsystem_load()
 {
-    _subsystem_state = subsys_loaded;           // Schon jetzt für Job::load()
+    _subsystem_state = subsys_loaded;           // Schon jetzt fÃ¼r Job::load()
     file_based_subsystem<Job>::subsystem_load();
     return true;
 }
@@ -243,7 +243,7 @@ bool Job_subsystem_impl::subsystem_load()
 
 bool Job_subsystem_impl::subsystem_activate()
 {
-    _subsystem_state = subsys_active;           // Schon jetzt für Job::activate()
+    _subsystem_state = subsys_active;           // Schon jetzt fÃ¼r Job::activate()
     file_based_subsystem<Job>::subsystem_activate();
 
     return true;
@@ -409,7 +409,7 @@ void Combined_job_nodes::close()
 
     while (!_job_node_set.empty()) {
         Job_node* job_node = *_job_node_set.begin();
-        job_node->disconnect_job();     // Ruft disconnect_job_node() und der löscht den Eintrag
+        job_node->disconnect_job();     // Ruft disconnect_job_node() und der lÃ¶scht den Eintrag
     }
 }
 
@@ -459,8 +459,8 @@ void Combined_job_nodes::withdraw_order_requests()
 {
     //Z_LOGI2( "zschimmer", obj_name() << " " << Z_FUNCTION << "\n" );
 
-    // Jetzt prüfen wir die verteilten Aufträge.
-    // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
+    // Jetzt prÃ¼fen wir die verteilten AuftrÃ¤ge.
+    // Die kÃ¶nnen auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
@@ -535,7 +535,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
             {
                 xml::Element_ptr order_queue_element = order_queue->dom_element( document, my_show_what );
 
-                // Alle <order> in unser kombiniertes <order_queue> übernehmen:
+                // Alle <order> in unser kombiniertes <order_queue> Ã¼bernehmen:
 
                 DOM_FOR_EACH_ELEMENT( order_queue_element, e )
                 {
@@ -726,7 +726,7 @@ bool Standard_job::on_load() // Transaction* ta )
     {
         Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
-        set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
+        set_log();  // Wir haben einen eigenen PrÃ¤fix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
 
         if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
         {
@@ -808,8 +808,8 @@ bool Standard_job::on_activate()
                 set_next_start_time( Time::now() );
 
                 //TODO
-                // Man könnte hier warnen, wenn die Schedule keine Periode hat und in der Warteschlange eine Task ohne Startzeit ist.
-                // Die würde nie gestartet werden.
+                // Man kÃ¶nnte hier warnen, wenn die Schedule keine Periode hat und in der Warteschlange eine Task ohne Startzeit ist.
+                // Die wÃ¼rde nie gestartet werden.
 
                 result = true;
             }
@@ -1134,7 +1134,7 @@ void Standard_job::set_order_controlled()
 void Standard_job::set_idle_timeout( const Duration& d )
 { 
     _idle_timeout = d; 
-    if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+    if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Ãœberlauf gibt
 }
 
 //-------------------------------------------------------Standard_job::add_on_exit_commands_element
@@ -1151,11 +1151,11 @@ void Standard_job::add_on_exit_commands_element( const xml::Element_ptr& command
 }
 
 //-----------------------------------------------------------Standard_job::prepare_on_exit_commands
-/* commands-Exit Codes in OS Exit Codes umsetzen, damit Auswertung des OS ExitCodes am Task-Ende möglich ist
+/* commands-Exit Codes in OS Exit Codes umsetzen, damit Auswertung des OS ExitCodes am Task-Ende mÃ¶glich ist
 success => 0
 error   => Wird nicht umgesetzt, da mehrere Werte umfassen kann, alle Integers ungleich 0 (lt. XSD-Schema). Erst bei Task-Ende ausgewertet
-signal  => Nur für Unix, wenn Exit-Code < 0
-numerisch => Unverändert übernommen
+signal  => Nur fÃ¼r Unix, wenn Exit-Code < 0
+numerisch => UnverÃ¤ndert Ã¼bernommen
 Unix-Signalname (lt. XSD) => Signal-Tabellenwert * (-1)
 */
 void Standard_job::prepare_on_exit_commands()
@@ -1228,7 +1228,7 @@ void Standard_job::prepare_on_exit_commands()
 void Standard_job::set_log()
 {
     _log->set_job_name( name() );
-    _log->set_prefix( "Job  " + path().without_slash() );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
+    _log->set_prefix( "Job  " + path().without_slash() );       // Zwei Blanks, damit die LÃ¤nge mit "Task " Ã¼bereinstimmt
     _log->set_profile_section( profile_section() );
     _log->set_title( obj_name() );
     _log->set_mail_defaults();
@@ -1405,7 +1405,7 @@ ptr<Task> Standard_job::create_task(Com_variable_set* params, const string& task
     task->_obj_name    = S() << "Task " << path().without_slash() << ":" << task->_id;
     task->_name        = task_name;
     task->_force_start = start_at.not_zero()? force : false;
-    task->_start_at    = start_at;     // 0: Bei nächster Periode starten
+    task->_start_at    = start_at;     // 0: Bei nÃ¤chster Periode starten
 
     if( const Com_variable_set* p = dynamic_cast<const Com_variable_set*>( +params ) )  task->merge_params( p );
 
@@ -1734,7 +1734,7 @@ ptr<Task> Standard_job::get_task_from_queue( const Time& now )
     {
         task = *it;
 
-        if( task->_force_start )    // Start auch außerhalb einer Periode
+        if( task->_force_start )    // Start auch auÃŸerhalb einer Periode
         {
             if( task->_start_at <= now )  break;        // Task mit Startzeitpunkt
         }
@@ -1844,7 +1844,7 @@ void Standard_job::enqueue_task( Task* task )
     }
     else
     {
-        // _schedule_use ist noch nicht gesetzt (<schedule next_start_function=""> kann erst nach dem Laden des Scheduler-Skripts ausgeführt werden)
+        // _schedule_use ist noch nicht gesetzt (<schedule next_start_function=""> kann erst nach dem Laden des Scheduler-Skripts ausgefÃ¼hrt werden)
         // Kann nur beim Laden des Scheduler-Skripts passieren
     }
 
@@ -2011,7 +2011,7 @@ void Standard_job::on_call(const Task_closed_call& call) {
 //------------------------------------------Standard_job::on_call Start_when_directory_changed_call
 
 void Standard_job::on_call(const Start_when_directory_changed_call&) {
-    bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
+    bool ok = check_for_changed_directory(Time::now());         // Hier prÃ¼fen, damit Signal zurÃ¼ckgesetzt wird
     log()->debug(S() << "Start_when_directory_changed_call ok=" << ok);
     if (ok) try_start_task();
 }
@@ -2145,12 +2145,12 @@ void Standard_job::start_when_directory_changed( const string& directory_name, c
 #           ifdef Z_WINDOWS
                 //return;
 
-                // Windows: Überwachung erneuern
-                // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
-                // (weil Task_subsystem::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
+                // Windows: Ãœberwachung erneuern
+                // Wenn das Verzeichnis bereits Ã¼berwacht war, aber inzwischen gelÃ¶scht, und das noch nicht bemerkt worden ist
+                // (weil Task_subsystem::wait vor lauter JobaktivitÃ¤t nicht gerufen wurde), dann ist es besser, die Ãœberwachung 
                 // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
-                // Das ist bei lokalen Verzeichnissen nicht möglich, weil mkdir auf einen Fehler läuft, solange die Überwachung noch aktiv ist.
-                // Aber bei Netzwerkverzeichnissen gibt es keinen Fehler, und die Überwachung schweigt.
+                // Das ist bei lokalen Verzeichnissen nicht mÃ¶glich, weil mkdir auf einen Fehler lÃ¤uft, solange die Ãœberwachung noch aktiv ist.
+                // Aber bei Netzwerkverzeichnissen gibt es keinen Fehler, und die Ãœberwachung schweigt.
 
                 break;
 #            else
@@ -2182,14 +2182,14 @@ void Standard_job::start_when_directory_changed( const string& directory_name, c
 
             if( old_directory_watcher->signaled() ) 
             {
-                new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
+                new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Ãœberwachung hinÃ¼berretten
                 Z_LOG2( "scheduler",  Z_FUNCTION << " old directory watchers signal has been transfered to new watcher.\n" );
             }
         }
         catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
 
-        // Nicht aus der Liste löschen, das bringt init_start_when_directory_changed() durcheinander! _directory_watcher_list.erase( it );
-        *it = new_dw;       // Alte durch neue Überwachung ersetzen
+        // Nicht aus der Liste lÃ¶schen, das bringt init_start_when_directory_changed() durcheinander! _directory_watcher_list.erase( it );
+        *it = new_dw;       // Alte durch neue Ãœberwachung ersetzen
     }
 
     _call_register.call_at<Start_when_directory_changed_call>(Time(0));
@@ -2232,7 +2232,7 @@ bool Standard_job::check_for_changed_directory( const Time& now )
     for (Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end();) {
         Directory_watcher* directory_watcher = *it;
 
-        directory_watcher->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
+        directory_watcher->has_changed();                        // has_changed() fÃ¼r Unix (und seit 22.3.04 fÃ¼r Windows, siehe dort).
         
         if (directory_watcher->signaled_then_reset()) {
             Z_LOG2( "zschimmer", Z_FUNCTION << " something_done=true\n" );
@@ -2260,7 +2260,7 @@ string Standard_job::trigger_files( Task* task )
     {
         Directory_watcher* directory_watcher = *it;
 
-        if( directory_watcher->filename_pattern() != "" )   // Nur mit regex= überwachte Verzeichnisse sollen berücksichtigt werden
+        if( directory_watcher->filename_pattern() != "" )   // Nur mit regex= Ã¼berwachte Verzeichnisse sollen berÃ¼cksichtigt werden
         {
             try
             {
@@ -2422,7 +2422,7 @@ void Standard_job::select_period( const Time& now )
             _schedule_use->log_changed_active_schedule( now );
 
             Period next_period = _schedule_use->next_period(now);
-            if (_period.end() < next_period.begin())    // Folgende Periode schließt sich nicht nahtlos an?
+            if (_period.end() < next_period.begin())    // Folgende Periode schlieÃŸt sich nicht nahtlos an?
                 _wake_when_in_period = false;
 
             set_period(next_period);  
@@ -2504,7 +2504,7 @@ void Standard_job::set_next_start_time2(const Time& now, bool repeat) {
                 else
                 if( !_period.repeat().is_eternal() ) {
                     next_start_time = _period.next_repeated( now );
-                    if( _spooler->_debug && !next_start_time.is_never())  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+                    if( _spooler->_debug && !next_start_time.is_never())  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "NÃ¤chste Wiederholung wegen <period repeat=\""
                     if( next_start_time >= _period.end() ) {
                         Period next_period = _schedule_use->next_period( _period.end() );
                         if( _period.end()    == next_period.begin()  &&  
@@ -2514,7 +2514,7 @@ void Standard_job::set_next_start_time2(const Time& now, bool repeat) {
                             if( _spooler->_debug )  msg += " (in the following period)";
                         } else {
                             next_start_time = Time::never;
-                            if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
+                            if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "NÃ¤chste Startzeit wird bestimmt zu Beginn der nÃ¤chsten Periode "
                                               else  msg = "";
                         }
                     }
@@ -2547,13 +2547,13 @@ Time Standard_job::next_start_time() const
 }
 
 //----------------------------------------------------------------Standard_job::calculate_next_time
-// Für Task_subsystem
+// FÃ¼r Task_subsystem
 // Wird auch gerufen von Directory_file_order_source::start()
 
 void Standard_job::calculate_next_time( const Time& now )
 {
     // Algorithmus ist mit task_to_start() abgestimmt.
-    // (Schön wäre ja, wenn man beide zusammenfassen könnte und wenn ein String geliefert würde, warum der Job noch nicht startet, worauf er wartet.)
+    // (SchÃ¶n wÃ¤re ja, wenn man beide zusammenfassen kÃ¶nnte und wenn ein String geliefert wÃ¼rde, warum der Job noch nicht startet, worauf er wartet.)
 
     Time next_time = Time::never;
 
@@ -2693,7 +2693,6 @@ bool Standard_job::on_requisite_loaded( File_based* file_based )
         assert( file_based == _module->process_class() );
         assert( dynamic_cast<Process_class*>( file_based ) );
         if (_waiting_for_process) {
-            _waiting_for_process_try_again = true;
             notify_a_process_is_idle();
         }
     }
@@ -2791,7 +2790,7 @@ ptr<Task> Standard_job::task_to_start()
             }
             else
             {
-                // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
+                // Wir kÃ¶nnen die Task nicht starten, denn die Sperre ist nicht verfÃ¼gbar
                 task = NULL, cause = cause_none, has_order = false;      
 
                 if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests( (lock::Holder*)NULL );
@@ -2804,7 +2803,7 @@ ptr<Task> Standard_job::task_to_start()
     {
         if( _module->_use_process_class )
         {
-            // Ist ein Prozess verfügbar?
+            // Ist ein Prozess verfÃ¼gbar?
 
             Process_class* process_class = _module->process_class_or_null();
 
@@ -2817,7 +2816,7 @@ ptr<Task> Standard_job::task_to_start()
                     {
                         if( !_waiting_for_process  )
                         {
-                            Message_string m ( "SCHEDULER-949", _module->_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                            Message_string m ( "SCHEDULER-949", _module->_process_class_path.to_string() );   // " ist fÃ¼r einen verfÃ¼gbaren Prozess vorgemerkt" );
                             if( task )  m.insert( 2, task->obj_name() );
                             log()->info( m );
                             process_class->enqueue_waiting_job( this );
@@ -2831,7 +2830,7 @@ ptr<Task> Standard_job::task_to_start()
                 else
                     _waiting_for_process = true;
 
-                task = NULL, cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
+                task = NULL, cause = cause_none, has_order = false;      // Wir kÃ¶nnen die Task nicht starten, denn kein Prozess ist verfÃ¼gbar
             }
             else
             {
@@ -2855,11 +2854,11 @@ ptr<Task> Standard_job::task_to_start()
 
                 if( has_order ) 
                 {
-                    Order* order = task->fetch_and_occupy_order( now, Z_FUNCTION );   // Versuchen, den Auftrag für die neue Task zu belegen
+                    Order* order = task->fetch_and_occupy_order( now, Z_FUNCTION );   // Versuchen, den Auftrag fÃ¼r die neue Task zu belegen
                     
                     if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
                     {
-                        // Z_LOG2( "scheduler", obj_name() << ": fetch_and_occupy_order() failed, Task will be rejected\n" );  // müllt das Log zu
+                        // Z_LOG2( "scheduler", obj_name() << ": fetch_and_occupy_order() failed, Task will be rejected\n" );  // mÃ¼llt das Log zu
                         task->close(); 
                         task = NULL;
                     }
@@ -2933,7 +2932,7 @@ void Standard_job::try_start_task()
                 if( _min_tasks <= not_ending_tasks_count() )  
                     _start_min_tasks = false;
 
-                task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
+                task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiÃŸ
 
                 task_started = true;
                 _wake_when_in_period = false;
@@ -2993,14 +2992,14 @@ bool Standard_job::should_start_task_because_of_min_tasks()
 
 bool Standard_job::above_min_tasks() const
 {
-    return not_ending_tasks_count() > _min_tasks;       // Nur Tasks zählen, die nicht beendet werden
+    return not_ending_tasks_count() > _min_tasks;       // Nur Tasks zÃ¤hlen, die nicht beendet werden
 }
 
 //--------------------------------------------------------------------Standard_job::below_min_tasks
 
 bool Standard_job::below_min_tasks() const
 {
-    return _min_tasks > 0  &&  not_ending_tasks_count() < _min_tasks;       // Nur Tasks zählen, die nicht beendet werden
+    return _min_tasks > 0  &&  not_ending_tasks_count() < _min_tasks;       // Nur Tasks zÃ¤hlen, die nicht beendet werden
 }
 
 //-------------------------------------------------------------Standard_job::not_ending_tasks_count
@@ -3052,7 +3051,7 @@ void Standard_job::set_state( State new_state )
     if( _state == s_stopped 
      || _state == s_error      )  _next_start_time = Time::never;
 
-    if( old_state > s_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
+    if( old_state > s_initialized  ||  new_state != s_stopped )  // Ãœbergang von none zu stopped interessiert uns nicht
     {
         if( new_state == s_stopping
          || new_state == s_stopped  && is_visible()

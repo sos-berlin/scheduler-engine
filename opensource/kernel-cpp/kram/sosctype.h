@@ -10,7 +10,7 @@
  *      Copyright (c) 1987, 1994 by Borland International
  *      All Rights Reserved.
  *
- *      Ver‰ndert, jz 8.10.95
+ *      Ver√§ndert, jz 8.10.95
  */
 
 #ifndef __SOSCTYPE_H

@@ -20,4 +20,11 @@ final class ScalaUtilsTest extends FreeSpec {
     case class A(name: String, i: Int)
     List(A("eins", 1), A("zwei", 2)) toKeyedMap { _.i } shouldEqual Map(1 -> A("eins", 1), 2 -> A("zwei", 2))
   }
+
+  "cast" in {
+    val s: Any = "Hej!"
+    val string = cast[String](s)
+    string shouldEqual "Hej!"
+    intercept[ClassCastException]( cast[String](1) ) .getMessage should include ("expected instead of")
+  }
 }

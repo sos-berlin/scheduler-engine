@@ -30,7 +30,7 @@ struct Thread : Thread_base, Non_cloneable
 
     bool                        thread_is_running           ();
     Id                          thread_id                   ()                                      { return _thread_id; }
-  //void                    set_thread_id                   ( Id id )                               { _thread_id = id; }            // Nur sinnvoll, wenn das Objekt mal nicht als Thread läuft (z.B. Task_subsystem)
+  //void                    set_thread_id                   ( Id id )                               { _thread_id = id; }            // Nur sinnvoll, wenn das Objekt mal nicht als Thread lÃ¤uft (z.B. Task_subsystem)
     HANDLE                      thread_handle               ()                                      { return _thread_handle; }
 
     void                    set_thread_name                 ( const string& name );
@@ -48,7 +48,7 @@ struct Thread : Thread_base, Non_cloneable
 
   public:
     Fill_zero                  _zero_;
-    Event                      _thread_handle;              // Trägt den Thread-Handle und signalisiert Ende des Threads
+    Event                      _thread_handle;              // TrÃ¤gt den Thread-Handle und signalisiert Ende des Threads
     Id                         _thread_id;
 };
 

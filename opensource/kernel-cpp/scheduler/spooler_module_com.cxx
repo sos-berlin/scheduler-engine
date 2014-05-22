@@ -22,7 +22,7 @@ namespace scheduler {
 bool check_result( const Variant& vt )
 {
     if( vt.vt == VT_BOOL     )  return V_BOOL(&vt) != 0;
-    if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
+    if( vt.vt == VT_EMPTY    )  return true;                       // Keine RÃ¼ckgabe? True, also weiter machen
     if( vt.vt == VT_ERROR  &&  vt.scode == DISP_E_UNKNOWNNAME )  return true;   // Funktion nicht bekannt?
     if( vt.vt == VT_NULL     )  return false;                      // NULL? False
     if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende

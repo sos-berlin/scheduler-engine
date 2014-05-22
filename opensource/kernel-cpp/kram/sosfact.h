@@ -1,4 +1,4 @@
-// sosfact.h                                            © 1995 SOS GmbH Berlin
+// sosfact.h                                            Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSFACT_H
 #define __SOSFACT_H

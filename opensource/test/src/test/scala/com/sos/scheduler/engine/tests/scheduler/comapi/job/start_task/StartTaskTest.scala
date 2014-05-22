@@ -18,7 +18,7 @@ final class StartTaskTest extends FunSuite with ScalaSchedulerTest {
   }
 
   @EventHandler def handle(e: TaskEndedEvent) {
-    if (e.jobPath == JobPath.of("/test-b")) {
+    if (e.jobPath == JobPath("/test-b")) {
       scheduler.instance[VariableSet].apply("test-b") should equal ("TEST-TEST")
       controller.terminateScheduler()
     }

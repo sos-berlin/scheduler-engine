@@ -25,7 +25,7 @@ struct Java_thread_data
 
     Fill_zero                  _zero_;
 
-    z::javabridge::Java_idispatch_container   _idispatch_container;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
+    z::javabridge::Java_idispatch_container   _idispatch_container;        // HÃ¤lt alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
 };
 
 //-----------------------------------------------------------------------Java_idispatch_stack_frame
@@ -38,7 +38,7 @@ struct Java_idispatch_stack_frame
 };
 
 //-----------------------------------------------------------------------------Java_module_instance
-// Für Java-Objekte
+// FÃ¼r Java-Objekte
 
 struct Java_module_instance : Module_instance
 {
@@ -76,7 +76,7 @@ struct Java_module_instance : Module_instance
 };
 
 //----------------------------------------------------------------------Java_module_script_instance
-// Für Scripting-Objekte via javax
+// FÃ¼r Scripting-Objekte via javax
 
 struct Java_module_script_instance : Java_module_instance
 {

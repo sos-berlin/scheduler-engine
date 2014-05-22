@@ -1,5 +1,5 @@
 //#define MODULE_NAME "odbctype"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "precomp.h"
@@ -202,7 +202,7 @@ void Odbc_c_date_time_type::read_text( Byte* p, const char* t, const Text_format
 
     sos_optional_date_time_type.read_text( (Byte*)&date, t, f );
 
-    //? if( date.null() ) ... einfügen? jz 4.5.98
+    //? if( date.null() ) ... einfÃ¼gen? jz 4.5.98
 
     ((Odbc_c_date_time*)p)->year     = date.year();
     ((Odbc_c_date_time*)p)->month    = date.month();
@@ -444,7 +444,7 @@ Sos_odbc_binding& Sos_odbc_binding::operator= ( const Sos_odbc_binding& o )
 
 void Sos_odbc_binding::prepare( Field_type* for_default )
 {
-    // _fCType, _cbValueMax müssen gesetzt sein.
+    // _fCType, _cbValueMax mÃ¼ssen gesetzt sein.
     // _field._type_ptr und _default_length werden hier versorgt.
 
     SWORD                fCType = _fCType;
@@ -484,7 +484,7 @@ void Sos_odbc_binding::prepare( Field_type* for_default )
             
             Sos_ptr<String0_type> t = SOS_NEW( String0_type( _cbValueMax - 1 ) );
 
-            if( _fSqlType == SQL_CHAR )  t->_rtrim = true;  // Hängende Blanks abschneiden (Oracle liefert sie)
+            if( _fSqlType == SQL_CHAR )  t->_rtrim = true;  // HÃ¤ngende Blanks abschneiden (Oracle liefert sie)
             
             _field->_type_ptr = +t;
 

@@ -10,7 +10,7 @@ import javax.ws.rs._
 import javax.ws.rs.core.{MediaType, Response}
 
 @Path("order")
-class OrderService @Inject()(
+class OrderService @Inject private(
     @QueryParam("jobChain") @DefaultValue("") jobChainPathString: String,
     @PathParam("orderId") @DefaultValue("") orderId: OrderId,
     orderSubsystem: OrderSubsystem,

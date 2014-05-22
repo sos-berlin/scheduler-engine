@@ -58,7 +58,7 @@ void clear_environment_from_sos_ini()
 /*
 string substitute_environment_variables( const string& value )
 {
-    if( !strchr( value.c_str(), '$' ) )  return value;      // Abkürzung
+    if( !strchr( value.c_str(), '$' ) )  return value;      // AbkÃ¼rzung
 
 
     string result;

@@ -1,4 +1,4 @@
-// zschimmer.h                                      ©2000 Joacim Zschimmer
+// zschimmer.h                                      Â©2000 Joacim Zschimmer
 // $Id: message.h 14183 2011-01-18 17:43:56Z rb $
 
 #ifndef __ZSCHIMMER_MESSAGE_H
@@ -16,7 +16,7 @@ struct Object;
 struct Host_and_port;
 
 void        insert_into_message( Message_string* m, int index, int64    ) throw();
-void        insert_into_message( Message_string* m, int index, const char* ) throw();               // Für gcc
+void        insert_into_message( Message_string* m, int index, const char* ) throw();               // FÃ¼r gcc
 inline void insert_into_message( Message_string* m, int index, long   v ) throw()                   { return insert_into_message( m, index, (int64)v ); }
 inline void insert_into_message( Message_string* m, int index, ulong  v ) throw()                   { return insert_into_message( m, index, (int64)v ); }
 inline void insert_into_message( Message_string* m, int index, int    v ) throw()                   { return insert_into_message( m, index, (int64)v ); }

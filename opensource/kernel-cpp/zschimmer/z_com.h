@@ -1,6 +1,6 @@
 // $Id: z_com.h 13404 2008-02-12 08:09:25Z jz $
 
-// §1719
+// Â§1719
 
 #ifndef __Z_COM_H
 #define __Z_COM_H
@@ -16,7 +16,7 @@
 
 //-------------------------------------------------------------------------------------------------
 
-inline bool                     operator <                  ( const CLSID& a, const CLSID& b )          { return memcmp( &a, &b, sizeof a ) < 0; }       // Für map<CLSID>
+inline bool                     operator <                  ( const CLSID& a, const CLSID& b )          { return memcmp( &a, &b, sizeof a ) < 0; }       // FÃ¼r map<CLSID>
 inline size_t                   hash_value                  ( const CLSID& clsid )                      { return clsid.Data1 ^ clsid.Data3 ^ clsid.Data4[7]; }
 Z_DEFINE_GNU_HASH_VALUE( , CLSID )
 
@@ -32,7 +32,7 @@ namespace com {
 
 #define STANDARD_LCID  ( MAKELCID( MAKELANGID( LANG_ENGLISH, SUBLANG_DEFAULT ), SORT_DEFAULT ) )
 
-#define Z_CLSCTX_SEPARATE_PROCESS ( (CLSCTX)0x1000000 )     // Erweiterung für com_create_instance(). Der COM-Server läuft in einem eigenen, abhängigen Prozess
+#define Z_CLSCTX_SEPARATE_PROCESS ( (CLSCTX)0x1000000 )     // Erweiterung fÃ¼r com_create_instance(). Der COM-Server lÃ¤uft in einem eigenen, abhÃ¤ngigen Prozess
 
 const int windows_codepage_iso_8859_1 = 28591;              // CP_UTF8 ist definiert, aber nicht diese codepage
 
@@ -73,7 +73,7 @@ string                          string_from_ole             ( const OLECHAR*, in
 string                          string_from_bstr            ( const BSTR );
 
 string                          string_from_variant         ( const VARIANT&, LCID = STANDARD_LCID );
-string                          string_from_variant_2       ( const VARIANT&, LCID = STANDARD_LCID );     // Für VariantChangeTypeEx()
+string                          string_from_variant_2       ( const VARIANT&, LCID = STANDARD_LCID );     // FÃ¼r VariantChangeTypeEx()
 string                          debug_string_from_variant   ( const VARIANT& );                     // Auf jeden Fall einen String liefern, auch wenn's keinen gibt.
 bool                            bool_from_variant           ( const VARIANT& );
 int                             int_from_variant            ( const VARIANT& );
@@ -147,8 +147,8 @@ HRESULT                         Bstr_to_bstr                ( const BSTR, BSTR* 
 HRESULT                         Bstr_to_string              ( const BSTR, string* result ) throw();
 HRESULT                         Olechar_to_string           ( const OLECHAR*r, int len, string* result ) throw();
 
-HRESULT                         Variant_to_string           ( const VARIANT&, string* result, LCID = STANDARD_LCID );   // Keine Änderung bei is_missing()
-HRESULT                         Variant_to_bool             ( const VARIANT&, bool* );                                  // Keine Änderung bei is_missing()
+HRESULT                         Variant_to_string           ( const VARIANT&, string* result, LCID = STANDARD_LCID );   // Keine Ã„nderung bei is_missing()
+HRESULT                         Variant_to_bool             ( const VARIANT&, bool* );                                  // Keine Ã„nderung bei is_missing()
 
 HRESULT                         Name_to_clsid               ( const OLECHAR* class_name, CLSID* result );
 HRESULT                         Name_to_clsid               ( const char*    class_name, CLSID* result );
@@ -157,7 +157,7 @@ inline HRESULT                  Name_to_clsid               ( const string&  cla
 HRESULT                         z_SafeArrayGetVartype       ( SAFEARRAY*, VARTYPE* result );
 
 //--------------------------------------------------------------------------------------Com_context
-// Für DllMain(Z_DLL_COM_ATTACH)// Der Aufbau muss stabil bleiben, er wird zwischen Hauptprogramm und nachgeladenen Modulen austauscht!
+// FÃ¼r DllMain(Z_DLL_COM_ATTACH)// Der Aufbau muss stabil bleiben, er wird zwischen Hauptprogramm und nachgeladenen Modulen austauscht!
 struct Com_context
 {
     int                         version;
@@ -254,7 +254,7 @@ struct Bstr
                                 Bstr                        ( const Bstr& );
                                 Bstr                        ( const OLECHAR* s, int size )          : _bstr( NULL ) { alloc_string( s, size ); }
                                 Bstr                        ( const OLECHAR* s )                    : _bstr( NULL ) { alloc_string( s ); }
-                              //Bstr                        ( const BSTR s )                        : _bstr( NULL ) { alloc_string( s, ::SysStringLen(s) ); }   // Vorsicht! typedef wchar_t* BSTR, SysStringLen() stürzt ab!
+                              //Bstr                        ( const BSTR s )                        : _bstr( NULL ) { alloc_string( s, ::SysStringLen(s) ); }   // Vorsicht! typedef wchar_t* BSTR, SysStringLen() stÃ¼rzt ab!
 
 #ifndef Z_OLECHAR_IS_WCHAR
                                 Bstr                        ( const wchar_t* s )                    : _bstr( NULL ) { alloc_string( s ); }
@@ -364,7 +364,7 @@ struct Bstr
 };
 
 //---------------------------------------------------------------------------------hash_value(Bstr)
-// Für stdext::hash_map<>
+// FÃ¼r stdext::hash_map<>
 
 inline size_t                   hash_value                  ( const Bstr& bstr )                    { return bstr.hash_value(); }
 
@@ -442,7 +442,7 @@ struct Variant : VARIANT
 {
     enum                        Vt_error                { vt_error };
     enum                        Vt_array                { vt_array };
-    enum                        Vt_missing              { vt_missing };                             // Für optionale Parameter: VT_ERROR, DISP_E_PARAMNOTFOUND
+    enum                        Vt_missing              { vt_missing };                             // FÃ¼r optionale Parameter: VT_ERROR, DISP_E_PARAMNOTFOUND
     enum                        Vt_empty                { vt_empty };
 
 

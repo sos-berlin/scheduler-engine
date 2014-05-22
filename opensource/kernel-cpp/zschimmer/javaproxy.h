@@ -10,8 +10,8 @@ namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace zschimmer { 
 namespace javabridge {
 
-// Ermöglicht die Übergabe von const char* und string an ein proxy_jobject<java::lang::String>.
-// Damit können C++-Strings an Java-Proxies übergeben werden.
+// ErmÃ¶glicht die Ãœbergabe von const char* und string an ein proxy_jobject<java::lang::String>.
+// Damit kÃ¶nnen C++-Strings an Java-Proxies Ã¼bergeben werden.
 
 template<> struct proxy_jobject< ::javaproxy::java::lang::String > : Proxy_jobject
 {

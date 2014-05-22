@@ -140,7 +140,7 @@ struct Time
     Time                        utc_from_time_zone          (const string&) const;
     Time                        local_time                  (const string& time_zone) const;
 
-    string                      db_string                   ( With_ms = with_ms ) const;    // Für Datenbank
+    string                      db_string                   ( With_ms = with_ms ) const;    // FÃ¼r Datenbank
     string                      utc_string                  ( With_ms = with_ms ) const;
     string                      without_timezone_string     ( With_ms = with_ms ) const;
     string                      as_string                   (const string& time_zone_name, With_ms = with_ms ) const;                        
@@ -150,7 +150,7 @@ struct Time
     static Time                 now                         ();
     static Time                 local_now                   ();
 
-#   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
+#   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen fÃ¼hrt mit gcc 3.3 zum Absturz in string::string
         string                 _time_as_string;
 #   endif    
 

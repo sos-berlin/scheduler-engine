@@ -1,4 +1,4 @@
-// sqlutil.h                            ©1996 SOS GmbH Berlin
+// sqlutil.h                            Â©1996 SOS GmbH Berlin
 
 #ifndef __SQLUTIL_H
 #define __SQLUTIL_H

@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosstrng"
-// sosstrng.cxx 		(c) Jörg Schwiemann
+// sosstrng.cxx 		(c) JÃ¶rg Schwiemann
 
 #include "../kram/sysdep.h"
 #include <stdlib.h>

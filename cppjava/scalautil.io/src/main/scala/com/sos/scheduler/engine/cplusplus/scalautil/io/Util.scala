@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
 import org.slf4j.LoggerFactory
+import scala.language.reflectiveCalls
 
 // Kann gelegentlich verallgemeinert werden zu com.sos.scalautil.io
 

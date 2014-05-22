@@ -24,7 +24,7 @@ extern "C"
     
     Weitere Optionen: 
     -Dprefix=/opt/perl5
-    -d (lässt Perl sich selbst antworten)
+    -d (lÃ¤sst Perl sich selbst antworten)
     -Duseshrplib, um libperl.so zu erzeugen
 
 
@@ -116,7 +116,7 @@ void Perl::close()
         PERL_SET_CONTEXT( PERL );
 
 #       ifdef Z_SOLARIS
-            if( !_start )  _script = "$a=1;",  start();        // Damit perl_destruct() nicht abstürtzt
+            if( !_start )  _script = "$a=1;",  start();        // Damit perl_destruct() nicht abstÃ¼rtzt
 #       endif
 
         PL_perl_destruct_level = 1;   // Setting PL_perl_destruct_level to 1 makes everything squeaky clean
@@ -333,7 +333,7 @@ void Perl::call( const string& function_name, const list<Variant>& params, VARIA
     if( error != "" )  
     {
 #       ifdef Z_HPUX
-            fprintf( stderr, "FEHLER: %s\n", error.c_str() );    // Nach throw stürzt das Programm ab. 12.11.03
+            fprintf( stderr, "FEHLER: %s\n", error.c_str() );    // Nach throw stÃ¼rzt das Programm ab. 12.11.03
 #       endif
 
         throw_xc( "PERL", error );

@@ -1,5 +1,5 @@
-// precomp.cxx                           ©1997 SOS GmbH, Joacim Zschimmer
+// precomp.cxx                           Â©1997 SOS GmbH, Joacim Zschimmer
 
-// Für precompiled headers
+// FÃ¼r precompiled headers
 
 #include "precomp.h"

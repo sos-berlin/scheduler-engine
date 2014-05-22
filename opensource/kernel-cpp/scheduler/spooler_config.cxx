@@ -54,7 +54,7 @@ xml::Element_ptr default_single_element( const xml::Element_ptr& element, const 
     if (xml::Element_ptr result = optional_single_element( element, name ))
         return result;
     else
-        return element.ownerDocument().createElement( name );     // K¸nstliches Element mit Attributwerten aus der DTD
+        return element.ownerDocument().createElement( name );     // K√ºnstliches Element mit Attributwerten aus der DTD
 }
 
 //-----------------------------------------------------------------------------------single_element
@@ -173,7 +173,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
                 _web_services->set_dom( e );
             }
             else
-            if( e.nodeName_is( "web_services" ) )       // Veraltet, heiﬂt jetzt <http_server>
+            if( e.nodeName_is( "web_services" ) )       // Veraltet, hei√üt jetzt <http_server>
             {
                 _log->info( message_string( "SCHEDULER-847", "<http_server>", e.nodeName() ) );
                 _web_services->set_dom( e );

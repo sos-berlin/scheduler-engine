@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.plugins.js644;
 
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.job.JobPath;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
@@ -22,8 +22,8 @@ import static com.sos.scheduler.engine.plugins.js644.JS644PluginIT.M.jobchainAct
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class JS644PluginIT extends SchedulerTest {
-    private static final JobPath jobPath = JobPath.of("/a");
-    private static final JobChainPath jobChainPath = JobChainPath.of("/A");
+    private static final JobPath jobPath = new JobPath("/a");
+    private static final JobChainPath jobChainPath = new JobChainPath("/A");
     private static final Duration timeout = shortTimeout;
 
     enum M { jobActivated, jobchainActivated }
@@ -41,11 +41,8 @@ public final class JS644PluginIT extends SchedulerTest {
     private void modifyJobFile() throws IOException {
         File jobFile = fileBasedFile(instance(JobSubsystem.class).job(jobPath));
         assertThat(jobFile + " does not exist", jobFile.exists());
-        OutputStream out = new FileOutputStream(jobFile, true);
-        try {
+        try (OutputStream out = new FileOutputStream(jobFile, true)) {
             out.write(' ');
-        } finally {
-            out.close();
         }
     }
 
@@ -60,6 +57,6 @@ public final class JS644PluginIT extends SchedulerTest {
     }
 
     private File fileBasedFile(Job o) {
-        return new File(controller().environment().liveDirectory(), o.path().string() + ".job.xml");
+        return new File(controller().environment().liveDirectory(), o.getPath().string() + ".job.xml");
     }
 }

@@ -1,6 +1,6 @@
 #include "precomp.h"
 
-#define __USELOCALES__      // für POSIX-strftime
+#define __USELOCALES__      // fÃ¼r POSIX-strftime
 
 
 #include <stdio.h>
@@ -27,7 +27,7 @@
 #if defined SYSTEM_MICROSOFT
 #   include <sys/types.h>
 #   include <sys/timeb.h>
-#   include "olestd.h"            // w_as_string für Versionsinfo
+#   include "olestd.h"            // w_as_string fÃ¼r Versionsinfo
 #endif
 
 #if defined SYSTEM_LINUX
@@ -58,7 +58,7 @@ namespace sos {
 
 
 const int buffer_size = 300;
-const int suppress_repeated = 3;    // Bei mehr als soviele gleiche Zeilen die Ausgabe unterdrücken
+const int suppress_repeated = 3;    // Bei mehr als soviele gleiche Zeilen die Ausgabe unterdrÃ¼cken
 
 bool Log_ptr::static_is_demo_version = true;
 
@@ -423,7 +423,7 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
     THREAD_LOCK( sos_static_ptr()->_log_lock )
     {
         char  line [ buffer_size + 50 ];
-        int text_begin = 0;               // Hier beginnt der eigentliche Text (nach den Spalten für Zeit etc.)
+        int text_begin = 0;               // Hier beginnt der eigentliche Text (nach den Spalten fÃ¼r Zeit etc.)
         char* l     = line;
         char* l_end = line + sizeof line - 5;
         char* p     = pbase();
@@ -439,7 +439,7 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
                 _time_stamp = time( 0 );
 #           endif
 
-            _elapsed_msec = elapsed_msec();     // (Zeit für das erste LOG-Zeichen geht mit ein)
+            _elapsed_msec = elapsed_msec();     // (Zeit fÃ¼r das erste LOG-Zeichen geht mit ein)
         }
 
         if( b != EOF ) {

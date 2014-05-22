@@ -25,7 +25,7 @@ struct Mail_static : Sos_self_deleting
     string                     _queue_dir;
     string                     _smtp_server;
     bool                       _smtp_username_set;
-    string                     _smtp_username;          // Nur für sos_mail_jmail.cxx, soll aus factory.ini [smtp] gelesen werden
+    string                     _smtp_username;          // Nur fÃ¼r sos_mail_jmail.cxx, soll aus factory.ini [smtp] gelesen werden
     string                     _smtp_password;
     string                     _cc;
     string                     _bcc;
@@ -100,7 +100,7 @@ struct Message : Sos_self_deleting
 
     Fill_zero                  _zero_;
     Sos_ptr<Mail_static>       _static;
-    string                     _queue_dir;                  // Verzeichnis für eMail, die wegen Fehler nicht verschickt werden kann
+    string                     _queue_dir;                  // Verzeichnis fÃ¼r eMail, die wegen Fehler nicht verschickt werden kann
     string                     _dequeue_log;
     bool                       _queue_only;
 };

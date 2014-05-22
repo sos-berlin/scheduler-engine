@@ -132,7 +132,7 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
 {
 /*  Was passiert, wenn ein zweiter Job try_to_free_process() rufen?
     Der beendet doch keine zweite Task, weil die vom ersten Job beendete findet!
-    Die Task müsste markiert werden. 
+    Die Task mÃ¼sste markiert werden. 
     Aber das wird zu komplizert, wir lassen das erstmal.
 
     Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it )

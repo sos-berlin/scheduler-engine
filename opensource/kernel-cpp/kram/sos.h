@@ -34,7 +34,7 @@ inline void* operator new( size_t, void* ptr )
 }
 
 #ifdef SYSTEM_DELETE_WITH_PARAMS
-    inline void operator delete( void* ptr, void* )		// Für VC++ 6: warning C4291
+    inline void operator delete( void* ptr, void* )		// FÃ¼r VC++ 6: warning C4291
     {
     }
 #endif
@@ -52,7 +52,7 @@ namespace sos
 #   define SOS_OPTIMIZE_SIZE
 #endif
 //#define SOS_OPTIMIZE_SPEED
-//#define SOS_DEBUGGED         // Auf zusätzliche Prüfungen zur Laufzeit verzichten
+//#define SOS_DEBUGGED         // Auf zusÃ¤tzliche PrÃ¼fungen zur Laufzeit verzichten
 
 //----------------------------------------------------------------------------------CONCATENATE
 
@@ -100,7 +100,7 @@ struct Has_constructions_module_name
 // #defines, die Methoden deklarieren und definieren:
 
 
-// DECLARE_BIT deklariert und definiert Methoden für ein Bit in einem Byte
+// DECLARE_BIT deklariert und definiert Methoden fÃ¼r ein Bit in einem Byte
 
 #define DECLARE_BIT(name,byte,mask) \
     Bool name() const    { return (byte & mask) != 0; } \
@@ -108,7 +108,7 @@ struct Has_constructions_module_name
 
 //------------------------------------------------------------------------------DECLARE_BIT_NOT
 
-// DECLARE_BIT_NOT deklariert und definiert Methoden für ein invertiertes Bit in einem Byte
+// DECLARE_BIT_NOT deklariert und definiert Methoden fÃ¼r ein invertiertes Bit in einem Byte
 
 #define DECLARE_BIT_NOT(name,byte,mask) \
     Bool name() const    { return (byte & mask) == 0; } \
@@ -116,7 +116,7 @@ struct Has_constructions_module_name
 
 //---------------------------------------------------------------------------------DECLARE_BITS
 
-// DECLARE_BITS deklariert und definiert Methoden für Bits in einer Variable
+// DECLARE_BITS deklariert und definiert Methoden fÃ¼r Bits in einer Variable
 
 #define DECLARE_BITS(Type,name,var,shift,length) \
     Type name() const    { return (Type) ( ((unsigned int)var >> shift) & ~(-1 << length) ); } \
@@ -124,16 +124,16 @@ struct Has_constructions_module_name
 
 //-----------------------------------------------------------------------DECLARE_ACCESS_METHODS
 
-// DECLARE_ACCESS_METHODS deklariert und definiert Methoden für den Zugriff auf eine Variable
+// DECLARE_ACCESS_METHODS deklariert und definiert Methoden fÃ¼r den Zugriff auf eine Variable
 
 #define DECLARE_ACCESS_METHODS( Type, name )                           \
     void            name( Type const& value )  { _##name = value; }    \
     Type const&     name() const               { return _##name;  }    \
-  /*Type _##name;  wird außerhalb des Makros deklariert */
+  /*Type _##name;  wird auÃŸerhalb des Makros deklariert */
 
 //-----------------------------------------------------------------------DECLARE_PRIVATE_MEMBER
 
-// DECLARE_PRIVATE_MEMBER deklariert ein privates Element und die öffentlichen Methoden für den Zugriff
+// DECLARE_PRIVATE_MEMBER deklariert ein privates Element und die Ã¶ffentlichen Methoden fÃ¼r den Zugriff
 
 #define DECLARE_PRIVATE_MEMBER( Type, name )  \
   public:                                     \
@@ -146,7 +146,7 @@ struct Has_constructions_module_name
 
 //------------------------------------------------------------------------DECLARE_PUBLIC_MEMBER
 
-// DECLARE_PUBLIC_MEMBER deklariert ein öffentliches Element und die öffentlichen Methoden für den Zugriff
+// DECLARE_PUBLIC_MEMBER deklariert ein Ã¶ffentliches Element und die Ã¶ffentlichen Methoden fÃ¼r den Zugriff
 
 #define DECLARE_PUBLIC_MEMBER( Type, name )   \
   public:                                     \
@@ -167,7 +167,7 @@ struct Has_constructions_module_name
 
 //----------------------------------------------------------------------------------------RENEW
 
-// Zerstören und wieder konstruieren:
+// ZerstÃ¶ren und wieder konstruieren:
 #define RENEW( OBJECT, TYPE )           \
     do {                                \
         (OBJECT).~TYPE();               \
@@ -389,7 +389,7 @@ template<class T>
 inline T max( T a, T b )  { return a > b ? a : b; }
 //inline long max( long a, long b )  { return a > b ? a : b; }
 
-#define __MINMAX_DEFINED            // Für Borland C++ 4.02  stdlib.h
+#define __MINMAX_DEFINED            // FÃ¼r Borland C++ 4.02  stdlib.h
 
 //-------------------------------------------------------------------------------------long2int
 
@@ -489,9 +489,9 @@ inline void exchange( TYPE* a, TYPE* b )
 
 enum Close_mode
 {
-	close_normal,           // Objekt normal schließen
-	close_error,            // Änderungen nach Möglichkeit nicht durchführen.
-    close_cursor            // Nur für Any_file
+	close_normal,           // Objekt normal schlieÃŸen
+	close_error,            // Ã„nderungen nach MÃ¶glichkeit nicht durchfÃ¼hren.
+    close_cursor            // Nur fÃ¼r Any_file
 };
 
 //---------------------------------------------------------------------------------_argc, _argv
@@ -556,7 +556,7 @@ inline void xlat( void* data, unsigned int length, const Byte* table )
 
 //=============================================================================================
 
-#include "area.h"           // für SHOW_MSG
+#include "area.h"           // fÃ¼r SHOW_MSG
 #include "log.h"
 
 namespace sos

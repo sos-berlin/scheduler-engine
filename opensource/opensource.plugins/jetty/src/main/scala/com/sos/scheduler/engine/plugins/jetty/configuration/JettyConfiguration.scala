@@ -7,21 +7,22 @@ import java.io.File
 import java.net.URL
 import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.server.Handler
+import org.eclipse.jetty.servlet.ServletContextHandler
 import scala.collection.immutable
 
 final case class JettyConfiguration(
   portOption: Option[TcpPortNumber] = None,
-  contextPath: String = "",
+  contextPath: String = Config.contextPath,
   webAppContextConfigurationOption: Option[WebAppContextConfiguration] = None,
   jettyXMLURLOption: Option[URL] = None,
   accessLogFileOption: Option[File] = None,
   loginServiceOption: Option[LoginService] = None,
-  handlers: immutable.Seq[Handler] = Nil
+  handlers: immutable.Seq[Handler] = Nil,
+  servletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil,
+  gzip: Boolean = false   // GzipFilter funktioniert nicht mit Spray (wegen async?)
 )
 
 object JettyConfiguration {
-  private val testPortRange = 40000 until 50000
-
   final case class WebAppContextConfiguration(
     resourceBaseURL: URL,
     webXMLFileOption: Option[File] = None)
@@ -37,7 +38,7 @@ object JettyConfiguration {
     }
 
     def random() = new TcpPortNumber {
-      lazy val value = findRandomFreeTcpPort(testPortRange)
+      lazy val value = findRandomFreeTcpPort()
     }
   }
 }

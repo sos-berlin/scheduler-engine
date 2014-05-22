@@ -83,7 +83,7 @@ struct Sql_file : Abs_file
     Bool                           _opened;
     Bool                           _odbc_mode;
 
-    int                            _required_length;        // minimale Satzlänge bis zum Schlüssel
+    int                            _required_length;        // minimale SatzlÃ¤nge bis zum SchlÃ¼ssel
 
     //jz30.11.95 const Field_type*              _record_type_ptr;
     //jz30.11.95 const Field_descr*             _key_descr_ptr;

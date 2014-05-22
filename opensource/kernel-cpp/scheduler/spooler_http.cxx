@@ -9,16 +9,16 @@
     Html_chunk_reader
     String_chunk_reader
 
-    Notdürftige Implementierung von HTTP 1.1
+    NotdÃ¼rftige Implementierung von HTTP 1.1
     Siehe http://www.w3.org/Protocols/rfc2616/rfc2616.html
 */
 
 
 /*
-    Mögliche Verbesserungen:
+    MÃ¶gliche Verbesserungen:
 
-    HTTP 1.1 ist nur dürftig implementiert.
-    Pipelining ist derzeit nicht möglich. Dazu muss ein signalisiertes recv während send() möglich sein --> Async_socket umarbeiten, getrenntes _state für recv() und send()
+    HTTP 1.1 ist nur dÃ¼rftig implementiert.
+    Pipelining ist derzeit nicht mÃ¶glich. Dazu muss ein signalisiertes recv wÃ¤hrend send() mÃ¶glich sein --> Async_socket umarbeiten, getrenntes _state fÃ¼r recv() und send()
     "Transfer-Encoding: chunked" nicht, wenn nur ein oder kein Chunk da ist (z.B.String_chunk_reader)
     Mehrere Chunks mit einem send-scattered() senden
     _operation->begin() schon wenn Kopf empfangen. Antworten und Anfrage empfangen gleichzeitig!  Request->get_part()
@@ -136,7 +136,7 @@ ptr<Http_server_interface> new_http_server( Scheduler* scheduler )
 string date_string( time_t t )
 {
     char time_text[] = "Sun Jan 01 00:00:00 1900 GMT";
-    //                  ^^^^^^^^^^^^^^^^^^^^^^^^^ wird von asctime() überschrieben
+    //                  ^^^^^^^^^^^^^^^^^^^^^^^^^ wird von asctime() Ã¼berschrieben
 
 #   ifdef Z_WINDOWS
         asctime_s( time_text, sizeof time_text, gmtime( &t ) );
@@ -145,7 +145,7 @@ string date_string( time_t t )
         asctime_r( gmtime_r( &t, &tm ), time_text );
 #   endif
     
-    strcpy( time_text + sizeof time_text - 5, " GMT" );   // asctime() hat das überschrieben
+    strcpy( time_text + sizeof time_text - 5, " GMT" );   // asctime() hat das Ã¼berschrieben
     return time_text;
 }
 
@@ -481,7 +481,7 @@ void Parser::add_text( const char* text, int len )
         size_t rest = _text.length() - ( _body_start + _content_length );
         if( rest > 0 )  
         {
-            if( rest == 2  &&  string_ends_with( _text, "\r\n" ) )  {}  // Okay für Firefox
+            if( rest == 2  &&  string_ends_with( _text, "\r\n" ) )  {}  // Okay fÃ¼r Firefox
                                                               else  z::throw_xc( "SPOOLER-HTTP toomuchdata" );
         }
 
@@ -494,7 +494,7 @@ void Parser::add_text( const char* text, int len )
 bool Parser::is_complete()
 {
     return _reading_body  &&  (    _text.length() == _body_start + _content_length
-                                || _text.length() == _body_start + _content_length + 2 );  // Firefox hängt noch ein \r\n an
+                                || _text.length() == _body_start + _content_length + 2 );  // Firefox hÃ¤ngt noch ein \r\n an
 }
 
 //-----------------------------------------------------------------------------Parser::parse_header
@@ -652,7 +652,7 @@ Operation::Operation( Operation_connection* pc )
     
 void Operation::close()
 { 
-    /* Für Order alles am Leben lassen:
+    /* FÃ¼r Order alles am Leben lassen:
     if( _web_service_operation )  _web_service_operation->close(),  _web_service_operation = NULL;
     if( _response )  _response->close(),  _response = NULL;
     if( _parser   )  _parser  ->close(),  _parser   = NULL;
@@ -667,7 +667,7 @@ void Operation::close()
 void Operation::link_order( Order* order )
 {
     _order = order;
-    order->set_http_operation( this );       // Order wird zweiter Eigentümer von Web_service_operation, neben Http_operation
+    order->set_http_operation( this );       // Order wird zweiter EigentÃ¼mer von Web_service_operation, neben Http_operation
 
     if( _web_service_operation )  order->set_web_service( _web_service_operation->web_service() );
 }
@@ -693,7 +693,7 @@ void Operation::unlink_order()
 
 void Operation::on_first_order_processing( Task* )
 {
-    // <web_service timeout="">: Die Frist gilt nur bis zur ersten Ausführung
+    // <web_service timeout="">: Die Frist gilt nur bis zur ersten AusfÃ¼hrung
 
     set_gmtimeout( double_time_max );       // Timeout abschalten
 }
@@ -759,7 +759,7 @@ void Operation::begin()
                 http_file_directory = _spooler->_web_services->http_file_directory_by_url_path_or_null( directory );
 
                 // Statt execute_http() sollte direkt der Zweig von execute_http() aufrufen werden, der Dateien liefert (also nicht "show_log?" etc.)
-                // Auch könnte execute_http() von Command_processor nach Web_service, Http_file_directory oder Http_server verschoben werden.
+                // Auch kÃ¶nnte execute_http() von Command_processor nach Web_service, Http_file_directory oder Http_server verschoben werden.
             }
 
             Command_processor command_processor ( _spooler, _connection->_security_level, _connection->peer_host(), this );
@@ -828,7 +828,7 @@ void Operation::cancel()
 {
     if( !_response  ||  _response->is_ready() )
     {
-        if( _web_service_operation ) _web_service_operation->log()->warn( message_string( "SCHEDULER-308" ) );  // "cancel() ignoriert, weil die Antwort schon übertragen wird"
+        if( _web_service_operation ) _web_service_operation->log()->warn( message_string( "SCHEDULER-308" ) );  // "cancel() ignoriert, weil die Antwort schon Ã¼bertragen wird"
         return;
     }
 
@@ -1022,7 +1022,7 @@ Response::Response(Request* request)
 
     if( request->header("cache-control") == "no-cache" )
         _headers.set( "Cache-Control", "no-cache" );   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
-                                                       // Gut wäre eine Frist, z.B. 10s
+                                                       // Gut wÃ¤re eine Frist, z.B. 10s
 }
 
 //------------------------------------------------------------------------------Response::~Response
@@ -1095,7 +1095,7 @@ void Response::send()
 
     set_ready();
 
-    // Evtl. sofort send() aufrufen? Nicht nötig.
+    // Evtl. sofort send() aufrufen? Nicht nÃ¶tig.
 }
 
 //---------------------------------------------------------------------------------Response::finish
@@ -1115,7 +1115,7 @@ void Response::finish()
     }
 
 
-    // _headers füllen
+    // _headers fÃ¼llen
 
     if( !_headers.contains( "Date" ) )  _headers.set( "Date", date_string( ::time(NULL) ) );
     if( _chunk_reader )  _headers.set_default( "Content-Type", _chunk_reader->_content_type );
@@ -1531,7 +1531,7 @@ bool Log_chunk_reader::next_chunk_is_ready()
                         {
                             // Wenn dieselbe Datei erneut beschrieben wird (bei Nested_job_chain_node), dann kann der Rest der bisherigen Datei 
                             // im HTTP-Protokoll verloren gehen. Wenn die Datei schneller beschrieben als gelesen wird.
-                            // Lösung: Eigene Datei (Warteschlange) fürs HTTP-Protokoll
+                            // LÃ¶sung: Eigene Datei (Warteschlange) fÃ¼rs HTTP-Protokoll
 
                             _file.close();
                             _file_seek = 0;

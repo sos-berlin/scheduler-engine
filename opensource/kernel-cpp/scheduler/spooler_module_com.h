@@ -32,7 +32,7 @@ struct Com_module_instance_base : Module_instance
 };
 
 //------------------------------------------------------------------------------Com_module_instance
-// Für COM-Objekte
+// FÃ¼r COM-Objekte
 #ifdef Z_WINDOWS
 
 struct Com_module_instance : Com_module_instance_base
@@ -51,15 +51,15 @@ struct Com_module_instance : Com_module_instance_base
     Fill_zero                  _zero_;
     ptr<Com_context>           _com_context;
 
-    HMODULE                    _com_module;                 // Für _module->_filename != ""
-    DllGetClassObject_func     _DllGetClassObject;          // Für _module->_filename != ""
+    HMODULE                    _com_module;                 // FÃ¼r _module->_filename != ""
+    DllGetClassObject_func     _DllGetClassObject;          // FÃ¼r _module->_filename != ""
 
     Fill_end                   _end_;
 };
 
 #endif
 //-----------------------------------------------------------------Scripting_engine_module_instance
-// Für Scripting Engines
+// FÃ¼r Scripting Engines
 
 struct Scripting_engine_module_instance : Com_module_instance_base
 {

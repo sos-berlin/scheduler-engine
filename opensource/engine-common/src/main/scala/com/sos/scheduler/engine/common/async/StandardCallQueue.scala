@@ -4,6 +4,7 @@ import StandardCallQueue._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
+import scala.language.existentials
 import scala.util.control.NonFatal
 
 final class StandardCallQueue extends PoppableCallQueue {
@@ -11,7 +12,7 @@ final class StandardCallQueue extends PoppableCallQueue {
 //private val queue = mutable.UnrolledBuffer[TimedCall[_]]()    Scala 2.10.0 insert() terminiert nicht
   private var closed = false
 
-  def add(o: TimedCall[_]) {
+  def add[A](o: TimedCall[A]) {
     logger debug s"Enqueue at ${o.atString} $o"
     synchronized {
       if (closed)  sys.error(s"CallQueue is closed. '$o' is rejected")
@@ -34,7 +35,7 @@ final class StandardCallQueue extends PoppableCallQueue {
     }
   }
 
-  def tryCancel(o: TimedCall[_]): Boolean = {
+  def tryCancel[A](o: TimedCall[A]): Boolean = {
     val cancelled = synchronized {
       indexOf(o) match {
         case -1 ⇒ None
@@ -48,7 +49,7 @@ final class StandardCallQueue extends PoppableCallQueue {
   def isEmpty =
     synchronized { queue.isEmpty }
 
-  private def indexOf(o: TimedCall[_]) =
+  private def indexOf[A](o: TimedCall[A]) =
     queue indexWhere { _ eq o }
 
   private def positionAfter(at: Long) =
@@ -58,7 +59,7 @@ final class StandardCallQueue extends PoppableCallQueue {
     }
 
   def nextTime =
-    headOption map { _.epochMillis } getOrElse Long.MaxValue
+    headOption.fold(Long.MaxValue) { _.epochMillis }
 
   def isMature =
     matureHeadOption.nonEmpty

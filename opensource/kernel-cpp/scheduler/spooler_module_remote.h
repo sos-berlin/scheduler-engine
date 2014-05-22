@@ -105,7 +105,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     ptr<object_server::Session> _session;
     ptr<object_server::Proxy>   _remote_instance;
     ptr<Async_operation>        _operation;
-    bool                        _end_success;               // Für end__start()
+    bool                        _end_success;               // FÃ¼r end__start()
     int                         _exit_code;
     int                         _termination_signal;
 

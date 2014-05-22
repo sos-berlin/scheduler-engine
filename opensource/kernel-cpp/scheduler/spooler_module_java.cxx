@@ -68,12 +68,12 @@ static jobject scheduler_jobject_from_variant( JNIEnv* jenv, const VARIANT& v, J
 
     if( v.vt == VT_EMPTY )
     {
-        return jenv->NewString( NULL, 0 );       // F�r job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
+        return jenv->NewString( NULL, 0 );       // Für job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
     }
     else
     if( v.vt == VT_ERROR  && v.scode == DISP_E_PARAMNOTFOUND ) 
     {
-        return jenv->NewString( NULL, 0 );       // F�r job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
+        return jenv->NewString( NULL, 0 );       // Für job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
     }
     else
     {
@@ -116,13 +116,13 @@ void init_java_vm( javabridge::Vm* java_vm )
         try
         {
             //fprintf( stderr, "make_path %s\n", work_dir.c_str() );
-            make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath ber�cksichtigt.
+            make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
         }
         catch( const exception& x ) { java_vm->_log.warn( "mkdir " + work_dir + " => " + x.what() ); }
     }
 
     java_vm->start();
-    java_vm->load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
+    java_vm->load_standard_classes();           // Wirkt natürlich nur für dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
 
     {
         Env env = java_vm->jni_env();
@@ -189,8 +189,8 @@ void Java_module_instance::init()
     try
     {
         // Das ist die falsche Stelle.
-        // Die Pr�fung sollte an h�herer Stelle, im Haupt-Prozess gerufen werden.
-        // Dort haben wir ein Protokoll f�r log()->warn() und f�r entfernte Jobs kann der Client-Scheduler die Version pr�fen.
+        // Die Prüfung sollte an höherer Stelle, im Haupt-Prozess gerufen werden.
+        // Dort haben wir ein Protokoll für log()->warn() und für entfernte Jobs kann der Client-Scheduler die Version prüfen.
         check_api_version();
     }
     catch( exception& x )  { Z_LOG2( "scheduler", "*** ERROR ***  " << x.what() << "\n" ); }  
@@ -200,7 +200,7 @@ void Java_module_instance::init()
 
 void Java_module_instance::check_api_version()
 {
-    /* Das muss auch f�r Monitor_impl realisiert werden. Besser auf statische Klassenmethode zur�ckgreifen (sos.spooler.Spooler_constants). 
+    /* Das muss auch für Monitor_impl realisiert werden. Besser auf statische Klassenmethode zurückgreifen (sos.spooler.Spooler_constants). 
 
     Local_frame local_frame ( jenv(), 10 );
 
@@ -219,8 +219,8 @@ void Java_module_instance::check_api_version()
     
     for( int i = 0; i < 4; i++ )  m[i] = as_int( my_version[i] ),  j[i] = as_int( java_version[i] );
 
-    if( j[0] != m[0]                        // 1. Teil muss �bereinstimmen
-     || j[1] != m[1]                        // 2. Teil muss �bereinstimmen
+    if( j[0] != m[0]                        // 1. Teil muss übereinstimmen
+     || j[1] != m[1]                        // 2. Teil muss übereinstimmen
      || j[1] == m[1]  &&  j[2] < m[2]       // 3. Teil muss nicht kleiner sein
      || j[2] == m[2]  &&  j[3] < m[3] )     // 4. Teil muss nicht kleiner sein
     {
@@ -297,7 +297,7 @@ Variant Java_module_instance::call( const string& name_par )
         result = env->CallBooleanMethod( _jobject, method_id ) != 0;
     }
     else
-    if( *name.rbegin() == ';' )     // F�r spooler_api_version()
+    if( *name.rbegin() == ';' )     // Für spooler_api_version()
     {
         In_call in_call ( this, name ); 
         Local_jstring jstr ( (jstring)env->CallObjectMethod( _jobject, method_id ) );
@@ -336,7 +336,7 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
             result = env->CallBooleanMethod( _jobject, method_id, param.as_bool() ) != 0;
         }
         else
-        if( string_ends_with( name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;" ) )  // F�r <run_time start_time_function="">, s. Run_time::call_function
+        if( string_ends_with( name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;" ) )  // Für <run_time start_time_function="">, s. Run_time::call_function
         {
             Bstr result;
 

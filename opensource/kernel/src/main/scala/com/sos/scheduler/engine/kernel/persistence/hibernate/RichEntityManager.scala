@@ -5,6 +5,7 @@ import javax.persistence.EntityManager
 import org.hibernate.jdbc.Work
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.immutable
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 class RichEntityManager(entityManager: EntityManager) {

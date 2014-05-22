@@ -295,7 +295,7 @@ struct Ole_class_descr
     virtual HRESULT             create_simple           ( IUnknown** );
     void                        dummy_call              ();
 
-    static Ole_class_descr*     head;                   // Liste aller Klassenbeschreibungen (über _next verkettet)
+    static Ole_class_descr*     head;                   // Liste aller Klassenbeschreibungen (Ã¼ber _next verkettet)
 
     Fill_zero                  _zero_;
     Ole_class_descr*           _next;                   // Verkettung aller Klassenbeschreibungen
@@ -317,7 +317,7 @@ struct Ole_class_descr
 
 
 
-    Ole_factory*               _class_factory;          // Eine IClassFactory für .exe (CoRegisterClassObject)
+    Ole_factory*               _class_factory;          // Eine IClassFactory fÃ¼r .exe (CoRegisterClassObject)
 
   private:
                                 Ole_class_descr         ( const Ole_class_descr& );             // icke implementerad

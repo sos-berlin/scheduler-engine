@@ -311,7 +311,7 @@ bool Scheduler_script_subsystem::subsystem_load()
 
 bool Scheduler_script_subsystem::subsystem_activate()
 {
-    _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen
+    _subsystem_state = subsys_active;  // Jetzt schon aktiv fÃ¼r die auszufÃ¼hrenden Skript-Funktionen
     file_based_subsystem<Scheduler_script>::subsystem_activate();
     return true;
 }

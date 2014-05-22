@@ -1,11 +1,11 @@
 #include "precomp.h"
 //#define MODULE_NAME "soslimt2"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 //#pragma implementation
 
-#include "sosstrng.h"         // Für storable.h: Storable_as<Sos_string>
+#include "sosstrng.h"         // FÃ¼r storable.h: Storable_as<Sos_string>
 #include "sos.h"
 #include "sosfield.h"
 #include "soslimtx.h"
@@ -13,7 +13,7 @@
 using namespace std;
 namespace sos {
 
-// Aus soslimtx.cxx herausgelöst, damit Solaris C++ 4.0.1 zufrieden ist
+// Aus soslimtx.cxx herausgelÃ¶st, damit Solaris C++ 4.0.1 zufrieden ist
 
 //------------------------------------------------------------Sos_limited_text_type::_type_info
 

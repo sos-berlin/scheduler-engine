@@ -1,5 +1,5 @@
 //#define MODULE_NAME "sqlfile"
-//#define AUTHOR      "Jörg Schwiemann"
+//#define AUTHOR      "JÃ¶rg Schwiemann"
 //#define COPYRIGHT   "1995 (C) Sos GmbH"
 
 // SQL-File-Zugriffe
@@ -83,17 +83,17 @@ struct Sql_file : Abs_file
 
     Sos_string                     _db_filename;
     Sos_string                     _sql_command;
-    Sos_string                     _seq_filename;           // Dateiname für sequentiellen Zugriffs (select ohne where)
+    Sos_string                     _seq_filename;           // Dateiname fÃ¼r sequentiellen Zugriffs (select ohne where)
     Sos_string                     _tablename;
     Any_file                       _session;
     Any_file                       _file;
     Dynamic_area                   _stmt;
     Open_mode                      _open_mode;
 
-    int                            _required_length;        // minimale Satzlänge bis zum Schlüssel
+    int                            _required_length;        // minimale SatzlÃ¤nge bis zum SchlÃ¼ssel
 
     Sos_ptr<Record_type>           _type;
-  //Sos_ptr<Record_type>           _write_record_type_ptr;   // null-optimierung und readonly für insert
+  //Sos_ptr<Record_type>           _write_record_type_ptr;   // null-optimierung und readonly fÃ¼r insert
     Sos_ptr<Field_descr>           _key_descr_ptr;
     Sos_ptr<Record_type>           _key_type;           // wenn _key_descr_ptr->field_count() > 0
     Text_format                    _format;
@@ -602,7 +602,7 @@ void Sql_file::get_record( Area& area )
         _file.open( _seq_filename, Any_file::Open_mode( Any_file::in | Any_file::seq ) );
     }
 
-    _file.get( area );              // nur für (in seq)
+    _file.get( area );              // nur fÃ¼r (in seq)
 }
 
 // --------------------------------------------------------------------- Sql_file::get_record_key
@@ -629,7 +629,7 @@ inline Bool check_stmt( const Area& stmt ) {
 
 void Sql_file::get_record_key( Area& area, const Key& key )
 {
-    if ( !_key_descr_ptr ) throw_xc( "SOS-1214", "sql" );  // Key-Beschreibung muß vorhanden sein!
+    if ( !_key_descr_ptr ) throw_xc( "SOS-1214", "sql" );  // Key-Beschreibung muÃŸ vorhanden sein!
 
     Any_file        f;
     Dynamic_area    buffer;
@@ -648,7 +648,7 @@ void Sql_file::get_record_key( Area& area, const Key& key )
     LOG( "Sql_file::get_record_key: " << _stmt << '\n' );
 
     try {
-        f.open( _db_filename + " " + as_string( _stmt ), // js: Temporärer String => Probleme?
+        f.open( _db_filename + " " + as_string( _stmt ), // js: TemporÃ¤rer String => Probleme?
                 Any_file::Open_mode( Any_file::in | Any_file::seq ) );
     } catch ( Xc& x ) {
         x.insert( c_str(_tablename) );
@@ -716,7 +716,7 @@ void Sql_file::insert( const Const_area& record )
 {
 /* Verbesserung:
    VALUES-Liste und Namensliste parallel in zwei Strings aufbauen,
-   dabei _write_empty_as_null berücksichtigen.
+   dabei _write_empty_as_null berÃ¼cksichtigen.
 */
     LOGBLOCK( "Sql_file::insert()" );
     int  i;
@@ -822,13 +822,13 @@ void Sql_file::append_value( const Field_descr& f, const Byte* p, Area* buffer, 
 
             if( hilfspuffer->length() == 0 )
             {
-                if( _write_empty_as_null  &&  ( !_key_type  ||  !_key_type->field_descr_by_name_or_0( f.name() ) ) )       // Schlüsselfeld nicht NULL speichern!
+                if( _write_empty_as_null  &&  ( !_key_type  ||  !_key_type->field_descr_by_name_or_0( f.name() ) ) )       // SchlÃ¼sselfeld nicht NULL speichern!
                 {
                     buffer->append( "NULL" );
                     return;
                 }
 
-                // Geht nicht, String0 ist VARCAHR.  jz 25.12.01 if( f.type_ptr()->info()->_std_type == std_type_char )  hilfspuffer->assign( " " );      // Für Oracle: "" ist gleichbedeutend mit NULL, " " aber nicht.
+                // Geht nicht, String0 ist VARCAHR.  jz 25.12.01 if( f.type_ptr()->info()->_std_type == std_type_char )  hilfspuffer->assign( " " );      // FÃ¼r Oracle: "" ist gleichbedeutend mit NULL, " " aber nicht.
             }
 
             write_string( *hilfspuffer, &rest, '\'', '\'' );
@@ -932,7 +932,7 @@ void Sql_file::update_direct( const Const_area& record )
 
 void Sql_file::store( const Const_area& record )
 {
-    Increment_semaphore<int> _x_ ( &_store );   // Für -auto-commit
+    Increment_semaphore<int> _x_ ( &_store );   // FÃ¼r -auto-commit
 
     if ( !_key_descr_ptr ) throw_xc( "SOS-1214", "sql" );
     if( record.length() < _required_length )   throw_xc( "SOS-1215", record.length(), _required_length );

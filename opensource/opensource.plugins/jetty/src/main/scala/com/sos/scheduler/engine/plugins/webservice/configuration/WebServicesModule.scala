@@ -18,5 +18,6 @@ object WebServicesModule {
     classOf[FolderService],
     classOf[JobService],
     classOf[JobsService],
+    classOf[RootService],
     classOf[TasksService])
 }

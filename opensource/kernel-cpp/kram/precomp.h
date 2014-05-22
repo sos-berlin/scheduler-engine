@@ -1,6 +1,6 @@
 // precompiled headers
 
-#if defined _MSC_VER  /* Führt hin und wieder zum Compilerabsturz */
+#if defined _MSC_VER  /* FÃ¼hrt hin und wieder zum Compilerabsturz */
 #   include <stdio.h>               // Wird von afx.h eingezogen. Besser hier damit sysdep.h stdin etc. neutralisieren kann
 #   include <stdexcpt.h>            // xmsg bzw. exception
 #   define SYSTEM_PRECOMPILED_HEADERS

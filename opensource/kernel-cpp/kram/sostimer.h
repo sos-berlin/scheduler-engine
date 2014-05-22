@@ -1,4 +1,4 @@
-// sostimer.h                            ©1996 SOS GmbH Berlin
+// sostimer.h                            Â©1996 SOS GmbH Berlin
 
 #ifndef __SOSTIMER_H
 #define __SOSTIMER_H

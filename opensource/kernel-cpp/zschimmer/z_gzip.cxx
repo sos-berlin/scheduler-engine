@@ -68,7 +68,7 @@ struct Gzip : Object
     bool                       _deflate;
     bool                       _gzip;                   // gzip-Kopf verwenden
     bool                       _is_gzip_header_read ;
-  //bool                       _auto;                   // Prüfen, ob gzip-Kopf da ist, sonst: _do_nothing;
+  //bool                       _auto;                   // PrÃ¼fen, ob gzip-Kopf da ist, sonst: _do_nothing;
   //bool                       _do_nothing;
     bool                       _is_closed;
 };
@@ -301,7 +301,7 @@ void Gzip::close()
         //}
         //else
         {
-            // _crc und _z_total_in prüfen. 
+            // _crc und _z_total_in prÃ¼fen. 
             // Die acht Bytes stehen in _z_stream und _file.get()
         }
 
@@ -416,7 +416,7 @@ void Gzip::write( const Byte* p, int length )
     while( _z_stream.avail_in > 0 )
     {
         int ret = process( Z_NO_FLUSH );
-        if( ret == Z_STREAM_END )  break;   // z_stream.avail_in sollte 8 Bytes enthalten (crc+length), oder ein Bruchstück, falls noch ein write() folgt
+        if( ret == Z_STREAM_END )  break;   // z_stream.avail_in sollte 8 Bytes enthalten (crc+length), oder ein BruchstÃ¼ck, falls noch ein write() folgt
     }
 }
 

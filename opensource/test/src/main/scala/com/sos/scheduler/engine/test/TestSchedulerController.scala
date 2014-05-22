@@ -161,7 +161,7 @@ with EventHandlerAnnotated {
     finally errorLogEventIsTolerated = Set()
   }
 
-  @EventHandler
+  @HotEventHandler
   def handleEvent(e: ErrorLogEvent) {
     if (testConfiguration.terminateOnError && !(e.codeOption exists testConfiguration.ignoreError) && !errorLogEventIsTolerated(e) && !testConfiguration.errorLogEventIsTolerated(e))
       terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))

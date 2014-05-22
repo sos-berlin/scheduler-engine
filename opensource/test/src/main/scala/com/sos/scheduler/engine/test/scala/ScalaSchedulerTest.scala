@@ -76,7 +76,7 @@ trait ScalaSchedulerTest
   protected final def shortTimeout: Duration =
     TestSchedulerController.shortTimeout
 
-  protected final def injector =
+  final def injector =
     scheduler.injector
 
   protected final def instance[A](implicit c: ClassTag[A]): A =

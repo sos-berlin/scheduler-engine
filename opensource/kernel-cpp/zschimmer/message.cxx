@@ -134,7 +134,7 @@ void Message_string::insert_string( int index, const char* value ) throw()
 }
 
 //------------------------------------------------------------------------------insert_into_message
-// Für gcc
+// FÃ¼r gcc
 void insert_into_message( Message_string* m, int index, const char* s ) throw()    
 { 
     m->insert_string( index, s ); 
@@ -522,7 +522,7 @@ void throw_null_pointer_exception()
 
 void throw_socket(int errn, const char* function_name, const Host_and_port& h, const char* insertion)
 {
-    // Host_and_port.as_string() löscht errno. Deshalb sollte Host_and_port.as_string() nicht als (String-)Parameter übergeben werden.
+    // Host_and_port.as_string() lÃ¶scht errno. Deshalb sollte Host_and_port.as_string() nicht als (String-)Parameter Ã¼bergeben werden.
     throw_socket(errn, function_name, h.as_string().c_str(), insertion);
 }
 

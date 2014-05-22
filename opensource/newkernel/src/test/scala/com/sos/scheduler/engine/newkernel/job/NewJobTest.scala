@@ -34,7 +34,7 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
     val eventBus = new SchedulerEventBus
     eventBus.registerAnnotated(this)
     withService(new ThreadService(eventBus)) {
-      val jobConfiguration = JobConfigurationXMLParser.parse(xml, inputFactory, DateTimeZone.getDefault)
+      val jobConfiguration = JobConfigurationXMLParser.parseString(xml, inputFactory, DateTimeZone.getDefault)
       val job = new NewJob(jobPath, jobConfiguration, eventBus, callQueue)
       job.activate()
       callRunner.run()
@@ -53,5 +53,5 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
 
 private object NewJobTest {
   private val logger = Logger(getClass)
-  private val jobPath = JobPath.of("/a")
+  private val jobPath = JobPath("/a")
 }

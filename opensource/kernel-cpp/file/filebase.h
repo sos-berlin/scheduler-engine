@@ -21,7 +21,7 @@ typedef uint Record_length;
 typedef uint Record_position;
 
 const int file_max_key_length    = 255;
-const int max_fs_filename = 200;             // Max. Länge des Dateinamens für Fileserver
+const int max_fs_filename = 200;             // Max. LÃ¤nge des Dateinamens fÃ¼r Fileserver
 
 struct SOS_CLASS Any_file;
 struct SOS_CLASS Any_file_obj;
@@ -38,7 +38,7 @@ enum Dbms_kind
     dbms_unknown,
     dbms_access,
     dbms_oracle,
-    dbms_oracle_thin,           // Oracle Thin-Treiber für JDBC mit seinen Macken
+    dbms_oracle_thin,           // Oracle Thin-Treiber fÃ¼r JDBC mit seinen Macken
     dbms_sql_server,
     dbms_mysql,
     dbms_sossql,
@@ -58,7 +58,7 @@ struct Key : Const_area
 
                                 Key                     ()                      : _number ( 0 ) {}
                                 Key                     ( const Const_area&, Number = 0 );
-                                Key                     ( const Key& key );  // Ab Borland 4.0 nötig
+                                Key                     ( const Key& key );  // Ab Borland 4.0 nÃ¶tig
 
   //                            operator const void*    () const;
     Number                      number                  () const;
@@ -102,7 +102,7 @@ struct SOS_CLASS File_base
         seq      = 0x1000,      // Nur sequentieller Zugriff
         share    = 0x2000,      // Gemeinsamer Zugriff
         blocked  = 0x4000,      // Geblockte Datei (512 Byte?)
-        unsafe   = 0x8000,      // Nicht gesichert, dafür schnell
+        unsafe   = 0x8000,      // Nicht gesichert, dafÃ¼r schnell
 
         in_seq   = 0x1001
     };
@@ -181,7 +181,7 @@ struct Key_specs
                                 Key_specs               ( Record_position, Record_length,
                                                           Key_attributes = Key_spec::ka_none );
 
-                                Key_specs               ( const Key_specs& ); // Ab Borland 4.0 nötig
+                                Key_specs               ( const Key_specs& ); // Ab Borland 4.0 nÃ¶tig
 
     Key_specs                   operator&               ( const Key_spec&  ) const;
     Key_specs                   operator&               ( const Key_specs& ) const;
@@ -218,7 +218,7 @@ struct Secondary_index
     };
 
     string                     _name;                   // Name des Index
-    std::vector<Segment>       _segments;               // Das letzte Segment ist der Primärschlüssel
+    std::vector<Segment>       _segments;               // Das letzte Segment ist der PrimÃ¤rschlÃ¼ssel
     string                     _filename;               // Dateiname des Index
     Any_file                   _file;
 };
@@ -262,9 +262,9 @@ struct File_spec
     Record_length              _max_record_length;
     Key_specs                  _key_specs;
     int                        _pad;                    // Padding factor in %
-    long                       _first_allocation;       // Anfängliche Größe der Datei in Byte
+    long                       _first_allocation;       // AnfÃ¤ngliche GrÃ¶ÃŸe der Datei in Byte
     Sos_static_ptr<Record_type> _field_type_ptr;        // Feldweise Satzbeschreibung (s. sosfield.h)
-    Bool                       _field_type_is_from_caller;  // Feldbeschreibung stammt nicht vom Dateityp (Für Dateityp com. Bei true wird _field_type_ptr nicht berücksichtigt.) jz 18.2.00 für Eichenauer
+    Bool                       _field_type_is_from_caller;  // Feldbeschreibung stammt nicht vom Dateityp (FÃ¼r Dateityp com. Bei true wird _field_type_ptr nicht berÃ¼cksichtigt.) jz 18.2.00 fÃ¼r Eichenauer
     Bool                       _need_type;              // open() soll Satzbeschreibung liefern
 };
 
@@ -287,7 +287,7 @@ struct File_info
     Sos_string                 _typename;
     Sos_string                 _filename;
     Key_specs                  _key_specs;
-    Sos_string                 _text;           // Formlos für Ingres (offene Transaktion etc.)
+    Sos_string                 _text;           // Formlos fÃ¼r Ingres (offene Transaktion etc.)
 };
 
 

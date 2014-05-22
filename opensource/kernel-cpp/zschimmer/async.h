@@ -74,7 +74,7 @@ struct Async_operation : Object
     void                        async_finish_           ();                                         // Operation beenden, ggfs. blockieren!
     virtual bool                async_finished_         () const                                    = 0;
     virtual bool                async_has_error_        () const                                    { return false; }       // Operation ist fehlerhaft (Fehler vom Server)
-    virtual void                async_check_error_      ()                                          {}                      // Löst Exception aus, wenn Operation fehlerhaft war
+    virtual void                async_check_error_      ()                                          {}                      // LÃ¶st Exception aus, wenn Operation fehlerhaft war
     virtual string              async_state_text_       () const                                    = 0;
     virtual bool                async_kill_             ();
     virtual void                async_abort_            ();

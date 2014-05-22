@@ -35,6 +35,9 @@ extends Subsystem with HasCommandHandlers {
       p.initialize(injector, prefixLog)
       tryRegisterEventHandler(p.pluginInstance)
     }
+    for (p <- pluginAdapterMap.values) {
+      p.prepare()
+    }
   }
 
   def newPluginAdapterSeq() =

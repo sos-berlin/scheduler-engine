@@ -70,17 +70,17 @@ struct Task : Object,
         s_none,
 
         s_loading,
-        s_waiting_for_process,  // Prozess aus Prozessklasse wählen, evtl. warten, bis ein Prozess verfügbar ist.
+        s_waiting_for_process,  // Prozess aus Prozessklasse wÃ¤hlen, evtl. warten, bis ein Prozess verfÃ¼gbar ist.
         s_starting,             // load, spooler_init, spooler_open
                                 // Bis hier gilt Task::starting() == true
         s_opening,              // spooler_open()
         s_opening_waiting_for_locks, // spooler_open() usw.: wegen try_hold_lock() erneut aufrufen
-        s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
+        s_running,              // LÃ¤uft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_waiting_for_locks, // spooler_process(): wegen try_hold_lock() erneut aufrufen
         s_running_waiting_for_order,
-        s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
-        s_running_remote_process,   // Prozess, der über remote Scheduler läuft (über Remote_module_instance_proxy)
+        s_running_process,      // LÃ¤uft in einem externen Prozess, auf dessen Ende nur gewartet wird
+        s_running_remote_process,   // Prozess, der Ã¼ber remote Scheduler lÃ¤uft (Ã¼ber Remote_module_instance_proxy)
 
         s_suspended,            // Angehalten
                                 // Ab hier gilt Task::ending() == true
@@ -109,8 +109,8 @@ struct Task : Object,
 
     enum Lock_level 
     {
-        lock_level_task_api,        // Task.try_hold_lock() in spooler_open() oder spooler_init(), gilt für die Task
-        lock_level_process_api,     // Task.try_hold_lock() in spooler_process(), gilt für nur für spooler_process()
+        lock_level_task_api,        // Task.try_hold_lock() in spooler_open() oder spooler_init(), gilt fÃ¼r die Task
+        lock_level_process_api,     // Task.try_hold_lock() in spooler_process(), gilt fÃ¼r nur fÃ¼r spooler_process()
         lock_level__max = lock_level_process_api
     };
 
@@ -369,7 +369,7 @@ struct Task : Object,
     Time                       _last_process_start_time;
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
-    Duration                   _timeout;                    // Frist für eine Operation (oder INT_MAX)
+    Duration                   _timeout;                    // Frist fÃ¼r eine Operation (oder INT_MAX)
     Time                       _last_warn_if_longer_operation_time;
     Time                       _idle_since;
     Time                       _idle_timeout_at;
@@ -381,7 +381,7 @@ struct Task : Object,
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
-    bool                       _is_in_database;             // Datensatz für diese Task ist in der Datenbank
+    bool                       _is_in_database;             // Datensatz fÃ¼r diese Task ist in der Datenbank
     bool                       _running_state_reached;      // Zustand s_running... erreicht
     bool                       _is_first_job_delay_after_error;
     bool                       _is_last_job_delay_after_error;
@@ -395,23 +395,23 @@ struct Task : Object,
     Variant                    _result;
     string                     _name;
     ptr<Order>                 _order;
-    ptr<Order>                 _order_for_task_end;         // Wird später als _order auf NULL gesetzt, damit im Fehlerfall XSLT-eMail mit <order> verschickt wird. Und für <commands on_exit_code=""/>
+    ptr<Order>                 _order_for_task_end;         // Wird spÃ¤ter als _order auf NULL gesetzt, damit im Fehlerfall XSLT-eMail mit <order> verschickt wird. Und fÃ¼r <commands on_exit_code=""/>
     string                     _changed_directories;        // Durch Semikolon getrennt
     string                     _trigger_files;              // Durch Semikolon getrennt
 
-    Registered_pids            _registered_pids;            // Für add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.
-    Subprocess_register        _subprocess_register;        // Fall Task im Scheduler-Prozess läuft
+    Registered_pids            _registered_pids;            // FÃ¼r add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.
+    Subprocess_register        _subprocess_register;        // Fall Task im Scheduler-Prozess lÃ¤uft
     Call_state                 _call_state;
     Xc_copy                    _error;
     Xc_copy                    _non_connection_reset_error;  // Der Fehler vor einem Verbindungsfehler wird hier aufgehoben, falls er wegen ignore_signals=".." wiederhergestellt werden muss
     bool                       _is_connection_reset_error;
 
-    ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
+    ptr<Module_instance>       _module_instance;            // Nur fÃ¼r Module_task. Hier, damit wir nicht immer wieder casten mÃ¼ssen.
     ptr<Web_service>           _web_service;
-    vector< ptr<lock::Requestor> > _lock_requestors;        // Nur für log_level_task_api und log_level_process_api
+    vector< ptr<lock::Requestor> > _lock_requestors;        // Nur fÃ¼r log_level_task_api und log_level_process_api
     ptr<lock::Holder>          _lock_holder;
 
-    ptr<File_logger>           _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
+    ptr<File_logger>           _file_logger;                // Ãœbernimmt kontinuierlich stdout und stderr ins Protokoll
 };
 
 //----------------------------------------------------------------------------------------Task_list

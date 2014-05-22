@@ -23,12 +23,12 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 {
     enum State
     {
-        // Mögliche Verbesserung: Alle Zustände, die auch File_based kennt, hier streichen. 
-        // Stattdessen s_inactive, ein Zustand, der sich in die File_based-Zustände aufspaltet
-        // Die übrigen Zustände gelten für s_active.
-        // s_stopped durch _is_stopped und s_pending ersetzen. Auch mit anderen Zuständen kombinierbar.
-        // s_stopping streichen? stop(false) lässt Tasks weiterlaufen. Ist das klug? Sollten ein gestoppte Job nicht immer die Tasks beenden?
-        // s_running streichen? Besagt nur, dass eine Task läuft, während bei s_pending keine Task läuft. s_pending, s_running -> s_ready?
+        // MÃ¶gliche Verbesserung: Alle ZustÃ¤nde, die auch File_based kennt, hier streichen. 
+        // Stattdessen s_inactive, ein Zustand, der sich in die File_based-ZustÃ¤nde aufspaltet
+        // Die Ã¼brigen ZustÃ¤nde gelten fÃ¼r s_active.
+        // s_stopped durch _is_stopped und s_pending ersetzen. Auch mit anderen ZustÃ¤nden kombinierbar.
+        // s_stopping streichen? stop(false) lÃ¤sst Tasks weiterlaufen. Ist das klug? Sollten ein gestoppte Job nicht immer die Tasks beenden?
+        // s_running streichen? Besagt nur, dass eine Task lÃ¤uft, wÃ¤hrend bei s_pending keine Task lÃ¤uft. s_pending, s_running -> s_ready?
 
         s_not_initialized,
         s_initialized,
@@ -37,7 +37,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
         s_error,                // Ein Fehler ist aufgetreten (nicht vom Skript), der Job ist nicht mehr aufrufbar.
         s_pending,              // Warten auf Start
-        s_running,              // Mindestens eine Task läuft (die Tasks können aber ausgesetzt, also gerade nicht aktiv sein: s_suspended etc.)
+        s_running,              // Mindestens eine Task lÃ¤uft (die Tasks kÃ¶nnen aber ausgesetzt, also gerade nicht aktiv sein: s_suspended etc.)
         s__max
     };
 
@@ -154,7 +154,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
   private:
     Fill_zero                  _zero_;
     const JobJ                 _typed_java_sister;
-    int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
+    int                        _job_chain_priority;         // Maximum der PrioritÃ¤ten aller Jobkettenknoten mit diesem Job. 
 };
 
 //-------------------------------------------------------------------------------------Standard_job
@@ -344,7 +344,7 @@ struct Standard_job : Job
     bool                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );
     bool                        is_in_job_chain             () const;
-    bool                     is_order_controlled            () const                                { return _is_order_controlled; }    // Für shell-Jobs nicht mehr relevant. Nur für spooler_process()
+    bool                     is_order_controlled            () const                                { return _is_order_controlled; }    // FÃ¼r shell-Jobs nicht mehr relevant. Nur fÃ¼r spooler_process()
     void                    set_order_controlled            ();
 
     void                    set_idle_timeout                ( const Duration& );
@@ -352,12 +352,12 @@ struct Standard_job : Job
 
     Module*                     module                      ()                                      { return _module; }
 
-    // public nur für Task:
+    // public nur fÃ¼r Task:
     Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
     void                        init_start_when_directory_changed( Task* = NULL );
     Time                        next_order_time             () const;
     Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
-    bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
+    bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag fÃ¼r die _order_queue an
     bool                        try_to_end_task             (Job* for_job);
     void                        kill_queued_task            ( int task_id );
     void                        end_tasks                   ( const string& task_warning );
@@ -417,7 +417,7 @@ struct Standard_job : Job
     friend struct               Job_history;
 
     Fill_zero                  _zero_;
-    bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
+    bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfÃ¼gbar ist
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>
 
@@ -432,9 +432,9 @@ struct Standard_job : Job
     State                      _state;
     bool                       _wake_when_in_period;
     bool                       _is_permanently_stopped;     // s_stopped wird zum Beenden verwendet und gilt nicht dauerhaft. Das sollte vereinfacht werden!
-    bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
-    Duration                   _task_timeout;               // Frist für einen Schritt einer Task
-    Duration                   _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
+    bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausfÃ¼hren
+    Duration                   _task_timeout;               // Frist fÃ¼r einen Schritt einer Task
+    Duration                   _idle_timeout;               // Frist fÃ¼r den Zustand Task::s_running_waiting_for_order
     bool                       _force_idle_timeout;         // _idle_timeout wirkt beendet auch Tasks, wenn _min_tasks unterschritten wird
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once_for_directory;
@@ -447,12 +447,12 @@ struct Standard_job : Job
 
     ptr<Job_schedule_use>      _schedule_use;
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
-    Period                     _period;                     // Derzeitige oder nächste Period
+    Period                     _period;                     // Derzeitige oder nÃ¤chste Period
     Time                       _next_single_start;
     Time                       _next_start_time;
 
     Duration                   _repeat;                     // spooler_task.repeat
-    Time                       _delay_until;                // Nach Fehler verzögern
+    Time                       _delay_until;                // Nach Fehler verzÃ¶gern
 
     xml::Document_ptr          _commands_document;          // <commands>...
     typedef map<int,xml::Element_ptr>  Exit_code_commands_map;
@@ -470,15 +470,15 @@ struct Standard_job : Job
 
 
     ptr<Module>                _module;                     // Job hat ein eigenes Skript
-    xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
+    xml::Element_ptr           _script_element;             // <script> (mit <include>) fÃ¼r <modify_job cmd="reload"/>
 
     typedef vector< ptr<Module_instance> >  Module_instance_vector;
     Module_instance_vector     _module_instances;
     ptr<Com_job>               _com_job;
 
-    ptr<Task_queue>            _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
+    ptr<Task_queue>            _task_queue;                 // Warteschlange der nÃ¤chsten zu startenden Tasks
     Task_set                   _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
-    long32                     _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
+    long32                     _running_tasks_count;        // Anzahl der Tasks, die tatsÃ¤chlich laufen (und nicht gerade warten)
     int                        _min_tasks;                  // Min. Anzahl Tasks, die der Scheduler stets laufen lassen soll
     bool                       _start_min_tasks;            // Starte Tasks solange _running_tasks.count() < _min_tasks
     int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!
@@ -493,7 +493,7 @@ struct Standard_job : Job
     int                        _max_order_setbacks;
 
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
-    Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
+    Start_when_directory_changed_list  _start_when_directory_changed_list;      // FÃ¼r <start_when_directory_changed>
 
     ptr<lock::Requestor>       _lock_requestor;
 

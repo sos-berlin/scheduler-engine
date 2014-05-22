@@ -178,7 +178,7 @@ void Xml_operation::put_request_part( const char* data, int length )
 
     if( length >= 2  &&  data[ length - 2 ] == '\r' )
     {
-        _operation_connection->_indent_string = "  ";      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+        _operation_connection->_indent_string = "  ";      // CR LF am Ende lÃ¤sst Antwort einrÃ¼cken. CR LF soll nur bei telnet-Eingabe kommen.
     }
 
     _request_bytes.append( data, length );
@@ -198,7 +198,7 @@ void Xml_operation::begin()
     _response = command_processor.response_execute_xml_bytes( _request_bytes, _operation_connection->_indent_string );
     _response->set_connection( _connection );
 
-    //if( _operation_connection->_indent )  _response->_response = replace_regex( response->_response, "\n", "\r\n" );      // Für Windows-telnet
+    //if( _operation_connection->_indent )  _response->_response = replace_regex( response->_response, "\n", "\r\n" );      // FÃ¼r Windows-telnet
 
     if( Synchronous_command_response* scr = dynamic_cast<Synchronous_command_response*>( +_response ) )
     {
@@ -216,7 +216,7 @@ void Xml_operation::begin()
 
 void Xml_response::close()
 {
-    _xml_writer.close();        // Zirkel auflösen!
+    _xml_writer.close();        // Zirkel auflÃ¶sen!
 }
 
 //--------------------------------------------------------------------Xml_response::signal_new_data
@@ -261,7 +261,7 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
         sockaddr_in    addr;     
         sockaddrlen_t  addr_len = sizeof addr;
 
-        addr.sin_addr = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Über alle Schnittstellen erreichbar
+        addr.sin_addr = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Ãœber alle Schnittstellen erreichbar
 
         int len = recvfrom( _read_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
         if( len > 0 ) 
@@ -383,10 +383,10 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
 
         if( _security_level <= Security::seclev_signal 
-            && 1 == 1  // JS-486 Keine Prüfung mehr
+            && 1 == 1  // JS-486 Keine PrÃ¼fung mehr
             )
         {
-            _log.warn( message_string( "SCHEDULER-287" ) );  // JS-486 Bei Zugriff via telnet und über Browser!
+            _log.warn( message_string( "SCHEDULER-287" ) );  // JS-486 Bei Zugriff via telnet und Ã¼ber Browser!
             do_close();
             return false;
         }
@@ -486,12 +486,12 @@ bool Communication::Connection::do_recv()
             }
 
             _operation = _operation_connection->new_operation();
-            _operation->set_async_manager( _spooler->_connection_manager );     // Für set_async_next_gmtime()
+            _operation->set_async_manager( _spooler->_connection_manager );     // FÃ¼r set_async_next_gmtime()
         }
 
         //if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
 
-        if( len > 0 ) // Ist überflüssig?
+        if( len > 0 ) // Ist Ã¼berflÃ¼ssig?
         {
             _operation->put_request_part( p, len );
         }
@@ -530,7 +530,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
         if( _connection_state == s_processing )
         {
-            //check_for_eof();  Wird nicht durchlaufen, weil kein Ereignis bestellt ist. Lösung: Empfangs- und Sendekanäle trennen (zwei Async_operation)
+            //check_for_eof();  Wird nicht durchlaufen, weil kein Ereignis bestellt ist. LÃ¶sung: Empfangs- und SendekanÃ¤le trennen (zwei Async_operation)
             if( _operation->async_finished() )  _connection_state = s_responding;
         }
 
@@ -551,7 +551,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
             if( state() == Buffered_socket_operation::s_ready  &&  _operation->response_is_complete() )
             {
-                if( _operation->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
+                if( _operation->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das fÃ¼hrt zum SchlieÃŸen der Verbindung.
 
                 remove_operation();
                 _connection_state = s_ready;
@@ -561,12 +561,12 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
         if( _eof )
         { 
-            // Bei _eof sofort handeln! Nämlich Verbindung schließen. 
-            // Sonst liefert select() immer wieder den Socket, was zur Schleife führt.
-            // Andere Lösung: Socket aus read-Menge des select() herausnehmen.
+            // Bei _eof sofort handeln! NÃ¤mlich Verbindung schlieÃŸen. 
+            // Sonst liefert select() immer wieder den Socket, was zur Schleife fÃ¼hrt.
+            // Andere LÃ¶sung: Socket aus read-Menge des select() herausnehmen.
 
-            // _http_response kann bei einem Log endlos sein. Also kein Kriterium, das Schließen zu verzögern.
-            //if( _http_response )  Z_LOG2( "scheduler.http", "Browser schließt Verbindung bevor HTTP-Response fertig gesendet werden konnte\n" );
+            // _http_response kann bei einem Log endlos sein. Also kein Kriterium, das SchlieÃŸen zu verzÃ¶gern.
+            //if( _http_response )  Z_LOG2( "scheduler.http", "Browser schlieÃŸt Verbindung bevor HTTP-Response fertig gesendet werden konnte\n" );
             remove_me();
             return true; 
         }
@@ -690,7 +690,7 @@ void Communication::close( double wait_time )
                                                 // Damit bleibt beim Neustart Windows-Schedulers der Browser nicht kleben (der kriegt den Verbindungsabbau nicht mit)
 
             connection->remove_me();
-            assert( _connection_list.empty()  ||  *_connection_list.begin() != connection );  // connection muss jetzt gelöscht sein
+            assert( _connection_list.empty()  ||  *_connection_list.begin() != connection );  // connection muss jetzt gelÃ¶scht sein
 
             connection_was_open = true;
             //connection->_connection_state = Connection::s_closing;
@@ -727,7 +727,7 @@ void Communication::close( double wait_time )
 
 void Communication::finish_responses( double wait_time )
 {
-    Connection_list copy = _connection_list;        // Nicht über Original-Liste laufen, die kann verändert werden
+    Connection_list copy = _connection_list;        // Nicht Ã¼ber Original-Liste laufen, die kann verÃ¤ndert werden
 
     FOR_EACH( Connection_list, copy, it )
     {
@@ -762,12 +762,12 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
     string port_name = tcp_or_udp + "-port " + as_string( ntohs( sa->sin_port ) );
 
-    if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
+    if( _spooler->_reuse_port )     // War fÃ¼r Suse 8 nÃ¶tig. Und fÃ¼r Windows XP, wenn Scheduler zuvor abgestÃ¼rzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
     {
         // Zutun: Beachte Unterschied zwischen SO_REUSEPORT und SO_REUSEADDR (http://www.unixguide.net/network/socketfaq/4.11.shtml)
         // und wie Windows und Unix sie auf ihre Weise behandeln.
         // Siehe http://msdn.microsoft.com/en-us/library/ms740621(VS.85).aspx
-        // Es scheint so zu sein, dass unter Unix (Suse 9.1, HP-UX 11 Itanium) SO_REUSEADDR ungefährlich ist und diese FIN_WAIT_2-Wartezeit vermeidet.
+        // Es scheint so zu sein, dass unter Unix (Suse 9.1, HP-UX 11 Itanium) SO_REUSEADDR ungefÃ¤hrlich ist und diese FIN_WAIT_2-Wartezeit vermeidet.
 
         // Unter Windows sollte SO_EXCLUSIVEADDRUSE gesetzt werden, damit der Port exklusiv dem Scheduler zugeordnet bleibt.
         // Aber dann bekommen wir anscheinend das FIN_WAIT_2-Problem beim Neustart des Schedulers.
@@ -775,14 +775,14 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
         // Unter Unix (Suse 9.1) wirkt SO_REUSEADDR offenbar nur, wenn der vorherige und der neue Scheduler diese Option setzen.
         // Gleichzeitiger Start wird dennoch abgewiesen, so dass ein SO_EXCLUSIVEADDRUSE wie unter Windows nicht gebraucht wird.
 
-        // Könnte eine Lösung des FIN_WAIT_2-Problems sein:
+        // KÃ¶nnte eine LÃ¶sung des FIN_WAIT_2-Problems sein:
         // shutdown( socket, SHUT_WR );                             // EOF senden
         // while( 0 == recv( socket, buffer, sizeof buffer ) );     // Warten, bis Gegenstelle EOF gesendet hat
         // close( socket );
 
         // Vielleicht kann man SO_REUSEADDR noch setzen, wenn die recv-Schleife nicht in einer Frist endet.
-        // Der nächste Scheduler öffnet dann erst ohne SO_REUSEADDR, und wenn er den Port nicht bekommt, mit SO_REUSEADDR (mit Meldung).
-        // Das vielleicht nur fürs bind(), danach SO_REUSEADDR wieder zurücknehmen.
+        // Der nÃ¤chste Scheduler Ã¶ffnet dann erst ohne SO_REUSEADDR, und wenn er den Port nicht bekommt, mit SO_REUSEADDR (mit Meldung).
+        // Das vielleicht nur fÃ¼rs bind(), danach SO_REUSEADDR wieder zurÃ¼cknehmen.
         
         // Offene http://../show_log?-Ausgaben vorher vielleicht noch ausgeben.
 
@@ -800,7 +800,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
     if( ret == SOCKET_ERROR  &&  socket_errno() == Z_EADDRINUSE )
     {
-        int my_errno = errno;  // Nur für Unix
+        int my_errno = errno;  // Nur fÃ¼r Unix
 
         _spooler->log()->warn( message_string( "SCHEDULER-289", port_name, wait_for_port_available ) );
 
@@ -821,7 +821,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
         if( print_dots )  fputc( '\n', stderr );
 
-        errno = my_errno;   // Nur für Unix
+        errno = my_errno;   // Nur fÃ¼r Unix
     }
 
     return ret;
@@ -854,7 +854,7 @@ void Communication::bind()
                 
                 sa.sin_port   = htons( _spooler->udp_port() );
                 sa.sin_family = AF_INET;
-                sa.sin_addr   = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Über alle Schnittstellen erreichbar
+                sa.sin_addr   = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Ãœber alle Schnittstellen erreichbar
 
                 ret = bind_socket( _udp_socket._read_socket, &sa, "UDP" );
                 if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "udp-bind ", as_string(_spooler->udp_port()).c_str() );
@@ -868,7 +868,7 @@ void Communication::bind()
                 _udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
 
                 {
-                    Message_string m ( "SCHEDULER-956", "UDP", _udp_port );     // "Scheduler erwartet Kommandos über $1-Port " 
+                    Message_string m ( "SCHEDULER-956", "UDP", _udp_port );     // "Scheduler erwartet Kommandos Ã¼ber $1-Port " 
                     if( sa.sin_addr.s_addr )  m.insert_string( 2, Ip_address( sa.sin_addr ).as_string() );    
                     _spooler->log()->info( m );
                 }
@@ -901,7 +901,7 @@ void Communication::bind()
                 
                 sa.sin_port   = htons( _spooler->tcp_port() );
                 sa.sin_family = AF_INET;
-                sa.sin_addr   = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Über alle Schnittstellen erreichbar
+                sa.sin_addr   = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Ãœber alle Schnittstellen erreichbar
 
                 ret = bind_socket( _listen_socket._read_socket, &sa, "TCP" );
                 if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
@@ -917,7 +917,7 @@ void Communication::bind()
                 _rebound = true;
 
                 {
-                    Message_string m ( "SCHEDULER-956", "TCP", _tcp_port );     // "Scheduler erwartet Kommandos über $1-Port " 
+                    Message_string m ( "SCHEDULER-956", "TCP", _tcp_port );     // "Scheduler erwartet Kommandos Ã¼ber $1-Port " 
                     if( sa.sin_addr.s_addr )  m.insert_string( 2, Ip_address( sa.sin_addr ).as_string() );    
                     _spooler->log()->info( m );
                 }
@@ -938,7 +938,7 @@ void Communication::bind()
             new_connection->_write_socket = STDOUT_FILENO;
             new_connection->_socket_send_buffer_size = 1024;
 
-            new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht möglich
+            new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht mÃ¶glich
             new_connection->add_to_socket_manager( _spooler->_connection_manager );
             new_connection->socket_expect_signals( Socket_operation::sig_read );
 

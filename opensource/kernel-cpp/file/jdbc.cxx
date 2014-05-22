@@ -1,5 +1,5 @@
 // $Id: jdbc.cxx 14579 2011-06-08 09:34:04Z jz $
-// §968
+// Â§968
 
 #include "precomp.h"
 #include <stdio.h>
@@ -42,7 +42,7 @@
 
 
 /*
-JDBC ™ 3.0 Specification
+JDBC Â™ 3.0 Specification
 
 8.3.1 Silent Truncation
 
@@ -364,7 +364,7 @@ void Jdbc_session::_open( Sos_database_file* db_file )
 #if 0  // Mit Class.forName()
         Class         class_loader_class ( static_ptr()->_java_vm, "java/lang/ClassLoader" );
         Local_jobject class_loader       ( static_ptr()->_java_vm );
-        Local_jobject cls                ( static_ptr()->_java_vm );                     // Dann mit java.lang.Class.forName(), denn dieser Aufruf lädt nicht aus der .jar (Linux)
+        Local_jobject cls                ( static_ptr()->_java_vm );                     // Dann mit java.lang.Class.forName(), denn dieser Aufruf lÃ¤dt nicht aus der .jar (Linux)
         class_loader = class_loader_class.call_static_object_method( "getSystemClassLoader", "()Ljava/lang/ClassLoader;" );
 
         Z_LOG2( "jdbc", "java Class.forName(\"" << _driver_class_name << "\")\n" );
@@ -389,7 +389,7 @@ void Jdbc_session::_open( Sos_database_file* db_file )
         _jdbc_driver = jdbc_driver;
 
         
-        // Verbindung über den geladenen Treiber öffnen
+        // Verbindung Ã¼ber den geladenen Treiber Ã¶ffnen
 
         Local_jobject properties = Class( "java/util/Properties" ).new_object( "()V" );
 
@@ -445,9 +445,9 @@ void Jdbc_session::_open( Sos_database_file* db_file )
         else
         if( string_begins_with( lcase( _dbms_name ), "firebird" ) )  _dbms = dbms_firebird;
         else
-        if( _dbms_name == "Adaptive Server Enterprise" )  _dbms = dbms_sybase;      // Über jconn3
+        if( _dbms_name == "Adaptive Server Enterprise" )  _dbms = dbms_sybase;      // Ãœber jconn3
         else
-        if( _dbms_name == "ASE"                        )  _dbms = dbms_sybase;      // Über jTDS
+        if( _dbms_name == "ASE"                        )  _dbms = dbms_sybase;      // Ãœber jTDS
         else
         if( _dbms_name == "H2"                         )  _dbms = dbms_h2;
     }
@@ -527,7 +527,7 @@ void Jdbc_session::_close( Close_mode )
 string Jdbc_session::modify_oracle_thin_stmt( const string& stmt )
 {
     // {ts'yyyy-mm-dd hh:mm:ss'} in to_date('yyyy-mm-dd hh:mm:ss','YYYY-MM-DD HH24:MI:SS') umsetzen, 
-    // weil der JDBC-Thin-Treiber die Uhrzeit nicht akzeptiert, denn er hält Oracle-Date für ein Jdbc-Date.
+    // weil der JDBC-Thin-Treiber die Uhrzeit nicht akzeptiert, denn er hÃ¤lt Oracle-Date fÃ¼r ein Jdbc-Date.
 
     if( stmt.find( "{ts'" ) == string::npos )  return stmt;
 
@@ -857,7 +857,7 @@ void Jdbc_file::describe_columns()
             {
                 LOG( "DER JDBC-TREIBER LIEFERT DIE METADATEN ERST NACH executeQuery()\n" );
                 session()->_connection_get_meta_data_not_implemented = true;
-                meta_data = NULL;  // Falls getColumnCount() Fehler geliefert hat, ist meta_data ungültig! (so bei Oracle thin driver ojdbc14.jar)
+                meta_data = NULL;  // Falls getColumnCount() Fehler geliefert hat, ist meta_data ungÃ¼ltig! (so bei Oracle thin driver ojdbc14.jar)
             }
             else
                 throw;           
@@ -919,12 +919,12 @@ void Jdbc_file::describe_columns()
 
         if( precision == -999 )  
         {
-            if( session()->_dbms == dbms_oracle_thin )  display_size = _max_length;     // Oracle würfelt die display_size von Clobs. Bei z.B. sag.sos kommt 86
+            if( session()->_dbms == dbms_oracle_thin )  display_size = _max_length;     // Oracle wÃ¼rfelt die display_size von Clobs. Bei z.B. sag.sos kommt 86
             precision = display_size;
         }
 
         if( display_size <= 0  &&  precision <= 0 )  
-            display_size = 1024;    // Wenigstens PostgresQL liefert bei String-Funktion keine vernünftige Länge.  2009-02-27
+            display_size = 1024;    // Wenigstens PostgresQL liefert bei String-Funktion keine vernÃ¼nftige LÃ¤nge.  2009-02-27
 
         if( precision == 0  &&  display_size > 0 )  precision = display_size;
 
@@ -1187,7 +1187,7 @@ void Jdbc_file::close( Close_mode close_mode )
     }
 
 
-    // Für JdbcOdbc erst das Statement nach dem ResultSet schließen, sonst liefert ResultSet.close() einen Fehler. 
+    // FÃ¼r JdbcOdbc erst das Statement nach dem ResultSet schlieÃŸen, sonst liefert ResultSet.close() einen Fehler. 
 
     if( _jdbc_result_set )  
     {
@@ -1366,7 +1366,7 @@ void Jdbc_file::get_record( Area& buffer )
                     stream = _jdbc_result_set.call_object_method( column_type == jdbc_type_clob? "getAsciiStream" : "getBinaryStream", "(I)Ljava/io/InputStream;", _jdbc_columns[ i ] );
                     if( stream )
                     {
-                        int    size = f->type_ptr()->field_size() + 100;    // Ein paar mehr, um Überlauf zu bemerken
+                        int    size = f->type_ptr()->field_size() + 100;    // Ein paar mehr, um Ãœberlauf zu bemerken
                         string value;
 
                         while( value.length() < size )

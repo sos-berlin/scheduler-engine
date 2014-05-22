@@ -18,7 +18,7 @@ inline void                     enter_mutex                 ( System_mutex* m ) 
 inline void                     leave_mutex                 ( System_mutex* m )                     { LeaveCriticalSection( m ); }
 
 //------------------------------------------------------------------------------------windows::Mutex
-// AUFBAU NICHT ÄNDERN, wird mit zur Laufzeit nachgeladenem Modul ausgetauscht!
+// AUFBAU NICHT Ã„NDERN, wird mit zur Laufzeit nachgeladenem Modul ausgetauscht!
 
 struct Mutex : Mutex_base
 {

@@ -16,8 +16,7 @@ extends TypedPath {
 object JobPath {
   implicit val MyJsonFormat = new IsString.MyJsonFormat(apply)
 
-  @JsonCreator def of(absolutePath: String): JobPath =
-    new JobPath(absolutePath)
+  @JsonCreator def valueOf(absolutePath: String) = new JobPath(absolutePath)
 
   def makeAbsolute(path: String) =
     new JobPath(AbsolutePath.makeAbsolute(path))

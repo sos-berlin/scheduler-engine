@@ -54,7 +54,7 @@ struct Com_mail : spooler_com::Imail,
     void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
 
 
-    Z_GNU_ONLY(                 Com_mail                    ();  )                                  // Für gcc 3.2. Nicht implementiert
+    Z_GNU_ONLY(                 Com_mail                    ();  )                                  // FÃ¼r gcc 3.2. Nicht implementiert
                                 Com_mail                    ( Spooler* );
                                ~Com_mail                    ();
                                 

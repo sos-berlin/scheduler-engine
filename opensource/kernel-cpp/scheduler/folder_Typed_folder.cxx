@@ -95,7 +95,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& di
 
 
 
-        /// Dateien hinzugef¸gt?
+        /// Dateien hinzugef√ºgt?
 
         while( de != ordered_directory_entries.end()  &&
                ( fb == ordered_file_baseds.end()  ||  (*de)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
@@ -110,7 +110,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& di
         
 
 
-        /// Dateien gelˆscht?
+        /// Dateien gel√∂scht?
 
         while( fb != ordered_file_baseds.end()  &&
                ( de == ordered_directory_entries.end()  ||  (*de)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?
@@ -170,10 +170,10 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 if( !is_new ) {
                     file_is_different = current_file_based->get_and_clear_force_file_reread() ||
                                         current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
-                                        current_file_based->name() != name;   // Objekt ist unter anderer Groﬂschreibung bekannt?
+                                        current_file_based->name() != name;   // Objekt ist unter anderer Gro√üschreibung bekannt?
 
                     if( !file_is_different ) {
-                        changed_file_info = current_file_based->changed_included_file_info();       // <include> ge‰ndert?
+                        changed_file_info = current_file_based->changed_included_file_info();       // <include> ge√§ndert?
                         if( changed_file_info )  file_is_different = true;
                     }
                 }
@@ -189,7 +189,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     }
                     catch( exception& x ) { content_xc = x; }
 
-                    if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() ) {   // ERRNO-2 (Datei gelˆscht)?
+                    if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() ) {   // ERRNO-2 (Datei gel√∂scht)?
                         if( old_file_based ) {
                             old_file_based->_file_is_removed = true;
                             old_file_based->remove();
@@ -245,8 +245,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 }
             }
         }
-        else                                        // Datei ist gelˆscht
-        if( old_file_based->has_base_file()  &&     // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht lˆschen
+        else                                        // Datei ist gel√∂scht
+        if( old_file_based->has_base_file()  &&     // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht l√∂schen
             !old_file_based->is_to_be_removed() )
         {
             something_changed = true;
@@ -254,7 +254,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
             string p = folder()->make_path( old_file_based->base_file_info()._path );
             old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
 
-            file_based = old_file_based;                // F¸r catch()
+            file_based = old_file_based;                // F√ºr catch()
             assert( file_based->_file_is_removed );
             
             file_based->handle_event( File_based::bfevt_removed );
@@ -269,7 +269,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         string msg;
 
 
-        if( directory_entry )        // Fehler beim Lˆschen soll das Objekt nicht als fehlerhaft markieren
+        if( directory_entry )        // Fehler beim L√∂schen soll das Objekt nicht als fehlerhaft markieren
         {
             file_based->_base_file_xc      = x;
             file_based->_base_file_xc_time = double_from_gmtime();
@@ -317,8 +317,8 @@ void Typed_folder::ignore_duplicate_configuration_file( File_based* current_file
         {
             if( !new_file_based )
             {
-                // Lokale Datei ge‰ndert, Objekt ist aber zentral definiert: 
-                file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Ge‰nderte lokale Datei wird ignoriert
+                // Lokale Datei ge√§ndert, Objekt ist aber zentral definiert: 
+                file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Ge√§nderte lokale Datei wird ignoriert
             }
             else
             //if( current_file_based  &&  !current_file_based->_configuration_origin )
@@ -380,7 +380,7 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
         if( replace_no  ||  
             use_base_mechanism  &&  !replace_yes )
         {
-            file_based->set_dom( element );         // Objekt erg‰nzen (<base>) oder ‰ndern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
+            file_based->set_dom( element );         // Objekt erg√§nzen (<base>) oder √§ndern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
         }
         else
         {
@@ -405,7 +405,7 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
 void Typed_folder::add_to_replace_or_remove_candidates( const File_based& file_based )             
 { 
     _replace_or_remove_candidates_set.insert( file_based.name() ); 
-    spooler()->folder_subsystem()->set_signaled( Z_FUNCTION );      // Kˆnnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
+    spooler()->folder_subsystem()->set_signaled( Z_FUNCTION );      // K√∂nnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
 }
 
 //------------------------------------------------Typed_folder::handle_replace_or_remove_candidates

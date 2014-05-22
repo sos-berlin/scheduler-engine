@@ -22,7 +22,7 @@ namespace com {
 namespace object_server {
 
 const int    initial_message_size   = 2000;
-const int    max_message_size       = 1000*1024*1024;   // Prüfung, falls unsinnige Bytes ankommen
+const int    max_message_size       = 1000*1024*1024;   // PrÃ¼fung, falls unsinnige Bytes ankommen
 const int    max_dispids_per_method = 1;                // Parameternamen bei GetIDsOfNames() nicht implementiert
 
 struct Server;
@@ -35,10 +35,10 @@ struct Output_message;
 struct Input_message;
 
 //-----------------------------------------------------------------------Connection_reset_exception
-// Connection_reset_exception wird vom Scheduler geprüft, um Fehlermeldungen aufgrund 
+// Connection_reset_exception wird vom Scheduler geprÃ¼ft, um Fehlermeldungen aufgrund 
 // eines Kills zu erkennen. Wenn der Kill (z.B. ignore_signals="SIGTERM") den Job nicht stoppen soll,
 // dann soll auch die vorherige Fehlermeldung wegen Verbindungsabbruchs den Job nicht stoppen.
-// Nur Verbindungsfehler, die durch ein Signal (kill, Absturz) hervorgerufen werden können,
+// Nur Verbindungsfehler, die durch ein Signal (kill, Absturz) hervorgerufen werden kÃ¶nnen,
 // sollten hiermit abgedeckt werden.
 // Ebenso, wenn der Prozess sich unerwartet beendet hat (_process_lost).
 
@@ -194,7 +194,7 @@ struct Input_message
 //---------------------------------------------------------------------------------------Connection
 
 struct Connection : Object,
-                    My_thread_only      // Erstmal nur für einen Thread zulassen.
+                    My_thread_only      // Erstmal nur fÃ¼r einen Thread zulassen.
 {
     enum Different_thread_allowed { diffthr_not_allowed = 0, diffthr_thread_allowed };
 
@@ -549,53 +549,53 @@ struct Object_id
 
 //-------------------------------------------------------------------------------------Object_entry
 /*
-    REFERENZZÄHLUNG
+    REFERENZZÃ„HLUNG
 
     "Orginal" ist das echte Objekt.
     "Proxy" ist dessen Stellvertreter auf der anderen Seite.
 
-    Wenn ein Zeiger auf ein Original zur anderen Seite übertragen wird:
+    Wenn ein Zeiger auf ein Original zur anderen Seite Ã¼bertragen wird:
         Beim Aufruf
             Hin
                 Original noch nicht in _object_table eingetragen?
                     Original eintragen
-                    Referenz des Originals hochzählen
+                    Referenz des Originals hochzÃ¤hlen
                     Der anderen Seite mitteilen, dass der Zeiger neu ist (is_new)
                     ---
                     Die andere Seite richtet einen Proxy ein (is_new)
-                    Referenz des Proxys hochzählen
+                    Referenz des Proxys hochzÃ¤hlen
 
                 sonst
-                    Referenz des Originals hochzählen?
+                    Referenz des Originals hochzÃ¤hlen?
                     Der anderen Seite mitteilen, dass der Zeiger bekannt ist
                     ---
                     Die andere Seite hat bereits einen Proxy
-                    Referenz des Proxys hochzählen?
+                    Referenz des Proxys hochzÃ¤hlen?
 
-            Zurück
-                Referenz des Proxys herunterzählen, bei 0 freigegeben
-                Der Original-Seite mitteilen, wenn Proxy freigegeben ist (Original-Seite zählt dann seinen Referenzzähler runter)
+            ZurÃ¼ck
+                Referenz des Proxys herunterzÃ¤hlen, bei 0 freigegeben
+                Der Original-Seite mitteilen, wenn Proxy freigegeben ist (Original-Seite zÃ¤hlt dann seinen ReferenzzÃ¤hler runter)
 
-        Beim Rücksprung
+        Beim RÃ¼cksprung
             Original noch nicht in _object_table eingetragen?
                 Original eintragen
-                Referenz des Originals hochzählen
+                Referenz des Originals hochzÃ¤hlen
                 Der anderen Seite mitteilen, dass der Zeiger neu ist (is_new)
                 ---
                 Die andere Seite richtet einen Proxy ein (is_new)
-                Referenz des Proxys hochzählen
+                Referenz des Proxys hochzÃ¤hlen
 
             sonst
-                Referenz des Originals hochzählen?
+                Referenz des Originals hochzÃ¤hlen?
                 Der anderen Seite mitteilen, dass der Zeiger bekannt ist
                 ---
                 Die andere Seite hat bereits einen Proxy
-                Referenz des Proxys hochzählen?
+                Referenz des Proxys hochzÃ¤hlen?
 
     
     Eine Routine gibt den letzten Zeiger auf ein Objekt frei.
-    Dieser Zeiger ist nicht mit dem aktuellen Aufruf übergeben worden, sondern schon vorher.
-    Die andere Seite muss darüber benachrichtigt werden.
+    Dieser Zeiger ist nicht mit dem aktuellen Aufruf Ã¼bergeben worden, sondern schon vorher.
+    Die andere Seite muss darÃ¼ber benachrichtigt werden.
     b) :-) Sofort bei Release
     a) :-( Jeder Antwort wird also eine Liste der Objekte beigelegt, die die andere Seite nicht mehr kennt.
 
@@ -616,7 +616,7 @@ struct Object_entry
     Fill_zero                  _zero_;
     Object_id                  _id;
     IUnknown*                  _iunknown;               // AddRef() und Release() nur bei _is_owner
-    bool                       _table_is_owner;         // Die Objekttabelle ist der (stellvertretende) Eigentümer des Objektes. Der richtige Eigentümer ist auf der anderen Seite
+    bool                       _table_is_owner;         // Die Objekttabelle ist der (stellvertretende) EigentÃ¼mer des Objektes. Der richtige EigentÃ¼mer ist auf der anderen Seite
     bool                       _is_proxy;
     Z_DEBUG_ONLY( string       _debug_string; )
 
@@ -797,7 +797,7 @@ struct Proxy : idispatch_base_implementation< IDispatch >  //Object
     ptr<Async_operation>       _sync_operation;
 
     typedef std::map< com::Bstr, DISPID >  Dispid_map;
-    Dispid_map                 _dispid_map;             // Cache für DISPIDs
+    Dispid_map                 _dispid_map;             // Cache fÃ¼r DISPIDs
 };
 
 //-----------------------------------------------------------------------proxy_with_local_methods<>
@@ -812,7 +812,7 @@ struct proxy_with_local_methods : idispatch_implementation< CLASS, INTERFACE >,
 
 
     void*                       operator new                ( size_t size, Z_new_type, const char* name, int lineno )   { return z_malloc( size, name, lineno ); }
-    void                        operator delete             ( void* p, Z_new_type, const char*, int )                   { z_free(p); }  // Für VC++ 6: Sonst warning C4291
+    void                        operator delete             ( void* p, Z_new_type, const char*, int )                   { z_free(p); }  // FÃ¼r VC++ 6: Sonst warning C4291
     void                        operator delete             ( void* p )                                                 { z_free(p); }
 
 
@@ -988,10 +988,10 @@ struct Simple_operation : Async_operation
     ptr<Session>               _session;
     Output_message             _output_message;
     Input_message              _input_message;
-    string                     _debug_text;             // Für Debug-Meldungen
+    string                     _debug_text;             // FÃ¼r Debug-Meldungen
     bool                       _on_stack;               //                                          Connection::pop_operation() rufen!
     int                        _callback_nesting;       // Von Connection::_callback_nesting
-    bool                       _different_thread_is_allowed;    // Nur vorsichtshalber, Thread-Fähigkeit müsste getestet werden
+    bool                       _different_thread_is_allowed;    // Nur vorsichtshalber, Thread-FÃ¤higkeit mÃ¼sste getestet werden
 
     Fill_end _end_;
 };

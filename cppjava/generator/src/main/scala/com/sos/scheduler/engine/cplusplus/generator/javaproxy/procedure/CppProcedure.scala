@@ -20,7 +20,7 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
   protected val parameterListDeclaration =
     m.parameters map { p => cppParameterDeclaration(p.typ) + " " + p.name } mkString ("(", ", ", ")")
 
-    val classClassCode = new CppCode {
+  val classClassCode = new CppCode {
     def headerCode = {
       val c = if (m.isStatic) "Static_method"  else "Method"
       JavaBridge.namespace + "::" + c + " const " + variableName + ";"
@@ -97,7 +97,7 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
     }
 
     "_" + variableNameOfJavaName(mangled(name)) + "__" +
-    mangled(m.parameterTypes map Jni.signatureString mkString) +
+    mangled((m.parameterTypes map Jni.signatureString).mkString) +
     "__method"
   }
 

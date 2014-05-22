@@ -22,7 +22,7 @@
 #endif
 
 #if !defined __SOSDATE_H
-#   include "sosdate.h"         // Für _sys_date
+#   include "sosdate.h"         // FÃ¼r _sys_date
 #endif
 
 #if !defined __SOSDB_H
@@ -50,7 +50,7 @@ using std::map;
 namespace sos
 {
 
-static const int max_sossql_field_size = 1024;     // Größe für generierte Ergebnisfelder
+static const int max_sossql_field_size = 1024;     // GrÃ¶ÃŸe fÃ¼r generierte Ergebnisfelder
 
 // Namen der vordefinierten, internen Tabellen:
 #define SYSTEM_TABLE_NAME "_SYSTEM"
@@ -74,10 +74,10 @@ Bool sql_like( const Dyn_obj& a, const Dyn_obj& b, Area* hilfspuffer = NULL );
 bool sql_regex_match( const string& a, const string& pattern );
 
 //----------------------------------------------------------------------------Sql_key_intervall
-// Ein geschlossenes Intervall von aufeinanderfolgenden, nacheinander zu lesenden Sätzen
-// Oder eine Menge von Intervallen, ein Intervall für jede Kombination der ersten _offset Bytes.
-// Die ersten _offset Bytes heißen Variabler Anteil, die restlichen Fester Anteil.
-// Damit kann ein segmentierter Schlüssel erfasst werden.
+// Ein geschlossenes Intervall von aufeinanderfolgenden, nacheinander zu lesenden SÃ¤tzen
+// Oder eine Menge von Intervallen, ein Intervall fÃ¼r jede Kombination der ersten _offset Bytes.
+// Die ersten _offset Bytes heiÃŸen Variabler Anteil, die restlichen Fester Anteil.
+// Damit kann ein segmentierter SchlÃ¼ssel erfasst werden.
 
 struct Sql_key_intervall
 {
@@ -98,7 +98,7 @@ struct Sql_key_intervall
     void                        assign                  ( const Const_area& key, uint len, uint offset );
 
     int                        _offset;                 // Bytes vor diesem Offset sind beliebig,
-                                                        // also für jeden Wert der ersten _offset Bytes ein eigenes Intervall!
+                                                        // also fÃ¼r jeden Wert der ersten _offset Bytes ein eigenes Intervall!
     int                        _length;
 
     const Const_area&           lowest_key              () const                        { return _lowest_key; }
@@ -143,7 +143,7 @@ enum Sql_operator
 {
     op_none,                // noch nicht definiert
   //op_null,                // Konstante NULL
-    op_select_star,         // * (alle Felder, nur temporär auf oberster Stufe)
+    op_select_star,         // * (alle Felder, nur temporÃ¤r auf oberster Stufe)
     op_const,               // Ein konstanter Wert
     op_field,               // Ein Feld einer Tabelle
     op_rowid,               // ROWID
@@ -293,22 +293,22 @@ struct Sql_table : Sos_self_deleting
     Sql_stmt*                  _stmt;
 
     int                        _index;                  // this == Sos_stmt::_table_array[ _index ]
-    Sos_string                 _user_name;              // Eigentümer der Tabelle oder ""
+    Sos_string                 _user_name;              // EigentÃ¼mer der Tabelle oder ""
     Sos_string                 _name;                   // Dateiname
-    Bool                       _full_file_name;         // Tabellenname ist vollständiger Dateiname
+    Bool                       _full_file_name;         // Tabellenname ist vollstÃ¤ndiger Dateiname
     Sos_limited_text<32>       _alias;
 
     Sos_ptr<Record_type>       _table_type;             // Satzbeschreibung der Datei
     Sos_ptr<Record_type>       _selected_type;          // Nur die selektierten Felder (von allen Klauseln)
-    Sos_ptr<Field_descr>       _table_field_descr;      // Der ganze Satz als ein Feld für table.*
+    Sos_ptr<Field_descr>       _table_field_descr;      // Der ganze Satz als ein Feld fÃ¼r table.*
     Byte*                      _base;                   // Zeiger auf den Satz
-    Dynamic_area               _record;                 // Puffer für den Satz
+    Dynamic_area               _record;                 // Puffer fÃ¼r den Satz
 
-    Field_descr*               _table_key_descr;        // Feldbeschreibung des Tabellenschlüssels
+    Field_descr*               _table_key_descr;        // Feldbeschreibung des TabellenschlÃ¼ssels
     Dynamic_area               _key;
 
-    int                        _result_key_offset;      // Offset des Schlüssels dieser Tabelle im Schlüssel der Ergebnismenge. Sql_stmt::_table_array[ 0 ]->_result_key_offset == 0. (s.a. Sql_stmt::_result_key_descr)
-  //Sos_simple_array<int>      _callers_key_table;      // Für Sql_select::get_key()
+    int                        _result_key_offset;      // Offset des SchlÃ¼ssels dieser Tabelle im SchlÃ¼ssel der Ergebnismenge. Sql_stmt::_table_array[ 0 ]->_result_key_offset == 0. (s.a. Sql_stmt::_result_key_descr)
+  //Sos_simple_array<int>      _callers_key_table;      // FÃ¼r Sql_select::get_key()
 
     Any_file::Open_mode        _open_mode;
     Any_file                   _file;                   // Datei, wenn nicht Systemtabelle
@@ -321,12 +321,12 @@ struct Sql_table : Sos_self_deleting
   //Bool                       _prepared;               // _file.prepare() gerufen
     Bool                       _opened;
     Bool                       _rewind;                 // _file.rewind() aufrufen!
-    Bool                       _rewound;                // Um überflüssige rewind() zu vermeiden, nicht jeder Dateityp kennt rewind()
+    Bool                       _rewound;                // Um Ã¼berflÃ¼ssige rewind() zu vermeiden, nicht jeder Dateityp kennt rewind()
     Bool                       _system;                 // Systemtabelle (ohne _file)
     Sql_key_intervalle         _key_intervalle;
-    int                        _ki_idx;                 // Key_intervall index für get_seq()
-    Bool                       _set_key;                // Beim nächsten _file.get() neu positionieren!
-    int                        _get_count;              // Statistik: Anzahl gelesener Sätze (rewind: setzt auf 0 zurück)
+    int                        _ki_idx;                 // Key_intervall index fÃ¼r get_seq()
+    Bool                       _set_key;                // Beim nÃ¤chsten _file.get() neu positionieren!
+    int                        _get_count;              // Statistik: Anzahl gelesener SÃ¤tze (rewind: setzt auf 0 zurÃ¼ck)
     int                        _set_count;              // Statistik: Anzahl Positionierungen
     int                        _get_key_count;          // Statistik: Anzahl getkeys
 
@@ -334,23 +334,23 @@ struct Sql_table : Sos_self_deleting
     Sql_outer_join             _outer_join;             // Fehlt ein Satz, dann NULL-Werte erzeugen
     Sql_expr_with_operands*    _build_expr_ptr;         // Zum Aufbau von _join_expr;
     Sos_static_ptr<Sql_expr>   _join_expr;
-    Bool                       _join_expr_accepted;     // WHERE-Klausel für den Join erfüllt? (pro fetch())
-    Bool                       _record_read;            // Für Outer Join: Bei false NULL-Werte erzeugen
-    Bool                       _record_accepted;        // Für Outer Join: Ein Satz durch die WHERE-Klausel gekommen
-    Bool                       _null_values_for_outer_join_read;  // Null-Satz wird gerade eingefügt (nach EOF) ==> Alles NULL
+    Bool                       _join_expr_accepted;     // WHERE-Klausel fÃ¼r den Join erfÃ¼llt? (pro fetch())
+    Bool                       _record_read;            // FÃ¼r Outer Join: Bei false NULL-Werte erzeugen
+    Bool                       _record_accepted;        // FÃ¼r Outer Join: Ein Satz durch die WHERE-Klausel gekommen
+    Bool                       _null_values_for_outer_join_read;  // Null-Satz wird gerade eingefÃ¼gt (nach EOF) ==> Alles NULL
     Sql_table_set              _master_tables;
-    Bool                       _key_join;               // Join auf den Schlüssel
+    Bool                       _key_join;               // Join auf den SchlÃ¼ssel
     Bool                       _equijoin;               // Join mit = (nur, wenn _key_join)
 
 
-  //int                        _appended_null_flags_offset;    // Null-Flags für outer join
+  //int                        _appended_null_flags_offset;    // Null-Flags fÃ¼r outer join
   //int                        _index;                  // in Sossql_static::_tables oder -1
   //Sos_simple_array<int>      _callers_key_table;      // callers field index -> table field index
   //Sos_simple_array<Field_descr*>      _callers_record_table;   // callers field index -> table field index
 };
 
 //-------------------------------------------------------------------------------------Sql_expr
-// Basisklasse für die verschiedenen Teilausdrücke
+// Basisklasse fÃ¼r die verschiedenen TeilausdrÃ¼cke
 
 struct Sql_expr : Sos_self_deleting
 {
@@ -370,18 +370,18 @@ struct Sql_expr : Sos_self_deleting
 
 
     Sql_operator               _operator;
-    Source_pos                 _pos;                    // Für Fehlermeldung
+    Source_pos                 _pos;                    // FÃ¼r Fehlermeldung
     Bool                       _prepared;
     Sql_table_set              _used_tables;
     Sos_ptr<Field_type>        _type;
 
-    Bool                       _all;                    // op_lt,op_le,op_eq,op_ne,op_ge,op_gt: Bedingung muss für alle erfüllt sein?
-    Bool                       _any;                    // op_lt,op_le,op_eq,op_ne,op_ge,op_gt: Bedingung muss für einen erfüllt sein?
+    Bool                       _all;                    // op_lt,op_le,op_eq,op_ne,op_ge,op_gt: Bedingung muss fÃ¼r alle erfÃ¼llt sein?
+    Bool                       _any;                    // op_lt,op_le,op_eq,op_ne,op_ge,op_gt: Bedingung muss fÃ¼r einen erfÃ¼llt sein?
                                                         // _all || _any ==> 2. Operand ist eine Liste!
 
     // Errechneter Wert dieses Knotens:
   //Bool                       _save_value;             // Wert merken?
-  //int                        _value_stamp;            // _value ist gültig, wenn _value_status == Sql_stmt::_stamp
+  //int                        _value_stamp;            // _value ist gÃ¼ltig, wenn _value_status == Sql_stmt::_stamp
     Bool                       _computed;               // Wert dieses Knotens ist bereits berechnet
     Bool                       _null;                   // == _value.null()
     Dyn_obj                    _value;
@@ -420,11 +420,11 @@ struct Sql_field_expr : Sql_expr
     Sos_string                 _table_name;
     Sos_string                 _name;
     Sos_ptr<Sql_table>         _table;
-    int                        _table_index;            // NACH order_table() UNGÜLTIG! _table_index > Sql_stmt::_table_array.last_index() ==> Tabelle von _outer_stmt
+    int                        _table_index;            // NACH order_table() UNGÃœLTIG! _table_index > Sql_stmt::_table_array.last_index() ==> Tabelle von _outer_stmt
     Sos_ptr<Field_descr>       _field_descr;
-    Sos_simple_array< Sos_ptr<Sql_expr> > _index_array; // Für Array-Indices
+    Sos_simple_array< Sos_ptr<Sql_expr> > _index_array; // FÃ¼r Array-Indices
     Sql_outer_join             _outer_join;
-    Bool                       _resolve_star;           // tabelle.* auflösen 
+    Bool                       _resolve_star;           // tabelle.* auflÃ¶sen 
 };
 
 //-------------------------------------------------------------------------------Sql_rowid_expr
@@ -460,7 +460,7 @@ struct Sql_param_expr : Sql_expr                        // Parameter "?"
 struct Sql_select_expr;         // Hinter Sql_select definiert.
 
 //-----------------------------------------------------------------------Sql_expr_with_operands
-// Teilausdrücke mit Operanden
+// TeilausdrÃ¼cke mit Operanden
 
 struct Sql_expr_with_operands : Sql_expr
 {
@@ -483,7 +483,7 @@ struct Sql_regex_expr : Sql_expr_with_operands
     static Sos_ptr<Sql_const_expr> create               ();
 
     string                     _pattern;
-    zschimmer::Regex           _regex;                  // Für Operator op_regex_match (=~)
+    zschimmer::Regex           _regex;                  // FÃ¼r Operator op_regex_match (=~)
 };
 
 //----------------------------------------------------------------------------------Sql_in_expr
@@ -495,7 +495,7 @@ struct Sql_in_expr : Sql_expr                           // {IN,<,<=,=,<>,>,>=} {
     void                       _obj_print               ( ostream* ) const;
 
     Sql_operator               _in_operator;            // op_lt, op_le, op_eq, op_ne, op_ge, op_gt
-    Bool                       _all;                    // Bedingung muss für alle erfüllt sein?
+    Bool                       _all;                    // Bedingung muss fÃ¼r alle erfÃ¼llt sein?
 };
 */
 //--------------------------------------------------------------------------------Sql_func_expr
@@ -533,8 +533,8 @@ struct Sql_aggregate_expr : Sql_expr_with_operands
 
     Fill_zero                  _zero_;
     bool                       _distinct;
-    int                        _aggregate_field_index;  // Index für Sql_aggregate::_aggregate_record_type[]
-    int                        _groupby_index;          // Nur für Groupby-Ausdruck
+    int                        _aggregate_field_index;  // Index fÃ¼r Sql_aggregate::_aggregate_record_type[]
+    int                        _groupby_index;          // Nur fÃ¼r Groupby-Ausdruck
 };
 
 //------------------------------------------------------------------Sql_func_group_counter_expr
@@ -551,7 +551,7 @@ struct Sql_func_group_counter_expr : Sql_expr_with_operands
 };
 
 //------------------------------------------------------------------------------Sql_loop_clause
-// Die LOOP-Klausel läßt eine Variable aus der Systemtabelle zwischen zwei Werten iterieren.
+// Die LOOP-Klausel lÃ¤ÃŸt eine Variable aus der Systemtabelle zwischen zwei Werten iterieren.
 
 struct Sql_loop_clause : Sos_self_deleting
 {
@@ -573,15 +573,15 @@ struct Sql_system_record
                                 Sql_system_record       () : _zero_(this+1) {}
 
     Fill_zero                  _zero_;
-    long                       _sys_loop_index;         // für LOOP-Klausel
+    long                       _sys_loop_index;         // fÃ¼r LOOP-Klausel
     long                       _sys_loop_end;
     Sos_date                   _sys_date;               // Tagesdatum
     long                       _sys_record_no;          // Nummer des Satzes in der Ergebnismenge
-                                                        // select .. where sys_record_no <= 3 liefert die ersten drei Sätze
+                                                        // select .. where sys_record_no <= 3 liefert die ersten drei SÃ¤tze
                                                         // Wird vor LOOP und ORDER BY berechnet
     Sos_limited_text<100>      _user;
     Sos_limited_text<2>        _sys_newline;            // "\n" oder "\r\n" (Windows)
-    Sos_limited_text<1>        _sys_cr;                 // "\r" (für MS Word)
+    Sos_limited_text<1>        _sys_cr;                 // "\r" (fÃ¼r MS Word)
 
     Field_descr*               _sys_loop_index_field;
 
@@ -589,7 +589,7 @@ struct Sql_system_record
 };
 
 //-------------------------------------------------------------------------------------Sql_stmt
-// Basisklasse für eine SQL-Anweisung
+// Basisklasse fÃ¼r eine SQL-Anweisung
 
 struct Sql_stmt : Sos_self_deleting
 {
@@ -670,30 +670,30 @@ struct Sql_stmt : Sos_self_deleting
                                                              // Ab _table_count sind Sondertabellen (_system_table und _param_table).
     Sos_simple_array< int >                 _table_order;
     Sql_table*                               ordered_table        ( int i )  { return _table_array[ _table_order[ i ] ]; }
-    Bool                                    _constant_select_fetched;  // für SELECT ohne FROM
-    int                                     _fetch_table_index;   // Diese Tabelle wird gerade gelesen (join), für ordered_table()!!
+    Bool                                    _constant_select_fetched;  // fÃ¼r SELECT ohne FROM
+    int                                     _fetch_table_index;   // Diese Tabelle wird gerade gelesen (join), fÃ¼r ordered_table()!!
 
     Sos_ptr<Sql_table>                      _system_table;        // Die Tabelle SYSTEM (Sql_system_record)
     Sql_system_record*                      _system;              // Der Satz der Systemtabelle
 
     Sos_simple_array<Sos_string>            _let_names;
     Sos_ptr<Sql_table>                      _let_table;           // Die Tabelle LET
-    Sos_simple_ptr_array<Sql_expr>          _let_expr_array;      // Ausdrücke
+    Sos_simple_ptr_array<Sql_expr>          _let_expr_array;      // AusdrÃ¼cke
 
     int                                     _param_count;         // Anzahl der ?-Parameter
     Sos_ptr<Sql_table>                      _param_table;         // Tabelle mit dem Parametersatz
-    Sos_ptr<Record_type>                    _param_callers_type;  // für Sql_select::execute()
-    const Byte*                             _param_callers_base;  // für execute()
+    Sos_ptr<Record_type>                    _param_callers_type;  // fÃ¼r Sql_select::execute()
+    const Byte*                             _param_callers_base;  // fÃ¼r execute()
 
     Sos_ptr<Sql_loop_clause>                _loop;                // LOOP-Klausel
-    Bool                                    _loop_before_where;   // LOOP vor WHERE ausführen!
+    Bool                                    _loop_before_where;   // LOOP vor WHERE ausfÃ¼hren!
     Sos_ptr<Sql_expr>                       _where;               // WHERE-Klausel
     Sos_ptr<Sql_expr>                       _assert;              // ASSERT-Klausel
-    Sql_expr*                               _last_not_true_expr;  // Für Fehlermeldung bei nicht erfüllter WHERE- oder ASSERT-Klausel
-    int4                                    _row_count;           // Anzahl verarbeiteter Sätze
-    Dynamic_area                            _hilfspuffer;         // Für Konvertierungen
-    Bool                                    _log_eval;            // Auswertung der Ausdrücke protokollieren
-    Bool                                    _xc_expr_inserted;    // Beim Fehler in eval_expr() Sql_expr bereits der Exception hinzugefügt?
+    Sql_expr*                               _last_not_true_expr;  // FÃ¼r Fehlermeldung bei nicht erfÃ¼llter WHERE- oder ASSERT-Klausel
+    int4                                    _row_count;           // Anzahl verarbeiteter SÃ¤tze
+    Dynamic_area                            _hilfspuffer;         // FÃ¼r Konvertierungen
+    Bool                                    _log_eval;            // Auswertung der AusdrÃ¼cke protokollieren
+    Bool                                    _xc_expr_inserted;    // Beim Fehler in eval_expr() Sql_expr bereits der Exception hinzugefÃ¼gt?
     Bool                                    _expr_error;          // Fehler bei eval_expr() oder eval_bool_expr() aufgetreten
     int                                     _rowid_len;           // 0: Keine ROWID
     Dynamic_area                            _rowid;               // ROWIDs aller Tabellen hintereinander
@@ -701,7 +701,7 @@ struct Sql_stmt : Sos_self_deleting
     Any_file_stream                         _error_log;
     Bool                                    _error_log_opened;
     Sql_stmt*                               _outer_stmt;          // Verschachteltes Select: Zeiger auf die Umgebung
-    int                                     _stamp;               // Stempel für Sql_expr::_value_stamp
+    int                                     _stamp;               // Stempel fÃ¼r Sql_expr::_value_stamp
     uint                                    _max_field_length;
     Bool                                    _using_func_field;    // field()-Funktion wird verwendet, Sql_table soll alle Felder lesen (==> _read_position = false)
     Bool                                    _order_tables;        // Zugriffsreihenfolge der Tabellen entsprechend der Joins ordnen (default)
@@ -726,11 +726,11 @@ struct Sql_orderby_clause
     Sos_simple_array< int >                 _index_array;       // Indices in select->_result_expr_array[]
     int                                     _first;             // Erster Index (optimiert)
     Sos_ptr<Record_type>                    _type;
-    Sos_simple_array<void*>                 _records;           // Für qsort(): Die Elemente müssen zusammenhängend im Speicher liegen!
+    Sos_simple_array<void*>                 _records;           // FÃ¼r qsort(): Die Elemente mÃ¼ssen zusammenhÃ¤ngend im Speicher liegen!
     Bool                                    _sorted;
     int1 /*Bool*/                           _descending_array[ max_orderby_params ];
     Field_descr*                            _field_array[ max_orderby_params ];
-    int                                     _record_no;         // Nächster zu lesender sortierter Satz
+    int                                     _record_no;         // NÃ¤chster zu lesender sortierter Satz
 
     static int _USERENTRY                    compare            ( const void*, const void* );
 };
@@ -782,7 +782,7 @@ struct Sql_aggregate
     const Byte*                             _current_aggregate_record;
     Sos_ptr<Sql_expr>                       _having;                    // HAVING-Klausel
     
-    typedef std::map<string,Byte*>           Result_map;                // ( Gruppenschüssel, Datensatz )
+    typedef std::map<string,Byte*>           Result_map;                // ( GruppenschÃ¼ssel, Datensatz )
     Result_map                              _result_map;
     Result_map::iterator                    _result_iterator;
 };
@@ -838,7 +838,7 @@ struct Sql_select : Sql_stmt
 
     Bool                       _obj_is_type             ( Sos_type_code t ) const               { return t == tc_Sql_select || Base_class::_obj_is_type( t ); }
 
-    static Sql_select*                      qsort_select;        // Für Aufruf von qsort()
+    static Sql_select*                      qsort_select;        // FÃ¼r Aufruf von qsort()
 
     Fill_zero                               _zero_;
     Sossql_file*                            _sossql_file;
@@ -848,20 +848,20 @@ struct Sql_select : Sql_stmt
     Sos_ptr<Record_type>                    _result_record_type;
   //Sos_ptr<Field_descr>                    _result_key_descr;
     int                                     _key_pos;                   // Immer 0
-    int                                     _key_len;                   // Schlüssellänge der Ergebnismenge, wenn alle Schlüsselfelder korrekt selektiert sind.
+    int                                     _key_len;                   // SchlÃ¼ssellÃ¤nge der Ergebnismenge, wenn alle SchlÃ¼sselfelder korrekt selektiert sind.
   //Sos_ptr<Sql_loop_clause>                _loop_2;                    // LOOP nach WHERE (innere Schleife)
     Sql_orderby_clause                      _orderby;
 
     Bool                                    _need_result_key;
-    Dynamic_area                            _last_record;               // zuletzt gelesener Satz für select distinct
+    Dynamic_area                            _last_record;               // zuletzt gelesener Satz fÃ¼r select distinct
     Bool                                    _last_record_valid;
     Bool                                    _distinct;                  // select distinct ...; Wird auch bei verschachteltem Select gesetzt: expr IN ( SELECT xxx )  => expr IN ( SELECT DISTINCT xxx )
     Bool                                    _update_allowed;
   //Bool                                    _select_star;               // select *
     uint                                    _max_result_field_length;
-    Bool                                    _resolve_star;              // tabelle.* kommt vor und soll aufgelöst werden (s. Sql_field_expr)
+    Bool                                    _resolve_star;              // tabelle.* kommt vor und soll aufgelÃ¶st werden (s. Sql_field_expr)
     bool                                    _has_aggregate_function;
-    Sql_aggregate                           _aggregate;           // Nur für select!
+    Sql_aggregate                           _aggregate;           // Nur fÃ¼r select!
 };
 
 //------------------------------------------------------------------------------Sql_select_expr
@@ -878,7 +878,7 @@ struct Sql_select_expr : Sql_expr                        // ( SELECT ... )
 
 //-------------------------------------------------------------------------------Sql_write_stmt
 
-struct Sql_write_stmt : Sql_stmt    // Für INSERT, UPDATE und DELETE
+struct Sql_write_stmt : Sql_stmt    // FÃ¼r INSERT, UPDATE und DELETE
 {
     BASE_CLASS( Sql_stmt )
 
@@ -957,7 +957,7 @@ struct Sossql_session : Sos_database_session
 
   //Fill_zero                  _zero_;
     Sos_string                 _catalog_name;
-    Sos_string                 _filename_prefix;        // Präfix für alle Tabelen-Dateinamen
+    Sos_string                 _filename_prefix;        // PrÃ¤fix fÃ¼r alle Tabelen-Dateinamen
     Any_file                   _catalog;
     int                        _limit;
 };
@@ -999,10 +999,10 @@ struct Sossql_file : Sos_database_file
     friend                      struct Sossql_session;
 
     Fill_zero                  _zero_;
-    Sos_string                 _catalog_name;           // Für Sossql_session
+    Sos_string                 _catalog_name;           // FÃ¼r Sossql_session
     Sos_ptr<Sql_stmt>          _stmt;
     Sql_select*                _select_stmt;            // == (Select_stmt*)_stmt oder NULL
-    Any_file                   _file;                   // Für -catalog
+    Any_file                   _file;                   // FÃ¼r -catalog
     int                        _limit;                  // Liefert Eof_exception
     int                        _max_records;            // Liefert Fehler
     int                        _record_count;
@@ -1053,7 +1053,7 @@ struct Sql_parser
         k_decimal,
         k_float,
 
-                            // Schlüsselwörter nach Wahrscheinlichkeit geordnet:
+                            // SchlÃ¼sselwÃ¶rter nach Wahrscheinlichkeit geordnet:
         k__keyword_first,
         k_like    = k__keyword_first,
         k_and,
@@ -1158,7 +1158,7 @@ struct Sql_parser
     Sos_ptr<Sql_expr>           parse_const_expr        ();
     Sos_ptr<Sql_expr>           parse_mult_expr         ();
     Sos_ptr<Sql_expr>           parse_add_expr          ();
-    Sos_ptr<Sql_expr>           parse_arith_expr        ()    { return parse_add_expr(); }  // für BETWEEN x AND y
+    Sos_ptr<Sql_expr>           parse_arith_expr        ()    { return parse_add_expr(); }  // fÃ¼r BETWEEN x AND y
     Sos_ptr<Sql_expr>           parse_expr              ()    { return parse_cond_expr(); }
     Sos_ptr<Sql_expr>           parse_cmp_expr          ();
     Sos_ptr<Sql_expr>           parse_and_expr          ();
@@ -1186,7 +1186,7 @@ struct Sql_parser
     istream*                   _input;
     Source_pos                 _pos;
     Token                      _token;
-    int                        _offset;             // für create table
+    int                        _offset;             // fÃ¼r create table
     int                        _param_count;
     Bit_set                    _expected_tokens_set;
     Bool                       _need_error_log;

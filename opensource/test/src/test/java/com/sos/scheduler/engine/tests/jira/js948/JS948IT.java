@@ -15,8 +15,8 @@ import com.sos.scheduler.engine.test.SchedulerTest;
  */
 public class JS948IT extends SchedulerTest {
 
-    private static final JobPath repeatJobPath = JobPath.of("/repeat");
-    private static final JobPath absoluteRepeatJobPath = JobPath.of("/absolute-repeat");
+    private static final JobPath repeatJobPath = new JobPath("/repeat");
+    private static final JobPath absoluteRepeatJobPath = new JobPath("/absolute-repeat");
 
     private int maxModifyCommands;
     private int maxTasks;

@@ -63,20 +63,20 @@ using namespace zschimmer::file;
             Eigene Konfigurationsverzeichnisse lesen, Timestamp und MD5 einsammeln
         Sonst bereits geladene Informationen benutzen
 
-        an Supervisor senden und dabei UDP-Signal für nächste Änderung bestellen
+        an Supervisor senden und dabei UDP-Signal fÃ¼r nÃ¤chste Ã„nderung bestellen
 
 
         Supervisor registriert Scheduler
         merkt sich am Scheduler gespeicherte Dateien (Zeitstempel, MD5)
-        Startet Verzeichnisüberwachung (sowieso durch folder.cxx)
-        vergleicht Dateien und liefert Änderungen
+        Startet VerzeichnisÃ¼berwachung (sowieso durch folder.cxx)
+        vergleicht Dateien und liefert Ã„nderungen
 
 
 
-    Verzeichnisänderung am Supervisor:
-        Für jeden registrierten Scheduler mit bestelltem UDP-Signal:
-            Verzeichnisse durchgehen und Änderung feststellen
-            Falls geändert, UDP-Signal
+    VerzeichnisÃ¤nderung am Supervisor:
+        FÃ¼r jeden registrierten Scheduler mit bestelltem UDP-Signal:
+            Verzeichnisse durchgehen und Ã„nderung feststellen
+            Falls geÃ¤ndert, UDP-Signal
             UDP-Signal wiederholen, wenn Scheduler Dateien nicht abholt, aber seine TCP-Verbindung noch besteht
 
 
@@ -85,7 +85,7 @@ using namespace zschimmer::file;
 
 
 
-    QUOTED-PRINTABLE, verändert für Scheduler "scheduler-printable"
+    QUOTED-PRINTABLE, verÃ¤ndert fÃ¼r Scheduler "scheduler-printable"
         09, 0A, 20 bis 7C -> durchlassen
         00 bis 1F -> U+7E '~', U+7E '~', U+40 '@' bis U+5F      U+00 -> ~~@   U+0D -> ~~M
         80 bis 9E -> U+7E '~', U+7E '~', U+60 '`' bis U+7E      U+80 -> ~~`
@@ -94,7 +94,7 @@ using namespace zschimmer::file;
         XML: Erstes und letztes Blank codieren: "~ "
 
 
-    ODER VERÄNDERTES UTF-8 (nein!)
+    ODER VERÃ„NDERTES UTF-8 (nein!)
         09, 0A, 20 bis 7E -> durchlassen
         00 bis 1F -> wie 100 bis 11F in UTF-8
         80 bis 9F -> wie 120 bis 140 in UTF-8
@@ -191,8 +191,8 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         }
         else
         {
-            // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
-            // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
+            // Verzeichnis ist gelÃ¶scht, aber es leben vielleicht noch Objekte, die gelÃ¶scht werden mÃ¼ssen.
+            // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() lÃ¶schen
             something_changed = subfolder->adjust_with_directory( now );    
         }
     }
@@ -235,7 +235,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
 
 
 
-        /// Dateien hinzugefügt?
+        /// Dateien hinzugefÃ¼gt?
 
         while( fi != ordered_file_infos.end()  &&
                ( fb == ordered_file_baseds.end()  ||  (*fi)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
@@ -250,7 +250,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
         
 
 
-        /// Dateien gelöscht?
+        /// Dateien gelÃ¶scht?
 
         while( fb != ordered_file_baseds.end()  &&
                ( fi == ordered_file_infos.end()  ||  (*fi)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?

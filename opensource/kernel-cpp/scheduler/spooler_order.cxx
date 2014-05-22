@@ -779,13 +779,13 @@ string Order_subsystem_impl::job_chain_db_where_condition( const Absolute_path& 
 string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  // JS-507
 {
     list<string> job_chain_names;
-    FOR_EACH_JOB_CHAIN( job_chain )
-        if( job_chain->is_distributed() )
-        {
+    FOR_EACH_JOB_CHAIN(job_chain) {
+        if (job_chain->is_distributed()) {
             S s;
             s << "'" << job_chain->path().without_slash() << "'";
             job_chain_names.push_back( s );
         }
+    }
 
     if( job_chain_names.empty() ) 
         return "";
@@ -803,7 +803,6 @@ int Order_subsystem_impl::order_count( Read_transaction* ta ) const // JS-507
         result += job_chain->order_count( ta );
     return result;
 }
-
 
 //-----------------------------------------------------Order_subsystem_impl::processing_order_count
 
@@ -823,7 +822,6 @@ int Order_subsystem_impl::processing_order_count( Read_transaction* ta ) const  
 
     return result;
 }
-
 
 //-------------------------------------------------------Order_subsystem_impl::count_started_orders
 
@@ -845,11 +843,9 @@ void Order_subsystem_impl::count_finished_orders()
 xml::Element_ptr Order_subsystem_impl::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const // JS-507
 {
     xml::Element_ptr result = File_based_subsystem::dom_element( dom_document, show_what );
-    
     xml::Element_ptr Order_subsystem_element = dom_document.createElement( "order_subsystem" ); 
 
     if( show_what.is_set( show_statistics ) ) {
-        
         xml::Element_ptr statistics_element = Order_subsystem_element.append_new_element( "order_subsystem.statistics" );
         xml::Element_ptr order_statistics_element = statistics_element.append_new_element( "order.statistics" );
     
@@ -861,7 +857,6 @@ xml::Element_ptr Order_subsystem_impl::dom_element( const xml::Document_ptr& dom
 
     result.appendChild( Order_subsystem_element );
     return result;
-
 }
 
 //-----------------------------------------------------------Order_subsystem_impl::state_statistic_element
@@ -873,7 +868,6 @@ xml::Element_ptr Order_subsystem_impl::state_statistic_element (const xml::Docum
     result.setAttribute( "count", count );
     return result;
 }
-
 
 //----------------------------------------------------------------ob_chain_folder::Job_chain_folder
 
@@ -905,7 +899,6 @@ void Job_chain_folder::remove_job_chain( Job_chain* job_chain )
     Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
 #   ifdef Z_DEBUG
-        //assert( job_chain->_order_map.empty() );
         assert( job_chain->_blacklist_map.empty() );
 #   endif
 
@@ -1772,8 +1765,8 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
         }
     }
 
-    FOR_EACH_JOB_CHAIN( outer_job_chain )
-        Z_FOR_EACH( Job_chain::Node_list, outer_job_chain->_node_list, it )                           
+    FOR_EACH_JOB_CHAIN( outer_job_chain ) {
+        Z_FOR_EACH( Job_chain::Node_list, outer_job_chain->_node_list, it ) {                          
             if( Nested_job_chain_node* nested_job_chain_node = Nested_job_chain_node::try_cast( *it ) )        
             {
                 if( nested_job_chain_node->nested_job_chain() == this )
@@ -1782,7 +1775,8 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
                     nested_job_chain_node->_nested_job_chain = NULL;
                 }
             }
-
+        }
+    }
 
     if( !disconnected_job_chains.empty() )
     {
@@ -2464,7 +2458,7 @@ Order* Job_chain::add_order_from_database_record(Transaction* ta, const Record& 
     return order;
 }
 
-
+//-----------------------------------------------------Job_chain::order_xml_file_based_node_or_null
 /*
     Returns (from column "order_xml" the node <file_based>) or NULL
 */

@@ -1,7 +1,7 @@
 // $Id: java_odl.h 11394 2005-04-03 08:30:29Z jz $
 
 
-/*  Ersatz für java.odl für Systeme ohne COM. 
+/*  Ersatz fÃ¼r java.odl fÃ¼r Systeme ohne COM. 
     2004 Zschimmer GmbH
 */
 

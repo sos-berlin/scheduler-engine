@@ -1,6 +1,6 @@
 //#define MODULE_NAME "filetab"
 //#define COPYRIGHT   "(c) SOS GmbH Berlin"
-//#define AUTHOR      "Jörg Schwiemann, Joacim Zschimmer"
+//#define AUTHOR      "JÃ¶rg Schwiemann, Joacim Zschimmer"
 
 #include "precomp.h"
 #include "../kram/sysdep.h"

@@ -1,4 +1,4 @@
-// sosdll.h                  © 1995 SOS GmbH Berlin
+// sosdll.h                  Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSDLL_H
 #define __SOSDLL_H

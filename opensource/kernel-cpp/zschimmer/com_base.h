@@ -1,12 +1,12 @@
 // $Id: com_base.h 13493 2008-04-16 17:53:36Z jz $
 
-// §1719
+// Â§1719
 
 #ifndef __ZSCHIMMER_COM_BASE_H
 #define __ZSCHIMMER_COM_BASE_H
 
 
-// Am Ende sind einige Voraus-Deklarationen für zschimmer::com (aus z_com.h) zum Gebrauch für zschimmer.h ptr<>
+// Am Ende sind einige Voraus-Deklarationen fÃ¼r zschimmer::com (aus z_com.h) zum Gebrauch fÃ¼r zschimmer.h ptr<>
 
 
 
@@ -16,9 +16,9 @@
 #   define SYSTEM_HAS_IDISPATCH
 #   define Z_OLECHAR_IS_WCHAR       // sizeof (OLECHAR) == sizeof (wchar_t)
 
-#   define _WIN32_DCOM              // Für CoCreateInstanceEx()
+#   define _WIN32_DCOM              // FÃ¼r CoCreateInstanceEx()
 
-#   define COM_LINKAGE              // Nur für Unix
+#   define COM_LINKAGE              // Nur fÃ¼r Unix
 
 #   include <winsock2.h>            // Damit nicht winsock.h eingezogen wird.
 #   include <windows.h>
@@ -32,7 +32,7 @@
 #       define V_UI8REF(VARIANT)  ((uint64*)&(VARIANT)->piVal)
 #   endif
 
-    typedef VARTYPE Variant_type;   // unsigned short. Bei eigener Implementierung für Unix ein typsicherer enum
+    typedef VARTYPE Variant_type;   // unsigned short. Bei eigener Implementierung fÃ¼r Unix ein typsicherer enum
 
 #   define Z_DEFINE_GUID(NAME,A,B,C,D,E,F,G,H,I,J,K)  const GUID NAME = { A,B,C,D,E,F,G,H,I,J,K }
 #   define DEFINE_UUIDOF( INTERFACE )

@@ -24,11 +24,11 @@ library zschimmer_java
         [propget]
         HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );
 
-        // Nicht für Invoke():
+        // Nicht fÃ¼r Invoke():
         const char*             const_java_class_name       ();
 
 
-        // Soll das Java-Objekt der Eigentümer dieses COM-Objekts sein?
+        // Soll das Java-Objekt der EigentÃ¼mer dieses COM-Objekts sein?
         // Andernfalls entfernt der Scheduler das Java-Objekt am Ende eines Aufrufs (z.B. spooler_process()).
         //[propget]
         //HRESULT                 Java_object_is_owner        ( [out,retval] VARIANT_BOOL* );

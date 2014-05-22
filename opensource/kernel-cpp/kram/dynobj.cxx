@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "dynobj"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 
@@ -21,8 +21,8 @@ namespace sos {
 const Dyn_obj null_dyn_obj;
 
 
-// Default-Typ, wenn Typ nur lesbare Werte beschreibt: (sollte dynamische Größe haben!)
-static const int    std_size = 2048;  //Vergrößert für SAN 21.7.97   1024;
+// Default-Typ, wenn Typ nur lesbare Werte beschreibt: (sollte dynamische GrÃ¶ÃŸe haben!)
+static const int    std_size = 2048;  //VergrÃ¶ÃŸert fÃ¼r SAN 21.7.97   1024;
 static String0_type std_dyn_obj_type ( std_size );   // Wenn !_field_copy_possible (rectab.cxx Field_type)
 
 //---------------------------------------------------------------------------_Dyn_obj::_Dyn_obj
@@ -295,7 +295,7 @@ void Dyn_obj::_assign( const Field_type* type, const void* p )
                 construct();
             }
 
-            Area area ( _ptr, _type->field_size() - 1 );  // nicht vergrößerbar
+            Area area ( _ptr, _type->field_size() - 1 );  // nicht vergrÃ¶ÃŸerbar
             type->write_text( (const Byte*)p, &area );
             _ptr[ area.length() ] = '\0';
         } 
@@ -389,7 +389,7 @@ int Dyn_obj::compare( const Dyn_obj& o ) const
     {
         // Wenn ein Parameter numerisch ist, muss numerisch verglichen werden,
         // weil sonst "00" != "0" und "2" > "10".
-        // Wenn ein Parameter nicht numerisch ist und auch keine Zahl enthält,
+        // Wenn ein Parameter nicht numerisch ist und auch keine Zahl enthÃ¤lt,
         // soll dann als Text verglichen werden? Hier gibt es einen Fehler und NULL ist das Ergebnis.
         double a = as_double( *this );
         double b = as_double( o );
@@ -419,11 +419,11 @@ int Dyn_obj::compare( const Dyn_obj& o ) const
     {
         Dynamic_area    a_buffer;    
         Area*           a = NULL;  
-        Area            a_area;     // Nicht Const_area, weil length verändert wird
+        Area            a_area;     // Nicht Const_area, weil length verÃ¤ndert wird
 
         Dynamic_area    b_buffer;    
         Area*           b = NULL;  
-        Area            b_area;     // Nicht Const_area, weil length verändert wird
+        Area            b_area;     // Nicht Const_area, weil length verÃ¤ndert wird
 
         // Bei String0_type und Text_type ist der Wert bereits als Text gespeiochert und kann direkt verglichen werden:
 
@@ -465,9 +465,9 @@ int Dyn_obj::compare( const Dyn_obj& o ) const
         // UPDATE-Anweisung ein Leerstring, beim SQLBindParameter aber NULL.
 
         // wenn std_type_char mit std_type_varchar verglichen wird, dann werden vom
-        // std_type_varchar die hängenden Blanks ignoriert (std_type_varchar wird zu std_type_char).
+        // std_type_varchar die hÃ¤ngenden Blanks ignoriert (std_type_varchar wird zu std_type_char).
 
-        // Wenn ein Feld CHAR ist, Länge der Felder durch Verkürzen einander anpassen:
+        // Wenn ein Feld CHAR ist, LÃ¤nge der Felder durch VerkÃ¼rzen einander anpassen:
 
         if( _type->info()->_std_type == std_type_char ) {
             if( a->length() > b->length()  /*&&  _type->info()->_std_type == std_type_char jz 15.4.97 ??*/ ) {
@@ -513,7 +513,7 @@ void calculate_decimal( const Decimal& a, const Decimal& b, Dyn_obj::Operator op
 {
     Decimal r;
 
-    // Überlauf prüfen!!
+    // Ãœberlauf prÃ¼fen!!
     switch( op ) {
         case Dyn_obj::op_add     : r = a + b; break;
         case Dyn_obj::op_subtract: r = a - b; break;
@@ -531,7 +531,7 @@ void calculate_big_int( Big_int a, Big_int b, Dyn_obj::Operator op, Big_int* res
 {
     Big_int r;
 
-    // Überlauf prüfen!!
+    // Ãœberlauf prÃ¼fen!!
     switch( op ) {
         case Dyn_obj::op_add     : r = a + b; break;
         case Dyn_obj::op_subtract: r = a - b; break;
@@ -578,7 +578,7 @@ void Dyn_obj::calculate( const Dyn_obj& o, Operator op, Dyn_obj* result ) const
                 }
                 catch( const Null_error& )
                 {
-                    as_double( o );             // Löst Exception aus, wenn nicht konvertierbar
+                    as_double( o );             // LÃ¶st Exception aus, wenn nicht konvertierbar
                     *result = null_dyn_obj;
                     return;
                 }
@@ -606,7 +606,7 @@ void Dyn_obj::calculate( const Dyn_obj& o, Operator op, Dyn_obj* result ) const
                 }
                 catch( const Null_error& )
                 {
-                    as_big_int( o );          // Löst Exception aus, wenn nicht konvertierbar
+                    as_big_int( o );          // LÃ¶st Exception aus, wenn nicht konvertierbar
                     *result = null_dyn_obj;
                     return;
                 }
@@ -640,7 +640,7 @@ void Dyn_obj::calculate( const Dyn_obj& o, Operator op, Dyn_obj* result ) const
                 }
                 catch( const Null_error& )
                 {
-                    as_double( o );             // Löst Exception aus, wenn nicht konvertierbar
+                    as_double( o );             // LÃ¶st Exception aus, wenn nicht konvertierbar
                     *result = null_dyn_obj;
                     return;
                 }
@@ -697,7 +697,7 @@ void Dyn_obj::_obj_print( ostream* s ) const
 {
     print( s );
 /*
-    if( !_type  ||  _type->null( _ptr ) )  *s << "«NULL»";
+    if( !_type  ||  _type->null( _ptr ) )  *s << "Â«NULLÂ»";
   //else  _type->print( _ptr, s, std_text_format );
     else {
         Dynamic_area buffer ( max_display_field_size );

@@ -86,7 +86,7 @@ Undestroyable_mutex::Undestroyable_mutex( const string& name, Kind kind )
     
 Undestroyable_mutex::~Undestroyable_mutex()
 {
-    // Wird nicht zerstört
+    // Wird nicht zerstÃ¶rt
 }
 
 //-----------------------------------------------------------------------Undestroyable_mutex::enter

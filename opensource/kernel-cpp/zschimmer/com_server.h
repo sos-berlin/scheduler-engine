@@ -24,7 +24,7 @@ struct                          Com_method;
 
 //-------------------------------------------------------------------------------------------------
 
-//typedef HRESULT              (* Com_class_factory_creator )( const CLSID&, const IID&, IUnknown** );    // Für perl_scripting_engine.cxx
+//typedef HRESULT              (* Com_class_factory_creator )( const CLSID&, const IID&, IUnknown** );    // FÃ¼r perl_scripting_engine.cxx
 
 //HRESULT                         com_get_class_object    ( Com_class_factory_creator, const CLSID&, const IID&, void** result );
 HRESULT                         Com_get_class_object    ( const Com_class_descriptor*, const CLSID&, const IID&, void** result );
