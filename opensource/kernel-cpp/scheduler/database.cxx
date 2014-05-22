@@ -420,8 +420,7 @@ void Database_retry::reopen_database_after_error( const exception& x, const stri
         throw;
 
     bool immediately_reopened = _db->try_reopen_after_error( x, function ); 
-    if (immediately_reopened)
-        _immediately_reopened_count++;
+    _immediately_reopened_count = immediately_reopened? _immediately_reopened_count + 1 : 0;
     repeat_loop(); 
 }
 
