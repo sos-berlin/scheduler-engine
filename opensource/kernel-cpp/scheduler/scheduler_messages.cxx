@@ -130,7 +130,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-267", "Error when storing the log in table $1: $2" },
     { "SCHEDULER-268", "Log of task $1 is not readable from database: $2" },
     { "SCHEDULER-269", "Error when closing the job history: $1" },
-    { "SCHEDULER-270", "Cannot open history: $1" },
     { "SCHEDULER-271", "Task is being terminated in favour of job $1" },
     { "SCHEDULER-272", "Terminating task after reaching deadline <job timeout=\"$1\">" },
     { "SCHEDULER-273", "Killing subprocess $1" },

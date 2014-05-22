@@ -1837,44 +1837,34 @@ void Job_history::set_dom_settings( xml::Element_ptr settings_element )
 void Job_history::open( Transaction* outer_transaction )
 {
     string section = _job->profile_section();
-    _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift
+    _job_path = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift
 
-    _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
+    if( !_history_yes )  return;
 
-    try
+    Transaction ta ( +_spooler->_db, outer_transaction );
     {
-        if( !_history_yes )  return;
+        set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 
-        Transaction ta ( +_spooler->_db, outer_transaction );
+        _spooler->_db->open_history_table( &ta );
+
+        if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() ) 
         {
-            set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
+            _extra_type = SOS_NEW( Record_type );
 
-            _spooler->_db->open_history_table( &ta );
-
-            if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() ) 
+            for( int i = 0; i < type->field_count(); i++ )
             {
-                _extra_type = SOS_NEW( Record_type );
-
-                for( int i = 0; i < type->field_count(); i++ )
+                string name = type->field_descr_ptr(i)->name();
+                if( my_columns.find( lcase(name) ) == my_columns.end() )  
                 {
-                    string name = type->field_descr_ptr(i)->name();
-                    if( my_columns.find( lcase(name) ) == my_columns.end() )  
-                    {
-                        _extra_names.push_back( name );
-                        type->field_descr_ptr(i)->add_to( _extra_type );
-                    }
+                    _extra_names.push_back( name );
+                    type->field_descr_ptr(i)->add_to( _extra_type );
                 }
             }
         }
-        ta.commit( Z_FUNCTION );
+    }
+    ta.commit( Z_FUNCTION );
 
-        _history_enabled = true;
-    }
-    catch( exception& x )  
-    { 
-        _job->_log->warn( message_string( "SCHEDULER-270", x ) );   // "FEHLER BEIM ÖFFNEN DER HISTORIE: "
-        _error = true;
-    }
+    _history_enabled = true;
 }
 
 //-------------------------------------------------------------------------------Job_history::close
@@ -1892,8 +1882,6 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
     bool with_log = show.is_set( show_log );
 
     xml::Element_ptr history_element;
-
-    if (_error) throw_xc("SCHEDULER-270", "(previous open error)");
 
     history_element = doc.createElement( "history" );
     dom_append_nl( history_element );
@@ -2200,8 +2188,6 @@ void Task_history::start()
     if( _task_id == _task->id() )  return;        // start() bereits gerufen
     _task_id = _task->id();
 
-    if( _job_history->_error )  return;
-
     _start_called = true;
 
 
@@ -2225,7 +2211,6 @@ void Task_history::end()
     if( !_start_called )  return;
     _start_called = false;
 
-    if( _job_history->_error )  return;
     if( !_task )  return;     // Vorsichtshalber
 
     try

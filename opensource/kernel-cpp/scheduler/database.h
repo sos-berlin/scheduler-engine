@@ -323,7 +323,6 @@ struct Job_history
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
     With_log_switch            _with_log;
     bool                       _history_enabled;
-    bool                       _error;
     bool                       _start_called;
 
     vector<string>             _extra_names;
