@@ -1364,7 +1364,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_title( modify_order_element.getAttribute( "title" ) );
     }
 
-    if (job_chain && job_chain->orders_are_recoverable() && _spooler->db()->opened()) {
+    if (job_chain && job_chain->orders_are_recoverable()) {
         order->persist();
     
         for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {

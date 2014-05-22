@@ -314,7 +314,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
 
     if( !_log->is_active() )  open_log();
 
-    if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_are_recoverable  &&  !_is_in_database  &&  db()->opened() )
+    if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_are_recoverable  &&  !_is_in_database)
     {
         db_insert();
     }
@@ -344,7 +344,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
 
 void Order::db_insert_order_history_record( Transaction* ta )
 {
-    if( _spooler->_order_history_yes  &&  db()->opened() )
+    if( _spooler->_order_history_yes)
     {
         assert(_history_id);
 
@@ -378,7 +378,7 @@ void Order::db_update_order_history_record_and_begin_new_history( Transaction* o
 
 void Order::db_update_order_history_record( Transaction* outer_transaction )
 {
-    if( _spooler->_order_history_yes  &&  db()->opened() )
+    if( _spooler->_order_history_yes)
     {
         if( !start_time() )  return;
         assert( _history_id );
@@ -431,7 +431,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
 
 void Order::db_update_order_history_state( Transaction* outer_transaction )
 {
-    if( _spooler->_order_history_yes  &&  db()->opened() )
+    if( _spooler->_order_history_yes)
     {
         if( !start_time() )  return;
         assert( _history_id );
@@ -457,7 +457,7 @@ void Order::db_update_order_history_state( Transaction* outer_transaction )
 
 void Order::db_insert_order_step_history_record( Transaction* ta )
 {
-    if( _spooler->_order_history_yes  &&  db()->opened() )
+    if( _spooler->_order_history_yes)
     {
         assert( _history_id );
         assert( _task );
@@ -491,7 +491,7 @@ void Order::db_insert_order_step_history_record( Transaction* ta )
 
 void Order::db_update_order_step_history_record( Transaction* ta )
 {
-    if( _spooler->_order_history_yes  &&  db()->opened() )
+    if( _spooler->_order_history_yes)
     {
         assert( _history_id );
         assert( _step_number );
@@ -615,11 +615,8 @@ bool Order::db_try_insert( bool throw_exists_exception )
     bool   record_exists_error     = false;
     string record_exists_insertion;
 
-    if( db()->opened() )
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
-        if( !db()->opened() )  break;
-
         if( _is_replacement )
         {
             Any_file result_set = ta.open_result_set
@@ -795,7 +792,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         update_ok = db_release_occupation();
     }
     else
-    if( _is_in_database &&  db()->opened() )
+    if( _is_in_database)
     {
         if( update_option == update_not_occupied  &&  _is_db_occupied )  z::throw_xc( Z_FUNCTION, "is_db_occupied" );
 
@@ -819,8 +816,6 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         {
             for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
             {
-                if( !db()->opened() )  break;
-
                 S delete_sql;
                 delete_sql << update.make_delete_stmt();
                 delete_sql << " and `distributed_next_time` is " << ( _is_distributed? "not null" : " null" );  // update_ok=false, wenn das nicht stimmt
@@ -864,8 +859,6 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
             for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
             {
-                if( !db()->opened() )  break;
-
                 if (_history_id) {
                     if (update_option == update_and_release_occupation  &&  _step_number) {
                         db_update_order_step_history_record( &ta );
@@ -913,7 +906,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         _state_text_modified = false;
     }
     else
-    if( db()->opened()  &&  _history_id )
+    if(_history_id )
     {
         for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
         {
@@ -1797,7 +1790,7 @@ void Order::set_id( const Order::Id& id )
 
         string id_string = string_id( id );    // Sicherstellen, das id in einen String wandelbar ist
 
-        if( db()->opened()  &&  id_string.length() > db()->order_id_length_max() )  
+        if (id_string.length() > db()->order_id_length_max() )  
             z::throw_xc( "SCHEDULER-345", id_string, db()->order_id_length_max(), db()->_orders_tablename + "." + "id" );
 
         if( id_string.length() > const_order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, const_order_id_length_max );
@@ -2419,12 +2412,10 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
         {
-            if (db()->opened()) {
-                if (!has_base_file()) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
-                    is_new = db_try_insert(exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
-                }
-                tip_next_node_for_new_distributed_order_state();
+            if (!has_base_file()) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
+                is_new = db_try_insert(exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
             }
+            tip_next_node_for_new_distributed_order_state();
         }
 
         if( is_new  &&  !_is_distributed )

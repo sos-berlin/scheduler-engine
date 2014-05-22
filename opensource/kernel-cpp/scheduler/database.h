@@ -52,7 +52,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
                                 Database                ( Spooler* );
 
     void                        close                   ();
-    void                        open                    ( const string& db_name );
+    void                        open                    ();
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
     void                    set_db_name                 (const string& o)                           { _db_name = o; }
@@ -80,7 +80,8 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     ptr<Com_variable_set>       properties              ();                                         // Mit "password"
     Database_lock_syntax        lock_syntax             ();
-    void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
+    void                        open_or_wait_until_opened();
+    bool                        try_reopen_after_error  ( const exception&, const string& function);
     void                        check_database          ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& table_name, const string& fields );
@@ -88,6 +89,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
+    void                        require_database        () const;
 
 
     Fill_zero                  _zero_;
@@ -126,7 +128,6 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     Any_file                   _db;
     ptr<Com_variable_set>      _properties;
     string                     _error;
-    map<string,long32>         _id_counters;
     Any_file                   _history_table;
     vector<Dyn_obj>            _history_update_params;
     int                        _id;
@@ -253,7 +254,7 @@ struct Transaction : Read_transaction
 
 struct Database_retry
 {
-                                Database_retry          ( Database* db )                        : _db(db), _enter_loop(1) {}
+                                Database_retry          ( Database* db )                            : _db(db), _enter_loop(1), _immediately_reopened_count(0) {}
 
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
@@ -261,8 +262,9 @@ struct Database_retry
     void                        reopen_database_after_error( const exception&, const string& function );
     void                        operator ++             (int)                                       { _enter_loop--; }
 
-    Database*                _db;
+    Database*                  _db;
     int                        _enter_loop;
+    int                        _immediately_reopened_count;
 };
 
 //-------------------------------------------------------------------------Retry_nested_transaction
@@ -275,7 +277,7 @@ struct Database_retry
 
 struct Retry_nested_transaction : Transaction
 {
-                                Retry_nested_transaction( Database* db, Transaction* outer )        : Transaction(db,outer), _database_retry( db ) {}
+                                Retry_nested_transaction(Database*, Transaction*);
   
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
@@ -320,8 +322,7 @@ struct Job_history
     bool                       _history_yes;
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
     With_log_switch            _with_log;
-    bool                       _use_db;
-    bool                       _error;
+    bool                       _history_enabled;
     bool                       _start_called;
 
     vector<string>             _extra_names;

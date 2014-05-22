@@ -86,10 +86,6 @@ xml::Document_ptr Scheduler_event::dom()
     scheduler_event_element.setAttribute( "object_type" , Scheduler_object::name_of_type_code( _object->scheduler_type_code() ) );
     scheduler_event_element.setAttribute_optional( "log_file"    , _log_path );
 
-    if( _count )
-    scheduler_event_element.setAttribute( "count", _count );
-
-
     switch( _object->scheduler_type_code() )
     {
         case Scheduler_object::type_scheduler:

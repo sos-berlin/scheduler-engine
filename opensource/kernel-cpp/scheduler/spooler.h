@@ -387,7 +387,6 @@ struct Spooler : Object,
     string                      directory                   () const                            { return _directory; }
     string                      home_directory              () const                            { return _home_directory; }
     string                      local_configuration_directory() const                           { return _configuration_directories[confdir_local]; }
-    string                      string_need_db              () const;
     string                      time_zone_name              () const                            { return _time_zone_name; }
 
     Timed_call*                 enqueue_call                (Timed_call*);
@@ -431,8 +430,8 @@ struct Spooler : Object,
 
     friend struct               Com_spooler;
 
-    string                      truncate_head(const string& str);
-    void                        check_licence();
+	string                      truncate_head(const string& str);
+	void                        check_licence();
     void                        release_com_objects         ();
     void                        load_arg                    ();
     void                        read_ini_filename           ();
@@ -640,11 +639,7 @@ struct Spooler : Object,
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
     ptr<Database>              _db;
-    bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
-    bool                       _wait_endless_for_db_open;   // need_db=yes
-    int                        _max_db_errors;              // Nach so vielen Fehlern im Scheduler-Leben DB abschalten (wie need_db)
     bool                       _db_check_integrity;
-    bool                       _jobs_allowed_for_licence;   // e.g. jobs are not allowed if scheduler runs as agent
     bool                       _remote_commands_allowed_for_licence;   // executing of remote commands are not allowed for "normal" scheduler
 
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
