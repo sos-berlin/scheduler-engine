@@ -1584,8 +1584,6 @@ void Spooler::read_command_line_arguments()
                 throw_sos_option_error( opt );
         }
 
-        if( _cluster_configuration._is_backup_member && !_cluster_configuration._demand_exclusiveness )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
-
         if( _is_service )  _interactive = false;
 
         if( _directory.empty() )    // Nur beim ersten Mal setzen!
@@ -1799,7 +1797,6 @@ void Spooler::destroy_subsystems()
 void Spooler::initialize_subsystems()
 {
     _event_subsystem           ->switch_subsystem_state( subsys_initialized );
-    initialize_cluster();
     _folder_subsystem          ->switch_subsystem_state( subsys_initialized );
     //_supervisor                ->switch_subsystem_state( subsys_initialized );
     _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
@@ -1820,6 +1817,7 @@ void Spooler::initialize_subsystems()
 
 void Spooler::initialize_subsystems_after_base_processing()
 {
+    initialize_cluster();
     _connection_manager = Z_NEW(object_server::Connection_manager);
     _supervisor                ->switch_subsystem_state( subsys_initialized );
     _job_subsystem             ->switch_subsystem_state( subsys_initialized );
@@ -1999,10 +1997,6 @@ void Spooler::start()
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
 
-    if (_cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness) {
-        if (!settings()->has_role_scheduler())  z::throw_xc("SCHEDULER-357"); 
-    }
-
     if (_spooler->settings()->has_role_scheduler())
         _db->open();
     
@@ -2081,10 +2075,8 @@ void Spooler::execute_config_commands()
 
 void Spooler::initialize_cluster() 
 {
-    if( _cluster_configuration._orders_are_distributed  ||  _cluster_configuration._demand_exclusiveness ) 
-    {
-        _cluster = cluster::new_cluster_subsystem( this );
-        _cluster->set_configuration( _cluster_configuration );
+    if (_cluster_configuration.is_cluster()) {
+        _cluster = cluster::new_cluster_subsystem(this, _cluster_configuration);
         _cluster->switch_subsystem_state( subsys_initialized );
     }
 }

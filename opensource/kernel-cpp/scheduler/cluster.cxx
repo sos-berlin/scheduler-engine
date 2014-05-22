@@ -50,9 +50,8 @@ struct Active_schedulers_watchdog;
 
 struct Cluster : Cluster_subsystem_interface
 {
-                                Cluster                     ( Scheduler* );
+                                Cluster                     (Scheduler*, const Configuration&);
                                ~Cluster                     ();
-
 
     // Subsystem
 
@@ -65,8 +64,6 @@ struct Cluster : Cluster_subsystem_interface
 
 
     // Cluster_subsystem_interface
-
-    void                    set_configuration               ( const Configuration& );
 
     void                    set_continue_exclusive_operation( const string& http_url );             // Oder continue_exclusive_non_backup etc.
     string                      my_member_id                ()                                      { return _cluster_member_id; }
@@ -1287,29 +1284,32 @@ void Configuration::set_dom( const xml::Element_ptr& cluster_element )
     _heart_beat_warn_timeout= cluster_element.int_getAttribute  ( "heart_beat_warn_timeout", _heart_beat_warn_timeout );
 }
 
-//----------------------------------------------------------------------------Configuration::finish
-    
-void Configuration::finish()
-{
-    if( _backup_precedence == -INT_MAX )  _backup_precedence = _is_backup_member? default_backup_precedence : default_non_backup_precedence;
-}
-
 //----------------------------------------------------------------------------new_cluster_subsystem
 
-ptr<Cluster_subsystem_interface> new_cluster_subsystem( Scheduler* scheduler )
+ptr<Cluster_subsystem_interface> new_cluster_subsystem( Scheduler* scheduler, const Configuration& c)
 {
-    ptr<Cluster> cluster = Z_NEW( Cluster( scheduler ) );
+    if (scheduler->settings()->_db_name == "") z::throw_xc("SCHEDULER-357");
+    if (c._is_backup_member && !c._demand_exclusiveness) z::throw_xc("SCHEDULER-368", "-backup", "-exclusive");
+    
+    ptr<Cluster> cluster = Z_NEW(Cluster(scheduler, c));
     return +cluster;
 }
 
 //---------------------------------------------------------------------------------Cluster::Cluster
 
-Cluster::Cluster( Spooler* spooler )
-:
+Cluster::Cluster(Spooler* spooler, const Configuration& c) :
     Cluster_subsystem_interface( spooler, type_cluster_member ),
     _zero_(this+1),
     _continue_exclusive_operation( continue_exclusive_any )
 {
+    _is_backup_member             = c._is_backup_member;
+    _backup_precedence            = c._backup_precedence == -INT_MAX? c._is_backup_member? default_backup_precedence : default_non_backup_precedence : c._backup_precedence;
+    _demand_exclusiveness         = c._demand_exclusiveness;
+    _orders_are_distributed       = c._orders_are_distributed;
+    _suppress_watchdog_thread     = c._suppress_watchdog_thread;
+    _heart_beat_timeout           = c._heart_beat_timeout;
+    _heart_beat_own_timeout       = c._heart_beat_own_timeout;
+    _heart_beat_warn_timeout      = c._heart_beat_warn_timeout;
 }
 
 //--------------------------------------------------------------------------------Cluster::~Cluster
@@ -1381,25 +1381,6 @@ void Cluster::calculate_next_heart_beat( time_t now )
                                                                   : heart_beat_period            );
 }
 
-//-----------------------------------------------------------------------Cluster::set_configuration
-
-void Cluster::set_configuration( const Configuration& c )
-{ 
-    assert_not_started( Z_FUNCTION ); 
-    
-    Configuration my_configuration = c; 
-    my_configuration.finish(); 
-
-    _is_backup_member             = my_configuration._is_backup_member;
-    _backup_precedence            = my_configuration._backup_precedence;
-    _demand_exclusiveness         = my_configuration._demand_exclusiveness;
-    _orders_are_distributed       = my_configuration._orders_are_distributed;
-    _suppress_watchdog_thread     = my_configuration._suppress_watchdog_thread;
-    _heart_beat_timeout           = my_configuration._heart_beat_timeout;
-    _heart_beat_own_timeout       = my_configuration._heart_beat_own_timeout;
-    _heart_beat_warn_timeout      = my_configuration._heart_beat_warn_timeout;
-}
-
 //--------------------------------------------------------------------Cluster::subsystem_initialize
 
 bool Cluster::subsystem_initialize()
@@ -1413,7 +1394,6 @@ bool Cluster::subsystem_initialize()
 bool Cluster::subsystem_load()
 {
     make_cluster_member_id();
-
     set_subsystem_state( subsys_loaded );
     return true;
 }

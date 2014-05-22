@@ -28,8 +28,10 @@ struct Configuration
                                 Configuration               ();
 
     void                        set_dom                     ( const xml::Element_ptr& cluster_element );
-    void                        finish                      ();
 
+    bool is_cluster() const { 
+        return _orders_are_distributed || _demand_exclusiveness; 
+    }
 
     Fill_zero                  _zero_;
     bool                       _is_backup_member;
@@ -49,7 +51,6 @@ struct Cluster_subsystem_interface : Object, Subsystem
                                 Cluster_subsystem_interface ( Scheduler* scheduler, Type_code t )   :  Subsystem( scheduler, this, t ) {}
 
 
-    virtual void            set_configuration               ( const Configuration& )                = 0;
     virtual void            set_continue_exclusive_operation( const string& http_url )              = 0;  // Oder continue_exclusive_non_backup etc.
     virtual string              my_member_id                ()                                      = 0;
     virtual int                 backup_precedence           ()                                      = 0;
@@ -74,7 +75,7 @@ struct Cluster_subsystem_interface : Object, Subsystem
 };
 
 
-ptr<Cluster_subsystem_interface> new_cluster_subsystem      ( Scheduler* );
+ptr<Cluster_subsystem_interface> new_cluster_subsystem      (Scheduler*, const Configuration&);
 
 //-------------------------------------------------------------------------------------------------
 
