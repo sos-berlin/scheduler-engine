@@ -339,22 +339,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.DatabaseC db__native(long cppReference);
 
 
-    @Override public java.lang.String db_cluster_member_id() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            java.lang.String result = db_cluster_member_id__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native java.lang.String db_cluster_member_id__native(long cppReference);
-
-
     @Override public java.lang.String db_distributed_member_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

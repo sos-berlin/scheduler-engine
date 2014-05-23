@@ -1190,7 +1190,7 @@ void Node::database_record_store()
                     sql::Update_stmt update ( &db()->_job_chain_nodes_table );
                 
                     update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update[ "cluster_member_id" ] = _job_chain->db_cluster_member_id();
+                    update[ "cluster_member_id" ] = _job_chain->db_distributed_member_id();
                     update[ "job_chain"         ] = _job_chain->path().without_slash();
                     update[ "order_state"       ] = _order_state.as_string();
                     update[ "action"            ] = _action == act_process? sql::Value() : string_action();
@@ -2141,11 +2141,12 @@ xml::Element_ptr Job_chain::why_dom_element(const xml::Document_ptr& doc) const 
     return result;
 }
 
-//------------------------------------------------------------------Job_chain::db_cluster_member_id
+//--------------------------------------------------------------Job_chain::db_distributed_member_id
 
-string Job_chain::db_cluster_member_id() const
+string Job_chain::db_distributed_member_id() const
 { 
-    return _is_distributed ? no_cluster_member_id : _spooler->db_cluster_member_id();
+    // Nur bei nicht verteilter Jobkette im verteilten Scheduler die cluster_member_id liefern, sonst "-"
+    return _is_distributed ? no_cluster_member_id : _spooler->db_distributed_member_id();
 }
 
 //---------------------------------------------------------------------------------normalized_state
@@ -3069,7 +3070,7 @@ void Job_chain::database_record_store()
                     sql::Update_stmt update ( &db()->_job_chains_table );
                 
                     update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update["cluster_member_id"  ] = db_cluster_member_id();
+                    update[ "cluster_member_id" ] = db_distributed_member_id();
                     update[ "path"              ] = path().without_slash();
                     update[ "stopped"           ] = _is_stopped;
 
@@ -3096,7 +3097,7 @@ void Job_chain::database_record_remove()
                 sql::Delete_stmt delete_statement ( &db()->_job_chains_table );
                 
                 delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db() );
-                delete_statement.and_where_condition( "cluster_member_id", db_cluster_member_id());
+                delete_statement.and_where_condition( "cluster_member_id", db_distributed_member_id());
                 delete_statement.and_where_condition( "path"              , path().without_slash() );
 
                 ta.execute( delete_statement, Z_FUNCTION );
@@ -3106,7 +3107,7 @@ void Job_chain::database_record_remove()
                 sql::Delete_stmt delete_statement ( &db()->_job_chain_nodes_table );
                 
                 delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db() );
-                delete_statement.and_where_condition( "cluster_member_id", db_cluster_member_id());
+                delete_statement.and_where_condition( "cluster_member_id", db_distributed_member_id());
                 delete_statement.and_where_condition( "job_chain"        , path().without_slash() );
 
                 ta.execute( delete_statement, Z_FUNCTION );
@@ -3127,7 +3128,7 @@ void Job_chain::database_record_load( Read_transaction* ta )
     if (_spooler->settings()->_use_java_persistence) {
         _typed_java_sister.loadPersistentState();
     }  else {
-        string my_db_cluster_member_id = _is_distributed? no_cluster_member_id : db_cluster_member_id();
+        string my_db_cluster_member_id = _is_distributed? no_cluster_member_id : db_distributed_member_id();
         {
             Any_file result_set = ta->open_result_set
             ( 
