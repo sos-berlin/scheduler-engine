@@ -1,50 +1,52 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import java.sql.{Connection, PreparedStatement}
 import javax.persistence.EntityManager
 import org.hibernate.jdbc.Work
-import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.immutable
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
-class RichEntityManager(entityManager: EntityManager) {
+class RichEntityManager(val delegate: EntityManager) extends AnyVal {
   def findOption[E](key: AnyRef)(implicit c: ClassTag[E]): Option[E] =
     findOption(key, c.runtimeClass.asInstanceOf[Class[E]])
 
   def findOption[E](key: AnyRef, clas: Class[E]): Option[E] =
-    Option(entityManager.find(clas, key))
+    Option(delegate.find(clas, key))
 
-  def fetchOption[E <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit c: ClassTag[E]): Option[E] =
-    fetchOption[E](queryString, c.runtimeClass.asInstanceOf[Class[E]], arguments)
+  def fetchOption[E <: AnyRef : ClassTag](queryString: String, arguments: Iterable[(String, AnyRef)] = Nil): Option[E] =
+    fetchOption[E](queryString, implicitClass[E], arguments)
 
-  def fetchOption[E <: AnyRef](queryString: String, clas: Class[E], arguments: Iterable[(String, AnyRef)] = Iterable()): Option[E] = {
+  def fetchOption[E <: AnyRef](queryString: String, clas: Class[E], arguments: Iterable[(String, AnyRef)] = Nil): Option[E] = {
     val i = fetchSeq(queryString, clas, arguments).iterator
-    if (i.hasNext) Some(i.next()) ensuring { _ => !i.hasNext }
+    if (i.hasNext) Some(i.next()) ensuring { _ ⇒ !i.hasNext }
     else None
   }
 
-  def fetchSeq[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit c: ClassTag[A]): immutable.Seq[A] =
-    fetchSeq[A](queryString, c.runtimeClass.asInstanceOf[Class[A]], arguments)
+  def fetchSeq[A <: AnyRef : ClassTag](queryString: String, arguments: Iterable[(String, AnyRef)] = Nil): immutable.Seq[A] =
+    fetchSeq[A](queryString, implicitClass[A], arguments)
 
-  def fetchSeq[A <: AnyRef](queryString: String, clas: Class[A], arguments: Iterable[(String, AnyRef)] = Iterable()): immutable.Seq[A] = {
-    val q = entityManager.createQuery(queryString, clas)
+  def fetchSeq[A <: AnyRef](queryString: String, clas: Class[A], arguments: Iterable[(String, AnyRef)] = Nil): immutable.Seq[A] = {
+    val q = delegate.createQuery(queryString, clas)
     for ((name, value) <- arguments) q.setParameter(name, value)
-    immutable.Seq() ++ q.getResultList
+    q.getResultList.toImmutableSeq
   }
 
-  def useJDBCPreparedStatement[A](sql: String)(f: PreparedStatement => A) = {
-    useJDBCConnection { connection =>
-      val preparedStatement = connection.prepareStatement(sql)
-      try f(preparedStatement)
-      finally preparedStatement.close()
+  def useJDBCPreparedStatement[A](sql: String)(f: PreparedStatement ⇒ A) = {
+    useJDBCConnection { connection ⇒
+      autoClosing(connection.prepareStatement(sql)) { preparedStatement ⇒
+        f(preparedStatement)
+      }
     }
   }
 
-  def useJDBCConnection[A](f: Connection => A): A = {
+  def useJDBCConnection[A](f: Connection ⇒ A): A = {
     // Geht nicht mit Hibernate 4.1.7 (aber mit EclipseLink): f(em.unwrap(classOf[java.sql.Connection]))
     var result: Option[A] = None
-    entityManager.unwrap(classOf[org.hibernate.Session]).doWork(new Work {
+    delegate.unwrap(classOf[org.hibernate.Session]).doWork(new Work {
       def execute(connection: Connection) {
         result = Some(f(connection))
       }

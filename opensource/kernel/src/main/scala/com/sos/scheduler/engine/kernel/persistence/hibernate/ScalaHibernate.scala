@@ -6,7 +6,7 @@ import javax.persistence.{EntityManagerFactory, EntityManager}
 
 object ScalaHibernate {
 
-  private val logger = Logger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
+  private val logger = Logger(getClass)
 
   def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A =
     transaction(entityManagerFactory)(f)
