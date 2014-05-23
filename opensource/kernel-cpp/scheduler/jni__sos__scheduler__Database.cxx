@@ -41,7 +41,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Database >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Database >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 1);
+        int ret = env->RegisterNatives(*cls, native_methods, sizeof native_methods / sizeof native_methods[0]);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.DatabaseCImpl");
     }
 

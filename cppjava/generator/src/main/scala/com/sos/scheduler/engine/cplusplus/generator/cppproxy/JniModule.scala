@@ -41,7 +41,7 @@ final class JniModule(config: CppClassConfiguration, procedureSignatures: Seq[Pr
       def body =
         "        Env env;\n" +
         s"        Class* cls = $hasProxyClassName::proxy_class_factory.clas();\n" +
-        s"        int ret = env->RegisterNatives(*cls, native_methods, ${jniMethods.size});\n" +
+        s"        int ret = env->RegisterNatives(*cls, native_methods, sizeof native_methods / sizeof native_methods[0]);\n" +
         s"""        if (ret < 0)  env.throw_java("RegisterNatives", "$javaClassFullName");""" + "\n"
 
       JavaBridge.namespace.nestedCode(
