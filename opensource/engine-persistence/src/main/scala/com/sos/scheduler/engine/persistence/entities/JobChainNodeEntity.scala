@@ -19,19 +19,19 @@ import javax.persistence._
 @IdClass(classOf[JobChainNodeEntityKey])
 class JobChainNodeEntity {
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
-  private[entities] var schedulerId: String = _
+  var schedulerId: String = _
 
   @Column(name=""""CLUSTER_MEMBER_ID"""", nullable=false) @Id
-  private[entities] var clusterMemberId: String = _
+  var clusterMemberId: String = _
 
   @Column(name=""""JOB_CHAIN"""", nullable=false) @Id
-  private[entities] var jobChainPath: String = _
+  var jobChainPath: String = _
 
   @Column(name=""""ORDER_STATE"""", nullable=false) @Id
-  private[entities] var orderState: String = _
+  var orderState: String = _
 
   @Column(name=""""ACTION"""") @Nullable
-  private[entities] var action: String= _
+  var action: String= _
 
   def this(k: JobChainNodeEntityKey) {
     this()

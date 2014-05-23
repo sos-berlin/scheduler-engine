@@ -16,24 +16,24 @@ import javax.persistence._
 @Table(name="SCHEDULER_JOB_CHAINS")
 @IdClass(classOf[JobChainEntityKey])
 class JobChainEntity {
-  @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
-  private[entities] var schedulerId: String = _
-
-  @Column(name=""""CLUSTER_MEMBER_ID"""", nullable=false) @Id
-  private[entities] var clusterMemberId: String = _
-
-  @Column(name=""""PATH"""", nullable=false) @Id
-  private[entities] var jobChainPath: String = _
-
-  @Column(name=""""STOPPED"""" , nullable=false)
-  private[entities] var isStopped: Boolean = _
-
   def this(k: JobChainEntityKey) {
     this()
     schedulerId = k.schedulerId
     clusterMemberId = k.clusterMemberId
     jobChainPath = k.jobChainPath
   }
+
+  @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
+  var schedulerId: String = _
+
+  @Column(name=""""CLUSTER_MEMBER_ID"""", nullable=false) @Id
+  var clusterMemberId: String = _
+
+  @Column(name=""""PATH"""", nullable=false) @Id
+  var jobChainPath: String = _
+
+  @Column(name=""""STOPPED"""" , nullable=false)
+  var isStopped: Boolean = _
 
   override def toString = "JobChainEntity"+ Seq(schedulerId, clusterMemberId, jobChainPath, isStopped).mkString("(", ",", ")")
 }
