@@ -3198,26 +3198,12 @@ void Job_chain::set_stopped( bool is_stopped )
     wake_orders();
 }
 
-//----------------------------------------------------------------------Job_chain::check_max_orders
-
-void Job_chain::check_max_orders() const 
-{
-    if (is_max_orders_reached()) {
-        int count = number_of_touched_orders();
-        int count_ignoring_max_orders = number_of_touched_orders_ignoring_max_orders();
-        if (count - count_ignoring_max_orders > _max_orders) {
-            _log->warn(message_string("SCHEDULER-719", _max_orders, count, count_ignoring_max_orders));
-            //Keine Exception nach Order::occupy_for_task() auslösen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
-        }
-    }
-}
-
 //-----------------------------------------------------------------Job_chain::is_max_orders_reached
 
 bool Job_chain::is_max_orders_reached() const
 {
     return _max_orders < INT_MAX  &&  
-           _max_orders <= number_of_touched_orders();
+           _max_orders <= number_of_touched_orders_obey_max_orders();
 }
 
 //--------------------------------------------------------------Job_chain::number_of_touched_orders
@@ -3237,7 +3223,7 @@ int Job_chain::number_of_touched_orders() const
 
 
 
-int Job_chain::number_of_touched_orders_ignoring_max_orders() const
+int Job_chain::number_of_touched_orders_obey_max_orders() const
 {
     assert_is_not_distributed(Z_FUNCTION);
 
@@ -3245,7 +3231,7 @@ int Job_chain::number_of_touched_orders_ignoring_max_orders() const
     Z_FOR_EACH_CONST(Node_list, _node_list, it)
     {
         if (Order_queue_node* node = Order_queue_node::try_cast(*it))
-            count += node->order_queue()->touched_and_ignoring_max_orders_order_count();
+            count += node->order_queue()->number_of_touched_orders_obey_max_orders();
     }
     return count;
 }
@@ -3965,13 +3951,14 @@ int Order_queue::touched_order_count()
 }
 
 
-int Order_queue::touched_and_ignoring_max_orders_order_count() const
+
+int Order_queue::number_of_touched_orders_obey_max_orders() const
 {
     int result = 0;
     FOR_EACH_CONST(Queue, _queue, it)
     {
         Order* order = *it;
-        if (order->is_touched() && order->_ignore_max_orders) result++;
+        if (order->is_touched() && !order->_ignore_max_orders) result++;
     }
     return result;
 }

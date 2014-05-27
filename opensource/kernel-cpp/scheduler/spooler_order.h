@@ -896,7 +896,7 @@ struct Job_chain : Com_job_chain,
     Order_subsystem_impl*       order_subsystem             () const;
 
     int                         number_of_touched_orders    () const;
-    int                         number_of_touched_orders_ignoring_max_orders     () const;
+    int                         number_of_touched_orders_obey_max_orders     () const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
     Untouched_is_allowed        untouched_is_allowed        () const                                { return is_max_orders_reached()? untouched_not_allowed : untouched_allowed; }
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
@@ -904,7 +904,6 @@ struct Job_chain : Com_job_chain,
     bool                        is_ready_for_order_processing() const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
-    void                        check_max_orders            () const;
     bool                        is_stopped                  () const                                { return _is_stopped; }
 
   private:
@@ -984,7 +983,7 @@ struct Order_queue : Com_order_queue,
     int                         order_count                 ( Read_transaction* ) const;
     int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
     int                         touched_order_count         ();
-    int                         touched_and_ignoring_max_orders_order_count() const;
+    int                         number_of_touched_orders_obey_max_orders() const;
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
     Order*                      first_immediately_processable_order(Untouched_is_allowed, const Time& now ) const;

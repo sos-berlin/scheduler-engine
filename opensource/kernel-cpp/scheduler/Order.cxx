@@ -332,8 +332,6 @@ void Order::occupy_for_task( Task* task, const Time& now )
     bool was_touched = _is_touched;
     touch();
     if (!was_touched) {
-        if ( _job_chain )   // JS-682
-            _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
         report_event_code(orderTouchedEvent, java_sister());
