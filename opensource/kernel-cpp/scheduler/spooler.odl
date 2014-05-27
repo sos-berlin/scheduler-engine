@@ -1173,6 +1173,12 @@ library Spooler
 
       //[id(26)]
       //HRESULT                 Start_now               ();
+
+        [id(29), propput]
+        HRESULT                 Ignore_max_orders       ( [in] VARIANT_BOOL );
+
+        [id(29), propget]
+        HRESULT                 Ignore_max_orders       ( [out, retval] VARIANT_BOOL* );
     }
 
     [

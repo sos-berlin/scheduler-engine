@@ -155,6 +155,14 @@ public class OrderBean implements Bean<Order> {
         return delegate.setback_count();
     }
 
+    public void setIgnore_max_orders(boolean b) {
+        delegate.set_ignore_max_orders(b);
+    }
+
+    public boolean getIgnore_max_orders() {
+        return delegate.ignore_max_orders();
+    }
+
     @Override public Order getDelegate() {
         return delegate;
     }

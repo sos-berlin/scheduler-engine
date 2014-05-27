@@ -675,6 +675,9 @@ struct Iorder : IDispatch
     virtual HRESULT     get_End_state               ( VARIANT* result )                             = 0;
 
     virtual HRESULT     get_Setback_count           ( int* )                                        = 0;
+
+    virtual HRESULT     put_Ignore_max_orders       ( VARIANT_BOOL )                                = 0;
+    virtual HRESULT     get_Ignore_max_orders       ( VARIANT_BOOL* )                               = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

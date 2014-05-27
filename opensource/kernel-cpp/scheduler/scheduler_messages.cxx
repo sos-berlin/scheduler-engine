@@ -503,7 +503,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-715", "The command-line option configuration-directory '$1' is not a directory" },
     { "SCHEDULER-717", "Remote commands are not allowed for the current licence-key(s)" },
     { "SCHEDULER-718", "Using '$1' configuration directory '$2'" },
-    { "SCHEDULER-719", "max_orders=\"$1\" but $2 orders are now started" },
     { "SCHEDULER-720", "job_chain $1 is deactivated (set max_orders to activate it)" },
     { "SCHEDULER-721", "Scheduler is not responding quickly, a microstep took $1s" },
     { "SCHEDULER-722", "Preceding content truncated (field length is limited to $1 bytes)" },

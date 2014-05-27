@@ -4900,6 +4900,8 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 27, "End_state"                 , (Com_method_ptr)&Com_order::get_End_state         , VT_VARIANT    },
     { DISPATCH_PROPERTYGET, 28, "Setback_count"             , (Com_method_ptr)&Com_order::get_Setback_count     , VT_INT        },
   //{ DISPATCH_METHOD     , 26, "Start_now"                 , (Com_method_ptr)&Com_order::Start_now             , VT_EMPTY      },
+    { DISPATCH_PROPERTYPUT, 29, "Ignore_max_orders"         , (Com_method_ptr)&Com_order::put_Ignore_max_orders , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 29, "Ignore_max_orders"         , (Com_method_ptr)&Com_order::get_Ignore_max_orders , VT_BOOL       },
     {}
 };
 
@@ -5654,6 +5656,29 @@ STDMETHODIMP Com_order::get_Setback_count( int* result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
+}
+
+
+STDMETHODIMP Com_order::put_Ignore_max_orders( VARIANT_BOOL b )
+{
+    try {
+        if (!_order) return E_POINTER;
+        _order->set_ignore_max_orders(b != 0);
+        return NOERROR;
+    }
+    catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
+}
+
+
+STDMETHODIMP Com_order::get_Ignore_max_orders(VARIANT_BOOL* result)
+{
+    try {
+        *result = VARIANT_FALSE;
+        if (!_order) return E_POINTER;
+        *result = _order->is_ignore_max_orders() ? VARIANT_TRUE : VARIANT_FALSE;
+        return NOERROR;
+    }
+    catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
 }
 
 //------------------------------------------------------------------------Com_order_queue::_methods

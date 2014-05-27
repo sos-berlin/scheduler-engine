@@ -1336,22 +1336,18 @@ bool Order_queue_node::set_action(Action action)
 
 bool Order_queue_node::is_ready_for_order_processing()
 {
-    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();   // act_next_state durchlassen, damit verteilter Auftrag verschoben werden kann.
+    // act_next_state durchlassen, damit verteilter Auftrag verschoben werden kann.
+    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();
 }
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
-    Order* result = NULL;
-
-    if( is_ready_for_order_processing() )
-    {
-        Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
-        result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
-    }
-
-    return result;
+    if (is_ready_for_order_processing())
+        return order_queue()->fetch_and_occupy_order(occupying_task, _job_chain->untouched_is_allowed(), now, cause);
+    else
+        return NULL;
 }
 
 //--------------------------------------------------------------------Order_queue_node::dom_element
@@ -3196,35 +3192,12 @@ void Job_chain::set_stopped( bool is_stopped )
     wake_orders();
 }
 
-//----------------------------------------------------------------------Job_chain::check_max_orders
-
-void Job_chain::check_max_orders() const 
-{
-    if (is_max_orders_reached()) {
-        int count = number_of_touched_orders();
-        if (count > _max_orders) {
-            _log->error(message_string("SCHEDULER-719", _max_orders, count));
-            //Keine Exception nach Order::occupy_for_task() auslösen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
-        }
-    }
-}
-
-//-----------------------------------------------------Job_chain::is_ready_for_new_order_processing
-
-Untouched_is_allowed Job_chain::is_ready_for_new_order_processing() const
-{
-    bool result = 
-       is_ready_for_order_processing() &&
-       !is_max_orders_reached();
-    return result? untouched_allowed : untouched_not_allowed;
-}
-
 //-----------------------------------------------------------------Job_chain::is_max_orders_reached
 
 bool Job_chain::is_max_orders_reached() const
 {
     return _max_orders < INT_MAX  &&  
-           _max_orders <= number_of_touched_orders();
+           _max_orders <= number_of_touched_orders_obey_max_orders();
 }
 
 //--------------------------------------------------------------Job_chain::number_of_touched_orders
@@ -3238,6 +3211,21 @@ int Job_chain::number_of_touched_orders() const
     {
         if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
             count += node->order_queue()->touched_order_count();
+    }
+    return count;
+}
+
+
+
+int Job_chain::number_of_touched_orders_obey_max_orders() const
+{
+    assert_is_not_distributed(Z_FUNCTION);
+
+    int count = 0;
+    Z_FOR_EACH_CONST(Node_list, _node_list, it)
+    {
+        if (Order_queue_node* node = Order_queue_node::try_cast(*it))
+            count += node->order_queue()->number_of_touched_orders_obey_max_orders();
     }
     return count;
 }
@@ -3956,6 +3944,19 @@ int Order_queue::touched_order_count()
     return result;
 }
 
+
+
+int Order_queue::number_of_touched_orders_obey_max_orders() const
+{
+    int result = 0;
+    FOR_EACH_CONST(Queue, _queue, it)
+    {
+        Order* order = *it;
+        if (order->is_touched() && !order->_ignore_max_orders) result++;
+    }
+    return result;
+}
+
 //-------------------------------------------------------------------------Order_queue::order_count
 
 int Order_queue::order_count( Read_transaction* ta ) const
@@ -4225,8 +4226,7 @@ Order* Order_queue::first_processable_order() const
 
 bool Order_queue::has_immediately_processable_order(const Time& now)
 { 
-    Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
-    return first_immediately_processable_order(v, now) != NULL; 
+    return first_immediately_processable_order(_job_chain->untouched_is_allowed(), now) != NULL; 
 }
 
 //-------------------------------------------------Order_queue::first_immediately_processable_order
@@ -4241,7 +4241,7 @@ Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed unt
     {
         Order* order = *o;
 
-        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed  ||  order->is_touched()))
+        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed || order->is_touched() || order->is_ignore_max_orders()))
         {
             result = order;
             result->_setback = Time(0);
@@ -4278,7 +4278,6 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
 {
     assert( occupying_task );
 
-
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
     ptr<Order> order = first_immediately_processable_order(untouched_is_allowed, now);
@@ -4292,7 +4291,9 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
 
         if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, untouched_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
             assert(o->_is_distributed);
-            if (o->_state != o->_occupied_state) {  // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), SCHEDULER-859. Order::set_dom() ändert _state, was wir hier speichern.
+            if (o->_state != o->_occupied_state) {
+                // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), 
+                // SCHEDULER-859. Order::set_dom() ändert _state, was wir hier speichern.
                 o->_task = NULL;
                 o->db_update(Order::update_and_release_occupation);
                 o->close();
