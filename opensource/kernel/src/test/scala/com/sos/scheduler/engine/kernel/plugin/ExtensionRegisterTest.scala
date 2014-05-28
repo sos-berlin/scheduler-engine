@@ -24,5 +24,5 @@ final class ExtensionRegisterTest extends FreeSpec {
 
 private object ExtensionRegisterTest {
   private case class TestExtension(x: Int)
-  private class TestPlugin extends AbstractPlugin with ExtensionRegister[TestExtension]
+  private class TestPlugin extends Plugin with ExtensionRegister[TestExtension]
 }

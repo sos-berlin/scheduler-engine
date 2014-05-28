@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty
 
 import JettyPlugin._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.kernel.plugin.{ExtensionRegister, Plugins, UseGuiceModule, AbstractPlugin}
+import com.sos.scheduler.engine.kernel.plugin._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
@@ -16,7 +16,7 @@ import org.w3c.dom.Element
 final class JettyPlugin @Inject private(
     @Named(Plugins.configurationXMLName) pluginElement: Element,
     schedulerConfiguration: SchedulerConfiguration)
-extends AbstractPlugin
+extends Plugin
 with ExtensionRegister[JettyPluginExtension] {
 
   private var webServer: WebServer = null

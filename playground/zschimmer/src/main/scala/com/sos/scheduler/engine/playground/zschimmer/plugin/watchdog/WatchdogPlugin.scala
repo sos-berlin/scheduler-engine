@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.plugin.{Plugins, AbstractPlugin}
+import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins}
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
 import com.sos.scheduler.engine.playground.zschimmer.{XMLs, Timer}
 import java.util.concurrent.TimeUnit
@@ -22,7 +22,7 @@ final class WatchdogPlugin @Inject private(
   scheduler: Scheduler,
   private implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   @Named(Plugins.configurationXMLName) confElement: Element)
-extends AbstractPlugin {
+extends Plugin {
 
   private val elem = XMLs.fromJavaDom(confElement).asInstanceOf[xml.Elem]
   private val configuration = Configuration(elem)
