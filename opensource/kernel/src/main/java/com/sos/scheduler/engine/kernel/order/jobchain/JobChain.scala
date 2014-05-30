@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -118,6 +119,13 @@ with UnmodifiableJobChain {
   def isStopped_=(o: Boolean) {
     cppProxy.set_stopped(o)
   }
+
+  def orderLimitOption: Option[Int] = someUnless(orderLimit, none = Int.MaxValue)
+
+  /**
+   * @return Int.MaxValue, when unlimited
+   */
+  def orderLimit: Int = cppProxy.max_orders
 
   private[order] def remove() {
     cppProxy.remove()

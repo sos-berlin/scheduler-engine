@@ -16,5 +16,6 @@ public interface Job_chainC extends CppProxyWithSister<JobChain>, File_basedC<Jo
     OrderC order_or_null(String orderID);
     boolean is_stopped();
     void set_stopped(boolean o);
+    int max_orders();
     void remove();
 }

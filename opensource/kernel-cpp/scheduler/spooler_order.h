@@ -901,6 +901,7 @@ struct Job_chain : Com_job_chain,
     Untouched_is_allowed        untouched_is_allowed        () const                                { return is_max_orders_reached()? untouched_not_allowed : untouched_allowed; }
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
+    int                         max_orders                  () const                                { return _max_orders; }
     bool                        is_ready_for_order_processing() const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;

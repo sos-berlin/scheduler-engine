@@ -25,6 +25,11 @@ final class ScalaUtilsTest extends FreeSpec {
     val s: Any = "Hej!"
     val string = cast[String](s)
     string shouldEqual "Hej!"
-    intercept[ClassCastException]( cast[String](1) ) .getMessage should include ("expected instead of")
+    intercept[ClassCastException]{ cast[String](1) } .getMessage should include ("expected instead of")
+  }
+
+  "someUnless" in {
+    someUnless(7, none = 0) shouldEqual Some(7)
+    someUnless(0, none = 0) shouldEqual None
   }
 }

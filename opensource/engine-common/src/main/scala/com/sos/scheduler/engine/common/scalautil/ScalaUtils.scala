@@ -43,4 +43,10 @@ object ScalaUtils {
     if (!(a isAssignableFrom o.getClass)) throw new ClassCastException(s"${a.getName} expected instead of ${o.getClass}")
     o.asInstanceOf[A]
   }
+
+  def someUnless[A](a: A, none: A): Option[A] =
+    if (a == none) None else Some(a)
+
+//  def substitute[A](a: A, from: A, to: A): A =
+//    if (a == from) to else a
 }
