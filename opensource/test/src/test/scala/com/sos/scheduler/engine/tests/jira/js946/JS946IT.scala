@@ -4,7 +4,11 @@ import JS946IT._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -32,14 +36,27 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
     scheduler executeXml <process_class name="inaccessible-remote" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
     // Wir starten beide Jobs parallel, damit der Test nicht zweimal eine Minute dauert.
     val time = currentTimeMillis()
-    val futures = List(invalidRemoteJobPath, inaccessibleRemoteJobPath) map { path ⇒ runJobFuture(path)._2 }
+    val futures = List(InvalidRemoteJobPath, InaccessibleRemoteJobPath) map { path ⇒ runJobFuture(path)._2 }
     for (f <- futures)
       Await.result(f, 70.s)
     currentTimeMillis - time shouldBe 60000L +- 10000
   }
+
+  "Limited job chain should continue when number of orders falls below limit" in {
+    val orderKeys = 1 to jobChain(TestJobChainPath).orderLimit + 2 map { i ⇒ TestJobChainPath orderKey i.toString }
+    val futures =
+      for (orderKey <- orderKeys) yield {
+        val f = controller.getEventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
+        scheduler executeXml OrderCommand(orderKey)
+        sleep(500.ms)
+        f
+      }
+    for (f <- futures) Await.result(f, 15.s)
+  }
 }
 
 private object JS946IT {
-  private val invalidRemoteJobPath = JobPath("/test-invalid-remote")
-  private val inaccessibleRemoteJobPath = JobPath("/test-inaccessible-remote")
+  private val InvalidRemoteJobPath = JobPath("/test-invalid-remote")
+  private val InaccessibleRemoteJobPath = JobPath("/test-inaccessible-remote")
+  private val TestJobChainPath = JobChainPath("/test-a")
 }

@@ -2006,6 +2006,8 @@ void Standard_job::on_call(const Task_closed_call& call) {
     _spooler->_task_subsystem->remove_task(call._task);
     if (_temporary) 
         _call_register.call<Remove_temporary_job_call>();
+    else
+        try_start_task();
 }
 
 //------------------------------------------Standard_job::on_call Start_when_directory_changed_call
