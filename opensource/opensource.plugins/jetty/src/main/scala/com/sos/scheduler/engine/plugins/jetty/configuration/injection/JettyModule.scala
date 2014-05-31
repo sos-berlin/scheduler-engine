@@ -10,20 +10,20 @@ import javax.ws.rs.{GET, Path}
 
 final class JettyModule extends JerseyModule {
   override def configureServlets() {
-    super.configureServlets()
     configureEngineServlets()
     configureOldCppServlet()
+    super.configureServlets()
     bind(classOf[DummyService])
   }
 
   private def configureEngineServlets() {
     serve(s"$enginePrefixPath/log") `with` classOf[MainLogServlet]
-    serveRegex(s"$enginePrefixPath/${JobLogServlet.PathInfoRegex}") `with` classOf[JobLogServlet]
-    serveRegex(s"$enginePrefixPath/${OrderLogServlet.PathInfoRegex}") `with` classOf[OrderLogServlet]
+    serve(s"$enginePrefixPath/job.log") `with` classOf[JobLogServlet]
+    serve(s"$enginePrefixPath/order.log") `with` classOf[OrderLogServlet]
   }
 
   private def configureOldCppServlet() {
-    serve(cppPrefixPath) `with` classOf[CppServlet]
+    serve(s"$cppPrefixPath") `with` classOf[CppServlet]
     serve(s"$cppPrefixPath/*") `with` classOf[CppServlet]
   }
 }
