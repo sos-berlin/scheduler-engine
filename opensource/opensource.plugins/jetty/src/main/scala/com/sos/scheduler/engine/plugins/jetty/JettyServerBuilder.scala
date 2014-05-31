@@ -23,6 +23,7 @@ object JettyServerBuilder {
         case None => new ServletContextHandler
       }
       (webAppContext: { def setContextPath(p: String) }).setContextPath(config.contextPath)
+      webAppContext.addFilter(classOf[VerbRestrictionFilter], "/*", null)   // This is redundant security. Jetty itself seams to filter TRACE
       for (modify <- config.servletContextHandlerModifiers) {
         modify(webAppContext)
       }

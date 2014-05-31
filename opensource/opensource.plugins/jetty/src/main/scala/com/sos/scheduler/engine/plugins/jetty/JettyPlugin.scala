@@ -58,6 +58,7 @@ object JettyPlugin {
   private def newRootContextHandler() = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
     result.setContextPath("/")
+    result.addFilter(classOf[VerbRestrictionFilter], "/*", null)
     result.addServlet(classOf[RootForwardingServlet], "/")
     result
   }

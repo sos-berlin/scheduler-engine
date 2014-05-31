@@ -3,12 +3,13 @@ package com.sos.scheduler.engine.plugins.jetty.log
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.plugins.jetty.utils.GetOnlyServlet
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @Singleton
-class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServlet {
+class OrderLogServlet @Inject private(orderSubsystem: OrderSubsystem) extends GetOnlyServlet {
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     val attributeName = classOf[OrderLogServlet].getName
     Option(request.getAttribute(attributeName).asInstanceOf[FileServletAsyncOperation]) match {
@@ -23,8 +24,4 @@ class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServ
         operation.continue()
     }
   }
-}
-
-object OrderLogServlet {
-  val PathInfoRegex = """order[.]log""".r
 }

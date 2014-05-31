@@ -63,6 +63,7 @@ const Http_status_code_table http_status_code_table[]  =
     { status_401_permission_denied             , "Permission Denied" },
     { status_403_forbidden                     , "Forbidden" },
     { status_404_bad_request                   , "Bad Request" },
+    { status_405_method_not_allowed            , "Method Not Allowed" },
     { status_500_internal_server_error         , "Internal Server Error" },
     { status_501_not_implemented               , "Not Implemented" },
     { status_504_gateway_timeout               , "Gateway Timeout" },

@@ -204,6 +204,7 @@ enum Status_code
     status_401_permission_denied            = 401,
     status_403_forbidden                    = 403,
     status_404_bad_request                  = 404,
+    status_405_method_not_allowed           = 405,
     status_500_internal_server_error        = 500,
     status_501_not_implemented              = 501,
     status_504_gateway_timeout              = 504,

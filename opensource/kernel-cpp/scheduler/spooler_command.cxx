@@ -1954,7 +1954,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
             response_content_type = "text/xml; charset=" + string_encoding;
         }
         else
-            throw http::Http_exception( http::status_501_not_implemented );
+            throw http::Http_exception( http::status_405_method_not_allowed );
 
 
         if( response_body.empty() )
