@@ -17,7 +17,7 @@ final class FileServletAsyncOperation(request: HttpServletRequest, response: Htt
 
   def start(file: File) {
     require(!started)
-    if (file.toString.isEmpty)  throw new HttpException(javax.servlet.http.HttpServletResponse.SC_NOT_FOUND, "Log has no file")
+    if (file.toString.isEmpty)  throw new HttpException(javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST, "Log has no file")
     response.setStatus(HttpServletResponse.SC_OK)
     response.setContentType("text/xml;charset="+logFileEncoding)
     response.setHeader("Cache-Control", "no-cache")
