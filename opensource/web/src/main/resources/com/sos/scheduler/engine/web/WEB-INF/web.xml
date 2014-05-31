@@ -18,13 +18,4 @@
         <!-- url-pattern must be "/", otherwise the servlet settings are ignored -->
         <url-pattern>/</url-pattern>
     </servlet-mapping>
-
-    <servlet>
-        <servlet-name>Statistics</servlet-name>
-        <servlet-class>org.eclipse.jetty.servlet.StatisticsServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Statistics</servlet-name>
-        <url-pattern>/jetty/statistics</url-pattern>
-    </servlet-mapping>
 </web-app>
