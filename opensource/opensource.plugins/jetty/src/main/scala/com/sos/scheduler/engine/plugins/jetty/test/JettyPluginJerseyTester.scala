@@ -1,13 +1,15 @@
 package com.sos.scheduler.engine.plugins.jetty.test
 
+import JettyPluginJerseyTester._
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.scalautil.{Logger, HasCloser}
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
 import java.net.URI
 import javax.ws.rs.core.MediaType
 import scala.reflect.ClassTag
-import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
+import java.io.Reader
 
 /**
  * @author Joacim Zschimmer
@@ -15,7 +17,6 @@ import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
 trait JettyPluginJerseyTester extends HasCloser {
 
   final val host = "127.0.0.1"
-
   private lazy val webClient = newAuthentifyingClient(webTimeout)
   protected lazy val webTimeout = 60.s
   lazy final val port: Int = jettyPortNumber(injector)
@@ -25,8 +26,15 @@ trait JettyPluginJerseyTester extends HasCloser {
     webClient.destroy()
   }
 
-  def get[A : ClassTag](uri: String, Accept: Iterable[MediaType] = Nil): A =
-    webResource.uri(new URI(uri)).accept(Accept.toArray: _*).get(implicitClass[A])
+  def get[A : ClassTag](uriString: String, Accept: Iterable[MediaType] = Nil): A = {
+    val uri = new URI(uriString)
+    logger.debug(s"HTTP GET $uri")
+    val r = webResource.uri(uri).accept(Accept.toArray: _*)
+    if (implicitClass[A] eq classOf[xml.Elem])
+      (xml.XML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
+    else
+      r.get(implicitClass[A])
+  }
 
 //  def post[A : ClassTag](uri: String, content: AnyRef, `Content-Type`: MediaType = null, Accept: Iterable[MediaType] = Nil): A = {
 //    val b = webResource.uri(new URI(uri)).getRequestBuilder
@@ -36,4 +44,15 @@ trait JettyPluginJerseyTester extends HasCloser {
 //  }
 
   def injector: Injector
+}
+
+object JettyPluginJerseyTester {
+  private val logger = Logger(getClass)
+
+  /**
+   * Replaces some neither reserved nor unreserved characters, that would be rejected by [[java.net.URI]] - for convenience.
+   */
+  def normalizeUri(o: String) =
+    o.replace("<", "%3C")
+     .replace(">", "%3E")
 }
