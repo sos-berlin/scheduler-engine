@@ -128,7 +128,6 @@ struct Standard_process : Process
     int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
     Process_id                  remote_process_id           () const                                { return _remote_process_id; }
     bool                     is_terminated                  ();
-    void                        end_task                    ();
     bool                        kill                        ();
     int                         exit_code                   ();
     int                         termination_signal          ();
@@ -818,15 +817,6 @@ void Standard_process::Async_remote_operation::close_remote_task( bool kill )
             catch( exception& x )  { _process->_log->warn( x.what() ); }
         }
     }
-}
-
-//-----------------------------------------------------------------------Standard_process::end_task
-
-void Standard_process::end_task()
-{
-    assert( _module_instance );
-
-    if( _module_instance )  _module_instance->end_task();
 }
 
 //---------------------------------------------------------------------------Standard_process::kill

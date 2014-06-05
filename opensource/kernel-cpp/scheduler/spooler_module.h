@@ -223,8 +223,6 @@ struct Module_instance : Object
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );
     void                        fill_process_environment    ();
 
-    void                        end_task                    ();
-
     bool                        implicit_load_and_start     ();
     virtual bool                load                        ();
     virtual void                start                       ();

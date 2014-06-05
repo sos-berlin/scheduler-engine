@@ -1099,14 +1099,6 @@ void Module_instance::release__end()
     //close();
 }
 
-//------------------------------------------------------------------------Module_instance::end_task
-
-void Module_instance::end_task()
-{
-    assert( _task );
-    if( _task )  _task->cmd_end();
-}
-
 //-------------------------------------------------------------------------Module_monitors::set_dom
 
 void Module_monitors::set_dom( const xml::Element_ptr& element )
