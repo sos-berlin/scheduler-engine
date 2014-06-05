@@ -115,7 +115,6 @@ struct Standard_process : Process
     bool                        async_continue              ();
     double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
     void                        remove_module_instance      ();
-    void                    set_temporary                   ( bool t )                              { _temporary = t; }
     void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
     void                    set_task_id                     ( int id )                              { _task_id = id; }
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
@@ -161,7 +160,6 @@ struct Standard_process : Process
     int                        _exit_code;
     int                        _termination_signal;
     Time                       _running_since;
-    bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long32                     _module_instance_count;
     Module_instance* const     _module_instance;
     ptr<Login>                 _login;
@@ -532,22 +530,20 @@ void Standard_process::close__end()
 
 void Standard_process::remove_module_instance()
 { 
-    if (_temporary) {
-        if( _session )
-        {
-            if( _session->connection() )  _exit_code          = _session->connection()->exit_code(),  
-                                          _termination_signal = _session->connection()->termination_signal();
+    if( _session )
+    {
+        if( _session->connection() )  _exit_code          = _session->connection()->exit_code(),  
+                                        _termination_signal = _session->connection()->termination_signal();
 
-            _session->close__start() -> async_finish();
-            _session->close__end();
-            _session = NULL;
-        }
+        _session->close__start() -> async_finish();
+        _session->close__end();
+        _session = NULL;
+    }
 
-        if( Process_class* process_class = _process_class )  
-        {
-            _process_class = NULL;
-            process_class->remove_process( this );
-        }
+    if( Process_class* process_class = _process_class )  
+    {
+        _process_class = NULL;
+        process_class->remove_process( this );
     }
 }
 
@@ -1357,8 +1353,6 @@ Process* Process_class::new_process(Module_instance* module_instance, const Host
     Host_and_port r = remote_scheduler.is_empty()? _remote_scheduler : remote_scheduler;
     ptr<Standard_process> process = Z_NEW( Standard_process(_spooler, module_instance, r));
 
-    process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
-
     add_process( process );
 
     return process;
@@ -1560,7 +1554,6 @@ bool Process_class_subsystem::async_continue()
 Process* Process_class_subsystem::new_temporary_process(Module_instance* module_instance, const Host_and_port& remote_scheduler)
 {
     ptr<Standard_process> process = Z_NEW(Standard_process(_spooler, module_instance, remote_scheduler));
-    process->set_temporary( true );
     temporary_process_class()->add_process( process );
     return +process;
 }

@@ -40,7 +40,6 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual string obj_name() const = 0;
 
     virtual void set_controller_address(const Host_and_port&) = 0;
-    virtual void set_temporary(bool t) = 0;
     virtual void set_job_name(const string& job_name) = 0;
     virtual void set_task_id(int id) = 0;
     virtual void set_priority(const string& priority) = 0;
