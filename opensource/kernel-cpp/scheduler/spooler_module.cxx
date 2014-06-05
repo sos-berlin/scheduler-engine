@@ -341,12 +341,6 @@ void Module::set_dom( const xml::Element_ptr& element )
             z::throw_xc( "SCHEDULER-441", element.nodeName(), "encoding", element.getAttribute( "encoding" ) );
     }
 
-    //if( _use_process_class )
-    //{
-        //set_checked_attribute( &_process_class_string, element, "process_class"    );
-        //if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
-    //}
-
     _set = true;
 }
 

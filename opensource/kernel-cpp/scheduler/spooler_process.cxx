@@ -206,7 +206,7 @@ const Com_method Process_class_configuration::_methods[] =
     {}
 };
 
-//--------------------------------------------------------Standard_process::Close_operation::Close_operation
+//-----------------------------------------------Standard_process::Close_operation::Close_operation
 
 Standard_process::Close_operation::Close_operation( Standard_process* p, bool run_independently )
 : 
@@ -225,14 +225,14 @@ Standard_process::Close_operation::~Close_operation()
 {
 }
 
-//--------------------------------------------------------Standard_process::Close_operation::async_continue_
+//-----------------------------------------------Standard_process::Close_operation::async_continue_
 
 bool Standard_process::Close_operation::async_continue_( Async_operation::Continue_flags )
 {
     return _process->continue_close_operation( this );
 }
 
-//----------------------------------------------------------------Standard_process::continue_close_operation
+//-------------------------------------------------------Standard_process::continue_close_operation
 
 bool Standard_process::continue_close_operation( Standard_process::Close_operation* op )
 {
@@ -311,14 +311,14 @@ bool Standard_process::continue_close_operation( Standard_process::Close_operati
     return something_done;
 }
 
-//--------------------------------------------------------Standard_process::Close_operation::async_finished_
+//-----------------------------------------------Standard_process::Close_operation::async_finished_
 
 bool Standard_process::Close_operation::async_finished_() const
 {
     return _state == s_finished;
 }
 
-//------------------------------------------------------Standard_process::Close_operation::async_state_text_
+//---------------------------------------------Standard_process::Close_operation::async_state_text_
 
 string Standard_process::Close_operation::async_state_text_() const
 {
@@ -332,7 +332,7 @@ string Standard_process::Close_operation::async_state_text_() const
     return result;
 }
 
-//------------------------------------------------------Standard_process::Close_operation::string_from_state
+//---------------------------------------------Standard_process::Close_operation::string_from_state
     
 string Standard_process::Close_operation::string_from_state( State state )
 {
@@ -346,7 +346,7 @@ string Standard_process::Close_operation::string_from_state( State state )
     }
 }
 
-//------------------------------------------Standard_process::Async_remote_operation::Async_remote_operation
+//---------------------------------Standard_process::Async_remote_operation::Async_remote_operation
     
 Standard_process::Async_remote_operation::Async_remote_operation( Standard_process* p ) 
 :                        
@@ -356,7 +356,7 @@ Standard_process::Async_remote_operation::Async_remote_operation( Standard_proce
     _process->_spooler->_process_count++;       // Jeder Prozess hat zwei Verbindungen: Zum Prozess und Xml_client_connection zum Scheduler
 }
 
-//-----------------------------------------Standard_process::Async_remote_operation::~Async_remote_operation
+//--------------------------------Standard_process::Async_remote_operation::~Async_remote_operation
     
 Standard_process::Async_remote_operation::~Async_remote_operation()
 {
@@ -368,7 +368,7 @@ Standard_process::Async_remote_operation::~Async_remote_operation()
     }
 }
 
-//------------------------------------------------------Standard_process::Async_remote_operation::state_name
+//---------------------------------------------Standard_process::Async_remote_operation::state_name
     
 string Standard_process::Async_remote_operation::state_name( State state )
 {
@@ -388,7 +388,7 @@ string Standard_process::Async_remote_operation::state_name( State state )
     return result;
 }
 
-//-----------------------------------------------Standard_process::Async_remote_operation::async_state_text_
+//--------------------------------------Standard_process::Async_remote_operation::async_state_text_
 
 string Standard_process::Async_remote_operation::async_state_text_() const
 {
@@ -398,7 +398,7 @@ string Standard_process::Async_remote_operation::async_state_text_() const
     return result;
 }
 
-//----------------------------------------------------Standard_process::Com_server_thread::Com_server_thread
+//-------------------------------------------Standard_process::Com_server_thread::Com_server_thread
 
 Standard_process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_server_thread* c ) 
 : 
@@ -408,7 +408,7 @@ Standard_process::Com_server_thread::Com_server_thread( object_server::Connectio
     set_thread_name( "scheduler::Standard_process::Com_server_thread" );
 }
 
-//----------------------------------------------------------Standard_process::Com_server_thread::thread_main
+//-------------------------------------------------Standard_process::Com_server_thread::thread_main
     
 int Standard_process::Com_server_thread::thread_main()
 {
@@ -448,7 +448,7 @@ Process::Process(Spooler* sp) :
     Scheduler_object( sp, this, type_process )
 {}
 
-//---------------------------------------------------------------------------------Standard_process::Standard_process
+//------------------------------------------------------------------------Standard_process::Standard_process
 
 Standard_process::Standard_process(Spooler* sp, Module_instance* module_instance, const Host_and_port& remote_scheduler)
 : 
@@ -460,7 +460,7 @@ Standard_process::Standard_process(Spooler* sp, Module_instance* module_instance
 {
 }
 
-//--------------------------------------------------------------------------------Standard_process::~Standard_process
+//-----------------------------------------------------------------------Standard_process::~Standard_process
 
 Standard_process::~Standard_process()
 {
@@ -477,7 +477,7 @@ Standard_process::~Standard_process()
     if( _xml_client_connection )  _xml_client_connection->set_async_manager( NULL );
 }
 
-//-----------------------------------------------------------------------------Standard_process::close_async
+//--------------------------------------------------------------------Standard_process::close_async
 
 void Standard_process::close_async()
 {
@@ -499,7 +499,7 @@ void Standard_process::close_async()
     }
 }
 
-//----------------------------------------------------------------------------Standard_process::close__start
+//-------------------------------------------------------------------Standard_process::close__start
 
 Async_operation* Standard_process::close__start( bool run_independently )
 {
@@ -512,7 +512,7 @@ Async_operation* Standard_process::close__start( bool run_independently )
     return _close_operation;
 }
 
-//------------------------------------------------------------------------------Standard_process::close__end
+//---------------------------------------------------------------------Standard_process::close__end
 
 void Standard_process::close__end()
 {
@@ -521,7 +521,7 @@ void Standard_process::close__end()
     _session = NULL;
 }
 
-//---------------------------------------------------------------------------Standard_process::close_session
+//---------------------------------------------------------Standard_process::close_session
 
 void Standard_process::close_session()
 { 
@@ -533,7 +533,7 @@ void Standard_process::close_session()
     }
 }
 
-//-----------------------------------------------------------------------------------Standard_process::start
+//--------------------------------------------------------------------------Standard_process::start
 
 void Standard_process::start()
 {
@@ -565,7 +565,7 @@ void Standard_process::start()
     _running_since = Time::now();
 }
 
-//---------------------------------------------------------------------Standard_process::start_local_process
+//------------------------------------------------------------Standard_process::start_local_process
 
 void Standard_process::start_local_process()
 {
@@ -612,7 +612,7 @@ void Standard_process::start_local_process()
     _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 }
 
-//----------------------------------------------------------------------Standard_process::start_local_thread
+//-------------------------------------------------------------Standard_process::start_local_thread
 
 void Standard_process::start_local_thread()
 {
@@ -631,7 +631,7 @@ void Standard_process::start_local_thread()
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
 }
 
-//-------------------------------------------------------------------------Standard_process::fill_connection
+//----------------------------------------------------------------Standard_process::fill_connection
 
 void Standard_process::fill_connection( object_server::Connection* connection )
 {
@@ -678,7 +678,7 @@ void Standard_process::fill_connection( object_server::Connection* connection )
     if( _controller_address )  connection->set_controller_address( _controller_address );
 }
 
-//----------------------------------------------------------------------Standard_process::async_remote_start
+//-------------------------------------------------------------Standard_process::async_remote_start
 
 void Standard_process::async_remote_start()
 {
@@ -695,7 +695,7 @@ void Standard_process::async_remote_start()
     _async_remote_operation->set_async_manager( _spooler->_connection_manager );
 }
 
-//-------------------------------------------------------------Standard_process::async_remote_start_continue
+//----------------------------------------------------Standard_process::async_remote_start_continue
 
 bool Standard_process::async_remote_start_continue( Async_operation::Continue_flags )
 {
@@ -783,7 +783,7 @@ bool Standard_process::async_remote_start_continue( Async_operation::Continue_fl
     return something_done;
 }
 
-//--------------------------------------------------------------------------Standard_process::async_continue
+//-----------------------------------------------------------------Standard_process::async_continue
 
 bool Standard_process::async_continue()
 {
@@ -791,7 +791,7 @@ bool Standard_process::async_continue()
                       : false;
 }
 
-//-----------------------------------------------Standard_process::Async_remote_operation::close_remote_task
+//--------------------------------------Standard_process::Async_remote_operation::close_remote_task
 
 void Standard_process::Async_remote_operation::close_remote_task( bool kill )
 {
@@ -820,7 +820,7 @@ void Standard_process::Async_remote_operation::close_remote_task( bool kill )
     }
 }
 
-//--------------------------------------------------------------------------------Standard_process::end_task
+//-----------------------------------------------------------------------Standard_process::end_task
 
 void Standard_process::end_task()
 {
@@ -829,7 +829,7 @@ void Standard_process::end_task()
     if( _module_instance )  _module_instance->end_task();
 }
 
-//------------------------------------------------------------------------------------Standard_process::kill
+//---------------------------------------------------------------------------Standard_process::kill
 
 bool Standard_process::kill()
 {
@@ -867,7 +867,7 @@ bool Standard_process::kill()
     return result;
 }
 
-//-------------------------------------------------------------------------------------Standard_process::pid
+//----------------------------------------------------------------------------Standard_process::pid
 
 int Standard_process::pid() const
 { 
@@ -898,14 +898,14 @@ int Standard_process::pid() const
     return result;
 }
 
-//---------------------------------------------------------------------------Standard_process::is_terminated
+//------------------------------------------------------------------Standard_process::is_terminated
 
 bool Standard_process::is_terminated()
 {
     return !_connection  ||  _connection->process_terminated();
 }
 
-//-------------------------------------------------------------------------------Standard_process::exit_code
+//----------------------------------------------------------------------Standard_process::exit_code
 
 int Standard_process::exit_code()
 {
@@ -914,7 +914,7 @@ int Standard_process::exit_code()
     return _exit_code;
 }
 
-//-----------------------------------------------------------------------Standard_process::termination_signal
+//--------------------------------------------------------------Standard_process::termination_signal
 
 int Standard_process::termination_signal()
 {
@@ -923,14 +923,14 @@ int Standard_process::termination_signal()
     return _termination_signal;
 }
 
-//--------------------------------------------------------------------------Standard_process::is_remote_host
+//-----------------------------------------------------------------Standard_process::is_remote_host
 
 bool Standard_process::is_remote_host() const
 { 
     return _remote_scheduler; 
 }
 
-//-----------------------------------------------------------------------------Standard_process::stdout_path
+//--------------------------------------------------------------------Standard_process::stdout_path
 
 File_path Standard_process::stdout_path()
 {
@@ -944,7 +944,7 @@ File_path Standard_process::stdout_path()
     return result;
 }
 
-//-----------------------------------------------------------------------------Standard_process::stderr_path
+//--------------------------------------------------------------------Standard_process::stderr_path
 
 File_path Standard_process::stderr_path()
 {
@@ -958,7 +958,7 @@ File_path Standard_process::stderr_path()
     return result;
 }
 
-//---------------------------------------------------------------------Standard_process::delete_files__start
+//------------------------------------------------------------Standard_process::delete_files__start
 
 bool Standard_process::try_delete_files( Has_log* log )
 {
@@ -972,7 +972,7 @@ bool Standard_process::try_delete_files( Has_log* log )
     return result;
 }
 
-//-------------------------------------------------------------------------Standard_process::undeleted_files
+//----------------------------------------------------------------Standard_process::undeleted_files
 
 list<File_path> Standard_process::undeleted_files()
 {
@@ -986,7 +986,7 @@ list<File_path> Standard_process::undeleted_files()
     return result;
 }
 
-//-----------------------------------------------------------------------------Standard_process::dom_element
+//--------------------------------------------------------------------Standard_process::dom_element
 
 xml::Element_ptr Standard_process::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
@@ -1018,14 +1018,14 @@ xml::Element_ptr Standard_process::dom_element( const xml::Document_ptr& documen
     return process_element;
 }
 
-//--------------------------------------------------------------------------------Standard_process::obj_name
+//-----------------------------------------------------------------------Standard_process::obj_name
 
 string Standard_process::obj_name() const
 {
     return "Standard_process " + short_name();
 }
 
-//------------------------------------------------------------------------------Standard_process::short_name
+//---------------------------------------------------------------------Standard_process::short_name
 
 string Standard_process::short_name() const
 {
