@@ -5,7 +5,6 @@
 
 #include "../zschimmer/com_remote.h"
 
-
 namespace sos {
 namespace scheduler {
 
@@ -40,8 +39,6 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual string short_name() const = 0;
     virtual string obj_name() const = 0;
 
-    virtual void add_module_instance(Module_instance*) = 0;
-    virtual void remove_module_instance(Module_instance*) = 0;
     virtual void set_controller_address(const Host_and_port&) = 0;
     virtual void set_temporary(bool t) = 0;
     virtual void set_job_name(const string& job_name) = 0;
@@ -60,9 +57,10 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual void close_async() = 0;
     virtual Async_operation* close__start(bool run_independently = false) = 0;
     virtual void close__end() = 0;
+    virtual void remove_module_instance() = 0;
     virtual bool async_continue() = 0;
 
-    static ptr<Process> new_process(Spooler* sp, const Host_and_port& remote_scheduler);
+    static ptr<Process> new_process(Spooler* sp, Module_instance*, const Host_and_port& remote_scheduler);
 };
 
 //----------------------------------------------------------------------Process_class_configuration
@@ -147,8 +145,8 @@ struct Process_class : Process_class_configuration,
     void                        add_process                 ( Standard_process* );
     void                        remove_process              ( Standard_process* );
 
-    Process*                    new_process                 (const Host_and_port& remote_scheduler);
-    Process*                    select_process_if_available (const Host_and_port& remote_scheduler);        // Startet bei Bedarf. Bei _max_processes: return NULL
+    Process*                    new_process                 (Module_instance*, const Host_and_port& remote_scheduler);
+    Process*                    select_process_if_available (Module_instance*, const Host_and_port& remote_scheduler);        // Startet bei Bedarf. Bei _max_processes: return NULL
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );
@@ -158,8 +156,6 @@ struct Process_class : Process_class_configuration,
     typedef stdext::hash_set< ptr<Process> > Process_set;
     Process_set&                process_set                 () { return _process_set; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-  //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-
 
   private:
     friend struct               Process_class_subsystem;
@@ -184,13 +180,10 @@ struct Process_class_folder : typed_folder<Process_class>
     // Typed_folder:
     bool                        is_empty_name_allowed       () const                                { return true; }
 
-  //void                        set_dom                     ( const xml::Element_ptr& );
     void                        add_process_class           ( Process_class* process_class )        { add_file_based( process_class ); }
     void                        remove_process_class        ( Process_class* process_class )        { remove_file_based( process_class ); }
     Process_class*              process_class               ( const string& name )                  { return file_based( name ); }
     Process_class*              process_class_or_null       ( const string& name )                  { return file_based_or_null( name ); }
-  //xml::Element_ptr            execute_xml_process_class   ( Command_processor*, const xml::Element_ptr& );
-  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }
 };
 
@@ -215,14 +208,13 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     string                      filename_extension          () const                                { return ".process_class.xml"; }
     string                      xml_element_name            () const                                { return "process_class"; }
     string                      xml_elements_name           () const                                { return "process_classes"; }
-  //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Process_class>          new_file_based              (const string& source)                  { return Z_NEW( Process_class( spooler() ) ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }
 
     ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }
     Process_class*              process_class               ( const Absolute_path& path )           { return file_based( path ); }
     Process_class*              process_class_or_null       ( const Absolute_path& path )           { return file_based_or_null( path ); }
-    Process*                    new_temporary_process       (const Host_and_port& remote_scheduler);
+    Process*                    new_temporary_process       (Module_instance*, const Host_and_port& remote_scheduler);
     Process_class*              temporary_process_class     ();
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();
@@ -236,7 +228,6 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     STDMETHODIMP            get_Process_class_or_null       ( BSTR, spooler_com::Iprocess_class** );
     STDMETHODIMP                Create_process_class        ( spooler_com::Iprocess_class** );
     STDMETHODIMP                Add_process_class           ( spooler_com::Iprocess_class* );
-
 
   private:
     Fill_zero                  _zero_;

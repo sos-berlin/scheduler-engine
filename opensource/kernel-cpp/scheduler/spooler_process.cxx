@@ -90,7 +90,7 @@ struct Standard_process : Process
 
 
 
-                                Standard_process            ( Spooler*, const Host_and_port& remote_scheduler);
+                                Standard_process            ( Spooler*, Module_instance*, const Host_and_port& remote_scheduler);
     Z_GNU_ONLY(                 Standard_process            (); )
                                ~Standard_process            ();
 
@@ -114,9 +114,7 @@ struct Standard_process : Process
     object_server::Session*     session                     ()                                      { return _session; }
     bool                        async_continue              ();
     double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
-    void                        add_module_instance         ( Module_instance* );
-    void                        remove_module_instance      ( Module_instance* );
-    int                         module_instance_count       ()                                      { return _module_instance_count; }
+    void                        remove_module_instance      ();
     void                    set_temporary                   ( bool t )                              { _temporary = t; }
     void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
     void                    set_task_id                     ( int id )                              { _task_id = id; }
@@ -165,7 +163,7 @@ struct Standard_process : Process
     Time                       _running_since;
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long32                     _module_instance_count;
-    Module_instance*           _module_instance;
+    Module_instance* const     _module_instance;
     ptr<Login>                 _login;
     string                     _priority;
     ptr<Com_variable_set>      _environment;
@@ -445,8 +443,8 @@ int Standard_process::Com_server_thread::thread_main()
 }
 
 
-ptr<Process> Process::new_process(Spooler* spooler, const Host_and_port& remote_scheduler) {
-    ptr<Standard_process> result = Z_NEW(Standard_process(spooler, remote_scheduler));
+ptr<Process> Process::new_process(Spooler* spooler, Module_instance* module_instance, const Host_and_port& remote_scheduler) {
+    ptr<Standard_process> result = Z_NEW(Standard_process(spooler, module_instance, remote_scheduler));
     return +result;
 }
 
@@ -457,11 +455,12 @@ Process::Process(Spooler* sp) :
 
 //---------------------------------------------------------------------------------Standard_process::Standard_process
 
-Standard_process::Standard_process(Spooler* sp, const Host_and_port& remote_scheduler)
+Standard_process::Standard_process(Spooler* sp, Module_instance* module_instance, const Host_and_port& remote_scheduler)
 : 
     Process(sp), 
     _zero_(this+1),
     _process_id( _spooler->get_next_process_id() ),
+    _module_instance(module_instance),
     _remote_scheduler(remote_scheduler)
 {
 }
@@ -529,27 +528,11 @@ void Standard_process::close__end()
     _session = NULL;
 }
 
-//---------------------------------------------------------------------Standard_process::add_module_instance
-
-void Standard_process::add_module_instance( Module_instance* module_instance )
-{ 
-    if( _module_instance_count != 0 )  assert(0), throw_xc( "Standard_process::add_module_instance" );
-
-    InterlockedIncrement( &_module_instance_count ); 
-
-    _module_instance = module_instance;
-}
-
 //------------------------------------------------------------------Standard_process::remove_module_instance
 
-void Standard_process::remove_module_instance( Module_instance* )
+void Standard_process::remove_module_instance()
 { 
-    _module_instance = NULL;
-
-    InterlockedDecrement( &_module_instance_count ); 
-
-    if( _temporary  &&  _module_instance_count == 0 )  
-    {
+    if (_temporary) {
         if( _session )
         {
             if( _session->connection() )  _exit_code          = _session->connection()->exit_code(),  
@@ -1367,14 +1350,12 @@ void Process_class::remove_process( Standard_process* process )
 
 //------------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process(const Host_and_port& remote_scheduler)
+Process* Process_class::new_process(Module_instance* module_instance, const Host_and_port& remote_scheduler)
 {
     assert_is_active();
 
-    ptr<Standard_process> process;
-
     Host_and_port r = remote_scheduler.is_empty()? _remote_scheduler : remote_scheduler;
-    process = Z_NEW( Standard_process(_spooler, r));        
+    ptr<Standard_process> process = Z_NEW( Standard_process(_spooler, module_instance, r));
 
     process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
 
@@ -1385,14 +1366,14 @@ Process* Process_class::new_process(const Host_and_port& remote_scheduler)
 
 //--------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available(const Host_and_port& remote_scheduler)
+Process* Process_class::select_process_if_available(Module_instance* module_instance, const Host_and_port& remote_scheduler)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&
         _process_set.size() < _max_processes
          && _spooler->_process_count < scheduler::max_processes)
     {
-        return new_process(remote_scheduler);
+        return new_process(module_instance, remote_scheduler);
     }
     else
         return NULL;
@@ -1576,13 +1557,11 @@ bool Process_class_subsystem::async_continue()
 
 //---------------------------------------------------Process_class_subsystem::new_temporary_process
 
-Process* Process_class_subsystem::new_temporary_process(const Host_and_port& remote_scheduler)
+Process* Process_class_subsystem::new_temporary_process(Module_instance* module_instance, const Host_and_port& remote_scheduler)
 {
-    ptr<Standard_process> process = Z_NEW( Standard_process( _spooler, remote_scheduler) );
-
+    ptr<Standard_process> process = Z_NEW(Standard_process(_spooler, module_instance, remote_scheduler));
     process->set_temporary( true );
     temporary_process_class()->add_process( process );
-
     return +process;
 }
 

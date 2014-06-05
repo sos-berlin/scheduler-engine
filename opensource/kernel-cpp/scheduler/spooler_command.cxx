@@ -1037,7 +1037,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
-    ptr<Process> process = Process::new_process(_spooler, Host_and_port());
+    ptr<Process> process = Process::new_process(_spooler, (Module_instance*)NULL, Host_and_port());
 
     process->set_controller_address(Host_and_port(client_host(), tcp_port));
     process->set_run_in_thread( kind == "process" );
