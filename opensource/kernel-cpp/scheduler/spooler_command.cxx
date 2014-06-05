@@ -1024,7 +1024,6 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
     Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << start_task_element.xml_string() << "\n");
-//    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !_spooler->_remote_commands_allowed_for_licence ) {
         if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
         return xml::Element_ptr();
@@ -1037,13 +1036,14 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
-    ptr<Process> process = Process::new_process(_spooler, (Module_instance*)NULL, Host_and_port());
+    Process_configuration process_configuration;
+    process_configuration._controller_address = Host_and_port(client_host(), tcp_port);
+    process_configuration._is_thread = kind == "process";
+    process_configuration._log_stdout_and_stderr = true;     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
+    process_configuration._java_options = start_task_element.getAttribute("java_options");
+    process_configuration._java_classpath = start_task_element.getAttribute("java_classpath");
+    ptr<Process> process = Process::new_process(_spooler, process_configuration);
 
-    process->set_controller_address(Host_and_port(client_host(), tcp_port));
-    process->set_run_in_thread( kind == "process" );
-    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
-    process->set_java_options(start_task_element.getAttribute("java_options"));
-    process->set_java_classpath(start_task_element.getAttribute("java_classpath"));
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
 

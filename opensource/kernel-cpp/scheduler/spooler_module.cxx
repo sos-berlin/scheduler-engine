@@ -836,21 +836,20 @@ bool Module_instance::load()
 
 //--------------------------------------------------------------Module_instance::try_to_get_process
 
-bool Module_instance::try_to_get_process()
+bool Module_instance::try_to_get_process(const Process_configuration* c)
 {
     if( !_process )
     {
-        _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(this, _remote_scheduler);
-        if( _process )
-        {
-            _process->set_login(_module->_login);
-            assert( !_process->started() );
-
-            _process->set_job_name( _job_name );
-            _process->set_task_id ( _task_id  );
-        }
-
-        // _process wird nur von Remote_module_instance_procy benutzt. 
+        Process_configuration process_configuration;
+        if (c) process_configuration = *c;
+        process_configuration._remote_scheduler = _remote_scheduler;
+        process_configuration._has_api = _module->has_api();
+        process_configuration._has_on_remote_task_running = _task;
+        process_configuration._job_name = _job_name;
+        process_configuration._task_id = _task_id;
+        process_configuration._login = _module->_login;
+        _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(process_configuration);
+        // _process wird nur von Remote_module_instance_proxy benutzt. 
         // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
     }
 

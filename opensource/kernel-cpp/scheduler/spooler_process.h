@@ -15,6 +15,28 @@ struct Process_class_folder;
 struct Process_class_subsystem;
 struct Standard_process;
 
+struct Has_on_remote_task_running {
+    virtual void on_remote_task_running() = 0;
+};
+
+struct Process_configuration {
+    Process_configuration() : _zero_(this + 1) {}
+    Fill_zero _zero_;
+    Has_on_remote_task_running* _has_on_remote_task_running;
+    Host_and_port _controller_address;
+    Host_and_port _remote_scheduler;
+    string _job_name;
+    int _task_id;
+    bool _has_api;
+    bool _is_thread;
+    bool _log_stdout_and_stderr;   // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren      
+    string _priority;
+    ptr<Com_variable_set> _environment;
+    ptr<Login> _login;
+    string _java_options;
+    string _java_classpath;
+};
+
 //------------------------------------------------------------------------------------------Process
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
 // Kann auch ein Thread sein.
@@ -39,17 +61,6 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual string short_name() const = 0;
     virtual string obj_name() const = 0;
 
-    virtual void set_controller_address(const Host_and_port&) = 0;
-    virtual void set_job_name(const string& job_name) = 0;
-    virtual void set_task_id(int id) = 0;
-    virtual void set_priority(const string& priority) = 0;
-    virtual void set_environment(const Com_variable_set& env) = 0;
-    virtual void set_java_options(const string& o) = 0;
-    virtual void set_java_classpath(const string& o) = 0;
-    virtual void set_run_in_thread(bool b) = 0;
-    virtual void set_log_stdout_and_stderr(bool b) = 0;
-    virtual void set_login(Login* o) = 0;
-
     virtual void start() = 0;
     virtual bool kill() = 0;
     virtual bool try_delete_files(Has_log*) = 0;
@@ -59,7 +70,7 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual void close_session() = 0;
     virtual bool async_continue() = 0;
 
-    static ptr<Process> new_process(Spooler* sp, Module_instance*, const Host_and_port& remote_scheduler);
+    static ptr<Process> new_process(Spooler* sp, const Process_configuration&);
 };
 
 //----------------------------------------------------------------------Process_class_configuration
@@ -144,8 +155,8 @@ struct Process_class : Process_class_configuration,
     void                        add_process                 (Process*);
     void                        remove_process              (Process*);
 
-    Process*                    new_process                 (Module_instance*, const Host_and_port& remote_scheduler);
-    Process*                    select_process_if_available (Module_instance*, const Host_and_port& remote_scheduler);        // Startet bei Bedarf. Bei _max_processes: return NULL
+    Process*                    new_process                 (const Process_configuration&);
+    Process*                    select_process_if_available (const Process_configuration&);        // Startet bei Bedarf. Bei _max_processes: return NULL
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );

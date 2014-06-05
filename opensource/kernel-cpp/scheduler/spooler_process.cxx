@@ -90,7 +90,7 @@ struct Standard_process : Process
 
 
 
-                                Standard_process            ( Spooler*, Module_instance*, const Host_and_port& remote_scheduler);
+                                Standard_process            (Spooler*, const Process_configuration&);
     Z_GNU_ONLY(                 Standard_process            (); )
                                ~Standard_process            ();
 
@@ -104,7 +104,6 @@ struct Standard_process : Process
 
     bool                        started                     ()                                      { return _connection != NULL; }
 
-    void                    set_controller_address          ( const Host_and_port& h )              { _controller_address = h; }
     void                        start                       ();
     void                        start_local_process         ();
     void                        start_local_thread          ();
@@ -115,15 +114,6 @@ struct Standard_process : Process
     bool                        async_continue              ();
     double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
     void                        close_session      ();
-    void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
-    void                    set_task_id                     ( int id )                              { _task_id = id; }
-    void                    set_priority                    ( const string& priority )              { _priority = priority; }
-    void                    set_environment                 ( const Com_variable_set& env )         { _environment = new Com_variable_set( env ); }
-    void                    set_java_options                (const string& o)                       { _java_options = o; }
-    void                    set_java_classpath              (const string& o)                       { _java_classpath = o; }
-    void                    set_run_in_thread               ( bool b )                              { _run_in_thread = b; }
-    void                    set_log_stdout_and_stderr       ( bool b )                              { _log_stdout_and_stderr = b; }
-    void                    set_login                       (Login* o)                              { _login = o; }
     Process_id                  process_id                  () const                                { return _process_id; }
     int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
     Process_id                  remote_process_id           () const                                { return _remote_process_id; }
@@ -145,9 +135,7 @@ struct Standard_process : Process
 
   private:
     Fill_zero                  _zero_;
-    string                     _job_name;
-    int                        _task_id;
-    Host_and_port              _controller_address;
+    Process_configuration const _configuration;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     ptr<Com_server_thread>     _com_server_thread;
@@ -156,22 +144,12 @@ struct Standard_process : Process
     int                        _exit_code;
     int                        _termination_signal;
     Time                       _running_since;
-    long32                     _module_instance_count;
-    Module_instance* const     _module_instance;
-    ptr<Login>                 _login;
-    string                     _priority;
-    ptr<Com_variable_set>      _environment;
-    string                     _java_options;
-    string                     _java_classpath;
-    bool                       _run_in_thread;
-    Host_and_port const        _remote_scheduler;
     Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
     const Process_id           _process_id;
-    bool                       _log_stdout_and_stderr;      // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
 };
 
 //----------------------------------------------------------------Process_class_subsystem::_methods
@@ -437,8 +415,8 @@ int Standard_process::Com_server_thread::thread_main()
 }
 
 
-ptr<Process> Process::new_process(Spooler* spooler, Module_instance* module_instance, const Host_and_port& remote_scheduler) {
-    ptr<Standard_process> result = Z_NEW(Standard_process(spooler, module_instance, remote_scheduler));
+ptr<Process> Process::new_process(Spooler* spooler, const Process_configuration& process_configuration) {
+    ptr<Standard_process> result = Z_NEW(Standard_process(spooler, process_configuration));
     return +result;
 }
 
@@ -449,13 +427,12 @@ Process::Process(Spooler* sp) :
 
 //------------------------------------------------------------------------Standard_process::Standard_process
 
-Standard_process::Standard_process(Spooler* sp, Module_instance* module_instance, const Host_and_port& remote_scheduler)
+Standard_process::Standard_process(Spooler* sp, const Process_configuration& process_configuration)
 : 
     Process(sp), 
     _zero_(this+1),
-    _process_id( _spooler->get_next_process_id() ),
-    _module_instance(module_instance),
-    _remote_scheduler(remote_scheduler)
+    _configuration(process_configuration),
+    _process_id( _spooler->get_next_process_id() )
 {
 }
 
@@ -543,7 +520,7 @@ void Standard_process::start()
         async_remote_start();
     }
     else
-    if( _run_in_thread )
+    if (_configuration._is_thread)
     {
         start_local_thread();
     }
@@ -577,15 +554,15 @@ void Standard_process::start_local_process()
     if( !_spooler->_factory_ini.empty() )
     parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
 
-    parameters.push_back(object_server::Parameter("param", "-java-options="+ _java_options +" "+spooler()->settings()->_job_java_options));
-    parameters.push_back(object_server::Parameter("param", "-java-classpath="+ _java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_classpath));
+    parameters.push_back(object_server::Parameter("param", "-java-options="+ _configuration._java_options +" "+spooler()->settings()->_job_java_options));
+    parameters.push_back(object_server::Parameter("param", "-java-classpath="+ _configuration._java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_classpath));
     parameters.push_back( object_server::Parameter( "param", "-O" ) );
 
-    if( !_job_name.empty() )
-    parameters.push_back( object_server::Parameter( "param", "-job=" + _job_name ) );
+    if (!_configuration._job_name.empty())
+        parameters.push_back( object_server::Parameter("param", "-job=" + _configuration._job_name));
 
-    if( _task_id )
-    parameters.push_back( object_server::Parameter( "param", "-task-id=" + as_string(_task_id) ) );
+    if (_configuration._task_id)
+        parameters.push_back(object_server::Parameter("param", "-task-id=" + as_string(_configuration._task_id)));
 
     if( !log_filename().empty() )
     parameters.push_back( object_server::Parameter( "param", "-log=" + log_categories_as_string() + " >+" + log_filename() ) );
@@ -599,8 +576,8 @@ void Standard_process::start_local_process()
         connection->set_ld_preload( static_ld_preload );
     #endif
 
-    connection->set_priority( _priority );
-    connection->set_login(_login);
+    connection->set_priority(_configuration._priority);
+    connection->set_login(_configuration._login);
     connection->start_process( parameters );
 
     _connection = +connection;
@@ -659,12 +636,11 @@ void Standard_process::fill_connection( object_server::Connection* connection )
             stdin_xml_writer.set_attribute( "stderr_path", c->stderr_path() );
         }
         
-        if (_log_stdout_and_stderr)
+        if (_configuration._log_stdout_and_stderr)
             stdin_xml_writer.set_attribute("log_stdout_and_stderr", "yes");
 
-        if( _environment )  
-        {
-            xml::Document_ptr dom_document = _environment->dom( "environment", "variable" );
+        if (_configuration._environment) {
+            xml::Document_ptr dom_document = _configuration._environment->dom("environment", "variable");
             stdin_xml_writer.write_element( dom_document.documentElement() );
         }
     }
@@ -674,7 +650,8 @@ void Standard_process::fill_connection( object_server::Connection* connection )
 
     connection->set_stdin_data( stdin_xml_writer.to_string() );
 
-    if( _controller_address )  connection->set_controller_address( _controller_address );
+    if (_configuration._controller_address) 
+        connection->set_controller_address(_configuration._controller_address);
 }
 
 //-------------------------------------------------------------Standard_process::async_remote_start
@@ -683,7 +660,7 @@ void Standard_process::async_remote_start()
 {
     ptr<object_server::Connection> c = _spooler->_connection_manager->new_connection();
 
-    c->set_remote_host( _remote_scheduler._host );
+    c->set_remote_host(_configuration._remote_scheduler._host);
     c->listen_on_tcp_port( INADDR_ANY );
 
 
@@ -706,7 +683,7 @@ bool Standard_process::async_remote_start_continue( Async_operation::Continue_fl
     {
         case Async_remote_operation::s_not_connected:
         {
-            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _remote_scheduler ) );
+            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _configuration._remote_scheduler ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );
@@ -725,11 +702,11 @@ bool Standard_process::async_remote_start_continue( Async_operation::Continue_fl
             xml_writer.write_prolog();
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
-            if (!_module_instance->_module->has_api())  xml_writer.set_attribute( "kind", "process" );
-            if (!rtrim(_java_options).empty())
-                xml_writer.set_attribute_optional("java_options", _java_options);
-            if (!rtrim(_java_classpath).empty())
-                xml_writer.set_attribute_optional("java_classpath", _java_classpath);
+            if (!_configuration._has_api)  xml_writer.set_attribute( "kind", "process" );
+            if (!rtrim(_configuration._java_options).empty())
+                xml_writer.set_attribute_optional("java_options", _configuration._java_options);
+            if (!rtrim(_configuration._java_classpath).empty())
+                xml_writer.set_attribute_optional("java_classpath", _configuration._java_classpath);
             xml_writer.end_element( "remote_scheduler.start_remote_task" );
             xml_writer.close();
             _xml_client_connection->send( xml_writer.to_string() );
@@ -758,7 +735,8 @@ bool Standard_process::async_remote_start_continue( Async_operation::Continue_fl
 
         case Async_remote_operation::s_running:    
         {
-            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->on_remote_task_running();
+            if (_configuration._has_on_remote_task_running)
+                _configuration._has_on_remote_task_running->on_remote_task_running();
             break;
         }
 
@@ -917,7 +895,7 @@ int Standard_process::termination_signal()
 
 bool Standard_process::is_remote_host() const
 { 
-    return _remote_scheduler; 
+    return _configuration._remote_scheduler; 
 }
 
 //--------------------------------------------------------------------Standard_process::stdout_path
@@ -985,13 +963,14 @@ xml::Element_ptr Standard_process::dom_element( const xml::Document_ptr& documen
     if( _connection )
     process_element.setAttribute( "pid"              , _connection->pid() );
 
-    if( !_job_name.empty() )
-    process_element.setAttribute( "job"              , _job_name );
+    if (!_configuration._job_name.empty())
+        process_element.setAttribute("job", _configuration._job_name);
 
-    if( _task_id )
-    process_element.setAttribute( "task"             , _task_id ),
-    process_element.setAttribute( "task_id"          , _task_id );          // VERALTET!
-    process_element.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
+    if (_configuration._task_id) {
+        process_element.setAttribute("task", _configuration._task_id);
+        process_element.setAttribute("task_id", _configuration._task_id);          // VERALTET!
+    }
+    process_element.setAttribute_optional("remote_scheduler", _configuration._remote_scheduler.as_string());
 
     if( _connection )
     {
@@ -1318,12 +1297,12 @@ void Process_class::remove_process(Process* process)
 
 //------------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process(Module_instance* module_instance, const Host_and_port& remote_scheduler)
+Process* Process_class::new_process(const Process_configuration& c)
 {
     assert_is_active();
-
-    Host_and_port r = remote_scheduler.is_empty()? _remote_scheduler : remote_scheduler;
-    ptr<Standard_process> process = Z_NEW( Standard_process(_spooler, module_instance, r));
+    Process_configuration conf = c;
+    conf._remote_scheduler = c._remote_scheduler.is_empty()? _remote_scheduler : c._remote_scheduler;
+    ptr<Standard_process> process = Z_NEW(Standard_process(_spooler, conf));
 
     add_process( process );
 
@@ -1332,14 +1311,14 @@ Process* Process_class::new_process(Module_instance* module_instance, const Host
 
 //--------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available(Module_instance* module_instance, const Host_and_port& remote_scheduler)
+Process* Process_class::select_process_if_available(const Process_configuration& process_configuration)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&
         _process_set.size() < _max_processes
          && _spooler->_process_count < scheduler::max_processes)
     {
-        return new_process(module_instance, remote_scheduler);
+        return new_process(process_configuration);
     }
     else
         return NULL;

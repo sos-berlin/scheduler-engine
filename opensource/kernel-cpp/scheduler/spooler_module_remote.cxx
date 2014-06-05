@@ -384,26 +384,24 @@ bool Remote_module_instance_proxy::Operation::begin__end()
 */
 //-------------------------------------------------Remote_module_instance_proxy::try_to_get_process
 
-bool Remote_module_instance_proxy::try_to_get_process()
+bool Remote_module_instance_proxy::try_to_get_process(const Process_configuration* c)
 {
-    bool ok = Module_instance::try_to_get_process();
-    if( ok )
-    {
-        assert( _process );
+    assert(!c);
+    Process_configuration process_configuration;
+    process_configuration._environment = new Com_variable_set(*_process_environment);
+    process_configuration._java_options = _module->_java_options;
+    process_configuration._java_classpath = _module->_java_class_path;
+    process_configuration._priority = _module->_priority;
 
-        if( _module->_priority != "" )  _process->set_priority( _module->_priority );
-        _process->set_environment( *_process_environment );
-        _process->set_java_options(_module->_java_options);
-        _process->set_java_classpath(_module->_java_class_path);
+    bool ok = Module_instance::try_to_get_process(&process_configuration);
+    if (ok) {
         _process->start();
-
-        _session      = _process->session(); 
-        _pid          = _session->connection()->pid();
-
-        ok = true;
+        _session = _process->session(); 
+        _pid = _session->connection()->pid();
+        return true;
+    } else {
+        return false;
     }
-
-    return ok;
 }
 
 //-------------------------------------------Remote_module_instance_proxy::continue_async_operation

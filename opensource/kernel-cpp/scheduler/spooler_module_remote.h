@@ -70,7 +70,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     bool                        name_exists                 ( const string& name );
     Variant                     call                        ( const string& name );
 
-    bool                        try_to_get_process          ();
+    bool                        try_to_get_process          (const Process_configuration*);
 
             Async_operation*    close__start                ();
             void                close__end                  ();
