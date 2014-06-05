@@ -88,7 +88,6 @@ const int                       const_order_id_length_max           = 250;      
 const Duration                  delete_temporary_files_delay        = Duration(2);                                
 const Duration                  delete_temporary_files_retry        = Duration(0.1);                              
 
-const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
 
 volatile int                    ctrl_c_pressed                      = 0;                // Tatsächliches Signal ist in last_signal

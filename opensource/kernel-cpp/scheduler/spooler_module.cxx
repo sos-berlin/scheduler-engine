@@ -846,17 +846,7 @@ bool Module_instance::try_to_get_process()
 {
     if( !_process )
     {
-        if( _module->_process_class_path.empty()  
-            &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
-        {
-            // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
-            _process = _spooler->process_class_subsystem()->new_temporary_process(this, _remote_scheduler);
-        }
-        else
-        {
-            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(this, _remote_scheduler);
-        }
-
+        _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(this, _remote_scheduler);
         if( _process )
         {
             _process->set_login(_module->_login);

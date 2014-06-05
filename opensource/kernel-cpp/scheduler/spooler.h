@@ -72,7 +72,6 @@ using time::Duration;
 //--------------------------------------------------------------------------------------------const
     
 extern const char               version_string[];
-extern const string             temporary_process_class_name;
 extern volatile int             ctrl_c_pressed;
 extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;

@@ -1497,8 +1497,7 @@ bool Process_class_subsystem::subsystem_initialize()
     set_subsystem_state( subsys_initialized );
     file_based_subsystem<Process_class>::subsystem_initialize();
 
-    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW( Process_class( spooler() ) ) );     // Default-Prozessklasse ohne Namen
-    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW( Process_class( spooler(), temporary_process_class_name ) ) );
+    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW(Process_class(spooler(), "")));     // Default-Prozessklasse ohne Namen
 
     return true;
 }
@@ -1547,15 +1546,6 @@ bool Process_class_subsystem::async_continue()
     }
 
     return something_done;
-}
-
-//---------------------------------------------------Process_class_subsystem::new_temporary_process
-
-Process* Process_class_subsystem::new_temporary_process(Module_instance* module_instance, const Host_and_port& remote_scheduler)
-{
-    ptr<Standard_process> process = Z_NEW(Standard_process(_spooler, module_instance, remote_scheduler));
-    temporary_process_class()->add_process( process );
-    return +process;
 }
 
 //-------------------------------------------------------------Process_class_subsystem::execute_xml
@@ -1659,13 +1649,6 @@ STDMETHODIMP Process_class_subsystem::Add_process_class( spooler_com::Iprocess_c
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
-}
-
-//-------------------------------------------------Process_class_subsystem::temporary_process_class
-
-Process_class* Process_class_subsystem::temporary_process_class()
-{ 
-    return spooler()->root_folder()->process_class_folder()->process_class( temporary_process_class_name ); 
 }
 
 //-------------------------------------------------------------------------------------------------

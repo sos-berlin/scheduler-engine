@@ -209,7 +209,6 @@ private object FileBasedSubsystemIT {
   private val schedulerServiceForwardingJobChainPath = JobChainPath("/scheduler_service_forwarding")
   private val schedulerServiceForwarderJobPath = JobPath("/scheduler_service_forwarder")
   private val emptyProcessClassPath = ProcessClassPath("")
-  private val temporaryProcessClassPath = ProcessClassPath("/(temporaries)")
   private val rootFolderPath = FolderPath("/")
   //private val testNestedJobChainPath =
 
@@ -217,7 +216,6 @@ private object FileBasedSubsystemIT {
     schedulerFileOrderSinkJobPath,
     schedulerServiceForwarderJobPath,
     emptyProcessClassPath,
-    temporaryProcessClassPath,
     rootFolderPath)
   
   private val pathIsInvisible = Set[TypedPath](
@@ -247,7 +245,7 @@ private object FileBasedSubsystemIT {
       List(JobChainPath("/test-jobChain"), JobChainPath("/test-jobChain-nested"))),
     TestSubsystemSetting(
       ProcessClassSubsystem,
-      List(emptyProcessClassPath, temporaryProcessClassPath),
+      List(emptyProcessClassPath),
       List(ProcessClassPath("/test-processClass")),
       predefinedIsVisible = true),
     TestSubsystemSetting(
