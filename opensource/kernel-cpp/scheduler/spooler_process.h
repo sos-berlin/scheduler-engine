@@ -56,7 +56,7 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual void close_async() = 0;
     virtual Async_operation* close__start(bool run_independently = false) = 0;
     virtual void close__end() = 0;
-    virtual void remove_module_instance() = 0;
+    virtual void close_session() = 0;
     virtual bool async_continue() = 0;
 
     static ptr<Process> new_process(Spooler* sp, Module_instance*, const Host_and_port& remote_scheduler);
@@ -141,8 +141,8 @@ struct Process_class : Process_class_configuration,
     void                    set_max_processes               ( int );
     void                  check_remote_scheduler            ( const Host_and_port& ) const;
 
-    void                        add_process                 ( Standard_process* );
-    void                        remove_process              ( Standard_process* );
+    void                        add_process                 (Process*);
+    void                        remove_process              (Process*);
 
     Process*                    new_process                 (Module_instance*, const Host_and_port& remote_scheduler);
     Process*                    select_process_if_available (Module_instance*, const Host_and_port& remote_scheduler);        // Startet bei Bedarf. Bei _max_processes: return NULL

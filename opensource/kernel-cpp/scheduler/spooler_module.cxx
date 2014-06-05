@@ -409,7 +409,7 @@ void Module::init()
 
     if( _kind != kind_internal )
     {
-        if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;  //process_class_subsystem()->has_process_classes();
+        if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;
         if( _dont_remote )  _use_process_class = false, _process_class_path.clear();
     }
 
@@ -916,7 +916,8 @@ void Module_instance::detach_process()
 {
     if( _process )
     {
-        _process->remove_module_instance();
+        _process->close_session();
+        _spooler->process_class_subsystem()->process_class(_module->_process_class_path)->remove_process(_process);
         _process = NULL;
     }
 }

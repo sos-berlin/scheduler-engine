@@ -114,7 +114,7 @@ struct Standard_process : Process
     object_server::Session*     session                     ()                                      { return _session; }
     bool                        async_continue              ();
     double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
-    void                        remove_module_instance      ();
+    void                        close_session      ();
     void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
     void                    set_task_id                     ( int id )                              { _task_id = id; }
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
@@ -144,11 +144,8 @@ struct Standard_process : Process
     string                      obj_name                    () const;
     string                      short_name                  () const;
 
-    
-    Fill_zero                  _zero_;
-    Process_class*             _process_class;
-
   private:
+    Fill_zero                  _zero_;
     string                     _job_name;
     int                        _task_id;
     Host_and_port              _controller_address;
@@ -478,8 +475,6 @@ Standard_process::~Standard_process()
 
     if( _process_handle_copy )  _spooler->unregister_process_handle( _process_handle_copy );
     if( _xml_client_connection )  _xml_client_connection->set_async_manager( NULL );
-
-    if( _process_class )  _process_class->remove_process( this );
 }
 
 //-----------------------------------------------------------------------------Standard_process::close_async
@@ -526,24 +521,15 @@ void Standard_process::close__end()
     _session = NULL;
 }
 
-//------------------------------------------------------------------Standard_process::remove_module_instance
+//---------------------------------------------------------------------------Standard_process::close_session
 
-void Standard_process::remove_module_instance()
+void Standard_process::close_session()
 { 
     if( _session )
     {
-        if( _session->connection() )  _exit_code          = _session->connection()->exit_code(),  
-                                        _termination_signal = _session->connection()->termination_signal();
-
         _session->close__start() -> async_finish();
         _session->close__end();
         _session = NULL;
-    }
-
-    if( Process_class* process_class = _process_class )  
-    {
-        _process_class = NULL;
-        process_class->remove_process( this );
     }
 }
 
@@ -555,7 +541,6 @@ void Standard_process::start()
 
     if( is_remote_host() )
     {
-        assert( _process_class );
         async_remote_start();
     }
     else
@@ -699,7 +684,6 @@ void Standard_process::async_remote_start()
 {
     ptr<object_server::Connection> c = _spooler->_connection_manager->new_connection();
 
-    assert( _process_class );
     c->set_remote_host( _remote_scheduler._host );
     c->listen_on_tcp_port( INADDR_ANY );
 
@@ -1313,21 +1297,19 @@ void Process_class::check_remote_scheduler( const Host_and_port& ) const
 
 //-----------------------------------------------------------------------Process_class::add_process
 
-void Process_class::add_process( Standard_process* process )
+void Process_class::add_process(Process* process)
 {
-    process->_process_class = this;
     _process_set.insert( process );
     _process_set_version++;
 }
 
 //--------------------------------------------------------------------------Spooler::remove_process
 
-void Process_class::remove_process( Standard_process* process )
+void Process_class::remove_process(Process* process)
 {
     Process_set::iterator it = _process_set.find( process );
     if( it == _process_set.end() )  z::throw_xc( Z_FUNCTION );
 
-    process->_process_class = NULL; 
     _process_set.erase( it ); 
     _process_set_version++;
 
