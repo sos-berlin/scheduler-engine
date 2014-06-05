@@ -53,16 +53,4 @@
         <url>https://github.com/sos-berlin/scheduler-engine</url>
     </scm>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <properties>
-                <!-- Versionsbezeichnungen für die nächste Freigabe und die darauffolgende Entwicklungsversion hier einstellen -->
-                <releaseVersion>1.7-RC1</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
-                <developmentVersion>1.7-SNAPSHOT</developmentVersion>
-                <tag>v${releaseVersion}</tag>
-                <ignoreSnapshots>true</ignoreSnapshots>
-            </properties>
-        </profile>
-    </profiles>
 </project>
