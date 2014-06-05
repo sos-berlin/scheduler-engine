@@ -2463,9 +2463,9 @@ void Spooler::run()
                     if( !wait_until.is_zero() )
 #               endif 
                 FOR_EACH_FILE_BASED( Process_class, process_class ) {
-                    Z_FOR_EACH( Process_class::Process_set, process_class->_process_set, p ) {
+                    Z_FOR_EACH( Process_class::Process_set, process_class->process_set(), p ) {
 #                       ifdef Z_WINDOWS
-                            if( object_server::Connection* server = (*p)->_connection )
+                            if( object_server::Connection* server = (*p)->connection())
                                 if( server->process_event() && *server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
 #                        else
                             Time next_time;
