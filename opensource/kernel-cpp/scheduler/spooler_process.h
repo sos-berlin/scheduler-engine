@@ -43,7 +43,6 @@ struct Process_configuration {
 
 struct Process : zschimmer::Object, Scheduler_object {
     Process(Spooler*);
-    virtual bool connected() = 0;
     virtual bool started() = 0;
     virtual bool is_remote_host() const = 0;
     virtual int exit_code() = 0;

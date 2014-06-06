@@ -39,22 +39,14 @@ bool Remote_module_instance_proxy::load()
 
 Async_operation* Remote_module_instance_proxy::close__start()
 {
-    if( _remote_instance )
-    {
-        if( _process  &&  _process->connected() )
-        {
-            Z_LOGI2( "scheduler", "*** Remote_module_instance_proxy::close(): _remote_instance->release()\n" );
-
-            try
-            {
-                _remote_instance->release();
-            }
-            catch( exception& x )
-            {
-                Z_LOG2( "scheduler", "Error ignored: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
-            }
+    if (_remote_instance) {
+        Z_LOGI2( "scheduler", "*** Remote_module_instance_proxy::close(): _remote_instance->release()\n" );
+        try {
+            _remote_instance->release();
         }
-
+        catch(exception& x) {
+            Z_LOG2( "scheduler", "Error ignored: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
+        }
         _remote_instance = NULL;
     }
 
