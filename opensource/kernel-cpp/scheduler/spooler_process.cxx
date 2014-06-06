@@ -102,7 +102,7 @@ struct Standard_process : Process
     bool                        continue_close_operation    ( Standard_process::Close_operation* );
 
 
-    bool                        started                     ()                                      { return _connection != NULL; }
+    bool                        is_started                  ()                                      { return _connection != NULL; }
 
     void                        start                       ();
     void                        start_local_process         ();
@@ -125,7 +125,6 @@ struct Standard_process : Process
     File_path                   stdout_path                 ();
     bool                        try_delete_files            ( Has_log* );
     std::list<file::File_path>  undeleted_files             ();
-    bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
     bool                        is_remote_host              () const;
     object_server::Connection*  connection                  () const                                { return _connection; }
 
@@ -513,7 +512,7 @@ void Standard_process::close_session()
 
 void Standard_process::start()
 {
-    if( started() )  assert(0), z::throw_xc( Z_FUNCTION );
+    if (is_started()) assert(0), z::throw_xc(Z_FUNCTION);
 
     if( is_remote_host() )
     {
