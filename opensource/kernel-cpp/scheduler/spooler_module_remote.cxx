@@ -1,14 +1,4 @@
-// $Id: spooler_module_remote.cxx 14014 2010-09-15 08:48:29Z rb $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-/*
-    Hier sind implementiert
-
-    Remote_module_instance_proxy
-*/
-
-
-
 #include "spooler.h"
-
 
 namespace sos {
 namespace scheduler {
@@ -43,7 +33,6 @@ void Remote_module_instance_proxy::init()
 bool Remote_module_instance_proxy::load()
 {
     return Com_module_instance_base::load();
-    //_remote_instance->call( "load" );
 }
 
 //-------------------------------------------------------Remote_module_instance_proxy::close__start
@@ -245,15 +234,10 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
 void Remote_module_instance_proxy::end__end()
 {
     if( !_remote_instance )  return;
-  //if( _operation->_call_state != Operation::c_finished )  z::throw_xc( "SCHEDULER-191", "end__end", state_name() );
     if( !_operation->async_finished() )  z::throw_xc( "SCHEDULER-191", "end__end", _operation->async_state_text() );
 
     _operation = NULL;
     _remote_instance->call__end();
-
-  //ptr<Async_operation> op = _operation;
-  //_operation = NULL;
-  //op->async_check_error();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::step__start
@@ -271,28 +255,12 @@ Async_operation* Remote_module_instance_proxy::step__start()
 
 Variant Remote_module_instance_proxy::step__end()
 {
-    Variant result;
-
     if( !_remote_instance )  z::throw_xc( "SCHEDULER-200", "step__end" );
-
-  //if( _call_state != c_finished )  z::throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
     if( !_operation )  z::throw_xc( "SCHEDULER-191", "step__end", "_operation==NULL" );
     if( !_operation->async_finished() )  z::throw_xc( "SCHEDULER-191", "step__end", _operation->async_state_text() );
 
     _operation = NULL;
-    result = _remote_instance->call__end();
-
-    // In spooler_task.cxx:
-    //if( _module->kind() == Module::kind_process )
-    //{
-    //    xml::Document_ptr dom_document           ( string_from_variant( result ) );
-    //    xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/process.result" );
-
-    //    _exit_code          = process_result_element.int_getAttribute( "exit_code", 0 );
-    //    _termination_signal = process_result_element.int_getAttribute( "signal", 0 );
-    //}
-
-    return result;
+    return _remote_instance->call__end();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::call__start
@@ -311,8 +279,6 @@ Async_operation* Remote_module_instance_proxy::call__start( const string& method
 Variant Remote_module_instance_proxy::call__end()
 {
     if( !_remote_instance )  z::throw_xc( "SCHEDULER-200", "call__end" );
-
-  //if( _call_state != c_finished )  z::throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
     if( !_operation->async_finished() )  z::throw_xc( "SCHEDULER-191", "call__end", _operation->async_state_text() );
 
     _operation = NULL;
@@ -373,15 +339,6 @@ Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy
     async_continue();
 }
 
-//----------------------------------------------Remote_module_instance_proxy::Operation::begin__end
-/*
-bool Remote_module_instance_proxy::Operation::begin__end()
-{
-    if( _call_state != c_begin )  z::throw_xc( "SCHEDULER-191", "begin__end", state_name() );
-
-    return check_result( _remote_instance->call__end() );
-}
-*/
 //-------------------------------------------------Remote_module_instance_proxy::try_to_get_process
 
 bool Remote_module_instance_proxy::try_to_get_process(const Process_configuration* c)
@@ -416,11 +373,6 @@ AGAIN:
 
         case c_begin:
         {
-            // PROVISORISCH
-            //_remote_scheduler_server = _spooler->_supervisor_connection;        
-            //if( !_remote_scheduler_server  ||  _remote_scheduler_server->state() != Supervisor_client_connection::s_finished )  z::throw_xc( Z_FUNCTION, "_remote_scheduler_server" );
-            //_remote_scheduler_server->send__start( "<remote_scheduler.start_task tcp_port='" << tcp_port << "'/>" );
-
             ptr<Async_operation> connection_operation = _session->connect_server__start();
             connection_operation->set_async_manager( _spooler->_connection_manager );
             operation->set_async_child( connection_operation );            
@@ -524,7 +476,7 @@ AGAIN:
                     *
                     * \todo
                     * Anpassen der Dokumentation - Dort steht:
-                    * Bei Ausführung auf einem entfernten Rechner mit <process_class remote_scheduler=""> wird die Datei auf dem entfernten Rechner gelesen.
+                    * Bei Ausführung auf einem entfernten Rechner mit <process_class remote_scheduler=""> wird die Datei auf dem entfernten Rechner gelesen.
                     * (Seite 35 der techn. Beschreibung).
                     *
                     * ... sollte ersatzlos gestrichen werden.
@@ -535,7 +487,6 @@ AGAIN:
                     * \newcode */
                       params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.includes_resolved().xml_string();    // Muss der letzte Parameter sein!
                     /* \newcodeend */
-
                 }
             }
 
@@ -645,7 +596,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_() const
         const_cast<Operation*>( this ) -> async_continue();
     }
 
-    return _call_state == c_finished;  //  ||  _operation && _operation->async_has_error();
+    return _call_state == c_finished;
 }
 
 //---------------------------------------Remote_module_instance_proxy::Operation::async_state_text_
@@ -667,16 +618,13 @@ string Remote_module_instance_proxy::Operation::state_name() const
     switch( _call_state )
     {
         case c_none           : return "none";
-
         case c_call_begin     : return "call_begin";
         case c_connect        : return "connect";
         case c_create_instance: return "create_instance";
         case c_construct      : return "construct";
         case c_begin          : return "begin";
-
         case c_release_begin  : return "release_begin";
         case c_release        : return "release";
-
         case c_finished       : return "finished";
         default               : return as_string(_call_state);      // Für Microsoft
     }

@@ -633,8 +633,6 @@ Module_instance::Module_instance( Module* module )
     _process_environment = new Com_variable_set();
     _process_environment->merge( _module->_process_environment );
     _spooler_exit_called = false;
-
-  //_close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
 }
 
 //----------------------------------------------------------------Module_instance::~Module_instance
@@ -726,7 +724,6 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     _com_task->set_task( task );
 
     _task_id = task->id();
-    //_title = task->obj_name();          // Titel für Prozess
     _monitor_instances.attach_task( task, log );
 
     _has_order = task->order() != NULL;      // Rückgabe von Auftragsparametern über Datei ermöglichen
@@ -738,16 +735,8 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
 void Module_instance::fill_process_environment()
 {
-    //if( _module->kind() == Module::kind_process )
-    //{
-    //    fill_process_environment_with_params();
-    //    // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausführen.
-    //}
-
-
     // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
     if( _task->environment_or_null() )  _process_environment->merge( _task->environment_or_null() );
-
 
     if( _module->kind() == Module::kind_process )
     {
@@ -793,7 +782,6 @@ void Module_instance::detach_task()
     
     _task = NULL;
     _task_id = 0;
-    //_title = "";
     _monitor_instances.detach_task();
 }
 
@@ -967,8 +955,6 @@ bool Module_instance::begin__end()
     }
 
     return true;
-    //_spooler_open_called = true;
-    //return check_result( call_if_exists( spooler_open_name ) );
 }
 
 //----------------------------------------------------------------------Module_instance::end__start
@@ -1058,11 +1044,6 @@ Variant Module_instance::call__end()
 {
     if( _call_method == spooler_exit_name  &&  !loaded() )  return true;
 
-  //if( _call_method == wait_for_subprocesses_name )        // Keine Methode des Jobs.
-  //{
-  //    return _com_task->_task->wait_for_subprocesses();   // Siehe auch Com_remote_module_instance_server
-  //}
-  //else
     if( _call_method == spooler_open_name )
     {
         _spooler_open_called = true;
@@ -1095,7 +1076,6 @@ Async_operation* Module_instance::release__start()
 
 void Module_instance::release__end()
 {
-    //close();
 }
 
 //-------------------------------------------------------------------------Module_monitors::set_dom
