@@ -62,7 +62,7 @@ string                          start_cause_name            ( Start_cause );
 //----------------------------------------------------------------------------------------------Task
 
 struct Task : Object, 
-              Scheduler_object,
+              Abstract_scheduler_object,
               javabridge::has_proxy<Task>,
               Has_on_remote_task_running
 {

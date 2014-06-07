@@ -669,7 +669,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
  */
 Spooler::Spooler(jobject java_main_context) 
 : 
-    Scheduler_object( this, this, Scheduler_object::type_scheduler ),
+    Abstract_scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
     _java_main_context(java_main_context),
     _subsystem_register(this),

@@ -9,7 +9,7 @@ namespace scheduler {
     
 Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& host_and_port )
 : 
-    Scheduler_object( sp, this, type_xml_client_connection ),
+    Abstract_scheduler_object( sp, this, type_xml_client_connection ),
     _zero_(this+1), 
     _host_and_port(host_and_port)
 {

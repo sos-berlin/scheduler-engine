@@ -119,7 +119,7 @@ struct Base_file_info
 
 //---------------------------------------------------------------------------------------File_based
 
-struct File_based : Scheduler_object,
+struct File_based : Abstract_scheduler_object,
                     Dependant,
                     Has_includes,
                     zschimmer::Has_addref_release
@@ -167,7 +167,7 @@ struct File_based : Scheduler_object,
 
     virtual jobject             java_sister                 ()                                      { return NULL; }
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     void                        close                       ();
     string                      obj_name                    () const;
 
@@ -176,11 +176,11 @@ struct File_based : Scheduler_object,
     bool                        on_requisite_loaded         ( File_based* );
     bool                        on_requisite_to_be_removed  ( File_based* );
     void                        on_requisite_removed        ( File_based* );
-    Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+    Prefix_log*                 log                         ()                                      { return Abstract_scheduler_object::log(); }
 
 
     // Has_includes
-    Spooler*                    spooler                     () const                                { return Scheduler_object::spooler(); }
+    Spooler*                    spooler                     () const                                { return Abstract_scheduler_object::spooler(); }
     Configuration_origin        configuration_origin        () const                                { return _configuration_origin; }
 
 
@@ -331,7 +331,7 @@ struct file_based : File_based
 //-------------------------------------------------------------------------------------Typed_folder
 // Order mit Objekten nur eines Typs
 
-struct Typed_folder : Scheduler_object, 
+struct Typed_folder : Abstract_scheduler_object, 
                       Object
 {
                                 Typed_folder                ( Folder*, Type_code );

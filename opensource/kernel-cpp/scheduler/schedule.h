@@ -321,7 +321,7 @@ enum Scheduler_holidays_usage                               // eMail von Andreas
 
 struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_time>, 
                       spooler_com::Ihas_java_class_name,
-                      Scheduler_object,
+                      Abstract_scheduler_object,
                       Dependant,
                       Non_cloneable
 {
@@ -345,7 +345,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Run_time"; }
 
-    // Scheduler_object 
+    // Abstract_scheduler_object 
     void                        close                       ();
     string                      obj_name                    () const;
 
@@ -354,7 +354,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     bool                        on_requisite_loaded         ( File_based* );
     bool                        on_requisite_to_be_removed  ( File_based* );
   //void                        on_requisite_removed        ( File_based* );
-    Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+    Prefix_log*                 log                         ()                                      { return Abstract_scheduler_object::log(); }
 
     void                        disconnect                  ();
     File_based*                 using_file_based            () const                                { return _using_object; }
@@ -470,7 +470,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Schedule>::java_sister(); }
 
-    // Scheduler_object
+    // Abstract_scheduler_object
 
     void                        close                       ();
   //void                        clear                       ();

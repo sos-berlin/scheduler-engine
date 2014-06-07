@@ -72,7 +72,7 @@ struct Order : Com_order,
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Order>::java_sister(); }
 
-    // Scheduler_object
+    // Abstract_scheduler_object
 
     void                        close                       ();
     virtual string              obj_name                    () const;
@@ -419,12 +419,12 @@ Order::State                    normalized_state        ( const Order::State& );
 
 //-------------------------------------------------------------------------------------Order_source
 
-struct Order_source : Scheduler_object, Event_operation
+struct Order_source : Abstract_scheduler_object, Event_operation
 {
                                 Order_source            ( Job_chain*, Scheduler_object::Type_code );
 
 
-    // Scheduler_object:
+    // Abstract_scheduler_object:
     Prefix_log*                 log                     ();
 
 
@@ -466,7 +466,7 @@ namespace job_chain {
 //----------------------------------------------------------------------------------job_chain::Node
 
 struct Node : Com_job_chain_node,
-              Scheduler_object
+              Abstract_scheduler_object
 {
     //---------------------------------------------------------------------------------------------
 
@@ -782,7 +782,7 @@ struct Job_chain : Com_job_chain,
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job_chain>::java_sister(); }
 
-    // Scheduler_object:
+    // Abstract_scheduler_object:
     string                      obj_name                    () const                                { return "Job_chain " + path(); }
     void                        close                       ();
 
@@ -959,14 +959,14 @@ struct Order_id_spaces_interface
 // 1:1-Beziehung mit Order_queue_node
 
 struct Order_queue : Com_order_queue,
-                     Scheduler_object,
+                     Abstract_scheduler_object,
                      javabridge::has_proxy<Order_queue>
 {
     Z_GNU_ONLY(                 Order_queue                 ();  )                                  // Für gcc 3.2. Nicht implementiert
                                 Order_queue                 ( job_chain::Order_queue_node* );
                                ~Order_queue                 ();
 
-    // Scheduler_object
+    // Abstract_scheduler_object
 
     void                        close                       ();
     string                      obj_name                    () const;

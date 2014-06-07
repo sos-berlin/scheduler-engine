@@ -91,7 +91,7 @@ const int                       max_processes                 = 10000;    // kei
 using namespace ::std;
 using namespace ::zschimmer::file;
 
-
+struct Abstract_scheduler_object;
 struct Command_processor;
 struct Communication;
 struct Event;
@@ -315,7 +315,7 @@ typedef map<Thread_id,Task_subsystem*>      Thread_id_map;
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler : Object,
-                 Scheduler_object,
+                 Abstract_scheduler_object,
                  javabridge::has_proxy<Spooler>
 {
     enum State
@@ -350,7 +350,7 @@ struct Spooler : Object,
 
     void                        close                       ();
 
-    // Scheduler_object:
+    // Abstract_scheduler_object:
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 
 

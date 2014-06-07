@@ -83,9 +83,9 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
     }
 }
 
-//---------------------------------------------------------------Scheduler_object::Scheduler_object
+//---------------------------------------------Abstract_scheduler_object::Abstract_scheduler_object
 
-Scheduler_object::Scheduler_object( Spooler* spooler, IUnknown* me, Type_code code )
+Abstract_scheduler_object::Abstract_scheduler_object( Spooler* spooler, IUnknown* me, Type_code code )
 : 
     _spooler(spooler), 
     _my_iunknown(me), 
@@ -133,26 +133,16 @@ void Scheduler_object::report_event_code(Event_code event_code, const ObjectJ& e
             s->report_event_code(event_code, eventSource);
 }
 
-//-------------------------------------------------------Scheduler_object::write_element_attributes
+//----------------------------------------------Abstract_scheduler_object::write_element_attributes
 
-void Scheduler_object::write_element_attributes( const xml::Element_ptr& ) const
+void Abstract_scheduler_object::write_element_attributes( const xml::Element_ptr& ) const
 {
     Z_DEBUG_ONLY( assert( !"Scheduler_object::write_element_attributes" ) );
 }
 
-//---------------------------------------------Scheduler_object::complain_about_non_empty_attribute
+//------------------------------------------------Abstract_scheduler_object::assert_empty_attribute
 
-//void Scheduler_object::complain_about_non_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
-//{
-//    if( element.getAttribute( attribute_name ) != "" )
-//    {
-//        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), attribute_name, element.getAttribute( attribute_name ) ) );
-//    }
-//}
-
-//---------------------------------------------------------Scheduler_object::assert_empty_attribute
-
-void Scheduler_object::assert_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
+void Abstract_scheduler_object::assert_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
 {
     if( element.getAttribute( attribute_name ) != "" )
     {
@@ -160,9 +150,9 @@ void Scheduler_object::assert_empty_attribute( const xml::Element_ptr& element, 
     }
 }
 
-//-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet
+//--------------------------------------------------Abstract_scheduler_object::mail_xslt_stylesheet
 
-ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
+ptr<Xslt_stylesheet> Abstract_scheduler_object::mail_xslt_stylesheet()
 { 
     if( !_mail_xslt_stylesheet )
     {
@@ -183,30 +173,30 @@ ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
     return _mail_xslt_stylesheet; 
 }
 
-//-----------------------------------------------------------------------------Scheduler_object::db
+//--------------------------------------------------------------------Abstract_scheduler_object::db
 
-Database* Scheduler_object::db() const 
+Database* Abstract_scheduler_object::db() const 
 {
     return _spooler->_db;
 }
 
-//------------------------------------------------------------------Scheduler_object::job_subsystem
+//---------------------------------------------------------Abstract_scheduler_object::job_subsystem
 
-Job_subsystem* Scheduler_object::job_subsystem() const
+Job_subsystem* Abstract_scheduler_object::job_subsystem() const
 {
     return _spooler->job_subsystem();
 }
 
-//-----------------------------------------------------------------Scheduler_object::task_subsystem
+//--------------------------------------------------------Abstract_scheduler_object::task_subsystem
 
-Task_subsystem* Scheduler_object::task_subsystem() const
+Task_subsystem* Abstract_scheduler_object::task_subsystem() const
 {
     return _spooler->task_subsystem();
 }
 
-//----------------------------------------------------------------Scheduler_object::order_subsystem
+//-------------------------------------------------------Abstract_scheduler_object::order_subsystem
 
-Order_subsystem* Scheduler_object::order_subsystem() const
+Order_subsystem* Abstract_scheduler_object::order_subsystem() const
 {
     return _spooler->order_subsystem();
 }

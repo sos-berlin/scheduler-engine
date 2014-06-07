@@ -10,7 +10,7 @@ using namespace directory_observer;
 
 Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 : 
-    Scheduler_object( folder->_spooler, this, type_code ),
+    Abstract_scheduler_object( folder->_spooler, this, type_code ),
     _zero_(this+1),
     _folder(folder)
 {

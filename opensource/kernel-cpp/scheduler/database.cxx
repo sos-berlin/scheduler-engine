@@ -428,7 +428,7 @@ void Database_retry::reopen_database_after_error( const exception& x, const stri
 
 Database::Database( Spooler* spooler )
 :
-    Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
+    Abstract_scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
     _database_descriptor( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names ),
     _jobs_table           ( &_database_descriptor, "scheduler_jobs"           , "spooler_id,cluster_member_id,path" ),

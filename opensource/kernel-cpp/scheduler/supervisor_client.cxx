@@ -35,7 +35,7 @@ DEFINE_SIMPLE_CALL(Http_connector, Supervisor_response_call)
 
 //-------------------------------------------------------------------------------Abstract_connector
 
-struct Abstract_connector : Async_operation, Scheduler_object
+struct Abstract_connector : Async_operation, Abstract_scheduler_object
 {
     private: Fill_zero _zero_;
 
@@ -45,7 +45,7 @@ struct Abstract_connector : Async_operation, Scheduler_object
     protected: bool _start_update_configuration_delayed;
 
     protected: Abstract_connector(Supervisor_client_interface* supervisor_client) :
-        Scheduler_object(supervisor_client->_spooler, this, type_supervisor_client_connection),
+        Abstract_scheduler_object(supervisor_client->_spooler, this, type_supervisor_client_connection),
         _zero_(this + 1),
         _supervisor_client(supervisor_client),
         _polling_interval(supervisor_client->spooler()->settings()->_supervisor_configuration_polling_interval),

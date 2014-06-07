@@ -539,12 +539,12 @@ Prefix_log::Prefix_log( int )
 
 //---------------------------------------------------------------------------Prefix_log::Prefix_log
 
-Prefix_log::Prefix_log( Scheduler_object* o )
+Prefix_log::Prefix_log(Scheduler_object* o)
 :
     _zero_(this+1),
     _object(o),
-    _spooler(o->_spooler),
-    _log(&o->_spooler->_base_log),
+    _spooler(o->spooler()),
+    _log(&o->spooler()->_base_log),
     _prefix( o->obj_name() ),
     _file(-1),
     _mail_defaults(NULL),
@@ -562,14 +562,14 @@ Prefix_log::~Prefix_log()
 
 //---------------------------------------------------------------------------------Prefix_log::init
 
-void Prefix_log::init( Scheduler_object* o, const string& prefix )
+void Prefix_log::init(Scheduler_object* o, const string& prefix)
 {
     reset_highest_level();
 
-    _mail_defaults = o->_spooler->_mail_defaults;
+    _mail_defaults = o->spooler()->_mail_defaults;
     _object  = o;
-    _spooler = o->_spooler;
-    _log     = &o->_spooler->_base_log;
+    _spooler = o->spooler();
+    _log     = &o->spooler()->_base_log;
     _prefix  = prefix;
 
     _mail_on_warning = _spooler->_mail_on_warning;

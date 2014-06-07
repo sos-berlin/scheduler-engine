@@ -41,7 +41,7 @@ struct Process_configuration {
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
 // Kann auch ein Thread sein.
 
-struct Process : zschimmer::Object, Scheduler_object {
+struct Process : zschimmer::Object, Abstract_scheduler_object {
     Process(Spooler*);
     virtual int exit_code() = 0;
     virtual int termination_signal() = 0;

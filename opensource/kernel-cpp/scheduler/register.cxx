@@ -11,7 +11,7 @@ namespace scheduler {
     
 Registered::Registered( Register* reg, IUnknown* iunknown, Scheduler_object::Type_code type_code, const string& name )
 :
-    Scheduler_object( reg->_spooler, iunknown, type_code ),
+    Abstract_scheduler_object( reg->_spooler, iunknown, type_code ),
     _zero_(this+1),
     _register(reg)
 {

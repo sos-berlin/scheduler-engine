@@ -5,7 +5,7 @@ namespace scheduler {
 
 //----------------------------------------------------------------------------Xml_client_connection
 
-struct Xml_client_connection : Async_operation, Scheduler_object
+struct Xml_client_connection : Async_operation, Abstract_scheduler_object
 {
     enum State
     {

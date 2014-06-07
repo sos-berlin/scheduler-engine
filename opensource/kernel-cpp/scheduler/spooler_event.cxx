@@ -42,7 +42,7 @@ string Scheduler_event::name_of_event_code( Scheduler_event_type event_code )
 
 //-----------------------------------------------------------------Scheduler_event::Scheduler_event
 
-Scheduler_event::Scheduler_event( Scheduler_event_type event_code, Log_level severity, Scheduler_object* object )
+Scheduler_event::Scheduler_event( Scheduler_event_type event_code, Log_level severity, Abstract_scheduler_object* object )
 :
     _zero_(this+1),
     _spooler(object->_spooler),
@@ -311,7 +311,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 
 Scheduler_event_manager::Scheduler_event_manager( Spooler* spooler ) 
 : 
-    Scheduler_object( spooler, this, Scheduler_object::type_scheduler_event_manager ),
+    Abstract_scheduler_object( spooler, this, Scheduler_object::type_scheduler_event_manager ),
     _zero_(this+1)
 {
 }

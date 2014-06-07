@@ -260,7 +260,7 @@ const Com_method Schedule_use::_methods[] =
 Schedule_use::Schedule_use( File_based* using_object )
 :
     Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( using_object->spooler(), static_cast<spooler_com::Irun_time*>( this ), type_schedule_use ),
+    Abstract_scheduler_object( using_object->spooler(), static_cast<spooler_com::Irun_time*>( this ), type_schedule_use ),
     _zero_(this+1),
     _using_object(using_object),
     _scheduler_holidays_usage(with_scheduler_holidays),

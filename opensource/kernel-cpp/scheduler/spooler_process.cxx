@@ -421,7 +421,7 @@ ptr<Process> Process::new_process(Spooler* spooler, const Process_configuration&
 
 
 Process::Process(Spooler* sp) : 
-    Scheduler_object( sp, this, type_process )
+    Abstract_scheduler_object( sp, this, type_process )
 {}
 
 //------------------------------------------------------------------------Standard_process::Standard_process

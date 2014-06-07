@@ -27,7 +27,7 @@ string string_from_subsystem_state( Subsystem_state state )
 
 Subsystem::Subsystem ( Spooler* spooler, IUnknown* iunknown, Type_code t )
 : 
-    Scheduler_object( spooler, iunknown, t ),
+    Abstract_scheduler_object( spooler, iunknown, t ),
     _zero_(this+1)
 {
     _spooler->_subsystem_register.add(this);

@@ -70,7 +70,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job>::java_sister(); }
     const JobJ&                 typed_java_sister           () const                                { return _typed_java_sister; }
 
-    // Scheduler_object:
+    // Abstract_scheduler_object:
     string                      obj_name                    () const                                { return "Job " + path().without_slash(); }
     void                        write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path().with_slash() ); }
 
