@@ -359,6 +359,14 @@ bool Remote_module_instance_proxy::try_to_get_process(const Process_configuratio
     }
 }
 
+
+void Remote_module_instance_proxy::detach_process() {
+    if (_process) {
+        _process->close_session();
+    }
+    Module_instance::detach_process();
+}
+
 //-------------------------------------------Remote_module_instance_proxy::continue_async_operation
 
 bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, Async_operation::Continue_flags )
@@ -580,7 +588,7 @@ string Remote_module_instance_proxy::process_name() const
 
 bool Remote_module_instance_proxy::Operation::async_finished_() const
 { 
-    if( _call_state == c_begin  &&  !_proxy->_process ) 
+    if( _call_state == c_begin  &&  !_proxy->_process )
     {
         // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,
         // weil die Operation nicht über Connection::current_super_operation() erreichbar ist.

@@ -68,6 +68,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     Variant                     call                        ( const string& name );
 
     bool                        try_to_get_process          (const Process_configuration*);
+    void                        detach_process              ();
 
             Async_operation*    close__start                ();
             void                close__end                  ();

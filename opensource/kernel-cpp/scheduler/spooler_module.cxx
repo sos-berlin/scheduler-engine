@@ -828,7 +828,8 @@ bool Module_instance::try_to_get_process(const Process_configuration* c)
 {
     if( !_process )
     {
-        _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(c? *c : Process_configuration());
+        Process_class* process_class = _spooler->process_class_subsystem()->process_class(_module->_process_class_path);
+        _process = process_class->select_process_if_available(c);
         // _process wird nur von Remote_module_instance_proxy benutzt. 
         // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
     }

@@ -1,7 +1,4 @@
-// $Id: spooler_process.cxx 14221 2011-04-29 14:18:28Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-
 #include "spooler.h"
-
 
 namespace sos {
 namespace scheduler {
@@ -13,18 +10,57 @@ const int connection_retry_time = 60;
 Process_class_subsystem    ::Class_descriptor    Process_class_subsystem    ::class_descriptor ( &typelib, "Spooler.Process_classes", Process_class_subsystem::_methods );
 Process_class_configuration::Class_descriptor    Process_class_configuration::class_descriptor ( &typelib, "Spooler.Process_class"  , Process_class          ::_methods );
 
-//------------------------------------------------------------------------------------------Standard_process
+//---------------------------------------------------------------------------------Abstract_process
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
 // Kann auch ein Thread sein.
 
-struct Standard_process : Process
-{
-    struct Close_operation : Async_operation
-    {
+struct Abstract_process : virtual Process {
+    protected: Abstract_process(Spooler* spooler, const Process_configuration& c) :
+        _spooler(spooler),
+        _configuration(c),
+        _process_id(spooler->get_next_process_id()),
+        _log(Z_NEW(Prefix_log(this)))
+    {}
+
+    public: virtual ~Abstract_process() {}
+
+    public: Type_code scheduler_type_code() const { 
+        return Scheduler_object::type_process; 
+    }
+
+    public: Spooler* spooler() const { 
+        return _spooler; 
+    }
+
+    public: Prefix_log* log() const { 
+        return _log; 
+    }
+
+    public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what&) {
+        xml::Element_ptr process_element = document.createElement( "process" );
+        process_element.setAttribute_optional("job", _configuration._job_name);
+        if (_configuration._task_id) {
+            process_element.setAttribute("task", _configuration._task_id);
+            process_element.setAttribute("task_id", _configuration._task_id);          // VERALTET!
+        }
+        process_element.setAttribute_optional("remote_scheduler", _configuration._remote_scheduler.as_string());
+        return process_element;
+    }
+
+    public: Spooler* const _spooler;
+    public: Process_configuration const _configuration;
+    public: Process_id const _process_id;
+    public: ptr<Prefix_log> const _log;
+};
+
+
+struct Async_remote_operation;
+
+struct Abstract_startable_process : Abstract_process {
+    struct Close_operation : Async_operation {
         enum State { s_initial, s_closing_session, s_closing_remote_process, s_finished };
 
-
-                                    Close_operation         ( Standard_process*, bool run_independently );
+                                    Close_operation         (Abstract_startable_process*, bool run_independently);
                                    ~Close_operation         ();
 
         // Async_operation:
@@ -35,81 +71,36 @@ struct Standard_process : Process
         static string               string_from_state       ( State );
 
       private:
-        friend struct               Standard_process;
+        friend struct               Abstract_startable_process;
 
-        Fill_zero                  _zero_;
         State                      _state;
-        ptr<Standard_process>      _process;
+        ptr<Abstract_startable_process> _process;
         Async_operation*           _close_session_operation;
-        ptr<Close_operation>       _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Standard_process schließen soll
+        ptr<Close_operation>       _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Abstract_process schließen soll
     };
 
+    Abstract_startable_process(Spooler* spooler, const Process_configuration& conf) :
+        Abstract_process(spooler, conf),
+        _process_handle_copy(NULL),
+        _is_killed(false),
+        _exit_code(0),
+        _termination_signal(0),
+        _remote_process_id(0),
+        _remote_pid(0)
+    {}
 
-    struct Async_remote_operation : Async_operation
-    {
-        enum State
-        {
-            s_not_connected,
-            s_connecting,
-            s_starting,
-            s_running,
-            s_closing,
-            s_closed
-        };
-
-        static string           state_name                  ( State );
-
-
-                                Async_remote_operation      ( Standard_process* );
-                               ~Async_remote_operation      ();
-
-        virtual bool            async_continue_             ( Continue_flags f )                    { return _process->async_remote_start_continue( f ); }
-        virtual bool            async_finished_             () const                                { return _state == s_running  ||  _state == s_closed; }
-        virtual string          async_state_text_           () const;
-
-        void                    close_remote_task           ( bool kill = false );
-
-
-        Fill_zero              _zero_;
-        State                  _state;
-        Standard_process*      _process;
-    };
-
-
-    struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread
-    {
-        typedef object_server::Connection_to_own_server_thread::Server_thread Base_class;
-
-                                Com_server_thread           ( object_server::Connection_to_own_server_thread* );
-
-        int                     thread_main                 ();
-
-        Fill_zero              _zero_;
-        ptr<Object_server>     _object_server;
-    };
-
-
-
-                                Standard_process            (Spooler*, const Process_configuration&);
-    Z_GNU_ONLY(                 Standard_process            (); )
-                               ~Standard_process            ();
-
+    ~Abstract_startable_process();
 
     void                        close_async                 ();
     Async_operation*            close__start                ( bool run_independently = false );
     void                        close__end                  ();
     bool                     is_closing                     ()                                      { return _close_operation != NULL; }
-    bool                        continue_close_operation    ( Standard_process::Close_operation* );
+    bool                        continue_close_operation    (Abstract_startable_process::Close_operation*);
 
 
     bool                        is_started                  ()                                      { return _connection != NULL; }
 
-    void                        start                       ();
-    void                        start_local_process         ();
-    void                        start_local_thread          ();
     void                        fill_connection             ( object_server::Connection* );
-    void                        async_remote_start          ();
-    bool                        async_remote_start_continue ( Async_operation::Continue_flags );
     object_server::Session*     session                     ()                                      { return _session; }
     bool                        async_continue              ();
     double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
@@ -132,12 +123,24 @@ struct Standard_process : Process
     string                      obj_name                    () const;
     string                      short_name                  () const;
 
-  private:
-    Fill_zero                  _zero_;
-    Process_configuration const _configuration;
+    public: void start() {
+        if (is_started()) assert(0), z::throw_xc(Z_FUNCTION);
+        do_start();
+        #ifdef Z_WINDOWS
+            if (_spooler)
+                _connection->set_event(&_spooler->_scheduler_event);
+        #endif
+        _log->set_prefix(obj_name());
+        _session = Z_NEW(object_server::Session(_connection));
+        _session->set_connection_has_only_this_session();
+        _running_since = Time::now();
+    }
+    
+    protected: virtual void do_start() = 0;
+
+  public:
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
-    ptr<Com_server_thread>     _com_server_thread;
     Process_handle             _process_handle_copy;
     bool                       _is_killed;
     int                        _exit_code;
@@ -145,10 +148,170 @@ struct Standard_process : Process
     Time                       _running_since;
     Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
-    ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
-    const Process_id           _process_id;
+    ptr<Async_remote_operation> _async_remote_operation;    // Nur für Standard_remote_process
+};
+
+
+struct Dummy_process : Abstract_startable_process {
+    public: Dummy_process(Spooler* spooler, const Process_configuration& conf) :
+        Abstract_startable_process(spooler, conf) 
+    {}
+
+    protected: void do_start() {
+        z::throw_xc(Z_FUNCTION);
+    }
+
+    public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
+        return Abstract_process::dom_element(document, show_what);
+    }
+};
+
+
+struct Local_process : Abstract_startable_process {
+    Local_process(Spooler* spooler, const Process_configuration& conf) :
+        Abstract_startable_process(spooler, conf)
+    {}
+
+    protected: void do_start() {
+        ptr<object_server::Connection_to_own_server_process> connection = new_connection();
+        _connection = +connection;
+        connection->start_process(parameters());
+        _process_handle_copy = _connection->process_handle();
+        _spooler->register_process_handle(_process_handle_copy);
+        _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+    }
+
+    private: ptr<object_server::Connection_to_own_server_process> new_connection() {
+        ptr<object_server::Connection_to_own_server_process> connection = _spooler->_connection_manager->new_connection_to_own_server_process();
+        connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
+        fill_connection(connection);
+        #ifdef Z_HPUX
+            connection->set_ld_preload( static_ld_preload );
+        #endif
+        connection->set_priority(_configuration._priority);
+        connection->set_login(_configuration._login);
+        return connection;
+    }
+
+    private: object_server::Parameters parameters() {
+        object_server::Parameters parameters;
+        if (!_spooler->_sos_ini.empty())
+            parameters.push_back(object_server::Parameter("param", "-sos.ini=" + _spooler->_sos_ini));   // Muss der erste Parameter sein! (für sos_main0()).
+        if (!_spooler->_factory_ini.empty())
+            parameters.push_back(object_server::Parameter("param", "-ini=" + _spooler->_factory_ini));
+        parameters.push_back(object_server::Parameter("param", "-java-options=" + _configuration._java_options + " " + spooler()->settings()->_job_java_options));
+        parameters.push_back(object_server::Parameter("param", "-java-classpath=" + _configuration._java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_classpath));
+        parameters.push_back(object_server::Parameter("param", "-O"));
+        if (!_configuration._job_name.empty())
+            parameters.push_back(object_server::Parameter("param", "-job=" + _configuration._job_name));
+        if (_configuration._task_id)
+            parameters.push_back(object_server::Parameter("param", "-task-id=" + as_string(_configuration._task_id)));
+        if (!log_filename().empty())
+             parameters.push_back(object_server::Parameter("param", "-log=" + log_categories_as_string() + " >+" + log_filename()));
+        parameters.push_back(object_server::Parameter("program", _spooler->_my_program_filename));
+        return parameters;
+    }
+};
+
+
+struct Thread_process : Abstract_startable_process {
+    struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread
+    {
+        typedef object_server::Connection_to_own_server_thread::Server_thread Base_class;
+
+        Com_server_thread(object_server::Connection_to_own_server_thread*);
+        int thread_main();
+
+        ptr<Object_server> _object_server;
+    };
+
+    Thread_process(Spooler* spooler, const Process_configuration& conf) :
+        Abstract_startable_process(spooler, conf) 
+    {}
+
+    protected: void do_start() {
+        Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
+        ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
+        fill_connection(connection);
+        _com_server_thread = Z_NEW(Com_server_thread(connection));
+        connection->start_thread(_com_server_thread);
+        _connection = +connection;
+        _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+        Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
+    }
+    
+    protected: int pid() const;
+
+    private: ptr<Com_server_thread> _com_server_thread;
+};
+
+struct Standard_remote_process;
+
+struct Async_remote_operation : Async_operation {
+    enum State {
+        s_not_connected,
+        s_connecting,
+        s_starting,
+        s_running,
+        s_closing,
+        s_closed
+    };
+
+    static string state_name(State);
+
+    Async_remote_operation(Standard_remote_process*);
+    ~Async_remote_operation();
+
+    virtual bool async_continue_(Continue_flags f);
+    
+    virtual bool async_finished_() const { 
+        return _state == s_running || _state == s_closed; 
+    }
+
+    virtual string async_state_text_() const;
+    void close_remote_task(bool kill = false);
+
+
+    State _state;
+    Standard_remote_process* _process;
+};
+
+
+struct Standard_remote_process : Abstract_startable_process {
+    Standard_remote_process(Spooler* spooler, const Process_configuration& conf) :
+        Abstract_startable_process(spooler, conf) 
+    {}
+
+    ~Standard_remote_process() {
+        if (_async_remote_operation) {
+            _async_remote_operation->set_async_manager( NULL );
+            _async_remote_operation = NULL;
+        }
+    }
+
+    protected: void do_start() {
+        async_remote_start();
+    }
+
+    public: bool kill() {
+        if (!_is_killed && _connection) {
+            // Async_operation (vorhandene oder neue, besser neue)
+            // mit <kill_task> starten. Nur, wenn noch nicht gestartet
+            // if( !_kill_task_operation )   _kill_task_operation = Z_NEW( Kill_task_operation );
+            // <remote_scheduler.task.close pid=" _remote_pid
+            if (_async_remote_operation && _async_remote_operation->_state != Async_remote_operation::s_closed)
+                _async_remote_operation->close_remote_task(true);
+            _is_killed = true;
+            return true;
+        } else
+            return false;
+    }
+
+
+    private: void async_remote_start();
+    public: bool async_remote_start_continue(Async_operation::Continue_flags);
 };
 
 //----------------------------------------------------------------Process_class_subsystem::_methods
@@ -182,11 +345,12 @@ const Com_method Process_class_configuration::_methods[] =
     {}
 };
 
-//-----------------------------------------------Standard_process::Close_operation::Close_operation
+//-------------------------------------Abstract_startable_process::Close_operation::Close_operation
 
-Standard_process::Close_operation::Close_operation( Standard_process* p, bool run_independently )
+Abstract_startable_process::Close_operation::Close_operation(Abstract_startable_process* p, bool run_independently)
 : 
-    _zero_(this+1), 
+    _state(s_initial),
+    _close_session_operation(NULL),
     _process(p)
 {
     if( run_independently )
@@ -195,22 +359,22 @@ Standard_process::Close_operation::Close_operation( Standard_process* p, bool ru
     }
 }
 
-//--------------------------------------------------------rocess::Close_operation::~Close_operation
+//------------------------------------Abstract_startable_process::Close_operation::~Close_operation
     
-Standard_process::Close_operation::~Close_operation()
+Abstract_startable_process::Close_operation::~Close_operation()
 {
 }
 
-//-----------------------------------------------Standard_process::Close_operation::async_continue_
+//-------------------------------------Abstract_startable_process::Close_operation::async_continue_
 
-bool Standard_process::Close_operation::async_continue_( Async_operation::Continue_flags )
+bool Abstract_startable_process::Close_operation::async_continue_(Async_operation::Continue_flags)
 {
     return _process->continue_close_operation( this );
 }
 
-//-------------------------------------------------------Standard_process::continue_close_operation
+//---------------------------------------------Abstract_startable_process::continue_close_operation
 
-bool Standard_process::continue_close_operation( Standard_process::Close_operation* op )
+bool Abstract_startable_process::continue_close_operation(Abstract_startable_process::Close_operation* op)
 {
     bool something_done = false;
 
@@ -269,7 +433,7 @@ bool Standard_process::continue_close_operation( Standard_process::Close_operati
 
             op->_state = Close_operation::s_finished;
 
-            ptr<Standard_process> process = op->_process;
+            ptr<Abstract_startable_process> process = op->_process;
             op->_process = NULL;
 
             if( op->_hold_self )    // run_independently
@@ -287,20 +451,20 @@ bool Standard_process::continue_close_operation( Standard_process::Close_operati
     return something_done;
 }
 
-//-----------------------------------------------Standard_process::Close_operation::async_finished_
+//-------------------------------------Abstract_startable_process::Close_operation::async_finished_
 
-bool Standard_process::Close_operation::async_finished_() const
+bool Abstract_startable_process::Close_operation::async_finished_() const
 {
     return _state == s_finished;
 }
 
-//---------------------------------------------Standard_process::Close_operation::async_state_text_
+//-----------------------------------Abstract_startable_process::Close_operation::async_state_text_
 
-string Standard_process::Close_operation::async_state_text_() const
+string Abstract_startable_process::Close_operation::async_state_text_() const
 {
     S result;
 
-    result << "Standard_process::Close_operation ";
+    result << "Abstract_startable_process::Close_operation ";
     result << string_from_state( _state );
     if( _close_session_operation )  result << " " << _close_session_operation->async_state_text();
     if( _process  &&  _process->_async_remote_operation )  result << " " << _process->_async_remote_operation->async_state_text();
@@ -308,9 +472,9 @@ string Standard_process::Close_operation::async_state_text_() const
     return result;
 }
 
-//---------------------------------------------Standard_process::Close_operation::string_from_state
+//-----------------------------------Abstract_startable_process::Close_operation::string_from_state
     
-string Standard_process::Close_operation::string_from_state( State state )
+string Abstract_startable_process::Close_operation::string_from_state( State state )
 {
     switch( state )
     {
@@ -322,19 +486,19 @@ string Standard_process::Close_operation::string_from_state( State state )
     }
 }
 
-//---------------------------------Standard_process::Async_remote_operation::Async_remote_operation
+//---------------------------------------------------Async_remote_operation::Async_remote_operation
     
-Standard_process::Async_remote_operation::Async_remote_operation( Standard_process* p ) 
+Async_remote_operation::Async_remote_operation(Standard_remote_process* p)
 :                        
-    _zero_(this+1), 
+    _state(s_not_connected), 
     _process(p) 
 {
     _process->_spooler->_process_count++;       // Jeder Prozess hat zwei Verbindungen: Zum Prozess und Xml_client_connection zum Scheduler
 }
 
-//--------------------------------Standard_process::Async_remote_operation::~Async_remote_operation
+//--------------------------------------------------Async_remote_operation::~Async_remote_operation
     
-Standard_process::Async_remote_operation::~Async_remote_operation()
+Async_remote_operation::~Async_remote_operation()
 {
     --_process->_spooler->_process_count;
 
@@ -344,9 +508,9 @@ Standard_process::Async_remote_operation::~Async_remote_operation()
     }
 }
 
-//---------------------------------------------Standard_process::Async_remote_operation::state_name
+//-----------------------------------Standard_remote_process::Async_remote_operation::state_name
     
-string Standard_process::Async_remote_operation::state_name( State state )
+string Async_remote_operation::state_name( State state )
 {
     string result;
 
@@ -364,9 +528,14 @@ string Standard_process::Async_remote_operation::state_name( State state )
     return result;
 }
 
-//--------------------------------------Standard_process::Async_remote_operation::async_state_text_
 
-string Standard_process::Async_remote_operation::async_state_text_() const
+bool Async_remote_operation::async_continue_(Continue_flags f) { 
+    return _process->async_remote_start_continue(f); 
+}
+
+//--------------------------------------------------------Async_remote_operation::async_state_text_
+
+string Async_remote_operation::async_state_text_() const
 {
     S result;
     result << "Async_remote_operation " << state_name( _state );
@@ -374,19 +543,18 @@ string Standard_process::Async_remote_operation::async_state_text_() const
     return result;
 }
 
-//-------------------------------------------Standard_process::Com_server_thread::Com_server_thread
+//---------------------------------------------Thread_process::Com_server_thread::Com_server_thread
 
-Standard_process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_server_thread* c ) 
+Thread_process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_server_thread* c ) 
 : 
-    Base_class(c),
-    _zero_(this+1)
+    Base_class(c)
 {
-    set_thread_name( "scheduler::Standard_process::Com_server_thread" );
+    set_thread_name( "scheduler::Thread_process::Com_server_thread" );
 }
 
-//-------------------------------------------------Standard_process::Com_server_thread::thread_main
+//---------------------------------------------------Thread_process::Com_server_thread::thread_main
     
-int Standard_process::Com_server_thread::thread_main()
+int Thread_process::Com_server_thread::thread_main()
 {
     Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
     int result = 0;
@@ -395,7 +563,7 @@ int Standard_process::Com_server_thread::thread_main()
 
     try
     {
-        _object_server = Z_NEW( Object_server() );  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Standard_process::pid()
+        _object_server = Z_NEW( Object_server() );  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Abstract_process::pid()
         _object_server->set_stdin_data( _connection->stdin_data() );
         _server = +_object_server;
 
@@ -414,35 +582,24 @@ int Standard_process::Com_server_thread::thread_main()
 }
 
 
-ptr<Process> Process::new_process(Spooler* spooler, const Process_configuration& process_configuration) {
-    ptr<Standard_process> result = Z_NEW(Standard_process(spooler, process_configuration));
-    return +result;
-}
-
-
-Process::Process(Spooler* sp) : 
-    Abstract_scheduler_object( sp, this, type_process )
-{}
-
-//------------------------------------------------------------------------Standard_process::Standard_process
-
-Standard_process::Standard_process(Spooler* sp, const Process_configuration& process_configuration)
-: 
-    Process(sp), 
-    _zero_(this+1),
-    _configuration(process_configuration),
-    _process_id( _spooler->get_next_process_id() )
-{
-}
-
-//-----------------------------------------------------------------------Standard_process::~Standard_process
-
-Standard_process::~Standard_process()
-{
-    if (_async_remote_operation) {
-        _async_remote_operation->set_async_manager( NULL );
-        _async_remote_operation = NULL;
+ptr<Process> Process::new_process(Spooler* spooler, const Process_configuration& configuration) {
+    if(configuration._remote_scheduler) {
+        ptr<Standard_remote_process> result = Z_NEW(Standard_remote_process(spooler, configuration));
+        return +result;
+    } else
+    if (configuration._is_thread) {
+        ptr<Thread_process> result = Z_NEW(Thread_process(spooler, configuration));
+        return +result;
+    } else {
+        ptr<Local_process> result = Z_NEW(Local_process(spooler, configuration));
+        return +result;
     }
+}
+
+//------------------------------------------Abstract_startable_process::~Abstract_startable_process
+
+Abstract_startable_process::~Abstract_startable_process()
+{
     if (_close_operation) {
         _close_operation->set_async_manager(NULL);
         _close_operation = NULL;
@@ -452,9 +609,9 @@ Standard_process::~Standard_process()
     if( _xml_client_connection )  _xml_client_connection->set_async_manager( NULL );
 }
 
-//--------------------------------------------------------------------Standard_process::close_async
+//----------------------------------------------------------Abstract_startable_process::close_async
 
-void Standard_process::close_async()
+void Abstract_startable_process::close_async()
 {
     if( !_close_operation )
     {
@@ -474,9 +631,9 @@ void Standard_process::close_async()
     }
 }
 
-//-------------------------------------------------------------------Standard_process::close__start
+//---------------------------------------------------------Abstract_startable_process::close__start
 
-Async_operation* Standard_process::close__start( bool run_independently )
+Async_operation* Abstract_startable_process::close__start( bool run_independently )
 {
     assert(!_close_operation);
     _close_operation = Z_NEW( Close_operation( this, run_independently ) );
@@ -487,18 +644,18 @@ Async_operation* Standard_process::close__start( bool run_independently )
     return _close_operation;
 }
 
-//---------------------------------------------------------------------Standard_process::close__end
+//-----------------------------------------------------------Abstract_startable_process::close__end
 
-void Standard_process::close__end()
+void Abstract_startable_process::close__end()
 {
     if (_close_operation) _close_operation->set_async_manager(NULL);
     _close_operation = NULL;
     _session = NULL;
 }
 
-//---------------------------------------------------------Standard_process::close_session
+//---------------------------------------------------------Abstract_startable_process::close_session
 
-void Standard_process::close_session()
+void Abstract_startable_process::close_session()
 { 
     if( _session )
     {
@@ -508,107 +665,9 @@ void Standard_process::close_session()
     }
 }
 
-//--------------------------------------------------------------------------Standard_process::start
+//------------------------------------------------------Abstract_startable_process::fill_connection
 
-void Standard_process::start()
-{
-    if (is_started()) assert(0), z::throw_xc(Z_FUNCTION);
-
-    if( is_remote_host() )
-    {
-        async_remote_start();
-    }
-    else
-    if (_configuration._is_thread)
-    {
-        start_local_thread();
-    }
-    else
-    {
-        start_local_process();
-    }
-
-#   ifdef Z_WINDOWS
-        if( _spooler )  _connection->set_event( &_spooler->_scheduler_event );
-#   endif
-
-    _log->set_prefix( obj_name() );
-
-    _session = Z_NEW( object_server::Session( _connection ) );
-    _session->set_connection_has_only_this_session();
-
-    _running_since = Time::now();
-}
-
-//------------------------------------------------------------Standard_process::start_local_process
-
-void Standard_process::start_local_process()
-{
-    ptr<object_server::Connection_to_own_server_process> connection = _spooler->_connection_manager->new_connection_to_own_server_process();
-    object_server::Parameters                            parameters;
-
-    if( !_spooler->_sos_ini.empty() )
-    parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
-
-    if( !_spooler->_factory_ini.empty() )
-    parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
-
-    parameters.push_back(object_server::Parameter("param", "-java-options="+ _configuration._java_options +" "+spooler()->settings()->_job_java_options));
-    parameters.push_back(object_server::Parameter("param", "-java-classpath="+ _configuration._java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_classpath));
-    parameters.push_back( object_server::Parameter( "param", "-O" ) );
-
-    if (!_configuration._job_name.empty())
-        parameters.push_back( object_server::Parameter("param", "-job=" + _configuration._job_name));
-
-    if (_configuration._task_id)
-        parameters.push_back(object_server::Parameter("param", "-task-id=" + as_string(_configuration._task_id)));
-
-    if( !log_filename().empty() )
-    parameters.push_back( object_server::Parameter( "param", "-log=" + log_categories_as_string() + " >+" + log_filename() ) );
-
-    parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
-
-    connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
-    fill_connection( connection );
-
-    #ifdef Z_HPUX
-        connection->set_ld_preload( static_ld_preload );
-    #endif
-
-    connection->set_priority(_configuration._priority);
-    connection->set_login(_configuration._login);
-    connection->start_process( parameters );
-
-    _connection = +connection;
-
-    _process_handle_copy = _connection->process_handle();
-    _spooler->register_process_handle( _process_handle_copy );
-
-    _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
-}
-
-//-------------------------------------------------------------Standard_process::start_local_thread
-
-void Standard_process::start_local_thread()
-{
-    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
-    ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
-   
-    fill_connection( connection );
-
-    _com_server_thread = Z_NEW( Com_server_thread( connection ) );
-    connection->start_thread( _com_server_thread );
-
-
-    _connection = +connection;
-
-    _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
-    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
-}
-
-//----------------------------------------------------------------Standard_process::fill_connection
-
-void Standard_process::fill_connection( object_server::Connection* connection )
+void Abstract_startable_process::fill_connection( object_server::Connection* connection )
 {
     xml::Xml_string_writer stdin_xml_writer;
 
@@ -653,9 +712,9 @@ void Standard_process::fill_connection( object_server::Connection* connection )
         connection->set_controller_address(_configuration._controller_address);
 }
 
-//-------------------------------------------------------------Standard_process::async_remote_start
+//------------------------------------------------------Standard_remote_process::async_remote_start
 
-void Standard_process::async_remote_start()
+void Standard_remote_process::async_remote_start()
 {
     ptr<object_server::Connection> c = _spooler->_connection_manager->new_connection();
 
@@ -670,9 +729,9 @@ void Standard_process::async_remote_start()
     _async_remote_operation->set_async_manager( _spooler->_connection_manager );
 }
 
-//----------------------------------------------------Standard_process::async_remote_start_continue
+//---------------------------------------------Standard_remote_process::async_remote_start_continue
 
-bool Standard_process::async_remote_start_continue( Async_operation::Continue_flags )
+bool Standard_remote_process::async_remote_start_continue( Async_operation::Continue_flags )
 {
     bool something_done = true;     // spooler.cxx ruft async_continue() auf
 
@@ -759,17 +818,17 @@ bool Standard_process::async_remote_start_continue( Async_operation::Continue_fl
     return something_done;
 }
 
-//-----------------------------------------------------------------Standard_process::async_continue
+//-------------------------------------------------------Abstract_startable_process::async_continue
 
-bool Standard_process::async_continue()
+bool Abstract_startable_process::async_continue()
 {
     return _connection? _connection->async_continue() 
                       : false;
 }
 
-//--------------------------------------Standard_process::Async_remote_operation::close_remote_task
+//--------------------------------------------------------Async_remote_operation::close_remote_task
 
-void Standard_process::Async_remote_operation::close_remote_task( bool kill )
+void Async_remote_operation::close_remote_task( bool kill )
 {
     if( _state <= s_connecting ) {
         if( _process->_xml_client_connection ) {
@@ -796,27 +855,14 @@ void Standard_process::Async_remote_operation::close_remote_task( bool kill )
     }
 }
 
-//---------------------------------------------------------------------------Standard_process::kill
+//---------------------------------------------------------------------------Abstract_startable_process::kill
 
-bool Standard_process::kill()
+bool Abstract_startable_process::kill()
 {
     bool result = false;
 
     if( !_is_killed  &&  _connection )
     {
-        if( is_remote_host() )
-        {
-            // Async_operation (vorhandene oder neue, besser neue)
-            // mit <kill_task> starten. Nur, wenn noch nicht gestartet
-            // if( !_kill_task_operation )   _kill_task_operation = Z_NEW( Kill_task_operation );
-            // <remote_scheduler.task.close pid=" _remote_pid
-
-            if( _async_remote_operation  &&  _async_remote_operation->_state != Async_remote_operation::s_closed )
-                _async_remote_operation->close_remote_task( true );
-
-            result = true;
-        }
-        else
         if( object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>( +_connection ) )
         {
             result = c->kill_process();
@@ -834,9 +880,16 @@ bool Standard_process::kill()
     return result;
 }
 
-//----------------------------------------------------------------------------Standard_process::pid
+//------------------------------------------------------------------Abstract_startable_process::pid
 
-int Standard_process::pid() const
+int Abstract_startable_process::pid() const
+{ 
+    return _connection? _connection->pid() : 0;
+}
+
+//------------------------------------------------------------------------------Thread_process::pid
+
+int Thread_process::pid() const
 { 
     int result = 0;
 
@@ -858,48 +911,48 @@ int Standard_process::pid() const
         }
         else
         {
-            result = _connection->pid();
+            result = Abstract_startable_process::pid();
         }
     }
 
     return result;
 }
 
-//------------------------------------------------------------------Standard_process::is_terminated
+//--------------------------------------------------------Abstract_startable_process::is_terminated
 
-bool Standard_process::is_terminated()
+bool Abstract_startable_process::is_terminated()
 {
     return !_connection  ||  _connection->process_terminated();
 }
 
-//----------------------------------------------------------------------Standard_process::exit_code
+//------------------------------------------------------------Abstract_startable_process::exit_code
 
-int Standard_process::exit_code()
+int Abstract_startable_process::exit_code()
 {
     if( _connection )  _exit_code = _connection->exit_code();
 
     return _exit_code;
 }
 
-//--------------------------------------------------------------Standard_process::termination_signal
+//----------------------------------------------------Abstract_startable_process::termination_signal
 
-int Standard_process::termination_signal()
+int Abstract_startable_process::termination_signal()
 {
     if( _connection )  _termination_signal = _connection->termination_signal();
 
     return _termination_signal;
 }
 
-//-----------------------------------------------------------------Standard_process::is_remote_host
+//-------------------------------------------------------Abstract_startable_process::is_remote_host
 
-bool Standard_process::is_remote_host() const
+bool Abstract_startable_process::is_remote_host() const
 { 
     return _configuration._remote_scheduler; 
 }
 
-//--------------------------------------------------------------------Standard_process::stdout_path
+//----------------------------------------------------------Abstract_startable_process::stdout_path
 
-File_path Standard_process::stdout_path()
+File_path Abstract_startable_process::stdout_path()
 {
     File_path result;
 
@@ -911,9 +964,9 @@ File_path Standard_process::stdout_path()
     return result;
 }
 
-//--------------------------------------------------------------------Standard_process::stderr_path
+//----------------------------------------------------------Abstract_startable_process::stderr_path
 
-File_path Standard_process::stderr_path()
+File_path Abstract_startable_process::stderr_path()
 {
     File_path result;
 
@@ -925,9 +978,9 @@ File_path Standard_process::stderr_path()
     return result;
 }
 
-//------------------------------------------------------------Standard_process::delete_files__start
+//--------------------------------------------------Abstract_startable_process::delete_files__start
 
-bool Standard_process::try_delete_files( Has_log* log )
+bool Abstract_startable_process::try_delete_files( Has_log* log )
 {
     bool result = true;
 
@@ -939,9 +992,9 @@ bool Standard_process::try_delete_files( Has_log* log )
     return result;
 }
 
-//----------------------------------------------------------------Standard_process::undeleted_files
+//------------------------------------------------------Abstract_startable_process::undeleted_files
 
-list<File_path> Standard_process::undeleted_files()
+list<File_path> Abstract_startable_process::undeleted_files()
 {
     list<File_path> result;
 
@@ -953,49 +1006,32 @@ list<File_path> Standard_process::undeleted_files()
     return result;
 }
 
-//--------------------------------------------------------------------Standard_process::dom_element
+//----------------------------------------------------------Abstract_startable_process::dom_element
 
-xml::Element_ptr Standard_process::dom_element( const xml::Document_ptr& document, const Show_what& )
+xml::Element_ptr Abstract_startable_process::dom_element(const xml::Document_ptr& document, const Show_what& show_what)
 {
-    xml::Element_ptr process_element = document.createElement( "process" );
-
-    if( _connection )
-    process_element.setAttribute( "pid"              , _connection->pid() );
-
-    if (!_configuration._job_name.empty())
-        process_element.setAttribute("job", _configuration._job_name);
-
-    if (_configuration._task_id) {
-        process_element.setAttribute("task", _configuration._task_id);
-        process_element.setAttribute("task_id", _configuration._task_id);          // VERALTET!
-    }
-    process_element.setAttribute_optional("remote_scheduler", _configuration._remote_scheduler.as_string());
-
-    if( _connection )
-    {
+    xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
+    if (_connection) {
+        process_element.setAttribute( "pid", _connection->pid() );
         process_element.setAttribute( "operations", _connection->operation_count() );
         process_element.setAttribute( "callbacks", _connection->callback_count() );
     }
-
     process_element.setAttribute( "running_since", _running_since.xml_value() );
-
-    Async_operation* operation = _connection? _connection->current_super_operation() : NULL;
-    if( operation )
-    process_element.setAttribute( "operation"        , operation->async_state_text() );
-
+    if (Async_operation* operation = _connection? _connection->current_super_operation() : NULL)
+        process_element.setAttribute("operation", operation->async_state_text());
     return process_element;
 }
 
-//-----------------------------------------------------------------------Standard_process::obj_name
+//-------------------------------------------------------------Abstract_startable_process::obj_name
 
-string Standard_process::obj_name() const
+string Abstract_startable_process::obj_name() const
 {
-    return "Standard_process " + short_name();
+    return "Abstract_process " + short_name();
 }
 
-//---------------------------------------------------------------------Standard_process::short_name
+//-----------------------------------------------------------Abstract_startable_process::short_name
 
-string Standard_process::short_name() const
+string Abstract_startable_process::short_name() const
 {
     S result;
 
@@ -1296,21 +1332,26 @@ void Process_class::remove_process(Process* process)
 
 //------------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process(const Process_configuration& c)
+Process* Process_class::new_process(const Process_configuration* c)
 {
     assert_is_active();
-    Process_configuration conf = c;
-    conf._remote_scheduler = c._remote_scheduler.is_empty()? _remote_scheduler : c._remote_scheduler;
-    ptr<Standard_process> process = Z_NEW(Standard_process(_spooler, conf));
-
-    add_process( process );
-
+    ptr<Process> process;
+    if (!c) {
+        ptr<Dummy_process> p = Z_NEW(Dummy_process(_spooler, Process_configuration()));
+        process = +p;
+    } else {
+        Process_configuration conf = *c;
+        conf._remote_scheduler = c->_remote_scheduler.is_empty()? _remote_scheduler : c->_remote_scheduler;
+        ptr<Process> p = Process::new_process(_spooler, conf);
+        process = +p;
+    }
+    add_process(process);
     return process;
 }
 
 //--------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available(const Process_configuration& process_configuration)
+Process* Process_class::select_process_if_available(const Process_configuration* process_configuration)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&

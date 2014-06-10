@@ -238,7 +238,7 @@ struct Module_instance : Object
     string                      process_name                () const                                { return ""; }
 
     virtual bool                try_to_get_process          (const Process_configuration* = NULL);
-    void                        detach_process              ();
+    virtual void                detach_process              ();
 
     virtual Async_operation*    close__start                ();
     virtual void                close__end                  ();

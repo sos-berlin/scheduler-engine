@@ -13,7 +13,6 @@ namespace scheduler {
 struct Process_class;
 struct Process_class_folder;
 struct Process_class_subsystem;
-struct Standard_process;
 
 struct Has_on_remote_task_running {
     virtual void on_remote_task_running() = 0;
@@ -41,8 +40,7 @@ struct Process_configuration {
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
 // Kann auch ein Thread sein.
 
-struct Process : zschimmer::Object, Abstract_scheduler_object {
-    Process(Spooler*);
+struct Process : zschimmer::Object, Scheduler_object {
     virtual int exit_code() = 0;
     virtual int termination_signal() = 0;
     virtual File_path stderr_path() = 0;
@@ -53,19 +51,20 @@ struct Process : zschimmer::Object, Abstract_scheduler_object {
     virtual Process_id process_id() const = 0;
     virtual int pid() const = 0;
     virtual Process_id remote_process_id() const = 0;
+    virtual string short_name() const = 0;
     virtual double async_next_gmtime() = 0;
     virtual xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&) = 0;
-    virtual string short_name() const = 0;
-    virtual string obj_name() const = 0;
+    
+    using Scheduler_object::obj_name;
 
     virtual void start() = 0;
     virtual bool kill() = 0;
     virtual bool try_delete_files(Has_log*) = 0;
+    virtual bool async_continue() = 0;
     virtual void close_async() = 0;
     virtual Async_operation* close__start(bool run_independently = false) = 0;
     virtual void close__end() = 0;
     virtual void close_session() = 0;
-    virtual bool async_continue() = 0;
 
     static ptr<Process> new_process(Spooler* sp, const Process_configuration&);
 };
@@ -152,8 +151,8 @@ struct Process_class : Process_class_configuration,
     void                        add_process                 (Process*);
     void                        remove_process              (Process*);
 
-    Process*                    new_process                 (const Process_configuration&);
-    Process*                    select_process_if_available (const Process_configuration&);        // Startet bei Bedarf. Bei _max_processes: return NULL
+    Process*                    new_process                 (const Process_configuration*);
+    Process*                    select_process_if_available (const Process_configuration*);
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );
