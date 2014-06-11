@@ -111,9 +111,7 @@ struct Abstract_startable_process : Abstract_process {
         _registered_process_handle(NULL),
         _is_killed(false),
         _exit_code(0),
-        _termination_signal(0),
-        _remote_process_id(0),
-        _remote_pid(0)
+        _termination_signal(0)
     {}
 
     public: ~Abstract_startable_process() {
@@ -121,8 +119,6 @@ struct Abstract_startable_process : Abstract_process {
             _close_operation->set_async_manager(NULL);
         if (_registered_process_handle)
             _spooler->unregister_process_handle(_registered_process_handle);
-        if (_xml_client_connection)
-            _xml_client_connection->set_async_manager(NULL);
     }
 
     public: void close_async() {
@@ -169,16 +165,16 @@ struct Abstract_startable_process : Abstract_process {
         do_start();
         #ifdef Z_WINDOWS
             if (_spooler)
-                _connection->set_event(&_spooler->_scheduler_event);
+                connection()->set_event(&_spooler->_scheduler_event);
         #endif
         _log->set_prefix(obj_name());
-        _session = Z_NEW(object_server::Session(_connection));
+        _session = Z_NEW(object_server::Session(connection()));
         _session->set_connection_has_only_this_session();
         _running_since = Time::now();
     }
     
     private: bool is_started() { 
-        return _connection != NULL; 
+        return connection() != NULL; 
     }
 
     protected: virtual void do_start() = 0;
@@ -223,16 +219,16 @@ struct Abstract_startable_process : Abstract_process {
     }
 
     public: bool async_continue() {
-        return _connection? _connection->async_continue() : false;
+        return connection()? connection()->async_continue() : false;
     }
 
     public: bool kill() {
         bool result = false;
-        if (!_is_killed  &&  _connection) {
-            if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection)) 
+        if (!_is_killed && connection()) {
+            if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection())) 
                 result = c->kill_process();
             else
-            if (dynamic_cast<object_server::Connection_to_own_server_thread*>(+_connection)) {
+            if (dynamic_cast<object_server::Connection_to_own_server_thread*>(+connection())) {
                 if (pid_t pid = this->pid())
                     try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
             }
@@ -243,48 +239,48 @@ struct Abstract_startable_process : Abstract_process {
     }
 
     public: int pid() const { 
-        return _connection? _connection->pid() : 0;
+        return connection()? connection()->pid() : 0;
     }
 
     public: bool is_terminated() {
-        return !_connection || _connection->process_terminated();
+        return !connection() || connection()->process_terminated();
     }
 
     public: int exit_code() {
-        if (_connection)
-            _exit_code = _connection->exit_code();
+        if (connection())
+            _exit_code = connection()->exit_code();
         return _exit_code;
     }
 
     public: int termination_signal() {
-        if (_connection)
-            _termination_signal = _connection->termination_signal();
+        if (connection())
+            _termination_signal = connection()->termination_signal();
         return _termination_signal;
     }
 
     public: File_path stdout_path() {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection)) 
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection())) 
             return c->stdout_path();
         else
             return File_path();
     }
 
     public: File_path stderr_path() {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection))
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection()))
             return c->stderr_path();
         else
             return File_path();
     }
 
     public: bool try_delete_files(Has_log* log) {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection))
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection()))
             return c->try_delete_files( log );
         else
             return true;
     }
 
     public: list<File_path> undeleted_files() {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection))
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection()))
             return c->undeleted_files();
         else
             return list<File_path>();
@@ -292,13 +288,13 @@ struct Abstract_startable_process : Abstract_process {
 
     public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
         xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
-        if (_connection) {
-            process_element.setAttribute( "pid", _connection->pid() );
-            process_element.setAttribute( "operations", _connection->operation_count() );
-            process_element.setAttribute( "callbacks", _connection->callback_count() );
+        if (connection()) {
+            process_element.setAttribute( "pid", connection()->pid() );
+            process_element.setAttribute( "operations", connection()->operation_count() );
+            process_element.setAttribute( "callbacks", connection()->callback_count() );
         }
         process_element.setAttribute( "running_since", _running_since.xml_value() );
-        if (Async_operation* operation = _connection? _connection->current_super_operation() : NULL)
+        if (Async_operation* operation = connection()? connection()->current_super_operation() : NULL)
             process_element.setAttribute("operation", operation->async_state_text());
         return process_element;
     }
@@ -308,12 +304,7 @@ struct Abstract_startable_process : Abstract_process {
     }
 
     public: string short_name() const {
-        S result;
-        if (_connection) 
-            result << _connection->short_name();
-        if (_remote_pid) 
-            result << ",pid=" << _remote_pid;
-        return result;
+        return connection() ? connection()->short_name() : "";
     }
 
     private: bool continue_close_operation(Abstract_startable_process::Close_operation*);
@@ -327,31 +318,23 @@ struct Abstract_startable_process : Abstract_process {
     }
 
     public: double async_next_gmtime() { 
-        return _connection ? _connection->async_next_gmtime() : time::never_double; 
+        return connection() ? connection()->async_next_gmtime() : time::never_double; 
     }
 
     public: Process_id process_id() const { 
         return _process_id; 
     }
 
-    public: object_server::Connection* connection() const { 
-        return _connection; 
-    }
-
     protected: virtual string async_state_text() const {
         return "";
     }
 
-    protected: ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     private: ptr<object_server::Session> _session;                // Wir haben immer nur eine Session pro Verbindung
     protected: Process_handle _registered_process_handle;
-    protected: bool _is_killed;
+    private: bool _is_killed;
     private: int _exit_code;
     private: int _termination_signal;
     private: Time _running_since;
-    public: Process_id _remote_process_id;
-    protected: pid_t _remote_pid;
-    public: ptr<Xml_client_connection> _xml_client_connection;     // Nur für Standard_remote_process
     private: ptr<Close_operation> _close_operation;
     protected: ptr<Async_remote_operation> _async_remote_operation;    // Nur für Standard_remote_process
 };
@@ -366,8 +349,8 @@ struct Dummy_process : Abstract_startable_process {
         z::throw_xc(Z_FUNCTION);
     }
 
-    public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
-        return Abstract_process::dom_element(document, show_what);
+    public: object_server::Connection* connection() const {
+        return NULL;
     }
 };
 
@@ -378,9 +361,8 @@ struct Local_process : Abstract_startable_process {
     {}
 
     protected: void do_start() {
-        ptr<object_server::Connection_to_own_server_process> connection = new_connection();
-        _connection = +connection;
-        connection->start_process(parameters());
+        _connection = new_connection();
+        _connection->start_process(parameters());
         _registered_process_handle = _connection->process_handle();
         _spooler->register_process_handle(_registered_process_handle);
         _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
@@ -416,6 +398,12 @@ struct Local_process : Abstract_startable_process {
         parameters.push_back(object_server::Parameter("program", _spooler->_my_program_filename));
         return parameters;
     }
+
+    public: object_server::Connection* connection() const {
+        return +_connection;
+    }
+    
+    private: ptr<object_server::Connection_to_own_server_process> _connection;
 };
 
 
@@ -455,11 +443,10 @@ struct Thread_process : Abstract_startable_process {
 
     protected: void do_start() {
         Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
-        ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
-        fill_connection(connection);
-        _com_server_thread = Z_NEW(Com_server_thread(connection));
-        connection->start_thread(_com_server_thread);
-        _connection = +connection;
+        _connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
+        fill_connection(_connection);
+        _com_server_thread = Z_NEW(Com_server_thread(_connection));
+        _connection->start_thread(_com_server_thread);
         _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
     }
@@ -477,6 +464,11 @@ struct Thread_process : Abstract_startable_process {
         return result;
     }
 
+    public: object_server::Connection* connection() const {
+        return +_connection;
+    }
+    
+    private: ptr<object_server::Connection_to_own_server_thread> _connection;
     private: ptr<Com_server_thread> _com_server_thread;
 };
 
@@ -514,7 +506,10 @@ struct Async_remote_operation : Async_operation {
 
 struct Standard_remote_process : Abstract_startable_process {
     Standard_remote_process(Spooler* spooler, const Process_configuration& conf) :
-        Abstract_startable_process(spooler, conf) 
+        Abstract_startable_process(spooler, conf),
+        _remote_process_id(0),
+        _remote_pid(0),
+        _is_killed(false)
     {}
 
     ~Standard_remote_process() {
@@ -522,6 +517,8 @@ struct Standard_remote_process : Abstract_startable_process {
             _async_remote_operation->set_async_manager( NULL );
             _async_remote_operation = NULL;
         }
+        if (_xml_client_connection)
+            _xml_client_connection->set_async_manager(NULL);
     }
 
     protected: void do_start() {
@@ -542,12 +539,32 @@ struct Standard_remote_process : Abstract_startable_process {
             return false;
     }
 
+    public: string short_name() const {
+        S result;
+        result << Abstract_startable_process::short_name();
+        if (_remote_pid) 
+            result << ",pid=" << _remote_pid;
+        return result;
+    }
+
     protected: virtual string async_state_text() const {
         return _async_remote_operation ? _async_remote_operation->async_state_text() : "";
     }
 
     private: void async_remote_start();
     public: bool async_remote_start_continue(Async_operation::Continue_flags);
+
+    public: object_server::Connection* connection() const {
+        return _connection;
+    }
+
+    friend struct Async_remote_operation;
+
+    private: ptr<object_server::Connection> _connection;
+    private: ptr<Xml_client_connection> _xml_client_connection;
+    private: Process_id _remote_process_id;
+    private: pid_t _remote_pid;
+    private: bool _is_killed;
 };
 
 //----------------------------------------------------------------Process_class_subsystem::_methods
@@ -736,13 +753,9 @@ ptr<Process> Process::new_process(Spooler* spooler, const Process_configuration&
 
 void Standard_remote_process::async_remote_start()
 {
-    ptr<object_server::Connection> c = _spooler->_connection_manager->new_connection();
-
-    c->set_remote_host(_configuration._remote_scheduler._host);
-    c->listen_on_tcp_port( INADDR_ANY );
-
-
-    _connection = +c;
+    _connection = _spooler->_connection_manager->new_connection();
+    _connection->set_remote_host(_configuration._remote_scheduler._host);
+    _connection->listen_on_tcp_port( INADDR_ANY );
 
     _async_remote_operation = Z_NEW( Async_remote_operation( this ) );
     _async_remote_operation->async_wake();
