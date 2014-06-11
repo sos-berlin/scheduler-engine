@@ -56,6 +56,7 @@ struct Abstract_process : virtual Process {
 
 struct Async_remote_operation;
 
+
 struct Abstract_startable_process : Abstract_process {
     struct Close_operation : Async_operation {
         enum State { s_initial, s_closing_session, s_closing_remote_process, s_finished };
@@ -105,9 +106,9 @@ struct Abstract_startable_process : Abstract_process {
         private: ptr<Close_operation> _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Abstract_process schließen soll
     };
 
-    Abstract_startable_process(Spooler* spooler, const Process_configuration& conf) :
+    public: Abstract_startable_process(Spooler* spooler, const Process_configuration& conf) :
         Abstract_process(spooler, conf),
-        _process_handle_copy(NULL),
+        _registered_process_handle(NULL),
         _is_killed(false),
         _exit_code(0),
         _termination_signal(0),
@@ -115,38 +116,53 @@ struct Abstract_startable_process : Abstract_process {
         _remote_pid(0)
     {}
 
-    ~Abstract_startable_process();
+    public: ~Abstract_startable_process() {
+        if (_close_operation) 
+            _close_operation->set_async_manager(NULL);
+        if (_registered_process_handle)
+            _spooler->unregister_process_handle(_registered_process_handle);
+        if (_xml_client_connection)
+            _xml_client_connection->set_async_manager(NULL);
+    }
 
-    void                        close_async                 ();
-    Async_operation*            close__start                ( bool run_independently = false );
-    void                        close__end                  ();
-    bool                     is_closing                     ()                                      { return _close_operation != NULL; }
-    bool                        continue_close_operation    (Close_operation*);
+    public: void close_async() {
+        if (!_close_operation) {
+            if (!is_terminated() && !_async_remote_operation) {
+                log()->warn(message_string("SCHEDULER-850", obj_name()));
+                try {
+                    kill();     // Nicht bei _async_remote_operation aufrufen, dass eine TCP-Nachricht starten würde
+                } catch (exception& x) { 
+                    _log->warn(x.what()); 
+                }
+            }
+            close__start(true);
+        }
+    }
 
+    public: Async_operation* close__start(bool run_independently) {
+        assert(!_close_operation);
+        _close_operation = Z_NEW(Close_operation(this, run_independently));
+        _close_operation->set_async_next_gmtime((time_t)0);
+        _close_operation->set_async_manager(_spooler->_connection_manager);
+        //_close_operation->async_continue();
+        return _close_operation;
+    }
 
-    bool                        is_started                  ()                                      { return _connection != NULL; }
+    public: void close__end() {
+        if (_close_operation) {
+            _close_operation->set_async_manager(NULL);
+            _close_operation = NULL;
+        }
+        _session = NULL;
+    }
 
-    void                        fill_connection             ( object_server::Connection* );
-    object_server::Session*     session                     ()                                      { return _session; }
-    bool                        async_continue              ();
-    double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
-    void                        close_session      ();
-    Process_id                  process_id                  () const                                { return _process_id; }
-    int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
-    bool                     is_terminated                  ();
-    bool                        kill                        ();
-    int                         exit_code                   ();
-    int                         termination_signal          ();
-    File_path                   stderr_path                 ();
-    File_path                   stdout_path                 ();
-    bool                        try_delete_files            ( Has_log* );
-    std::list<file::File_path>  undeleted_files             ();
-    bool                        is_remote_host              () const;
-    object_server::Connection*  connection                  () const                                { return _connection; }
-
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    string                      obj_name                    () const;
-    string                      short_name                  () const;
+    public: void close_session() { 
+        if (_session) {
+            _session->close__start()->async_finish();
+            _session->close__end();
+            _session = NULL;
+        }
+    }
 
     public: void start() {
         if (is_started()) assert(0), z::throw_xc(Z_FUNCTION);
@@ -161,25 +177,183 @@ struct Abstract_startable_process : Abstract_process {
         _running_since = Time::now();
     }
     
+    private: bool is_started() { 
+        return _connection != NULL; 
+    }
+
     protected: virtual void do_start() = 0;
+
+    protected: void fill_connection(object_server::Connection* connection) {
+        connection->set_stdin_data(stdin_xml(connection));
+        if (_configuration._controller_address) 
+            connection->set_controller_address(_configuration._controller_address);
+    }
+
+    private: string stdin_xml(object_server::Connection* connection) const {
+        xml::Xml_string_writer stdin_xml_writer;
+        stdin_xml_writer.set_encoding(string_encoding);
+        stdin_xml_writer.write_prolog();
+        stdin_xml_writer.begin_element("task_process");
+        {
+            stdin_xml_writer.set_attribute_optional( "include_path"          , _spooler->include_path() );
+            stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->java_subsystem()->java_vm()->options() +" "+
+                _spooler->settings()->_job_java_options);
+            stdin_xml_writer.set_attribute_optional( "java_class_path"       , spooler()->settings()->_job_java_classpath + Z_PATH_SEPARATOR +
+                _spooler->java_subsystem()->java_vm()->class_path());
+            stdin_xml_writer.set_attribute_optional( "javac"                 , _spooler->java_subsystem()->java_vm()->javac_filename() );
+            stdin_xml_writer.set_attribute_optional( "java_work_dir"         , _spooler->java_work_dir() );
+            stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
+            stdin_xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
+            stdin_xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
+            stdin_xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
+            if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(connection)) {
+                stdin_xml_writer.set_attribute("stdout_path", c->stdout_path());
+                stdin_xml_writer.set_attribute("stderr_path", c->stderr_path());
+            }
+            if (_configuration._log_stdout_and_stderr)
+                stdin_xml_writer.set_attribute("log_stdout_and_stderr", "yes");
+            if (_configuration._environment) {
+                xml::Document_ptr dom_document = _configuration._environment->dom("environment", "variable");
+                stdin_xml_writer.write_element( dom_document.documentElement() );
+            }
+        }
+        stdin_xml_writer.end_element("task_process");
+        stdin_xml_writer.flush();
+        return stdin_xml_writer.to_string();
+    }
+
+    public: bool async_continue() {
+        return _connection? _connection->async_continue() : false;
+    }
+
+    public: bool kill() {
+        bool result = false;
+        if (!_is_killed  &&  _connection) {
+            if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection)) 
+                result = c->kill_process();
+            else
+            if (dynamic_cast<object_server::Connection_to_own_server_thread*>(+_connection)) {
+                if (pid_t pid = this->pid())
+                    try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
+            }
+        }
+        if (result)  
+            _is_killed = true;
+        return result;
+    }
+
+    public: int pid() const { 
+        return _connection? _connection->pid() : 0;
+    }
+
+    public: bool is_terminated() {
+        return !_connection || _connection->process_terminated();
+    }
+
+    public: int exit_code() {
+        if (_connection)
+            _exit_code = _connection->exit_code();
+        return _exit_code;
+    }
+
+    public: int termination_signal() {
+        if (_connection)
+            _termination_signal = _connection->termination_signal();
+        return _termination_signal;
+    }
+
+    public: File_path stdout_path() {
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection)) 
+            return c->stdout_path();
+        else
+            return File_path();
+    }
+
+    public: File_path stderr_path() {
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection))
+            return c->stderr_path();
+        else
+            return File_path();
+    }
+
+    public: bool try_delete_files(Has_log* log) {
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection))
+            return c->try_delete_files( log );
+        else
+            return true;
+    }
+
+    public: list<File_path> undeleted_files() {
+        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+_connection))
+            return c->undeleted_files();
+        else
+            return list<File_path>();
+    }
+
+    public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
+        xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
+        if (_connection) {
+            process_element.setAttribute( "pid", _connection->pid() );
+            process_element.setAttribute( "operations", _connection->operation_count() );
+            process_element.setAttribute( "callbacks", _connection->callback_count() );
+        }
+        process_element.setAttribute( "running_since", _running_since.xml_value() );
+        if (Async_operation* operation = _connection? _connection->current_super_operation() : NULL)
+            process_element.setAttribute("operation", operation->async_state_text());
+        return process_element;
+    }
+
+    public: string obj_name() const {
+        return "Abstract_process " + short_name();
+    }
+
+    public: string short_name() const {
+        S result;
+        if (_connection) 
+            result << _connection->short_name();
+        if (_remote_pid) 
+            result << ",pid=" << _remote_pid;
+        return result;
+    }
+
+    private: bool continue_close_operation(Abstract_startable_process::Close_operation*);
+
+    public: bool is_remote_host() const {
+        return _configuration._remote_scheduler; 
+    }       
+
+    public: object_server::Session* session() { 
+        return _session; 
+    }
+
+    public: double async_next_gmtime() { 
+        return _connection ? _connection->async_next_gmtime() : time::never_double; 
+    }
+
+    public: Process_id process_id() const { 
+        return _process_id; 
+    }
+
+    public: object_server::Connection* connection() const { 
+        return _connection; 
+    }
 
     protected: virtual string async_state_text() const {
         return "";
     }
 
-  public:
-    ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
-    ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
-    Process_handle             _process_handle_copy;
-    bool                       _is_killed;
-    int                        _exit_code;
-    int                        _termination_signal;
-    Time                       _running_since;
-    Process_id                 _remote_process_id;
-    pid_t                      _remote_pid;
-    ptr<Xml_client_connection>  _xml_client_connection;
-    ptr<Close_operation>       _close_operation;
-    ptr<Async_remote_operation> _async_remote_operation;    // Nur für Standard_remote_process
+    protected: ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
+    private: ptr<object_server::Session> _session;                // Wir haben immer nur eine Session pro Verbindung
+    protected: Process_handle _registered_process_handle;
+    protected: bool _is_killed;
+    private: int _exit_code;
+    private: int _termination_signal;
+    private: Time _running_since;
+    public: Process_id _remote_process_id;
+    protected: pid_t _remote_pid;
+    public: ptr<Xml_client_connection> _xml_client_connection;     // Nur für Standard_remote_process
+    private: ptr<Close_operation> _close_operation;
+    protected: ptr<Async_remote_operation> _async_remote_operation;    // Nur für Standard_remote_process
 };
 
 
@@ -207,8 +381,8 @@ struct Local_process : Abstract_startable_process {
         ptr<object_server::Connection_to_own_server_process> connection = new_connection();
         _connection = +connection;
         connection->start_process(parameters());
-        _process_handle_copy = _connection->process_handle();
-        _spooler->register_process_handle(_process_handle_copy);
+        _registered_process_handle = _connection->process_handle();
+        _spooler->register_process_handle(_registered_process_handle);
         _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
     }
 
@@ -418,7 +592,7 @@ bool Abstract_startable_process::continue_close_operation(Abstract_startable_pro
         if( _session )
         {
             op->_close_session_operation = _session->close__start();
-    
+
             if( !op->_close_session_operation->async_finished() )
             {
                 op->_close_session_operation->set_async_parent( op );
@@ -558,122 +732,6 @@ ptr<Process> Process::new_process(Spooler* spooler, const Process_configuration&
     }
 }
 
-//------------------------------------------Abstract_startable_process::~Abstract_startable_process
-
-Abstract_startable_process::~Abstract_startable_process()
-{
-    if (_close_operation) {
-        _close_operation->set_async_manager(NULL);
-        _close_operation = NULL;
-    }
-
-    if( _process_handle_copy )  _spooler->unregister_process_handle( _process_handle_copy );
-    if( _xml_client_connection )  _xml_client_connection->set_async_manager( NULL );
-}
-
-//----------------------------------------------------------Abstract_startable_process::close_async
-
-void Abstract_startable_process::close_async()
-{
-    if( !_close_operation )
-    {
-        if( !_async_remote_operation  &&  !is_terminated() )
-        {
-            log()->warn( message_string( "SCHEDULER-850", obj_name()) );
-
-            try
-            {
-                kill();     // Nicht bei _async_remote_operation aufrufen, dass eine TCP-Nachricht starten würde
-            }
-            catch( exception& x ) { _log->warn( x.what() ); }
-        }
-
-
-        close__start( true );
-    }
-}
-
-//---------------------------------------------------------Abstract_startable_process::close__start
-
-Async_operation* Abstract_startable_process::close__start( bool run_independently )
-{
-    assert(!_close_operation);
-    _close_operation = Z_NEW( Close_operation( this, run_independently ) );
-    _close_operation->set_async_next_gmtime((time_t)0);
-    _close_operation->set_async_manager( _spooler->_connection_manager );
-    //_close_operation->async_continue();
-
-    return _close_operation;
-}
-
-//-----------------------------------------------------------Abstract_startable_process::close__end
-
-void Abstract_startable_process::close__end()
-{
-    if (_close_operation) _close_operation->set_async_manager(NULL);
-    _close_operation = NULL;
-    _session = NULL;
-}
-
-//---------------------------------------------------------Abstract_startable_process::close_session
-
-void Abstract_startable_process::close_session()
-{ 
-    if( _session )
-    {
-        _session->close__start() -> async_finish();
-        _session->close__end();
-        _session = NULL;
-    }
-}
-
-//------------------------------------------------------Abstract_startable_process::fill_connection
-
-void Abstract_startable_process::fill_connection( object_server::Connection* connection )
-{
-    xml::Xml_string_writer stdin_xml_writer;
-
-    stdin_xml_writer.set_encoding( string_encoding );
-    stdin_xml_writer.write_prolog();
-
-    stdin_xml_writer.begin_element( "task_process" );
-    {
-        stdin_xml_writer.set_attribute_optional( "include_path"          , _spooler->include_path() );
-        stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->java_subsystem()->java_vm()->options() +" "+
-            _spooler->settings()->_job_java_options);
-        stdin_xml_writer.set_attribute_optional( "java_class_path"       , spooler()->settings()->_job_java_classpath + Z_PATH_SEPARATOR +
-            _spooler->java_subsystem()->java_vm()->class_path());
-        stdin_xml_writer.set_attribute_optional( "javac"                 , _spooler->java_subsystem()->java_vm()->javac_filename() );
-        stdin_xml_writer.set_attribute_optional( "java_work_dir"         , _spooler->java_work_dir() );
-        stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
-        stdin_xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
-        stdin_xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
-        stdin_xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
-
-        if( object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>( connection ) )
-        {
-            stdin_xml_writer.set_attribute( "stdout_path", c->stdout_path() );
-            stdin_xml_writer.set_attribute( "stderr_path", c->stderr_path() );
-        }
-        
-        if (_configuration._log_stdout_and_stderr)
-            stdin_xml_writer.set_attribute("log_stdout_and_stderr", "yes");
-
-        if (_configuration._environment) {
-            xml::Document_ptr dom_document = _configuration._environment->dom("environment", "variable");
-            stdin_xml_writer.write_element( dom_document.documentElement() );
-        }
-    }
-
-    stdin_xml_writer.end_element( "task_process" );
-    stdin_xml_writer.flush();
-
-    connection->set_stdin_data( stdin_xml_writer.to_string() );
-
-    if (_configuration._controller_address) 
-        connection->set_controller_address(_configuration._controller_address);
-}
-
 //------------------------------------------------------Standard_remote_process::async_remote_start
 
 void Standard_remote_process::async_remote_start()
@@ -780,14 +838,6 @@ bool Standard_remote_process::async_remote_start_continue( Async_operation::Cont
     return something_done;
 }
 
-//-------------------------------------------------------Abstract_startable_process::async_continue
-
-bool Abstract_startable_process::async_continue()
-{
-    return _connection? _connection->async_continue() 
-                      : false;
-}
-
 //--------------------------------------------------------Async_remote_operation::close_remote_task
 
 void Async_remote_operation::close_remote_task( bool kill )
@@ -815,161 +865,6 @@ void Async_remote_operation::close_remote_task( bool kill )
             catch( exception& x )  { _process->_log->warn( x.what() ); }
         }
     }
-}
-
-//---------------------------------------------------------------------------Abstract_startable_process::kill
-
-bool Abstract_startable_process::kill()
-{
-    bool result = false;
-
-    if( !_is_killed  &&  _connection )
-    {
-        if( object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>( +_connection ) )
-        {
-            result = c->kill_process();
-        }
-        else
-        if( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) )
-        {
-            if( pid_t pid = this->pid() )
-                try_kill_process_immediately( pid );   // Für kind_remote kind_process (Process_module_instance)
-        }
-    }
-
-    if( result )  _is_killed = true;
-
-    return result;
-}
-
-//------------------------------------------------------------------Abstract_startable_process::pid
-
-int Abstract_startable_process::pid() const
-{ 
-    return _connection? _connection->pid() : 0;
-}
-
-//--------------------------------------------------------Abstract_startable_process::is_terminated
-
-bool Abstract_startable_process::is_terminated()
-{
-    return !_connection  ||  _connection->process_terminated();
-}
-
-//------------------------------------------------------------Abstract_startable_process::exit_code
-
-int Abstract_startable_process::exit_code()
-{
-    if( _connection )  _exit_code = _connection->exit_code();
-
-    return _exit_code;
-}
-
-//----------------------------------------------------Abstract_startable_process::termination_signal
-
-int Abstract_startable_process::termination_signal()
-{
-    if( _connection )  _termination_signal = _connection->termination_signal();
-
-    return _termination_signal;
-}
-
-//-------------------------------------------------------Abstract_startable_process::is_remote_host
-
-bool Abstract_startable_process::is_remote_host() const
-{ 
-    return _configuration._remote_scheduler; 
-}
-
-//----------------------------------------------------------Abstract_startable_process::stdout_path
-
-File_path Abstract_startable_process::stdout_path()
-{
-    File_path result;
-
-    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
-    {
-        result = c->stdout_path();
-    }
-
-    return result;
-}
-
-//----------------------------------------------------------Abstract_startable_process::stderr_path
-
-File_path Abstract_startable_process::stderr_path()
-{
-    File_path result;
-
-    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
-    {
-        result = c->stderr_path();
-    }
-
-    return result;
-}
-
-//--------------------------------------------------Abstract_startable_process::delete_files__start
-
-bool Abstract_startable_process::try_delete_files( Has_log* log )
-{
-    bool result = true;
-
-    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
-    {
-        result = c->try_delete_files( log );
-    }
-
-    return result;
-}
-
-//------------------------------------------------------Abstract_startable_process::undeleted_files
-
-list<File_path> Abstract_startable_process::undeleted_files()
-{
-    list<File_path> result;
-
-    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
-    {
-        result = c->undeleted_files();
-    }
-
-    return result;
-}
-
-//----------------------------------------------------------Abstract_startable_process::dom_element
-
-xml::Element_ptr Abstract_startable_process::dom_element(const xml::Document_ptr& document, const Show_what& show_what)
-{
-    xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
-    if (_connection) {
-        process_element.setAttribute( "pid", _connection->pid() );
-        process_element.setAttribute( "operations", _connection->operation_count() );
-        process_element.setAttribute( "callbacks", _connection->callback_count() );
-    }
-    process_element.setAttribute( "running_since", _running_since.xml_value() );
-    if (Async_operation* operation = _connection? _connection->current_super_operation() : NULL)
-        process_element.setAttribute("operation", operation->async_state_text());
-    return process_element;
-}
-
-//-------------------------------------------------------------Abstract_startable_process::obj_name
-
-string Abstract_startable_process::obj_name() const
-{
-    return "Abstract_process " + short_name();
-}
-
-//-----------------------------------------------------------Abstract_startable_process::short_name
-
-string Abstract_startable_process::short_name() const
-{
-    S result;
-
-    if( _connection )  result << _connection->short_name();
-    if( _remote_pid )  result << ",pid=" << _remote_pid;
-
-    return result;
 }
 
 //-----------------------------------------Process_class_configuration::Process_class_configuration
