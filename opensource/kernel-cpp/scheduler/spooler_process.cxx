@@ -229,22 +229,6 @@ struct Abstract_startable_process : Abstract_process {
         }
     }
 
-    public: bool kill() {
-        bool result = false;
-        if (!_is_killed && connection()) {
-            if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection())) 
-                result = c->kill_process();
-            else
-            if (dynamic_cast<object_server::Connection_to_own_server_thread*>(+connection())) {
-                if (pid_t pid = this->pid())
-                    try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
-            }
-        }
-        if (result)  
-            _is_killed = true;
-        return result;
-    }
-
     public: int pid() const { 
         return connection()? connection()->pid() : 0;
     }
@@ -361,6 +345,10 @@ struct Dummy_process : Abstract_startable_process {
         z::throw_xc(Z_FUNCTION);
     }
 
+    public: bool kill() {
+        return false;
+    }
+
     public: object_server::Connection* connection() const {
         return NULL;
     }
@@ -369,7 +357,8 @@ struct Dummy_process : Abstract_startable_process {
 
 struct Local_process : Abstract_startable_process {
     Local_process(Spooler* spooler, const Process_configuration& conf) :
-        Abstract_startable_process(spooler, conf)
+        Abstract_startable_process(spooler, conf),
+        _is_killed(false)
     {}
 
     protected: void do_start() {
@@ -411,11 +400,21 @@ struct Local_process : Abstract_startable_process {
         return parameters;
     }
 
+    public: bool kill() {
+        if (!_is_killed && _connection) {
+            bool killed = _connection->kill_process();
+            _is_killed = killed;
+            return killed;
+        } else
+            return false;
+    }
+
     public: object_server::Connection* connection() const {
         return +_connection;
     }
     
     private: ptr<object_server::Connection_to_own_server_process> _connection;
+    private: bool _is_killed;
 };
 
 
@@ -450,7 +449,7 @@ struct Thread_process : Abstract_startable_process {
     };
 
     Thread_process(Spooler* spooler, const Process_configuration& conf) :
-        Abstract_startable_process(spooler, conf) 
+        Abstract_startable_process(spooler, conf)
     {}
 
     protected: void do_start() {
@@ -474,6 +473,14 @@ struct Thread_process : Abstract_startable_process {
             }
         }
         return result;
+    }
+
+    public: bool kill() {
+        if (!_connection) {
+            if (pid_t pid = this->pid())
+                try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
+        }
+        return false;
     }
 
     public: object_server::Connection* connection() const {
