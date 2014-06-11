@@ -50,16 +50,16 @@ Async_operation* Remote_module_instance_proxy::close__start()
         _remote_instance = NULL;
     }
 
-    if( _process  &&  _module->kind() != Module::kind_process )
+    if( _api_process  &&  _module->kind() != Module::kind_process )
     {
-        _exit_code          = _process->exit_code();
-        _termination_signal = _process->termination_signal();
+        _exit_code          = _api_process->exit_code();
+        _termination_signal = _api_process->termination_signal();
     }
 
     _idispatch = NULL;
 
-    if (_process)  
-        return _process->close__start();
+    if (_api_process)  
+        return _api_process->close__start();
     else {
         _operation = Z_NEW(Sync_operation);
         return _operation;
@@ -79,7 +79,7 @@ bool Remote_module_instance_proxy::kill()
 {
     // Wenn noch andere Modulinstanzen (Tasks) im Prozess laufen sollten, sind die auch weg.
 
-    return _process        ? _process->kill() :
+    return _api_process    ? _api_process->kill() :
          //_remote_instance? _remote_instance->kill_process() :
            _operation      ? _operation->async_kill() 
                            : false;
@@ -89,7 +89,7 @@ bool Remote_module_instance_proxy::kill()
 
 int Remote_module_instance_proxy::exit_code()
 {
-    if( _process )  _exit_code = _process->exit_code();
+    if( _api_process )  _exit_code = _api_process->exit_code();
     return _exit_code;
 }
 
@@ -97,7 +97,7 @@ int Remote_module_instance_proxy::exit_code()
 
 int Remote_module_instance_proxy::termination_signal()
 {
-    if( _process )  _termination_signal = _process->termination_signal();
+    if( _api_process )  _termination_signal = _api_process->termination_signal();
     return _termination_signal;
 }
 
@@ -105,22 +105,22 @@ int Remote_module_instance_proxy::termination_signal()
 
 File_path Remote_module_instance_proxy::stdout_path()                                      
 { 
-    return _process? _process->stdout_path() : File_path();
+    return _api_process? _api_process->stdout_path() : File_path();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::stderr_path
 
 File_path Remote_module_instance_proxy::stderr_path()
 { 
-    return _process? _process->stderr_path() : File_path();
+    return _api_process? _api_process->stderr_path() : File_path();
 }
 
 //---------------------------------------------------Remote_module_instance_proxy::try_delete_files
 
 bool Remote_module_instance_proxy::try_delete_files( Has_log* log )
 {
-    return _process? _process->try_delete_files( log )
-                   : true;
+    return _api_process? _api_process->try_delete_files( log )
+                       : true;
 }
 
 //----------------------------------------------------Remote_module_instance_proxy::undeleted_files
@@ -129,7 +129,7 @@ list<File_path> Remote_module_instance_proxy::undeleted_files()
 {
     list<File_path> result;
 
-    if( _process )  result = _process->undeleted_files();
+    if( _api_process )  result = _api_process->undeleted_files();
 
     return result;
 }
@@ -332,10 +332,10 @@ Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy
 
 //-------------------------------------------------Remote_module_instance_proxy::try_to_get_process
 
-bool Remote_module_instance_proxy::try_to_get_process(const Process_configuration* c)
+bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configuration* c)
 {
     assert(!c);
-    Process_configuration process_configuration;
+    Api_process_configuration process_configuration;
     process_configuration._remote_scheduler = _remote_scheduler;
     process_configuration._environment = new Com_variable_set(*_process_environment);
     process_configuration._java_options = _module->_java_options;
@@ -349,8 +349,10 @@ bool Remote_module_instance_proxy::try_to_get_process(const Process_configuratio
 
     bool ok = Module_instance::try_to_get_process(&process_configuration);
     if (ok) {
-        _process->start();
-        _pid = _process->connection()->pid();
+        _api_process = dynamic_cast<Api_process*>(+_process);
+        if (!_api_process) z::throw_xc(Z_FUNCTION);
+        _api_process->start();
+        _pid = _api_process->session()->connection()->pid();
         return true;
     } else {
         return false;
@@ -359,8 +361,9 @@ bool Remote_module_instance_proxy::try_to_get_process(const Process_configuratio
 
 
 void Remote_module_instance_proxy::detach_process() {
-    if (_process) {
-        _process->close_session();
+    if (_api_process) {
+        _api_process->close_session();
+        _api_process = NULL;
     }
     Module_instance::detach_process();
 }
@@ -377,7 +380,7 @@ AGAIN:
 
         case c_begin:
         {
-            ptr<Async_operation> connection_operation = _process->session()->connect_server__start();
+            ptr<Async_operation> connection_operation = _api_process->session()->connect_server__start();
             connection_operation->set_async_manager( _spooler->_connection_manager );
             operation->set_async_child( connection_operation );            
             operation->_call_state = c_connect;
@@ -393,7 +396,7 @@ AGAIN:
         case c_connect:
         {
             operation->set_async_child( NULL );
-            _process->session()->connect_server__end();
+            _api_process->session()->connect_server__end();
         }
         
         // Nächste Operation
@@ -402,7 +405,7 @@ AGAIN:
             operation->_multi_qi.allocate( 1 );
             operation->_multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
             
-            operation->set_async_child(_process->session()->create_instance__start(spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, operation->_multi_qi));
+            operation->set_async_child(_api_process->session()->create_instance__start(spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, operation->_multi_qi));
 
             operation->_call_state = c_create_instance;
             break;
@@ -412,7 +415,7 @@ AGAIN:
         case c_create_instance:
         {
             operation->set_async_child( NULL );
-            HRESULT hr = _process->session()->create_instance__end( 1, operation->_multi_qi );
+            HRESULT hr = _api_process->session()->create_instance__end( 1, operation->_multi_qi );
             if( FAILED(hr) )  throw_com( hr, "create_instance", string_from_clsid( *operation->_multi_qi[ 0 ].pIID ) );
 
             _remote_instance = dynamic_cast<object_server::Proxy*>( operation->_multi_qi[0].pItf );
@@ -579,14 +582,14 @@ AGAIN:
 
 string Remote_module_instance_proxy::process_name() const
 {
-    return _process? _process->short_name() : "";
+    return _api_process? _api_process->short_name() : "";
 }
 
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_
 
 bool Remote_module_instance_proxy::Operation::async_finished_() const
 { 
-    if( _call_state == c_begin  &&  !_proxy->_process )
+    if( _call_state == c_begin  &&  !_proxy->_api_process )
     {
         // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,
         // weil die Operation nicht über Connection::current_super_operation() erreichbar ist.
@@ -608,7 +611,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_() const
 string Remote_module_instance_proxy::Operation::async_state_text_() const
 { 
     string text = "Remote_module_instance_proxy(state=" + state_name();
-    if( _call_state == c_begin  &&  !_proxy->_process )  text += ", waiting for available process in process class";
+    if( _call_state == c_begin  &&  !_proxy->_api_process )  text += ", waiting for available process in process class";
   //if( _operation )  text += "," + _operation->async_state_text();
     text += ")";
 

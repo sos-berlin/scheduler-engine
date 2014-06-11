@@ -237,7 +237,7 @@ struct Module_instance : Object
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
     string                      process_name                () const                                { return ""; }
 
-    virtual bool                try_to_get_process          (const Process_configuration* = NULL);
+    virtual bool                try_to_get_process          (const Api_process_configuration* = NULL);
     virtual void                detach_process              ();
 
     virtual Async_operation*    close__start                ();

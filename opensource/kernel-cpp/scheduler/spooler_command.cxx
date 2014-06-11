@@ -70,7 +70,7 @@ struct Log_categories_reset_operation : Async_operation
 
 struct Remote_task_close_command_response : File_buffered_command_response
 {
-                                Remote_task_close_command_response( Process*, Communication::Connection* );
+                                Remote_task_close_command_response( Api_process*, Communication::Connection* );
                                ~Remote_task_close_command_response()                                {}
 
     // Async_operation
@@ -87,7 +87,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
 
     Fill_zero                  _zero_;
     Process_id                 _process_id;
-    ptr<Process>               _process;
+    ptr<Api_process>           _process;
     ptr<Communication::Connection>  _connection;
     ptr<Async_operation>       _operation;
     State                      _state;
@@ -96,7 +96,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
 
 //---------------------------Remote_task_close_command_response::Remote_task_close_command_response
 
-Remote_task_close_command_response::Remote_task_close_command_response( Process* p, Communication::Connection* c )
+Remote_task_close_command_response::Remote_task_close_command_response( Api_process* p, Communication::Connection* c )
 : 
     _zero_(this+1), 
     _process(p), 
@@ -1036,13 +1036,13 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
-    Process_configuration process_configuration;
-    process_configuration._controller_address = Host_and_port(client_host(), tcp_port);
-    process_configuration._is_thread = kind == "process";
-    process_configuration._log_stdout_and_stderr = true;     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
-    process_configuration._java_options = start_task_element.getAttribute("java_options");
-    process_configuration._java_classpath = start_task_element.getAttribute("java_classpath");
-    ptr<Process> process = Process::new_process(_spooler, process_configuration);
+    Api_process_configuration api_process_configuration;
+    api_process_configuration._controller_address = Host_and_port(client_host(), tcp_port);
+    api_process_configuration._is_thread = kind == "process";
+    api_process_configuration._log_stdout_and_stderr = true;     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
+    api_process_configuration._java_options = start_task_element.getAttribute("java_options");
+    api_process_configuration._java_classpath = start_task_element.getAttribute("java_classpath");
+    ptr<Api_process> process = Api_process::new_process(_spooler, api_process_configuration);
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
@@ -1075,7 +1075,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     int  process_id = close_element. int_getAttribute( "process_id" );
     bool kill       = close_element.bool_getAttribute( "kill", false );
 
-    Process* process = _communication_operation->_operation_connection->get_task_process( process_id );
+    Api_process* process = _communication_operation->_operation_connection->get_task_process( process_id );
 
     if( kill )  process->kill();
 

@@ -42,7 +42,7 @@ void Communication::Operation_connection::close()
 {
     Z_FOR_EACH( Task_process_register, _task_process_register, it )
     {
-        Process* process = it->second;
+        Api_process* process = it->second;
         process->close_async();
     }
 
@@ -51,7 +51,7 @@ void Communication::Operation_connection::close()
 
 //---------------------------------------Communication::Operation_connection::register_task_process
 
-void Communication::Operation_connection::register_task_process( Process* process )
+void Communication::Operation_connection::register_task_process( Api_process* process )
 {
     assert( process->process_id() );
     _task_process_register[ process->process_id() ] = process;
@@ -63,7 +63,7 @@ void Communication::Operation_connection::unregister_task_process( Process_id pr
 {
     assert( process_id );
 
-    Process* process = get_task_process( process_id );
+    Api_process* process = get_task_process( process_id );
     process->close_async();
 
     _task_process_register.erase( process_id );
@@ -71,7 +71,7 @@ void Communication::Operation_connection::unregister_task_process( Process_id pr
 
 //--------------------------------------------Communication::Operation_connection::get_task_process
 
-Process* Communication::Operation_connection::get_task_process( Process_id process_id )
+Api_process* Communication::Operation_connection::get_task_process( Process_id process_id )
 {
     assert( process_id );
 

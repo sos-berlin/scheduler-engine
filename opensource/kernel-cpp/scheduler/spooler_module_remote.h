@@ -67,7 +67,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     bool                        name_exists                 ( const string& name );
     Variant                     call                        ( const string& name );
 
-    bool                        try_to_get_process          (const Process_configuration*);
+    bool                        try_to_get_process          (const Api_process_configuration*);
     void                        detach_process              ();
 
             Async_operation*    close__start                ();
@@ -105,6 +105,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     bool                        _end_success;               // Für end__start()
     int                         _exit_code;
     int                         _termination_signal;
+    private: ptr<Api_process>  _api_process;
 
     Fill_end                   _end_;
 };

@@ -824,10 +824,9 @@ bool Module_instance::load()
 
 //--------------------------------------------------------------Module_instance::try_to_get_process
 
-bool Module_instance::try_to_get_process(const Process_configuration* c)
+bool Module_instance::try_to_get_process(const Api_process_configuration* c)
 {
-    if( !_process )
-    {
+    if (!_process) {
         Process_class* process_class = _spooler->process_class_subsystem()->process_class(_module->_process_class_path);
         _process = process_class->select_process_if_available(c);
         // _process wird nur von Remote_module_instance_proxy benutzt. 
@@ -890,7 +889,6 @@ void Module_instance::detach_process()
 {
     if( _process )
     {
-        _process->close_session();
         _spooler->process_class_subsystem()->process_class(_module->_process_class_path)->remove_process(_process);
         _process = NULL;
     }

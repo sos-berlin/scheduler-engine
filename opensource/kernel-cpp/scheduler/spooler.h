@@ -92,6 +92,7 @@ using namespace ::std;
 using namespace ::zschimmer::file;
 
 struct Abstract_scheduler_object;
+struct Api_process;
 struct Command_processor;
 struct Communication;
 struct Event;
