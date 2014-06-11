@@ -41,13 +41,14 @@ struct Api_process_configuration {
 
 /** Ein Prozess, in dem ein Module oder eine Task ablaufen kann. Kann auch ein Thread sein. */
 struct Process : zschimmer::Object, Scheduler_object {
+    using Scheduler_object::obj_name;
+
     virtual Process_id process_id() const = 0;
     virtual string short_name() const = 0;
     virtual double async_next_gmtime() = 0;
     virtual object_server::Connection* connection() const = 0;
     virtual xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&) = 0;
     
-    using Scheduler_object::obj_name;
     virtual bool async_continue() = 0;
 };
 
@@ -60,8 +61,6 @@ struct Api_process : virtual Process {
     virtual std::list<file::File_path> undeleted_files() = 0;
     virtual object_server::Session* session() = 0;
     virtual int pid() const = 0;
-    
-    using Scheduler_object::obj_name;
 
     virtual void start() = 0;
     virtual bool kill() = 0;

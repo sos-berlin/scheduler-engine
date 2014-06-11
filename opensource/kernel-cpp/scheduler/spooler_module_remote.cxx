@@ -352,7 +352,7 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
         _api_process = dynamic_cast<Api_process*>(+_process);
         if (!_api_process) z::throw_xc(Z_FUNCTION);
         _api_process->start();
-        _pid = _api_process->session()->connection()->pid();
+        _pid = _api_process->pid();
         return true;
     } else {
         return false;
