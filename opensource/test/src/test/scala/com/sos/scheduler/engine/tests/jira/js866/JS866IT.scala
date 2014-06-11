@@ -34,7 +34,7 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <start_job job={jobPath.string}/>
     val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == jobPath } .taskId
     scheduler executeXml <kill_task job={jobPath.string} id={taskId.value.toString} immediately="yes"/>
-    eventPipe.nextWithCondition[TaskEndedEvent] { _.jobPath == jobPath }
+    eventPipe.nextKeyed[TaskEndedEvent](taskId)
   }
 }
 
