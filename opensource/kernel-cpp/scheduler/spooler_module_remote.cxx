@@ -105,33 +105,40 @@ int Remote_module_instance_proxy::termination_signal()
 
 File_path Remote_module_instance_proxy::stdout_path()                                      
 { 
-    return _api_process? _api_process->stdout_path() : File_path();
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+        return local_api_process->stdout_path();
+    else
+        return File_path();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::stderr_path
 
 File_path Remote_module_instance_proxy::stderr_path()
 { 
-    return _api_process? _api_process->stderr_path() : File_path();
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+        return local_api_process->stderr_path();
+    else
+        return File_path();
 }
 
 //---------------------------------------------------Remote_module_instance_proxy::try_delete_files
 
 bool Remote_module_instance_proxy::try_delete_files( Has_log* log )
 {
-    return _api_process? _api_process->try_delete_files( log )
-                       : true;
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+        return local_api_process->try_delete_files(log);
+    else
+        return true;
 }
 
 //----------------------------------------------------Remote_module_instance_proxy::undeleted_files
 
 list<File_path> Remote_module_instance_proxy::undeleted_files()
 {
-    list<File_path> result;
-
-    if( _api_process )  result = _api_process->undeleted_files();
-
-    return result;
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+        return local_api_process->undeleted_files();
+    else
+        return list<File_path>();
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj

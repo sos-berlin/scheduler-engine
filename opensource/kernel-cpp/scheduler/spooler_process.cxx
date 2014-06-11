@@ -253,34 +253,6 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
         return _termination_signal;
     }
 
-    public: File_path stdout_path() {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection())) 
-            return c->stdout_path();
-        else
-            return File_path();
-    }
-
-    public: File_path stderr_path() {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection()))
-            return c->stderr_path();
-        else
-            return File_path();
-    }
-
-    public: bool try_delete_files(Has_log* log) {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection()))
-            return c->try_delete_files( log );
-        else
-            return true;
-    }
-
-    public: list<File_path> undeleted_files() {
-        if (object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>(+connection()))
-            return c->undeleted_files();
-        else
-            return list<File_path>();
-    }
-
     public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
         xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
         if (connection()) {
@@ -375,8 +347,8 @@ struct Dummy_process : Abstract_process {
 };
 
 
-struct Local_api_process : Abstract_api_process {
-    Local_api_process(Spooler* spooler, const Api_process_configuration& conf) :
+struct Standard_local_api_process : Local_api_process, virtual Abstract_api_process {
+    Standard_local_api_process(Spooler* spooler, const Api_process_configuration& conf) :
         Abstract_process(spooler, conf),
         Abstract_api_process(spooler, conf),
         _is_killed(false)
@@ -428,6 +400,25 @@ struct Local_api_process : Abstract_api_process {
             return killed;
         } else
             return false;
+    }
+
+    public: File_path stdout_path() {
+        return _connection? _connection->stdout_path() : File_path();
+    }
+
+    public: File_path stderr_path() {
+        return _connection? _connection->stderr_path() : File_path();
+    }
+
+    public: bool try_delete_files(Has_log* log) {
+        if (_connection)
+            return _connection->try_delete_files( log );
+        else
+            return true;
+    }
+
+    public: list<File_path> undeleted_files() {
+        return _connection? _connection->undeleted_files() : list<File_path>();
     }
 
     public: object_server::Connection* connection() const {
@@ -781,7 +772,7 @@ ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_co
         ptr<Thread_api_process> result = Z_NEW(Thread_api_process(spooler, configuration));
         return +result;
     } else {
-        ptr<Local_api_process> result = Z_NEW(Local_api_process(spooler, configuration));
+        ptr<Standard_local_api_process> result = Z_NEW(Standard_local_api_process(spooler, configuration));
         return +result;
     }
 }

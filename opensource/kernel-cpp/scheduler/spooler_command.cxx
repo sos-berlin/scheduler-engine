@@ -144,34 +144,38 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
 
         case s_deleting_files:
         {
-            bool ok = _process->try_delete_files( _process->log() );
-            if( !ok )
-            {
-                // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
-                // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
+            bool ok;
+            if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) {
+                ok = local_api_process->try_delete_files( _process->log() );
+                if (!ok) {
+                    // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
+                    // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
 
-                double now = double_from_gmtime();
+                    double now = double_from_gmtime();
 
-                if( !_trying_deleting_files_until )  
-                {
-                    string paths = join( ", ", _process->undeleted_files() );
-                    if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
-                }
+                    if( !_trying_deleting_files_until )  
+                    {
+                        string paths = join( ", ", local_api_process->undeleted_files() );
+                        if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
+                    }
 
-                if( _trying_deleting_files_until  &&  _trying_deleting_files_until < now )   // Nach Fristablauf geben wir auf
-                {
-                    string paths = join( ", ", _process->undeleted_files() );
-                    if( _process->log() )  _process->log()->info( message_string( "SCHEDULER-878", paths ) );
-                    //_job->log()->warn( message_string( "SCHEDULER-878", paths ) );
-                    ok = true;
+                    if( _trying_deleting_files_until  &&  _trying_deleting_files_until < now )   // Nach Fristablauf geben wir auf
+                    {
+                        string paths = join( ", ", local_api_process->undeleted_files() );
+                        if( _process->log() )  _process->log()->info( message_string( "SCHEDULER-878", paths ) );
+                        //_job->log()->warn( message_string( "SCHEDULER-878", paths ) );
+                        ok = true;
+                    }
+                    else
+                    {
+                        if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay.as_double();
+                        set_async_next_gmtime( min( now + delete_temporary_files_retry.as_double(), _trying_deleting_files_until ) );
+                    }
                 }
-                else
-                {
-                    if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay.as_double();
-                    set_async_next_gmtime( min( now + delete_temporary_files_retry.as_double(), _trying_deleting_files_until ) );
-                }
+            } else {
+                ok = true;
             }
-            
+
             if( ok )
                 _state = s_responding;
 

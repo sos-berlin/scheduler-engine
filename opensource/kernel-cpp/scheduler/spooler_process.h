@@ -56,21 +56,25 @@ struct Process : zschimmer::Object, Scheduler_object {
 struct Api_process : virtual Process {
     virtual int exit_code() = 0;
     virtual int termination_signal() = 0;
-    virtual File_path stderr_path() = 0;
-    virtual File_path stdout_path() = 0;
-    virtual std::list<file::File_path> undeleted_files() = 0;
     virtual object_server::Session* session() = 0;
     virtual int pid() const = 0;
 
     virtual void start() = 0;
     virtual bool kill() = 0;
-    virtual bool try_delete_files(Has_log*) = 0;
     virtual void close_async() = 0;
     virtual Async_operation* close__start(bool run_independently = false) = 0;
     virtual void close__end() = 0;
     virtual void close_session() = 0;
 
     static ptr<Api_process> new_process(Spooler* sp, const Api_process_configuration&);
+};
+
+
+struct Local_api_process : virtual Api_process {
+    virtual bool try_delete_files(Has_log*) = 0;
+    virtual File_path stderr_path() = 0;
+    virtual File_path stdout_path() = 0;
+    virtual std::list<file::File_path> undeleted_files() = 0;
 };
 
 //----------------------------------------------------------------------Process_class_configuration
