@@ -50,7 +50,6 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual object_server::Connection* connection() const = 0;
     virtual Process_id process_id() const = 0;
     virtual int pid() const = 0;
-    virtual Process_id remote_process_id() const = 0;
     virtual string short_name() const = 0;
     virtual double async_next_gmtime() = 0;
     virtual xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&) = 0;

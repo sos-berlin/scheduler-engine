@@ -107,7 +107,6 @@ struct Abstract_startable_process : Abstract_process {
     void                        close_session      ();
     Process_id                  process_id                  () const                                { return _process_id; }
     int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
-    Process_id                  remote_process_id           () const                                { return _remote_process_id; }
     bool                     is_terminated                  ();
     bool                        kill                        ();
     int                         exit_code                   ();
