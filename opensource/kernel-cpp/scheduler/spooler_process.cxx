@@ -123,14 +123,8 @@ struct Abstract_startable_process : Abstract_process {
 
     public: void close_async() {
         if (!_close_operation) {
-            if (!is_terminated() && !_async_remote_operation) {
-                log()->warn(message_string("SCHEDULER-850", obj_name()));
-                try {
-                    kill();     // Nicht bei _async_remote_operation aufrufen, dass eine TCP-Nachricht starten würde
-                } catch (exception& x) { 
-                    _log->warn(x.what()); 
-                }
-            }
+            if (!is_terminated())
+                emergency_kill();
             close__start(true);
         }
     }
@@ -222,6 +216,19 @@ struct Abstract_startable_process : Abstract_process {
         return connection()? connection()->async_continue() : false;
     }
 
+    protected: virtual bool is_non_close_async_operation_active() const {
+        return false;
+    }
+
+    protected: virtual void emergency_kill() {
+        log()->warn(message_string("SCHEDULER-850", obj_name()));
+        try {
+            kill();
+        } catch (exception& x) { 
+            log()->warn(x.what()); 
+        }
+    }
+
     public: bool kill() {
         bool result = false;
         if (!_is_killed && connection()) {
@@ -303,11 +310,17 @@ struct Abstract_startable_process : Abstract_process {
         return "Abstract_process " + short_name();
     }
 
-    public: string short_name() const {
+    public: virtual string short_name() const {
         return connection() ? connection()->short_name() : "";
     }
 
     private: bool continue_close_operation(Abstract_startable_process::Close_operation*);
+
+    protected: virtual bool on_session_closed(Abstract_startable_process::Close_operation*) {
+        return false;
+    }
+
+    protected: virtual void on_closing_remote_process() {}
 
     public: bool is_remote_host() const {
         return _configuration._remote_scheduler; 
@@ -336,7 +349,6 @@ struct Abstract_startable_process : Abstract_process {
     private: int _termination_signal;
     private: Time _running_since;
     private: ptr<Close_operation> _close_operation;
-    protected: ptr<Async_remote_operation> _async_remote_operation;    // Nur für Standard_remote_process
 };
 
 
@@ -525,6 +537,10 @@ struct Standard_remote_process : Abstract_startable_process {
         async_remote_start();
     }
 
+    protected: virtual void emergency_kill() {
+        // Nicht möglich, weil kill() asynchron über TCP geht.
+    }
+
     public: bool kill() {
         if (!_is_killed && _connection) {
             // Async_operation (vorhandene oder neue, besser neue)
@@ -554,6 +570,24 @@ struct Standard_remote_process : Abstract_startable_process {
     private: void async_remote_start();
     public: bool async_remote_start_continue(Async_operation::Continue_flags);
 
+    protected: bool on_session_closed(Abstract_startable_process::Close_operation* op) {
+        if (_async_remote_operation) {
+            _async_remote_operation->close_remote_task();
+            _async_remote_operation->set_async_parent(op);
+            return true;
+        } else
+            return false;
+    }
+
+    protected: void on_closing_remote_process() {
+        if (_async_remote_operation)
+            _async_remote_operation->set_async_parent(NULL);
+    }
+
+    protected: bool is_non_close_async_operation_active() const {
+        return _async_remote_operation && !_async_remote_operation->async_finished() || Abstract_startable_process::is_non_close_async_operation_active();
+    }
+
     public: object_server::Connection* connection() const {
         return _connection;
     }
@@ -561,6 +595,7 @@ struct Standard_remote_process : Abstract_startable_process {
     friend struct Async_remote_operation;
 
     private: ptr<object_server::Connection> _connection;
+    private: ptr<Async_remote_operation> _async_remote_operation;
     private: ptr<Xml_client_connection> _xml_client_connection;
     private: Process_id _remote_process_id;
     private: pid_t _remote_pid;
@@ -603,77 +638,49 @@ const Com_method Process_class_configuration::_methods[] =
 bool Abstract_startable_process::continue_close_operation(Abstract_startable_process::Close_operation* op)
 {
     bool something_done = false;
-
-    if( op->_state == Close_operation::s_initial )
-    {
-        if( _session )
-        {
+    if (op->_state == Close_operation::s_initial) {
+        if (_session) {
             op->_close_session_operation = _session->close__start();
-
-            if( !op->_close_session_operation->async_finished() )
-            {
-                op->_close_session_operation->set_async_parent( op );
-                op->_close_session_operation->set_async_manager( _spooler->_connection_manager );
+            if (!op->_close_session_operation->async_finished()) {
+                op->_close_session_operation->set_async_parent(op);
+                op->_close_session_operation->set_async_manager(_spooler->_connection_manager);
             }
-
             something_done = true;
         }
-
         op->_state = Close_operation::s_closing_session;
     }
-
-    if( op->_state == Close_operation::s_closing_session )
-    {
-#       ifdef Z_WINDOWS
-            if( op->_close_session_operation )  op->_close_session_operation->async_continue();       // Falls wir wegen Prozess-Event aufgerufen worden sind
-#       endif
-
-        if( !op->_close_session_operation  ||  op->_close_session_operation->async_finished() )
-        {
-            if( op->_close_session_operation )
-            {
+    if (op->_state == Close_operation::s_closing_session) {
+        #ifdef Z_WINDOWS
+            if (op->_close_session_operation)
+                op->_close_session_operation->async_continue();       // Falls wir wegen Prozess-Event aufgerufen worden sind
+        #endif
+        if (!op->_close_session_operation || op->_close_session_operation->async_finished()) {
+            if (op->_close_session_operation) {
                 op->_close_session_operation->set_async_parent( NULL );
                 op->_close_session_operation = NULL;
                 _session->close__end();
                 _session = NULL;
-
                 something_done = true;
             }
-
-            if( _async_remote_operation )
-            {
-                _async_remote_operation->close_remote_task();
-                _async_remote_operation->set_async_parent( op );
-                something_done = true;
-            }
-
+            something_done |= on_session_closed(op);
             op->_state = Close_operation::s_closing_remote_process;
         }
     }
-
-    if( op->_state == Close_operation::s_closing_remote_process )
-    {
-        if( !_async_remote_operation || _async_remote_operation->async_finished() )
-        {
-            if( _async_remote_operation )  _async_remote_operation->set_async_parent( NULL );
-
+    if (op->_state == Close_operation::s_closing_remote_process) {
+        if (!is_non_close_async_operation_active()) {
+            on_closing_remote_process();
             op->_state = Close_operation::s_finished;
-
             ptr<Abstract_startable_process> process = op->_process;
             op->_process = NULL;
-
-            if( op->_hold_self )    // run_independently
-            {
+            if (op->_hold_self) {   // run_independently
                 process->close__end();
                 process->_close_operation = NULL;
                 op->_hold_self = NULL;
                 // this ist jetzt ungültig!
             }
-
             something_done = true;
         }
     }
-
     return something_done;
 }
 
