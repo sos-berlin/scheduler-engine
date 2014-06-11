@@ -216,12 +216,30 @@ struct Local_process : Abstract_startable_process {
 
 
 struct Thread_process : Abstract_startable_process {
-    struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread
-    {
-        typedef object_server::Connection_to_own_server_thread::Server_thread Base_class;
+    struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread {
+        Com_server_thread::Com_server_thread(object_server::Connection_to_own_server_thread* c) : 
+            object_server::Connection_to_own_server_thread::Server_thread(c)
+        {
+            set_thread_name("scheduler::Thread_process::Com_server_thread");
+        }
 
-        Com_server_thread(object_server::Connection_to_own_server_thread*);
-        int thread_main();
+        int Com_server_thread::thread_main() {
+            Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
+            int result = 0;
+            Com_initialize com_initialize;
+            try {
+                _object_server = Z_NEW(Object_server);  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Abstract_process::pid()
+                _object_server->set_stdin_data(_connection->stdin_data());
+                _server = +_object_server;
+                result = run_server();
+            } catch (exception& x) {
+                string msg = S() << "ERROR in Com_server_thread: " << x.what() << "\n";
+                Z_LOG2("scheduler", msg);
+                cerr << msg;
+            }
+            Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
+            return result;
+        }
 
         ptr<Object_server> _object_server;
     };
@@ -241,7 +259,18 @@ struct Thread_process : Abstract_startable_process {
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
     }
     
-    protected: int pid() const;
+    protected: int Thread_process::pid() const {
+        int result = 0;
+        if (_com_server_thread && _connection) {
+            if (ptr<Object_server> object_server = _com_server_thread->_object_server) {
+                Object* o = object_server->get_class_object_or_null(spooler_com::CLSID_Remote_module_instance_server);
+                if (Com_remote_module_instance_server::Class_data* class_data = dynamic_cast<Com_remote_module_instance_server::Class_data*>(o)) {
+                    result = class_data->_remote_instance_pid;
+                }
+            }
+        }
+        return result;
+    }
 
     private: ptr<Com_server_thread> _com_server_thread;
 };
@@ -539,44 +568,6 @@ string Async_remote_operation::async_state_text_() const
     S result;
     result << "Async_remote_operation " << state_name( _state );
     if( _process )  result << " " << _process->obj_name();
-    return result;
-}
-
-//---------------------------------------------Thread_process::Com_server_thread::Com_server_thread
-
-Thread_process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_server_thread* c ) 
-: 
-    Base_class(c)
-{
-    set_thread_name( "scheduler::Thread_process::Com_server_thread" );
-}
-
-//---------------------------------------------------Thread_process::Com_server_thread::thread_main
-    
-int Thread_process::Com_server_thread::thread_main()
-{
-    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
-    int result = 0;
-
-    Com_initialize com_initialize;
-
-    try
-    {
-        _object_server = Z_NEW( Object_server() );  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Abstract_process::pid()
-        _object_server->set_stdin_data( _connection->stdin_data() );
-        _server = +_object_server;
-
-        result = run_server();
-    }
-    catch( exception& x )
-    {
-        S s; 
-        s << "ERROR in Com_server_thread: " << x.what() << "\n";
-        Z_LOG2( "scheduler", s );
-        cerr << s;
-    }
-
-    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
     return result;
 }
 
@@ -884,37 +875,6 @@ bool Abstract_startable_process::kill()
 int Abstract_startable_process::pid() const
 { 
     return _connection? _connection->pid() : 0;
-}
-
-//------------------------------------------------------------------------------Thread_process::pid
-
-int Thread_process::pid() const
-{ 
-    int result = 0;
-
-    if( _connection )
-    {
-        if( _com_server_thread )
-        {
-            if( ptr<Object_server> object_server = _com_server_thread->_object_server )
-            {
-                // Hmm, scheint der einzige Weg zu sein, an die Pid der Process_module_instance heranzukommen.
-
-                Object* o = object_server->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
-
-                if( Com_remote_module_instance_server::Class_data* class_data = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
-                {
-                    result = class_data->_remote_instance_pid;
-                }
-            }
-        }
-        else
-        {
-            result = Abstract_startable_process::pid();
-        }
-    }
-
-    return result;
 }
 
 //--------------------------------------------------------Abstract_startable_process::is_terminated
