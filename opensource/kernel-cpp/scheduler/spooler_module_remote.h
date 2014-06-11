@@ -100,7 +100,6 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     Fill_zero                  _zero_;
 
-    ptr<object_server::Session> _session;
     ptr<object_server::Proxy>   _remote_instance;
     ptr<Async_operation>        _operation;
     bool                        _end_success;               // Für end__start()

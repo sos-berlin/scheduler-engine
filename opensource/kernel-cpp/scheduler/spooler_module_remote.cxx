@@ -71,7 +71,6 @@ Async_operation* Remote_module_instance_proxy::close__start()
 void Remote_module_instance_proxy::close__end()
 {
     Com_module_instance_base::close__end();
-    _session = NULL;
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::kill
@@ -351,8 +350,7 @@ bool Remote_module_instance_proxy::try_to_get_process(const Process_configuratio
     bool ok = Module_instance::try_to_get_process(&process_configuration);
     if (ok) {
         _process->start();
-        _session = _process->session(); 
-        _pid = _session->connection()->pid();
+        _pid = _process->connection()->pid();
         return true;
     } else {
         return false;
@@ -379,7 +377,7 @@ AGAIN:
 
         case c_begin:
         {
-            ptr<Async_operation> connection_operation = _session->connect_server__start();
+            ptr<Async_operation> connection_operation = _process->session()->connect_server__start();
             connection_operation->set_async_manager( _spooler->_connection_manager );
             operation->set_async_child( connection_operation );            
             operation->_call_state = c_connect;
@@ -395,7 +393,7 @@ AGAIN:
         case c_connect:
         {
             operation->set_async_child( NULL );
-            _session->connect_server__end();
+            _process->session()->connect_server__end();
         }
         
         // Nächste Operation
@@ -404,7 +402,7 @@ AGAIN:
             operation->_multi_qi.allocate( 1 );
             operation->_multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
             
-            operation->set_async_child( _session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, operation->_multi_qi ) );
+            operation->set_async_child(_process->session()->create_instance__start(spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, operation->_multi_qi));
 
             operation->_call_state = c_create_instance;
             break;
@@ -414,7 +412,7 @@ AGAIN:
         case c_create_instance:
         {
             operation->set_async_child( NULL );
-            HRESULT hr = _session->create_instance__end( 1, operation->_multi_qi );
+            HRESULT hr = _process->session()->create_instance__end( 1, operation->_multi_qi );
             if( FAILED(hr) )  throw_com( hr, "create_instance", string_from_clsid( *operation->_multi_qi[ 0 ].pIID ) );
 
             _remote_instance = dynamic_cast<object_server::Proxy*>( operation->_multi_qi[0].pItf );
