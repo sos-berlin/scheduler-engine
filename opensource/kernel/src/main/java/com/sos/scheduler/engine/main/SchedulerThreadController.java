@@ -48,7 +48,7 @@ public class SchedulerThreadController implements SchedulerController {
         Stopwatch stopwatch = new Stopwatch();
         terminateScheduler();
         if (!tryJoinThread(terminationTimeout)) {
-            logger.warn("Still waiting for JobScheduler termination ("+terminationTimeout+") ...");
+            logger.warn("Still waiting for JobScheduler termination ("+terminationTimeout.getStandardSeconds() +"s) ...");
             tryJoinThread(new Duration(Long.MAX_VALUE));
             logger.info("JobScheduler has been terminated after "+stopwatch);
         }
