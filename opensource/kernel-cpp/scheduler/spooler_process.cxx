@@ -60,23 +60,49 @@ struct Abstract_startable_process : Abstract_process {
     struct Close_operation : Async_operation {
         enum State { s_initial, s_closing_session, s_closing_remote_process, s_finished };
 
-                                    Close_operation         (Abstract_startable_process*, bool run_independently);
-                                   ~Close_operation         ();
+        public: Close_operation(Abstract_startable_process* p, bool run_independently) : 
+            _state(s_initial),
+            _close_session_operation(NULL),
+            _process(p),
+            _hold_self(run_independently? this : NULL)
+        {}
 
-        // Async_operation:
-        bool                        async_continue_         ( Continue_flags );
-        bool                        async_finished_         () const;
-        string                      async_state_text_       () const;
+        public: ~Close_operation() {}
 
-        static string               string_from_state       ( State );
+        public: bool async_continue_(Async_operation::Continue_flags) {
+            return _process->continue_close_operation(this);
+        }
 
-      private:
-        friend struct               Abstract_startable_process;
+        public: bool async_finished_() const {
+            return _state == s_finished;
+        }
 
-        State                      _state;
-        ptr<Abstract_startable_process> _process;
-        Async_operation*           _close_session_operation;
-        ptr<Close_operation>       _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Abstract_process schließen soll
+        public: string async_state_text_() const {
+            S result;
+            result << "Abstract_startable_process::Close_operation " << string_from_state(_state);
+            if (_close_session_operation)
+                result << " " << _close_session_operation->async_state_text();
+            if (_process)
+                result << " " << _process->async_state_text();
+            return result;
+        }
+
+        public: static string string_from_state(State state) {
+            switch (state) {
+                case s_initial:                 return "initial";
+                case s_closing_session:         return "closing_session";
+                case s_closing_remote_process:  return "closing_remote_process";
+                case s_finished:                return "finished";
+                default:                        return S() << "State(" << state << ")";
+            }
+        }
+
+        friend struct Abstract_startable_process;
+
+        private: State _state;
+        private: ptr<Abstract_startable_process> _process;
+        private: Async_operation* _close_session_operation;
+        private: ptr<Close_operation> _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Abstract_process schließen soll
     };
 
     Abstract_startable_process(Spooler* spooler, const Process_configuration& conf) :
@@ -95,7 +121,7 @@ struct Abstract_startable_process : Abstract_process {
     Async_operation*            close__start                ( bool run_independently = false );
     void                        close__end                  ();
     bool                     is_closing                     ()                                      { return _close_operation != NULL; }
-    bool                        continue_close_operation    (Abstract_startable_process::Close_operation*);
+    bool                        continue_close_operation    (Close_operation*);
 
 
     bool                        is_started                  ()                                      { return _connection != NULL; }
@@ -136,6 +162,10 @@ struct Abstract_startable_process : Abstract_process {
     }
     
     protected: virtual void do_start() = 0;
+
+    protected: virtual string async_state_text() const {
+        return "";
+    }
 
   public:
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
@@ -217,15 +247,15 @@ struct Local_process : Abstract_startable_process {
 
 struct Thread_process : Abstract_startable_process {
     struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread {
-        Com_server_thread::Com_server_thread(object_server::Connection_to_own_server_thread* c) : 
+        Com_server_thread(object_server::Connection_to_own_server_thread* c) : 
             object_server::Connection_to_own_server_thread::Server_thread(c)
         {
             set_thread_name("scheduler::Thread_process::Com_server_thread");
         }
 
-        int Com_server_thread::thread_main() {
+        int thread_main() {
             Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
-            int result = 0;
+            int result;
             Com_initialize com_initialize;
             try {
                 _object_server = Z_NEW(Object_server);  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Abstract_process::pid()
@@ -236,6 +266,7 @@ struct Thread_process : Abstract_startable_process {
                 string msg = S() << "ERROR in Com_server_thread: " << x.what() << "\n";
                 Z_LOG2("scheduler", msg);
                 cerr << msg;
+                result = 0;
             }
             Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
             return result;
@@ -259,7 +290,7 @@ struct Thread_process : Abstract_startable_process {
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
     }
     
-    protected: int Thread_process::pid() const {
+    protected: int pid() const {
         int result = 0;
         if (_com_server_thread && _connection) {
             if (ptr<Object_server> object_server = _com_server_thread->_object_server) {
@@ -337,6 +368,9 @@ struct Standard_remote_process : Abstract_startable_process {
             return false;
     }
 
+    protected: virtual string async_state_text() const {
+        return _async_remote_operation ? _async_remote_operation->async_state_text() : "";
+    }
 
     private: void async_remote_start();
     public: bool async_remote_start_continue(Async_operation::Continue_flags);
@@ -372,33 +406,6 @@ const Com_method Process_class_configuration::_methods[] =
 #endif
     {}
 };
-
-//-------------------------------------Abstract_startable_process::Close_operation::Close_operation
-
-Abstract_startable_process::Close_operation::Close_operation(Abstract_startable_process* p, bool run_independently)
-: 
-    _state(s_initial),
-    _close_session_operation(NULL),
-    _process(p)
-{
-    if( run_independently )
-    {
-        _hold_self = this;
-    }
-}
-
-//------------------------------------Abstract_startable_process::Close_operation::~Close_operation
-    
-Abstract_startable_process::Close_operation::~Close_operation()
-{
-}
-
-//-------------------------------------Abstract_startable_process::Close_operation::async_continue_
-
-bool Abstract_startable_process::Close_operation::async_continue_(Async_operation::Continue_flags)
-{
-    return _process->continue_close_operation( this );
-}
 
 //---------------------------------------------Abstract_startable_process::continue_close_operation
 
@@ -477,41 +484,6 @@ bool Abstract_startable_process::continue_close_operation(Abstract_startable_pro
     }
 
     return something_done;
-}
-
-//-------------------------------------Abstract_startable_process::Close_operation::async_finished_
-
-bool Abstract_startable_process::Close_operation::async_finished_() const
-{
-    return _state == s_finished;
-}
-
-//-----------------------------------Abstract_startable_process::Close_operation::async_state_text_
-
-string Abstract_startable_process::Close_operation::async_state_text_() const
-{
-    S result;
-
-    result << "Abstract_startable_process::Close_operation ";
-    result << string_from_state( _state );
-    if( _close_session_operation )  result << " " << _close_session_operation->async_state_text();
-    if( _process  &&  _process->_async_remote_operation )  result << " " << _process->_async_remote_operation->async_state_text();
-
-    return result;
-}
-
-//-----------------------------------Abstract_startable_process::Close_operation::string_from_state
-    
-string Abstract_startable_process::Close_operation::string_from_state( State state )
-{
-    switch( state )
-    {
-        case s_initial:                 return "initial";
-        case s_closing_session:         return "closing_session";
-        case s_closing_remote_process:  return "closing_remote_process";
-        case s_finished:                return "finished";
-        default:                        return S() << "State(" << state << ")";
-    }
 }
 
 //---------------------------------------------------Async_remote_operation::Async_remote_operation
