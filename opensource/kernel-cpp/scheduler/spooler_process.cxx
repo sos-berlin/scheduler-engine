@@ -58,7 +58,7 @@ struct Abstract_process : virtual Process {
 };
 
 
-struct Async_remote_operation;
+struct Async_tcp_operation;
 
 
 struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
@@ -341,8 +341,12 @@ struct Dummy_process : Abstract_process {
         return time::never_double; 
     }
 
+    public: string obj_name() const {
+        return short_name();
+    }
+
     public: string short_name() const {
-        return "";
+        return "Dummy_process";
     }
 };
 
@@ -504,9 +508,9 @@ struct Thread_api_process : Abstract_api_process {
     private: ptr<Com_server_thread> _com_server_thread;
 };
 
-struct Standard_remote_api_process;
+struct Tcp_remote_api_process;
 
-struct Async_remote_operation : Async_operation {
+struct Async_tcp_operation : Async_operation {
     enum State {
         s_not_connected,
         s_connecting,
@@ -518,8 +522,8 @@ struct Async_remote_operation : Async_operation {
 
     static string state_name(State);
 
-    Async_remote_operation(Standard_remote_api_process*);
-    ~Async_remote_operation();
+    Async_tcp_operation(Tcp_remote_api_process*);
+    ~Async_tcp_operation();
 
     virtual bool async_continue_(Continue_flags f);
     
@@ -532,94 +536,110 @@ struct Async_remote_operation : Async_operation {
 
 
     State _state;
-    Standard_remote_api_process* _process;
+    Tcp_remote_api_process* _process;
 };
 
 
-struct Standard_remote_api_process : Abstract_api_process {
-    Standard_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
+struct Abstract_remote_api_process : Abstract_api_process {
+    Abstract_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
         Abstract_process(spooler, conf),
         Abstract_api_process(spooler, conf),
         _remote_process_id(0),
-        _remote_pid(0),
-        _is_killed(false)
+        _remote_pid(0)
     {}
 
-    ~Standard_remote_api_process() {
-        if (_async_remote_operation) {
-            _async_remote_operation->set_async_manager( NULL );
-            _async_remote_operation = NULL;
-        }
-        if (_xml_client_connection)
-            _xml_client_connection->set_async_manager(NULL);
-    }
-
     protected: void do_start() {
-        async_remote_start();
-    }
-
-    protected: virtual void emergency_kill() {
-        // Nicht möglich, weil kill() asynchron über TCP geht.
-    }
-
-    public: bool kill() {
-        if (!_is_killed && _connection) {
-            // Async_operation (vorhandene oder neue, besser neue)
-            // mit <kill_task> starten. Nur, wenn noch nicht gestartet
-            // if( !_kill_task_operation )   _kill_task_operation = Z_NEW( Kill_task_operation );
-            // <remote_scheduler.task.close pid=" _remote_pid
-            if (_async_remote_operation && _async_remote_operation->_state != Async_remote_operation::s_closed)
-                _async_remote_operation->close_remote_task(true);
-            _is_killed = true;
-            return true;
-        } else
-            return false;
+        _connection = _spooler->_connection_manager->new_connection();
+        _connection->set_remote_host(_configuration._remote_scheduler._host);
+        _connection->listen_on_tcp_port( INADDR_ANY );
     }
 
     public: string short_name() const {
         S result;
         result << Abstract_api_process::short_name();
-        if (_remote_pid) 
-            result << ",pid=" << _remote_pid;
+        if (_remote_pid)
+            result << ",remote_pid=" << _remote_pid;
         return result;
-    }
-
-    protected: virtual string async_state_text() const {
-        return _async_remote_operation ? _async_remote_operation->async_state_text() : "";
-    }
-
-    private: void async_remote_start();
-    public: bool async_remote_start_continue(Async_operation::Continue_flags);
-
-    protected: bool on_session_closed(Abstract_api_process::Close_operation* op) {
-        if (_async_remote_operation) {
-            _async_remote_operation->close_remote_task();
-            _async_remote_operation->set_async_parent(op);
-            return true;
-        } else
-            return false;
-    }
-
-    protected: void on_closing_remote_process() {
-        if (_async_remote_operation)
-            _async_remote_operation->set_async_parent(NULL);
-    }
-
-    protected: bool is_non_close_async_operation_active() const {
-        return _async_remote_operation && !_async_remote_operation->async_finished() || Abstract_api_process::is_non_close_async_operation_active();
     }
 
     public: object_server::Connection* connection() const {
         return _connection;
     }
 
-    friend struct Async_remote_operation;
-
     private: ptr<object_server::Connection> _connection;
-    private: ptr<Async_remote_operation> _async_remote_operation;
+    protected: Process_id _remote_process_id;
+    protected: pid_t _remote_pid;
+};
+
+
+struct Tcp_remote_api_process : Abstract_remote_api_process {
+    Tcp_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
+        Abstract_process(spooler, conf),
+        Abstract_remote_api_process(spooler, conf),
+        _is_killed(false)
+    {}
+
+    ~Tcp_remote_api_process() {
+        if (_async_tcp_operation) {
+            _async_tcp_operation->set_async_manager( NULL );
+            _async_tcp_operation = NULL;
+        }
+        if (_xml_client_connection)
+            _xml_client_connection->set_async_manager(NULL);
+    }
+
+    protected: void do_start();
+
+    protected: virtual void emergency_kill() {
+        // Nicht möglich, weil kill() asynchron über TCP geht.
+    }
+
+    public: bool kill() {
+        if (!_is_killed && connection()) {
+            // Async_operation (vorhandene oder neue, besser neue)
+            // mit <kill_task> starten. Nur, wenn noch nicht gestartet
+            // if( !_kill_task_operation )   _kill_task_operation = Z_NEW( Kill_task_operation );
+            // <remote_scheduler.task.close pid=" _remote_pid
+            if (_async_tcp_operation && _async_tcp_operation->_state != Async_tcp_operation::s_closed)
+                _async_tcp_operation->close_remote_task(true);
+            _is_killed = true;
+            return true;
+        } else
+            return false;
+    }
+
+    public: string obj_name() const {
+        return "Tcp_remote_api_process " + short_name();
+    }
+
+    protected: virtual string async_state_text() const {
+        return _async_tcp_operation ? _async_tcp_operation->async_state_text() : "";
+    }
+
+    protected: bool on_session_closed(Abstract_api_process::Close_operation* op) {
+        if (_async_tcp_operation) {
+            _async_tcp_operation->close_remote_task();
+            _async_tcp_operation->set_async_parent(op);
+            return true;
+        } else
+            return false;
+    }
+
+    protected: void on_closing_remote_process() {
+        if (_async_tcp_operation)
+            _async_tcp_operation->set_async_parent(NULL);
+    }
+
+    protected: bool is_non_close_async_operation_active() const {
+        return _async_tcp_operation && !_async_tcp_operation->async_finished() || Abstract_api_process::is_non_close_async_operation_active();
+    }
+
+    public: bool async_remote_start_continue(Async_operation::Continue_flags);
+
+    friend struct Async_tcp_operation;
+
+    private: ptr<Async_tcp_operation> _async_tcp_operation;
     private: ptr<Xml_client_connection> _xml_client_connection;
-    private: Process_id _remote_process_id;
-    private: pid_t _remote_pid;
     private: bool _is_killed;
 };
 
@@ -707,7 +727,7 @@ bool Abstract_api_process::continue_close_operation(Abstract_api_process::Close_
 
 //---------------------------------------------------Async_remote_operation::Async_remote_operation
     
-Async_remote_operation::Async_remote_operation(Standard_remote_api_process* p)
+Async_tcp_operation::Async_tcp_operation(Tcp_remote_api_process* p)
 :                        
     _state(s_not_connected), 
     _process(p) 
@@ -717,7 +737,7 @@ Async_remote_operation::Async_remote_operation(Standard_remote_api_process* p)
 
 //--------------------------------------------------Async_remote_operation::~Async_remote_operation
     
-Async_remote_operation::~Async_remote_operation()
+Async_tcp_operation::~Async_tcp_operation()
 {
     --_process->_spooler->_process_count;
 
@@ -729,7 +749,7 @@ Async_remote_operation::~Async_remote_operation()
 
 //-----------------------------------Standard_remote_api_process::Async_remote_operation::state_name
     
-string Async_remote_operation::state_name( State state )
+string Async_tcp_operation::state_name( State state )
 {
     string result;
 
@@ -748,13 +768,13 @@ string Async_remote_operation::state_name( State state )
 }
 
 
-bool Async_remote_operation::async_continue_(Continue_flags f) { 
+bool Async_tcp_operation::async_continue_(Continue_flags f) { 
     return _process->async_remote_start_continue(f); 
 }
 
 //--------------------------------------------------------Async_remote_operation::async_state_text_
 
-string Async_remote_operation::async_state_text_() const
+string Async_tcp_operation::async_state_text_() const
 {
     S result;
     result << "Async_remote_operation " << state_name( _state );
@@ -765,7 +785,7 @@ string Async_remote_operation::async_state_text_() const
 
 ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_configuration& configuration) {
     if(configuration._remote_scheduler) {
-        ptr<Standard_remote_api_process> result = Z_NEW(Standard_remote_api_process(spooler, configuration));
+        ptr<Tcp_remote_api_process> result = Z_NEW(Tcp_remote_api_process(spooler, configuration));
         return +result;
     } else
     if (configuration._is_thread) {
@@ -777,42 +797,36 @@ ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_co
     }
 }
 
-//--------------------------------------------------Standard_remote_api_process::async_remote_start
 
-void Standard_remote_api_process::async_remote_start()
-{
-    _connection = _spooler->_connection_manager->new_connection();
-    _connection->set_remote_host(_configuration._remote_scheduler._host);
-    _connection->listen_on_tcp_port( INADDR_ANY );
-
-    _async_remote_operation = Z_NEW( Async_remote_operation( this ) );
-    _async_remote_operation->async_wake();
-    _async_remote_operation->set_async_manager( _spooler->_connection_manager );
+void Tcp_remote_api_process::do_start() {
+    Abstract_remote_api_process::do_start();
+    _async_tcp_operation = Z_NEW( Async_tcp_operation( this ) );
+    _async_tcp_operation->async_wake();
+    _async_tcp_operation->set_async_manager( _spooler->_connection_manager );
 }
 
-//-----------------------------------------Standard_remote_api_process::async_remote_start_continue
 
-bool Standard_remote_api_process::async_remote_start_continue( Async_operation::Continue_flags )
+bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Continue_flags )
 {
     bool something_done = true;     // spooler.cxx ruft async_continue() auf
 
     if( _xml_client_connection )  _xml_client_connection->async_check_exception();
 
-    switch( _async_remote_operation->_state )
+    switch( _async_tcp_operation->_state )
     {
-        case Async_remote_operation::s_not_connected:
+        case Async_tcp_operation::s_not_connected:
         {
             _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _configuration._remote_scheduler ) );
-            _xml_client_connection->set_async_parent( _async_remote_operation );
+            _xml_client_connection->set_async_parent( _async_tcp_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );
             _xml_client_connection->connect();
 
             something_done = true;
-            _async_remote_operation->_state = Async_remote_operation::s_connecting;
+            _async_tcp_operation->_state = Async_tcp_operation::s_connecting;
         }
 
-        case Async_remote_operation::s_connecting:
+        case Async_tcp_operation::s_connecting:
         {
             if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
@@ -820,7 +834,7 @@ bool Standard_remote_api_process::async_remote_start_continue( Async_operation::
             xml_writer.set_encoding( string_encoding );
             xml_writer.write_prolog();
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
-            xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
+            xml_writer.set_attribute( "tcp_port", connection()->tcp_port() );
             if (!_configuration._has_api)  xml_writer.set_attribute( "kind", "process" );
             if (!rtrim(_configuration._java_options).empty())
                 xml_writer.set_attribute_optional("java_options", _configuration._java_options);
@@ -831,10 +845,10 @@ bool Standard_remote_api_process::async_remote_start_continue( Async_operation::
             _xml_client_connection->send( xml_writer.to_string() );
 
             something_done = true;
-            _async_remote_operation->_state = Async_remote_operation::s_starting;
+            _async_tcp_operation->_state = Async_tcp_operation::s_starting;
         }
 
-        case Async_remote_operation::s_starting:
+        case Async_tcp_operation::s_starting:
         {
             xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document();
             if( !dom_document )  break;
@@ -847,26 +861,26 @@ bool Standard_remote_api_process::async_remote_start_continue( Async_operation::
             assert(_remote_process_id);
             _remote_pid        = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "pid", 0 );
 
-            _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+            _spooler->log()->debug9( message_string( "SCHEDULER-948", connection()->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
             something_done = true;
-            _async_remote_operation->_state = Async_remote_operation::s_running;
+            _async_tcp_operation->_state = Async_tcp_operation::s_running;
         }
 
-        case Async_remote_operation::s_running:    
+        case Async_tcp_operation::s_running:    
         {
             if (_configuration._has_on_remote_task_running)
                 _configuration._has_on_remote_task_running->on_remote_task_running();
             break;
         }
 
-        case Async_remote_operation::s_closing:
+        case Async_tcp_operation::s_closing:
         {
             if( xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document() )  
             {
                 Z_LOG2( "zschimmer", Z_FUNCTION << " XML response " << dom_document.xml_string() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
                 something_done = true;
-                _async_remote_operation->_state = Async_remote_operation::s_closed;
+                _async_tcp_operation->_state = Async_tcp_operation::s_closed;
             }
 
             break;
@@ -881,7 +895,7 @@ bool Standard_remote_api_process::async_remote_start_continue( Async_operation::
 
 //--------------------------------------------------------Async_remote_operation::close_remote_task
 
-void Async_remote_operation::close_remote_task( bool kill )
+void Async_tcp_operation::close_remote_task( bool kill )
 {
     if( _state <= s_connecting ) {
         if( _process->_xml_client_connection ) {
