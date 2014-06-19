@@ -18,22 +18,30 @@ public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
     @Test
     public void testImmediately() {
         controller().activateScheduler();
-        addOrders(maxOrderCount, "now");
+        addOrders(1, "now");
+        addOrders(2, "now");
         controller().waitForTermination(shortTimeout);
     }
 
     // Startet die Aufträge verzögert. Der zweite Auftrag soll nicht erst anlaufen, wenn der erste beendet worden ist.
     @Test
-    public void testScheduled() {
+    public void testScheduledAtSameTime() {
         controller().activateScheduler();
-        addOrders(maxOrderCount, "now+1");
+        addOrders(1, "now+1");
+        addOrders(2, "now+1");
         controller().waitForTermination(shortTimeout);
     }
 
-    private void addOrders(int n, String startAt) {
-        for (int i = 0; i < n; i++) {
-            scheduler().executeXml("<add_order job_chain='/A' id='" + i + "' at='" + startAt + "' />");
-        }
+    @Test
+    public void testScheduledAtDifferentTimes() {
+        controller().activateScheduler();
+        addOrders(1, "now+1");
+        addOrders(2, "now+2");
+        controller().waitForTermination(shortTimeout);
+    }
+
+    private void addOrders(int id, String startAt) {
+        scheduler().executeXml("<add_order job_chain='/A' id='" + id + "' at='" + startAt + "' />");
     }
 
     @EventHandler

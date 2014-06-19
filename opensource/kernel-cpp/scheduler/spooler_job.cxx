@@ -1946,9 +1946,13 @@ void Standard_job::on_call(const Calculated_next_time_do_something_call&) {
 void Standard_job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
     Time t = next_order_time();
-    if (t <= Time::now())
+    if (t <= Time::now()) {
         process_orders();
-    else
+        Time next = next_order_time();
+        if (next != t && !next.is_never()) {
+            _call_register.call_at<Order_timed_call>(next);
+        }
+    } else
     if (!t.is_never())
         _call_register.call_at<Order_timed_call>(t);
 }
