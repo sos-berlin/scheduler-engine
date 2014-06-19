@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.ss.runtime;
+package com.sos.scheduler.engine.tests.jira.js946.twoorders;
 
 import sos.spooler.Job_impl;
 

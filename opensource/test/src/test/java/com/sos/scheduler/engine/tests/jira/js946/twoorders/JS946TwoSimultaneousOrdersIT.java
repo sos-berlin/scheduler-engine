@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.ss.runtime;
+package com.sos.scheduler.engine.tests.jira.js946.twoorders;
 
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderStepStartedEvent;
@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public final class RuntimeTest extends SchedulerTest {
+public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
 
 	private static final int maxOrderCount = 2;
 	private int numberOfStartedOrders = 0;

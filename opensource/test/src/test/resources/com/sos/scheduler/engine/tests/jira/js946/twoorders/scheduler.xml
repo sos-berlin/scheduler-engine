@@ -3,7 +3,7 @@
 	<config>
 		<jobs>
 			<job name="a" order="yes" tasks="2" idle_timeout="60">
-				<script java_class="com.sos.scheduler.engine.tests.excluded.ss.runtime.JobSleep" />
+				<script java_class="com.sos.scheduler.engine.tests.jira.js946.twoorders.JobSleep" />
 			</job>
 		</jobs>
 		<job_chains>
