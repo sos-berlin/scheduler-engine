@@ -279,7 +279,7 @@ void Job_subsystem_impl::do_something()
 {
     FOR_EACH_JOB(job) {
         if (Standard_job* j = dynamic_cast<Standard_job*>(job))
-            j->try_start_task();
+            j->try_start_tasks();
     }
 }
 
@@ -1913,7 +1913,7 @@ void Standard_job::on_call(const State_cmd_call& call) {
 //----------------------------------------------------------Standard_job::on_call Period_begin_call
 
 void Standard_job::on_call(const Period_begin_call&) {
-    try_start_task();
+    try_start_tasks();
 }
 
 //------------------------------------------------------------Standard_job::on_call Period_end_call
@@ -1930,15 +1930,20 @@ void Standard_job::on_call(const Period_end_call&) {
 
 //-----------------------------------------------------Standard_job::on_call Start_queued_task_call
 
-void Standard_job::on_call(const job::Start_queued_task_call&) 
+void Standard_job::on_call(const Start_queued_task_call&) 
 {
-    try_start_task();
+    Time t = _task_queue->next_start_time();
+    try_start_tasks();
+    Time next = _task_queue->next_start_time();
+    if (next != t) {
+        _call_register.call_at<Start_queued_task_call>(_task_queue->next_start_time());
+    }
 }
 
 //-------------------------------------Standard_job::on_call Calculated_next_time_do_something_call
 
 void Standard_job::on_call(const Calculated_next_time_do_something_call&) {
-    try_start_task();
+    try_start_tasks();
 }
 
 //-----------------------------------------------------------Standard_job::on_call Order_timed_call
@@ -1946,57 +1951,61 @@ void Standard_job::on_call(const Calculated_next_time_do_something_call&) {
 void Standard_job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
     Time t = next_order_time();
-    if (t <= Time::now())
-        process_order();
-    else
-    if (!t.is_never())
-        _call_register.call_at<Order_timed_call>(t);
+    process_orders();
+    Time next = next_order_time();
+    if (next != t) {
+        _call_register.call_at<Order_timed_call>(next);
+    }
 }
 
 //----------------------------------------------Standard_job::on_call Order_possibly_available_call
 
 void Standard_job::on_call(const Order_possibly_available_call&) {
-    process_order();
+    process_orders();
 }
 
-//----------------------------------------------------------------------Standard_job::process_order
+//---------------------------------------------------------------------Standard_job::process_orders
 
-void Standard_job::process_order() {
+void Standard_job::process_orders() {
+    continue_tasks_waiting_for_order();
+    try_start_tasks();
+}
+
+
+void Standard_job::continue_tasks_waiting_for_order() {
     Time now = Time::now();
     Z_FOR_EACH( Task_set, _running_tasks, t ) {
         Task* task = *t;
         if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) {
             if( task->fetch_and_occupy_order( now, Z_FUNCTION ) ) {
                 task->do_something();
-                return;
             }
         }
     }
-    try_start_task();
 }
 
 //-----------------------------------------------------Standard_job::on_call Process_available_call
 
 void Standard_job::on_call(const Process_available_call&) {
-    try_start_task();
+    try_start_tasks();
 }
 
 //-------------------------------------------------------Standard_job::on_call Below_min_tasks_call
 
 void Standard_job::on_call(const Below_min_tasks_call&) {
-    try_start_task();
+    try_start_tasks();
 }
 
 //-------------------------------------------------------Standard_job::on_call Below_max_tasks_call
 
 void Standard_job::on_call(const Below_max_tasks_call&) {
-    try_start_task();
+    try_start_tasks();
 }
 
 //-------------------------------------------------------Standard_job::on_call Locks_available_call
 
 void Standard_job::on_call(const Locks_available_call&) {
-    try_start_task();
+    try_start_tasks();
 }
 
 //-----------------------------------------------------------Standard_job::on_call Task_closed_call
@@ -2007,7 +2016,7 @@ void Standard_job::on_call(const Task_closed_call& call) {
     if (_temporary) 
         _call_register.call<Remove_temporary_job_call>();
     else
-        try_start_task();
+        try_start_tasks();
 }
 
 //------------------------------------------Standard_job::on_call Start_when_directory_changed_call
@@ -2015,7 +2024,7 @@ void Standard_job::on_call(const Task_closed_call& call) {
 void Standard_job::on_call(const Start_when_directory_changed_call&) {
     bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
     log()->debug(S() << "Start_when_directory_changed_call ok=" << ok);
-    if (ok) try_start_task();
+    if (ok) try_start_one_task();
 }
 
 //--------------------------------------------------Standard_job::on_call Remote_temporary_job_call
@@ -2051,7 +2060,7 @@ void Standard_job::set_state_cmd(State_cmd state_cmd)
                     if (state_cmd == sc_enable) _enabled = true;         // JS-551
                     check_min_tasks( "job has been unstopped" );
                     set_next_start_time( Time::now() );
-                    try_start_task();
+                    try_start_tasks();
                 }
             }
             break;
@@ -2082,7 +2091,7 @@ void Standard_job::set_state_cmd(State_cmd state_cmd)
                     
             set_state(_running_tasks.empty()? s_pending : s_running);
             check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
-            try_start_task();
+            try_start_tasks();
             break;
         }
 
@@ -2101,7 +2110,7 @@ void Standard_job::set_state_cmd(State_cmd state_cmd)
                     task->_cause = cause_wake;
                     task->_let_run = true;
                     task->init();
-                    try_start_task();
+                    try_start_tasks();
                 }
             }
             break;
@@ -2111,14 +2120,14 @@ void Standard_job::set_state_cmd(State_cmd state_cmd)
             if (is_in_period(Time::now())) {
                 _wake_when_in_period = true;
                 if (_state == s_pending || _state == s_running)
-                    try_start_task();
+                    try_start_tasks();
             }
             return;
         }
 
         case sc_start:
             start_task( NULL, "", Time::now() );
-            try_start_task();
+            try_start_one_task();
             break;
 
         case sc_remove:     
@@ -2907,7 +2916,17 @@ ptr<Task> Standard_job::task_to_start()
 
 //---------------------------------------------------------------------Standard_job::try_start_task
 
-void Standard_job::try_start_task()
+void Standard_job::try_start_tasks()
+{
+    while (true) {
+        bool started = try_start_one_task();
+        if (!started) break;
+    }
+}
+
+//-----------------------------------------------------------------Standard_job::try_start_one_task
+
+bool Standard_job::try_start_one_task()
 {
     bool task_started = false;
 
@@ -2945,6 +2964,7 @@ void Standard_job::try_start_task()
 
     if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() ) 
         _lock_requestor->dequeue_lock_requests();
+    return task_started;
 }
 
 //-------------------------------------------------------------------Standard_job::on_task_finished

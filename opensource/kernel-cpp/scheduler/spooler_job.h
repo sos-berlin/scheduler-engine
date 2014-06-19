@@ -371,7 +371,8 @@ struct Standard_job : Job
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     bool                        above_min_tasks             () const;
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
-    void                        try_start_task              ();
+    void                        try_start_tasks             ();
+    bool                        try_start_one_task          ();
 
   private:
     void                        set_log                     ();
@@ -397,7 +398,8 @@ struct Standard_job : Job
     void                        set_next_time               ( const Time& );
     Time                        next_start_time             () const;
     void                        calculate_next_time         ( const Time& now );
-    void                        process_order               ();
+    void                        process_orders              ();
+    void                        continue_tasks_waiting_for_order();
     ptr<Task>                   task_to_start               ();
     void                        set_state                   ( State );
     bool                        execute_state_cmd           (State_cmd);

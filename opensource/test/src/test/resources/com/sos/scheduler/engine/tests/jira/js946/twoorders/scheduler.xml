@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+	<config>
+		<jobs>
+			<job name="a" order="yes" tasks="2" idle_timeout="60">
+				<script java_class="com.sos.scheduler.engine.tests.jira.js946.twoorders.JobSleep" />
+			</job>
+		</jobs>
+		<job_chains>
+			<job_chain name="A">
+				<job_chain_node state="state1" job="a"/>
+				<job_chain_node.end state="end"/>
+			</job_chain>
+		</job_chains>
+	</config>
+</spooler>
