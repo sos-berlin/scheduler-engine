@@ -1930,9 +1930,14 @@ void Standard_job::on_call(const Period_end_call&) {
 
 //-----------------------------------------------------Standard_job::on_call Start_queued_task_call
 
-void Standard_job::on_call(const job::Start_queued_task_call&) 
+void Standard_job::on_call(const Start_queued_task_call&) 
 {
+    Time t = _task_queue->next_start_time();
     try_start_tasks();
+    Time next = _task_queue->next_start_time();
+    if (next != t) {
+        _call_register.call_at<Start_queued_task_call>(_task_queue->next_start_time());
+    }
 }
 
 //-------------------------------------Standard_job::on_call Calculated_next_time_do_something_call
