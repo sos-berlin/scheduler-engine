@@ -11,22 +11,20 @@ import static org.junit.Assert.assertEquals;
 public final class RuntimeTest extends SchedulerTest {
 
 	private static final int maxOrderCount = 2;
-	private static int numberOfStartedOrders = 0;
+	private int numberOfStartedOrders = 0;
     private int finishedOrderCount = 0;
 
+    // Startet die Aufträge sofort, sie laufen dann auch sofort an.
     @Test
-    // Started die Aufträge sofort, sie laufen dann auch sofort an.
-    public void testImmediately() throws Exception {
-        numberOfStartedOrders = 0;
+    public void testImmediately() {
         controller().activateScheduler();
         addOrders(maxOrderCount, "now");
         controller().waitForTermination(shortTimeout);
     }
 
+    // Startet die Aufträge verzögert. Der zweite Auftrag soll nicht erst anlaufen, wenn der erste beendet worden ist.
     @Test
-    // Started die Aufträge zeitverzögert, der zweite Auftrag läuft erst dann an, wenn der erste beendet worden ist.
-    public void testScheduled() throws Exception {
-        numberOfStartedOrders = 0;
+    public void testScheduled() {
         controller().activateScheduler();
         addOrders(maxOrderCount, "now+1");
         controller().waitForTermination(shortTimeout);
@@ -45,13 +43,10 @@ public final class RuntimeTest extends SchedulerTest {
 
     @EventHandler
     public void handle(OrderFinishedEvent e) {
-
-        // alle Aufträge müssen bereits gestartet worden sein, wenn ein Auftrag beendet wird.
-        assertEquals(maxOrderCount,numberOfStartedOrders);
-
+        // Alle Aufträge müssen bereits gestartet worden sein, wenn ein Auftrag beendet wird.
+        assertEquals(maxOrderCount, numberOfStartedOrders);
         finishedOrderCount += 1;
         if (finishedOrderCount == maxOrderCount )
             controller().terminateScheduler();
-
     }
 }
