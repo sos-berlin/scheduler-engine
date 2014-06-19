@@ -72,6 +72,11 @@
             <artifactId>web</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.sos.scheduler.enginedoc</groupId>
+            <artifactId>enginedoc-common</artifactId>
+            <version>${enginedoc.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit-dep</artifactId>
             <scope>test</scope>
