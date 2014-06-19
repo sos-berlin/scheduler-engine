@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js946
+package com.sos.scheduler.engine.tests.jira.js946.a
 
 /**
  * @author Joacim Zschimmer

@@ -3,5 +3,5 @@
     order="yes"
     tasks="5"
 >
-    <script java_class="com.sos.scheduler.engine.tests.jira.js946.TestJob"/>
+    <script java_class="com.sos.scheduler.engine.tests.jira.js946.a.TestJob"/>
 </job>
