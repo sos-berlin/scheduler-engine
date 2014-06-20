@@ -6,15 +6,6 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <!--fileSet>
-            <!- - das es für die release Version noch keine scheduler.dll gibt, wird diese zunächst aus bind (also der debug Version)
-                 zur Verfügung gestellt - ->
-            <directory>${visualStudioPlatform}/Release</directory>
-            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
-            <includes>
-                <include>scheduler.dll</include>
-            </includes>
-        </fileSet-->
         <fileSet>
             <directory>${visualStudioPlatform}/Release</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
@@ -22,13 +13,6 @@
                 <include>scheduler.exe</include>
                 <include>jobscheduler-engine.dll</include>
                 <include>spidermonkey.dll</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>scheduler</directory>
-            <outputDirectory>/com/sos/scheduler/engine/kernelcpp</outputDirectory>
-            <includes>
-                <include>scheduler.xsd</include>
             </includes>
         </fileSet>
     </fileSets>

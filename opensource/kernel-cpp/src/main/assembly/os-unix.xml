@@ -7,7 +7,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-		<directory>${cpuArchitecture}/Release</directory>
+        		<directory>${cpuArchitecture}/Release</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
                 <include>libjobscheduler-engine.so</include>
@@ -15,13 +15,6 @@
                 <include>libspidermonkey.so</include>
                 <include>javascript</include>
                 <include>setuid</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>scheduler</directory>
-            <outputDirectory>/com/sos/scheduler/engine/kernelcpp</outputDirectory>
-            <includes>
-                <include>scheduler.xsd</include>
             </includes>
         </fileSet>
     </fileSets>

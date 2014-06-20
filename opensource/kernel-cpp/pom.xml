@@ -208,23 +208,6 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>package-documentation</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/documentation.xml</descriptor>
-                            </descriptors>
-                            <archive>
-                                <manifest>
-                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>package-binaries</id>
                         <phase>package</phase>
                         <goals>
@@ -238,6 +221,9 @@
                                 <manifest>
                                     <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                                 </manifest>
+				                        <manifestEntries>
+				                            <Architechture>${osArch}</Architechture>
+				                        </manifestEntries>
                             </archive>
                         </configuration>
                     </execution>
@@ -255,6 +241,9 @@
                                 <manifest>
                                     <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                                 </manifest>
+				                        <manifestEntries>
+				                            <Architechture>${osArch}</Architechture>
+				                        </manifestEntries>
                             </archive>
                         </configuration>
                     </execution>
