@@ -151,6 +151,36 @@
             </properties>
         </profile>
         <profile>
+            <id>sunos-x64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>sunos</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>sunos</operatingSystem>
+                <osArch>sunos-x64</osArch>
+                <cpuArchitecture>x64</cpuArchitecture>
+            </properties>
+        </profile>
+        <profile>
+            <id>sunos-x86</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>sunos</name>
+                    <arch>x86</arch>
+            </os>
+            </activation>
+            <properties>
+                <operatingSystem>sunos</operatingSystem>
+                <osArch>sunos-x86</osArch>
+                <cpuArchitecture>x86</cpuArchitecture>
+            </properties>
+        </profile>
+        <profile>
             <id>aix</id>
             <activation>
                 <os>
