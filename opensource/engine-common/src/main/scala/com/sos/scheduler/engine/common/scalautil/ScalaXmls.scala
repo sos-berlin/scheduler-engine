@@ -1,17 +1,30 @@
 package com.sos.scheduler.engine.common.scalautil
 
-import com.google.common.base.Charsets._
+import com.google.common.base.Charsets.UTF_8
 import java.io.File
+import java.nio.charset.Charset
 
 object ScalaXmls {
   object implicits {
     implicit class RichFile(val delegate: File) extends AnyVal {
 
-      def xml =
-        scala.xml.XML.loadFile(delegate)
+      def xml = scala.xml.XML.loadFile(delegate)
 
       def xml_=(o: scala.xml.Elem) {
         scala.xml.XML.save(delegate.getPath, o, enc = UTF_8.name, xmlDecl = true)
+      }
+    }
+
+    implicit class RichElem(val delegate: scala.xml.Elem) extends AnyVal {
+      def toBytes: Array[Byte] = toBytes(xmlDecl = true)
+
+      def toBytes(xmlDecl: Boolean, encoding: Charset = UTF_8): Array[Byte] = {
+        val b = new StringBuilder
+        if (xmlDecl) {
+          b.append(s"<?xml version='1.0' encoding='${encoding.name}'?>")
+        }
+        scala.xml.Utility.serialize(delegate, sb = b)
+        b.toString().getBytes(encoding)
       }
     }
   }
