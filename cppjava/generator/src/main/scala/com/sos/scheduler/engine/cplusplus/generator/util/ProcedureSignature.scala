@@ -1,16 +1,17 @@
 package com.sos.scheduler.engine.cplusplus.generator.util
 
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppThreadSafe
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppField, CppThreadSafe}
 import java.lang.reflect._
 import scala.language.existentials
 
-case class ProcedureSignature(
+final case class ProcedureSignature(
   name: String,
   returnType: Class[_],
   parameterTypes: List[Class[_]],
   isStatic: Boolean = false,
-  isThreadSafe: Boolean = false)
+  isThreadSafe: Boolean = false,
+  isField: Boolean = false)
 extends Ordered[ProcedureSignature] {
 
   val nativeJavaName = name + "__native"
@@ -67,7 +68,8 @@ object ProcedureSignature {
       returnClass,
       method.getParameterTypes.toList,
       isStatic = Modifier.isStatic(method.getModifiers),
-      isThreadSafe = method.getAnnotation(classOf[CppThreadSafe]) != null)
+      isThreadSafe = method.getAnnotation(classOf[CppThreadSafe]) != null,
+      isField = method.getAnnotation(classOf[CppField]) != null)
   }
 
   def apply(c: Constructor[_]) = ofConstructor(c.getParameterTypes)
