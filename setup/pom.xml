@@ -35,7 +35,7 @@ call prepare-setup.sh <version> to use this pom
         <repository>
             <id>sos</id>
             <name>SOS Internal Repository</name>
-            <url>http://archiva.sos:8080/archiva/repository/sos</url>
+            <url>${repositoryBase}/sos</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -44,7 +44,7 @@ call prepare-setup.sh <version> to use this pom
         <repository>
             <id>sos-os</id>
             <name>SOS snapshot Repository (${setup.platform})</name>
-            <url>http://archiva.sos:8080/archiva/repository/sos-os-${setup.platform}</url>
+            <url>${repositoryBase}/sos-os-${setup.platform}</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
