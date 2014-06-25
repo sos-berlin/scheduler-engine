@@ -9,7 +9,6 @@
 # ---------------------------------------------------------------------------------------------------------------
 set -e
 mvn clean
-ant -f purge-local-repo.xml
 mvn install -U -Pprepare-platform -Dengine.platform=windows-x86
 mvn install -U -Pprepare-platform -Dengine.platform=linux-x86
 mvn install -U -Pprepare-platform -Dengine.platform=windows-x64

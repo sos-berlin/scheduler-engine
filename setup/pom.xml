@@ -13,6 +13,11 @@ call prepare-setup.sh <version> to use this pom
 
     <properties>
         <setup.platform>${osArch}</setup.platform>
+
+        <!-- see http://rterp.wordpress.com/2012/03/16/stamping-version-number-and-build-time-in-properties-file-with-maven/ for details -->
+        <build.timestamp>${maven.build.timestamp}</build.timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+
     </properties>
 
     <artifactId>setup</artifactId>
@@ -56,18 +61,42 @@ call prepare-setup.sh <version> to use this pom
 
     <build>
         <plugins>
+        
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>purge-local-repository</id>
+                        <phase>clean</phase>
+                        <configuration>
+                        		<inherited>false</inherited>
+                            <target name="purge local repository">
+															<delete dir="${user.home}/.m2/repository//com/sos/scheduler/engine" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+
+                    <!-- copy the jar for the JobScheduler engine -->
                     <execution>
-                        <id>copy</id>
-                        <phase>install</phase>
+                        <id>copy-sos-jar</id>
+                        <phase>process-resources</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
                             <goal>copy</goal>
                         </goals>
                         <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler/lib</outputDirectory>
                             <artifactItems>
                                 <!-- fat jar mit allen benötigten jars der JobScheduler engine (derzeit nicht ausgeliefert) -->
                                 <artifactItem>
@@ -77,75 +106,245 @@ call prepare-setup.sh <version> to use this pom
                                     <type>jar</type>
                                     <destFileName>${project.groupId}-${project.version}.jar</destFileName>
                                 </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+
+                    <!-- collect 3rd party jars -->
+                    <execution>
+                        <id>copy-3rdparty</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                           <outputDirectory>${project.build.directory}/setup/scheduler/lib</outputDirectory>
+                           <excludeGroupIds>com.sos.scheduler.engine</excludeGroupIds>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>unpack-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/workspace/scheduler</outputDirectory>
+                            <artifactItems>
                                 <artifactItem>
                                     <groupId>com.sos.scheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-setup</artifactId>
                                     <version>${enginedoc.version}</version>
-                                    <type>jar</type>
                                     <destFileName>com.sos.scheduler.enginedoc-kernel-${enginedoc.version}.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.sos.scheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-common</artifactId>
                                     <version>${enginedoc.version}</version>
-                                    <type>jar</type>
                                     <destFileName>com.sos.scheduler.enginedoc-common-${enginedoc.version}.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
+
+                    <execution>
+                        <id>unpack-binaries</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/workspace/scheduler.${setup.platform}</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+												            <!-- Plattformspezifischer C++ Kern -->
+												            <groupId>${project.groupId}</groupId>
+												            <artifactId>kernel-cpp</artifactId>
+												            <version>${project.version}</version>
+												            <classifier>${setup.platform}</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+
+                </executions>
+
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+
+                    <!-- generate the version info file -->
+                    <execution>
+                        <id>copy-version-info</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler.${setup.platform}/bin</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/templates</directory>
+                                    <includes>
+                                        <include>.version-engine</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- get the binaries (excluding Unix libraries) -->
+                    <execution>
+                        <id>copy-binaries</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler.${setup.platform}/bin</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/workspace/scheduler.${setup.platform}/com/sos/scheduler/engine/kernelcpp/bin</directory>
+                                    <excludes>
+                                        <exclude>*.so</exclude>
+                                    </excludes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- get the binaries (for Unix) -->
+                    <execution>
+                        <id>copy-libraries</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler.${setup.platform}/lib</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/workspace/scheduler.${setup.platform}/com/sos/scheduler/engine/kernelcpp/bin</directory>
+                                    <includes>
+                                        <include>*.so</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- get the scheduler.xsd -->
+                    <execution>
+                        <id>copy-xsd</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler/config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/workspace/scheduler/com/sos/scheduler/enginedoc/common</directory>
+                                    <includes>
+                                        <include>scheduler.xsd</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- get the documentation (german) -->
+                    <execution>
+                        <id>copy-documenation-de</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler/doc/de</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/workspace/scheduler/enginedoc/doc.de</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- get the documentation (english) -->
+                    <execution>
+                        <id>copy-documenation-en</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/setup/scheduler/doc/en</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/workspace/scheduler/enginedoc/doc.en</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
+
+            <!-- output the generated setup structure in a jar file -->
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <configuration>
-                    <target>
-                        <ant antfile="prepare-setup.xml" target="setup.platform">
-                            <property name="setup.platform" value="${setup.platform}" />
-                            <property name="setup.version" value="${project.version}" />
-                            <property name="settings.localRepository" value="${settings.localRepository}" />
-                        </ant>
-                    </target>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>do-setup</id>
-                        <phase>install</phase>
+                        <id>package-setup</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/setup.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                </manifest>
+				                        <manifestEntries>
+				                            <Architechture>${osArch}</Architechture>
+				                        </manifestEntries>
+                            </archive>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+            
         </plugins>
+
     </build>
 
     <dependencies>
+
         <dependency>
-            <!-- Liefert alle benötigten jars für die engine aus dem Artefakt jar und deren Abhängige -->
             <groupId>${project.groupId}</groupId>
             <artifactId>jar</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <!-- Plattformspezifischer C++ Kern -->
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${setup.platform}</classifier>
             <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
         </dependency>
 
         <dependency>
@@ -161,4 +360,5 @@ call prepare-setup.sh <version> to use this pom
             </exclusions>
         </dependency>
     </dependencies>
+
 </project>
