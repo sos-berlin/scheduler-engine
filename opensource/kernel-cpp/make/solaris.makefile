@@ -14,7 +14,7 @@ CFLAGS += -D_FILE_OFFSET_BITS=64
 LINK_FLAGS += -m32
 LIBS += -liconv
 else
-CFLAGS += -m64 -xarch=amd64
+CFLAGS += -m64
 LINK_FLAGS += -m64
 endif	
 
