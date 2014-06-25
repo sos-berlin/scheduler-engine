@@ -3,12 +3,12 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__Scheduler.h"
+#include "com__google__inject__Injector.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "com__sos__scheduler__engine__kernel__async__CppCall.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
-#include "java__lang__Class.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -24,10 +24,9 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _initialize____method;
-    ::zschimmer::javabridge::Method const _instance__Ljava_lang_Class_2__method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _log__Ljava_lang_String_2ILjava_lang_String_2__method;
-    ::zschimmer::javabridge::Static_method const _of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method;
+    ::zschimmer::javabridge::Static_method const _newInjector__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onActivated____method;
     ::zschimmer::javabridge::Method const _onClose____method;
@@ -49,10 +48,9 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "enqueueCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_initialize____method(this, "initialize", "()V")
-    ,_instance__Ljava_lang_Class_2__method(this, "instance", "(Ljava/lang/Class;)Ljava/lang/Object;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_log__Ljava_lang_String_2ILjava_lang_String_2__method(this, "log", "(Ljava/lang/String;ILjava/lang/String;)V")
-    ,_of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method(this, "of", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/main/SchedulerControllerBridge;Ljava/lang/String;)Lcom/sos/scheduler/engine/kernel/Scheduler;")
+    ,_newInjector__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method(this, "newInjector", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/main/SchedulerControllerBridge;Ljava/lang/String;)Lcom/google/inject/Injector;")
     ,_onActivate____method(this, "onActivate", "()V")
     ,_onActivated____method(this, "onActivated", "()V")
     ,_onClose____method(this, "onClose", "()V")
@@ -116,15 +114,6 @@ void Scheduler::initialize() const {
     cls->_initialize____method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object Scheduler::instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Class >& p0) const {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    Scheduler__class* cls = _class.get();
-    ::javaproxy::java::lang::Object result;
-    result.steal_local_ref(cls->_instance__Ljava_lang_Class_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
 ::javaproxy::java::lang::String Scheduler::javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
@@ -143,14 +132,14 @@ void Scheduler::log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::j
     cls->_log__Ljava_lang_String_2ILjava_lang_String_2__method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::com::sos::scheduler::engine::kernel::Scheduler Scheduler::of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) {
+::javaproxy::com::google::inject::Injector Scheduler::newInjector(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) {
     ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
     parameter_list._jvalues[2].l = p2.get_jobject();
     Scheduler__class* cls = Scheduler__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler result;
-    result.steal_local_ref(cls->_of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
+    ::javaproxy::com::google::inject::Injector result;
+    result.steal_local_ref(cls->_newInjector__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 

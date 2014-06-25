@@ -29,14 +29,15 @@ struct Java_subsystem : Java_subsystem_interface
     // Java_subsystem_interface:
     void                        initialize_java_sister      ();
     javabridge::Vm*             java_vm                     ()                                      { return _java_vm; }
+    InjectorJ&                  injectorJ                   ()                                      { return _injectorJ; }
     SchedulerJ&                 schedulerJ                  ()                                      { return _schedulerJ; }
     xml::Element_ptr            dom_element                 (const xml::Document_ptr&);
     virtual void                on_scheduler_activated      ();
 
   private:
     ptr<javabridge::Vm>        _java_vm;
+    InjectorJ                  _injectorJ;
     SchedulerJ                 _schedulerJ;
-  //PlatformJ                  _platformJ;
 };
 
 //-------------------------------------------------------------------------------new_java_subsystem
@@ -86,7 +87,8 @@ void Java_subsystem::close()
 //-----------------------------------------------------------Java_subsystem::initialize_java_sister
 
 void Java_subsystem::initialize_java_sister() {
-    _schedulerJ.assign_(SchedulerJ::of(_spooler->j(), _spooler->java_main_context(), string_from_file(_spooler->_configuration_file_path)));
+    _injectorJ.assign_(SchedulerJ::newInjector(_spooler->j(), _spooler->java_main_context(), string_from_file(_spooler->_configuration_file_path)));
+    _schedulerJ.assign_(_injectorJ.getInstance(SchedulerJ::java_class_()->get_jobject()));
 }
 
 //-------------------------------------------------------------Java_subsystem::subsystem_initialize

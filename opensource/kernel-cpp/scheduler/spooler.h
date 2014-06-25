@@ -522,6 +522,7 @@ struct Spooler : Object,
 
     Database*                   db                          ()                                  { return _db; }
 
+    InjectorJ                   injectorJ                   () const                            { return _java_subsystem->injectorJ(); }
     SchedulerJ&                 schedulerJ                  () const                            { return _java_subsystem->schedulerJ(); }
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 

@@ -139,7 +139,7 @@ with HasInjector {
     }
   }
 
-  @ForCpp private def instance[A](c: Class[A]): A =
+  private def instance[A](c: Class[A]): A =
     injector.getInstance(c)
 
   @ForCpp private def getEventSubsystem =
@@ -228,14 +228,12 @@ object Scheduler {
   private val logger = Logger(getClass)
   private val mavenProperties = MavenProperties(getClass)
 
-  @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
+  @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
     controllerBridge.cppSettings.setSettingsInCpp(cppProxy.modifiable_settings)
-
-    val injector = createInjector(Seq(
+    createInjector(Seq(
       new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),
       PluginModule(configurationXml)))
-    injector.getInstance(classOf[Scheduler])
   }
 
   @ForCpp

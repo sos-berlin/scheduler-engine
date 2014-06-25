@@ -92,6 +92,7 @@
                             <arguments>
                                 <argument>-c++-output-directory=${basedir}</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
+                                <argument>com.google.inject.Injector</argument>
                                 <argument>com.sos.scheduler.engine.common.xml.XmlUtils</argument>
                                 <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>
                                 <argument>java.lang.Class</argument>

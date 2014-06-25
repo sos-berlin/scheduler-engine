@@ -479,7 +479,7 @@ void Order_subsystem_impl::close()
 OrderSubsystemJ& Order_subsystem_impl::typed_java_sister() {
     // OrderSubsystem is a @Singleton in Dependency Injector and constructed by the injector configuration module. So we don't construct OrderSubsystem via CppProxy
     if (!_typed_java_sister) 
-        _typed_java_sister = spooler()->schedulerJ().instance(OrderSubsystemJ::java_class_()->get_jobject());
+        _typed_java_sister = spooler()->injectorJ().getInstance(OrderSubsystemJ::java_class_()->get_jobject());
     return _typed_java_sister;
 }
 

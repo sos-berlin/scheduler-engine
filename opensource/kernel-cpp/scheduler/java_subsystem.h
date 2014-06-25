@@ -16,6 +16,7 @@ struct Java_subsystem_interface : Object, Subsystem
 
     virtual void                initialize_java_sister      ()                                      = 0;
     virtual javabridge::Vm*     java_vm                     ()                                      = 0;
+    virtual InjectorJ&          injectorJ                   ()                                      = 0;
     virtual SchedulerJ&         schedulerJ                  ()                                      = 0;
   //virtual const PlatformJ&    platformJ                   () const                                = 0;
     virtual xml::Element_ptr    dom_element                 (const xml::Document_ptr&)              = 0;

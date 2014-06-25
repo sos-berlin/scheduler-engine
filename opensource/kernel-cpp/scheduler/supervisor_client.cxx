@@ -229,7 +229,7 @@ struct Http_connector : Abstract_connector {
         Abstract_connector(c),
         _zero_(this + 1),
         _supervisor_uri(supervisor_uri),
-        _webClientJ(spooler()->schedulerJ().instance(CppWebClientJ::java_class_()->get_jobject()))
+        _webClientJ(spooler()->injectorJ().getInstance(CppWebClientJ::java_class_()->get_jobject()))
     {
         if (_spooler->_spooler_id.empty()) z::throw_xc(message_string("SCHEDULER-485", "supervisor"));
     }
