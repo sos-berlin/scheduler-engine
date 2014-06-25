@@ -8,9 +8,18 @@ CFLAGS += -O2
 #CFLAGS += -O0
 CFLAGS += -fPIC
 
+ifeq ($(cpuArchitecture),x86)
+CFLAGS += -m32
+CFLAGS += -D_FILE_OFFSET_BITS=64
+LINK_FLAGS += -m32
+LIBS += -liconv
+else
+CFLAGS += -m64 -xarch=amd64
+LINK_FLAGS += -m64
+endif	
+
 LIBS += -lsocket
 LIBS += -lthread
-LIBS += -liconv
 
 # Damit offene Referenzen nicht bemängelt werden:
 #LINK_DYNAMIC = -Xlinker -b

@@ -18,7 +18,11 @@ else
 ifeq ($(OS),AIX)
 SYSTEM_AIX := 1
 else
+ifeq ($(OS),SunOS)
+SYSTEM_SUNOS := 1
+else
 SYSTEM_SOLARIS := 1
+endif
 endif
 endif
 endif
@@ -39,6 +43,12 @@ endif
 
 ifdef SYSTEM_AIX
 SYSTEM      := aix
+SYSTEM_UNIX := 1
+SYSTEM_GNU  := 1
+endif
+
+ifdef SYSTEM_SUNOS
+SYSTEM      := solaris
 SYSTEM_UNIX := 1
 SYSTEM_GNU  := 1
 endif
