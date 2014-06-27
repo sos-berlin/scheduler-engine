@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Cpp.quoted
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
+import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature.{MethodAccess, FieldAccess, ExpressionAccess}
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
@@ -17,7 +18,11 @@ final class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
     val jniParameterDeclarations = m.parameters map { p => Jni.typeName(p.typ) + " " + p.name }
     val declaration = "static " + jniReturnTypeName + " JNICALL " + jniName.simpleName +
       inParentheses("JNIEnv* jenv" :: "jobject" :: "jlong cppReference" :: jniParameterDeclarations)
-    val call = "o_->" + m.name + (inParentheses(m.parameters map cppExpressionStringOfJni) when !m.isField)
+    val call = m.access match {
+      case MethodAccess ⇒ "o_->" + m.name + inParentheses(m.parameters map cppExpressionStringOfJni)
+      case FieldAccess ⇒ "o_->" + m.name
+      case ExpressionAccess(expression) ⇒ expression.replace("$->", "o_->")
+    }
     val code =
       "    Env env = jenv;\n" +
       "    try {\n" +

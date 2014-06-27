@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.cplusplus.generator.util
 
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppField, CppThreadSafe}
+import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature._
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppExpression, CppField, CppThreadSafe}
 import java.lang.reflect._
 import scala.language.existentials
 
@@ -11,7 +12,7 @@ final case class ProcedureSignature(
   parameterTypes: List[Class[_]],
   isStatic: Boolean = false,
   isThreadSafe: Boolean = false,
-  isField: Boolean = false)
+  access: Access = MethodAccess)
 extends Ordered[ProcedureSignature] {
 
   val nativeJavaName = name + "__native"
@@ -69,10 +70,30 @@ object ProcedureSignature {
       method.getParameterTypes.toList,
       isStatic = Modifier.isStatic(method.getModifiers),
       isThreadSafe = method.getAnnotation(classOf[CppThreadSafe]) != null,
-      isField = method.getAnnotation(classOf[CppField]) != null)
+      access = methodToAccess(method))
+  }
+
+  private def methodToAccess(method: Method): Access = {
+    val isField = method.getAnnotation(classOf[CppField]) != null
+    val expressionOption = Option(method.getAnnotation(classOf[CppExpression])) map { _.value }
+    (isField, expressionOption) match {
+      case (false, None) ⇒ MethodAccess
+      case (true, None) ⇒
+        require(method.getParameterTypes.length == 0, "@CppField requires no method parameters")
+        FieldAccess
+      case (false, Some(expression)) ⇒
+        require(method.getParameterTypes.length == 0, "@CppExpression requires no method parameters")
+        ExpressionAccess(expression)
+      case _ ⇒ sys.error("Combination of @CppField and @CppExpression is not possible")
+    }
   }
 
   def apply(c: Constructor[_]) = ofConstructor(c.getParameterTypes)
 
   def ofConstructor(t: Seq[Class[_]]) = new ProcedureSignature("<init>", classOf[Void], t.toList)
+
+  sealed trait Access
+  final case object MethodAccess extends Access
+  final case object FieldAccess extends Access
+  final case class ExpressionAccess(cppExpression: String) extends Access
 }
