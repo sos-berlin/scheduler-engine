@@ -111,8 +111,6 @@ void Process_module_instance::init()
 
 bool Process_module_instance::load()
 {
-    //if( _module->_process_class_path != ""  &&  _module->process_class()->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
-
     bool ok = Module_instance::load();
     if( !ok )  return ok;
 

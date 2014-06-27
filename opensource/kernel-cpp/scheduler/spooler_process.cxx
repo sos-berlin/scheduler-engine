@@ -43,7 +43,7 @@ struct Abstract_process : virtual Process {
             process_element.setAttribute("task", _configuration._task_id);
             process_element.setAttribute("task_id", _configuration._task_id);          // VERALTET!
         }
-        process_element.setAttribute_optional("remote_scheduler", _configuration._remote_scheduler.as_string());
+        process_element.setAttribute_optional("remote_scheduler", _configuration._remote_scheduler_address);
         return process_element;
     }
 
@@ -113,7 +113,6 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
     protected: Abstract_api_process(Spooler* spooler, const Api_process_configuration& conf) :
         Abstract_process(spooler, conf),
         _registered_process_handle(NULL),
-        _is_killed(false),
         _exit_code(0),
         _termination_signal(0)
     {}
@@ -283,7 +282,7 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
     protected: virtual void on_closing_remote_process() {}
 
     public: bool is_remote_host() const {
-        return _configuration._remote_scheduler; 
+        return !_configuration._remote_scheduler_address.empty(); 
     }       
 
     public: object_server::Session* session() { 
@@ -316,7 +315,6 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
 
     private: ptr<object_server::Session> _session;                // Wir haben immer nur eine Session pro Verbindung
     protected: Process_handle _registered_process_handle;
-    private: bool _is_killed;
     private: int _exit_code;
     private: int _termination_signal;
     private: Time _running_since;
@@ -548,9 +546,8 @@ struct Abstract_remote_api_process : Abstract_api_process {
         _remote_pid(0)
     {}
 
-    protected: void do_start() {
+    protected: void prepare_connection() {
         _connection = _spooler->_connection_manager->new_connection();
-        _connection->set_remote_host(_configuration._remote_scheduler._host);
         _connection->listen_on_tcp_port( INADDR_ANY );
     }
 
@@ -576,6 +573,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     Tcp_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
         Abstract_process(spooler, conf),
         Abstract_remote_api_process(spooler, conf),
+        _remote_scheduler(Host_and_port(conf._remote_scheduler_address)),
         _is_killed(false)
     {}
 
@@ -638,6 +636,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
 
     friend struct Async_tcp_operation;
 
+    private: Host_and_port const _remote_scheduler;
     private: ptr<Async_tcp_operation> _async_tcp_operation;
     private: ptr<Xml_client_connection> _xml_client_connection;
     private: bool _is_killed;
@@ -784,7 +783,7 @@ string Async_tcp_operation::async_state_text_() const
 
 
 ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_configuration& configuration) {
-    if(configuration._remote_scheduler) {
+    if (!configuration._remote_scheduler_address.empty()) {
         ptr<Tcp_remote_api_process> result = Z_NEW(Tcp_remote_api_process(spooler, configuration));
         return +result;
     } else
@@ -799,7 +798,8 @@ ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_co
 
 
 void Tcp_remote_api_process::do_start() {
-    Abstract_remote_api_process::do_start();
+    prepare_connection();
+    connection()->set_remote_host(_remote_scheduler.host());
     _async_tcp_operation = Z_NEW( Async_tcp_operation( this ) );
     _async_tcp_operation->async_wake();
     _async_tcp_operation->set_async_manager( _spooler->_connection_manager );
@@ -816,7 +816,7 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
     {
         case Async_tcp_operation::s_not_connected:
         {
-            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _configuration._remote_scheduler ) );
+            _xml_client_connection = Z_NEW(Xml_client_connection(_spooler, _remote_scheduler));
             _xml_client_connection->set_async_parent( _async_tcp_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );
@@ -946,12 +946,16 @@ void Process_class_configuration::set_max_processes( int max_processes )
 
 //------------------------------------------------Process_class_configuration::set_remote_scheduler
 
-void Process_class_configuration::set_remote_scheduler( const Host_and_port& remote_scheduler )
+void Process_class_configuration::set_remote_scheduler_address(const string& remote_scheduler)
 {
-    check_remote_scheduler( remote_scheduler );
-
-    _remote_scheduler = remote_scheduler;
-    if( _remote_scheduler._host  &&  _remote_scheduler._port == 0 )  _remote_scheduler._port = _spooler->_tcp_port;
+    _remote_scheduler_address = remote_scheduler;
+    if (_remote_scheduler_address.find(':') == string::npos) {  
+        Host_and_port hp = _remote_scheduler_address;
+        if (hp._host && hp._port == 0) {  // Eigenen Port übernehmen
+            hp._port = _spooler->_tcp_port;
+            _remote_scheduler_address = hp.as_string();
+        }
+    }
 }
 
 //------------------------------------------------------------Process_class_configuration::obj_name
@@ -975,8 +979,8 @@ void Process_class_configuration::set_dom( const xml::Element_ptr& e )
     string name = e.getAttribute( "name" );
     if( name != "" )  set_name( name );         // Leere Name steht für die Default-Prozessklasse
 
-    set_max_processes   ( (int)e.uint_getAttribute( "max_processes"   , _max_processes ) );
-    set_remote_scheduler(      e.     getAttribute( "remote_scheduler", _remote_scheduler.as_string() ) );
+    set_max_processes((int)e.uint_getAttribute("max_processes", _max_processes));
+    set_remote_scheduler_address(e.getAttribute("remote_scheduler", _remote_scheduler_address));
 }
 
 //---------------------------------------------------------Process_class_configuration::dom_element
@@ -987,7 +991,7 @@ xml::Element_ptr Process_class_configuration::dom_element( const xml::Document_p
         
     fill_file_based_dom_element( result, show_what );
     result.setAttribute         ( "max_processes"   , _max_processes );
-    result.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
+    result.setAttribute_optional("remote_scheduler", _remote_scheduler_address);
 
     return result;
 }
@@ -1015,7 +1019,7 @@ STDMETHODIMP Process_class_configuration::put_Remote_scheduler( BSTR remote_sche
 
     try
     {
-        set_remote_scheduler( string_from_bstr( remote_scheduler_bstr ) );
+        set_remote_scheduler_address(string_from_bstr(remote_scheduler_bstr));
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -1083,12 +1087,11 @@ void Process_class::set_configuration( const Process_class_configuration& config
     if( normalized_path() != configuration.normalized_path() )  assert(0), z::throw_xc( Z_FUNCTION );
 
     // Erst die Warnungen
-    check_max_processes   ( configuration.max_processes() );
-    check_remote_scheduler( configuration.remote_scheduler() );
+    check_max_processes(configuration.max_processes());
 
     // Jetzt ändern. Es sollte keine Exception auftreten.
-    set_max_processes   ( configuration.max_processes() );
-    set_remote_scheduler( configuration.remote_scheduler() );
+    set_max_processes(configuration.max_processes());
+    set_remote_scheduler_address(configuration.remote_scheduler_address());
 }
 
 //-----------------------------------------------------------------------------Process_class::close
@@ -1174,12 +1177,6 @@ void Process_class::set_max_processes( int max_processes )
     notify_a_process_is_idle();
 }
 
-//------------------------------------------------------------Process_class::check_remote_scheduler
-
-void Process_class::check_remote_scheduler( const Host_and_port& ) const
-{
-}
-
 //-----------------------------------------------------------------------Process_class::add_process
 
 void Process_class::add_process(Process* process)
@@ -1222,7 +1219,7 @@ Process* Process_class::new_process(const Api_process_configuration* c)
         process = +p;
     } else {
         Api_process_configuration conf = *c;
-        conf._remote_scheduler = c->_remote_scheduler.is_empty()? _remote_scheduler : c->_remote_scheduler;
+        conf._remote_scheduler_address = c->_remote_scheduler_address.empty()? _remote_scheduler_address : c->_remote_scheduler_address;
         ptr<Api_process> p = Api_process::new_process(_spooler, conf);
         process = +p;
     }

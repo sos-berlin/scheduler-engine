@@ -25,7 +25,7 @@ struct Api_process_configuration {
     Fill_zero _zero_;
     Has_on_remote_task_running* _has_on_remote_task_running;
     Host_and_port _controller_address;
-    Host_and_port _remote_scheduler;
+    string _remote_scheduler_address;
     string _job_name;
     int _task_id;
     bool _has_api;
@@ -91,11 +91,9 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     int                         max_processes               () const                                { return _max_processes; }
     virtual void          check_max_processes               ( int ) const                           {}
 
-    virtual void            set_remote_scheduler            ( const Host_and_port& );
-    const Host_and_port&        remote_scheduler            () const                                { return _remote_scheduler; }
-    virtual void          check_remote_scheduler            ( const Host_and_port& ) const          {}
-
-    bool                        is_remote_host              () const                                { return _remote_scheduler; }
+    virtual void            set_remote_scheduler_address    ( const string& );
+    const string&               remote_scheduler_address    () const                                { return _remote_scheduler_address; }
+    bool                        is_remote_host              () const                                { return !_remote_scheduler_address.empty(); }
 
     string                      obj_name                    () const;
 
@@ -109,7 +107,7 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     STDMETHODIMP            put_Name                        ( BSTR );
     STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( name(), result ); }
     STDMETHODIMP            put_Remote_scheduler            ( BSTR );
-    STDMETHODIMP            get_Remote_scheduler            ( BSTR* result )                        { return String_to_bstr( _remote_scheduler.as_string(), result ); }
+    STDMETHODIMP            get_Remote_scheduler            ( BSTR* result )                        { return String_to_bstr( _remote_scheduler_address, result ); }
     STDMETHODIMP            put_Max_processes               ( int );
     STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
 
@@ -117,7 +115,7 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     Fill_zero                  _zero_;
 
     int                        _max_processes;
-    Host_and_port              _remote_scheduler;
+    string                     _remote_scheduler_address;
     // Neue Einstellungen in Process_class::set_configuration() berücksichtigen!
 
 
@@ -154,7 +152,6 @@ struct Process_class : Process_class_configuration,
     void                    set_configuration               ( const Process_class_configuration& );
     void                  check_max_processes               ( int ) const;
     void                    set_max_processes               ( int );
-    void                  check_remote_scheduler            ( const Host_and_port& ) const;
 
     void                        add_process                 (Process*);
     void                        remove_process              (Process*);

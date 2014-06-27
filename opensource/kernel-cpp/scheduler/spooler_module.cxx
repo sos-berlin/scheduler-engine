@@ -412,7 +412,7 @@ void Module::init()
     {
         case kind_internal:             if( _process_class_path != ""  )
                                             if( Process_class* process_class = process_class_or_null() )
-                                                if( process_class->remote_scheduler() )  z::throw_xc( "SCHEDULER-REMOTE-INTERNAL?" );
+                                                if( !process_class->remote_scheduler_address().empty() )  z::throw_xc( "SCHEDULER-REMOTE-INTERNAL?" );
                                         break;
 
         case kind_remote:               break;
@@ -441,7 +441,7 @@ void Module::init()
 
 //--------------------------------------------------------------------------Module::create_instance
 
-ptr<Module_instance> Module::create_instance(const Host_and_port& remote_scheduler)
+ptr<Module_instance> Module::create_instance(const string& remote_scheduler)
 {
     ptr<Module_instance> result = create_instance_impl(remote_scheduler);
 
@@ -460,7 +460,7 @@ ptr<Module_instance> Module::create_instance(const Host_and_port& remote_schedul
 
 //---------------------------------------------------------------------Module::create_instance_impl
 
-ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_scheduler)
+ptr<Module_instance> Module::create_instance_impl(const string& remote_scheduler)
 {
     ptr<Module_instance> result;
 
@@ -468,7 +468,7 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.is_empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }

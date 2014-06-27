@@ -97,8 +97,8 @@ struct Module : Object
     void                        init0                       ();
     void                        init                        ();
 
-    ptr<Module_instance>        create_instance             (const Host_and_port& remote_scheduler = Host_and_port());
-    virtual ptr<Module_instance> create_instance_impl       (const Host_and_port& remote_scheduler);
+    ptr<Module_instance>        create_instance             (const string& remote_scheduler = "");
+    virtual ptr<Module_instance> create_instance_impl       (const string& remote_scheduler);
     bool                        set                         ()                                      { return _set; }
     bool                        has_api                     () const;
     Kind                        kind                        () const                                { return _kind; }
@@ -290,7 +290,7 @@ struct Module_instance : Object
     bool                       _initialized;
     bool                       _load_called;
 
-    Host_and_port              _remote_scheduler;           // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
+    string                     _remote_scheduler_address;   // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
     ptr<Process>               _process;                    // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
     ptr<Com_variable_set>      _process_environment;
     bool                       _has_order;

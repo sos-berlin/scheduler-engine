@@ -2459,7 +2459,7 @@ bool Task::do_kill()
 
 bool Task::do_load()
 {
-    Host_and_port remote_scheduler = read_remote_scheduler_parameter();
+    string remote_scheduler = read_remote_scheduler_parameter();
     
     if (ptr<Module_instance> module_instance = _job->create_module_instance(remote_scheduler)) {
         module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
@@ -2485,9 +2485,9 @@ bool Task::do_load()
 
 //------------------------------------------------------------Task::read_remote_scheduler_parameter
 
-Host_and_port Task::read_remote_scheduler_parameter() {
-    Host_and_port remote_scheduler = _order? _order->params()->get_string("scheduler.remote_scheduler") : "";
-    if (remote_scheduler) {
+string Task::read_remote_scheduler_parameter() {
+    string remote_scheduler = _order? _order->params()->get_string("scheduler.remote_scheduler") : "";
+    if (!remote_scheduler.empty()) {
         if (_spooler->is_cluster())  z::throw_xc("SCHEDULER-483");
         if (_job->module()->kind() != Module::kind_process)  z::throw_xc("SCHEDULER-484");   // Ein API-Prozess kann mehrere Order nacheinander ausführen. Die Tasks könnten dann für jeden Order wechseln.
     }

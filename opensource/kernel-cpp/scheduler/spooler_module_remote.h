@@ -54,14 +54,14 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
 
 
-                                Remote_module_instance_proxy( Module* module, const Host_and_port& remote_scheduler) : Com_module_instance_base(module), _zero_(_end_) { _remote_scheduler = remote_scheduler; }
+                                Remote_module_instance_proxy( Module* module, const string& remote_scheduler) : Com_module_instance_base(module), _zero_(_end_) { _remote_scheduler_address = remote_scheduler; }
                                ~Remote_module_instance_proxy();
 
     void                        init                        ();
     bool                        load                        ();
     void                        close                       ();
     bool                        kill                        ();
-    bool                        is_remote_host              () const                                { return !_remote_scheduler.is_empty(); }
+    bool                        is_remote_host              () const                                { return !_remote_scheduler_address.empty(); }
   
     void                        add_obj                     ( IDispatch*, const string& name );
     bool                        name_exists                 ( const string& name );
