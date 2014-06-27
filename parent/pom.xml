@@ -765,31 +765,6 @@
         <url>http://www.sos-berlin.com/jira/browse/</url>
     </issueManagement-->
 
-    <!-- 
-    	To ensure that always the local (compiled) snapshot is used, we use updatePolicy=never
-    	If you want to check for remote updates you can override the repositories in your pom or use the -U option
-    -->
-    <repositories>
-        <repository>
-            <id>sos-os</id>
-            <name>SOS snapshot Repository (${osArch})</name>
-            <url>${repositoryBase}/sos-os-${osArch}</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>sos</id>
-            <name>SOS Internal Repository</name>
-            <url>${repositoryBase}/sos</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <distributionManagement>
         <repository>
             <id>sos-release</id>
@@ -805,4 +780,5 @@
             <url>scp://www.yourcompany.com/www/docs/project/</url>
         </site-->
     </distributionManagement>
+
 </project>

@@ -28,32 +28,31 @@ call prepare-setup.sh <version> to use this pom
             <properties>
                 <setup.platform>${engine.platform}</setup.platform>
             </properties>
+				    <repositories>
+				        <repository>
+				            <id>sos</id>
+				            <name>SOS Internal Repository</name>
+				            <url>${repositoryBase}/sos</url>
+				            <snapshots>
+				                <enabled>true</enabled>
+				                <updatePolicy>always</updatePolicy>
+				            </snapshots>
+				        </repository>
+				        <repository>
+				            <id>sos-os</id>
+				            <name>SOS snapshot Repository (${setup.platform})</name>
+				            <url>${repositoryBase}/sos-os-${setup.platform}</url>
+				            <snapshots>
+				                <enabled>true</enabled>
+				                <updatePolicy>always</updatePolicy>
+				            </snapshots>
+				            <releases>
+				                <enabled>false</enabled>
+				            </releases>
+				        </repository>
+				    </repositories>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>sos</id>
-            <name>SOS Internal Repository</name>
-            <url>${repositoryBase}/sos</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>sos-os</id>
-            <name>SOS snapshot Repository (${setup.platform})</name>
-            <url>${repositoryBase}/sos-os-${setup.platform}</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
