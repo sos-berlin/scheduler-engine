@@ -541,9 +541,7 @@ struct Async_tcp_operation : Async_operation {
 struct Abstract_remote_api_process : Abstract_api_process {
     Abstract_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
         Abstract_process(spooler, conf),
-        Abstract_api_process(spooler, conf),
-        _remote_process_id(0),
-        _remote_pid(0)
+        Abstract_api_process(spooler, conf)
     {}
 
     protected: void prepare_connection() {
@@ -551,21 +549,11 @@ struct Abstract_remote_api_process : Abstract_api_process {
         _connection->listen_on_tcp_port( INADDR_ANY );
     }
 
-    public: string short_name() const {
-        S result;
-        result << Abstract_api_process::short_name();
-        if (_remote_pid)
-            result << ",remote_pid=" << _remote_pid;
-        return result;
-    }
-
     public: object_server::Connection* connection() const {
         return _connection;
     }
 
     private: ptr<object_server::Connection> _connection;
-    protected: Process_id _remote_process_id;
-    protected: pid_t _remote_pid;
 };
 
 
@@ -574,6 +562,8 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         Abstract_process(spooler, conf),
         Abstract_remote_api_process(spooler, conf),
         _remote_scheduler(Host_and_port(conf._remote_scheduler_address)),
+        _remote_process_id(0),
+        _remote_pid(0),
         _is_killed(false)
     {}
 
@@ -610,6 +600,13 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         return "Tcp_remote_api_process " + short_name();
     }
 
+    public: string short_name() const {
+        string result = Abstract_remote_api_process::short_name();
+        if (_remote_pid)
+            result += ",remote_pid=" + _remote_pid;
+        return result;
+    }
+
     protected: virtual string async_state_text() const {
         return _async_tcp_operation ? _async_tcp_operation->async_state_text() : "";
     }
@@ -639,6 +636,8 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     private: Host_and_port const _remote_scheduler;
     private: ptr<Async_tcp_operation> _async_tcp_operation;
     private: ptr<Xml_client_connection> _xml_client_connection;
+    private: Process_id _remote_process_id;
+    private: pid_t _remote_pid;
     private: bool _is_killed;
 };
 
