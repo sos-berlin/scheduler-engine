@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
-import ExtraScheduler._
+import com.sos.scheduler.engine.common.io.ReaderIterator
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants._
+import com.sos.scheduler.engine.tests.jira.js973.ExtraScheduler._
 import java.io.{InputStream, InputStreamReader}
 import java.nio.charset.Charset
 import scala.collection.JavaConversions._

@@ -1,9 +1,10 @@
-package com.sos.scheduler.engine.tests.jira.js973
+package com.sos.scheduler.engine.common.io
 
 import java.io.InputStream
 import scala.sys._
 
-final class InputStreamIterator(in: InputStream) extends Iterator[Byte] {
+// TODO Test
+private final class InputStreamIterator(in: InputStream) extends Iterator[Byte] {
   private var nextByte: Int = -2
 
   def hasNext =

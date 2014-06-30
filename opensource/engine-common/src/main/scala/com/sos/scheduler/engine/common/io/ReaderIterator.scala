@@ -1,17 +1,15 @@
-package com.sos.scheduler.engine.tests.jira.js973
+package com.sos.scheduler.engine.common.io
 
 import java.io.Reader
-import scala.sys._
 
 final class ReaderIterator(reader: Reader) extends Iterator[Char] {
   private var nextChar: Int = -2
 
-  def hasNext =
-    provideNextByte() != -1
+  def hasNext = provideNextByte() != -1
 
   def next() = {
     val result = provideNextByte()
-    if (result < 0)  error("End of InputStream")
+    if (result < 0) throw new NoSuchElementException("End of Reader")
     nextChar = -2
     result.toChar
   }
