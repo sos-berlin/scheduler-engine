@@ -10,29 +10,29 @@ import scala.collection.immutable
 import scala.concurrent.promise
 
 final class ExtraScheduler(args: immutable.Seq[String], env: Iterable[(String, String)], tcpPort: Int)
-    extends AutoCloseable {
+extends AutoCloseable {
 
   private var process: Process = null
   private val tcpIsReadyPromise = promise[Boolean]()
 
-  def tcpIsReadyFuture =
-    tcpIsReadyPromise.future
+  def tcpIsReadyFuture = tcpIsReadyPromise.future
 
   private val stdoutThread = new Thread("stdout collector") {
     override def run() {
+      val expectedMessageCode = "SCHEDULER-956"
       try
-        unbufferedInputStreamToLines(process.getInputStream, schedulerEncoding) { line =>
-          logger info line
-          if ((line contains " SCHEDULER-956 ") && (line contains " TCP"))
-            tcpIsReadyPromise success true
+        unbufferedInputStreamToLines(process.getInputStream, schedulerEncoding) { line ⇒
+          logger.info(line)
+          if ((line contains s" $expectedMessageCode ") && (line contains " TCP"))
+            tcpIsReadyPromise.success(true)
         }
       catch {
-        case t: Throwable =>
+        case t: Throwable ⇒
           logger.error(s"Thread aborts with $t", t)
           throw t
       }
       finally
-        tcpIsReadyPromise tryFailure new RuntimeException("ExtraScheduler has not started successfully")
+        tcpIsReadyPromise.tryFailure(new RuntimeException(s"ExtraScheduler has not started successfully with message $expectedMessageCode"))
     }
   }
 
@@ -54,17 +54,15 @@ final class ExtraScheduler(args: immutable.Seq[String], env: Iterable[(String, S
     }
   }
 
-  def address =
-    SchedulerAddress(s"127.0.0.1:$tcpPort")
+  def address = SchedulerAddress(s"127.0.0.1:$tcpPort")
 
-  override def toString =
-    s"ExtraScheduler($address)"
+  override def toString = s"ExtraScheduler($address)"
 }
 
 private object ExtraScheduler {
-  private def logger = Logger(getClass)
+  private val logger = Logger(getClass)
 
-  private def unbufferedInputStreamToLines(in: InputStream, encoding: Charset)(processLine: String => Unit) {
+  private def unbufferedInputStreamToLines(in: InputStream, encoding: Charset)(processLine: String ⇒ Unit) {
     val lineBuffer = new StringBuffer(1000)
     val i = new ReaderIterator(new InputStreamReader(in, encoding))
     while (i.hasNext) {

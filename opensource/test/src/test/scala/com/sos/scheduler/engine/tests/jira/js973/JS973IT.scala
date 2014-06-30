@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
-import JS973IT._
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
@@ -16,13 +17,12 @@ import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.tests.jira.js973.JS973IT.OrderFinishedWithResultEvent
+import com.sos.scheduler.engine.tests.jira.js973.JS973IT._
 import java.io.File
 import java.nio.file.Files
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import scala.concurrent.Await
-import com.sos.scheduler.engine.data.message.MessageCode
 
 final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 
@@ -147,9 +147,10 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddress], expectedResult: String) {
-    val eventPipe = controller.newEventPipe()
-    scheduler executeXml newOrder(orderKey, remoteScheduler)
-    eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey } .result should startWith (expectedResult)
+    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      scheduler executeXml newOrder(orderKey, remoteScheduler)
+      eventPipe.nextWithCondition[OrderFinishedWithResultEvent] {_.orderKey == orderKey}.result should startWith(expectedResult)
+    }
   }
 
   private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: MessageCode) {
