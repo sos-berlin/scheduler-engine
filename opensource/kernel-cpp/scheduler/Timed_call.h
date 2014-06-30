@@ -51,7 +51,7 @@ struct Object_call : Timed_call {
     string obj_name() const;
 
   protected:
-    virtual Abstract_scheduler_object* object() const = 0;
+    virtual Scheduler_object* object() const = 0;
 
     virtual string call_name() const { 
         return name_of_type_info(typeid(*this)); 
@@ -90,7 +90,7 @@ struct object_call : Object_call {
         _object(o) 
     {}
 
-    Abstract_scheduler_object* object() const { 
+    Scheduler_object* object() const { 
         return _object; 
     }
 
