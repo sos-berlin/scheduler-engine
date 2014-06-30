@@ -25,7 +25,7 @@ Has_proxy::~Has_proxy()
 
 //---------------------------------------------------------------------Has_proxy::cache_proxy_class
 
-void Has_proxy::cache_proxy_class()
+void Has_proxy::cache_proxy_class() const
 {
     if (!_proxy_class)
         _proxy_class = proxy_class();
@@ -33,7 +33,7 @@ void Has_proxy::cache_proxy_class()
 
 //-------------------------------------------------------------------------Has_proxy::proxy_jobject
 
-jobject Has_proxy::java_proxy_jobject() 
+jobject Has_proxy::java_proxy_jobject() const
 {
     jobject result = _proxy.get_jobject();
     if( !result ) {
@@ -45,7 +45,7 @@ jobject Has_proxy::java_proxy_jobject()
 
 //--------------------------------------------------------------------------Has_proxy::create_proxy
 
-void Has_proxy::create_proxy() 
+void Has_proxy::create_proxy() const
 {
     cache_proxy_class(); 
     jobject context = _sister_context_proxy? _sister_context_proxy->java_sister() : NULL;
@@ -55,14 +55,14 @@ void Has_proxy::create_proxy()
 
 //----------------------------------------------------------------Has_proxy::set_reference_in_proxy
 
-void Has_proxy::set_reference_in_proxy(jlong value)
+void Has_proxy::set_reference_in_proxy(jlong value) const
 {
     _proxy_class->set_reference_in_proxy(java_proxy_jobject(), value);
 }
 
 //---------------------------------------------------------------------------Has_proxy::java_sister
 
-jobject Has_proxy::java_sister() 
+jobject Has_proxy::java_sister() const 
 {
     if (!_java_sister) {
         cache_proxy_class();

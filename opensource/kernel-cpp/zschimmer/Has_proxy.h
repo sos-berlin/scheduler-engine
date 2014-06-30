@@ -22,11 +22,11 @@ struct Has_proxy
                                 Has_proxy                   (Has_proxy* sister_context_proxy);
     virtual                    ~Has_proxy                   ();
 
-    jobject                     j                           ()                                      { return java_proxy_jobject(); }
-    jobject                     java_proxy_jobject          ();
-    virtual jobject             java_sister                 (); 
+    jobject                     j                           () const                                { return java_proxy_jobject(); }
+    jobject                     java_proxy_jobject          () const;
+    virtual jobject             java_sister                 () const; 
 
-    static jobject              jobject_of                  (Has_proxy* a)                          { return a? a->java_proxy_jobject() : NULL; }
+    static jobject              jobject_of                  (const Has_proxy* a)                    { return a? a->java_proxy_jobject() : NULL; }
 
 protected:
     virtual const Proxy_class*  proxy_class                 () const                                = 0;
@@ -34,17 +34,17 @@ protected:
 private:
     template<class SELF> friend struct has_proxy;
 
-    jlong                       cpp_reference               ()                                      { return (jlong)this; }
+    jlong                       cpp_reference               () const                                { return (jlong)this; }
     static Has_proxy*           of_cpp_reference_           (jlong, const char* debug_string);
 
-    void                        cache_proxy_class           ();
-    void                    set_reference_in_proxy          (jlong);
-    void                        create_proxy                ();
+    void                        cache_proxy_class           () const;
+    void                    set_reference_in_proxy          (jlong) const;
+    void                        create_proxy                () const;
 
-    Proxy_class const*         _proxy_class;
-    Global_jobject2            _proxy;
     Has_proxy* const           _sister_context_proxy;       // Kontext für die Java-Schwester oder NULL
-    Global_jobject2            _java_sister;                // Manche C++-Klassen haben neben dem C++-Proxy eine Java-Schwester, eine von C++ unabhängige Klasse
+    mutable Proxy_class const* _proxy_class;
+    mutable Global_jobject2    _proxy;
+    mutable Global_jobject2    _java_sister;                // Manche C++-Klassen haben neben dem C++-Proxy eine Java-Schwester, eine von C++ unabhängige Klasse
 };
 
 //--------------------------------------------------------------------------------------has_proxy<>
