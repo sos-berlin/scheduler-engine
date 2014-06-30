@@ -35,13 +35,17 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) {
 
   def parseElement[A](name: String)(body: ⇒ A): A = {
     requireStartElement(name)
-    parseElement(body)
+    parseElement()(body)
   }
 
-  def parseElement[A](body: ⇒ A): A = {
+  def parseElement[A]()(body: ⇒ A): A = {
     val result = body
     eat[EndElement]
     result
+  }
+
+  def ignoreAttributes() {
+    next()
   }
 
   def forEachAttribute(f: PartialFunction[(String, String), Unit]) {
@@ -65,7 +69,7 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) {
       val name = element.getName.toString
       try f.applyOrElse(name, { name: String => sys.error(s"Unexpected XML element <$name>, $errorSuffix") })
       catch {
-        case x: Exception ⇒ throw new RuntimeException(s"Error in XML element <$name>: $x - $errorSuffix", x)
+        case x: Exception ⇒ throw new WrappedException(s"Error in XML element <$name>: $x - $errorSuffix", x)
       }
     }
 
@@ -113,7 +117,7 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) {
 object ScalaXMLEventReader {
 
   def parseString[A](xml: String, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parse: ScalaXMLEventReader ⇒ A): A =
-    parseDocument(new StreamSource(new StringReader(xml)), inputFactory)(parse)
+    parseDocument(StringSource(xml), inputFactory)(parse)
 
   def parseDocument[A](source: Source, inputFactory: XMLInputFactory)(parse: ScalaXMLEventReader ⇒ A): A = {
     val reader = new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))
@@ -131,4 +135,10 @@ object ScalaXMLEventReader {
 
   private def locationStringOf(o: Location) =
     (Option(o.getSystemId) ++ Option(o.getPublicId)).flatten.mkString(":") + ":" + o.getLineNumber +":" + o.getColumnNumber
+
+  final class WrappedException(override val getMessage: String, override val getCause: Exception) extends RuntimeException
+  
+  object WrappedException {
+    def unapply(o: WrappedException) = Some(o.getCause)
+  }
 }

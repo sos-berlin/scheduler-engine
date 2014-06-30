@@ -26,7 +26,7 @@ final class OldScheduleXMLParser(defaultTimeZone: DateTimeZone, eventReader: Sca
         case "period" => builder.periods += new SchedulePeriodXMLParser(eventReader).parse()
         case "weekdays" => parseAttributelessElement {
           forEachStartElement {
-            case "day" => parseElement {
+            case "day" => parseElement() {
               forEachAttribute {
                 case ("day", s) =>
                   builder.weekdaysPeriods(Weekday(s)) = SchedulePeriodXMLParser.parseSchedulePeriodSeq(eventReader)
