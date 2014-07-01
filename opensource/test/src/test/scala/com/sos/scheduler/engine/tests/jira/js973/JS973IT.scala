@@ -5,11 +5,13 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.data.base.IsString
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.HotEventHandler
+import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
@@ -17,30 +19,34 @@ import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT._
 import java.io.File
 import java.nio.file.Files
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import scala.concurrent.Await
 
-final class JS973IT extends FreeSpec with ScalaSchedulerTest {
+@RunWith(classOf[JUnitRunner])
+final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBeforeAndAfterAll {
 
-  private lazy val aSlave = newSlave()
-  private lazy val bSlave = newSlave()
-  private lazy val processClassSlave = newSlave()
-  private lazy val slaves = List(aSlave, bSlave, processClassSlave)
+  private lazy val aAgent = newAgent()
+  private lazy val bAgent = newAgent()
+  private lazy val processClassAgent = newAgent()
+  private lazy val agents = List(aAgent, bAgent, processClassAgent)
 
   override def checkedBeforeAll() {
     controller.startScheduler()
-    slaves foreach { _.extraScheduler.start() }   // Parallel mit Test-Scheduler starten
+    agents foreach { _.extraScheduler.start() }   // Parallel mit Test-Scheduler starten
     controller.waitUntilSchedulerIsActive()
-    scheduler executeXml <process_class name="test-c" remote_scheduler={processClassSlave.extraScheduler.address.string}/>
+    scheduler executeXml <process_class name="test-c" remote_scheduler={processClassAgent.extraScheduler.address.string}/>
   }
 
   override def afterAll() {
     super.afterAll()
-    slaves foreach { _.close() }
+    agents foreach { _.close() }
   }
 
   s"Without parameter $remoteSchedulerParameterName runs job in our scheduler" in {
@@ -48,45 +54,45 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   s"Empty parameter $remoteSchedulerParameterName runs job in our scheduler" in {
-    testOrderWithRemoteScheduler(shellJobChainPath, Some(SchedulerAddress("")), "**")
+    testOrderWithRemoteScheduler(shellJobChainPath, Some(SchedulerAddressString("")), "**")
   }
 
   s"Order parameter $remoteSchedulerParameterName selects a remote scheduler" in {
-    testOrderWithRemoteScheduler(shellJobChainPath, aSlave)
+    testOrderWithRemoteScheduler(shellJobChainPath, aAgent)
   }
 
   s"Task runs on remote_scheduler of process_class" in {
-    testOrderWithRemoteScheduler(processClassJobChainPath, None, processClassSlave.expectedResult)
+    testOrderWithRemoteScheduler(processClassJobChainPath, None, processClassAgent.expectedResult)
   }
 
   s"Order parameter $remoteSchedulerParameterName overrides remote scheduler of process class" in {
-    testOrderWithRemoteScheduler(processClassJobChainPath, aSlave)
+    testOrderWithRemoteScheduler(processClassJobChainPath, aAgent)
   }
 
   "Shell with monitor" in {
-    testOrderWithRemoteScheduler(shellWithMonitorJobChainPath, aSlave)
+    testOrderWithRemoteScheduler(shellWithMonitorJobChainPath, aAgent)
   }
 
 //  JS-973 gilt nicht für API-Tasks.
 //  test(s"For an order, the task running on right remote scheduler is selected") {
 //    val eventPipe = controller.newEventPipe()
-//    testOrderWithRemoteScheduler(apiJobChainPath, aSlave)
+//    testOrderWithRemoteScheduler(apiJobChainPath, aAgent)
 //    val aTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == apiJobPath } .taskId
-//    testOrderWithRemoteScheduler(apiJobChainPath, bSlave)
+//    testOrderWithRemoteScheduler(apiJobChainPath, bAgent)
 //    val bTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == apiJobPath } .taskId
-//    testOrderWithRemoteScheduler(apiJobChainPath, aSlave, aTaskId)
+//    testOrderWithRemoteScheduler(apiJobChainPath, aAgent, aTaskId)
 //    intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == apiJobPath } }
-//    testOrderWithRemoteScheduler(apiJobChainPath, bSlave, bTaskId)
+//    testOrderWithRemoteScheduler(apiJobChainPath, bAgent, bTaskId)
 //    intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == apiJobPath } }
 //    eventPipe.close()
 //  }
 
   s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job" in {
-    testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = MessageCode("Z-4003"))
+    testInvalidJobChain(shellJobChainPath, SchedulerAddressString(":INVALID-ADDRESS"), expectedErrorCode = MessageCode("Z-4003"))
   }
 
   "Not for API jobs" in {
-    testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = MessageCode("SCHEDULER-484"))
+    testInvalidJobChain(apiJobChainPath, SchedulerAddressString(aAgent.extraScheduler.address.string), expectedErrorCode = MessageCode("SCHEDULER-484"))
   }
 
   "File_order_sink_module::create_instance_impl" in {
@@ -120,40 +126,41 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 //    pending
 //  }
 
-  private def newSlave(): Slave = {
+  private def newAgent(): Agent = {
     val tcpPort = findRandomFreeTcpPort()
     val args = List(
       controller.cppBinaries.file(CppBinary.exeFilename).getPath,
       s"-sos.ini=${controller.environment.sosIniFile}",
       s"-ini=${controller.environment.iniFile}",
-      s"-id=slave-$tcpPort",
+      s"-id=agent-$tcpPort",
+      s"-roles=agent",
       s"-log-dir=${controller.environment.logDirectory.getPath}",
       s"-log-level=debug9",
       s"-log=+${controller.environment.schedulerLog.getPath}",
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
       s"-e",
-      new File(controller.environment.configDirectory.getPath, "slave-scheduler.xml").getPath)
+      new File(controller.environment.configDirectory.getPath, "agent-scheduler.xml").getPath)
     val testValue = s"TEST-$tcpPort"
-    new Slave(new ExtraScheduler(args, List(testVariableName -> testValue), tcpPort), s"*$testValue*")
+    new Agent(new ExtraScheduler(args, List(testVariableName -> testValue), tcpPort), s"*$testValue*")
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, slave: Slave) {
-    testOrderWithRemoteScheduler(jobChainPath, Some(slave.extraScheduler.address), slave.expectedResult)
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent) {
+    testOrderWithRemoteScheduler(jobChainPath, Some(SchedulerAddressString(agent.extraScheduler.address.string)), agent.expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, remoteScheduler: Option[SchedulerAddress], expectedResult: String) {
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, remoteScheduler: Option[SchedulerAddressString], expectedResult: String) {
     testOrderWithRemoteScheduler(newOrderKey(jobChainPath), remoteScheduler, expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddress], expectedResult: String) {
+  private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddressString], expectedResult: String) {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       scheduler executeXml newOrder(orderKey, remoteScheduler)
       eventPipe.nextWithCondition[OrderFinishedWithResultEvent] {_.orderKey == orderKey}.result should startWith(expectedResult)
     }
   }
 
-  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: MessageCode) {
+  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddressString, expectedErrorCode: MessageCode) {
     val eventPipe = controller.newEventPipe()
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
@@ -187,7 +194,7 @@ private object JS973IT {
   private val extraSchedulerTimeout = 60.s
   private val logger = Logger(getClass)
 
-  private def newOrder(orderKey: OrderKey, remoteSchedulerOption: Option[SchedulerAddress]) =
+  private def newOrder(orderKey: OrderKey, remoteSchedulerOption: Option[SchedulerAddressString]) =
     <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
       <params>{
         remoteSchedulerOption.toList map { o => <param name={remoteSchedulerParameterName} value={o.string}/>}
@@ -196,11 +203,11 @@ private object JS973IT {
 
   private case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
 
-  private class Slave(val extraScheduler: ExtraScheduler, _expectedResult: String) extends AutoCloseable {
+  private class Agent(val extraScheduler: ExtraScheduler, _expectedResult: String) extends AutoCloseable {
     def close() {
-      logger info s"close start $extraScheduler"
+      logger.info(s"close start $extraScheduler")
       extraScheduler.close()
-      logger info s"close finished $extraScheduler"
+      logger.info(s"close finished $extraScheduler")
     }
 
     def expectedResult = {
@@ -208,4 +215,6 @@ private object JS973IT {
       _expectedResult
     }
   }
+
+  private case class SchedulerAddressString(string: String) extends IsString
 }
