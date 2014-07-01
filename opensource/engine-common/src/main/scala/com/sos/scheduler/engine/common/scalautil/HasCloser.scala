@@ -5,7 +5,7 @@ import com.google.common.io.Closer
 import java.io.Closeable
 import scala.language.reflectiveCalls
 
-trait HasCloser extends AutoCloseable {
+trait HasCloser extends AutoCloseable with CloseOnError {
 
   private val _closer: Closer = Closer.create()
 

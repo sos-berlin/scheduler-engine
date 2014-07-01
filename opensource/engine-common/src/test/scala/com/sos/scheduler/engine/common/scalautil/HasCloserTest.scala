@@ -3,21 +3,21 @@ package com.sos.scheduler.engine.common.scalautil
 import HasCloserTest._
 import com.google.common.io.Closer
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{FreeSpec, FunSuite}
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class HasCloserTest extends FunSuite {
+final class HasCloserTest extends FreeSpec {
 
-  test("onClose") {
+  "onClose" in {
     val a = new A
     a.closed shouldBe false
     a.close()
     a.closed shouldBe true
   }
 
-  test("implicit Closer.apply") {
+  "implicit Closer.apply" in {
     import HasCloser.implicits._
     implicit val closer = Closer.create()
     var a = false
@@ -27,7 +27,7 @@ final class HasCloserTest extends FunSuite {
     a shouldBe true
   }
 
-  test("registerCloseable") {
+  "registerCloseable" in {
     import HasCloser.implicits._
     implicit val closer = Closer.create()
     val b = (new B).registerCloseable
