@@ -9,7 +9,7 @@ import java.net.URI
 
 final class WebServiceTester(injector: Injector) {
 
-  lazy val jettyConfiguration = JettyConfiguration(portOption = Some(TcpPortNumber.random()))
+  lazy val jettyConfiguration = JettyConfiguration(portOption = Some(TcpPortNumber.lazyRandom()))
   lazy val portNumber = jettyConfiguration.portOption.get.value
 
   private lazy val webServer = new WebServer(jettyConfiguration)

@@ -13,7 +13,7 @@ object SchedulerConfigurationAdapter {
 
     JettyConfiguration(
       portOption = pluginElement.getAttribute("port") match {
-        case "TEST" => Some(TcpPortNumber.random())
+        case "TEST" => Some(TcpPortNumber.lazyRandom())
         case _ => xmlAttributeIntOption(pluginElement, "port") map TcpPortNumber.apply
       },
       jettyXMLURLOption = configFileIfExists("jetty.xml") map { _.toURI.toURL },

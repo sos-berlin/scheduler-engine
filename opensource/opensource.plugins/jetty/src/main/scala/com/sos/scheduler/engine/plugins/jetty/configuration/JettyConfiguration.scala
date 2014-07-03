@@ -29,15 +29,15 @@ object JettyConfiguration {
 
 
   trait TcpPortNumber {
-    val value: Int
+    def value: Int
   }
 
   object TcpPortNumber {
     def apply(o: Int) = new TcpPortNumber {
-      lazy val value = o
+      val value = o
     }
 
-    def random() = new TcpPortNumber {
+    def lazyRandom() = new TcpPortNumber {
       lazy val value = findRandomFreeTcpPort()
     }
   }
