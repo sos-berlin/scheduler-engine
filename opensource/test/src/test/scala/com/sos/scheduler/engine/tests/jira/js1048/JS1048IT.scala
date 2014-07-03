@@ -25,7 +25,7 @@ final class JS1048IT extends FreeSpec {
   private lazy val testConfiguration =
     TestConfiguration(
       testClass = getClass,
-      cppSettings = CppSettings.testMap + (CppSettingName.alwaysCreateDatabaseTables -> false.toString))
+      cppSettings = CppSettings.TestMap + (CppSettingName.alwaysCreateDatabaseTables -> false.toString))
 
   "After JobScheduler restart with an unchanged .order.xml, a previous state should remain" in {
     autoClosing(ProvidesTestEnvironment(testConfiguration)) { envProvider =>

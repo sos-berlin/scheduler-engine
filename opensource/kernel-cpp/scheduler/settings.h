@@ -55,7 +55,6 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     void                        set_defaults                (Spooler*);
     void                        set_from_variables          (const com_objects::Com_variable_set&);
     void                        set                         (int number, const string& value);
-    string                      get                         (int number) const;
     
     bool has_role_scheduler() const {
         return _roles.find(role_scheduler) != _roles.end();

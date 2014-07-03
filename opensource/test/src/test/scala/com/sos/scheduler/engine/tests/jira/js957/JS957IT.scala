@@ -24,7 +24,7 @@ final class JS957IT extends FunSuite {
   private val testConfiguration = TestConfiguration(
     testClass = getClass,
     logCategories = "scheduler java.stackTrace-",
-    cppSettings = CppSettings.testMap + (CppSettingName.alwaysCreateDatabaseTables -> false.toString),
+    cppSettings = CppSettings.TestMap + (CppSettingName.alwaysCreateDatabaseTables -> false.toString),
     database = Some(DefaultDatabaseConfiguration(closeDelay = 60.s)))
 
   test("Order should start once, and after Scheduler abort and restart, order should continue starting") {

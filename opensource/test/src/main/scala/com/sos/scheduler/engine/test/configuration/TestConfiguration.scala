@@ -34,7 +34,7 @@ final case class TestConfiguration(
 
   ignoreError: MessageCode ⇒ Boolean = _ ⇒ false,
 
-  cppSettings: Map[CppSettingName, String] = CppSettings.testMap)
+  cppSettings: Map[CppSettingName, String] = CppSettings.TestMap)
 
 
 object TestConfiguration {

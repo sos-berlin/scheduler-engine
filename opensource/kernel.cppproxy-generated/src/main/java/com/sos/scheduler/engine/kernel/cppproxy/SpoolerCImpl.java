@@ -1007,11 +1007,11 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native void self_check__native(long cppReference);
 
 
-    @Override public java.lang.String setting(int p0) {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.SettingsC settings() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = setting__native(cppReference(), p0);
-            checkIsNotReleased(java.lang.String.class, result);
+            com.sos.scheduler.engine.kernel.cppproxy.SettingsC result = settings__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.SettingsC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -1020,7 +1020,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
         }
     }
 
-    private static native java.lang.String setting__native(long cppReference, int p0);
+    private static native com.sos.scheduler.engine.kernel.cppproxy.SettingsC settings__native(long cppReference);
 
 
     @Override public void signal() {

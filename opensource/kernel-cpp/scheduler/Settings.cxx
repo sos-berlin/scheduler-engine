@@ -119,20 +119,6 @@ void Settings::set(int number, const string& value) {
     }
 }
 
-//------------------------------------------------------------------------------------Settings::get
-
-string Settings::get(int number) const {
-    // number wird in Java SettingName festgelegt.
-
-    switch (number) {
-        case 1: return _db_name;
-        case 2: return _job_java_classpath;
-        case 3: return _html_dir;
-        default:
-            z::throw_xc("UNKNOWN_SETTING", number);
-    }
-}
-
 //---------------------------------------------------------------------------Settings::require_role
 
 void Settings::require_role(Role role) const {

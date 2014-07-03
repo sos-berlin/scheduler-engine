@@ -17,6 +17,244 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jboolean JNICALL _1always_1create_1database_1tables(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_always_create_database_tables()");
+        return (o_->_always_create_database_tables);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL _1cluster_1restart_1after_1emergency_1abort(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_cluster_restart_after_emergency_abort()");
+        return (o_->_cluster_restart_after_emergency_abort);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jstring JNICALL _1db_1name(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_db_name()");
+        return env.jstring_from_string(o_->_db_name);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jstring JNICALL _1html_1dir(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_html_dir()");
+        return env.jstring_from_string(o_->_html_dir);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jstring JNICALL _1job_1java_1classpath(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_job_java_classpath()");
+        return env.jstring_from_string(o_->_job_java_classpath);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jstring JNICALL _1job_1java_1options(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_job_java_options()");
+        return env.jstring_from_string(o_->_job_java_options);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL _1keep_1order_1content_1on_1reschedule(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_keep_order_content_on_reschedule()");
+        return (o_->_keep_order_content_on_reschedule);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL _1max_1length_1of_1blob_1entry(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_max_length_of_blob_entry()");
+        return (o_->_max_length_of_blob_entry);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL _1order_1distributed_1balanced(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_order_distributed_balanced()");
+        return (o_->_order_distributed_balanced);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL _1supervisor_1configuration_1polling_1interval(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_supervisor_configuration_polling_interval()");
+        return (o_->_supervisor_configuration_polling_interval);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL _1use_1java_1persistence(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_use_java_persistence()");
+        return (o_->_use_java_persistence);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL _1use_1old_1microscheduling_1for_1jobs(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_use_old_microscheduling_for_jobs()");
+        return (o_->_use_old_microscheduling_for_jobs);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL _1use_1old_1microscheduling_1for_1tasks(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_use_old_microscheduling_for_tasks()");
+        return (o_->_use_old_microscheduling_for_tasks);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL is_1freezed(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::is_freezed()");
+        return (o_->is_freezed());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL set__ILjava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jint p0, jstring p1)
 {
     Env env = jenv;
@@ -32,6 +270,20 @@ static void JNICALL set__ILjava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"_always_create_database_tables__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1always_1create_1database_1tables },
+    { (char*)"_cluster_restart_after_emergency_abort__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1cluster_1restart_1after_1emergency_1abort },
+    { (char*)"_db_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1db_1name },
+    { (char*)"_html_dir__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1html_1dir },
+    { (char*)"_job_java_classpath__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1java_1classpath },
+    { (char*)"_job_java_options__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1java_1options },
+    { (char*)"_keep_order_content_on_reschedule__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1keep_1order_1content_1on_1reschedule },
+    { (char*)"_max_length_of_blob_entry__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1max_1length_1of_1blob_1entry },
+    { (char*)"_order_distributed_balanced__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1order_1distributed_1balanced },
+    { (char*)"_supervisor_configuration_polling_interval__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1supervisor_1configuration_1polling_1interval },
+    { (char*)"_use_java_persistence__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1java_1persistence },
+    { (char*)"_use_old_microscheduling_for_jobs__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1jobs },
+    { (char*)"_use_old_microscheduling_for_tasks__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1tasks },
+    { (char*)"is_freezed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1freezed },
     { (char*)"set__native", (char*)"(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set__ILjava_lang_String_2 }
 };
 

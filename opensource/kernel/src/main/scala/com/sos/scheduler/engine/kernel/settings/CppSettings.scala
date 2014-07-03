@@ -1,9 +1,15 @@
 package com.sos.scheduler.engine.kernel.settings
 
-import CppSettingName._
 import com.sos.scheduler.engine.kernel.cppproxy.SettingsC
+import com.sos.scheduler.engine.kernel.settings.CppSettingName._
 
+/**
+ * C++ settings (settings.cxx), for write-access only.
+ * For reading, see [[com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration]].
+ */
 final class CppSettings private(val valueMap: Map[CppSettingName, String]) {
+
+  def apply(name: CppSettingName) = valueMap(name)
 
   def setSettingsInCpp(cppProxy: SettingsC) {
     for (e <- valueMap)
@@ -12,9 +18,9 @@ final class CppSettings private(val valueMap: Map[CppSettingName, String]) {
 }
 
 object CppSettings {
-  lazy val empty = apply(Nil)
-  lazy val testMap = Map(alwaysCreateDatabaseTables -> true.toString)
+  lazy val Empty = apply(Nil)
+  lazy val TestMap = Map(alwaysCreateDatabaseTables -> true.toString)
 
-  def apply(values: Iterable[(CppSettingName, String)]) =
-    new CppSettings(values.toMap)
+  def apply(values: Iterable[(CppSettingName, String)]): CppSettings =
+    new CppSettings(values.toMap withDefault { o ⇒ throw new NoSuchElementException(s"Unknown CppSettingName $o") })
 }

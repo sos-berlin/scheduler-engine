@@ -27,7 +27,7 @@ final class CppServletIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     testPackage = Some(JettyPluginTests.getClass.getPackage),
-    cppSettings = CppSettings.testMap + (CppSettingName.htmlDir -> httpDirectory.getPath))    // Für Bitmuster-Test
+    cppSettings = CppSettings.TestMap + (CppSettingName.htmlDir -> httpDirectory.getPath))    // Für Bitmuster-Test
 
   "Kommando ueber POST" in {
     val result = stringFromResponse(webResource.path("/jobscheduler/engine-cpp").`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[ClientResponse], "<show_state/>"))

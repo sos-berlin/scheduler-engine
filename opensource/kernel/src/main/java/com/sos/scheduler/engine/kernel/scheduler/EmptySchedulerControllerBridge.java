@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 public class EmptySchedulerControllerBridge implements SchedulerControllerBridge {
     public static final EmptySchedulerControllerBridge singleton = new EmptySchedulerControllerBridge();
 
-    private final CppSettings cppSettings = CppSettings.empty();
+    private final CppSettings cppSettings = CppSettings.Empty();
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
 
     private EmptySchedulerControllerBridge() {}

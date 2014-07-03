@@ -78,6 +78,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     String distributed_member_id();
     String db_distributed_member_id();
     SettingsC modifiable_settings();
+    SettingsC settings();
     @CppThreadSafe void signal();
     DatabaseC db();
     Folder_subsystemC folder_subsystem();
@@ -92,6 +93,5 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 
     boolean has_any_task();
     @CppThreadSafe void write_to_scheduler_log(String category, String text);
-    String setting(int index);
     String time_zone_name();
 }

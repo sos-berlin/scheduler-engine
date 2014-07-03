@@ -1127,16 +1127,16 @@ static void JNICALL self_1check(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL setting__I(JNIEnv* jenv, jobject, jlong cppReference, jint p0)
+static jobject JNICALL settings(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::setting()");
-        return env.jstring_from_string(o_->setting(p0));
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::settings()");
+        return Has_proxy::jobject_of(o_->settings());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
-        return jstring();
+        return jobject();
     }
 }
 
@@ -1426,7 +1426,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"run_check_ctrl_c__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::run_1check_1ctrl_1c },
     { (char*)"schedule_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Schedule_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::schedule_1subsystem },
     { (char*)"self_check__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::self_1check },
-    { (char*)"setting__native", (char*)"(JI)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::setting__I },
+    { (char*)"settings__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/SettingsC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::settings },
     { (char*)"signal__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::signal },
     { (char*)"standing_order_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Standing_order_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::standing_1order_1subsystem },
     { (char*)"start__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::start },

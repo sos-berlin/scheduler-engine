@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
-import java.io.File
-
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
-import com.sos.scheduler.engine.kernel.settings.CppSettingName
-import com.sos.scheduler.engine.kernel.settings.CppSettingName.htmlDir
+import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
+import java.io.File
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 final class SchedulerConfiguration @Inject private(spoolerC: SpoolerC) {
+
+  private lazy val settingsC = spoolerC.settings
 
   def clusterMemberId: ClusterMemberId =
     ClusterMemberId(spoolerC.cluster_member_id)
@@ -33,7 +33,7 @@ final class SchedulerConfiguration @Inject private(spoolerC: SpoolerC) {
   def schedulerId: SchedulerId =
     SchedulerId(spoolerC.id)
 
-  def tcpPort: Int =
+  lazy val tcpPort: Int =
     spoolerC.tcp_port
 
   def udpPort: Option[Int] =
@@ -42,12 +42,9 @@ final class SchedulerConfiguration @Inject private(spoolerC: SpoolerC) {
       case n => Some(n)
     }
 
-  def webDirectoryOption: Option[File] =
-    setting(htmlDir) match {
+  lazy val webDirectoryOption: Option[File] =
+    settingsC._html_dir match {
       case "" => None
       case o => Some(new File(o))
     }
-
-  private def setting(name: CppSettingName): String =
-    spoolerC.setting(name.getNumber)
 }

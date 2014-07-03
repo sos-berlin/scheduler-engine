@@ -35,7 +35,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    cppSettings = CppSettings.testMap + (CppSettingName.useJavaPersistence -> true.toString))
+    cppSettings = CppSettings.TestMap + (CppSettingName.useJavaPersistence -> true.toString))
 
   private val testStartTime = now() withMillisOfSecond 0
   private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
