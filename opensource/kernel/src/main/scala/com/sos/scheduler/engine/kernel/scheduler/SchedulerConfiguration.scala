@@ -33,6 +33,9 @@ final class SchedulerConfiguration @Inject private(spoolerC: SpoolerC) {
   def schedulerId: SchedulerId =
     SchedulerId(spoolerC.id)
 
+  lazy val httpPort: Int =
+    settingsC._http_port
+
   lazy val tcpPort: Int =
     spoolerC.tcp_port
 

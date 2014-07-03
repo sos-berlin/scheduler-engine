@@ -71,6 +71,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native java.lang.String _html_dir__native(long cppReference);
 
 
+    @Override public int _http_port() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return _http_port__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int _http_port__native(long cppReference);
+
+
     @Override public java.lang.String _job_java_classpath() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

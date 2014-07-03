@@ -28,7 +28,9 @@ public enum CppSettingName {
 
     alwaysCreateDatabaseTables(12),
 
-    roles(13);
+    roles(13),
+
+    httpPort(14);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

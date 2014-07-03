@@ -49,4 +49,7 @@ trait SettingsC extends CppProxy {
 
   @CppField
   def _always_create_database_tables: Boolean  // For tests only to suppress java error messages
+
+  @CppField
+  def _http_port: Int
 }

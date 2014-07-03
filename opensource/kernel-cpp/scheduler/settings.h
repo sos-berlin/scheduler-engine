@@ -40,7 +40,9 @@ enum Setting_name {
 
     setting_always_create_database_tables = 12,
     
-    setting_roles = 13
+    setting_roles = 13,
+
+    setting_http_port = 14
 };
 
 
@@ -87,6 +89,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     bool                       _use_old_microscheduling_for_tasks;
     bool                       _always_create_database_tables;  // For tests only to suppress java error messages
     std::set<Role>             _roles;
+    int                        _http_port;
 };
 
 }} //namespace sos::scheduler

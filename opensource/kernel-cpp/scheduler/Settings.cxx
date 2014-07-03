@@ -114,6 +114,12 @@ void Settings::set(int number, const string& value) {
             }
             break;
         }
+        case setting_http_port: {
+            int port = as_int(value);
+            if (port < 1 || port > 65535) z::throw_xc("SCHEDULER-391", "http-port", value, "1-65535");
+            _http_port = port;
+            break;
+        }
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }

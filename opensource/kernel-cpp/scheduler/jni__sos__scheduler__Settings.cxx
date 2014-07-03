@@ -85,6 +85,23 @@ static jstring JNICALL _1html_1dir(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jint JNICALL _1http_1port(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_http_port()");
+        return (o_->_http_port);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jstring JNICALL _1job_1java_1classpath(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -274,6 +291,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"_cluster_restart_after_emergency_abort__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1cluster_1restart_1after_1emergency_1abort },
     { (char*)"_db_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1db_1name },
     { (char*)"_html_dir__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1html_1dir },
+    { (char*)"_http_port__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1http_1port },
     { (char*)"_job_java_classpath__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1java_1classpath },
     { (char*)"_job_java_options__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1java_1options },
     { (char*)"_keep_order_content_on_reschedule__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1keep_1order_1content_1on_1reschedule },
