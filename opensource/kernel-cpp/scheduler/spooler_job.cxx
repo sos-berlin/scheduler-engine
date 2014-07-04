@@ -1933,10 +1933,14 @@ void Standard_job::on_call(const Period_end_call&) {
 void Standard_job::on_call(const Start_queued_task_call&) 
 {
     Time t = _task_queue->next_start_time();
-    try_start_tasks();
-    Time next = _task_queue->next_start_time();
-    if (next != t) {
-        _call_register.call_at<Start_queued_task_call>(_task_queue->next_start_time());
+    if (t <= Time::now()) {
+        try_start_tasks();
+        Time next = _task_queue->next_start_time();
+        if (next != t) {
+            _call_register.call_at<Start_queued_task_call>(next);
+        }
+    } else {
+        _call_register.call_at<Start_queued_task_call>(t);
     }
 }
 
@@ -1951,10 +1955,15 @@ void Standard_job::on_call(const Calculated_next_time_do_something_call&) {
 void Standard_job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
     Time t = next_order_time();
-    process_orders();
-    Time next = next_order_time();
-    if (next != t) {
-        _call_register.call_at<Order_timed_call>(next);
+    if (t <= Time::now()) {
+        process_orders();
+        Time next = next_order_time();
+        if (next != t) {
+            Z_LOG2("scheduler.signal", "Order_timed_call next=" << t.as_string(time_zone_name()) << "\n");
+            _call_register.call_at<Order_timed_call>(next);
+        }
+    } else {
+        _call_register.call_at<Order_timed_call>(t);
     }
 }
 
@@ -2616,7 +2625,7 @@ void Job::signal_earlier_order( Order* order )
 void Standard_job::signal_earlier_order( const Time& t, const string& order_name, const string& function )
 {
     if (!t.is_never()) {
-        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << order_name << "  " << order_name << " " << t.as_string(time_zone_name()) << "\n" );
+        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << order_name << " " << t.as_string(time_zone_name()) << "\n" );
         if (_call_register.at<Order_timed_call>() >= t)
             _call_register.call_at<Order_timed_call>(t);
     }

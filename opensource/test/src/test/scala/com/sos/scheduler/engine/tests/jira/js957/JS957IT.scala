@@ -16,7 +16,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
-/** Jira-Tickets JS-956 und JS-957. */
+/** Jira-Tickets JS-956, JS-957 und JS-1172. */
 @RunWith(classOf[JUnitRunner])
 final class JS957IT extends FreeSpec {
 
