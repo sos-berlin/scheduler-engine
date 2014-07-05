@@ -86,30 +86,33 @@ struct Scheduler_object
         type_event_subsystem,
     };
 
-
     static string               name_of_type_code           ( Type_code );
 
-                                Scheduler_object            ( Spooler*, IUnknown* me, Type_code );
     virtual                    ~Scheduler_object            ();
 
-    Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
-    void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }
-    Spooler*                    spooler                     () const                                { return _spooler; }
+    virtual Type_code           scheduler_type_code         () const = 0;
+    virtual Spooler*            spooler                     () const = 0;
+    virtual Prefix_log*         log                         () const = 0;
 
     virtual void                close                       ()                                      {}
     void                        report_event                (const AbstractEventJ&);
     void                        report_event                (const AbstractEventJ&, const ObjectJ& eventSource);
     void                        report_event_code           (Event_code event_code, const ObjectJ& eventSource);
-    virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
-    virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
-    virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
-    virtual void                write_element_attributes    ( const xml::Element_ptr& ) const;
+    virtual string              obj_name                    () const                                { return name_of_type_code(scheduler_type_code()); }
+};
 
 
-    void                        complain_about_non_empty_attribute( const xml::Element_ptr&, const string& attribute_name );
+struct Abstract_scheduler_object : Scheduler_object {
+    Abstract_scheduler_object(Spooler*, IUnknown* me, Type_code);
+
+    Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
+    void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }
+    Spooler*                    spooler                     () const                                { return _spooler; }
     void                        assert_empty_attribute      ( const xml::Element_ptr&, const string& attribute_name );
     virtual void                self_check                  ()                                      {}
-
+    virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
+    virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
+    virtual void                write_element_attributes    ( const xml::Element_ptr& ) const;
     Prefix_log*                 log                         () const                                { return _log; }
     Database*                   db                          () const;
     Job_subsystem*              job_subsystem               () const;

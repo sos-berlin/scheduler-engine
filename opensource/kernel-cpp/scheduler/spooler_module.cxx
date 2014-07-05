@@ -341,12 +341,6 @@ void Module::set_dom( const xml::Element_ptr& element )
             z::throw_xc( "SCHEDULER-441", element.nodeName(), "encoding", element.getAttribute( "encoding" ) );
     }
 
-    //if( _use_process_class )
-    //{
-        //set_checked_attribute( &_process_class_string, element, "process_class"    );
-        //if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
-    //}
-
     _set = true;
 }
 
@@ -409,7 +403,7 @@ void Module::init()
 
     if( _kind != kind_internal )
     {
-        if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;  //process_class_subsystem()->has_process_classes();
+        if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;
         if( _dont_remote )  _use_process_class = false, _process_class_path.clear();
     }
 
@@ -639,8 +633,6 @@ Module_instance::Module_instance( Module* module )
     _process_environment = new Com_variable_set();
     _process_environment->merge( _module->_process_environment );
     _spooler_exit_called = false;
-
-  //_close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
 }
 
 //----------------------------------------------------------------Module_instance::~Module_instance
@@ -732,7 +724,6 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     _com_task->set_task( task );
 
     _task_id = task->id();
-    //_title = task->obj_name();          // Titel für Prozess
     _monitor_instances.attach_task( task, log );
 
     _has_order = task->order() != NULL;      // Rückgabe von Auftragsparametern über Datei ermöglichen
@@ -744,16 +735,8 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
 void Module_instance::fill_process_environment()
 {
-    //if( _module->kind() == Module::kind_process )
-    //{
-    //    fill_process_environment_with_params();
-    //    // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausführen.
-    //}
-
-
     // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
     if( _task->environment_or_null() )  _process_environment->merge( _task->environment_or_null() );
-
 
     if( _module->kind() == Module::kind_process )
     {
@@ -799,7 +782,6 @@ void Module_instance::detach_task()
     
     _task = NULL;
     _task_id = 0;
-    //_title = "";
     _monitor_instances.detach_task();
 }
 
@@ -842,32 +824,12 @@ bool Module_instance::load()
 
 //--------------------------------------------------------------Module_instance::try_to_get_process
 
-bool Module_instance::try_to_get_process()
+bool Module_instance::try_to_get_process(const Api_process_configuration* c)
 {
-    if( !_process )
-    {
-        if( _module->_process_class_path.empty()  
-            &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
-        {
-            // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
-            _process = _spooler->process_class_subsystem()->new_temporary_process(_remote_scheduler);
-        }
-        else
-        {
-            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(_remote_scheduler);
-        }
-
-        if( _process )
-        {
-            _process->add_module_instance( this );
-            _process->set_login(_module->_login);
-            assert( !_process->started() );
-
-            _process->set_job_name( _job_name );
-            _process->set_task_id ( _task_id  );
-        }
-
-        // _process wird nur von Remote_module_instance_procy benutzt. 
+    if (!_process) {
+        Process_class* process_class = _spooler->process_class_subsystem()->process_class(_module->_process_class_path);
+        _process = process_class->select_process_if_available(c);
+        // _process wird nur von Remote_module_instance_proxy benutzt. 
         // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
     }
 
@@ -927,7 +889,7 @@ void Module_instance::detach_process()
 {
     if( _process )
     {
-        _process->remove_module_instance( this );
+        _spooler->process_class_subsystem()->process_class(_module->_process_class_path)->remove_process(_process);
         _process = NULL;
     }
 }
@@ -984,8 +946,6 @@ bool Module_instance::begin__end()
     }
 
     return true;
-    //_spooler_open_called = true;
-    //return check_result( call_if_exists( spooler_open_name ) );
 }
 
 //----------------------------------------------------------------------Module_instance::end__start
@@ -1075,11 +1035,6 @@ Variant Module_instance::call__end()
 {
     if( _call_method == spooler_exit_name  &&  !loaded() )  return true;
 
-  //if( _call_method == wait_for_subprocesses_name )        // Keine Methode des Jobs.
-  //{
-  //    return _com_task->_task->wait_for_subprocesses();   // Siehe auch Com_remote_module_instance_server
-  //}
-  //else
     if( _call_method == spooler_open_name )
     {
         _spooler_open_called = true;
@@ -1112,15 +1067,6 @@ Async_operation* Module_instance::release__start()
 
 void Module_instance::release__end()
 {
-    //close();
-}
-
-//------------------------------------------------------------------------Module_instance::end_task
-
-void Module_instance::end_task()
-{
-    assert( _task );
-    if( _task )  _task->cmd_end();
 }
 
 //-------------------------------------------------------------------------Module_monitors::set_dom

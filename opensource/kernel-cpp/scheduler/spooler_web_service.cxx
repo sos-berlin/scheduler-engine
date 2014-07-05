@@ -354,7 +354,7 @@ xml::Element_ptr Web_services::dom_element( const xml::Document_ptr& document, c
 Web_service::Web_service( Spooler* sp )
 : 
     Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( sp, (Iweb_service*)this, Scheduler_object::type_web_service ),
+    Abstract_scheduler_object( sp, (Iweb_service*)this, Scheduler_object::type_web_service ),
     _zero_(this+1),
     _next_operation_id(1),
     _timeout( INT_MAX ),
@@ -589,7 +589,7 @@ Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* 
 : 
     _zero_(this+1), 
     Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( ws->_spooler, (Iweb_service_operation*)this, Scheduler_object::type_web_service_operation ),
+    Abstract_scheduler_object( ws->_spooler, (Iweb_service_operation*)this, Scheduler_object::type_web_service_operation ),
     _web_service(ws), 
     _http_operation(ht),
     _id(operation_id)
@@ -909,7 +909,7 @@ Web_service_request::Web_service_request( Web_service_operation* web_service_ope
 : 
     _zero_(this+1), 
     Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( web_service_operation->_spooler, (Iweb_service_request*)this, Scheduler_object::type_web_service_request ),
+    Abstract_scheduler_object( web_service_operation->_spooler, (Iweb_service_request*)this, Scheduler_object::type_web_service_request ),
     _web_service_operation(web_service_operation)
 {
 }
@@ -1043,7 +1043,7 @@ Web_service_response::Web_service_response( Web_service_operation* web_service_o
 : 
     _zero_(this+1), 
     Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( web_service_operation->_spooler, (Iweb_service_response*)this, Scheduler_object::type_web_service_response ),
+    Abstract_scheduler_object( web_service_operation->_spooler, (Iweb_service_response*)this, Scheduler_object::type_web_service_response ),
     _web_service_operation(web_service_operation)
 {
 }

@@ -70,7 +70,7 @@ struct Log_categories_reset_operation : Async_operation
 
 struct Remote_task_close_command_response : File_buffered_command_response
 {
-                                Remote_task_close_command_response( Process*, Communication::Connection* );
+                                Remote_task_close_command_response( Api_process*, Communication::Connection* );
                                ~Remote_task_close_command_response()                                {}
 
     // Async_operation
@@ -87,7 +87,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
 
     Fill_zero                  _zero_;
     Process_id                 _process_id;
-    ptr<Process>               _process;
+    ptr<Api_process>           _process;
     ptr<Communication::Connection>  _connection;
     ptr<Async_operation>       _operation;
     State                      _state;
@@ -96,7 +96,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
 
 //---------------------------Remote_task_close_command_response::Remote_task_close_command_response
 
-Remote_task_close_command_response::Remote_task_close_command_response( Process* p, Communication::Connection* c )
+Remote_task_close_command_response::Remote_task_close_command_response( Api_process* p, Communication::Connection* c )
 : 
     _zero_(this+1), 
     _process(p), 
@@ -144,34 +144,38 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
 
         case s_deleting_files:
         {
-            bool ok = _process->try_delete_files( _process->log() );
-            if( !ok )
-            {
-                // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
-                // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
+            bool ok;
+            if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) {
+                ok = local_api_process->try_delete_files( _process->log() );
+                if (!ok) {
+                    // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
+                    // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
 
-                double now = double_from_gmtime();
+                    double now = double_from_gmtime();
 
-                if( !_trying_deleting_files_until )  
-                {
-                    string paths = join( ", ", _process->undeleted_files() );
-                    if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
-                }
+                    if( !_trying_deleting_files_until )  
+                    {
+                        string paths = join( ", ", local_api_process->undeleted_files() );
+                        if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
+                    }
 
-                if( _trying_deleting_files_until  &&  _trying_deleting_files_until < now )   // Nach Fristablauf geben wir auf
-                {
-                    string paths = join( ", ", _process->undeleted_files() );
-                    if( _process->log() )  _process->log()->info( message_string( "SCHEDULER-878", paths ) );
-                    //_job->log()->warn( message_string( "SCHEDULER-878", paths ) );
-                    ok = true;
+                    if( _trying_deleting_files_until  &&  _trying_deleting_files_until < now )   // Nach Fristablauf geben wir auf
+                    {
+                        string paths = join( ", ", local_api_process->undeleted_files() );
+                        if( _process->log() )  _process->log()->info( message_string( "SCHEDULER-878", paths ) );
+                        //_job->log()->warn( message_string( "SCHEDULER-878", paths ) );
+                        ok = true;
+                    }
+                    else
+                    {
+                        if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay.as_double();
+                        set_async_next_gmtime( min( now + delete_temporary_files_retry.as_double(), _trying_deleting_files_until ) );
+                    }
                 }
-                else
-                {
-                    if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay.as_double();
-                    set_async_next_gmtime( min( now + delete_temporary_files_retry.as_double(), _trying_deleting_files_until ) );
-                }
+            } else {
+                ok = true;
             }
-            
+
             if( ok )
                 _state = s_responding;
 
@@ -1024,7 +1028,6 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
     Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << start_task_element.xml_string() << "\n");
-//    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !_spooler->_remote_commands_allowed_for_licence ) {
         if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
         return xml::Element_ptr();
@@ -1037,13 +1040,14 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
-    ptr<Process> process = Z_NEW( Process( _spooler, Host_and_port()) );
+    Api_process_configuration api_process_configuration;
+    api_process_configuration._controller_address = Host_and_port(client_host(), tcp_port);
+    api_process_configuration._is_thread = kind == "process";
+    api_process_configuration._log_stdout_and_stderr = true;     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
+    api_process_configuration._java_options = start_task_element.getAttribute("java_options");
+    api_process_configuration._java_classpath = start_task_element.getAttribute("java_classpath");
+    ptr<Api_process> process = Api_process::new_process(_spooler, api_process_configuration);
 
-    process->set_controller_address(Host_and_port(client_host(), tcp_port));
-    process->set_run_in_thread( kind == "process" );
-    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
-    process->set_java_options(start_task_element.getAttribute("java_options"));
-    process->set_java_classpath(start_task_element.getAttribute("java_classpath"));
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
 
@@ -1075,7 +1079,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     int  process_id = close_element. int_getAttribute( "process_id" );
     bool kill       = close_element.bool_getAttribute( "kill", false );
 
-    Process* process = _communication_operation->_operation_connection->get_task_process( process_id );
+    Api_process* process = _communication_operation->_operation_connection->get_task_process( process_id );
 
     if( kill )  process->kill();
 

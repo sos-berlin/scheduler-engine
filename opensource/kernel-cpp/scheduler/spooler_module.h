@@ -223,8 +223,6 @@ struct Module_instance : Object
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );
     void                        fill_process_environment    ();
 
-    void                        end_task                    ();
-
     bool                        implicit_load_and_start     ();
     virtual bool                load                        ();
     virtual void                start                       ();
@@ -239,8 +237,8 @@ struct Module_instance : Object
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
     string                      process_name                () const                                { return ""; }
 
-    virtual bool                try_to_get_process          ();
-    void                        detach_process              ();
+    virtual bool                try_to_get_process          (const Api_process_configuration* = NULL);
+    virtual void                detach_process              ();
 
     virtual Async_operation*    close__start                ();
     virtual void                close__end                  ();

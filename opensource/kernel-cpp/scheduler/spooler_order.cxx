@@ -46,7 +46,7 @@ struct Job_chain_folder : Job_chain_folder_interface
 
 //--------------------------------------------------------------------------Database_order_detector
 
-struct Database_order_detector : Async_operation, Scheduler_object
+struct Database_order_detector : Async_operation, Abstract_scheduler_object
 {
                                 Database_order_detector     ( Spooler* );
 
@@ -207,7 +207,7 @@ Standing_order_folder::~Standing_order_folder()
 Database_order_detector::Database_order_detector( Spooler* spooler ) 
 :
     _zero_(this+1),
-    Scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
+    Abstract_scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
 {
     _now_database_distributed_next_time   = Time::of_utc_date_time( now_database_distributed_next_time   );
     _never_database_distributed_next_time = Time::of_utc_date_time( never_database_distributed_next_time );
@@ -909,7 +909,7 @@ void Job_chain_folder::remove_job_chain( Job_chain* job_chain )
 
 Order_source::Order_source( Job_chain* job_chain, Scheduler_object::Type_code t ) 
 : 
-    Scheduler_object( job_chain->_spooler, static_cast<Object*>(this), t ),
+    Abstract_scheduler_object( job_chain->_spooler, static_cast<Object*>(this), t ),
     _zero_(this+1),
     _job_chain( job_chain )
 {
@@ -984,7 +984,7 @@ namespace job_chain {
 
 Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )         
 : 
-    Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
+    Abstract_scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
     _zero_(this+1), 
     _job_chain(job_chain),
     _type(type),
@@ -3582,7 +3582,7 @@ xml::Element_ptr Order_id_spaces::dom_element( const xml::Document_ptr& document
 
 Order_id_space::Order_id_space( Order_subsystem_impl* order_subsystem )
 : 
-    Scheduler_object( order_subsystem->_spooler, this, type_job_chain_group ), 
+    Abstract_scheduler_object( order_subsystem->_spooler, this, type_job_chain_group ), 
     _zero_(this+1)
 {
     _log->set_prefix( obj_name() );
@@ -3770,7 +3770,7 @@ string Order_id_space::name() const
 
 Order_queue::Order_queue( Order_queue_node* order_queue_node )
 :
-    Scheduler_object( order_queue_node->spooler(), static_cast<spooler_com::Iorder_queue*>( this ), type_order_queue ),
+    Abstract_scheduler_object( order_queue_node->spooler(), static_cast<spooler_com::Iorder_queue*>( this ), type_order_queue ),
     javabridge::has_proxy<Order_queue>(order_queue_node->job_chain()->spooler()),
     _zero_(this+1),
     _order_queue_node(order_queue_node),

@@ -206,7 +206,7 @@ struct Cluster_operation : Async_operation
 
 //-------------------------------------------------------------------------------------------------
 
-struct Heart_beat_watchdog_thread : Thread, Scheduler_object
+struct Heart_beat_watchdog_thread : Thread, Abstract_scheduler_object
 {
                                 Heart_beat_watchdog_thread  ( Cluster* );
 
@@ -223,7 +223,7 @@ struct Heart_beat_watchdog_thread : Thread, Scheduler_object
 
 //-----------------------------------------------------------------------------------Cluster_member
 
-struct Cluster_member : Object, Scheduler_object
+struct Cluster_member : Object, Abstract_scheduler_object
 {
     enum Mark_as_inactive_option
     {
@@ -287,7 +287,7 @@ struct Has_alarm
 
 //---------------------------------------------------------------------------------------Heart_beat
 
-struct Heart_beat : Async_operation, Scheduler_object, Has_alarm
+struct Heart_beat : Async_operation, Abstract_scheduler_object, Has_alarm
 {
                                 Heart_beat                  ( Cluster* );
 
@@ -298,7 +298,7 @@ struct Heart_beat : Async_operation, Scheduler_object, Has_alarm
     bool                        async_continue_             ( Continue_flags );
 
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
 
 
@@ -311,7 +311,7 @@ struct Heart_beat : Async_operation, Scheduler_object, Has_alarm
 
 //----------------------------------------------------------------------Exclusive_scheduler_watchdog
 
-struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Has_alarm
+struct Exclusive_scheduler_watchdog : Async_operation, Abstract_scheduler_object, Has_alarm
 {
                                 Exclusive_scheduler_watchdog( Cluster* );
 
@@ -342,7 +342,7 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Has_ala
 
 //------------------------------------------------------------------------Active_schedulers_watchdog
 
-struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Has_alarm
+struct Active_schedulers_watchdog : Async_operation, Abstract_scheduler_object, Has_alarm
 {
                                 Active_schedulers_watchdog   ( Cluster* );
 
@@ -373,7 +373,7 @@ bool is_heartbeat_operation( Async_operation* operation )
 
 Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Cluster* d )
 :
-    Scheduler_object( d->_spooler, this, type_heart_beat_watchdog_thread ),
+    Abstract_scheduler_object( d->_spooler, this, type_heart_beat_watchdog_thread ),
     _zero_(this+1),
     _cluster(d)
 {
@@ -469,7 +469,7 @@ int Heart_beat_watchdog_thread::thread_main()
 
 Cluster_member::Cluster_member( Cluster* d, const string& id ) 
 : 
-    Scheduler_object( d->_spooler, this, Scheduler_object::type_cluster_member ),
+    Abstract_scheduler_object( d->_spooler, this, Scheduler_object::type_cluster_member ),
     _zero_(this+1), 
     _cluster(d), 
     _member_id(id),
@@ -903,7 +903,7 @@ void Has_alarm::on_alarm()
 
 Heart_beat::Heart_beat( Cluster* m ) 
 :
-    Scheduler_object( m->_spooler, this, Scheduler_object::type_heart_beat ),
+    Abstract_scheduler_object( m->_spooler, this, Scheduler_object::type_heart_beat ),
     _zero_(this+1),
     _cluster(m)
 {
@@ -977,7 +977,7 @@ void Heart_beat::set_alarm()
 
 Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog( Cluster* m ) 
 :
-    Scheduler_object( m->_spooler, this, Scheduler_object::type_exclusive_scheduler_watchdog ),
+    Abstract_scheduler_object( m->_spooler, this, Scheduler_object::type_exclusive_scheduler_watchdog ),
     _zero_(this+1),
     _cluster(m)
 {
@@ -1162,7 +1162,7 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 
 Active_schedulers_watchdog::Active_schedulers_watchdog( Cluster* m ) 
 :
-    Scheduler_object( m->_spooler, this, Scheduler_object::type_active_schedulers_watchdog ),
+    Abstract_scheduler_object( m->_spooler, this, Scheduler_object::type_active_schedulers_watchdog ),
     _zero_(this+1),
     _cluster(m)
 {

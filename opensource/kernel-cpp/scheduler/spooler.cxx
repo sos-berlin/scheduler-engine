@@ -88,7 +88,6 @@ const int                       const_order_id_length_max           = 250;      
 const Duration                  delete_temporary_files_delay        = Duration(2);                                
 const Duration                  delete_temporary_files_retry        = Duration(0.1);                              
 
-const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
 
 volatile int                    ctrl_c_pressed                      = 0;                // Tatsächliches Signal ist in last_signal
@@ -670,7 +669,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
  */
 Spooler::Spooler(jobject java_main_context) 
 : 
-    Scheduler_object( this, this, Scheduler_object::type_scheduler ),
+    Abstract_scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
     _java_main_context(java_main_context),
     _subsystem_register(this),
@@ -2463,9 +2462,9 @@ void Spooler::run()
                     if( !wait_until.is_zero() )
 #               endif 
                 FOR_EACH_FILE_BASED( Process_class, process_class ) {
-                    Z_FOR_EACH( Process_class::Process_set, process_class->_process_set, p ) {
+                    Z_FOR_EACH( Process_class::Process_set, process_class->process_set(), p ) {
 #                       ifdef Z_WINDOWS
-                            if( object_server::Connection* server = (*p)->_connection )
+                            if( object_server::Connection* server = (*p)->connection())
                                 if( server->process_event() && *server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
 #                        else
                             Time next_time;

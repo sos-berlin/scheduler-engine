@@ -12,9 +12,9 @@ struct Web_service_operation;
 
 //------------------------------------------------------------------------------Http_file_directory
 
-struct Http_file_directory : Object, Scheduler_object
+struct Http_file_directory : Object, Abstract_scheduler_object
 {
-                                Http_file_directory         ( Scheduler* scheduler, const string& url_path, const File_path& directory ) : Scheduler_object( scheduler, this, type_http_file_directory ),
+                                Http_file_directory         ( Scheduler* scheduler, const string& url_path, const File_path& directory ) : Abstract_scheduler_object( scheduler, this, type_http_file_directory ),
                                                                                                                                             _url_path(url_path), _directory(directory) {}
 
     string                      url_path                    () const                                { return _url_path; }
@@ -30,7 +30,7 @@ struct Http_file_directory : Object, Scheduler_object
 //--------------------------------------------------------------------------------------Web_service
 
 struct Web_service : idispatch_implementation< Web_service, spooler_com::Iweb_service >,
-                    Scheduler_object
+                    Abstract_scheduler_object
 {
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
@@ -59,7 +59,7 @@ struct Web_service : idispatch_implementation< Web_service, spooler_com::Iweb_se
 
 
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     string                      obj_name                    () const                                { return "Web_service " + _name; }
 
     void                        activate                    ();
@@ -126,7 +126,7 @@ ptr<Web_services_interface>     new_web_services            ( Scheduler* );
 //---------------------------------------------------------------------------Web_service_operation 
 
 struct Web_service_operation : idispatch_implementation< Web_service_operation, spooler_com::Iweb_service_operation >,
-                               Scheduler_object
+                               Abstract_scheduler_object
 {
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
@@ -136,7 +136,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
                                ~Web_service_operation       ();
 
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     bool                        closed                      () const                                { return _http_operation == NULL; }
@@ -195,7 +195,7 @@ struct Web_service_stylesheet_operation : Web_service_operation
 //------------------------------------------------------------------------------Web_service_request
 
 struct Web_service_request : idispatch_implementation< Web_service_request, spooler_com::Iweb_service_request >,
-                             Scheduler_object
+                             Abstract_scheduler_object
 {
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
@@ -203,7 +203,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
 
                                 Web_service_request         ( Web_service_operation* );
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
     bool                        closed                      () const                                { return _web_service_operation == NULL; }
@@ -236,7 +236,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
 //-----------------------------------------------------------------------------Web_service_response
 
 struct Web_service_response : idispatch_implementation< Web_service_response, spooler_com::Iweb_service_response >,
-                              Scheduler_object
+                              Abstract_scheduler_object
 {
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
@@ -244,7 +244,7 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
 
                                 Web_service_response        ( Web_service_operation* );
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
     bool                        closed                      () const                                { return _web_service_operation == NULL; }

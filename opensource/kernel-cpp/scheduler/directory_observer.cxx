@@ -33,7 +33,7 @@ static bool file_info_is_lesser( const file::File_info* a, const file::File_info
 
 Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path, Configuration_origin w )
 :
-    Scheduler_object( scheduler, this, type_directory_tree ),
+    Abstract_scheduler_object( scheduler, this, type_directory_tree ),
     _zero_(this+1),
     _directory_path(directory_path),
     _refresh_aged_entries_at(double_time_max),
@@ -435,7 +435,7 @@ void Directory::assert_ordered_list()
 
 Directory_observer::Directory_observer( Scheduler* scheduler, const File_path& directory_path, Configuration_origin w )
 :
-    Scheduler_object( scheduler, this, type_directory_observer ),
+    Abstract_scheduler_object( scheduler, this, type_directory_observer ),
     _zero_(this+1),
     _directory_path(directory_path)
 {

@@ -17,7 +17,7 @@ void                            split_standing_order_name   ( const string& name
 
 //-----------------------------------------------------------------------------------Order_id_space
 
-struct Order_id_space : Object, Scheduler_object
+struct Order_id_space : Object, Abstract_scheduler_object
 {
                                 Order_id_space              ( Order_subsystem_impl* );
 

@@ -40,7 +40,7 @@ struct Timed_call : z::Call, javabridge::has_proxy<Timed_call>
 };
 
 //--------------------------------------------------------------------------------------Object_call
-// Ein Aufruf eines Scheduler_object zu einer bestimmten Zeit
+// Ein Aufruf eines Abstract_scheduler_object zu einer bestimmten Zeit
 
 struct Object_call : Timed_call {
   protected: 
@@ -51,7 +51,7 @@ struct Object_call : Timed_call {
     string obj_name() const;
 
   protected:
-    virtual Scheduler_object* object() const = 0;
+    virtual Abstract_scheduler_object* object() const = 0;
 
     virtual string call_name() const { 
         return name_of_type_info(typeid(*this)); 
@@ -90,7 +90,7 @@ struct object_call : Object_call {
         _object(o) 
     {}
 
-    Scheduler_object* object() const { 
+    Abstract_scheduler_object* object() const { 
         return _object; 
     }
 

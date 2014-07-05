@@ -41,7 +41,7 @@ struct Scheduler_event
     static string               name_of_event_code          ( Scheduler_event_type );
 
 
-                                Scheduler_event             ( Scheduler_event_type, Log_level severity, Scheduler_object* );
+                                Scheduler_event             ( Scheduler_event_type, Log_level severity, Abstract_scheduler_object* );
 
     Time                        timestamp                   ();
 
@@ -69,7 +69,7 @@ struct Scheduler_event
     Time                       _timestamp;
     Log_level                  _severity;
     bool                       _scheduler_terminates;
-    Scheduler_object*          _object;
+    Abstract_scheduler_object* _object;
     ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
     string                     _log_path;
     Xc_copy                    _error;
@@ -81,7 +81,7 @@ struct Scheduler_event
 //-------------------------------------------------------------------------Scheduler_event_manager 
 
 struct Scheduler_event_manager : Object, 
-                                 Scheduler_object
+                                 Abstract_scheduler_object
 {
                                 Scheduler_event_manager     ( Spooler* );
 

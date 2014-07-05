@@ -169,7 +169,7 @@ int Task_subsystem::count_tasks_exist( ) const
 
 Task::Task(Standard_job* job)
 :
-    Scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
+    Abstract_scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
     javabridge::has_proxy<Task>(job->_spooler),
     _zero_(this+1),
     _job(job),

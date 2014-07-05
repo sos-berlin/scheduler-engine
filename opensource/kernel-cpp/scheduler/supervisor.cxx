@@ -56,7 +56,7 @@ struct Xml_file_info : Base_file_info
 //---------------------------------------------------------------------------------Remote_scheduler
 
 struct Remote_scheduler : Remote_scheduler_interface, 
-                          Scheduler_object
+                          Abstract_scheduler_object
 {
                                 Remote_scheduler            (Supervisor* supervisor, const string& id);
 
@@ -157,7 +157,7 @@ struct Hostname_cache
 //----------------------------------------------------------------------------Remote_configurations
 
 struct Remote_configurations : Object,
-                               Scheduler_object,
+                               Abstract_scheduler_object,
                                Directory_observer::Directory_handler
 {
                                 Remote_configurations       ( Supervisor*, const File_path& directory );
@@ -445,7 +445,7 @@ xml::Element_ptr Remote_scheduler_register::dom_element( const xml::Document_ptr
 
 Remote_scheduler::Remote_scheduler(Supervisor* supervisor, const string& id)
 : 
-    Scheduler_object( supervisor->spooler(), this, type_remote_scheduler ),
+    Abstract_scheduler_object( supervisor->spooler(), this, type_remote_scheduler ),
     _zero_(this+1), 
     _supervisor(supervisor),
     _remote_configurations(supervisor->remote_configurations()),
@@ -898,7 +898,7 @@ void Remote_scheduler::connection_lost_event( const exception* x )
 
 Remote_configurations::Remote_configurations( Supervisor* supervisor, const File_path& directory_path )
 :
-    Scheduler_object( supervisor->spooler(), this, type_remote_configuration_observer ),
+    Abstract_scheduler_object( supervisor->spooler(), this, type_remote_configuration_observer ),
     _zero_(this+1),
     _supervisor(supervisor)
 {

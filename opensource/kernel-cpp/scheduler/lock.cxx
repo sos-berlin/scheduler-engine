@@ -686,7 +686,7 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
                 Use* lock_use = *u;
                 xml::Element_ptr entry_element = queue_element.append_new_element( "lock.queue.entry" );
 
-                Scheduler_object* object = lock_use->requestor()->object();
+                Abstract_scheduler_object* object = lock_use->requestor()->object();
                 object->write_element_attributes( entry_element );
             }
         }
@@ -810,9 +810,9 @@ STDMETHODIMP Lock::Remove()
 //
 //-----------------------------------------------------------------------------Requestor::Requestor
 
-Requestor::Requestor( Scheduler_object* o ) 
+Requestor::Requestor( Abstract_scheduler_object* o ) 
 : 
-    Scheduler_object( o->_spooler, this, type_lock_requestor ),
+    Abstract_scheduler_object( o->_spooler, this, type_lock_requestor ),
     _zero_(this+1),
     _object(o)
 {
@@ -1102,7 +1102,7 @@ string Requestor::obj_name() const
 
 Use::Use( Requestor* requestor, const Absolute_path& lock_path, Lock::Lock_mode lock_mode ) 
 : 
-    Scheduler_object( requestor->_spooler, this, type_lock_requestor ),
+    Abstract_scheduler_object( requestor->_spooler, this, type_lock_requestor ),
     _zero_(this+1), 
     _requestor(requestor),
     _lock_path( lock_path ),
@@ -1256,9 +1256,9 @@ string Use::obj_name() const
 
 //-----------------------------------------------------------------------------------Holder::Holder
 
-Holder::Holder( Scheduler_object* o ) 
+Holder::Holder( Abstract_scheduler_object* o ) 
 : 
-    Scheduler_object( o->_spooler, this, type_lock_holder ),
+    Abstract_scheduler_object( o->_spooler, this, type_lock_holder ),
     _zero_(this+1), 
     _object(o)
 {

@@ -72,7 +72,6 @@ using time::Duration;
 //--------------------------------------------------------------------------------------------const
     
 extern const char               version_string[];
-extern const string             temporary_process_class_name;
 extern volatile int             ctrl_c_pressed;
 extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
@@ -92,7 +91,8 @@ const int                       max_processes                 = 10000;    // kei
 using namespace ::std;
 using namespace ::zschimmer::file;
 
-
+struct Abstract_scheduler_object;
+struct Api_process;
 struct Command_processor;
 struct Communication;
 struct Event;
@@ -262,6 +262,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_communication.h"
 #include "spooler_http.h"
 #include "spooler_command.h"
+#include "spooler_process.h"
 #include "spooler_module.h"
 #include "spooler_module_com.h"
 #include "spooler_module_internal.h"
@@ -273,7 +274,6 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_job.h"
 #include "spooler_subprocess.h"
 #include "spooler_task.h"
-#include "spooler_process.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
 #include "spooler_web_service.h"
@@ -316,7 +316,7 @@ typedef map<Thread_id,Task_subsystem*>      Thread_id_map;
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler : Object,
-                 Scheduler_object,
+                 Abstract_scheduler_object,
                  javabridge::has_proxy<Spooler>
 {
     enum State
@@ -351,7 +351,7 @@ struct Spooler : Object,
 
     void                        close                       ();
 
-    // Scheduler_object:
+    // Abstract_scheduler_object:
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 
 

@@ -1100,7 +1100,7 @@ string Connection::short_name() const
 
     if( _peer._port )  result << _peer;
                  else  result << _remote_host;
-
+    if (_pid) result << ",pid=" << _pid;
     return result;
 }
 

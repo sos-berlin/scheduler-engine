@@ -8,7 +8,7 @@ namespace folder {
 
 File_based::File_based( File_based_subsystem* subsystem, IUnknown* iunknown, Type_code type_code )
 : 
-    Scheduler_object( subsystem->spooler(), iunknown, type_code ),
+    Abstract_scheduler_object( subsystem->spooler(), iunknown, type_code ),
     _zero_(this+1),
     _visible(visible_yes),
     _file_based_subsystem(subsystem),

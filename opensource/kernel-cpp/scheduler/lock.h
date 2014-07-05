@@ -30,7 +30,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
                                ~Lock                        ();
 
 
-    // Scheduler_object
+    // Abstract_scheduler_object
 
     void                        close                       ();
   //string                      obj_name                    () const;
@@ -145,7 +145,7 @@ struct Lock_folder : typed_folder< Lock >
 
 struct Use : Object, 
              Dependant,
-             Scheduler_object, 
+             Abstract_scheduler_object, 
              Non_cloneable
 {
                                 Use                         ( Requestor*, const Absolute_path& lock_path = Absolute_path(), Lock::Lock_mode = Lock::lk_exclusive );
@@ -163,7 +163,7 @@ struct Use : Object,
 
     // Dependant:
     bool                        on_requisite_loaded         ( File_based* );
-    Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+    Prefix_log*                 log                         ()                                      { return Abstract_scheduler_object::log(); }
 
     Lock*                       lock                        () const;
     Lock*                       lock_or_null                () const;
@@ -185,10 +185,10 @@ struct Use : Object,
 //----------------------------------------------------------------------------------------Requestor
 
 struct Requestor : Object, 
-                   Scheduler_object, 
+                   Abstract_scheduler_object, 
                    Non_cloneable
 {
-                                Requestor                   ( Scheduler_object* );
+                                Requestor                   ( Abstract_scheduler_object* );
                                ~Requestor                   ();
 
     void                        close                       ();
@@ -211,7 +211,7 @@ struct Requestor : Object,
     virtual bool                locks_are_available         () const                                { return locks_are_available_for_holder( (Holder*)NULL ); }
     bool                        enqueue_lock_requests       ( Holder* );
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
-    Scheduler_object*           object                      () const                                { return _object; }
+    Abstract_scheduler_object*           object                      () const                                { return _object; }
 
   //void                        on_new_lock                 ( Lock* );
     virtual void                on_locks_are_available      ()                                      = 0;
@@ -221,7 +221,7 @@ struct Requestor : Object,
 
   private:
     Fill_zero                  _zero_;
-    Scheduler_object*          _object;
+    Abstract_scheduler_object*          _object;
     bool                       _is_enqueued;
     Absolute_path              _folder_path;
 
@@ -232,9 +232,9 @@ struct Requestor : Object,
 
 //-------------------------------------------------------------------------------------------Holder
     
-struct Holder : Object, Scheduler_object, Non_cloneable
+struct Holder : Object, Abstract_scheduler_object, Non_cloneable
 {
-                                Holder                      ( Scheduler_object* );
+                                Holder                      ( Abstract_scheduler_object* );
     virtual                    ~Holder                      ();
 
     void                        close                       ();
@@ -251,7 +251,7 @@ struct Holder : Object, Scheduler_object, Non_cloneable
     void                        release_locks               ( const Requestor* );
     bool                        is_holding_all_of           ( const Requestor* );                   // Alle Sperren haltend?
     bool                        is_holding_none_of          ( const Requestor* );
-    Scheduler_object*           object                      () const                                { return _object; }
+    Abstract_scheduler_object*           object                      () const                                { return _object; }
 
     string                      obj_name                    () const;
 
@@ -262,7 +262,7 @@ struct Holder : Object, Scheduler_object, Non_cloneable
   //set<const Requestor*>      _holding_requestor_set;      // Die Requestor, deren Sperren gehalten werden (belegt sind)
 
   protected:
-    Scheduler_object*          _object;                     // Task
+    Abstract_scheduler_object*          _object;                     // Task
 };
 
 //-----------------------------------------------------------------------------------Lock_subsystem

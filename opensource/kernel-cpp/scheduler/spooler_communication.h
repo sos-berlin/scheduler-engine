@@ -151,9 +151,9 @@ struct Communication
         virtual string          connection_type             () const                                = 0;
 
         void                    close                       ();
-        void                    register_task_process       ( Process* );
+        void                    register_task_process       ( Api_process* );
         void                    unregister_task_process     ( Process_id process_id );
-        Process*                get_task_process            ( Process_id process_id );
+        Api_process*            get_task_process            ( Process_id process_id );
 
 
 
@@ -161,8 +161,8 @@ struct Communication
         Spooler*               _spooler;
         Connection*            _connection;
 
-        typedef map< Process_id, ptr<Process> >  Task_process_register;
-        Task_process_register      _task_process_register;
+        typedef map< Process_id, ptr<Api_process> >  Task_process_register;
+        Task_process_register   _task_process_register;
     };
 
 

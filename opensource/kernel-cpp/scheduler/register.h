@@ -13,7 +13,7 @@ template< class REGISTERED_, class IREGISTERED > struct reg;
 //---------------------------------------------------------------------------------------Registered
 
 struct Registered : IUnknown,
-                    Scheduler_object, 
+                    Abstract_scheduler_object, 
                     Non_cloneable
 {
                                 Registered                  ( Register*, IUnknown*, Scheduler_object::Type_code, const string& name = "" );
@@ -28,7 +28,7 @@ struct Registered : IUnknown,
     virtual void                remove                      ();
 
 
-    // Scheduler_object
+    // Abstract_scheduler_object
     string                      obj_name                    () const;
 
 

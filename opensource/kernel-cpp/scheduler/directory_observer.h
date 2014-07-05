@@ -31,7 +31,7 @@ struct Folder_directory_lister : file::Directory_lister
 
 //-----------------------------------------------------------------------------------Directory_tree
 
-struct Directory_tree : Scheduler_object,
+struct Directory_tree : Abstract_scheduler_object,
                         Object
 {
                                 Directory_tree              ( Scheduler*, const file::File_path& directory_path, Configuration_origin );
@@ -140,7 +140,7 @@ struct Directory : Object
 
 //-------------------------------------------------------------------------------Directory_observer
 
-struct Directory_observer : Scheduler_object,
+struct Directory_observer : Abstract_scheduler_object,
                             Event_operation
 {
     struct Directory_handler

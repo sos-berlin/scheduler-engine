@@ -47,7 +47,7 @@ enum Database_lock_syntax
 
 //-----------------------------------------------------------------------------------------Database
 
-struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
+struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_object
 {
                                 Database                ( Spooler* );
 
