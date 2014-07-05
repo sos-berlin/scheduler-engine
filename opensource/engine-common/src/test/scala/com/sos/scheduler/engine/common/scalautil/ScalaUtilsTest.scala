@@ -1,9 +1,12 @@
 package com.sos.scheduler.engine.common.scalautil
 
-import ScalaUtils._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 final class ScalaUtilsTest extends FreeSpec {
 
   "toImmutableSeq of an already immutable.Seq" in {
@@ -13,7 +16,7 @@ final class ScalaUtilsTest extends FreeSpec {
 
   "countEquals" in {
     Iterator(11, 22, 33, 22, 33, 33).countEquals shouldEqual Map(11 -> 1, 22 -> 2, 33 -> 3)
-    List[Int]() shouldEqual Map[Int, Int]()
+    Map[Int, Int]().countEquals shouldEqual Map()
   }
 
   "toKeyedMap" in {

@@ -1,12 +1,15 @@
 package com.sos.scheduler.engine.common.io
 
 import java.io.StringReader
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class ReaderIteratorTest extends FreeSpec {
   "ReaderIterator" in {
     newIterator().toList shouldEqual List('a', 'b', 'c')

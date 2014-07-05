@@ -1,16 +1,18 @@
 package com.sos.scheduler.engine.common.scalautil
 
+import com.google.common.base.Charsets.{ISO_8859_1, UTF_8}
+import com.google.common.io.Files
+import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
 import java.io.File
-
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
-import ScalaXmls.implicits._
-import com.google.common.base.Charsets.{UTF_8, ISO_8859_1}
-import com.google.common.io.Files
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class ScalaXmlsTest extends FreeSpec {
   ".xml" in {
     val f = File.createTempFile("sos", ".tmp")

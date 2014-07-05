@@ -2,12 +2,15 @@ package com.sos.scheduler.engine.data.xmlcommands
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderState
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class OrderCommandTest extends FreeSpec {
   "OrderCommand" in {
     val orderKey = JobChainPath("/JOBCHAIN") orderKey "ID"

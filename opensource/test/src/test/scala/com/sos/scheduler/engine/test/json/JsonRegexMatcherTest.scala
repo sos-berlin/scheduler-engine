@@ -1,11 +1,14 @@
 package com.sos.scheduler.engine.test.json
 
-import JsonRegexMatcher._
+import com.sos.scheduler.engine.test.json.JsonRegexMatcher._
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class JsonRegexMatcherTest extends FreeSpec {
   "checkRegexJson" in {
     val json = """{"a": 1, "b": "BB"}"""
