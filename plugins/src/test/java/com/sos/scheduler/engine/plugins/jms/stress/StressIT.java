@@ -23,9 +23,9 @@ import static org.junit.Assert.assertEquals;
  * a test with more parallel processes you you to change max_processes in spooler.h or use the binaries 
  * of version 1.3.12.1346-BT.
  */
-public class StressTest extends SchedulerTest implements TaskInfoListener {
+public class StressIT extends SchedulerTest implements TaskInfoListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(StressTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(StressIT.class);
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";
     private static final String providerUrl = "vm://localhost";
@@ -39,7 +39,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        logger.debug("starting test for " + StressTest.class.getName());
+        logger.debug("starting test for " + StressIT.class.getName());
 	}
 	
 	@Ignore

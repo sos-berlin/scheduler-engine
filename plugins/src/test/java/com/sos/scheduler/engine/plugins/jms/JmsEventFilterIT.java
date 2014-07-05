@@ -27,13 +27,13 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 
 
-public class JmsEventFilterTest extends JMSConnection {
+public class JmsEventFilterIT extends JMSConnection {
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
 //  private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
-    private static final Logger logger = LoggerFactory.getLogger(JmsEventFilterTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(JmsEventFilterIT.class);
     private static final List<String> eventsToListen = asList("OrderTouchedEvent");
     private static final String jobchain = "jmstest";
 
@@ -46,7 +46,7 @@ public class JmsEventFilterTest extends JMSConnection {
     // This object is needed for serializing and deserializing of the event objects
     private final ObjectMapper mapper = EngineJacksonConfiguration.newObjectMapper();
 
-    public JmsEventFilterTest() throws Exception {
+    public JmsEventFilterIT() throws Exception {
     	super(providerUrl,eventsToListen);
         mapper.registerSubtypes(OrderTouchedEvent.class);
     	setMessageListener( new MyListener() );
