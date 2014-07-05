@@ -11,7 +11,7 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class StartTaskTest extends FunSuite with ScalaSchedulerTest {
+final class StartTaskIT extends FunSuite with ScalaSchedulerTest {
 
   test("job.start_task") {
     controller.waitForTermination(shortTimeout)
