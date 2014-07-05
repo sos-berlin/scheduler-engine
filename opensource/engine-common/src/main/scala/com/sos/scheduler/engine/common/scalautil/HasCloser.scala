@@ -14,7 +14,20 @@ trait HasCloser extends AutoCloseable with CloseOnError {
     _closer
   }
 
-  final def onClose(f: => Unit) {
+  final def whenNotClosedAtShutdown(body: ⇒ Unit) {
+    val hook = new Thread(s"ShutdownHook for $toString") {
+      override def run() {
+        body
+      }
+    }
+    Runtime.getRuntime.addShutdownHook(hook)
+    onClose {
+      Runtime.getRuntime.removeShutdownHook(hook)
+    }
+  }
+
+  /** Registers the function for execution in close(), in reverse order of registering. */
+  final def onClose(f: ⇒ Unit) {
     closer.register(toCloseable(f))
   }
 
@@ -27,7 +40,7 @@ trait HasCloser extends AutoCloseable with CloseOnError {
 object HasCloser {
   object implicits {
     implicit class RichCloser(val delegate: Closer) extends AnyVal {
-      final def apply(f: => Unit) {
+      final def apply(f: ⇒ Unit) {
         delegate.register(toCloseable(f))
       }
     }
@@ -40,7 +53,7 @@ object HasCloser {
     }
   }
 
-  private def toCloseable(f: => Unit) =
+  private def toCloseable(f: ⇒ Unit) =
     new Closeable {
       def close() {
         f
