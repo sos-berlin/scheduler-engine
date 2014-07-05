@@ -57,7 +57,7 @@ with EventHandlerAnnotated {
 
   override def close() {
     try delegate.close()
-    super.close()
+    finally super.close()
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */

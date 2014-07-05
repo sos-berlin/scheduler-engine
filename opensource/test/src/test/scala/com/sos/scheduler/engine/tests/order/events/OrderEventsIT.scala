@@ -20,8 +20,8 @@ import scala.collection.mutable
 final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
 
   private val eventPipe = controller.newEventPipe()
-  private val hotEvents = new mutable.HashMap[String, Event] with mutable.SynchronizedMap[String, Event]
-  private val coldEvents = new mutable.HashMap[String, Event] with mutable.SynchronizedMap[String, Event]
+  private val hotEvents = new mutable.HashMap[String, Event]
+  private val coldEvents = new mutable.HashMap[String, Event]
 
   test("Persistent order") {
     checkOrderStates(persistentOrderKey)
@@ -155,9 +155,11 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def addEvent(m: mutable.HashMap[String,Event], pair: (String, Event)) {
-    val (name, e) = pair
-    assert(!m.contains(name), "Duplicate event "+ name +": "+ e)
-    m(name) = e
+    m.synchronized {
+      val (name, e) = pair
+      assert(!m.contains(name), "Duplicate event " + name + ": " + e)
+      m(name) = e
+    }
   }
 }
 

@@ -13,7 +13,7 @@ final class ScalaUtilsTest extends FreeSpec {
 
   "countEquals" in {
     Iterator(11, 22, 33, 22, 33, 33).countEquals shouldEqual Map(11 -> 1, 22 -> 2, 33 -> 3)
-    Nil.countEquals shouldEqual Map()
+    List[Int]() shouldEqual Map[Int, Int]()
   }
 
   "toKeyedMap" in {

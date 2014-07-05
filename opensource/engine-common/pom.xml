@@ -63,8 +63,12 @@
             <artifactId>scala-library</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-xml_${scala.binaryVersion}</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scalatest.scala.version}</artifactId>
+            <artifactId>scalatest_${scala.binaryVersion}</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -95,6 +99,10 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.spray</groupId>
+            <artifactId>${spray-json.artifactId}</artifactId>
         </dependency>
     </dependencies>
 </project>

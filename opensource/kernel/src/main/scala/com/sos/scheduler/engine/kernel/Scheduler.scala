@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.common.async.CallRunner
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -56,10 +56,10 @@ final class Scheduler @Inject private(
 extends Sister
 with SchedulerIsClosed
 with SchedulerXmlCommandExecutor
-with HasInjector {
+with HasInjector
+with HasCloser {
 
   private var closed = false
-  private val closer = Closer.create()
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
   private lazy val pluginSubsystem = injector.apply[PluginSubsystem]
   private lazy val commandSubsystem = injector.apply[CommandSubsystem]
@@ -103,9 +103,11 @@ with HasInjector {
       try databaseSubsystem.close() catch { case NonFatal(x) ⇒ prefixLog.error(s"databaseSubsystem.close(): $x") }
       try pluginSubsystem.close() catch { case NonFatal(x) ⇒ prefixLog.error(s"pluginSubsystem.close(): $x") }
     }
-    eventBus.dispatchEvents()
-    disposableCppProxyRegister.tryDisposeAll()
-    closer.close()
+    finally {
+      eventBus.dispatchEvents()
+      disposableCppProxyRegister.tryDisposeAll()
+      super.close()
+    }
   }
 
   @ForCpp private def onLoad() {
@@ -190,12 +192,12 @@ with HasInjector {
   def uncheckedExecuteXml(xml: String): String = {
     if (closed) sys.error("Scheduler is closed")
     inSchedulerThread { cppProxy.execute_xml_string(xml) }
-    .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
+    .stripSuffix("\u0000")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
   }
 
   def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String) =
     inSchedulerThread { cppProxy.execute_xml_string_with_security_level(xml, securityLevel.cppName, clientHostName) }
-    .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
+    .stripSuffix("\u0000")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
 
   //    /** @param text Sollte auf \n enden */
   //    public void writeToSchedulerLog(LogCategory category, String text) {

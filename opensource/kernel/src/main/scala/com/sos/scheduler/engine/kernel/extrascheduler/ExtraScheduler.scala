@@ -58,7 +58,7 @@ extends AutoCloseable with HasCloser {
           unbufferedInputStreamToLines(in, schedulerEncoding) { line ⇒
             logger.info(line)
             if ((line contains s" $expectedMessageCode ") && (line contains " TCP"))
-              tcpIsReadyPromise.success()
+              tcpIsReadyPromise.success(())
           }
         catch {
           case t: Throwable ⇒

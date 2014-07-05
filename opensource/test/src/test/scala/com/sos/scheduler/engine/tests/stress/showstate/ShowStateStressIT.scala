@@ -23,12 +23,12 @@ final class ShowStateStressIT extends SchedulerTest {
 }
 
 object ShowStateStressIT {
-  private def emptyCommand = (//<params/>.toString
+  private def emptyCommand = //<params/>.toString
       <commands>
           <subsystem.show what="statistics"/>
           <show_state what="folders cluster remote_schedulers schedules" subsystems="lock schedule process_class folder"/>
       </commands>
-      ).toString()
+      .toString()
 
   def main(args: Array[String]) {
     def inetSocketAddress(a: String) = {
@@ -45,7 +45,7 @@ object ShowStateStressIT {
     private val socket = new Socket
     socket.connect(address)
     private val writer = new OutputStreamWriter(socket.getOutputStream, encoding)
-    private val reader = new SplitReader(new InputStreamReader(socket.getInputStream), '\0')
+    private val reader = new SplitReader(new InputStreamReader(socket.getInputStream), '\u0000')
 
     def close() {
       socket.close()

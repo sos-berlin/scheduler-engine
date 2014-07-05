@@ -1,15 +1,12 @@
 package com.sos.scheduler.engine.common.async
 
-import FutureTest._
+import com.sos.scheduler.engine.common.async.FutureTest._
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{OneInstancePerTest, FunSuite}
-import org.slf4j.LoggerFactory
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.collection.mutable
 import scala.concurrent._
-import scala.concurrent.future
-import scala.sys.error
 import scala.util.Success
 
 @RunWith(classOf[JUnitRunner])
@@ -17,7 +14,7 @@ class FutureTest extends FunSuite with OneInstancePerTest {
   implicit private val executionContext = new QueuedExecutionContextExecutor
 
   test("Success") {
-    val f = future { "Hallo!" }
+    val f = Future { "Hallo!" }
     f.isCompleted should be (false)
     executionContext.run()
     f.isCompleted should be (true)
@@ -25,7 +22,7 @@ class FutureTest extends FunSuite with OneInstancePerTest {
   }
 
   test("Failure") {
-    val f = future { throw TestException() }
+    val f = Future { throw TestException() }
     f.isCompleted should be (false)
     executionContext.run()
     f.isCompleted should be (true)
@@ -34,11 +31,9 @@ class FutureTest extends FunSuite with OneInstancePerTest {
 }
 
 private object FutureTest {
-  val logger = LoggerFactory.getLogger(classOf[FutureTest])
-
   private case class TestException() extends RuntimeException
 
-  class QueuedExecutionContextExecutor extends ExecutionContextExecutor {
+  private class QueuedExecutionContextExecutor extends ExecutionContextExecutor {
     private val queue = mutable.UnrolledBuffer[Runnable]()
 
     def execute(runnable: Runnable) {
@@ -51,8 +46,7 @@ private object FutureTest {
     }
 
     def reportFailure(t: Throwable) {
-      //logger.error(s"reportFailure $t", t)
-      error(t.toString)
+      sys.error(t.toString)
     }
   }
 }

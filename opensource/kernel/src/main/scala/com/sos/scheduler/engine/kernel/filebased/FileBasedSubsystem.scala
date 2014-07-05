@@ -24,15 +24,15 @@ trait FileBasedSubsystem extends Subsystem {
 
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue
 
-  private val mutablePathSet = new mutable.HashSet[Path] with mutable.SynchronizedSet[Path]
+  private val mutablePathSet = new mutable.HashSet[Path]
 
   def onFileBasedEvent(e: FileBasedEvent) {
     val path = e.typedPath.asInstanceOf[Path]
     assert(e.typedPath.fileBasedType == fileBasedType)
     assert(path.getClass == description.pathClass, s"${path.getClass} is not expected ${description.getClass}")
     e match {
-      case e: FileBasedAddedEvent ⇒ mutablePathSet += path
-      case e: FileBasedRemovedEvent ⇒ mutablePathSet -= path
+      case e: FileBasedAddedEvent ⇒ mutablePathSet.synchronized { mutablePathSet += path; () }
+      case e: FileBasedRemovedEvent ⇒ mutablePathSet.synchronized { mutablePathSet -= path; (); }
       case _ =>
     }
   }
@@ -52,7 +52,9 @@ trait FileBasedSubsystem extends Subsystem {
     paths.size
 
   final def paths: Seq[Path] =
-    mutablePathSet.toImmutableSeq
+    mutablePathSet.synchronized {
+      mutablePathSet.toImmutableSeq
+    }
 
   def visiblePaths: Seq[Path] =
     cppProxy.file_based_paths(visibleOnly = true) map description.stringToPath

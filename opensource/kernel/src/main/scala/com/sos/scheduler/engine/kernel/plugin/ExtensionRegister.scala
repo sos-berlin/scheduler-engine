@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import ExtensionRegister._
 import scala.collection.{immutable, mutable}
 
 /** Andere Plugins können hier ihre Erweiterungen dieses Plugins registrieren.
@@ -9,7 +8,7 @@ import scala.collection.{immutable, mutable}
 trait ExtensionRegister[A] {
   this: Plugin ⇒
 
-  private val register = new SynchronizedArrayBuffer[A]
+  private val register = new mutable.ArrayBuffer[A]
   @volatile private var _extensions: immutable.Seq[A] = null
 
   def addExtension(extension: A) {
@@ -28,8 +27,4 @@ trait ExtensionRegister[A] {
     }
     _extensions
   }
-}
-
-private object ExtensionRegister {
-  private class SynchronizedArrayBuffer[A] extends mutable.ArrayBuffer[A] with mutable.SynchronizedBuffer[A]
 }

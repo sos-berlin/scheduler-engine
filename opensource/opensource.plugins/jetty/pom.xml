@@ -98,7 +98,7 @@
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scalatest.scala.version}</artifactId>
+            <artifactId>scalatest_${scala.binaryVersion}</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -142,7 +142,7 @@
         </dependency>
         <dependency>
             <groupId>io.spray</groupId>
-            <artifactId>spray-json_${scala.binaryVersion}</artifactId>
+            <artifactId>${spray-json.artifactId}</artifactId>
         </dependency>
     </dependencies>
 </project>

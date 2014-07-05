@@ -38,7 +38,7 @@ object ManyTcpCommands {
         if (eof) -1
         else
           inputStream.read() match {
-            case '\0' => eof = true; -1
+            case '\u0000' => eof = true; -1
             case c => c
           }
     }
