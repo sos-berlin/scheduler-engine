@@ -1,43 +1,43 @@
 package com.sos.scheduler.engine.kernel.xml
 
-import CppXmlSchemaValidatorTest._
 import com.google.common.io.Resources.getResource
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.kernel.xml.CppXmlSchemaValidatorTest._
 import java.net.URL
 import javax.xml.XMLConstants._
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
 import org.junit.runner.RunWith
-import org.scalatest.FunSpec
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.xml.sax.SAXParseException
 
 @RunWith(classOf[JUnitRunner])
-class CppXmlSchemaValidatorTest extends FunSpec {
+class CppXmlSchemaValidatorTest extends FreeSpec {
 
-  describe("CppXmlSchemaValidator") {
-    lazy val validator = new CppXmlSchemaValidator(schemaResourceUrl.toExternalForm)
+  "CppXmlSchemaValidator" - {
+    lazy val validator = new CppXmlSchemaValidator(SchemaResourceUrl.toExternalForm)
 
-    it("should accept valid XML") {
-      validator.validate(dom(validXmlUrl))
+    "should accept valid XML" in {
+      validator.validate(dom(ValidXmlUrl))
     }
 
-    it("should reject invalid XML") {
-      validationShouldFail { validator.validate(dom(invalidXmlUrl)) }
+    "should reject invalid XML" in {
+      validationShouldFail { validator.validate(dom(InvalidXmlUrl)) }
     }
   }
 
-  describe("javax.xml.Validator") {
-    lazy val validator = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(schemaResourceUrl).newValidator
+  "javax.xml.Validator" - {
+    lazy val validator = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(SchemaResourceUrl).newValidator
 
-    it("should accept valid XML") {
-      validate(validXmlUrl)
+    "should accept valid XML" in {
+      validate(ValidXmlUrl)
     }
 
-    it("should reject invalid XML") {
-      validationShouldFail { validate(invalidXmlUrl) }
+    "should reject invalid XML" in {
+      validationShouldFail { validate(InvalidXmlUrl) }
     }
 
     def validate(u: URL) {
@@ -49,9 +49,9 @@ class CppXmlSchemaValidatorTest extends FunSpec {
 }
 
 object CppXmlSchemaValidatorTest {
-  private lazy val schemaResourceUrl = getResource("com/sos/scheduler/engine/kernel/xml/test.xsd")
-  private lazy val validXmlUrl = getResource("com/sos/scheduler/engine/kernel/xml/testValid.xml")
-  private lazy val invalidXmlUrl = getResource("com/sos/scheduler/engine/kernel/xml/testInvalid.xml")
+  private lazy val SchemaResourceUrl = getResource("com/sos/scheduler/engine/kernel/xml/test.xsd")
+  private lazy val ValidXmlUrl = getResource("com/sos/scheduler/engine/kernel/xml/testValid.xml")
+  private lazy val InvalidXmlUrl = getResource("com/sos/scheduler/engine/kernel/xml/testInvalid.xml")
 
   private def dom(u: URL) = {
     val factory = DocumentBuilderFactory.newInstance

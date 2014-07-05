@@ -1,16 +1,16 @@
 package com.sos.scheduler.engine.tests.jira.js1039
 
-import JS1039TaskStdoutIT._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.tests.jira.js1039.JS1039TaskStdoutIT._
 import java.util.regex.Pattern
 import org.junit.runner.RunWith
-import org.scalatest.FunSpec
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
@@ -22,21 +22,21 @@ import scala.util.matching.Regex
   * 32 Tests: Shell oder API, mit oder ohne Monitor, lokal oder fern, stdout oder stderr:
   * Skript schreibt, spooler_task_after() schreibt, spooler_task_after() liest spooler_task.stdxxx_text. */
 @RunWith(classOf[JUnitRunner])
-final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
+final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val tcpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
+  private lazy val tcpPort = findRandomFreeTcpPort()
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val schedulerVariables = scheduler.instance[VariableSet]
 
   private lazy val jobResults: Map[JobPath, JobResult] = {
-    (jobSettings map { _.jobPath } map { jobPath =>
-      for (o <- stdOutErrList) schedulerVariables(o) = ""
+    (JobSettings map { _.jobPath } map { jobPath =>
+      for (o <- StdOutErrList) schedulerVariables(o) = ""
       runJobAndWaitForEnd(jobPath)
       jobPath -> JobResult(
         taskLog = controller.environment.taskLogFileString(jobPath),
-        variableMap = Map() ++ schedulerVariables)
+        variableMap = schedulerVariables.toMap)
     }).toMap
   }
 
@@ -57,11 +57,11 @@ final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
   }
 
   private def checkJobs(testName: String, predicate: JobSetting => Boolean = _ => true)(f: (JobResult, String) => Unit) {
-    describe(testName) {
-      for (jobSetting <- jobSettings if predicate(jobSetting)) {
-        describe(s"Job ${jobSetting.jobPath.name}") {
-          for (outOrErr <- stdOutErrList) {
-            it(outOrErr.toLowerCase) {
+    testName - {
+      for (jobSetting <- JobSettings if predicate(jobSetting)) {
+        s"Job ${jobSetting.jobPath.name}" - {
+          for (outOrErr <- StdOutErrList) {
+            outOrErr.toLowerCase in {
               f(jobResults(jobSetting.jobPath), outOrErr)
             }
           }
@@ -73,7 +73,7 @@ final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
   private def shouldOccurExactlyOnce(in: String, what: String) {
     in should include (what)
     withClue(s"'$what' should occur only once:") {
-      (new Regex(Pattern.quote(what)) findAllIn in).size should equal(1)
+      (new Regex(Pattern.quote(what)) findAllIn in).size shouldEqual 1
     }
   }
 }
@@ -81,13 +81,13 @@ final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
 
 private object JS1039TaskStdoutIT {
 
-  private val stdOutErrList = List("STDOUT", "STDERR")  // Nach stdout und stderr geschriebene Strings und zugleich Namen globaler Scheduler-Variablen.
+  private val StdOutErrList = List("STDOUT", "STDERR")  // Nach stdout und stderr geschriebene Strings und zugleich Namen globaler Scheduler-Variablen.
 
   private case class JobSetting(jobPath: JobPath, hasMonitor: Boolean = false)
 
   private case class JobResult(taskLog: String, variableMap: Map[String, String])
 
-  private val jobSettings = List(
+  private val JobSettings = List(
     JobSetting(JobPath("/test-local-shell")),
     JobSetting(JobPath("/test-local-shell-monitor"), hasMonitor = true),
     JobSetting(JobPath("/test-local-api")),
