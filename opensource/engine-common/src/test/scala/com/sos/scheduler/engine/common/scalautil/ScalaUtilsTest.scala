@@ -1,9 +1,12 @@
 package com.sos.scheduler.engine.common.scalautil
 
 import ScalaUtils._
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 final class ScalaUtilsTest extends FreeSpec {
 
   "toImmutableSeq of an already immutable.Seq" in {

@@ -2,14 +2,17 @@ package com.sos.scheduler.engine.kernel.time
 
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeZone.UTC
-import org.joda.time.{DateTimeZone, LocalDateTime, DateTime}
+import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable
 
+@RunWith(classOf[JUnitRunner])
 final class TimeZonesTest extends FunSuite {
 
-  import TimeZonesTest._
+  import com.sos.scheduler.engine.kernel.time.TimeZonesTest._
 
   private val springHelsinkiToUtc = immutable.Seq(
       Helsinki(2012,  3, 25, 2, 30) -> Utc(2012,  3, 25,  0, 30) -> 120,   // Noch Winterzeit

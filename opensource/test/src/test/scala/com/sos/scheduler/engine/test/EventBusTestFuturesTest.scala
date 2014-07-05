@@ -1,15 +1,18 @@
 package com.sos.scheduler.engine.test
 
-import EventBusTestFuturesTest._
 import _root_.scala.concurrent.Await
 import _root_.scala.concurrent.duration.FiniteDuration
-import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventBus
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
+import com.sos.scheduler.engine.test.EventBusTestFuturesTest._
 import java.util.concurrent.TimeUnit
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 final class EventBusTestFuturesTest extends FreeSpec {
   "eventFuture without predicate" in {
     val eventBus = new HotEventBus

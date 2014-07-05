@@ -1,55 +1,59 @@
 package com.sos.scheduler.engine.common.time
 
-import ScalaJoda._
-import org.joda.time.{LocalTime, DateTime, Instant, Duration}
-import org.scalatest.FunSpec
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import org.joda.time.{DateTime, Duration, Instant, LocalTime}
+import org.junit.runner.RunWith
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
-class ScalaJodaTest extends FunSpec {
-  describe("Duration") {
-    it("Int.ms") {
+@RunWith(classOf[JUnitRunner])
+class ScalaJodaTest extends FreeSpec {
+
+  "Duration" - {
+    "Int.ms" in {
       (7.ms: Duration).getMillis should equal (7)
     }
-    it("Long.ms") {
+    "Long.ms" in {
       (7L.ms: Duration).getMillis should equal (7)
     }
-    it("Int.s") {
+    "Int.s" in {
       (7.s: Duration).getStandardSeconds should equal (7)
       (7.s: Duration).getMillis should equal (7*1000)
     }
-    it("Long.s") {
+    "Long.s" in {
       (7L.s: Duration).getStandardSeconds should equal (7)
       (7L.s: Duration).getMillis should equal (7*1000)
     }
-    it("Int.hours") {
+    "Int.hours" in {
       (7.hours: Duration).getStandardHours should equal (7)
       (7.hours: Duration).getMillis should equal (7*3600*1000)
     }
-    it("Long.hours") {
+    "Long.hours" in {
       (7L.hours: Duration).getStandardHours should equal (7)
       (7L.hours: Duration).getMillis should equal (7*3600*1000)
     }
-    it("Int.days") {
+    "Int.days" in {
       (7.days: Duration).getStandardDays should equal (7)
       (7.days: Duration).getMillis should equal (7*24*3600*1000)
     }
-    it("Long.days") {
+    "Long.days" in {
       (7L.days: Duration).getStandardDays should equal (7)
       (7L.days: Duration).getMillis should equal (7*24*3600*1000)
     }
-    it("Duration + Duration") {
+    "Duration + Duration" in {
       (7.s + 2.ms: Duration).getMillis should equal (7*1000 + 2)
     }
-    it("Duration - Duration") {
+    "Duration - Duration" in {
       (7.s - 2.ms: Duration).getMillis should equal (7*1000 - 2)
     }
-    it("Int * Duration") {
+    "Int * Duration" in {
       (3 * 7.s: Duration).getMillis should equal (3 * 7*1000)
     }
-    it("Long * Duration") {
+    "Long * Duration" in {
       (3L * 7.s: Duration).getMillis should equal (3 * 7*1000)
     }
-    it("pretty") {
+    "pretty" in {
       0.s.pretty should equal ("0s")
       1.s.pretty should equal ("1s")
       1200.ms.pretty should equal ("1.2s")
@@ -60,10 +64,10 @@ class ScalaJodaTest extends FunSpec {
       (-10).ms.pretty should equal ("-0.01s")
       (-1).s.pretty should equal ("-1s")
     }
-//    it("Duration * Int") {
+//    "Duration * Int" in {
 //      ((7.s * 3): Duration).getMillis should equal (7*1000 * 3)
 //    }
-//    it ("Duration < Duration") {
+//    it ("Duration < Duration" in {
 //      (new Duration(7) < new Duration(2)) should equal (false)
 //      (new Duration(7) <= new Duration(2)) should equal (false)
 //      (new Duration(7) > new Duration(2)) should equal (true)
@@ -78,30 +82,30 @@ class ScalaJodaTest extends FunSpec {
 //      (new Duration(7) >= new Duration(2)) should equal (true)
 //    }
   }
-  describe("Instant") {
-    it ("Instant + Duration") {
+  "Instant" - {
+    "Instant + Duration" in {
       (new Instant(7) + 2.ms: Instant) should equal (new Instant(7 + 2))
     }
-    it ("Instant - Duration") {
+    "Instant - Duration" in {
       (new Instant(7) - 2.ms: Instant) should equal (new Instant(7 - 2))
     }
-    it ("Instant - Instant") {
+    "Instant - Instant" in {
       (new Instant(7) - new Instant(2): Duration) should equal (new Duration(7 - 2))
     }
   }
-  describe("DateTime") {
-    it ("DateTime + Duration") {
+  "DateTime" - {
+    "DateTime + Duration" in {
       (new DateTime(7) + 2.ms: DateTime) should equal (new DateTime(7 + 2))
     }
-    it ("DateTime - Duration") {
+    "DateTime - Duration" in {
       (new DateTime(7) - 2.ms: DateTime) should equal (new DateTime(7 - 2))
     }
-    it ("DateTime - DateTime") {
+    "DateTime - DateTime" in {
       (new DateTime(7) - new DateTime(2): Duration) should equal (new Duration(7 - 2))
     }
   }
-  describe("LocalTime") {
-    it ("LocalTime < LocalTime") {
+  "LocalTime" - {
+    "LocalTime < LocalTime" in {
       new LocalTime(7) < new LocalTime(2) should equal (false)
       new LocalTime(7) <= new LocalTime(2) should equal (false)
       new LocalTime(7) > new LocalTime(2) should equal (true)
