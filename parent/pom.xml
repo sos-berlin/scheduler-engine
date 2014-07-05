@@ -15,6 +15,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
+
+        <akka.version>2.3.4</akka.version>
         <scala.version>2.11.1</scala.version>
         <scala.binaryVersion>2.11</scala.binaryVersion>
         <scala.plugin.version>2.15.2</scala.plugin.version>
@@ -23,6 +25,8 @@
         <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.4.1</jackson.version>
         <spray-json.artifactId>spray-json_2.11.0-RC4</spray-json.artifactId>
+        <spray.version>1.3.1</spray.version>
+
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
@@ -497,6 +501,46 @@
                 <groupId>io.spray</groupId>
                 <artifactId>${spray-json.artifactId}</artifactId>
                 <version>1.2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>io.spray</groupId>
+                <artifactId>spray-http_${scala.binaryVersion}</artifactId>
+                <version>${spray.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.spray</groupId>
+                <artifactId>spray-servlet_${scala.binaryVersion}</artifactId>
+                <version>${spray.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.spray</groupId>
+                <artifactId>spray-routing_${scala.binaryVersion}</artifactId>
+                <version>${spray.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.spray</groupId>
+                <artifactId>spray-client_${scala.binaryVersion}</artifactId>
+                <version>${spray.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe</groupId>
+                <artifactId>config</artifactId>
+                <version>1.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.akka</groupId>
+                <artifactId>akka-actor_${scala.binaryVersion}</artifactId>
+                <version>${akka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.akka</groupId>
+                <artifactId>akka-slf4j_${scala.binaryVersion}</artifactId>
+                <version>${akka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.akka</groupId>
+                <artifactId>akka-testkit_${scala.binaryVersion}</artifactId>
+                <version>${akka.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

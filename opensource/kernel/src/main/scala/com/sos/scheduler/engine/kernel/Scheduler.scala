@@ -1,8 +1,6 @@
 package com.sos.scheduler.engine.kernel
 
-import Scheduler._
 import com.google.common.base.Objects.firstNonNull
-import com.google.common.io.Closer
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.async.CallRunner
@@ -18,6 +16,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
+import com.sos.scheduler.engine.kernel.Scheduler._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
@@ -67,6 +66,7 @@ with HasCloser {
 
   val startInstant = now()
 
+  onClose { injector.apply[DependencyInjectionCloser].closer.close() }
   enableJavaUtilLoggingOverSLF4J()
   TimeZones.initialize()
   //DateTimeZone.setDefault(UTC);
@@ -140,9 +140,6 @@ with HasCloser {
         "UNKNOWN_COMMAND"   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
     }
   }
-
-  private def instance[A](c: Class[A]): A =
-    injector.getInstance(c)
 
   @ForCpp private def getEventSubsystem =
     injector.getInstance(classOf[EventSubsystem])

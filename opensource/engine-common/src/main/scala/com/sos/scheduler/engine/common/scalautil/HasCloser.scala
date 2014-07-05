@@ -8,7 +8,7 @@ trait HasCloser extends AutoCloseable with CloseOnError {
 
   private val _closer: Closer = Closer.create()
 
-  implicit final def closer: Closer = {
+  protected implicit final def closer: Closer = {
     if (_closer == null) throw new NullPointerException(s"$getClass should extend HasClose further in front?")
     _closer
   }

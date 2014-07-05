@@ -151,5 +151,18 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${scala.binaryVersion}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.spray</groupId>
+            <artifactId>spray-client_${scala.binaryVersion}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.spray</groupId>
+            <artifactId>spray-routing_${scala.binaryVersion}</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
