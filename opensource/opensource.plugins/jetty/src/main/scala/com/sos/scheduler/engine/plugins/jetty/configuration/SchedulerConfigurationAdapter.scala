@@ -14,7 +14,10 @@ object SchedulerConfigurationAdapter {
     JettyConfiguration(
       portOption = pluginElement.getAttribute("port") match {
         case "TEST" => Some(TcpPortNumber.lazyRandom())
-        case "http-port" ⇒ Some(TcpPortNumber(schedulerConfiguration.httpPort))
+        case "http-port" ⇒
+          val httpPort = schedulerConfiguration.httpPort
+          require(httpPort != 0, "http-port is not defined")
+          Some(TcpPortNumber(httpPort))
         case _ => xmlAttributeIntOption(pluginElement, "port") map TcpPortNumber.apply
       },
       jettyXMLURLOption = configFileIfExists("jetty.xml") map { _.toURI.toURL },

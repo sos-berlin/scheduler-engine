@@ -874,6 +874,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
 
+    if (int o = _settings->_http_port)
+        state_element.setAttribute("http_port", o);
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
 
