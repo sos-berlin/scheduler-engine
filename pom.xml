@@ -21,6 +21,8 @@
 
     <modules>
         <module>cppjava</module>
+        <module>engine-test</module>
+        <module>engine-tests</module>
         <module>opensource</module>
         <module>parent</module>
         <module>plugins</module>

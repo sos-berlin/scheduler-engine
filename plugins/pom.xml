@@ -49,8 +49,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>test</artifactId>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>engine-test</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--

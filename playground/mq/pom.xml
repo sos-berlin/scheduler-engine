@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>test</artifactId>
+            <artifactId>engine-test</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
