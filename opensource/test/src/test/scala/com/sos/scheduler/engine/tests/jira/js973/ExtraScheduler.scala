@@ -1,9 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
 import ExtraScheduler._
+import com.google.common.base.Strings.nullToEmpty
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.system.OperatingSystem
+import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants._
-import java.io.{InputStream, InputStreamReader}
+import java.io.{File, InputStream, InputStreamReader}
 import java.nio.charset.Charset
 import scala.collection.JavaConversions._
 import scala.collection.immutable
@@ -39,6 +42,11 @@ final class ExtraScheduler(args: immutable.Seq[String], env: Iterable[(String, S
   def start() {
     if (process != null) throw new IllegalStateException()
     val processBuilder = new ProcessBuilder(args :+ s"-tcp-port=$tcpPort")
+    if (OperatingSystem.isUnix) {
+      val name = operatingSystem.getDynamicLibraryEnvironmentVariableName
+      val previous = nullToEmpty(System.getenv(name))
+      processBuilder.environment().put(name, OperatingSystem.concatFileAndPathChain(new File(args.head).getParentFile, previous))
+    }
     for ((k, v) <- env) processBuilder.environment().put(k, v)
     processBuilder.redirectErrorStream(true)
     process = processBuilder.start()

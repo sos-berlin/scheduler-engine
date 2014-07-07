@@ -19,11 +19,14 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT.OrderFinishedWithResultEvent
 import java.io.File
 import java.nio.file.Files
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import scala.concurrent.Await
 import com.sos.scheduler.engine.data.message.MessageCode
 
+@RunWith(classOf[JUnitRunner])
 final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val aSlave = newSlave()
@@ -127,6 +130,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
       s"-sos.ini=${controller.environment.sosIniFile}",
       s"-ini=${controller.environment.iniFile}",
       s"-id=slave-$tcpPort",
+      s"-roles=agent",
       s"-log-dir=${controller.environment.logDirectory.getPath}",
       s"-log-level=debug9",
       s"-log=+${controller.environment.schedulerLog.getPath}",
