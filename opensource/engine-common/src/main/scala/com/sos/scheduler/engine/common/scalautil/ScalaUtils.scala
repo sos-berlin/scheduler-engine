@@ -47,6 +47,10 @@ object ScalaUtils {
   def someUnless[A](a: A, none: A): Option[A] =
     if (a == none) None else Some(a)
 
-//  def substitute[A](a: A, from: A, to: A): A =
-//    if (a == from) to else a
+  implicit class RichAny[A](val delegate: A) extends AnyVal {
+    def substitute(substitution: (A, A)): A = substitute(substitution._1, substitution._2)
+
+    @inline def substitute(when: A, _then: ⇒ A): A =
+      if (delegate == when) _then else delegate
+  }
 }

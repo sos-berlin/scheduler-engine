@@ -35,4 +35,12 @@ final class ScalaUtilsTest extends FreeSpec {
     someUnless(7, none = 0) shouldEqual Some(7)
     someUnless(0, none = 0) shouldEqual None
   }
+
+  "substitute" in {
+    7 substitute 7 -> 3 shouldEqual 3
+    7.substitute(7, 3) shouldEqual 3
+    7 substitute 4 -> 3 shouldEqual 7
+    7.substitute(4, sys.error("ERROR")) shouldEqual 7
+    "" substitute "" -> null shouldEqual null
+  }
 }
