@@ -21,7 +21,9 @@ final class ExtraScheduler(
 extends AutoCloseable with HasCloser {
 
   val address = SchedulerAddress("127.0.0.1", tcpPort)
-  private val tcpIsReadyPromise = Promise[Unit]()
+  private val isActivePromise = Promise[Unit]()
+
+  onClose { isActivePromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") ) }
 
   def start() {
     closeOnError {
@@ -38,7 +40,7 @@ extends AutoCloseable with HasCloser {
     }
   }
 
-  private def startProcess() = {
+  private def startProcess(): Process = {
     val processBuilder = new ProcessBuilder(args :+ s"-tcp-port=${address.port}" :+ s"-ip-address=${address.interface}")
     if (OperatingSystem.isUnix) {
       val name = operatingSystem.getDynamicLibraryEnvironmentVariableName
@@ -53,12 +55,12 @@ extends AutoCloseable with HasCloser {
   private def startStdoutCollectorThread(in: InputStream) {
     new Thread(s"Stdout collector $address") {
       override def run() {
-        val expectedMessageCode = "SCHEDULER-956"
+        val expectedMessageCode = "SCHEDULER-902"
         try
           unbufferedInputStreamToLines(in, schedulerEncoding) { line ⇒
             logger.info(line)
-            if ((line contains s" $expectedMessageCode ") && (line contains " TCP"))
-              tcpIsReadyPromise.success(())
+            if (!isActivePromise.isCompleted && (line contains s" $expectedMessageCode ") && (line contains " state=running"))
+              isActivePromise.success(())
           }
         catch {
           case t: Throwable ⇒
@@ -66,7 +68,7 @@ extends AutoCloseable with HasCloser {
             throw t
         }
         finally
-          tcpIsReadyPromise.tryFailure(new RuntimeException(s"ExtraScheduler has not started successfully with message $expectedMessageCode"))
+          isActivePromise.tryFailure(new RuntimeException(s"ExtraScheduler has not started successfully with message $expectedMessageCode"))
       }
       start()
       onClose {
@@ -82,7 +84,7 @@ extends AutoCloseable with HasCloser {
     logger.debug(s"Finished closing $this")
   }
 
-  def tcpIsReadyFuture = tcpIsReadyPromise.future
+  def isActiveFuture = isActivePromise.future
 
   override def toString = s"ExtraScheduler($address)"
 }

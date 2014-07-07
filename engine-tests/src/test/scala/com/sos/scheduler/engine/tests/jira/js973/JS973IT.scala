@@ -210,7 +210,7 @@ private object JS973IT {
     }
 
     def expectedResult = {
-      Await.result(extraScheduler.tcpIsReadyFuture, extraSchedulerTimeout.toScalaDuration)
+      Await.result(extraScheduler.isActiveFuture, extraSchedulerTimeout.toScalaDuration)
       _expectedResult
     }
   }
