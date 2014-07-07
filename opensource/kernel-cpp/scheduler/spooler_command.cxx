@@ -2074,7 +2074,7 @@ void Command_processor::execute_config_file( const string& filename )
 
 xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text, bool is_bytes )
 {
-    Z_LOGI2( "scheduler.xml", "XML-Dokument wird gelesen ...\n" );
+    Z_LOGI2( "scheduler.xml", "Reading XML document ...\n" );
 
     xml::Document_ptr command_doc;
     command_doc.create();
