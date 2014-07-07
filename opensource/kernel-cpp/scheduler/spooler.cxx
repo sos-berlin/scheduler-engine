@@ -2917,6 +2917,7 @@ string Spooler::execute_xml_string_with_security_level(const string& xml_command
 
 string Spooler::execute_xml_string_with_security_level(const string& xml_command, Security::Level security_level, const Host& client_host) {
     Command_processor cp ( _spooler, security_level, client_host);
+    cp.set_log(log());
     return cp.execute_xml_string(xml_command);
 }
 
@@ -2930,6 +2931,7 @@ http::Java_response* Spooler::java_execute_http(const SchedulerHttpRequestJ& req
 
 http::Java_response* Spooler::java_execute_http_with_security_level(const SchedulerHttpRequestJ& requestJ, const SchedulerHttpResponseJ& responseJ, const string& security_level) {
     Command_processor command_processor ( this, Security::as_level(security_level));
+    command_processor.set_log(log());
     ptr<http::Request> request = http::new_java_request(requestJ);
     ptr<http::Java_response> response = Z_NEW(http::Java_response(request, responseJ));
     command_processor.execute_http(request, response, (Http_file_directory*)NULL);

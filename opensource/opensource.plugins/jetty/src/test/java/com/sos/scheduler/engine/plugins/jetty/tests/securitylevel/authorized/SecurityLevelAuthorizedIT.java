@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.plugins.jetty.tests.securitylevel.authorized;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfiguration;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -31,6 +33,12 @@ public class SecurityLevelAuthorizedIT extends SchedulerTest {
     private static final String realmPropertiesPath = "com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/realm.properties";
     private static final String anonymousUser = "anonymous";
     private static final String xmlCommand = new CommandBuilder().startJobImmediately("a").getCommand();
+
+    public SecurityLevelAuthorizedIT() {
+        super(new TestConfigurationBuilder(SecurityLevelAuthorizedIT.class)
+                .terminateOnError(false)  // SCHEDULER-121  The security settings do not allow this operation
+                .build());
+    }
 
     @Test
     public void test() throws Exception {
