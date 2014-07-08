@@ -947,12 +947,6 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 //    return result;
 //}
 
-//---------------------------------------------------------------------Task::on_remote_task_running
-
-void Task::on_remote_task_running() {
-    _call_register.call<Remote_task_running_call>();
-}
-
 //------------------------------------------------------------------------------------Task::on_call
 
 void Task::on_call(const Task_starting_completed_call&) {

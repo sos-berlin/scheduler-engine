@@ -15,15 +15,9 @@ struct Process_class_folder;
 struct Process_class_subsystem;
 
 
-struct Has_on_remote_task_running {
-    virtual void on_remote_task_running() = 0;
-};
-
-
 struct Api_process_configuration {
     Api_process_configuration() : _zero_(this + 1) {}
     Fill_zero _zero_;
-    Has_on_remote_task_running* _has_on_remote_task_running;
     Host_and_port _controller_address;
     string _remote_scheduler_address;
     string _job_name;

@@ -576,7 +576,13 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
             _xml_client_connection->set_async_manager(NULL);
     }
 
-    protected: void do_start();
+    protected: void do_start() {
+        prepare_connection();
+        connection()->set_remote_host(_remote_scheduler.host());
+        _async_tcp_operation = Z_NEW( Async_tcp_operation( this ) );
+        _async_tcp_operation->async_wake();
+        _async_tcp_operation->set_async_manager( _spooler->_connection_manager );
+    }
 
     protected: virtual void emergency_kill() {
         // Nicht möglich, weil kill() asynchron über TCP geht.
@@ -796,15 +802,6 @@ ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_co
 }
 
 
-void Tcp_remote_api_process::do_start() {
-    prepare_connection();
-    connection()->set_remote_host(_remote_scheduler.host());
-    _async_tcp_operation = Z_NEW( Async_tcp_operation( this ) );
-    _async_tcp_operation->async_wake();
-    _async_tcp_operation->set_async_manager( _spooler->_connection_manager );
-}
-
-
 bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Continue_flags )
 {
     bool something_done = true;     // spooler.cxx ruft async_continue() auf
@@ -867,8 +864,6 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
 
         case Async_tcp_operation::s_running:    
         {
-            if (_configuration._has_on_remote_task_running)
-                _configuration._has_on_remote_task_running->on_remote_task_running();
             break;
         }
 

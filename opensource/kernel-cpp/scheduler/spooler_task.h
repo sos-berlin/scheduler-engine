@@ -63,8 +63,7 @@ string                          start_cause_name            ( Start_cause );
 
 struct Task : Object, 
               Abstract_scheduler_object,
-              javabridge::has_proxy<Task>,
-              Has_on_remote_task_running
+              javabridge::has_proxy<Task>
 {
     enum State
     {
@@ -169,7 +168,6 @@ struct Task : Object,
 
     Standard_job*               job                         ();
     Time                        calculated_start_time       ( const Time& now );
-    void                        on_remote_task_running      ();
     void                        on_call                     (const job::Task_starting_completed_call&);
     void                        on_call                     (const job::Task_opening_completed_call&);
     void                        on_call                     (const job::Task_step_completed_call& );
