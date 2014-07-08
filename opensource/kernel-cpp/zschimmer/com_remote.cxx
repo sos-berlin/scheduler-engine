@@ -1610,7 +1610,7 @@ list<File_path> Connection_to_own_server_process::undeleted_files()
 
 string Connection_to_own_server_process::short_name() const
 { 
-    return S() << "pid=" << pid();
+    return S() << "pid=" << pid() << " controller=" << _controller_address;
 }
 
 //-------------------------------------------------------Connection_to_own_server_process::obj_name
@@ -1809,7 +1809,7 @@ string Connection_to_own_server_thread::short_name() const
 { 
     S result;
 
-    result << "thread_id=" << thread_id();
+    result << "thread_id=" << thread_id() << " controller=" << _controller_address;
 
     return result;
 }
