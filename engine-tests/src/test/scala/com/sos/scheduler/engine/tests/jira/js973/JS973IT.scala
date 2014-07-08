@@ -32,9 +32,9 @@ import scala.concurrent.Await
 @RunWith(classOf[JUnitRunner])
 final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBeforeAndAfterAll {
 
-  private lazy val aAgent = newAgent()
-  private lazy val bAgent = newAgent()
-  private lazy val processClassAgent = newAgent()
+  private lazy val aAgent = newAgent(1)
+  private lazy val bAgent = newAgent(2)
+  private lazy val processClassAgent = newAgent(3)
   private lazy val agents = List(aAgent, bAgent, processClassAgent)
 
   override def checkedBeforeAll() {
@@ -112,27 +112,26 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     Files.delete(fileOrdersDir)
   }
 
-  //test("Not in a cluster") {}
-  //TODO Nicht für Cluster-Betrieb. In spooler_task prüfen.
+  //test("Not in a cluster") {} ⇒ SCHEDULER-483
 
-//  JS-974 gilt nur für Aufträge, nicht für Task-Starts
+//  JS-973 gilt nur für Aufträge, nicht für Task-Starts
 //  ignore(s"Order parameter overrides task parameter") {
 //    // Oder sollte ein leerer AUftragsparameter den Task-Parameter gelten lassen? "" ist wie nicht angegeben.
 //    pending
 //  }
 
-//  JS-974 gilt nur für Aufträge, nicht für Task-Starts
+//  JS-973 gilt nur für Aufträge, nicht für Task-Starts
 //  ignore(s"Empty order parameter overrides task parameter") {
 //    pending
 //  }
 
-  private def newAgent(): Agent = {
+  private def newAgent(id: Int): Agent = {
     val tcpPort = findRandomFreeTcpPort()
     val args = List(
       controller.cppBinaries.file(CppBinary.exeFilename).getPath,
       s"-sos.ini=${controller.environment.sosIniFile}",
       s"-ini=${controller.environment.iniFile}",
-      s"-id=agent-$tcpPort",
+      s"-id=agent-$id-$tcpPort",
       s"-roles=agent",
       s"-log-dir=${controller.environment.logDirectory.getPath}",
       s"-log-level=debug9",
