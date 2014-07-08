@@ -1,11 +1,13 @@
 package com.sos.scheduler.engine.common.scalautil
 
-import HasCloserTest._
 import com.google.common.io.Closer
+import com.sos.scheduler.engine.common.scalautil.HasCloserTest._
 import org.junit.runner.RunWith
-import org.scalatest.{FreeSpec, FunSuite}
+import org.mockito.Mockito._
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar.mock
 
 @RunWith(classOf[JUnitRunner])
 final class HasCloserTest extends FreeSpec {
@@ -18,7 +20,7 @@ final class HasCloserTest extends FreeSpec {
   }
 
   "implicit Closer.apply" in {
-    import HasCloser.implicits._
+    import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
     implicit val closer = Closer.create()
     var a = false
     closer { a = true }
@@ -28,12 +30,22 @@ final class HasCloserTest extends FreeSpec {
   }
 
   "registerCloseable" in {
-    import HasCloser.implicits._
+    import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
     implicit val closer = Closer.create()
-    val b = (new B).registerCloseable
-    b.closed shouldBe false
+    val c = mock[AutoCloseable].registerCloseable
+    verify(c, times(0)).close()
     closer.close()
-    b.closed shouldBe true
+    verify(c, times(1)).close()
+  }
+
+  "registerAutoCloseable" in {
+    val hasCloser = new HasCloser {
+      val autoCloseable = mock[AutoCloseable]
+      registerAutoCloseable(autoCloseable)
+    }
+    verify(hasCloser.autoCloseable, times(0)).close()
+    hasCloser.close()
+    verify(hasCloser.autoCloseable, times(1)).close()
   }
 }
 
@@ -43,12 +55,5 @@ private object HasCloserTest {
   private class A extends HasCloser {
     var closed = false
     onClose { closed = true }
-  }
-
-  private class B {
-    var closed = false
-    def close() {
-      closed = true
-    }
   }
 }

@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.common.scalautil
 
-import HasCloser._
 import com.google.common.io.Closer
-import java.io.Closeable
+import com.sos.scheduler.engine.common.scalautil.HasCloser._
 import scala.language.reflectiveCalls
 
 trait HasCloser extends AutoCloseable with CloseOnError {
@@ -14,7 +13,7 @@ trait HasCloser extends AutoCloseable with CloseOnError {
     _closer
   }
 
-  final def whenNotClosedAtShutdown(body: ⇒ Unit) {
+  protected final def whenNotClosedAtShutdown(body: ⇒ Unit) {
     val hook = new Thread(s"ShutdownHook for $toString") {
       override def run() {
         body
@@ -27,8 +26,12 @@ trait HasCloser extends AutoCloseable with CloseOnError {
   }
 
   /** Registers the function for execution in close(), in reverse order of registering. */
-  final def onClose(f: ⇒ Unit) {
-    closer.register(toCloseable(f))
+  protected final def onClose(f: ⇒ Unit) {
+    closer.register(toGuavaCloseable(f))
+  }
+
+  protected final def registerAutoCloseable(autoCloseable: AutoCloseable) {
+    closer.register(toGuavaCloseable(autoCloseable))
   }
 
   def close() {
@@ -38,23 +41,31 @@ trait HasCloser extends AutoCloseable with CloseOnError {
 
 
 object HasCloser {
+  private type GuavaCloseable = java.io.Closeable
+
   object implicits {
     implicit class RichCloser(val delegate: Closer) extends AnyVal {
       final def apply(f: ⇒ Unit) {
-        delegate.register(toCloseable(f))
+        delegate.register(toGuavaCloseable(f))
       }
     }
 
     implicit class RichClosable[A <: { def close() }](val delegate: A) extends AnyVal {
       final def registerCloseable(implicit closer: Closer): A = {
-        closer.register(toCloseable { delegate.close() })
+        closer.register(toGuavaCloseable { delegate.close() })
         delegate
       }
     }
   }
 
-  private def toCloseable(f: ⇒ Unit) =
-    new Closeable {
+  private def toGuavaCloseable(autoCloseable: AutoCloseable): GuavaCloseable =
+    autoCloseable match {
+      case o: GuavaCloseable ⇒ o
+      case o ⇒ toGuavaCloseable { o.close() }
+    }
+
+  private def toGuavaCloseable(f: ⇒ Unit): GuavaCloseable =
+    new GuavaCloseable {
       def close() {
         f
       }
