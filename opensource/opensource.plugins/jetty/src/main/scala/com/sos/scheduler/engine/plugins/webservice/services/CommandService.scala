@@ -33,7 +33,8 @@ final class CommandService @Inject private(xmlCommandExecutor: SchedulerXmlComma
 object CommandService {
   def executeCommandWithSecurityLevel(xmlCommandExecutor: SchedulerXmlCommandExecutor, command: String, request: HttpServletRequest) = {
     val securityLevel = SchedulerSecurityRequest.securityLevel(request)
-    val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel, request.getRemoteHost)
+    val clientHost = Option(request.getHeader("X-Forwarded-For")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost
+    val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel, clientHost)
     Response.ok(resultXml).cacheControl(noCache).build()
   }
 
