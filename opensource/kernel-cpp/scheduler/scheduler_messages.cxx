@@ -443,7 +443,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-845", "Task ended without processing the order. The order remains in job's order queue in the same state" },
     { "SCHEDULER-846", "After task exception and due to stop_on_error='no', the order has been moved to error_state='$1'" },
     { "SCHEDULER-847", "Please use new name '$1' instead of old '$2'" },
-    { "SCHEDULER-848", "Task pid=$1 started for remote scheduler" },
+    { "SCHEDULER-848", "Task pid=$1 started for remote scheduler $2" },
     { "SCHEDULER-849", "Timeout is not possible for a subprocess running on a remote host (it cannot be killed), pid=$1" },
     { "SCHEDULER-850", "After lost connection to remote scheduler, process $1 is going to be killed" },
     { "SCHEDULER-851", "After possibly volatile error (number $1), the statement which caused the error will be repeated: $2" },

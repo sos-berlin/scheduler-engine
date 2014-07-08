@@ -1055,7 +1055,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " register_task_process()\n");
     _communication_operation->_operation_connection->register_task_process( process );
     
-    if( _log )  _log->info( message_string( "SCHEDULER-848", process->pid() ) );
+    if (_log) _log->info(message_string("SCHEDULER-848", process->pid(), api_process_configuration._controller_address.as_string()));
 
     xml::Element_ptr result = _answer.createElement( "process" ); 
     result.setAttribute( "process_id", process->process_id() );
