@@ -15,6 +15,7 @@ struct Option__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Method const __constructor____method;
     ::zschimmer::javabridge::Static_method const _apply__Ljava_lang_Object_2__method;
+    ::zschimmer::javabridge::Method const _contains__Ljava_lang_Object_2__method;
     ::zschimmer::javabridge::Static_method const _empty____method;
     ::zschimmer::javabridge::Method const _get____method;
     ::zschimmer::javabridge::Method const _isDefined____method;
@@ -31,6 +32,7 @@ Option__class::Option__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor____method(this, "<init>", "()V")
     ,_apply__Ljava_lang_Object_2__method(this, "apply", "(Ljava/lang/Object;)Lscala/Option;")
+    ,_contains__Ljava_lang_Object_2__method(this, "contains", "(Ljava/lang/Object;)Z")
     ,_empty____method(this, "empty", "()Lscala/Option;")
     ,_get____method(this, "get", "()Ljava/lang/Object;")
     ,_isDefined____method(this, "isDefined", "()Z")
@@ -72,6 +74,13 @@ Option::~Option() { assign_(NULL); }
     ::javaproxy::scala::Option result;
     result.steal_local_ref(cls->_apply__Ljava_lang_Object_2__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
+}
+
+bool Option::contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    Option__class* cls = _class.get();
+    return 0 != cls->_contains__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::scala::Option Option::empty() {

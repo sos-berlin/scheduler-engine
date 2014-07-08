@@ -48,6 +48,7 @@ struct Option : ::zschimmer::javabridge::proxy_jobject< Option >, ::javaproxy::j
   public:
 
     static ::javaproxy::scala::Option apply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
+    bool contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
     static ::javaproxy::scala::Option empty();
     ::javaproxy::java::lang::Object get() const;
     bool isDefined() const;
