@@ -211,6 +211,7 @@ bool Socket_operation::accept( SOCKET listen_socket )
 
     set_socket_event_name( "accepted" );
 
+    Z_LOG2("socket.accept", "accept(" << listen_socket << ") => " << _peer_host_and_port.as_string() << "\n" );
     return true;
 }
 
