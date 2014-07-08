@@ -57,7 +57,8 @@ final class TestEnvironment(
       s"-ini=$iniFile",
       s"-log-level=debug9",
       s"-log-dir=${logDirectory.getPath}",
-      s"-log=$logCategories> ${schedulerLog.getPath}") ++
+      s"-log=$logCategories> +${schedulerLog.getPath}",   // "+" (append) in case some ExtraScheduler has been started before
+      "-ip-address=127.0.0.1") ++
     (if (OperatingSystem.isUnix) Some("-env=" + libraryPathEnv(cppBinaries.directory)) else None) ++
     Some(configDirectory.getPath)
 
