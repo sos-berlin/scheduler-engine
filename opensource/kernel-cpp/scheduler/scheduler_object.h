@@ -116,9 +116,9 @@ struct Scheduler_object
     Task_subsystem*             task_subsystem              () const;
     Order_subsystem*            order_subsystem             () const;
 
-    Spooler*                   _spooler;
-    IUnknown*                  _my_iunknown;
-    Type_code                  _scheduler_object_type_code;
+    Spooler* const             _spooler;
+    IUnknown* const            _my_iunknown;
+    Type_code const            _scheduler_object_type_code;
     ptr<Xslt_stylesheet>       _mail_xslt_stylesheet;
     string                     _mail_xslt_stylesheet_path;
     ptr<Prefix_log>            _log;
