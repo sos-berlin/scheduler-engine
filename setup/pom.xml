@@ -136,13 +136,11 @@ call prepare-setup.sh <version> to use this pom
                                     <groupId>com.sos.scheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-setup</artifactId>
                                     <version>${enginedoc.version}</version>
-                                    <destFileName>com.sos.scheduler.enginedoc-kernel-${enginedoc.version}.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.sos.scheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-common</artifactId>
                                     <version>${enginedoc.version}</version>
-                                    <destFileName>com.sos.scheduler.enginedoc-common-${enginedoc.version}.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
