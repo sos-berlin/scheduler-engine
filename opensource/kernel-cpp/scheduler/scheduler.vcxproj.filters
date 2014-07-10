@@ -349,6 +349,9 @@
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     
+    <ClCompile Include="jni__sos__scheduler__Api_process_configuration.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">

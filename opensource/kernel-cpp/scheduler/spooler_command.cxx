@@ -92,6 +92,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
     ptr<Async_operation>       _operation;
     State                      _state;
     double                     _trying_deleting_files_until;
+    ptr<Remote_task_close_command_response> _hold_self;
 };
 
 //---------------------------Remote_task_close_command_response::Remote_task_close_command_response
@@ -100,7 +101,8 @@ Remote_task_close_command_response::Remote_task_close_command_response( Api_proc
 : 
     _zero_(this+1), 
     _process(p), 
-    _connection(c) 
+    _connection(c),
+    _hold_self(c? NULL : this)
 {
 }
 
@@ -118,6 +120,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
     Z_DEBUG_ONLY( if( _operation )  assert( _operation->async_finished() ) );
 
     bool something_done = false;
+    ptr<Remote_task_close_command_response> hold_me = this;
 
     switch( _state )
     {
@@ -185,23 +188,25 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
         if( _state != s_responding )  break;
 
         case s_responding: {    // XML-Anwort 
-            begin_standard_response();
-
-            _xml_writer.begin_element( "ok" );
-            //int KEIN_STDOUT;
-            //write_file( "stdout", _process->stdout_path() );
-            //write_file( "stderr", _process->stderr_path() );
-            _xml_writer.end_element( "ok" );
-
-            _xml_writer.flush();
-
-            end_standard_response();
-
-            if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _process_id );
-
-            _state = s_finished;
-            if( continue_flags )
-                _connection->async_wake();
+            if (_connection) {
+                begin_standard_response();
+                _xml_writer.begin_element( "ok" );
+                //int KEIN_STDOUT;
+                //write_file( "stdout", _process->stdout_path() );
+                //write_file( "stderr", _process->stderr_path() );
+                _xml_writer.end_element( "ok" );
+                _xml_writer.flush();
+                end_standard_response();
+                _connection->_operation_connection->unregister_task_process(_process_id);
+                _state = s_finished;
+                if( continue_flags )
+                    _connection->async_wake();
+            } else {
+                _process->spooler()->unregister_api_process(_process_id);
+                _hold_self = NULL;
+                set_async_manager(NULL);
+                _state = s_finished;
+            }
 
             _process    = NULL;
             _connection = NULL;
@@ -1051,9 +1056,12 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
 
-
-    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " register_task_process()\n");
-    _communication_operation->_operation_connection->register_task_process( process );
+    if (_communication_operation) {  // Old plain TCP
+        Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " register_task_process()\n");
+        _communication_operation->_operation_connection->register_task_process( process );
+    } else {
+        _spooler->register_api_process(process);
+    }
     
     if (_log) _log->info(message_string("SCHEDULER-848", process->pid(), api_process_configuration._controller_address.as_string()));
 
@@ -1079,16 +1087,20 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     int  process_id = close_element. int_getAttribute( "process_id" );
     bool kill       = close_element.bool_getAttribute( "kill", false );
 
-    Api_process* process = _communication_operation->_operation_connection->get_task_process( process_id );
+    Api_process* process = _communication_operation?  // Old plain TCP
+        _communication_operation->_operation_connection->get_task_process( process_id )
+        : _spooler->task_process(process_id);
 
     if( kill )  process->kill();
 
-    ptr<Remote_task_close_command_response> response = Z_NEW( Remote_task_close_command_response( process, _communication_operation->_connection ) );
+    ptr<Remote_task_close_command_response> response = Z_NEW(Remote_task_close_command_response(process, _communication_operation ? _communication_operation->_connection : NULL));
     response->set_async_manager( _spooler->_connection_manager );
     response->async_continue();
-    _response = response;
-
-    return xml::Element_ptr();
+    if (_communication_operation) {  // Old plain TCP
+        _response = response;
+        return xml::Element_ptr();
+    } else
+        return _answer.createElement("ok");
 }
 
 //--------------------------------------------------------------Command_processor::execute_add_jobs

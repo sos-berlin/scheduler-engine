@@ -504,6 +504,10 @@ struct Spooler : Object,
 
     void                        send_cmd                    ();
 
+    void                        register_api_process       (Api_process*);
+    void                        unregister_api_process     (Process_id);
+    Api_process*                task_process                (Process_id);
+
     // Prozesse
     void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
     void                        unregister_process_handle   ( Process_handle );                 // Für abort_immediately()
@@ -776,6 +780,8 @@ struct Spooler : Object,
     bool                       _has_windows_console;
     bool                       _check_memory_leak;
     Process_id                 _next_process_id;
+    typedef map<Process_id, ptr<Api_process> >  Api_process_register;
+    Api_process_register      _api_process_register;
     Duration                   _max_micro_step_time;
 
     string                     _java_options;

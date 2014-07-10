@@ -1,4 +1,9 @@
 #include "spooler.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__agentclient__CppHttpRemoteApiProcessClient.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.h"
+
+typedef javaproxy::com::sos::scheduler::engine::kernel::agentclient::CppHttpRemoteApiProcessClient CppHttpRemoteApiProcessClientJ;
 
 namespace sos {
 namespace scheduler {
@@ -647,6 +652,44 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     private: bool _is_killed;
 };
 
+
+struct Http_remote_api_process;
+
+struct Http_remote_api_process : Abstract_remote_api_process {
+    Http_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
+        Abstract_process(spooler, conf),
+        Abstract_remote_api_process(spooler, conf),
+        _clientJ(CppHttpRemoteApiProcessClientJ::apply(spooler->injectorJ(), _configuration.java_proxy_jobject()))
+    {}
+
+    protected: void do_start() {
+        prepare_connection();
+        _clientJ.startRemoteTask(connection()->tcp_port());
+    }
+
+    protected: virtual void emergency_kill() {
+        // Nicht möglich, weil kill() asynchron über HTTP geht.
+    }
+
+    public: bool kill() {
+        return _clientJ.killRemoteTask();
+    }
+
+    public: string obj_name() const {
+        return "Http_remote_api_process " + short_name() + " " + (string)_clientJ.toString();
+    }
+
+    protected: virtual string async_state_text() const {
+        return _clientJ.toString();
+    }
+
+    protected: void on_closing_remote_process() {
+        return _clientJ.closeRemoteTask();
+    }
+
+    private: CppHttpRemoteApiProcessClientJ _clientJ;
+};
+
 //----------------------------------------------------------------Process_class_subsystem::_methods
 
 const Com_method Process_class_subsystem::_methods[] =
@@ -788,7 +831,11 @@ string Async_tcp_operation::async_state_text_() const
 
 
 ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_configuration& configuration) {
-    if (!configuration._remote_scheduler_address.empty()) {
+    if (string_begins_with(configuration._remote_scheduler_address, "http://")) {
+        ptr<Http_remote_api_process> result = Z_NEW(Http_remote_api_process(spooler, configuration));
+        return +result;
+    } else
+    if (!configuration._remote_scheduler_address.empty()) {       
         ptr<Tcp_remote_api_process> result = Z_NEW(Tcp_remote_api_process(spooler, configuration));
         return +result;
     } else

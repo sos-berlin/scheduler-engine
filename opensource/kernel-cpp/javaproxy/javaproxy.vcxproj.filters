@@ -329,6 +329,12 @@
     </ClCompile>
     
     
+    <ClCompile Include="com__sos__scheduler__engine__kernel__agentclient__CppHttpRemoteApiProcessClient.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h">

@@ -692,7 +692,7 @@ Spooler::Spooler(jobject java_main_context)
     _validate_xml(true),
     _environment( variable_set_from_environment() ),
     _holidays(this),
-    _next_process_id(1),
+    _next_process_id(1 + rand() % 1000000000),
     _configuration_directories(confdir__max+1),
     _configuration_directories_as_option_set(confdir__max+1),
     _max_micro_step_time(Duration(10)),
@@ -863,6 +863,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     xml::Element_ptr state_element = dom.createElement( "state" );
  
     state_element.setAttribute( "time"                 , Time::now().xml_value());   // Veraltet (<answer> hat time).
+    state_element.setAttribute( "time_zone"            , _time_zone_name);
     state_element.setAttribute( "id"                   , id() );
     state_element.setAttribute( "spooler_id"           , id() );
     state_element.setAttribute( "spooler_running_since", start_time().xml_value(time::without_ms));
@@ -973,6 +974,14 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if (_supervisor) state_element.appendChild( _supervisor->dom_element( dom, show_what ) );
     if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show_what ) );
     if (_web_services) state_element.appendChild( _web_services->dom_element( dom, show_what ) );
+    if (!_api_process_register.empty()) {
+        xml::Element_ptr processes_element = state_element.append_new_element("remote_processes");
+        Z_FOR_EACH(Api_process_register, _api_process_register, it) {
+            xml::Element_ptr process_element = processes_element.append_new_element("remote_process");
+            process_element.setAttribute("id", it->second->process_id());
+            process_element.setAttribute("pid", it->second->pid());
+        }
+    }
 
     state_element.appendChild( _communication.dom_element( dom, show_what ) );
 
@@ -1053,6 +1062,28 @@ void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_ev
     *s << "<state";
     *s << " state=\"" << state_name() << '"';
     *s << "/>";
+}
+
+
+void Spooler::register_api_process(Api_process* process) {
+    assert(process->process_id());
+    _api_process_register[process->process_id()] = process;
+}
+
+
+void Spooler::unregister_api_process(Process_id process_id) {
+    assert(process_id);
+    Api_process* process = task_process(process_id);
+    process->close_async();
+    _api_process_register.erase(process_id);
+}
+
+
+Api_process* Spooler::task_process(Process_id process_id) {
+    assert(process_id);
+    Api_process_register::iterator it = _api_process_register.find(process_id);
+    if (it == _api_process_register.end())  z::throw_xc(Z_FUNCTION, "unknown process id", process_id);
+    return it->second;
 }
 
 //-----------------------------------------------------------------Spooler::register_process_handle

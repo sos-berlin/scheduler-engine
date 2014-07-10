@@ -15,7 +15,7 @@ struct Process_class_folder;
 struct Process_class_subsystem;
 
 
-struct Api_process_configuration {
+struct Api_process_configuration : javabridge::has_proxy<Api_process_configuration> {
     Api_process_configuration() : _zero_(this + 1) {}
     Fill_zero _zero_;
     Host_and_port _controller_address;
