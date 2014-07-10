@@ -1801,11 +1801,6 @@ Job_history::Job_history( Job* job )
 
 Job_history::~Job_history()
 {
-    try
-    {
-        close();
-    }
-    catch( exception& x ) { _job->_log->warn( message_string( "SCHEDULER-269", x ) ); }  // "FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: "
 }
 
 //---------------------------------------------------------------Job_history::read_profile_settings
@@ -1840,37 +1835,29 @@ void Job_history::open( Transaction* outer_transaction )
 
     if( !_history_yes )  return;
 
-    Transaction ta ( +_spooler->_db, outer_transaction );
-    {
+    for (Retry_nested_transaction ta(_spooler->_db, outer_transaction); ta.enter_loop(); ta++) try {
         set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 
         _spooler->_db->open_history_table( &ta );
 
-        if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() ) 
+        if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() )
         {
             _extra_type = SOS_NEW( Record_type );
 
             for( int i = 0; i < type->field_count(); i++ )
             {
                 string name = type->field_descr_ptr(i)->name();
-                if( my_columns.find( lcase(name) ) == my_columns.end() )  
+                if( my_columns.find( lcase(name) ) == my_columns.end() )
                 {
                     _extra_names.push_back( name );
                     type->field_descr_ptr(i)->add_to( _extra_type );
                 }
             }
         }
-    }
-    ta.commit( Z_FUNCTION );
+        ta.commit(Z_FUNCTION);
+    } catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
 
     _history_enabled = true;
-}
-
-//-------------------------------------------------------------------------------Job_history::close
-
-void Job_history::close()
-{
-    _history_enabled = false;
 }
 
 //---------------------------------------------------------------------------Job_history::read_tail
@@ -1889,7 +1876,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     try {
         if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
-        if( _history_enabled  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+        if( _history_enabled  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die Datenbank vorübergehend(wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
         if (!_history_enabled) z::throw_xc("SCHEDULER-136");
         if (_spooler->_db->_db_name == "") z::throw_xc("SCHEDULER-361", Z_FUNCTION);
 
@@ -2072,21 +2059,6 @@ void Task_history::write( bool start )
     {
         try
         {
-            if( _job_history->_history_enabled )
-            {
-                if( !_spooler->_db->opened() )       // Datenbank ist (wegen eines Fehlers) geschlossen worden?
-                {
-                    _job_history->close();
-                    _job_history->open( (Transaction*)NULL );
-                    
-                    if( !start )  
-                    {
-                        _spooler->log()->info( message_string( "SCHEDULER-307" ) );   // "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben"
-                        return;
-                    }
-                }
-            }
-
             if( _job_history->_history_enabled )
             {
                 Transaction ta ( +_spooler->_db );

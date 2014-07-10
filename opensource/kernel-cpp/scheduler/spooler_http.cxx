@@ -544,7 +544,7 @@ void Parser::eat( const char* what )
     while( *w  &&  *_next_char == *w )  w++, _next_char++;
     if( *w != '\0' )  
     {
-        if( what[0] == '\n' )  z::throw_xc( "SCHEDULER-213", "Zeilenende" );
+        if( what[0] == '\n' )  z::throw_xc( "SCHEDULER-213", "Line end" );
                          else  z::throw_xc( "SCHEDULER-213", what );
     }
 

@@ -487,7 +487,9 @@ OrderSubsystemJ& Order_subsystem_impl::typed_java_sister() {
 
 bool Order_subsystem_impl::subsystem_initialize()
 {
-    init_file_order_sink( _spooler );
+    if (_spooler->modifiable_settings()->has_role_scheduler()) {
+        init_file_order_sink(_spooler);
+    }
 
     _subsystem_state = subsys_initialized;
     return true;
