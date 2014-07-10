@@ -156,6 +156,10 @@
             <artifactId>akka-actor_${scala.binaryVersion}</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${scala.binaryVersion}</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.spray</groupId>
             <artifactId>spray-client_${scala.binaryVersion}</artifactId>
         </dependency>

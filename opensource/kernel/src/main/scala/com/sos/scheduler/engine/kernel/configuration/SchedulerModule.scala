@@ -5,12 +5,12 @@ import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
+import com.sos.scheduler.engine.kernel.configuration.AkkaProvider.newActorSystem
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
@@ -50,7 +50,7 @@ with HasCloser {
     provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideSingleton { cppProxy.variables.getSister: VariableSet }
-    provideSingleton[ActorSystem] { ActorSystem("JobScheduler") sideEffect { o ⇒ onClose { o.shutdown() }}}
+    provideSingleton[ActorSystem] { newActorSystem(closer) }
     provideSingleton[ExecutionContext] { ExecutionContext.global }
     bindSubsystems()
   }
