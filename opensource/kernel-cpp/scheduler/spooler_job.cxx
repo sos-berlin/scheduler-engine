@@ -652,7 +652,6 @@ void Standard_job::close()
     }
 
     _log->finish_log();
-    _history.close();
     _log->close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:

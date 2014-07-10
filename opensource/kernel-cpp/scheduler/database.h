@@ -268,12 +268,11 @@ struct Database_retry
 };
 
 //-------------------------------------------------------------------------Retry_nested_transaction
-// for( Retry_nested_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
-// {
+// for (Retry_nested_transaction ta(_spooler->_db, outer_transaction); ta.enter_loop(); ta++) try {
 //      ...
 //      ta.commit();
 // } 
-// catch( exception& x ) { ta.reopen_after_error( x ); }
+// catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
 
 struct Retry_nested_transaction : Transaction
 {
@@ -306,7 +305,6 @@ struct Job_history
     void                        read_profile_settings   ();
     void                        set_dom_settings        ( xml::Element_ptr settings_element );
     void                        open                    (  Transaction* );
-    void                        close                   ();
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
     xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what&, bool use_task_schema = false );
