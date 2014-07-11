@@ -64,14 +64,14 @@ const DWORD             Z_DLL_COM_DETACH = 102;         // Eigene Erweiterung
 #define DISPATCH_PROPERTYPUT    0x4
 #define DISPATCH_PROPERTYPUTREF 0x8
 
-#define	DISPID_VALUE	        (  0 )
-#define	DISPID_UNKNOWN	        ( -1 )
-#define	DISPID_PROPERTYPUT      ( -3 )
-#define	DISPID_NEWENUM	        ( -4 )
-#define	DISPID_EVALUATE	        ( -5 )
-#define	DISPID_CONSTRUCTOR      ( -6 )
-#define	DISPID_DESTRUCTOR       ( -7 )
-#define	DISPID_COLLECT          ( -8 )
+#define DISPID_VALUE            (  0 )
+#define DISPID_UNKNOWN          ( -1 )
+#define DISPID_PROPERTYPUT      ( -3 )
+#define DISPID_NEWENUM          ( -4 )
+#define DISPID_EVALUATE         ( -5 )
+#define DISPID_CONSTRUCTOR      ( -6 )
+#define DISPID_DESTRUCTOR       ( -7 )
+#define DISPID_COLLECT          ( -8 )
 
 const int WC_NO_BEST_FIT_CHARS = 0x00000400;
 

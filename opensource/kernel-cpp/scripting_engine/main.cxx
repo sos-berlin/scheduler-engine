@@ -46,10 +46,10 @@ struct Script_site : iunknown_implementation< Script_site, IActiveScriptSite >
     STDMETHODIMP                QueryInterface          ( const IID&, void** );
 
     // IActiveScriptSite:
-    STDMETHODIMP                GetDocVersionString     ( BSTR *pbstrVersion ) 	                        { *pbstrVersion = SysAllocString( L"" ); return S_OK; }
+    STDMETHODIMP                GetDocVersionString     ( BSTR *pbstrVersion )                          { *pbstrVersion = SysAllocString( L"" ); return S_OK; }
     STDMETHODIMP                GetItemInfo             ( LPCOLESTR, DWORD, IUnknown**, ITypeInfo** )   { return E_FAIL; }
     STDMETHODIMP                OnScriptError           ( IActiveScriptError* );
-    STDMETHODIMP                GetLCID                 ( LCID *plcid )	                                { *plcid = 9; return S_OK; }
+    STDMETHODIMP                GetLCID                 ( LCID *plcid )                                 { *plcid = 9; return S_OK; }
     STDMETHODIMP                OnScriptTerminate       ( const VARIANT *, const EXCEPINFO * )          { return S_OK; }
     STDMETHODIMP                OnStateChange           ( SCRIPTSTATE )                                 { return S_OK; }
     STDMETHODIMP                OnEnterScript           ()                                              { return S_OK; }

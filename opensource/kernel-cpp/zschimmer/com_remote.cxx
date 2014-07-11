@@ -857,7 +857,7 @@ void Connection::set_event( Event* event )
 
     if( _is_async )
     {
-#       ifdef Z_WINDOWS    	
+#       ifdef Z_WINDOWS
         {
             int err;
 
