@@ -29,9 +29,11 @@ call prepare-setup.sh <version> to use this pom
         -->
         <profile>
             <id>prepare-platform</id>
+
             <properties>
                 <setup.platform>${engine.platform}</setup.platform>
             </properties>
+            
             <repositories>
                 <repository>
                     <id>sos</id>
@@ -55,31 +57,38 @@ call prepare-setup.sh <version> to use this pom
                     </releases>
                 </repository>
             </repositories>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>purge-local-repository</id>
+                                <phase>clean</phase>
+                                <configuration>
+                                    <inherited>false</inherited>
+                                    <target name="purge local repository">
+                                    <delete dir="${user.home}/.m2/repository//com/sos/scheduler/engine" />
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
         </profile>
+
     </profiles>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>purge-local-repository</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <inherited>false</inherited>
-                            <target name="purge local repository">
-                            <delete dir="${user.home}/.m2/repository//com/sos/scheduler/engine" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
