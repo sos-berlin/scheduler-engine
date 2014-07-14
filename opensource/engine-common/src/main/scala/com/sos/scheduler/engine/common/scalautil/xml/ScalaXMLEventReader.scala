@@ -48,6 +48,10 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) {
     next()
   }
 
+  def noAttributes() {
+    forEachAttribute(PartialFunction.empty)
+  }
+
   def forEachAttribute(f: PartialFunction[(String, String), Unit]) {
     val element = peek.asStartElement
 
