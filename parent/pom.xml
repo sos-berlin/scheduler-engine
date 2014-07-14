@@ -608,10 +608,9 @@
                     </environmentVariables>
                     <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
-                        <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
-                        <com.sos.scheduler.engine.test.underMaven />
-                        <com.sos.scheduler.engine.test.binary.tmpdir>${project.basedir}/target/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
-                        <com.sos.scheduler.engine.test.directory>${project.basedir}/target/surefire-reports</com.sos.scheduler.engine.test.directory>
+                        <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
+                        <com.sos.scheduler.engine.test.binary.tmpdir>${project.build.directory}/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
+                        <com.sos.scheduler.engine.test.directory>${project.build.directory}/surefire-reports</com.sos.scheduler.engine.test.directory>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -626,10 +625,9 @@
                     </environmentVariables>
                     <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
-                        <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
-                        <com.sos.scheduler.engine.test.underMaven />
-                        <com.sos.scheduler.engine.test.binary.tmpdir>${project.basedir}/target/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
-                        <com.sos.scheduler.engine.test.directory>${project.basedir}/target/failsafe-reports</com.sos.scheduler.engine.test.directory>
+                        <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
+                        <com.sos.scheduler.engine.test.binary.tmpdir>${project.build.directory}/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
+                        <com.sos.scheduler.engine.test.directory>${project.build.directory}/failsafe-reports</com.sos.scheduler.engine.test.directory>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -708,7 +706,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.12</version> <!--  http://jira.codehaus.org/browse/SUREFIRE-959 wird in 2.15 gelöst sein -->
+                    <version>2.17</version>
                 </plugin>
                 <plugin>
                     <groupId>org.scala-tools</groupId>

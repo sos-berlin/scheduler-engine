@@ -7,7 +7,4 @@ object IDE {
       mainClassName.startsWith("com.intellij.") || mainClassName.startsWith("org.jetbrains.")
     }
   }
-
-//  private def isRunningUnderMaven: Boolean =
-//    System.getProperty("com.sos.scheduler.engine.test.underMaven") != null
 }
