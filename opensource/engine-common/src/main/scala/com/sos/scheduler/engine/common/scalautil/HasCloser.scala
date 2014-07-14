@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.common.scalautil
 
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.common.scalautil.HasCloser._
+import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
 import scala.language.reflectiveCalls
 
 trait HasCloser extends AutoCloseable with CloseOnError {
@@ -13,16 +14,12 @@ trait HasCloser extends AutoCloseable with CloseOnError {
     _closer
   }
 
+  protected final def onCloseOrShutdown(body: ⇒ Unit) {
+    closer.onCloseOrShutdown(body)
+  }
+
   protected final def whenNotClosedAtShutdown(body: ⇒ Unit) {
-    val hook = new Thread(s"ShutdownHook for $toString") {
-      override def run() {
-        body
-      }
-    }
-    Runtime.getRuntime.addShutdownHook(hook)
-    onClose {
-      Runtime.getRuntime.removeShutdownHook(hook)
-    }
+    closer.whenNotClosedAtShutdown(body)
   }
 
   /** Registers the function for execution in close(), in reverse order of registering. */
@@ -45,8 +42,25 @@ object HasCloser {
 
   object implicits {
     implicit class RichCloser(val delegate: Closer) extends AnyVal {
-      final def apply(f: ⇒ Unit) {
-        delegate.register(toGuavaCloseable(f))
+      final def onCloseOrShutdown(body: ⇒ Unit) {
+        apply(body)
+        whenNotClosedAtShutdown(body)
+      }
+      
+      final def apply(body: ⇒ Unit) {
+        delegate.register(toGuavaCloseable(body))
+      }
+
+      final def whenNotClosedAtShutdown(body: ⇒ Unit) {
+        val hook = new Thread(s"ShutdownHook for $toString") {
+          override def run() {
+            body
+          }
+        }
+        sys.runtime.addShutdownHook(hook)
+        apply {
+          sys.runtime.removeShutdownHook(hook)
+        }
       }
     }
 
