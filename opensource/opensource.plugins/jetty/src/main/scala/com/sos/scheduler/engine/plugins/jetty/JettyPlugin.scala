@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import JettyPlugin._
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.kernel.plugin._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
+import com.sos.scheduler.engine.plugins.jetty.JettyPlugin._
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
 import java.net.BindException
-import javax.inject.{Named, Inject}
+import javax.inject.{Inject, Named}
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
 
@@ -17,14 +18,16 @@ final class JettyPlugin @Inject private(
     @Named(Plugins.configurationXMLName) pluginElement: Element,
     schedulerConfiguration: SchedulerConfiguration)
 extends Plugin
-with ExtensionRegister[JettyPluginExtension] {
+with ExtensionRegister[JettyPluginExtension]
+with HasCloser {
 
   private var webServer: WebServer = null
 
   override def onActivate() {
-    webServer = new WebServer(myJettyConfiguration)
+    webServer = new WebServer(myJettyConfiguration).registerCloseable
     val portNumbersString = webServer.portNumbers mkString " "
     if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")
+    else logger.warn(s"No HTTP port seems to be configured")
     try {
       webServer.start()
     }
@@ -41,13 +44,8 @@ with ExtensionRegister[JettyPluginExtension] {
       servletContextHandlerModifiers = extensions map { _.modifyServletContextHandler })
   }
 
-  override def close() {
-    if (webServer != null)
-      webServer.close()
-  }
-
   def portNumber: Int = {
-    if (webServer == null) throw new IllegalStateException()
+    if (webServer == null) throw new IllegalStateException("JettyPlugin has not been activated")
     webServer.portNumbers.headOption getOrElse sys.error("JettyPlugin has no TCP port configured")
   }
 }

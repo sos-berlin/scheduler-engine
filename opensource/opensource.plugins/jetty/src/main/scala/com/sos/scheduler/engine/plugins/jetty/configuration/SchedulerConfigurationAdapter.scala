@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{TcpPortNumber, WebAppContextConfiguration}
@@ -8,18 +9,20 @@ import org.w3c.dom.Element
 
 object SchedulerConfigurationAdapter {
   def jettyConfiguration(pluginElement: Element, schedulerConfiguration: SchedulerConfiguration) = {
-    def configFileIfExists(filename: String) =
-      Some(new File(schedulerConfiguration.mainConfigurationDirectory, filename)) filter { _.exists }
-
-    JettyConfiguration(
-      portOption = pluginElement.getAttribute("port") match {
+    val portOption = {
+      val schedulerHttpPort = schedulerConfiguration.httpPort
+      val portString = pluginElement.getAttribute("port")
+      if (schedulerHttpPort != 0) require(portString.isEmpty, s"Either use -http-port=$schedulerHttpPort or port='$portString'")
+      portString match {
         case "TEST" => Some(TcpPortNumber.lazyRandom())
-        case "http-port" ⇒
-          val httpPort = schedulerConfiguration.httpPort
-          require(httpPort != 0, "http-port is not defined")
-          Some(TcpPortNumber(httpPort))
+        case "" if schedulerHttpPort != 0 ⇒
+          Some(TcpPortNumber(schedulerHttpPort))
         case _ => xmlAttributeIntOption(pluginElement, "port") map TcpPortNumber.apply
-      },
+      }
+    }
+    def configFileIfExists(filename: String) = Some(schedulerConfiguration.mainConfigurationDirectory / filename) filter { _.exists }
+    JettyConfiguration(
+      portOption = portOption,
       jettyXMLURLOption = configFileIfExists("jetty.xml") map { _.toURI.toURL },
       webAppContextConfigurationOption = Some(WebAppContextConfiguration(
         resourceBaseURL = Config.resourceBaseURL,
