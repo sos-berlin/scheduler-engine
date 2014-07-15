@@ -31,6 +31,8 @@ final class CommandService @Inject private(xmlCommandExecutor: SchedulerXmlComma
 }
 
 object CommandService {
+  private val ReadOnlyCommandPrefixes = List("<show_", "show_", "<s ", "<s/>", "s ")
+
   def executeCommandWithSecurityLevel(xmlCommandExecutor: SchedulerXmlCommandExecutor, command: String, request: HttpServletRequest) = {
     val securityLevel = SchedulerSecurityRequest.securityLevel(request)
     val clientHost = Option(request.getHeader("X-Forwarded-For")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost
@@ -49,8 +51,7 @@ object CommandService {
       requireValidXml(command)
   }
 
-  private def commandIsReadOnly(command: String) =
-    (command startsWith "<show_") || (command startsWith "show_") || (s"$command " startsWith "s ")
+  private def commandIsReadOnly(command: String) = ReadOnlyCommandPrefixes exists s"$command ".startsWith
 
   private def requireValidXml(xmlString: String) {
     try xml.XML.loadString(xmlString)

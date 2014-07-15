@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import CommandServiceIT._
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester.normalizeUri
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
@@ -27,6 +29,7 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
 
   "Execute a show command via GET" in {
     getCommand("<show_state/>") should include ("<state")
+    getCommand("<s/>") should include ("<state")
   }
 
   "Execute a show command without XML syntax via GET" in {
@@ -35,7 +38,7 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
   }
 
   "POST executes a modifying command" in {
-    xml.XML.loadString(postCommand(modifyingCommand)).child(0).child(0) shouldEqual <ok/>
+    xml.XML.loadString(postCommand(ModifyingCommand)).child(0).child(0) shouldEqual <ok/>
   }
 
   "GET inhibits a modifying command" in {
@@ -44,26 +47,29 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
         getCommand(command)
       }
     }
-    httpGetShouldForbid(modifyingCommand)
-    httpGetShouldForbid(strippedModifyingCommand)
+    httpGetShouldForbid(ModifyingCommand)
+    httpGetShouldForbid(StrippedModifyingCommand)
+    httpGetShouldForbid("<start_job job='/a'/>")
   }
 
   "GET rejects a concatenated modifying command" in {
     interceptHttpError(ClientResponse.Status.BAD_REQUEST) {
-      getCommand(s"<show_state/>$modifyingCommand")
+      getCommand(s"<show_state/>$ModifyingCommand")
     }
   }
 
   def postCommand(command: String) =
     webResource.path("/jobscheduler/engine/command").accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], command)
 
-  def getCommand(command: String) =
-    get[String](normalizeUri(s"/jobscheduler/engine/command?command=$command"), Accept = List(TEXT_XML_TYPE))
+  def getCommand(command: String) = {
+    val c = command.replaceAll(" ", "%20")
+    get[String](normalizeUri(s"/jobscheduler/engine/command?command=$c"), Accept = List(TEXT_XML_TYPE))
+  }
 }
 
 private object CommandServiceIT {
-  private val strippedModifyingCommand = "check_folders"
-  private val modifyingCommand = s"<$strippedModifyingCommand/>"
+  private val StrippedModifyingCommand = "check_folders"
+  private val ModifyingCommand = s"<$StrippedModifyingCommand/>"
 
   private def interceptHttpError(status: ClientResponse.Status)(body: ⇒ Unit) {
     intercept[UniformInterfaceException](body).getResponse.getClientResponseStatus shouldEqual status
