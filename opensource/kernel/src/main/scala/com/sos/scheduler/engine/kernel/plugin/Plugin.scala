@@ -1,12 +1,19 @@
 package com.sos.scheduler.engine.kernel.plugin
 
+import com.sos.scheduler.engine.common.scalautil.HasCloser
+
 /**
  * @author Joacim Zschimmer
  */
-trait Plugin {
+trait Plugin extends HasCloser {
 
   private var _isPrepared = false
   private var _isActive = false
+
+  onClose {
+    _isActive = false
+    _isPrepared = false
+  }
 
   final def prepare() {
     onPrepare()
@@ -22,11 +29,6 @@ trait Plugin {
   }
 
   def onActivate() {}
-
-  def close() {
-    _isActive = false
-    _isPrepared = false
-  }
 
   def xmlState: String = ""
 
