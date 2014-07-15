@@ -503,6 +503,8 @@ struct Spooler : Object,
     void                        async_signal                ( const char* signal_name = "" )    { _scheduler_event.async_signal( signal_name ); }
 
     void                        send_cmd                    ();
+    void                        send_cmd_via_tcp            ();
+    void                        send_cmd_via_http           ();
 
     void                        register_api_process       (Api_process*);
     void                        unregister_api_process     (Process_id);

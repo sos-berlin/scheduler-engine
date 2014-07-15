@@ -1346,6 +1346,15 @@ void Spooler::send_cmd()
         throw;
     }
 
+    if (_settings->_http_port) {
+        send_cmd_via_http();
+    } else {
+        send_cmd_via_tcp();
+    }
+}
+
+
+void Spooler::send_cmd_via_tcp() {
     SOCKET sock = socket( PF_INET, SOCK_STREAM, 0 );
     if( sock == SOCKET_ERROR )  z::throw_socket( socket_errno(), "socket" );
 
@@ -1402,6 +1411,13 @@ void Spooler::send_cmd()
     fflush( stdout );
 
     closesocket( sock );
+}
+
+
+void Spooler::send_cmd_via_http() {
+    string host = !_ip_address.is_empty() ? _ip_address.as_string() : "127.0.0.1";
+    string uri = S() << "http://" << host << ":" <<_settings->_http_port << "/";
+    java_subsystem()->schedulerJ().sendCommandAndReplyToStout(uri, _send_cmd_xml_bytes);
 }
 
 //--------------------------------------------------------------------------------Spooler::load_arg

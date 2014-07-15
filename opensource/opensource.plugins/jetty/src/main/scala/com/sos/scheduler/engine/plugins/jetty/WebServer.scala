@@ -1,26 +1,24 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.plugins.jetty.JettyServerBuilder.newJettyServer
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration
 import org.eclipse.jetty.server.{Connector, Server}
+import scala.collection.immutable
 
-class WebServer(jettyConfiguration: JettyConfiguration) {
-  private var started = false
+final class WebServer(jettyConfiguration: JettyConfiguration) extends HasCloser {
+
   private val jettyServer: Server = newJettyServer(jettyConfiguration)
+  val portNumbers: immutable.Seq[Int] = (connectors map { _.getPort } filter { _ != 0 }).toImmutableSeq
 
-  private val connectors: Seq[Connector] = for (cs <- jettyServer.getConnectors) yield cs
-  val portNumbers: Seq[Int] = connectors map { _.getPort } // Der Port des ersten Connector oder None
+  private def connectors: Seq[Connector] = Option(jettyServer.getConnectors) map { _.toSeq } getOrElse Nil
 
   def start() {
     jettyServer.start()
-    started = true
-  }
-
-  def close() {
-    jettyServer.stop()
-    if (started) {
+    onClose {
+      jettyServer.stop()
       jettyServer.join()
-      started = false
     }
   }
 }

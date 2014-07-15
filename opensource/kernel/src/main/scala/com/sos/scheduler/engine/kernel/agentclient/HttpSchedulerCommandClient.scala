@@ -34,7 +34,7 @@ final class HttpSchedulerCommandClient(baseUri: Uri)(implicit actorSystem: Actor
     pipeline(Post(commandUri, elem))
 }
 
-private object HttpSchedulerCommandClient {
+object HttpSchedulerCommandClient {
 
   @Singleton
   final class Factory @Inject private(actorSystem: ActorSystem) {

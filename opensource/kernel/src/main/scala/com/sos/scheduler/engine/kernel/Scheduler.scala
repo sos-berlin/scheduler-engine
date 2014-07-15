@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
+import com.sos.scheduler.engine.kernel.agentclient.{HttpSchedulerCommandClient, CppHttpRemoteApiProcessClient}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
@@ -32,13 +33,17 @@ import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.kernel.util.MavenProperties
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
+import java.net.URI
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.Instant.now
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -139,6 +144,13 @@ with HasCloser {
         prefixLog.warn(x.toString)
         "UNKNOWN_COMMAND"   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
     }
+  }
+
+  @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]) {
+    val client = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(uri))
+    val future = client.execute(scala.xml.XML.load(new ByteArrayInputStream(bytes)))
+    val response: String = Await.result(future, Duration.Inf)
+    System.out.println(response)
   }
 
   @ForCpp private def getEventSubsystem =
