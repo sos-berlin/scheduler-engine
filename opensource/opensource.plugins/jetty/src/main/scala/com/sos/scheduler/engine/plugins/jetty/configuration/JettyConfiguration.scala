@@ -19,7 +19,7 @@ final case class JettyConfiguration(
   loginServiceOption: Option[LoginService] = None,
   handlers: immutable.Seq[Handler] = Nil,
   servletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil,
-  gzip: Boolean = false   // GzipFilter funktioniert nicht mit Spray (wegen async?)
+  gzip: Boolean = true
 )
 
 object JettyConfiguration {
