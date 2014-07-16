@@ -31,7 +31,6 @@ object JettyServerBuilder {
         def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
           webAppContext.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
         }
-        //Funktioniert nicht mit Spray (wegen async?)
         addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
       }
       // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
