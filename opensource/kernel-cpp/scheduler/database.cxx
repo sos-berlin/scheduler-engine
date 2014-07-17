@@ -1876,7 +1876,6 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     try {
         if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
-        if( _history_enabled  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die Datenbank vorübergehend(wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
         if (!_history_enabled) z::throw_xc("SCHEDULER-136");
         if (_spooler->_db->_db_name == "") z::throw_xc("SCHEDULER-361", Z_FUNCTION);
 
