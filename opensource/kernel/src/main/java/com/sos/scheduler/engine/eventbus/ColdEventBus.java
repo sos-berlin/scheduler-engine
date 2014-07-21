@@ -44,7 +44,7 @@ public class ColdEventBus extends AbstractEventBus implements Runnable {
         while (true) {
             Call call = wait? callQueue.poll(Long.MAX_VALUE, TimeUnit.DAYS) : callQueue.poll();
             if (call == null) break;
-            logger.trace("dispatch "+call);
+            if (logger.isTraceEnabled()) logger.trace("dispatch "+call);
             dispatchCall(call);
         }
     }
