@@ -81,7 +81,7 @@ final class NewJob(
   def tryToEndATask(): Boolean =
     ???
 
-  def task(id: TaskId) = tasks.getOrElse(id, sys.error(s"Unknown TaskId $id for job $path"))
+  def task(id: TaskId) = tasks.getOrElse(id, sys.error(s"Unknown TaskId ${id.string} for job ${path.string}"))
 
   def canBeRemovedNow =
     !hasTask
