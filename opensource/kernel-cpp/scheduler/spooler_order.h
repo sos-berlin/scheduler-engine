@@ -188,6 +188,7 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
     string                      string_payload          () const;
+    string                      remote_scheduler        ()                                          { return params()->get_string("scheduler.remote_scheduler"); }
     void                    set_params                  ( const xml::Element_ptr&, Variable_set_map* = NULL );
     ptr<Com_variable_set>       params_or_null          () const;
     ptr<Com_variable_set>       params                  ();

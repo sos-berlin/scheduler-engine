@@ -2480,10 +2480,13 @@ bool Task::do_load()
 //------------------------------------------------------------Task::read_remote_scheduler_parameter
 
 string Task::read_remote_scheduler_parameter() {
-    string remote_scheduler = _order? _order->params()->get_string("scheduler.remote_scheduler") : "";
+    string remote_scheduler = _order? _order->remote_scheduler() : "";
     if (!remote_scheduler.empty()) {
         if (_spooler->is_cluster())  z::throw_xc("SCHEDULER-483");
-        if (_job->module()->kind() != Module::kind_process)  z::throw_xc("SCHEDULER-484");   // Ein API-Prozess kann mehrere Order nacheinander ausführen. Die Tasks könnten dann für jeden Order wechseln.
+        if (_job->module()->kind() != Module::kind_process) {
+            log()->warn(Message_string("SCHEDULER-484"));   // Ein API-Prozess kann mehrere Order nacheinander ausführen. Die Tasks könnten dann für jeden Order wechseln.
+            remote_scheduler = "";
+        }
     }
     return remote_scheduler;
 }
