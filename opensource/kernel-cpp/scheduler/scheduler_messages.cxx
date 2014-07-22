@@ -314,7 +314,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-481", "Method '$1' with signature '$2' is not implemented." },
     { "SCHEDULER-482", "Language '$1' is not supported on 64 bit. Please check the script element." },
     { "SCHEDULER-483", "Order parameter 'scheduler.remote_scheduler' cannot be used in a cluster (option -exclusive or -distributed-orders)" },
-    { "SCHEDULER-484", "Order parameter 'scheduler.remote_scheduler' can be used only for shell script jobs" },
+    { "SCHEDULER-484", "Order parameter 'scheduler.remote_scheduler' can be used only for shell script jobs and is ignored for API jobs" },
     { "SCHEDULER-485", "Missing JobScheduler ID (spooler_id=\"\" or -id)" },
     { "SCHEDULER-486", "Self-referencing dependency $1" },
     { "SCHEDULER-487", "Role '$1' needed for this operation" },
