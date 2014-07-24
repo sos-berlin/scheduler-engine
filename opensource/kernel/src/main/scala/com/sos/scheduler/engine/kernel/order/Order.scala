@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaCollections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -79,10 +80,10 @@ with OrderPersistence {
   }
 
   def jobChainPath: JobChainPath =
-    JobChainPath(cppProxy.job_chain_path_string)
+    emptyToNone(cppProxy.job_chain_path_string) map JobChainPath.apply getOrElse throwNotInAJobChain()
 
   def jobChain: JobChain =
-    jobChainOption getOrElse { throw new SchedulerException(s"Order is not in a job chain: $toString") }
+    jobChainOption getOrElse throwNotInAJobChain()
 
   def jobChainOption: Option[JobChain] =
     Option(cppProxy.job_chain) map { _.getSister }
@@ -97,9 +98,11 @@ with OrderPersistence {
 
   override def toString = {
     val result = getClass.getSimpleName
-    if (cppProxy.cppReferenceIsValid) s"$result $jobChainPath:$id"
+    if (cppProxy.cppReferenceIsValid) s"$result ${cppProxy.job_chain_path_string}:$id"
     else result
   }
+
+  private def throwNotInAJobChain() = throw new SchedulerException(s"Order is not in a job chain: $toString")
 }
 
 
