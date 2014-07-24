@@ -243,7 +243,6 @@ struct Order : Com_order,
     int64                       next_time_millis        ()                                          { return next_time().millis(); }
     Time                        next_time               ();
     void                        set_next_start_time     ();
-    bool                        is_in_initial_state     ();
     void                    set_task_error              ( const Xc& x )                             { _task_error = x; }
 
     // Auftrag in einer Jobkette:

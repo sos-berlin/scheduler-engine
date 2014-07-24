@@ -2156,8 +2156,8 @@ void Order::reset()
     } else {
         set_state( _initial_state );
     }
-    set_next_start_time();
     _is_touched = false;
+    set_next_start_time();
     prepare_for_next_roundtrip();
 }
 
@@ -2487,7 +2487,7 @@ void Order::activate_schedule()
 
 void Order::set_next_start_time()
 {
-    if (is_in_initial_state()) {
+    if (!_is_touched) {
         if( _schedule_use->is_defined() )
         {
             set_setback( first_start_time() );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
@@ -2499,21 +2499,6 @@ void Order::set_next_start_time()
     {
         set_setback( _setback );
     }
-}
-
-//-----------------------------------------------------------------------Order::is_in_initial_state
-
-bool Order::is_in_initial_state() {
-    if (_outer_job_chain_path.empty()) {
-        return _state == _initial_state;
-    } else {
-        if (Job_chain* outer_job_chain = order_subsystem()->job_chain_or_null(_outer_job_chain_path))
-            if (Node* outer_node = outer_job_chain->node_from_state_or_null(_outer_job_chain_state))
-                if (Nested_job_chain_node* n = Nested_job_chain_node::try_cast(outer_node))
-                    if (job_chain() == n->nested_job_chain()  &&  _state == n->nested_job_chain()->first_node()->order_state())
-                        return true;
-    }
-    return false;
 }
 
 //----------------------------------------------Order::tip_next_node_for_new_distributed_order_state
@@ -3022,6 +3007,7 @@ Time Order::next_time()
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
+
 Time Order::first_start_time()
 {
     Time result = Time::never;
@@ -3054,6 +3040,7 @@ Time Order::first_start_time()
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
+
 Time Order::next_start_time()
 {
     Time result = Time::never;
