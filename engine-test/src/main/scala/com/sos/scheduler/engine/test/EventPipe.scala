@@ -48,7 +48,7 @@ extends EventHandlerAnnotated with AutoCloseable {
     @tailrec def waitForEvent(): E =
       tryPoll(until - now()) match {
         case None ⇒
-          throw new TimeoutException(s"Expected Event '$expectedName' has not arrived with ${timeout.pretty}")
+          throw new TimeoutException(s"Expected event '$expectedName' has not arrived within ${timeout.pretty}")
         case Some(e: TerminatedEvent) ⇒
           sys.error(s"Expected event '$expectedName' has not arrived before ${classOf[TerminatedEvent].getName} has arrived")
         case Some(e: Event) if (expectedEventClass isAssignableFrom e.getClass) && evalPredicateIfDefined(predicate, e.asInstanceOf[E]) ⇒
