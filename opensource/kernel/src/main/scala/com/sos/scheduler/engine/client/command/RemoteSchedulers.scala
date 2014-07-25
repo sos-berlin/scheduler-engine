@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.command
 
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.message.MessageCode

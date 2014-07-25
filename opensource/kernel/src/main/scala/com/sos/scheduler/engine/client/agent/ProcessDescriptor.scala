@@ -1,7 +1,7 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.agent
 
+import com.sos.scheduler.engine.client.command.RemoteSchedulers._
 import com.sos.scheduler.engine.common.scalautil.xml.StringSource
-import com.sos.scheduler.engine.kernel.agentclient.RemoteSchedulers._
 
 /** XML response from command &lt;start_remote_task>.
  * @author Joacim Zschimmer

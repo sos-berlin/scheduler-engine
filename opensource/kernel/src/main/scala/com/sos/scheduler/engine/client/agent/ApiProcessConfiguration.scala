@@ -1,7 +1,7 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.agent
 
-import com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC
 import java.net.URI
 
 /**

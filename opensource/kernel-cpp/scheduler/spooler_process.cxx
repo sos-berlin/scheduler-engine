@@ -1,9 +1,9 @@
 #include "spooler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__agentclient__CppHttpRemoteApiProcessClient.h"
+#include "../javaproxy/com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.h"
 
-typedef javaproxy::com::sos::scheduler::engine::kernel::agentclient::CppHttpRemoteApiProcessClient CppHttpRemoteApiProcessClientJ;
+typedef javaproxy::com::sos::scheduler::engine::client::agent::CppHttpRemoteApiProcessClient CppHttpRemoteApiProcessClientJ;
 
 namespace sos {
 namespace scheduler {

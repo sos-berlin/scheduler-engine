@@ -1,5 +1,6 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.agent
 
+import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 

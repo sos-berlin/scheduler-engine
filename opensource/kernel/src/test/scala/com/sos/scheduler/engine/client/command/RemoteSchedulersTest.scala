@@ -1,7 +1,7 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.command
 
+import com.sos.scheduler.engine.client.command.RemoteSchedulers._
 import com.sos.scheduler.engine.common.scalautil.xml.{ScalaXMLEventReader, StringSource}
-import com.sos.scheduler.engine.kernel.agentclient.RemoteSchedulers._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

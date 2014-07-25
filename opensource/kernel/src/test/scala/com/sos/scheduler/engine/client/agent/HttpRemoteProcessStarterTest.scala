@@ -1,10 +1,11 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Guice}
+import com.sos.scheduler.engine.client.agent.HttpRemoteProcessStarterTest._
+import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.kernel.agentclient.HttpRemoteProcessStarterTest._
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner

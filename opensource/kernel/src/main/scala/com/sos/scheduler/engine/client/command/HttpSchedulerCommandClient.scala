@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
 import javax.inject.{Inject, Singleton}
@@ -13,13 +13,13 @@ import spray.httpx.encoding.{Deflate, Gzip}
  * HTTP client for JobScheduler command webservice.
  * @author Joacim Zschimmer
  */
-final class HttpSchedulerCommandClient(baseUri: Uri)(implicit actorSystem: ActorSystem) {
+final class HttpSchedulerCommandClient private[command](baseUri: Uri)(implicit actorSystem: ActorSystem) {
 
   import actorSystem.dispatcher
   private implicit val timeout = 60.seconds
   private val commandUri = baseUri.path match {
     case Path.Empty | Path.SingleSlash ⇒ baseUri.copy(path = Path("/jobscheduler/engine/command"))
-    case _ ⇒ sys.error(s"Invalid JobScheduler URI: $baseUri")
+    case _ ⇒ throw new IllegalArgumentException(s"Invalid JobScheduler URL: $baseUri")
   }
   private val pipeline: HttpRequest ⇒ Future[String] =
     sendReceive ~>

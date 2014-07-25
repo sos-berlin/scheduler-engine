@@ -1,8 +1,9 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.agent
 
+import com.sos.scheduler.engine.client.agent.HttpRemoteProcess._
+import com.sos.scheduler.engine.client.command.RemoteSchedulers._
+import com.sos.scheduler.engine.client.command.{HttpSchedulerCommandClient, RemoteSchedulers}
 import com.sos.scheduler.engine.common.scalautil.xml.StringSource
-import com.sos.scheduler.engine.kernel.agentclient.HttpRemoteProcess._
-import com.sos.scheduler.engine.kernel.agentclient.RemoteSchedulers._
 import scala.concurrent.{ExecutionContext, Future}
 
 /** A remote process started by [[HttpRemoteProcessStarter]].

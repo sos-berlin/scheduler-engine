@@ -1,10 +1,10 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.agent
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.client.agent.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.kernel.agentclient.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

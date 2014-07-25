@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.kernel.agentclient
+package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.sos.scheduler.engine.kernel.agentclient.TestCommandExecutorHttpServer._
+import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer._
 import java.net.URI
 import javax.inject.Inject
 import scala.concurrent.Future
@@ -36,7 +36,7 @@ extends SimpleRoutingApp {
   }
 }
 
-private object TestCommandExecutorHttpServer {
+object TestCommandExecutorHttpServer {
   val Interface = "127.0.0.1"
 
   final class Factory @Inject private(actorSystem: ActorSystem) {

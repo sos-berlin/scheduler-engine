@@ -293,8 +293,9 @@
     <ClCompile Include="com__google__inject__Injector.cxx" />
     
     
-    <ClCompile Include="com__sos__scheduler__engine__kernel__agentclient__CppHttpRemoteApiProcessClient.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
