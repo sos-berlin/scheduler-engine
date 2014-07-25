@@ -2125,7 +2125,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if (is_in_job_chain())
         {
-            report_event( CppEventFactoryJ::newOrderStateChangedEvent(_job_chain_path, string_id(), previous_state.as_string()), java_sister() );
+            report_event(CppEventFactoryJ::newOrderStateChangedEvent(_job_chain_path, string_id(), previous_state.as_string(), _state.as_string()), java_sister());
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
