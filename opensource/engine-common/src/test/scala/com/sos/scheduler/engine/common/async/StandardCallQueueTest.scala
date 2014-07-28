@@ -5,21 +5,21 @@ import org.joda.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 
 @RunWith(classOf[JUnitRunner])
 final class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
   private val callQueue = new StandardCallQueue
 
   test("warm-up") {
-    callQueue add { () => }
+    callQueue {}
     callQueue add TimedCall(now() + 50.ms) {}
     callQueue.popMature()
   }
 
   test("add(=>A)") {
     var a = 0
-    callQueue add { () => a += 1 }
+    callQueue { a += 1 }
     val call = callQueue.popMature().get
     call.epochMillis should equal (0)
     call.onApply()

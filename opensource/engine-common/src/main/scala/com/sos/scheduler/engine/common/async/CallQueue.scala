@@ -1,33 +1,25 @@
 package com.sos.scheduler.engine.common.async
 
-import java.util.concurrent.Callable
-import scala.sys._
+import java.util.NoSuchElementException
 
 trait CallQueue extends AutoCloseable {
 
-  def close()
+  def apply(f: ⇒ Unit) {
+    add(ShortTermCall { () ⇒ f })
+  }
 
   def add[A](o: TimedCall[A])
 
   def tryCancel[A](o: TimedCall[A]): Boolean
 
-  def nextTime: Long
-
-
-  final def add[A](f: () => A) {
-    add(ShortTermCall(f))
-  }
-
   final def add(o: Runnable) {
-    add(ShortTermCall(o))
-  }
-
-  final def add(o: Callable[_]) {
     add(ShortTermCall(o))
   }
 
   final def remove(o: TimedCall[_]) {
     val removed = tryCancel(o)
-    if (!removed) error(s"Unknown TimedCall '$o'")
+    if (!removed) throw new NoSuchElementException(s"Unknown TimedCall '$o'")
   }
+
+  def nextTime: Long
 }
