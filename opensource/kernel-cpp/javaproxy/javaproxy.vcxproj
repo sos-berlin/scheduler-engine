@@ -255,7 +255,7 @@
   
     
     
-    <ClCompile Include="com__sos__scheduler__engine__kernel__supervisor__CppWebClient.cxx" />
+    
     
     <ClCompile Include="java__lang__Class.cxx" />
     <ClCompile Include="scala__util__Try.cxx" />
@@ -296,6 +296,7 @@
     
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

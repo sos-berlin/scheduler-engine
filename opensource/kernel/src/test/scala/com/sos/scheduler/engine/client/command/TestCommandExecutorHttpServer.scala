@@ -7,6 +7,8 @@ import java.net.URI
 import javax.inject.Inject
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
+import spray.http.StatusCodes.BadRequest
 import spray.routing.SimpleRoutingApp
 
 /**
@@ -24,9 +26,15 @@ extends SimpleRoutingApp {
     val serverFuture = startServer(Interface, port) {
       post {
         path("jobscheduler" / "engine" / "command") {
-          entity(as[String]) { commandString ⇒
-            complete {
-              execute(commandString)
+          decompressRequest() {
+            entity(as[String]) { commandString ⇒
+              try {
+                val result = execute(commandString)
+                complete { result }
+              }
+              catch {
+                case NonFatal(t) ⇒ complete(BadRequest, t.toString)
+              }
             }
           }
         }
@@ -37,7 +45,7 @@ extends SimpleRoutingApp {
 }
 
 object TestCommandExecutorHttpServer {
-  val Interface = "127.0.0.1"
+  private val Interface = "127.0.0.1"
 
   final class Factory @Inject private(actorSystem: ActorSystem) {
     def apply(port: Int, executor: String ⇒ String) = new TestCommandExecutorHttpServer(port, executor)(actorSystem)

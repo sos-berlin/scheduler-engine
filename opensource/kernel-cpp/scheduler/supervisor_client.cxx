@@ -3,7 +3,7 @@
 #include "spooler.h"
 #include "../zschimmer/base64.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__supervisor__CppWebClient.h"
+#include "../javaproxy/com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.h"
 #include "../javaproxy/java__lang__Class.h"
 #include "../javaproxy/scala__util__Try.h"
 
@@ -23,7 +23,7 @@ namespace supervisor {
 //-------------------------------------------------------------------------------------------------
 
 typedef ::javaproxy::scala::util::Try TryJ;
-typedef ::javaproxy::com::sos::scheduler::engine::kernel::supervisor::CppWebClient CppWebClientJ;
+typedef ::javaproxy::com::sos::scheduler::engine::client::command::CppHttpSchedulerCommandClient CommandClientJ;
 
 using namespace directory_observer;
 using xml::Xml_writer;
@@ -219,7 +219,7 @@ struct Abstract_connector : Async_operation, Abstract_scheduler_object
 struct Http_connector : Abstract_connector {
     private: Fill_zero _zero_;
     private: string const _supervisor_uri;
-    private: CppWebClientJ const _webClientJ;
+    private: CommandClientJ const _commandClientJ;
     private: bool _is_ready;
     private: bool _connection_failed;
     private: Xc_copy _exception;
@@ -229,13 +229,9 @@ struct Http_connector : Abstract_connector {
         Abstract_connector(c),
         _zero_(this + 1),
         _supervisor_uri(supervisor_uri),
-        _webClientJ(spooler()->injectorJ().getInstance(CppWebClientJ::java_class_()->get_jobject()))
+        _commandClientJ(spooler()->injectorJ().getInstance(CommandClientJ::java_class_()->get_jobject()))
     {
         if (_spooler->_spooler_id.empty()) z::throw_xc(message_string("SCHEDULER-485", "supervisor"));
-    }
-
-    public: ~Http_connector() {
-        _webClientJ.close();
     }
 
     public: string obj_name() const {
@@ -264,8 +260,7 @@ struct Http_connector : Abstract_connector {
         } else {
             try {
                 _supervisor_response_call = Z_NEW(Supervisor_response_call(this));
-                string uri = S() << _supervisor_uri << "/jobscheduler/engine/command";
-                _webClientJ.postXml(uri, new_fetch_command(), _supervisor_response_call->java_sister());
+                _commandClientJ.postXml(_supervisor_uri, new_fetch_command(), _supervisor_response_call->java_sister());
                 _connection_failed = false;
             }
             catch (exception& x) {

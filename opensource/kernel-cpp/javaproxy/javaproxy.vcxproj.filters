@@ -241,9 +241,7 @@
     
     
     
-    <ClCompile Include="com__sos__scheduler__engine__kernel__supervisor__CppWebClient.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
+    
     
     <ClCompile Include="java__lang__Class.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
@@ -334,6 +332,9 @@
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     </ItemGroup>
