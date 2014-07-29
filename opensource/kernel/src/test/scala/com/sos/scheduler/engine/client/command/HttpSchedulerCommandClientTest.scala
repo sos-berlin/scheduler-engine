@@ -51,6 +51,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
     val startFuture = client.execute(<INVALID/>)
     Await.ready(startFuture, TestTimeout).value.get match {
       case Failure(t) ⇒ // Okay
+      case o ⇒ fail(o.toString)
     }
   }
 
@@ -60,6 +61,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
     val startFuture = errorClient.execute(<INVALID/>)
     Await.ready(startFuture, TestTimeout).value.get match {
       case Failure(t) ⇒ // Okay
+      case o ⇒ fail(o.toString)
     }
   }
 
