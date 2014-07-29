@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.common.scalautil
 
+import scala.annotation.tailrec
+import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.reflect.ClassTag
-import scala.collection.JavaConversions._
 
 object ScalaUtils {
   // Warum ist das nicht in Scala enthalten?
@@ -36,6 +37,18 @@ object ScalaUtils {
   implicit class RichJavaIterator[A](val delegate: java.util.Iterator[A]) extends AnyVal {
     def toImmutableSeq: immutable.Seq[A] =
       Vector() ++ delegate
+  }
+
+  implicit class RichThrowable[A <: Throwable](val delegate: A) extends AnyVal {
+    def rootCause: Throwable = {
+      @tailrec def cause(t: Throwable): Throwable =
+        t.getCause match {
+          case null ⇒ t
+          case o if o == t ⇒ t
+          case o ⇒ cause(o)
+        }
+      cause(delegate)
+    }
   }
 
   def cast[A : ClassTag](o: Any): A = {

@@ -24,6 +24,10 @@ final class ScalaUtilsTest extends FreeSpec {
     List(A("eins", 1), A("zwei", 2)) toKeyedMap { _.i } shouldEqual Map(1 -> A("eins", 1), 2 -> A("zwei", 2))
   }
 
+  "Throwable.rootCause" in {
+    new Exception("A", new Exception("B", new Exception("ROOT"))).rootCause.getMessage shouldEqual "ROOT"
+  }
+
   "cast" in {
     val s: Any = "Hej!"
     val string = cast[String](s)
