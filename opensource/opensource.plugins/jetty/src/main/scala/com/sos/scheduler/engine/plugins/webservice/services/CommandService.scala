@@ -13,7 +13,7 @@ import javax.ws.rs.core.{Context, MediaType, Response}
 @Singleton
 final class CommandService @Inject private(xmlCommandExecutor: SchedulerXmlCommandExecutor) {
   @POST
-  @Consumes(Array(MediaType.TEXT_XML))
+  @Consumes(Array(MediaType.TEXT_XML, MediaType.APPLICATION_XML))
   @Produces(Array(MediaType.TEXT_XML))
   def post(
       command: String,
