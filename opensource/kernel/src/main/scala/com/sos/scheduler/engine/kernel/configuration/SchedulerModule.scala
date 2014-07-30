@@ -43,6 +43,7 @@ with HasCloser {
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
     bindInstance(controllerBridge.getEventBus: SchedulerEventBus )
+    bind(classOf[SchedulerConfiguration]) toProvider classOf[SchedulerConfiguration.InjectProvider]
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
     bindInstance(cppProxy.log.getSister: PrefixLog )
