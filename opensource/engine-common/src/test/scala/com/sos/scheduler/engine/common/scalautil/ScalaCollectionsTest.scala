@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.scalautil
 
-import ScalaCollections.{RichTraversable, emptyToNone}
+import ScalaCollections._
 import ScalaCollectionsTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -28,6 +28,10 @@ final class ScalaCollectionsTest extends FreeSpec {
 
     r(Seq[A]()) should be ('empty)
     intercept[Exception] { r(Seq(a1, a2)) }
+  }
+
+  "toSeqMultiMap" in {
+    List(1 -> 11, 2 -> 22, 3 -> 33, 2 -> 222).toSeqMultiMap shouldEqual Map(1 -> List(11), 2 -> List(22, 222), 3 -> List(33))
   }
 
   "emptyToNone" in {

@@ -1,7 +1,9 @@
 package com.sos.scheduler.engine.common.scalautil
 
 import scala.collection.TraversableLike
+import scala.collection.immutable
 import scala.sys.error
+import ScalaUtils._
 
 object ScalaCollections {
   implicit class RichTraversable[A](val delegate: Traversable[A]) extends AnyVal {
@@ -19,6 +21,11 @@ object ScalaCollections {
       delegate groupBy key filter { _._2.size > 1 }
   }
 
+  implicit class RichPairTraversable[A, B](val delegate: Traversable[(A, B)]) extends AnyVal {
+    def toSeqMultiMap: Map[A, immutable.Seq[B]] =
+      delegate groupBy { _._1 } map { case (k, v) ⇒ k -> (v map { _._2 }).toImmutableSeq }
+  }
+
   def emptyToNone(o: String): Option[String] =
     if (o.isEmpty) None else Some(o)
 
@@ -27,4 +34,5 @@ object ScalaCollections {
 
   def emptyToNone[A](o: Array[A]): Option[Array[A]] =
     if (o.isEmpty) None else Some(o)
+
 }
