@@ -1,17 +1,14 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
-import PluginLoginService._
-import com.google.common.base.Splitter
-import com.sos.scheduler.engine.common.xml.NamedChildElements
-import java.util.regex.Pattern
+import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.scheduler.engine.plugins.jetty.configuration.PluginLoginService._
 import org.eclipse.jetty.security.MappedLoginService
-import org.eclipse.jetty.util.security.{Credential, Password}
-import org.w3c.dom.Element
-import scala.collection.JavaConversions._
+import org.eclipse.jetty.util.security.Credential
+import scala.collection.immutable
 
-final class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
-  logins foreach { o => putUser(o.name, o.credential, o.roles) }
-  setName(realmName)
+final class PluginLoginService private extends MappedLoginService {
+
+  setName(RealmName)
 
   def loadUser(username: String) = null
 
@@ -19,22 +16,14 @@ final class PluginLoginService(logins: Iterable[Login]) extends MappedLoginServi
 }
 
 object PluginLoginService {
-  private val realmName = "JobScheduler realm"
+  private val RealmName = "JobScheduler realm"
 
-  def apply(element: Element) =
-    new PluginLoginService(logins(element))
-
-  private val spaceSplitter = Splitter.on(Pattern.compile(" +")).omitEmptyStrings
-
-  private def logins(element: Element) =
-    new NamedChildElements("logins", element) flatMap {
-      new NamedChildElements("login", _) map { e =>
-        Login(
-          e.getAttribute("name"),
-          new Password(e.getAttribute("password")),
-          spaceSplitter.split(e.getAttribute("roles")).toArray)
+  def apply(logins: TraversableOnce[Login]): PluginLoginService =
+    new PluginLoginService sideEffect { service ⇒
+      for (login <- logins) {
+        service.putUser(login.name, login.credential, login.roles.toArray)
       }
     }
 
-  case class Login(name: String, credential: Credential, roles: Array[String])
+  final case class Login(name: String, credential: Credential, roles: immutable.Seq[String])
 }

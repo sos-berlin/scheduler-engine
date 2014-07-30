@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
-import JettyConfiguration._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.WebAppContextConfiguration
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration._
 import java.io.File
 import java.net.URL
 import org.eclipse.jetty.security.LoginService
@@ -23,10 +22,10 @@ final case class JettyConfiguration(
 )
 
 object JettyConfiguration {
+
   final case class WebAppContextConfiguration(
     resourceBaseURL: URL,
     webXMLFileOption: Option[File] = None)
-
 
   trait TcpPortNumber {
     def value: Int
@@ -36,9 +35,11 @@ object JettyConfiguration {
     def apply(o: Int) = new TcpPortNumber {
       val value = o
     }
+  }
 
-    def lazyRandom() = new TcpPortNumber {
-      lazy val value = findRandomFreeTcpPort()
-    }
+  final case class FixedTcpPortNumber(value: Int) extends TcpPortNumber
+
+  final class LazyRandomTcpPortNumber extends TcpPortNumber {
+    lazy val value = findRandomFreeTcpPort()
   }
 }
