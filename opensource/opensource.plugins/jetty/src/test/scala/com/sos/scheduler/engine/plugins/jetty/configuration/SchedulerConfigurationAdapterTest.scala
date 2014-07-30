@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.plugins.jetty.configuration
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber}
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, WarEntry}
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter.jettyConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapterTest._
+import java.io.File
 import org.eclipse.jetty.util.security.Password
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
@@ -54,7 +55,7 @@ final class SchedulerConfigurationAdapterTest extends FreeSpec {
     }
   }
 
-  "XML configuration with loginService" in {
+  "XML configuration with loginService and web archives" in {
     val elem =
       <plugin.config>
         <loginService>
@@ -63,10 +64,14 @@ final class SchedulerConfigurationAdapterTest extends FreeSpec {
             <login name="B-NAME" password="B-PASSWORD" roles=" X  Y "/>
           </logins>
         </loginService>
+        <webContexts>
+          <warWebContext contextPath="/A" war="A.war"/>
+          <warWebContext contextPath="/B" war="B.war"/>
+        </webContexts>
       </plugin.config>
 
-    val loginService = jettyConfiguration(toDomElement(elem), emptySchedulerConfiguration)
-      .loginServiceOption.get.asInstanceOf[PluginLoginService]
+    val conf = jettyConfiguration(toDomElement(elem), emptySchedulerConfiguration)
+    val loginService = conf.loginServiceOption.get.asInstanceOf[PluginLoginService]
 
     val aUser = loginService.getUsers.get("A-NAME")
     aUser.getSubject.getPrivateCredentials(classOf[Password]).toSet shouldEqual Set(new Password("A-PASSWORD"))
@@ -79,6 +84,8 @@ final class SchedulerConfigurationAdapterTest extends FreeSpec {
     bUser.isUserInRole("Y", null) shouldBe true
     bUser.isUserInRole("", null) shouldBe false
     bUser.isUserInRole(" ", null) shouldBe false
+
+    conf.wars shouldEqual List(WarEntry("/A", new File("A.war")), WarEntry("/B", new File("B.war")))
   }
 }
 

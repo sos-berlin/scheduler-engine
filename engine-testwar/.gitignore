@@ -1,0 +1,6 @@
+# MAVEN
+/target/
+
+# IntelliJ IDEA
+/engine-testwar.iml
+

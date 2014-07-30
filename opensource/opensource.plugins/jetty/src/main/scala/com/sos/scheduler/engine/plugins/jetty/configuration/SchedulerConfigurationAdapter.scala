@@ -6,13 +6,14 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, TcpPortNumber, WebAppContextConfiguration}
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, TcpPortNumber, WarEntry, WebAppContextConfiguration}
 import com.sos.scheduler.engine.plugins.jetty.configuration.PluginLoginService.Login
 import java.io.File
 import java.util.regex.Pattern
 import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.util.security.Password
 import org.w3c.dom.Element
+import scala.collection.immutable
 
 object SchedulerConfigurationAdapter {
 
@@ -29,17 +30,17 @@ object SchedulerConfigurationAdapter {
         val portOption = port(attributeMap get "port", schedulerConfiguration.httpPortOption)
         val children = forEachStartElement {
           case "loginService" ⇒ parseLoginService()
+          case "webContexts" ⇒ parseWebContexts()
         }
-        val loginServiceOption = children.oneOption[LoginService]
         JettyConfiguration(
           portOption = portOption,
           jettyXMLURLOption = configFileIfExists("jetty.xml") map { _.toURI.toURL },
           webAppContextConfigurationOption = Some(WebAppContextConfiguration(
             resourceBaseURL = Config.resourceBaseURL,
             webXMLFileOption = configFileIfExists("web.xml"))),
-          loginServiceOption = loginServiceOption,
-          accessLogFileOption = Some(new File(schedulerConfiguration.logDirectory, "http.log"))
-        )
+          loginServiceOption = children.oneOption[LoginService]("loginService"),
+          wars = children.all[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
+          accessLogFileOption = Some(new File(schedulerConfiguration.logDirectory, "http.log")))
       }
     }
 
@@ -56,17 +57,29 @@ object SchedulerConfigurationAdapter {
     def parseLoginService(): LoginService =
       parseElement("loginService") {
         val children = forEachStartElement {
-          case "logins" ⇒ parseElement() {
-            parseEachRepeatingElement("login") {
-              Login(
-                attributeMap("name"),
-                new Password(attributeMap("password")),
-                SpaceSplitter.split(attributeMap("roles")).toImmutableSeq)
-            }
+          case "logins" ⇒
+            parseElement() {
+              parseEachRepeatingElement("login") {
+                Login(
+                  attributeMap("name"),
+                  new Password(attributeMap("password")),
+                  SpaceSplitter.split(attributeMap("roles")).toImmutableSeq)
+              }
           }
         }
         PluginLoginService(children.one[Iterable[Login]]("logins"))
       }
+
+    def parseWebContexts(): immutable.IndexedSeq[WarEntry] =
+      parseElement("webContexts") {
+        forEachStartElement {
+          case "warWebContext" ⇒
+            parseElement() {
+              WarEntry(contextPath = attributeMap("contextPath"), warFile = new File(attributeMap("war")))
+            }
+        }
+      }
+      .values
 
     def configFileIfExists(filename: String) = Some(schedulerConfiguration.mainConfigurationDirectory / filename) filter { _.exists }
 
