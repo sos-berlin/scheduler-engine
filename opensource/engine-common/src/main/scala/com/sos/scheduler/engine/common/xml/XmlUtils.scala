@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.common.xml
 
+import com.google.common.base.Charsets.UTF_8
 import com.google.common.base.Objects.firstNonNull
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.io._
@@ -16,7 +17,7 @@ import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.{Result, TransformerFactory}
 import javax.xml.xpath.{XPathConstants, XPathFactory}
 import org.w3c.dom.{Document, Element, Node, NodeList}
-import org.xml.sax.{SAXParseException, ErrorHandler, InputSource}
+import org.xml.sax.{ErrorHandler, InputSource, SAXParseException}
 import scala.collection.JavaConversions._
 import scala.sys.error
 
@@ -74,9 +75,12 @@ import scala.sys.error
   }
 
   @ForCpp
-  def toXmlBytes(n: Node, encoding: String, indent: Boolean): Array[Byte] = {
+  def toXmlBytes(n: Node, encoding: String, indent: Boolean): Array[Byte] =
+    toXmlBytes(n, Charset.forName(encoding), indent = indent)
+
+  def toXmlBytes(n: Node, encoding: Charset = UTF_8, indent: Boolean = false): Array[Byte] = {
     val o = new ByteArrayOutputStream
-      writeXmlTo(n, o, Charset.forName(encoding), indent = indent)
+      writeXmlTo(n, o, encoding, indent = indent)
     o.toByteArray
   }
 

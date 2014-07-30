@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.common.xml;
 
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.List;
 
 import static com.google.common.base.Charsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
