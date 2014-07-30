@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.client.command
 
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.message.MessageCode
 import javax.xml.transform.Source
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
@@ -19,23 +20,20 @@ object RemoteSchedulers {
   
   def readSchedulerResponses[A](source: Source)(read: ScalaXMLEventReader ⇒ A): immutable.Seq[A] = {
     try {
-      val result = mutable.Buffer[A]()
-      ScalaXMLEventReader.parse(source) { eventReader ⇒
+      val result = ScalaXMLEventReader.parse(source) { eventReader ⇒
         import eventReader._
         parseDocument {
           parseElement("spooler") {
-            ignoreAttributes()
             parseElement("answer") {
-              ignoreAttributes()
-              forEachStartElement {
+              forEachStartElement[A] {
                 case "ERROR" ⇒ throw errorElementToException(eventReader)
-                case _ ⇒ result += read(eventReader)
+                case _ ⇒ read(eventReader)
               }
             }
           }
         }
       }
-      result.toVector
+      result.values.toImmutableSeq
     } catch {
       case ScalaXMLEventReader.WrappedException(x: XmlResponseException) ⇒ throw x
     }
@@ -43,16 +41,13 @@ object RemoteSchedulers {
 
   def errorElementToException(eventReader: ScalaXMLEventReader): XmlResponseException = {
     import eventReader._
-    var code: Option[MessageCode] = None
-    var text: Option[String] = None
-    parseElement("ERROR") {
-      forEachAttribute {
-        case ("code", value) ⇒ code = Some(MessageCode(value))
-        case ("text", value) ⇒ text = Some(value)
-        case _ ⇒
-      }
+    val (code, text) = parseElement("ERROR") {
+      (attributeMap.asConverted("code")(MessageCode.apply),
+        attributeMap.get("text"))
     }
-    throw new XmlResponseException(code getOrElse MessageCode("UNKNOWN"), text getOrElse "UNKNOWN ERROR")
+    throw new XmlResponseException(
+      code = code getOrElse MessageCode("UNKNOWN"),
+      getMessage = text getOrElse "UNKNOWN ERROR")
   }
 
   final case class XmlResponseException(code: MessageCode, override val getMessage: String) extends RuntimeException

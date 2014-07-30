@@ -1,22 +1,21 @@
 package com.sos.scheduler.engine.newkernel.job
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.{TaskPersistentState, TaskId}
+import com.sos.scheduler.engine.data.job.{TaskId, TaskPersistentState}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.kernel.cppproxy.{SpoolerC, Job_nodeC, Variable_setC}
+import com.sos.scheduler.engine.kernel.cppproxy.{Job_nodeC, SpoolerC, Variable_setC}
 import com.sos.scheduler.engine.kernel.job.{Job, JobStateCommand}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.newkernel.job.commands.StopJobCommand
 import java.io.ByteArrayInputStream
-import javax.xml.stream.XMLInputFactory
-import javax.xml.stream.events.{EndDocument, StartDocument}
+import javax.xml.transform.stream.StreamSource
 import org.joda.time.DateTimeZone
 import org.w3c.dom.{Document, Element}
 import scala.sys.error
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 
 @ForCpp
 final class CppNewJob(/*cppProxy: JavaJobC,*/ injector: Injector, jobSister: Job, timeZone: DateTimeZone)
@@ -39,9 +38,7 @@ extends Sister {
   }
 
   @ForCpp def setXmlBytes(bytes: Array[Byte]) {
-    val inputFactory = XMLInputFactory.newInstance()
-    val reader = new ScalaXMLEventReader(inputFactory.createXMLEventReader(new ByteArrayInputStream(bytes)))
-    configuration = reader.parseDocument {
+    configuration = ScalaXMLEventReader.parseDocument(new StreamSource(new ByteArrayInputStream(bytes))) { reader ⇒
       JobConfigurationXMLParser.parseWithReader(timeZone)(reader)
     }
   }
@@ -68,7 +65,7 @@ extends Sister {
   }
 
   @ForCpp def canBeRemovedNow: Boolean =
-    jobOption map { _.canBeRemovedNow } getOrElse false
+    jobOption exists { _.canBeRemovedNow }
 
   @ForCpp def onRemoveNow() {}
 

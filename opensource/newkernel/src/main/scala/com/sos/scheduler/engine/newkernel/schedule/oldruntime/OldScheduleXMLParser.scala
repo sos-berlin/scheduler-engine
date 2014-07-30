@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.newkernel.schedule.oldruntime
 
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
-import com.sos.scheduler.engine.newkernel.schedule.{Weekday, Schedule}
-import javax.xml.stream.XMLEventReader
+import com.sos.scheduler.engine.newkernel.schedule.{Schedule, Weekday}
 import org.joda.time.DateTimeZone
 
 final class OldScheduleXMLParser(defaultTimeZone: DateTimeZone, eventReader: ScalaXMLEventReader) {
@@ -24,13 +23,10 @@ final class OldScheduleXMLParser(defaultTimeZone: DateTimeZone, eventReader: Sca
 
       forEachStartElement {
         case "period" => builder.periods += new SchedulePeriodXMLParser(eventReader).parse()
-        case "weekdays" => parseAttributelessElement {
+        case "weekdays" => parseElement() {
           forEachStartElement {
             case "day" => parseElement() {
-              forEachAttribute {
-                case ("day", s) =>
-                  builder.weekdaysPeriods(Weekday(s)) = SchedulePeriodXMLParser.parseSchedulePeriodSeq(eventReader)
-              }
+              builder.weekdaysPeriods(Weekday(attributeMap("day"))) = SchedulePeriodXMLParser.parseSchedulePeriodSeq(eventReader)
             }
           }
         }

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.client.command
 
 import com.sos.scheduler.engine.client.command.RemoteSchedulers._
 import com.sos.scheduler.engine.common.scalautil.xml.{ScalaXMLEventReader, StringSource}
+import javax.xml.stream.events.StartElement
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -35,6 +36,7 @@ final class RemoteSchedulersTest extends FreeSpec {
     intercept[RuntimeException] {
       readSchedulerResponse(StringSource(xmlString))(read)
     }
+    .getMessage should include ("Incomplete XML response")
   }
 
   "readSchedulerResponse with too much elements" in {
@@ -42,14 +44,13 @@ final class RemoteSchedulersTest extends FreeSpec {
     intercept[RuntimeException] {
       readSchedulerResponse(StringSource(xmlString))(read)
     }
+    .getMessage should include ("More than one")
   }
 
   private def read(eventReader: ScalaXMLEventReader): String = {
     import eventReader._
-    parseElement() {
-      val result = peek.asStartElement.getName.getLocalPart
-      ignoreAttributes()
-      result
+    parseStartElement() {
+      eat[StartElement].getName.getLocalPart
     }
   }
 }

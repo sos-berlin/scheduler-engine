@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import JobConfigurationXMLParserTest._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.newkernel.job.JobConfigurationXMLParserTest._
 import javax.xml.stream.XMLInputFactory
 import org.joda.time.DateTimeZone
 import org.junit.runner.RunWith
@@ -25,7 +25,7 @@ final class JobConfigurationXMLParserTest extends FunSuite {
     assert(jobConfiguration.script.asInstanceOf[ShellScript].text == "exit 0")
   }
 
-  val n = 1000000
+  val n = 100000
   test(s"$n x JobConfigurationXMLParser") {
     val xml =
       <new_job title="TITLE">
@@ -35,7 +35,7 @@ final class JobConfigurationXMLParserTest extends FunSuite {
       .toString()
     val stopwatch = new Stopwatch()
     for (i <- 1 to n) JobConfigurationXMLParser.parseString(xml, inputFactory, DateTimeZone.getDefault)
-    logger debug stopwatch.toString
+    logger.debug(s"${n*1000 / stopwatch.elapsedMs} XMLs/s")
   }
 }
 

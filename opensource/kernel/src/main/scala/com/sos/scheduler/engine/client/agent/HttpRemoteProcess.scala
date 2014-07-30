@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.client.agent.HttpRemoteProcess._
+import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import com.sos.scheduler.engine.client.command.RemoteSchedulers._
-import com.sos.scheduler.engine.client.command.{HttpSchedulerCommandClient, RemoteSchedulers}
 import com.sos.scheduler.engine.common.scalautil.xml.StringSource
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,9 +27,7 @@ object HttpRemoteProcess {
     def fromXml(o: String) =
       readSchedulerResponse(StringSource(o)) { eventReader ⇒
         import eventReader._
-        parseElement("ok") {
-          ignoreAttributes()
-        }
+        parseElement("ok") {}
       }
   }
 }

@@ -12,17 +12,10 @@ object ProcessDescriptor {
   def fromXml(o: String) =
     readSchedulerResponse(StringSource(o)) { eventReader ⇒
       import eventReader._
-      var processId: String = null
-      var pid: Option[Int] = None
-
       parseElement("process") {
-        forEachAttribute {
-          case ("process_id", value) ⇒ processId = value
-          case ("pid", value) ⇒ pid = Some(value.toInt)
-          case _ ⇒
-        }
+        ProcessDescriptor(
+          processId = attributeMap("process_id"),
+          pid = attributeMap.asConverted("pid") { _.toInt } getOrElse 0)
       }
-      require(processId != null, "Attribute 'process_id' is missing")
-      ProcessDescriptor(processId = processId, pid = pid getOrElse 0)
     }
 }

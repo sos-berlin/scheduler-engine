@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.newkernel.schedule.oldruntime.OldScheduleXMLPars
 import javax.xml.stream.XMLInputFactory
 import javax.xml.transform.Source
 import org.joda.time.DateTimeZone
-import scala.sys.error
 
 class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: ScalaXMLEventReader) {
 
@@ -14,11 +13,9 @@ class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: ScalaXMLEve
   def parse(): JobConfiguration =
     parseElement("new_job") {
       val builder = new JobConfiguration.Builder
-      forEachAttribute {
-        case ("title", v) => builder.title = v
-      }
+      builder.title = attributeMap.getOrElse("title", "")
       forEachStartElement {
-        case "description" => parseAttributelessElement { builder.description = eatText() }
+        case "description" => parseElement() { builder.description = eatText() }
         case "run_time" => builder.schedule = Some(new OldScheduleXMLParser(timeZone, eventReader).parse())
         case "script" => builder.script = Some(parseScript())
       }
@@ -27,14 +24,11 @@ class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: ScalaXMLEve
 
   private def parseScript(): JobScript = {
     parseElement("script") {
-      var language = ""
-      forEachAttribute {
-        case ("language", v) => language = v
-      }
+      val language = attributeMap("language")
       val text = eatText().trim
       language match {
         case "shell" => ShellScript(text)
-        case _ => error(s"Unknown script language '$language'")
+        case _ => sys.error(s"Unknown script language '$language'")
       }
     }
   }
