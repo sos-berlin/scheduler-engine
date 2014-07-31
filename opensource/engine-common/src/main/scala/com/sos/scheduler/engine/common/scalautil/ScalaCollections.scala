@@ -1,23 +1,22 @@
 package com.sos.scheduler.engine.common.scalautil
 
-import scala.collection.TraversableLike
-import scala.collection.immutable
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import scala.collection.{TraversableLike, immutable}
 import scala.sys.error
-import ScalaUtils._
 
 object ScalaCollections {
   implicit class RichTraversable[A](val delegate: Traversable[A]) extends AnyVal {
 
-    def requireDistinct[K](key: A => K) = {
+    def requireDistinct[K](key: A ⇒ K) = {
       duplicates(key) match {
-        case o if o.nonEmpty => error("Unexpected duplicates: "+ o.keys.mkString(", "))
-        case _ =>
+        case o if o.nonEmpty ⇒ error("Unexpected duplicates: "+ o.keys.mkString(", "))
+        case _ ⇒
       }
       delegate
     }
 
     /** Liefert die Duplikate, also Listenelemente, deren Schlüssel mehr als einmal vorkommt. */
-    def duplicates[K](key: A => K) =
+    def duplicates[K](key: A ⇒ K) =
       delegate groupBy key filter { _._2.size > 1 }
   }
 

@@ -13,20 +13,20 @@ final class ScalaCollectionsTest extends FreeSpec {
   "duplicateKeys" in {
     def dup(o: Seq[A]) = o duplicates { _.i }
 
-    dup(Seq[A]()) should be ('empty)
-    dup(Seq(a1)) should be ('empty)
-    dup(Seq(a1, b1)) should be ('empty)
-    dup(Seq(a1, b1, c1)) should be ('empty)
-    dup(Seq(a1, a1)) should equal (Map(1 -> Seq(a1, a1)))
-    dup(Seq(a1, a2)) should equal (Map(1 -> Seq(a1, a2)))
-    dup(Seq(a1, a2, b1)) should equal (Map(1 -> Seq(a1, a2)))
-    dup(Seq(a1, a2, b1, c1, c2, c3)) should equal (Map(1 -> Seq(a1, a2), 3 -> Seq(c1, c2, c3)))
+    dup(Seq[A]()) shouldBe 'empty
+    dup(Seq(a1)) shouldBe 'empty
+    dup(Seq(a1, b1)) shouldBe 'empty
+    dup(Seq(a1, b1, c1)) shouldBe 'empty
+    dup(Seq(a1, a1)) shouldEqual Map(1 -> Seq(a1, a1))
+    dup(Seq(a1, a2)) shouldEqual Map(1 -> Seq(a1, a2))
+    dup(Seq(a1, a2, b1)) shouldEqual Map(1 -> Seq(a1, a2))
+    dup(Seq(a1, a2, b1, c1, c2, c3)) shouldEqual Map(1 -> Seq(a1, a2), 3 -> Seq(c1, c2, c3))
   }
 
   "requireDistinct" in {
     def r(o: Seq[A]) = o requireDistinct { _.i }
 
-    r(Seq[A]()) should be ('empty)
+    r(Seq[A]()) shouldBe 'empty
     intercept[Exception] { r(Seq(a1, a2)) }
   }
 
