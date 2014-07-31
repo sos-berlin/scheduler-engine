@@ -6,7 +6,7 @@ import java.nio.charset.Charset
 
 object ScalaXmls {
   object implicits {
-    implicit class RichFile(val delegate: File) extends AnyVal {
+    implicit class RichXmlFile(val delegate: File) extends AnyVal {
 
       def xml = scala.xml.XML.loadFile(delegate)
 
