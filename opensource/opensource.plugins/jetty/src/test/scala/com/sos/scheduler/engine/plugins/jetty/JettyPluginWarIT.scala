@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginWarIT._
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
@@ -20,18 +21,15 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
   override lazy val testConfiguration = TestConfiguration(testClass = getClass, testPackage = Some(Tests.testPackage))
 
   override protected def onBeforeSchedulerActivation() {
-    val warFile = findWarFile()
-    new File(testEnvironment.configDirectory, "scheduler.xml").xml = schedulerConfigElem(warFile)
+    (testEnvironment.configDirectory / "scheduler.xml").xml = generateSchedulerConfig(findWarFile())
   }
 
-  ".war" - {
-    "testwar.html" in {
-      webResource.path(s"$ContextPath/testwar.html").get(classOf[String]).trim shouldEqual "<html><body>TEST</body></html>"
-    }
+  "testwar.html" in {
+    webResource.path(s"$ContextPath/testwar.html").get(classOf[String]).trim shouldEqual "<html><body>TEST</body></html>"
+  }
 
-    "TestServlet" in {
-      webResource.path(s"$ContextPath/TEST").get(classOf[String]).trim shouldEqual "TestServlet"
-    }
+  "TestServlet" in {
+    webResource.path(s"$ContextPath/TEST").get(classOf[String]).trim shouldEqual "TestServlet"
   }
 }
 
@@ -40,7 +38,7 @@ private object JettyPluginWarIT {
   private val WarRelativePath = "engine/engine-testwar/target/engine-testwar.war"
   private val logger = Logger(getClass)
 
-  private def schedulerConfigElem(warFile: File) =
+  private def generateSchedulerConfig(warFile: File) =
     <spooler>
       <config>
         <plugins>
@@ -60,8 +58,8 @@ private object JettyPluginWarIT {
     @tailrec
     def f(baseDir: File): File =
       baseDir match {
-        case o if new File(baseDir, WarRelativePath).exists ⇒ new File(baseDir, WarRelativePath)
-        case o if (o != null) && new File(o, "pom.xml").exists ⇒ f(o.getParentFile)
+        case o if (baseDir / WarRelativePath).exists ⇒ baseDir / WarRelativePath
+        case o if (o != null) && (o / "pom.xml").exists ⇒ f(o.getParentFile)
         case _ ⇒ sys.error(s"$WarRelativePath is missing, all Maven directories up from $workingDir searched, we possibly do not run under Maven?")
       }
     val result = f(workingDir).getCanonicalFile
