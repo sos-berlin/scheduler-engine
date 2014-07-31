@@ -38,8 +38,8 @@ object SchedulerConfigurationAdapter {
           webAppContextConfigurationOption = Some(WebAppContextConfiguration(
             resourceBaseURL = Config.resourceBaseURL,
             webXMLFileOption = configFileIfExists("web.xml"))),
-          loginServiceOption = children.oneOption[LoginService]("loginService"),
-          wars = children.all[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
+          loginServiceOption = children.option[LoginService]("loginService"),
+          wars = children.byName[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
           accessLogFileOption = Some(new File(schedulerConfiguration.logDirectory, "http.log")))
       }
     }

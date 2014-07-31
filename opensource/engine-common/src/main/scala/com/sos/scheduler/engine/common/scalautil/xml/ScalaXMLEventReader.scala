@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.common.scalautil.xml
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.ScalaCollections.RichPairTraversable
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{cast, implicitClass, _}
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.RichStartElement
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader._
@@ -52,7 +51,7 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) extends AutoClosea
   @deprecated("Use attribute")
   def forEachAttribute(f: PartialFunction[(String, String), Unit]) {
     def callF(nameValue: (String, String)) = {
-      try f.applyOrElse(nameValue, { o: (String, String) ⇒ sys.error(s"Unexpected XML attribute ${ o._1 }") })
+      try f.applyOrElse(nameValue, { o: (String, String) ⇒ sys.error(s"Unexpected XML attribute ${o._1}") })
       catch {
         case x: Exception ⇒
           val (name, value) = nameValue
@@ -71,7 +70,7 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) extends AutoClosea
     def callF(element: StartElement) = {
       def errorSuffix = s"at ${locationToString(element.getLocation)}"
       val name = element.getName.toString
-      try f.applyOrElse(name, { name: String => sys.error(s"Unexpected XML element <$name>, $errorSuffix") })
+      try f.applyOrElse(name, { name: String ⇒ sys.error(s"Unexpected XML element <$name>, $errorSuffix") })
       catch {
         case x: Exception ⇒ throw new WrappedException(s"Error in XML element <$name>: $x - $errorSuffix", x)
       }
@@ -201,54 +200,40 @@ object ScalaXMLEventReader {
   }
 
   final class ConvertedElementMap[A] private[xml](pairs: immutable.IndexedSeq[(String, A)]) {
-//    private var unreadElements = mutable.BitSet()
-//    for (i <- pairs.indices) unreadElements += i
-
-    private lazy val nameValueMap: Map[String, immutable.Seq[A]] = pairs.toSeqMultiMap
-      .withDefault { k ⇒ throw new NoSuchElementException(s"XML element <$k> is required") }
 
     def one[B <: A : ClassTag]: B =
-      oneOption[B] getOrElse { throw new NoSuchElementException(s"No element for type ${implicitClass[B].getSimpleName}") }
+      option[B] getOrElse { throw new NoSuchElementException(s"No element for type ${implicitClass[B].getSimpleName}") }
 
-    def one[B <: A : ClassTag](name: String): B =
-      oneOption[B](name) getOrElse { throw new NoSuchElementException(s"Element <$name> is required") }
+    def one[B <: A : ClassTag](elementName: String): B =
+      option[B](elementName) getOrElse { throw new NoSuchElementException(s"Element <$elementName> is required") }
 
-    def oneOption[B <: A : ClassTag]: Option[B] = {
-      val result = all[B]
+    def option[B <: A : ClassTag]: Option[B] = {
+      val result = byClass[B]
       require(result.isEmpty || result.tail.isEmpty, s"Element for type ${implicitClass[B].getSimpleName} is allowed only once")
       result.headOption map cast[B]
     }
 
-    def oneOption[B <: A : ClassTag](name: String): Option[B] = {
-      val result = all[B](name)
-      require(result.length <= 1, s"Element <$name> is allowed only once")
+    def option[B <: A : ClassTag](elementName: String): Option[B] = {
+      val result = byName[B](elementName)
+      require(result.length <= 1, s"Element <$elementName> is allowed only once")
       result.headOption map cast[B]
     }
 
-    def all[B <: A : ClassTag]: immutable.IndexedSeq[B] =
-      pairs collect { case (_, v) if implicitClass[B] isAssignableFrom v.getClass ⇒ v.asInstanceOf[B] } map cast[B]
+    def byClass[B <: A : ClassTag]: immutable.IndexedSeq[B] =
+      pairs collect { case (_, v) if implicitClass[B] isAssignableFrom v.getClass ⇒ v.asInstanceOf[B] }
 
-    def all[B <: A : ClassTag](name: String): immutable.Seq[B] =
-      nameValueMap.get(name) match {
-        case Some(seq) ⇒ seq map cast[B]
-        case None ⇒ Nil
-      }
+    def byName[B <: A : ClassTag](elementName: String): immutable.Seq[B] =
+      apply(elementName) map cast[B]
 
-    def values: immutable.IndexedSeq[A] = pairs map { _._2 }
+    def values: immutable.IndexedSeq[A] =
+      pairs map { _._2 }
 
-    def apply(name: String) = nameValueMap(name)
-
-//    def requireAllElementsRead() {
-//      if (unreadElements.nonEmpty) throw new UnparsedElementsException((unreadElements map { i ⇒ pairs(i)._1 }).toImmutableSeq)
-//    }
+    def apply(elementName: String): immutable.Seq[A] =
+      pairs collect { case (k, v) if k == elementName ⇒ v }
   }
 
   final class UnparsedAttributesException private[xml](val names: immutable.Seq[String]) extends RuntimeException {
     override def getMessage = s"Unknown XML attributes " + (names mkString ", ")
-  }
-
-  final class UnparsedElementsException private[xml](val names: immutable.Seq[String]) extends RuntimeException {
-    override def getMessage = s"Unknown XML elements " + (names map { o ⇒ s"<$o>" } mkString ", ")
   }
 
   final class WrappedException(override val getMessage: String, override val getCause: Exception) extends RuntimeException

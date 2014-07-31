@@ -14,6 +14,47 @@ import scala.collection.immutable
  */
 @RunWith(classOf[JUnitRunner])
 final class ScalaXMLEventReaderTest extends FreeSpec {
+  "Methods" in {
+    case class X(y: Y, z: immutable.Seq[Z])
+    trait T
+    case class Y() extends T
+    case class Z() extends T
+    val x = parseString(<X><Y/><Z/><Z/></X>.toString()) { eventReader ⇒
+      import eventReader._
+      parseElement("X") {
+        val children = forEachStartElement {
+          case "Y" ⇒ parseElement() { Y() }
+          case "Z" ⇒ parseElement() { Z() }
+        }
+
+        (children.values: immutable.IndexedSeq[T]) shouldEqual List(Y(), Z(), Z())
+
+        (children.one[Y]("Y"): Y) shouldEqual Y()
+        (children.one[Y]: Y)  shouldEqual Y()
+        (children.option[Y]("Y"): Option[Y]) shouldEqual Some(Y())
+        (children.option[Y]: Option[Y])  shouldEqual Some(Y())
+        (children.byClass[Y]: immutable.Seq[Y]) shouldEqual List(Y())
+        (children.byClass[Y]: immutable.Seq[Y]) shouldEqual List(Y())
+        (children.byName[Y]("Y"): immutable.Seq[Y]) shouldEqual List(Y())
+
+        intercept[IllegalArgumentException] { children.one[Z]("Z") }
+        intercept[IllegalArgumentException] { children.one[Z] }
+        intercept[IllegalArgumentException] { children.option[Z]("Z") }
+        intercept[IllegalArgumentException] { children.option[Z] }
+        (children.byClass[Z]: immutable.Seq[Z]) shouldEqual List(Z(), Z())
+        (children.byClass[Z]: immutable.Seq[Z]) shouldEqual List(Z(), Z())
+        (children.byName[Z]("Z"): immutable.Seq[Z]) shouldEqual List(Z(), Z())
+
+        intercept[ClassCastException] { children.one[Y]("Z") }
+        intercept[ClassCastException] { children.option[Y]("Z") }
+        intercept[ClassCastException] { children.byName[Y]("Z") }
+
+        X(children.one[Y], children.byClass[Z])
+      }
+    }
+    x shouldEqual X(Y(), List(Z(), Z()))
+  }
+
   "ScalaXMLEventReader" in {
     val testXmlString = <A><B/><C x="xx" optional="oo"><D/><D/></C></A>.toString()
     parseString(testXmlString)(parseA) shouldEqual A(B(), C(x = "xx", o = "oo", List(D(), D())))
@@ -71,13 +112,11 @@ private object ScalaXMLEventReaderTest {
       }
 
     parseElement("A") {
-      val elementsMap = forEachStartElement {
+      val children = forEachStartElement {
         case "B" ⇒ parseElement() { B() }
         case "C" ⇒ parseC()
       }
-      (elementsMap.one[B]("B"): B) shouldEqual (elementsMap.one[B]: B)
-      (elementsMap.one[C]("C"): C) shouldEqual (elementsMap.one[C]: C)
-      A(elementsMap.one[B]("B"), elementsMap.one[C])
+      A(children.one[B]("B"), children.one[C])
     }
   }
 }
