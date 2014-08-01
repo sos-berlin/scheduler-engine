@@ -16,8 +16,7 @@ final case class JettyConfiguration(
   jettyXMLURLOption: Option[URL] = None,
   accessLogFileOption: Option[File] = None,
   loginServiceOption: Option[LoginService] = None,
-  handlers: immutable.Seq[Handler] = Nil,
-  servletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil,
+  rootServletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil,
   wars: immutable.Seq[WarEntry] = Nil)
 
 

@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurati
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
 import java.net.BindException
 import javax.inject.{Inject, Named}
-import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
@@ -39,9 +38,7 @@ with HasCloser {
 
   private def myJettyConfiguration = {
     val conf = SchedulerConfigurationAdapter.jettyConfiguration(pluginElement, schedulerConfiguration)
-    conf.copy(
-      handlers = newRootContextHandler() +: conf.handlers,
-      servletContextHandlerModifiers = extensions map { _.modifyServletContextHandler })
+    conf.copy(rootServletContextHandlerModifiers = extensions map { _.modifyServletContextHandler })
   }
 
   def portNumber: Int = {
@@ -52,38 +49,4 @@ with HasCloser {
 
 object JettyPlugin {
   private val logger = Logger(getClass)
-
-  private def newRootContextHandler() = {
-    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
-    result.setContextPath("/")
-    result.addFilter(classOf[VerbRestrictionFilter], "/*", null)
-    result.addServlet(classOf[RootForwardingServlet], "/")
-    result
-  }
 }
-
-// jobscheduler/engine/  Übersicht über den Zustand und weitere URIs
-// jobscheduler/engine/log  Hauptprotokoll
-// jobscheduler/engine/configuration
-// jobscheduler/engine/folders?folder=PATH?type={folder,job,jobChain,...}&deep={false,true}
-// jobscheduler/engine/{folders,jobs,jobChains}?folder=PATH&deep={false,true}
-// jobscheduler/engine/{folder,job,jobChain}?job=PATH  Übersicht über alle Informationen zum Objekt
-// jobscheduler/engine/tasks => Liste der Tasks
-// jobscheduler/engine/task/TASKID/state
-// jobscheduler/engine/task/TASKID/log
-// jobscheduler/engine/task/TASKID/log.state
-// jobscheduler/engine/order?jobChain=PATH&order=ORDERID
-// jobscheduler/engine/order/configuration?jobChain=PATH&order=ORDERID
-// jobscheduler/engine/order/log?jobChain=PATH&order=ORDERID&historyId=...
-// jobscheduler/engine/order/log?jobChain=PATH&order=ORDERID
-// jobscheduler/engine/job_chain/configuration?jobChain=PATH
-// jobscheduler/engine/job_chain/state?jobChain=PATH
-// / -> jobscheduler/ -> jobscheduler/engine/
-
-// ERLEDIGT:
-// jobscheduler/engine/gui/  Operations GUI, wenn über web.xml konfiguriert
-// jobscheduler/engine/z/  Alte GUI
-// jobscheduler/engine/command&command=XMLCOMMAND
-// jobscheduler/engine/command  POST
-// jobscheduler/engine/job/configuration?job=PATH => Job-Konfiguration
-// jobscheduler/engine/job/description?job=PATH

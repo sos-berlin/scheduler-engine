@@ -19,12 +19,12 @@ import scala.language.reflectiveCalls
 
 object JettyServerBuilder {
   def newJettyServer(config: JettyConfiguration) = {
-    def newContextHandler(): Handler = {
+    def newJobSchedulerContextHandler(): Handler = {
       val webAppContext = config.webAppContextConfigurationOption match {
         case Some(c) ⇒ newWebAppContext(config.contextPath, c)
         case None ⇒ new ServletContextHandler sideEffect { o ⇒ setStandardsIn(o, config.contextPath) }
       }
-      for (modify <- config.servletContextHandlerModifiers) {
+      for (modify <- config.rootServletContextHandlerModifiers) {
         modify(webAppContext)
       }
       // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
@@ -58,6 +58,17 @@ object JettyServerBuilder {
       webAppContext
     }
 
+    def newRootContextHandler() = {
+      val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
+      result.setContextPath("/")
+      result.addFilter(classOf[VerbRestrictionFilter], "/*", null)
+      for (modify <- config.rootServletContextHandlerModifiers) {
+        modify(result)
+      }
+      result.addServlet(classOf[PingServlet], "/PING")
+      result
+    }
+
     def setStandardsIn(handler: ServletContextHandler, contextPath: String) {
       handler.setContextPath(contextPath)
       for (s <- config.loginServiceOption) {
@@ -75,45 +86,45 @@ object JettyServerBuilder {
     val logHandlerOption = config.accessLogFileOption map { o ⇒ newRequestLogHandler(new NCSARequestLog(o.getPath)) }
     result.setHandler(newHandlerCollection(
       logHandlerOption ++
-      Some(newContextHandler()) ++
+      Some(newJobSchedulerContextHandler()) ++
+      Some(newRootContextHandler()) ++
       (config.wars map { case WarEntry(contextPath, warFile) ⇒ newWarWebAppContext(contextPath, warFile) }) ++
-      config.handlers ++
       Some(new DefaultHandler)))
     for (o <- config.jettyXMLURLOption) new XmlConfiguration(o).configure(result)
     result
   }
 
-  def newConnector(port: Int) = {
+  private def newConnector(port: Int) = {
     val connector = new SelectChannelConnector
     connector.setPort(port)
     connector
   }
 
-  def newRequestLogHandler(r: RequestLog) = {
+  private def newRequestLogHandler(r: RequestLog) = {
     val result = new RequestLogHandler
     result.setRequestLog(r)
     result
   }
 
-  def newHandlerCollection(handlers: Iterable[Handler]) = {
+  private def newHandlerCollection(handlers: Iterable[Handler]) = {
     val result = new HandlerCollection
     result.setHandlers(handlers.toArray)
     result
   }
 
-  def servletContextHandlerHasWebXml(h: ServletContextHandler) = h match {
+  private def servletContextHandlerHasWebXml(h: ServletContextHandler) = h match {
     case w: WebAppContext ⇒ w.getWebInf != null
     case _ ⇒ false
   }
 
-  def newFilterHolder[F <: Filter](c: Class[F], initParameters: Iterable[(String, String)]) = {
+  private def newFilterHolder[F <: Filter](c: Class[F], initParameters: Iterable[(String, String)]) = {
     val result = new FilterHolder(Holder.Source.EMBEDDED)
     result.setHeldClass(c)
     for (p <- initParameters) result.setInitParameter(p._1, p._2)
     result
   }
 
-  def newConstraintSecurityHandler(loginService: LoginService, roles: Iterable[String]) = {
+  private def newConstraintSecurityHandler(loginService: LoginService, roles: Iterable[String]) = {
     val constraint = {
       val o = new Constraint()
       o.setName(Constraint.__BASIC_AUTH)

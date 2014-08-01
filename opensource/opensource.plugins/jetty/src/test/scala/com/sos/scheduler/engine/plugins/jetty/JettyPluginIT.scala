@@ -23,9 +23,7 @@ final class JettyPluginIT extends FreeSpec with ScalaSchedulerTest with JettyPlu
 
 private object JettyPluginIT {
   private val PathsVerbs = List[(String, Set[String])](
-    "/" -> Set("OPTIONS", "GET", "HEAD"),
-    "/x" -> Set("OPTIONS", "GET", "HEAD"),
-    "/jobscheduler" -> DefaultServletMethods,
+    "/PING" -> GetServletMethods,
     "/jobscheduler/" -> DefaultServletMethods,
     "/jobscheduler/unknown" -> DefaultServletMethods,
     "/jobscheduler/z/" -> DefaultServletMethods,
