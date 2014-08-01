@@ -25,11 +25,12 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
   }
 
   "testwar.html" in {
-    webResource.path(s"$ContextPath/testwar.html").get(classOf[String]).trim shouldEqual "<html><body>TEST</body></html>"
+    get[String](s"$ContextPath/testwar.html").trim shouldEqual "<html><body>TEST</body></html>"
   }
 
   "TestServlet" in {
-    webResource.path(s"$ContextPath/TEST").get(classOf[String]).trim shouldEqual "TestServlet"
+    get[String](s"$ContextPath/TEST").trim shouldEqual "TestServlet"
+  }
   }
 }
 
@@ -58,8 +59,8 @@ private object JettyPluginWarIT {
     @tailrec
     def f(baseDir: File): File =
       baseDir match {
-        case o if (baseDir / WarRelativePath).exists ⇒ baseDir / WarRelativePath
-        case o if (o != null) && (o / "pom.xml").exists ⇒ f(o.getParentFile)
+        case d if (d / WarRelativePath).exists ⇒ d / WarRelativePath
+        case d if (d != null) && (d / "pom.xml").exists ⇒ f(d.getParentFile)
         case _ ⇒ sys.error(s"$WarRelativePath is missing, all Maven directories up from $workingDir searched, we possibly do not run under Maven?")
       }
     val result = f(workingDir).getCanonicalFile
