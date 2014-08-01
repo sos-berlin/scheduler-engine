@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginWarIT._
-import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
+import com.sos.scheduler.engine.plugins.jetty.test.{HttpVerbRestrictionTester, JettyPluginJerseyTester}
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -19,6 +20,7 @@ import scala.annotation.tailrec
 final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester {
 
   override lazy val testConfiguration = TestConfiguration(testClass = getClass, testPackage = Some(Tests.testPackage))
+  private lazy val verbTester = new HttpVerbRestrictionTester(webResource)
 
   override protected def onBeforeSchedulerActivation() {
     (testEnvironment.configDirectory / "scheduler.xml").xml = generateSchedulerConfig(findWarFile())
@@ -31,6 +33,9 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
   "TestServlet" in {
     get[String](s"$ContextPath/TEST").trim shouldEqual "TestServlet"
   }
+
+  "HTTP Verbs" in {
+    verbTester.checkPathForVerbs(s"$ContextPath/TEST", GetServletMethods)
   }
 }
 
