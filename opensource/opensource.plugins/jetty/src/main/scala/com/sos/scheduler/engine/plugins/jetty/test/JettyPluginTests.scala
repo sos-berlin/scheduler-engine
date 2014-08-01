@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.configuration.ObjectMapperJacksonJsonProvider
 import com.sun.jersey.api.client.Client
-import com.sun.jersey.api.client.config.DefaultClientConfig
+import com.sun.jersey.api.client.config.{ClientConfig, DefaultClientConfig}
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import java.net.URI
 import org.joda.time.Duration
@@ -38,7 +38,10 @@ object JettyPluginTests {
     }
 
   def newAuthentifyingClient(timeout: Duration = defaultTimeout, filters: Iterable[ClientFilter] = Iterable()) = {
-    val config = new DefaultClientConfig sideEffect { _.getSingletons.add(ObjectMapperJacksonJsonProvider) }
+    val config = new DefaultClientConfig sideEffect { o ⇒
+      o.getSingletons.add(ObjectMapperJacksonJsonProvider)
+      o.getProperties.put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, false: java.lang.Boolean)
+    }
     Client.create(config) sideEffect { client ⇒
       client.setReadTimeout(min(timeout.getMillis.toInt, Int.MaxValue))
       client.addFilter(new HTTPBasicAuthFilter("testName", "testPassword"))
