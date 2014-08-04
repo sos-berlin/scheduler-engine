@@ -25,7 +25,7 @@ object SchedulerConfigurationAdapter {
   def parseWithReader(schedulerConfiguration: SchedulerConfiguration)(eventReader: ScalaXMLEventReader): JettyConfiguration = {
     import eventReader._
 
-    def result = {
+    def result =
       parseElement("plugin.config") {
         val portOption = port(attributeMap get "port", schedulerConfiguration.httpPortOption)
         val children = forEachStartElement {
@@ -42,9 +42,8 @@ object SchedulerConfigurationAdapter {
           wars = children.byName[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
           accessLogFileOption = Some(new File(schedulerConfiguration.logDirectory, "http.log")))
       }
-    }
 
-    def port(attributeOption: Option[String], schedulerOption: Option[Int]): Option[TcpPortNumber] = {
+    def port(attributeOption: Option[String], schedulerOption: Option[Int]): Option[TcpPortNumber] =
       (attributeOption, schedulerOption) match {
         case (Some(a), Some(s)) ⇒ throw new IllegalArgumentException(s"Either use port='$a' or -http-port=$s")
         case (Some("TEST"), None) ⇒ Some(new LazyRandomTcpPortNumber)
@@ -52,7 +51,6 @@ object SchedulerConfigurationAdapter {
         case (None, Some(s)) ⇒ Some(FixedTcpPortNumber(s))
         case (None, None) ⇒ None
       }
-    }
 
     def parseLoginService(): LoginService =
       parseElement("loginService") {
@@ -85,6 +83,4 @@ object SchedulerConfigurationAdapter {
 
     result
   }
-
-  //private final case class Logins(logins: Iterable[Login])
 }
