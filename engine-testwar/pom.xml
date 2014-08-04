@@ -28,10 +28,22 @@
                     <quiet/>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>  <!-- No jars in .war -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     
     <dependencies>
+        <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>engine-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
