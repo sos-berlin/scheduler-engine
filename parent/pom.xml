@@ -21,7 +21,7 @@
         <scala.binaryVersion>2.11</scala.binaryVersion>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <jersey.version>1.17</jersey.version>
-        <jetty.version>8.1.5.v20120716</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
+        <jetty.version>8.1.15.v20140411</jetty.version>
         <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.4.1</jackson.version>
         <spray-json.artifactId>spray-json_2.11.0-RC4</spray-json.artifactId>
