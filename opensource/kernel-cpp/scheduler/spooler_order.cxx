@@ -4167,7 +4167,7 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
     if( _next_announced_distributed_order_time != t  &&  !is_now )
     {
         Z_LOG2( "scheduler.order", obj_name() << "  " << Z_FUNCTION << "(" << t.as_string(_spooler->_time_zone_name) << ( is_now? ",is_now" : "" ) << ")"
-            "  vorher: " << _next_announced_distributed_order_time.as_string(_spooler->_time_zone_name) << "\n" );
+            ", previously " << _next_announced_distributed_order_time.as_string(_spooler->_time_zone_name) << "\n" );
     }
 
     _next_announced_distributed_order_time = t; 
