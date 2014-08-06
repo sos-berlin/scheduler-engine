@@ -5,7 +5,8 @@
 
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/string_list.h"
-#include "../zschimmer/xml_any.h"
+#include "../zschimmer/xml_java.h"
+#include "../zschimmer/xslt_java.h"
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"

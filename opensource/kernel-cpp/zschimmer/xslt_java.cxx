@@ -50,36 +50,11 @@ void Xslt_parameters::allocate(int)
     _hashMapJ = HashMapJ::new_instance();
 }
 
-//-----------------------------------------------------------------------Xslt_parameters::set_xpath
-
-void Xslt_parameters::set_xpath(int, const string& name, const string& value)
-{
-    _hashMapJ.put(StringJ(name), StringJ(value));
-    //Parameter p;
-    //p._name = name;
-    //p._value = value;
-    //_parameters[i] = p;
-}
-
 //----------------------------------------------------------------------Xslt_parameters::set_string
 
 void Xslt_parameters::set_string(int i, const string& name, const string& value)
 {
-    Z_LOG2("zschimmer", Z_FUNCTION << " " << i << " " << name << "=" << value << "\n");
-
-    string string_value;
-
-    if( value.find( '"' ) != string::npos )
-    {
-        if( value.find( '\'' ) != string::npos )  throw_xc( "JAVAXSLT-005", name, value );    // Anscheinend kennt libxslt keine Ersatzdarstellung für Anführungszeichen
-        string_value = "'" + value + "'";
-    }
-    else
-    {
-        string_value = "\"" + value + "\"";
-    }
-
-    set_xpath( i, name, string_value );
+    _hashMapJ.put(StringJ(name), StringJ(value));
 }
 
 //-----------------------------------------------------------------Xslt_stylesheet::Xslt_stylesheet
@@ -92,20 +67,6 @@ Xslt_stylesheet::Xslt_stylesheet()
 
 Xslt_stylesheet::~Xslt_stylesheet()
 {}
-
-//--------------------------------------------------------------------------Xslt_stylesheet::is_xml
-
-bool Xslt_stylesheet::is_xml( const string& str )
-{
-    return string_begins_with( str, "<" );
-}
-
-//--------------------------------------------------------------------------Xslt_stylesheet::is_xml
-
-bool Xslt_stylesheet::is_xml( const BSTR bstr )
-{
-    return bstr && bstr[0] == '<';
-}
 
 //-----------------------------------------------------------------------Xslt_stylesheet::load_file
 

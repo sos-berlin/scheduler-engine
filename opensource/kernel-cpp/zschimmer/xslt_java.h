@@ -21,7 +21,6 @@ struct Xslt_parameters : Non_cloneable
                                ~Xslt_parameters             ();
 
     void                        allocate                    ( int size );
-    void                        set_xpath                   ( int i, const string& name, const string& value );
     void                        set_string                  ( int i, const string& name, const string& value );
 
   private:
@@ -43,16 +42,10 @@ struct Xslt_stylesheet {
                                ~Xslt_stylesheet             ();
 
     void                        release                     ()                                      {}
-    bool                        is_xml                      ( const string& );
-    bool                        is_xml                      ( const BSTR );
-    string                      path                        () const                                { return _path; }
     void                        load                        ( const Document_ptr& stylesheet );
-    bool                        loaded                      () const                                { return _stylesheetJ != NULL; }
     void                        load_file                   ( const string& filename );
-    void                        set_parameter               ( const string& name, const string& value );
     Document_ptr                apply                       ( const Document_ptr& );
     Document_ptr                apply                       ( const Document_ptr&, const Xslt_parameters& );
-    string                      xml_from_result             ( const Document_ptr& );
 
   private:
     CppXsltStylesheetJ         _stylesheetJ;

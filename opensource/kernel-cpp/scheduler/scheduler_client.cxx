@@ -6,7 +6,7 @@
 #include "../zschimmer/argv.h"
 #include "../zschimmer/async_socket.h"
 #include "../zschimmer/file.h"
-#include "../zschimmer/xml_any.h"
+#include "../zschimmer/xml_java.h"
 
 using namespace std;
 using namespace zschimmer;
