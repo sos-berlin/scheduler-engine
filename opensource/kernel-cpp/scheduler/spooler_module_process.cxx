@@ -1,6 +1,9 @@
 // $Id: spooler_module_process.cxx 14205 2011-03-21 15:45:37Z jz $
 
 #include "spooler.h"
+#if defined Z_UNIX
+#   include <sys/resource.h>
+#endif
 
 using namespace std;
 

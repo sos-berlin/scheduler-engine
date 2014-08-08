@@ -75,6 +75,7 @@
 #   include <process.h>
 #else
 #   include <signal.h>
+#   include <sys/resource.h>
 #endif
 
 #include "mutex.h"
@@ -83,7 +84,6 @@
 #include "com_server.h"
 #include "com_remote.h"
 #include "z_process.h"
-//#include "utf8.h"
 
 #ifdef Z_WINDOWS
 #   include "z_windows_process.h"
@@ -105,8 +105,6 @@ extern char** _argv;
 #endif
 
 const string socket_environment_name = "__scheduler_socket";
-//#define PORT_ENV_NAME     "__scheduler_port"
-
 
 //-------------------------------------------------------------------------------------------------
 
@@ -4479,11 +4477,6 @@ int Server::main( int argc, char** argv )
         //else
         //if( string_begins_with( argv[i], "-port="   ) )  server_port = as_int( argv[i] + 6 );
     }
-
-//#   ifndef USE_SOCKETPAIR
-//        if( controller_port == 0 )  controller_port = as_int( getenv( PORT_ENV_NAME ) );
-//#   endif
-
 
     if( server )
     {
