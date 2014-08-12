@@ -1,28 +1,28 @@
 package com.sos.scheduler.engine.tests.scheduler.job.period
 
-import JobPeriodIT._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.tests.scheduler.job.period.JobPeriodIT._
 import org.joda.time.Instant.now
-import org.joda.time.{Instant, Duration}
+import org.joda.time.{Duration, Instant}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
 
 @RunWith(classOf[JUnitRunner])
-final class JobPeriodIT extends FunSuite with ScalaSchedulerTest {
+final class JobPeriodIT extends FreeSpec with ScalaSchedulerTest {
 
-  private val counts = mutable.HashMap[JobPath, Int]() ++ (jobConfigs map { _.path -> 0 })
+  private val counts = mutable.HashMap[JobPath, Int]() ++ (JobConfigs map { _.path -> 0 })
   private val n = 3
 
-  for (j <- jobConfigs) {
+  for (j <- JobConfigs) {
     val duration = n * j.interval + 500.ms
-    test(s"Task ${j.path} should start about $n times in ${duration.getMillis}ms") {
+    s"Task ${j.path} should start about $n times in ${duration.getMillis}ms" in {
       sleep(durationUntilNextInterval(j.interval, (-900).ms))
       scheduler executeXml j.xmlElem
       sleep(duration)
@@ -53,7 +53,7 @@ private object JobPeriodIT {
     val xmlElem: xml.Elem
   }
 
-  private val jobConfigs = immutable.Seq(
+  private val JobConfigs = immutable.Seq(
     new JobConfig {
       val path = JobPath("/test-shell")
       val interval = 1.s
@@ -67,7 +67,7 @@ private object JobPeriodIT {
     },
     new JobConfig {
       val path = JobPath("/test-api")
-      val interval = 4.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
+      val interval = 8.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
       val xmlElem =
         <job name={path.name}>
           <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
