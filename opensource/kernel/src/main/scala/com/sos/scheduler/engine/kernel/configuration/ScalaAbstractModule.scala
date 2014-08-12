@@ -10,11 +10,14 @@ abstract class ScalaAbstractModule extends AbstractModule {
   private lazy val myBinder = binder skipSources classOf[ScalaAbstractModule]
 
   final def bindInstance[A <: AnyRef : ClassTag](instance: A) =
-    myBinder bind implicitClass[A] toInstance instance
+    bindClass[A] toInstance instance
 
-  final def provideSingleton[A <: AnyRef : ClassTag](provider: => A) =
+  final def bindClass[A <: AnyRef : ClassTag] =
+    myBinder bind implicitClass[A]
+
+  final def provideSingleton[A <: AnyRef : ClassTag](provider: ⇒ A) =
     provide[A](provider) in SINGLETON
 
-  final def provide[A <: AnyRef : ClassTag](provider: => A) =
+  final def provide[A <: AnyRef : ClassTag](provider: ⇒ A) =
     myBinder bind implicitClass[A] toProvider new Provider[A] { def get = provider }
 }
