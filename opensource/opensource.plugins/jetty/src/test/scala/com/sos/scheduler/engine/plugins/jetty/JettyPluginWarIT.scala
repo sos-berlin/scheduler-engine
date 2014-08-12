@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.google.common.io.Resources
 import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -9,6 +10,7 @@ import com.sos.scheduler.engine.plugins.jetty.test.{HttpVerbRestrictionTester, J
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.util.IDE
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -23,7 +25,7 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
   private lazy val verbTester = new HttpVerbRestrictionTester(webResource)
 
   override protected def onBeforeSchedulerActivation() {
-    (testEnvironment.configDirectory / "scheduler.xml").xml = generateSchedulerConfig(findWarFile())
+    (testEnvironment.configDirectory / "scheduler.xml").xml = generateSchedulerConfig(warFile())
   }
 
   "testwar.html" in {
@@ -41,7 +43,8 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
 
 private object JettyPluginWarIT {
   private val ContextPath = "/TESTWAR"
-  private val WarRelativePath = "engine/engine-testwar/target/engine-testwar.war"
+  private val WarFilename = "engine-testwar.war"
+  private val WarRelativePath = s"engine/engine-testwar/target/$WarFilename"
   private val logger = Logger(getClass)
 
   private def generateSchedulerConfig(warFile: File) =
@@ -59,7 +62,14 @@ private object JettyPluginWarIT {
       </config>
     </spooler>
 
-  private def findWarFile(): File = {
+  private def warFile(): File = {
+    if (IDE.isRunningUnderIDE)
+      forIdeFindWarFile()
+    else
+      new File(Resources.getResource(WarFilename).toURI)
+  }
+
+  private def forIdeFindWarFile(): File = {
     val workingDir = new File(".").getAbsoluteFile
     @tailrec
     def f(baseDir: File): File =
@@ -70,6 +80,7 @@ private object JettyPluginWarIT {
       }
     val result = f(workingDir).getCanonicalFile
     logger.debug(s"Found $result")
+    logger.warn(s"Using $WarFilename detected in directory ${result.getParent}")
     result
   }
 }
