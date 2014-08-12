@@ -19,6 +19,12 @@ object FileUtils {
         Files.write(o, delegate)
       }
 
+      def contentString: String = contentString(UTF_8)
+
+      def contentString_=(o: String) {
+        write(o, UTF_8)
+      }
+
       def contentString(encoding: Charset) =
         Files.toString(delegate, encoding)
 

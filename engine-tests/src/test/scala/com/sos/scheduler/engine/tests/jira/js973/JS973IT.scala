@@ -98,7 +98,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   "File_order_sink_module::create_instance_impl" in {
     val fileOrdersDir = Files.createTempDirectory("test")
     val orderFile = fileOrdersDir.toFile / "test.txt"
-    orderFile.write("test")
+    orderFile.contentString = "test"
     val jobChainPath = JobChainPath("/test-file-order")
     val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
     controller.getEventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
