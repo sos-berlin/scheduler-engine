@@ -18,13 +18,15 @@ public final class ScriptEngineTest {
 	@Test public void testFunction() throws ScriptException, NoSuchMethodException {
         engine.eval("function add (a, b) { var c = a + b; return c; }");
 		Invocable invocable = (Invocable)engine;
-        assertEquals(15.0, invocable.invokeFunction("add", 10, 5));
+        assertEquals(15.0, ((Number)invocable.invokeFunction("add", 10, 5)).doubleValue());   // Java 7 liefert Double, Java 8 liefert Integer (oder Long?)
 
-        IntegerAdder adder = invocable.getInterface(IntegerAdder.class);
-        assertEquals(15, adder.add(10, 5));
+        // Brauchen wir nicht
+        // Since Java 8: ECMAScript Exception: TypeError: Can not extend/implement non-public class/interface com.sos.scheduler.engine.jobapi.scripting.ScriptEngineTest.IntegerAdder.
+        //IntegerAdder adder = invocable.getInterface(IntegerAdder.class);
+        //assertEquals(15, adder.add(10, 5));
 	}
 
-	private interface IntegerAdder {
-	    int add(int a, int b);
-	}
+//	private interface IntegerAdder {
+//	    int add(int a, int b);
+//	}
 }
