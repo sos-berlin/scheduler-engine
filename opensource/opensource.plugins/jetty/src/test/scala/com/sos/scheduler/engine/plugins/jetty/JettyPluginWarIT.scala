@@ -22,7 +22,6 @@ import scala.annotation.tailrec
 final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester {
 
   override lazy val testConfiguration = TestConfiguration(testClass = getClass, testPackage = Some(Tests.testPackage))
-  private lazy val verbTester = new HttpVerbRestrictionTester(webResource)
 
   override protected def onBeforeSchedulerActivation() {
     (testEnvironment.configDirectory / "scheduler.xml").xml = generateSchedulerConfig(warFile())
@@ -37,7 +36,7 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
   }
 
   "HTTP Verbs" in {
-    verbTester.checkPathForVerbs(s"$ContextPath/TEST", GetServletMethods)
+    new HttpVerbRestrictionTester(webResource).checkPathForVerbs(s"$ContextPath/TEST", GetServletMethods)
   }
 }
 
@@ -69,6 +68,7 @@ private object JettyPluginWarIT {
       new File(Resources.getResource(WarFilename).toURI)
   }
 
+  /** IntelliJ kopiert nicht die engine-testwar.war, wie in der pom.xml definiert. Deshalb suchen wir sie selbst. */
   private def forIdeFindWarFile(): File = {
     val workingDir = new File(".").getAbsoluteFile
     @tailrec
