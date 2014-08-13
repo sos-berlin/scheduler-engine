@@ -395,9 +395,15 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         if (_configuration._task_id)
             parameters.push_back(object_server::Parameter("param", "-task-id=" + as_string(_configuration._task_id)));
         if (!log_filename().empty())
-             parameters.push_back(object_server::Parameter("param", "-log=" + log_categories_as_string() + " >+" + log_filename()));
+             parameters.push_back(object_server::Parameter("param", "-log=" + filtered_log_categories_as_string() + " >+" + log_filename()));
         parameters.push_back(object_server::Parameter("program", _spooler->_my_program_filename));
         return parameters;
+    }
+
+    private: string filtered_log_categories_as_string() const {
+        string s = log_categories_as_string();
+        string stderr_string = "stderr";   // Log-Kategorie zum Debuggen (der String ist zum Suchen)
+        return trim(replace_regex((" "+ s +" "), " "+ stderr_string +" ", " "));   // "stderr" nicht an API-Prozess, weil der das nur in eine Datei schreibt, statt auf die IDE-Konsole 
     }
 
     public: bool kill() {
