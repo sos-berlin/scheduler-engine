@@ -2035,50 +2035,47 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         result.appendChild( node->dom_element( document, modified_show ) );
     }
 
-    if( show_what._max_order_history  &&  db()->opened() )
+    if (show_what._max_order_history)
     {
-        xml::Element_ptr order_history_element = document.createElement( "order_history" );
+        xml::Element_ptr order_history_element = document.createElement("order_history");
 
-        try
-        {
-            Read_transaction ta ( db() );
+        try {
+            for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                Any_file sel = ta.open_result_set(S() <<
+                    "select %limit(" << show_what._max_order_history << ")"
+                    " `order_id`, `history_id`, `job_chain`, `start_time`, `end_time`, `title`, `state`, `state_text`"
+                    " from " << db()->_order_history_tablename <<
+                    " where `job_chain`=" << sql::quoted(path().without_slash()) <<
+                    " and `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
+                    " order by `history_id` desc",
+                    Z_FUNCTION);
 
-            Any_file sel = ta.open_result_set( S() <<
-                           "select %limit(" << show_what._max_order_history << ")"
-                           " `order_id`, `history_id`, `job_chain`, `start_time`, `end_time`, `title`, `state`, `state_text`"
-                           " from " << db()->_order_history_tablename <<
-                           " where `job_chain`=" << sql::quoted( path().without_slash() ) <<
-                             " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                           " order by `history_id` desc",
-                           Z_FUNCTION );
+                while (!sel.eof()) {
+                    Record record = sel.get_record();
 
-            while( !sel.eof() )
-            {
-                Record record = sel.get_record();
+                    ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
+                    order->set_id(record.as_string("order_id"));
+                    order->set_state(record.as_string("state"));
+                    order->set_state_text(record.as_string("state_text"));
+                    order->set_title(record.as_string("title"));
+                    order->_start_time = Time::of_utc_date_time(record.as_string("start_time"));
+                    order->_end_time = Time::of_utc_date_time(record.as_string("end_time"));
 
-                ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
-                order->set_id        ( record.as_string( "order_id"   ) );
-                order->set_state     ( record.as_string( "state"      ) );
-                order->set_state_text( record.as_string( "state_text" ) );
-                order->set_title     ( record.as_string( "title"      ) );
-                order->_start_time = Time::of_utc_date_time( record.as_string( "start_time" ) );
-                order->_end_time   = Time::of_utc_date_time( record.as_string( "end_time"   ) );
+                    xml::Element_ptr order_element = order->dom_element(document, show_what);
+                    order_element.setAttribute_optional("job_chain", record.as_string("job_chain"));
+                    order_element.setAttribute("history_id", record.as_string("history_id"));
 
-                xml::Element_ptr order_element = order->dom_element( document, show_what );
-                order_element.setAttribute_optional( "job_chain" , record.as_string( "job_chain"  ) );
-                order_element.setAttribute         ( "history_id", record.as_string( "history_id" ) );
-
-                order_history_element.appendChild( order_element );
+                    order_history_element.appendChild(order_element);
+                }
             }
+            catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_order_history_tablename, x), Z_FUNCTION); }
         }
-        catch( exception& x )
-        {
+        catch (exception& x) {
             order_history_element.appendChild( create_error_element( document, x, 0 ) );
         }
 
-        result.appendChild( order_history_element );
+        result.appendChild(order_history_element);
     }
-
 
     if( !_blacklist_map.empty() )
     {
