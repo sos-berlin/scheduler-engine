@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.scheduler.job.period.JobPeriodIT._
 import org.joda.time.Instant.now
-import org.joda.time.{Duration, Instant}
+import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -26,16 +26,18 @@ final class JobPeriodIT extends FreeSpec with ScalaSchedulerTest {
       sleep(durationUntilNextInterval(j.interval, (-900).ms))
       scheduler executeXml j.xmlElem
       sleep(duration)
-      counts(j.path) should be (n +- 1)
+      withClue(s"At ${now() toDateTime DateTimeZone.getDefault}: ") {
+        counts(j.path) should be (n +- 1)
+      }
       stopJob(j.path)
     }
   }
 
-  @EventHandler def handle(e: TaskStartedEvent) {
+  @EventHandler def handle(e: TaskStartedEvent): Unit = {
     counts(e.jobPath) += 1
   }
 
-  private def stopJob(jobPath: JobPath) {
+  private def stopJob(jobPath: JobPath): Unit = {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
   }
 }
@@ -56,7 +58,7 @@ private object JobPeriodIT {
   private val JobConfigs = immutable.Seq(
     new JobConfig {
       val path = JobPath("/test-shell")
-      val interval = 1.s
+      val interval = 2.s
       val xmlElem =
         <job name={path.name}>
           <script language="shell">exit 0</script>
@@ -67,7 +69,7 @@ private object JobPeriodIT {
     },
     new JobConfig {
       val path = JobPath("/test-api")
-      val interval = 8.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
+      val interval = 3.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
       val xmlElem =
         <job name={path.name}>
           <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
