@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.test
 
-import TestEnvironment._
 import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecursivly
-import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
+import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
 import com.sos.scheduler.engine.data.filebased.TypedPath
@@ -16,6 +14,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
+import com.sos.scheduler.engine.test.TestEnvironment._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
 
@@ -33,14 +32,14 @@ final class TestEnvironment(
   val databaseDirectory = directory
   private var isPrepared = false
 
-  private[test] def prepare() {
+  private[test] def prepare(): Unit = {
     if (!isPrepared) {
       prepareTemporaryConfigurationDirectory()
       isPrepared = true
     }
   }
 
-  private def prepareTemporaryConfigurationDirectory() {
+  private def prepareTemporaryConfigurationDirectory(): Unit = {
     makeDirectories(directory)
     removeDirectoryContentRecursivly(directory)
     makeDirectories(configDirectory)

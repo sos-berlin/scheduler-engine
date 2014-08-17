@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import TestSchedulerController._
-import _root_.scala.Some
 import _root_.scala.collection.JavaConversions._
 import _root_.scala.reflect.ClassTag
 import _root_.scala.sys.error
@@ -11,8 +9,7 @@ import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
@@ -20,7 +17,8 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.kernel.util.Hostware
-import com.sos.scheduler.engine.main.{SchedulerThreadController, CppBinaries, CppBinary, SchedulerState}
+import com.sos.scheduler.engine.main.{CppBinaries, CppBinary, SchedulerState, SchedulerThreadController}
+import com.sos.scheduler.engine.test.TestSchedulerController._
 import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinaries}
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -55,44 +53,42 @@ with EventHandlerAnnotated {
         c.testJdbcUrl(testName, environment.databaseDirectory)
     }
 
-  override def close() {
+  override def close(): Unit = {
     try delegate.close()
     finally super.close()
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
-  def activateScheduler(args: java.lang.Iterable[String]) {
+  def activateScheduler(args: java.lang.Iterable[String]): Unit = {
     startScheduler(iterableAsScalaIterable(args).toSeq: _*)
     waitUntilSchedulerIsActive()
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
-  def activateScheduler() {
+  def activateScheduler(): Unit =
     activateScheduler(Nil: _*)
-  }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
-  def activateScheduler(args: String*) {
+  def activateScheduler(args: String*): Unit = {
     startScheduler(args: _*)
     waitUntilSchedulerIsActive()
   }
 
-  def startScheduler(args: java.lang.Iterable[String]) {
+  def startScheduler(args: java.lang.Iterable[String]): Unit =
     startScheduler(iterableAsScalaIterable(args).toSeq)
-  }
 
-  def startScheduler(args: String*) {
+  def startScheduler(args: String*): Unit = {
     prepare()
     val extraOptions = nullToEmpty(System.getProperty(classOf[TestSchedulerController].getName + ".options"))
     val allArgs = Seq() ++
-        environment.standardArgs(cppBinaries, logCategories) ++
+        environment.standardArgs(cppBinaries, logCategories = logCategories) ++
         Splitter.on(",").omitEmptyStrings.split(extraOptions) ++
         testConfiguration.mainArguments ++
         args
     delegate.startScheduler(allArgs)
   }
 
-  def prepare() {
+  def prepare(): Unit = {
     if (!isPrepared) {
       registerEventHandler(this)
       environment.prepare()
@@ -110,7 +106,7 @@ with EventHandlerAnnotated {
   }
 
   /** Wartet, bis das Objekt [[com.sos.scheduler.engine.kernel.Scheduler]] verfügbar ist. */
-  def waitUntilSchedulerIsActive() {
+  def waitUntilSchedulerIsActive(): Unit = {
     val previous = _scheduler
     _scheduler = delegate.waitUntilSchedulerState(SchedulerState.active)
     if (_scheduler == null) {
@@ -120,7 +116,7 @@ with EventHandlerAnnotated {
     if (previous == null && testConfiguration.terminateOnError) checkForErrorLogLine()
   }
 
-  def waitForTermination(timeout: Duration) {
+  def waitForTermination(timeout: Duration): Unit = {
     val ok = tryWaitForTermination(timeout)
     if (!ok) {
       val x = new SchedulerRunningAfterTimeoutException(timeout)
@@ -132,14 +128,14 @@ with EventHandlerAnnotated {
     }
   }
 
-  private def automaticStart() {
+  private def automaticStart(): Unit = {
     if (!delegate.isStarted) {
       if (Thread.currentThread ne thread)  throw new IllegalStateException("TestSchedulerController.automaticStart() must be called in constructing thread")
       error("JobScheduler is not active yet")
     }
   }
 
-  private def checkForErrorLogLine() {
+  private def checkForErrorLogLine(): Unit = {
     val lastErrorLine = _scheduler.instance[PrefixLog].lastByLevel(SchedulerLogLevel.error)
     if (!lastErrorLine.isEmpty) error("Test terminated after error log line: " + lastErrorLine)
   }
@@ -162,13 +158,13 @@ with EventHandlerAnnotated {
   }
 
   @HotEventHandler
-  def handleEvent(e: ErrorLogEvent) {
+  def handleEvent(e: ErrorLogEvent): Unit = {
     if (testConfiguration.terminateOnError && !(e.codeOption exists testConfiguration.ignoreError) && !errorLogEventIsTolerated(e) && !testConfiguration.errorLogEventIsTolerated(e))
       terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
   }
 
   @EventHandler @HotEventHandler
-  def handleEvent(e: EventHandlerFailedEvent) {
+  def handleEvent(e: EventHandlerFailedEvent): Unit = {
     if (testConfiguration.terminateOnError) {
       logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
       terminateAfterException(e.getThrowable)
@@ -184,7 +180,7 @@ with EventHandlerAnnotated {
   /** Eine Exception in runnable beendet den Scheduler. */
   def newThread(runnable: Runnable) =
     new Thread {
-      override def run() {
+      override def run(): Unit = {
         try runnable.run()
         catch {
           case t: Throwable =>
@@ -201,7 +197,7 @@ with EventHandlerAnnotated {
     result
   }
 
-  private def registerEventHandler(o: EventHandlerAnnotated) {
+  private def registerEventHandler(o: EventHandlerAnnotated): Unit = {
     eventBus registerAnnotated o
     onClose { eventBus unregisterAnnotated o }
   }
@@ -254,7 +250,6 @@ object TestSchedulerController {
     }
 
   object implicits {
-    implicit def testTimeout =
-      TestTimeout (shortTimeout)
+    implicit def testTimeout = TestTimeout(shortTimeout)
   }
 }
