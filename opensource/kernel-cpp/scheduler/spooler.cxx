@@ -1514,7 +1514,7 @@ void Spooler::read_command_line_arguments()
         {
             if( opt.with_value( "sos.ini"          ) )  _sos_ini = opt.value();   // wurde in Hostware-main() bearbeitet
             else
-            if( opt.flag      ( "V"                ) )  ;   // wurde in sos_main() bearbeitet
+            if( opt.flag      ( 'V', "version"     ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.flag      ( "?"                ) )  ;   // wurde in sos_main() bearbeitet
             else
@@ -2036,13 +2036,8 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
 
-    {
-        string b = SchedulerJ::versionCommitHash();
-        if (!b.empty()) b = " (commit " + b + ")";
-        _log->info( message_string( "SCHEDULER-900", _version + b, _configuration_file_path, getpid() ) );
-    }
+    _log->info(message_string("SCHEDULER-900", (string)SchedulerJ::buildVersion(), _configuration_file_path, getpid()));
     _spooler_start_time = Time::now();
-
 
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
@@ -3779,6 +3774,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     {
         int     relevant_arg_count  = 0;
         bool    need_call_scheduler = true;
+        bool    print_version       = false;
         bool    call_scheduler      = false;
 #ifdef Z_WINDOWS
         bool    do_install_service  = false;
@@ -3827,7 +3823,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
-            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string );
+            if( opt.flag      ( 'V', "version"     ) )  need_call_scheduler = false, print_version = true, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string );
             else
             if( opt.flag      ( "?"                )
              || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string ), scheduler::print_usage();
@@ -3897,6 +3893,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                 if (opt.with_value("java-classpath")) java_classpath = opt.value();
                 else
+                if (opt.with_value("job-java-classpath")) {}
+                else
+                if (opt.with_value("log-dir")) {}
+                else
                   call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
                 if( !command_line.empty() )  command_line += " ";
@@ -3955,7 +3955,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
                 need_call_scheduler = false;
             }            
-
 
 #           ifdef Z_WINDOWS
                 if( service_name != "" ) 
@@ -4019,6 +4018,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 }
 
 #           endif
+            else
+            if (print_version) {
+                start_java(java_options, java_classpath);
+                fprintf(stdout, "JobScheduler engine %s\n", ((string)sos::scheduler::SchedulerJ::buildVersion()).c_str());
+            }
+
         }
     }
     catch( const exception& x )

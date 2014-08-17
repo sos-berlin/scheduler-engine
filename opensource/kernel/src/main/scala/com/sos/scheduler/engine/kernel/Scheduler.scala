@@ -31,7 +31,7 @@ import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
-import com.sos.scheduler.engine.kernel.util.MavenProperties
+import com.sos.scheduler.engine.kernel.util.{ResourcePath, MavenProperties}
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
@@ -237,7 +237,7 @@ with HasCloser {
 @ForCpp
 object Scheduler {
   private val logger = Logger(getClass)
-  private val mavenProperties = MavenProperties(getClass)
+  private val mavenProperties = new MavenProperties("com/sos/scheduler/engine/kernel/maven.properties")
 
   @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)

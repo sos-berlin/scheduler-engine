@@ -1,48 +1,48 @@
 package com.sos.scheduler.engine.kernel.util
 
+import com.google.common.io.Resources.getResource
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 
-final class MavenProperties(classResource: ClassResource) {
+final class MavenProperties(resourcePath: String) {
 
   private val properties: java.util.Properties =
-    autoClosing(classResource.getInputStream) { in =>
+    autoClosing(getResource(resourcePath).openStream()) { in ⇒
       val p = new java.util.Properties
       p.load(in)
       p
     }
 
-  def groupId: String =
-    apply("project.groupId")
+  override def toString = s"$groupId:$artifactId-$version $branchAndCommitSuffix"
 
-  def artifactId: String =
-    apply("project.artifactId")
+  def groupId = asString("project.groupId")
+
+  def artifactId = asString("project.artifactId")
 
   def buildVersion: String = {
-    val v = version
-    if (v endsWith "-SNAPSHOT") s"$v (git $versionCommitHash)"
-    else v
+    var result = version
+    if (version endsWith "-SNAPSHOT") result += s" $branchAndCommitSuffix"
+    result
   }
 
+  private def branchAndCommitSuffix = "(" +
+    (List("branch", versionBranch, versionCommitHash) filter { _.nonEmpty } mkString " ") +
+    s", built $buildDateTime)"
+
   def version: String =
-    apply("project.version") match {
+    asString("project.version") match {
       case "${project.version}" ⇒ "(IDE development)"
       case o ⇒ o
     }
 
-  def versionCommitHash: String =
-    apply("project.versionCommitHash")
+  def versionCommitHash = asString("sourceVersion.commitHash")
 
-  def apply(name: String): String =
+  def versionBranch = asString("sourceVersion.branch")
+
+  def buildDateTime: DateTime =
+    ISODateTimeFormat.dateTime.parseDateTime(asString("maven.build.timestamp"))
+
+  private def asString(name: String): String =
     Option(properties.getProperty(name)) getOrElse { throw new NoSuchElementException(s"Unknown property '$name'") }
-
-  override def toString =
-    s"$groupId/$artifactId-$version ($versionCommitHash)"
-}
-
-
-object MavenProperties {
-  private val resourceSimpleName = "maven.properties"
-
-  def apply(clas: Class[_]): MavenProperties =
-    new MavenProperties(new ClassResource(clas, resourceSimpleName))
 }
