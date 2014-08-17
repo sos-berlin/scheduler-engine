@@ -144,9 +144,11 @@ void log_start( const char* filename_ )
     {
         if( const char* gt = strchr( filename, '>' ) )
         {
-            string log_categories ( filename, gt - filename );
-            sos_static_ptr()->_log_categories = log_categories;
-            zschimmer::static_log_categories.set_multiple( log_categories );
+            string log_categories = trim(string(filename, gt - filename));
+            if (!log_categories.empty()) {
+                sos_static_ptr()->_log_categories = log_categories;
+                zschimmer::static_log_categories.set_multiple( log_categories );
+            }
             filename = gt + 1;
             while( filename[0] == ' ' )  filename++;
         }

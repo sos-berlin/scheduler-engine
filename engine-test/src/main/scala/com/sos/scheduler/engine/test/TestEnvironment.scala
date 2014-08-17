@@ -48,7 +48,7 @@ final class TestEnvironment(
     TestEnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer)
   }
 
-  private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Iterable[String] =
+  private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Seq[String] = {
     List(
       cppBinaries.file(CppBinary.exeFilename).getPath,
       s"-job-java-options=$jobJavaOptions",
@@ -57,10 +57,13 @@ final class TestEnvironment(
       s"-ini=$iniFile",
       s"-log-level=debug9",
       s"-log-dir=${logDirectory.getPath}",
-      s"-log=$logCategories> +${schedulerLog.getPath}",   // "+" (append) in case some ExtraScheduler has been started before
-      "-ip-address=127.0.0.1") ++
-    (if (OperatingSystem.isUnix) Some("-env=" + libraryPathEnv(cppBinaries.directory)) else None) ++
-    Some(configDirectory.getPath)
+      s"-log=${logCategories.trim}>+${schedulerLog.getPath}",   // "+" (append) in case some ExtraScheduler has been started before
+      "-ip-address=127.0.0.1",
+      if (OperatingSystem.isUnix) "-env=" + libraryPathEnv(cppBinaries.directory) else "",
+      configDirectory.getPath
+    ) filter { _.nonEmpty }
+  }
+
 
   def sosIniFile =
     new File(configDirectory, "sos.ini").getAbsoluteFile
