@@ -14,26 +14,6 @@
     <inceptionYear>2011</inceptionYear>
 
     <build>
-        <testResources>
-            <testResource>
-                <!-- Standard Wiederholen -->
-                <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
-                <directory>${project.build.testSourceDirectory}</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </testResource>
-            <testResource>
-                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
-                <directory>src/test/scala</directory>
-                <excludes>
-                    <exclude>**/*.scala</exclude>
-                </excludes>
-            </testResource>
-        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.scala-tools</groupId>

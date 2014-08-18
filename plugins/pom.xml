@@ -14,22 +14,6 @@
     <inceptionYear>2011</inceptionYear>
     <description>plugins of the scheduler kernel.</description>
 
-    <build>
-        <testResources>
-            <testResource>
-                <!-- Standard wiederholen -->
-                <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
-                <directory>${project.build.testSourceDirectory}</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </testResource>
-        </testResources>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
