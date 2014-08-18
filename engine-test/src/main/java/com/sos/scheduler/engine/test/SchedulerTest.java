@@ -14,6 +14,7 @@ import java.io.IOException;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
     public static final Duration shortTimeout = TestSchedulerController.shortTimeout();
+    public static final Duration errorOnlyTimeout = TestSchedulerController.errorOnlyTimeout();
 
     private final TestSchedulerController controller;
 

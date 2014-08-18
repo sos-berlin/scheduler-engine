@@ -215,6 +215,8 @@ with EventHandlerAnnotated {
 
 object TestSchedulerController {
   final val shortTimeout = 15.s
+  /** Long timeout elapses in case of error only. */
+  final val errorOnlyTimeout = 30.s
   private val logger = Logger(getClass)
 
   def apply(testConfiguration: TestConfiguration): TestSchedulerController = {
