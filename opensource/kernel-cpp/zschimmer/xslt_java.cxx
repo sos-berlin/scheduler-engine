@@ -52,7 +52,7 @@ void Xslt_parameters::allocate(int)
 
 //----------------------------------------------------------------------Xslt_parameters::set_string
 
-void Xslt_parameters::set_string(int i, const string& name, const string& value)
+void Xslt_parameters::set_string(const string& name, const string& value)
 {
     _hashMapJ.put(StringJ(name), StringJ(value));
 }

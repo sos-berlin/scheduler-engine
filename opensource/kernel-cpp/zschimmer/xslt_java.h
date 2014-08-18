@@ -21,7 +21,7 @@ struct Xslt_parameters : Non_cloneable
                                ~Xslt_parameters             ();
 
     void                        allocate                    ( int size );
-    void                        set_string                  ( int i, const string& name, const string& value );
+    void set_string(const string& name, const string& value);
 
   private:
     friend                      struct Xslt_stylesheet;

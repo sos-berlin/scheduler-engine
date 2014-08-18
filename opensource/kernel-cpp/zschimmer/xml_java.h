@@ -285,6 +285,10 @@ struct Element_ptr : Node_ptr
 
     string                      text                        () const;
     string                      trimmed_text                () const;                               // Erste und letzte Leerzeile werden abgeschnitten (nach <tag> und vor </tag>)
+    
+    operator const ElementJ&() const { 
+        return _elementJ; 
+    }
 
 private:
     ElementJ                   _elementJ;
