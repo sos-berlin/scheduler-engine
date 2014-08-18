@@ -13,9 +13,9 @@ final class StandardCallQueue extends PoppableCallQueue {
   private var closed = false
 
   def add[A](o: TimedCall[A]) {
-    logger debug s"Enqueue at ${o.atString} $o"
+    if (o.epochMillis == 0) logger.trace(s"Enqueue $o") else logger.debug(s"Enqueue at ${o.atString} $o")
     synchronized {
-      if (closed)  sys.error(s"CallQueue is closed. '$o' is rejected")
+      if (closed) sys.error(s"CallQueue is closed. '$o' is rejected")
       val i = positionAfter(o.epochMillis)
       if (i < queue.size) queue.insert(i, o)
       else queue.append(o)  // Scala 2.10.0: queue.insert(queue.size, x) geht in eine Schleife

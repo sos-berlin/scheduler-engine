@@ -18,7 +18,7 @@ trait TimedCall[A] extends Callable[A] {
     new Instant(epochMillis)
 
   private[async] final def onApply() {
-    logger debug s"Calling $toString"
+    logger.trace(s"Calling $toString")
     val result = Try(call()) match {
       case Failure(t) if t.getClass.getName == "org.scalatest.exceptions.TestFailedException" ⇒ throw t
       case o ⇒ o
@@ -27,7 +27,7 @@ trait TimedCall[A] extends Callable[A] {
   }
 
   private[async] final def onCancel() {
-    logger debug s"Cancel $toString"
+    logger.debug(s"Cancel $toString")
     callOnComplete(Failure(CancelledException()))
   }
 
