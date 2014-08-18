@@ -7,14 +7,13 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
@@ -43,7 +42,7 @@ public class JS498RhinoOrderIT extends SchedulerTest {
         controller().activateScheduler();
         File resultFile = prepareResultFile();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination(errorOnlyTimeout);
         resultMap = getResultMap(resultFile);
         checkScriptOnlyJob();
         checkJobObjects();

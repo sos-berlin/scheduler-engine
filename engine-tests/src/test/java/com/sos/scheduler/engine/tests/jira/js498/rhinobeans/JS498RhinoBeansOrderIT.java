@@ -1,19 +1,19 @@
 package com.sos.scheduler.engine.tests.jira.js498.rhinobeans;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.common.system.Bitness;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
@@ -29,24 +29,22 @@ import static org.junit.Assert.assertTrue;
  * @author Stefan Schädlich
  * @version 1.0 - 16.12.2011 13:39:41
  */
-public class JS498RhinoBeansOrderIT extends SchedulerTest {
+public final class JS498RhinoBeansOrderIT extends SchedulerTest {
 
     private static final String jobchain = "chain";
 
     private final CommandBuilder util = new CommandBuilder();
-    private HashMap<String,String> resultMap;
+    private Map<String,String> resultMap;
 
     @Test
     public void test() throws IOException {
-//        if (Bitness.is32Bit()) {    // SpiderMonkey stellen wir nur für 32bit bereit
-            controller().activateScheduler();
-            File resultFile = prepareResultFile();
-            controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
-            controller().waitForTermination(shortTimeout);
-            resultMap = getResultMap(resultFile);
-            checkJobObjects();
-            checkJobFunctions();
-//        }
+        controller().activateScheduler();
+        File resultFile = prepareResultFile();
+        controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
+        controller().waitForTermination(errorOnlyTimeout);
+        resultMap = getResultMap(resultFile);
+        checkJobObjects();
+        checkJobFunctions();
     }
 
     private File prepareResultFile() {
@@ -56,8 +54,8 @@ public class JS498RhinoBeansOrderIT extends SchedulerTest {
         return resultFile;
     }
 
-    private HashMap<String,String> getResultMap(File resultFile) throws IOException {
-        HashMap<String,String> result = new HashMap<String, String>();
+    private static Map<String,String> getResultMap(File resultFile) throws IOException {
+        Map<String,String> result = new HashMap<>();
         List<String> lines = Files.readLines(resultFile, Charset.defaultCharset());
         for(String line : lines) {
             String[] arr = line.split("=");
@@ -69,7 +67,7 @@ public class JS498RhinoBeansOrderIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(OrderFinishedEvent e)  {
+    public void handleOrderEnd(OrderFinishedEvent e) {
         controller().terminateScheduler();
     }
 

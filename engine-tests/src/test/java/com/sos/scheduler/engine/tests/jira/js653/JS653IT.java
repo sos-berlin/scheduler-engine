@@ -18,7 +18,7 @@ import static java.lang.Thread.sleep;
  * <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a>
  */
 public final class JS653IT extends SchedulerTest {
-    private static final long idleTimeoutMs = 5*1000;
+    private static final long idleTimeoutMs = 10*1000;
     private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
             OrderIdAndState.of("simpleShouldRun", "state.job1"),
             OrderIdAndState.of("simpleWithStateShouldRun", "state.job1"),
