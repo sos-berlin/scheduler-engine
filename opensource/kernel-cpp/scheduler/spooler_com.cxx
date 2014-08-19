@@ -805,7 +805,6 @@ void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log
 {
     result->allocate( int_cast(_map.size()) );
 
-    int i = 0;
     for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
     {
         if( Com_variable* v = it->second )
@@ -815,8 +814,7 @@ void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log
 
             try
             {
-                result->set_string( i, name, value );
-                i++;  // Nur, wenn kein Fehler aufgetreten ist (z.B. wegen " und ' im String).
+                result->set_string(name, value);
             }
             catch( exception& x )
             {
