@@ -812,8 +812,7 @@ void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log
             string name  = string_from_bstr   ( v->_name );
             string value = string_from_variant( v->_value );
 
-            try
-            {
+            try {
                 result->set_string(name, value);
             }
             catch( exception& x )

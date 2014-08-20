@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job_chain
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+        xmlns:TestPlugin="http://example.com/TestPlugin" xsi:schemaLocation="http://example.com/TestPlugin TestPlugin.xsd">
+    <job_chain_node state="100" job="/test-a"/>
+    <job_chain_node state="200" job="/test-a">
+        <TestPlugin:clone_order TestPlugin:job_chain="/test-b"/>
+    </job_chain_node>
+    <job_chain_node state="300" job="/test-a"/>
+    <job_chain_node.end state="end"/>
+</job_chain>

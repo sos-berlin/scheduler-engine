@@ -3,14 +3,13 @@ package com.sos.scheduler.engine.kernel.plugin
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.ScalaCollections._
-import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventBus}
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.eventbus.{EventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.log.PrefixLog
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
-import com.sos.scheduler.engine.kernel.scheduler.Subsystem
+import com.sos.scheduler.engine.kernel.scheduler.{SchedulerException, Subsystem}
 import javax.inject.{Inject, Singleton}
 import scala.collection.{immutable, mutable}
-import scala.sys.error
 
 @Singleton
 final class PluginSubsystem @Inject private(
@@ -65,7 +64,7 @@ extends Subsystem with HasCommandHandlers {
   }
 
   def activate() {
-    for (p <- pluginInstances
+    for (p <- pluginAdapters
          if pluginConfigurationMap(p.pluginClassName).activationMode eq ActivationMode.activateOnStart)
       p.activate()
   }
@@ -83,6 +82,12 @@ extends Subsystem with HasCommandHandlers {
   private[plugin] def pluginConfiguration(className: String) =
     pluginConfigurationMap.getOrElse(className, throw new SchedulerException(s"Unknown plugin '$className'"))
 
-  private def pluginInstances =
+  def pluginsByXmlNamespace(s: String): immutable.Seq[NamespaceXmlPlugin] =
+    (plugins collect { case o: NamespaceXmlPlugin if o.xmlNamespace == s ⇒ o }).toImmutableSeq
+
+  private def pluginAdapters =
     pluginAdapterMap.values
+
+  private def plugins =
+    pluginAdapterMap.values map { _.pluginInstance }
 }

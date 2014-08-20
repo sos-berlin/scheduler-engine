@@ -13,6 +13,7 @@
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
+namespace javaproxy { namespace org { namespace w3c { namespace dom { struct Element; }}}}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
@@ -50,6 +51,7 @@ struct Node : ::zschimmer::javabridge::proxy_jobject< Node >, ::javaproxy::java:
     }
   public:
 
+    void processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

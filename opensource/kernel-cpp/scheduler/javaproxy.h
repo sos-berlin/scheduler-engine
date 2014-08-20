@@ -21,7 +21,10 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__EndNode.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__JobChain.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__JobNode.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__NestedJobChainNode.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__Node.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderSubsystem.h"
@@ -45,8 +48,13 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpReq
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::Order OrderJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderSubsystem OrderSubsystemJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::EndNode EndNodeJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobChain JobChainJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobNode JobNodeJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::NestedJobChainNode NestedJobChainNodeJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Node NodeJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 

@@ -71,6 +71,8 @@ struct Order : Com_order,
                                ~Order                   ();
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Order>::java_sister(); }
+    OrderJ&                     typed_java_sister           ()                                      { return _typed_java_sister; }
+
 
     // Abstract_scheduler_object
 
@@ -318,6 +320,8 @@ struct Order : Com_order,
     Order_subsystem_impl*       order_subsystem         () const;
     Com_log*                    com_log                 () const                                    { return _com_log; }
 
+    void db_start_order_history();
+    void on_occupied();
 
   private:
     Time                        first_start_time();
@@ -411,6 +415,7 @@ struct Order : Com_order,
     ptr<http::Operation>       _http_operation;
     ptr<Com_log>               _com_log;                // COM-Hülle für Log
     bool                       _ignore_max_orders;
+    OrderJ                     _typed_java_sister;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -536,6 +541,7 @@ struct Node : Com_job_chain_node,
                                 Node                        ( Job_chain*, const Order::State& state, Type );
 
     virtual jobject             java_sister                 () = 0;
+    virtual NodeJ&              typed_java_sister           () = 0;
 
     virtual void                close                       ();
     string                      obj_name                    () const;
@@ -622,8 +628,13 @@ struct End_node : Node, javabridge::has_proxy<End_node>
                                 End_node                    ( Job_chain* job_chain, const Order::State& state );
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<End_node>::java_sister(); }
+    
+    EndNodeJ& typed_java_sister() { 
+        return _typed_java_sister; 
+    }
 
-
+    private:
+    EndNodeJ _typed_java_sister;
 };
 
 //----------------------------------------------------------------------job_chain::Order_queue_node
@@ -665,6 +676,7 @@ struct Job_node : Order_queue_node,
                                ~Job_node                    ();
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job_node>::java_sister(); }
+    JobNodeJ&                   typed_java_sister           ()                                      { return _typed_java_sister; }
 
     void                        close                       ();
     bool                        initialize                  ();
@@ -697,6 +709,7 @@ struct Job_node : Order_queue_node,
     Job*                       _job;
     bool                       _on_error_setback;
     bool                       _on_error_suspend;
+    JobNodeJ                   _typed_java_sister;
 };
 
 //-----------------------------------------------------------------job_chain::Nested_job_chain_node
@@ -711,6 +724,7 @@ struct Nested_job_chain_node : Node, javabridge::has_proxy<Nested_job_chain_node
                                ~Nested_job_chain_node       ();
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Nested_job_chain_node>::java_sister(); }
+    NestedJobChainNodeJ&        typed_java_sister           ()                                      { return _typed_java_sister; }
 
     void                        close                       ();
     bool                        initialize                  ();
@@ -728,6 +742,7 @@ struct Nested_job_chain_node : Node, javabridge::has_proxy<Nested_job_chain_node
     Absolute_path              _nested_job_chain_path; 
     reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
   //Job_chain_set              _using_job_chains_set;
+    NestedJobChainNodeJ        _typed_java_sister;
 };
 
 //-----------------------------------------------------------------------------job_chain::Sink_node

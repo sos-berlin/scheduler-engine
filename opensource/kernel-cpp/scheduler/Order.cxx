@@ -61,6 +61,7 @@ Order::Order( Standing_order_subsystem* subsystem )
     Com_order(this),
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     javabridge::has_proxy<Order>(subsystem->spooler()),
+    _typed_java_sister(java_sister()),
     _zero_(this+1)
 {
     _com_log = new Com_log;
@@ -336,6 +337,28 @@ void Order::occupy_for_task( Task* task, const Time& now )
         order_subsystem()->count_started_orders();
         report_event_code(orderTouchedEvent, java_sister());
     }
+}
+
+
+void Order::on_occupied() {
+    _is_success_state = true;
+    _end_state_reached = false;
+    _task_error = NULL;
+}
+
+
+void Order::db_start_order_history() {
+    for (Retry_transaction ta (db()); ta.enter_loop(); ta++) try {
+        bool new_in_order_history = !_history_id;
+        if (new_in_order_history) {
+            _history_id = db()->get_order_history_id(&ta);
+        }
+        db_insert_order_step_history_record(&ta);
+        if (new_in_order_history) {
+            db_insert_order_history_record(&ta);
+        }
+        ta.commit(Z_FUNCTION);
+    } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_order_history_tablename + " or " + db()->_order_step_history_tablename, x), Z_FUNCTION); }
 }
 
 //------------------------------------------------------------Order::db_insert_order_history_record
@@ -2542,6 +2565,9 @@ Job_chain* Order::job_chain_for_api() const
 
 void Order::postprocessing( Order_state_transition state_transition )
 {
+    //if (!job_chain_path().empty()) {
+    //    report_event(CppEventFactoryJ::newOrderStepEndedEvent(job_chain_path(), string_id(), state_transition), java_sister());
+    //}
     _is_success_state = state_transition == post_success;
 
     Job*      last_job          = _task? _task->job() : NULL;

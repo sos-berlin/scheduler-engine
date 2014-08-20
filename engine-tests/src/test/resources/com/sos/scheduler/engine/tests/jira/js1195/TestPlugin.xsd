@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema
+        targetNamespace="http://example.com/TestPlugin"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified" attributeFormDefault="qualified"
+>
+    <xsd:attribute name="test" type="xsd:string"/>
+
+    <xsd:element name="clone_order">
+        <xsd:complexType>
+            <xsd:attribute name="job_chain" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

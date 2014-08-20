@@ -1265,7 +1265,8 @@ Absolute_path Node::job_chain_path() const
 End_node::End_node(Job_chain* job_chain, const Order::State& state) 
 : 
     Node(job_chain, state, n_end), 
-    javabridge::has_proxy<End_node>(job_chain->spooler()) 
+    javabridge::has_proxy<End_node>(job_chain->spooler()),
+    _typed_java_sister(java_sister())
 {}
 
 //----------------------------------------------------------------Order_queue_node::why_dom_element
@@ -1346,9 +1347,16 @@ bool Order_queue_node::is_ready_for_order_processing()
 
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
-    if (is_ready_for_order_processing())
-        return order_queue()->fetch_and_occupy_order(occupying_task, _job_chain->untouched_is_allowed(), now, cause);
-    else
+    if (!is_ready_for_order_processing())
+        return NULL;
+    else 
+    if (Order* order = order_queue()->fetch_and_occupy_order(occupying_task, _job_chain->untouched_is_allowed(), now, cause)) {
+        order->db_start_order_history();
+        order->assert_task(Z_FUNCTION);
+        order->on_occupied();
+        return order;
+    }
+    else 
         return NULL;
 }
 
@@ -1372,7 +1380,8 @@ Job_node::Job_node( Job_chain* job_chain, const Order::State& state, const Absol
     Order_queue_node( job_chain, state, n_job ),
     javabridge::has_proxy<Job_node>(job_chain->spooler()),
     _zero_(this+1),
-    _job_path( job_path )
+    _job_path( job_path ),
+    _typed_java_sister(java_sister())
 {
     if( job_path == "" )  assert(0), z::throw_xc( Z_FUNCTION, "no job path" );
 }
@@ -1559,7 +1568,8 @@ Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order:
     Node( job_chain, state, n_job_chain ),
     javabridge::has_proxy<Nested_job_chain_node>(spooler()),
     _nested_job_chain_path( job_chain_path ),
-    _nested_job_chain(this)
+    _nested_job_chain(this),
+    _typed_java_sister(java_sister())
 {
 }
 
@@ -2186,6 +2196,7 @@ Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_,
     }
 
     _node_list.push_back( +node );
+    node->typed_java_sister().processConfigurationDomElement(element);
 
     return node;
 }
@@ -4316,29 +4327,6 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     }
 
     _has_tip_for_new_order = false;
-
-    if( order ) 
-    {
-        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-        {
-            bool new_in_order_history = !order->_history_id;
-            if (new_in_order_history) {
-                order->_history_id = db()->get_order_history_id(&ta);
-            }
-            order->db_insert_order_step_history_record( &ta );
-            if (new_in_order_history) {
-                order->db_insert_order_history_record(&ta);
-            }
-            ta.commit( Z_FUNCTION );
-        }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_order_history_tablename + " or " + db()->_order_step_history_tablename, x ), Z_FUNCTION ); }
-
-        order->assert_task( Z_FUNCTION );
-        order->_is_success_state = true;
-        order->_end_state_reached = false;
-        order->_task_error = NULL;
-    }
-
     return order;
 }
 

@@ -6,6 +6,7 @@
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
+#include "org__w3c__dom__Element.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
 
@@ -14,6 +15,7 @@ struct Node__class : ::zschimmer::javabridge::Class
     Node__class(const string& class_name);
    ~Node__class();
 
+    ::zschimmer::javabridge::Method const _processConfigurationDomElement__Lorg_w3c_dom_Element_2__method;
 
     static const ::zschimmer::javabridge::class_factory< Node__class > class_factory;
 };
@@ -22,7 +24,7 @@ const ::zschimmer::javabridge::class_factory< Node__class > Node__class::class_f
 
 Node__class::Node__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-{}
+    ,_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method(this, "processConfigurationDomElement", "(Lorg/w3c/dom/Element;)V"){}
 
 Node__class::~Node__class() {}
 
@@ -41,6 +43,13 @@ Node::~Node() { assign_(NULL); }
 
 
 
+
+void Node::processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    Node__class* cls = _class.get();
+    cls->_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method.call(get_jobject(), parameter_list);
+}
 
 
 ::zschimmer::javabridge::Class* Node::java_object_class_() const { return _class.get(); }
