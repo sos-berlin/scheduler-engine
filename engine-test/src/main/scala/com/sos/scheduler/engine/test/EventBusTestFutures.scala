@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.concurrent.{Promise, Future, Await}
+import _root_.scala.concurrent.{Await, Future, Promise}
 import _root_.scala.reflect.ClassTag
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.eventbus.{EventSubscription, EventBus}
+import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
+import java.util.concurrent.TimeoutException
 import org.joda.time.Duration
 
 object EventBusTestFutures {
@@ -13,7 +15,10 @@ object EventBusTestFutures {
     implicit class RichEventBus(val delegate: EventBus) extends AnyVal {
 
       def awaitingKeyedEvent[E <: KeyedEvent](key: E#Key)(f: => Unit)(implicit e: ClassTag[E], timeout: TestTimeout): E =
-        awaitingEvent2[E](predicate = _.key == key, timeout = timeout.duration)(f)(e)
+        try awaitingEvent2[E](predicate = _.key == key, timeout = timeout.duration)(f)(e)
+        catch {
+          case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, key=$key")
+        }
 
       def awaitingEvent[E <: Event](predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E], timeout: TestTimeout): E =
         awaitingEvent2[E](predicate = predicate, timeout = timeout.duration)(f)(e)
@@ -21,7 +26,10 @@ object EventBusTestFutures {
       private def awaitingEvent2[E <: Event](timeout: Duration, predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E]): E = {
         val future = eventFuture[E](predicate = predicate)(e)
         f
-        Await.result(future, timeout)
+        try Await.result(future, timeout)
+        catch {
+          case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for event ${implicitClass[E].getName}")
+        }
       }
 
       /** @return Future, der mit dem nächsten KeyedEvent E erfolgreich endet. */
