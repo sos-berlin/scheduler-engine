@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import static com.google.common.base.Charsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -102,6 +103,16 @@ public final class XmlUtilsTest {
     }
 
     @Test public void testChildElements() {
+        testChildElements("<root><a/>x<b><bb/></b>x<c/></root>", "a", "b", "c");
+        testChildElements("<root>xx<a/>x<b><bb/></b>x<c/>xx</root>", "a", "b", "c");
+    }
+
+    @Test public void testnodeListToSeq() {
+        Element e = XmlUtils.loadXml("<a><b/><c/></a>").getDocumentElement();
+        scala.collection.Seq<Node> i = XmlUtils.nodeListToSeq(e.getChildNodes());
+        assertThat(i.size(), equalTo(2));
+        assertThat(i.apply(0).getNodeName(), equalTo("b"));
+        assertThat(i.apply(1).getNodeName(), equalTo("c"));
         testChildElements("<root><a/>x<b><bb/></b>x<c/></root>", "a", "b", "c");
         testChildElements("<root>xx<a/>x<b><bb/></b>x<c/>xx</root>", "a", "b", "c");
     }

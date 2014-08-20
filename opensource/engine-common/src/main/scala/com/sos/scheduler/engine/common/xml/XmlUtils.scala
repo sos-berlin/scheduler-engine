@@ -19,6 +19,7 @@ import javax.xml.xpath.{XPathConstants, XPathFactory}
 import org.w3c.dom.{Document, Element, Node, NodeList}
 import org.xml.sax.{ErrorHandler, InputSource, SAXParseException}
 import scala.collection.JavaConversions._
+import scala.collection.immutable
 import scala.sys.error
 
 @ForCpp object XmlUtils {
@@ -247,4 +248,7 @@ import scala.sys.error
 
   def xmlBytesToString(bytes: Array[Byte]): String =
     xml.XML.load(new ByteArrayInputStream(bytes)).toString()
+
+  def nodeListToSeq(nodeList: NodeList): immutable.Seq[Node] =
+    for (i ← 0 until nodeList.getLength) yield nodeList.item(i)
 }
