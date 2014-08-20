@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaCollections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{NodeKey, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
@@ -44,6 +44,8 @@ with OrderPersistence {
 
   def id: OrderId =
     OrderId(cppProxy.string_id)
+
+  def nodeKey = NodeKey(jobChainPath, state)
 
   def state: OrderState =
     OrderState(cppProxy.string_state)

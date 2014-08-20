@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1195
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax._
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderState, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEndedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.order.Order
@@ -30,7 +30,7 @@ extends Plugin with NamespaceXmlPlugin {
   override def onActivate(): Unit = {
     eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
       case EventSourceEvent(e: OrderStepEndedEvent, order: Order) ⇒
-        for (conf ← nodeConfigurations.get(NodeKey(order.jobChainPath, order.state))) {
+        for (conf ← nodeConfigurations.get(order.nodeKey)) {
           val command = OrderCommand(
             OrderKey(conf.jobChainPath, order.id),
             parameters = order.parameters.toMap)
@@ -42,9 +42,9 @@ extends Plugin with NamespaceXmlPlugin {
   def attachPluginXmlConfigurable(obj: PluginXmlConfigurable, element: dom.Element) =
     obj match {
       case jobNode: JobNode ⇒
-        val nodeKey = NodeKey(jobNode.jobChainPath, jobNode.orderState)
+        val nodeKey = jobNode.nodeKey
         logger.debug(s"Attaching XML of $nodeKey")
-        val orderStepEndConfiguration = ScalaXMLEventReader.parseDocument(domElementToStaxSource(element))(parseWithReader)
+        val orderStepEndConfiguration = ScalaXMLEventReader.parseDocument(domElementToStaxSource(element))(parse)
         require(!(nodeConfigurations contains nodeKey))
         nodeConfigurations += nodeKey → orderStepEndConfiguration
     }
@@ -52,26 +52,21 @@ extends Plugin with NamespaceXmlPlugin {
   def detachPluginXmlConfigurable(obj: PluginXmlConfigurable) =
     obj match {
       case jobNode: JobNode ⇒
-        val nodeKey = NodeKey(jobNode.jobChainPath, jobNode.orderState)
-        logger.debug(s"Detaching $nodeKey")
-        nodeConfigurations.remove(nodeKey)
+        logger.debug(s"Detaching ${jobNode.nodeKey}")
+        nodeConfigurations -= jobNode.nodeKey
     }
 }
 
 private object TestPlugin {
   private val logger = Logger(getClass)
 
-  private def parseWithReader(eventReader: ScalaXMLEventReader): NodeConfiguration = {
+  private def parse(eventReader: ScalaXMLEventReader): NodeConfiguration = {
     import eventReader._
-
-    val jobChainPath =
-      parseElement("clone_order") {
-        JobChainPath(attributeMap("job_chain"))
-      }
+    val jobChainPath = parseElement("clone_order") {
+      JobChainPath(attributeMap("job_chain"))
+    }
     NodeConfiguration(jobChainPath)
   }
 
   private case class NodeConfiguration(jobChainPath: JobChainPath)
-
-  private case class NodeKey(jobChainPath: JobChainPath, state: OrderState)
 }

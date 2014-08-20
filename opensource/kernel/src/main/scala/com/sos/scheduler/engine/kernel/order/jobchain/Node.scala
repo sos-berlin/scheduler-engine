@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.xml.XmlUtils.nodeListToSeq
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{NodeKey, JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeOverview}
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
 import com.sos.scheduler.engine.kernel.plugin.{NamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
@@ -43,6 +43,8 @@ abstract class Node extends Sister with PluginXmlConfigurable {
     new JobChainNodePersistentState(jobChainPath, orderState, action)
 
   def overview: NodeOverview
+
+  final def nodeKey = NodeKey(jobChainPath, orderState)
 
   final def jobChainPath =
     JobChainPath(cppProxy.job_chain_path)
