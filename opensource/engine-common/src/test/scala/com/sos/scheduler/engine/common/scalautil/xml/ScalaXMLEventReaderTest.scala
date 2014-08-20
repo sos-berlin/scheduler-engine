@@ -65,6 +65,21 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
     parseString(testXmlString)(parseA) shouldEqual A(B(), C(x = "xx", o = "DEFAULT", List(D(), D())))
   }
 
+//  "parseElementAsXmlString" in {
+//    val testXmlString = <A><B b="b">text<C/></B><B/></A>.toString()
+//    assertResult("""<B b="b">text<C/></B>, <B/>""") {
+//      parseString(testXmlString) { eventReader ⇒
+//        import eventReader._
+//        parseElement("A") {
+//          val children = forEachStartElement {
+//            case "B" ⇒ parseElementAsXmlString()
+//          }
+//          children("B") mkString " ,"
+//        }
+//      }
+//    }
+//  }
+
   "Detects extra attribute" in {
     val testXmlString = <A><B/><C x="xx" optional="oo" z="zz"><D/><D/></C></A>.toString()
     intercept[WrappedException] { parseString(testXmlString)(parseA) }

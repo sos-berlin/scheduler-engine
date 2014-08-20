@@ -2,20 +2,25 @@ package com.sos.scheduler.engine.common.scalautil.xml
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{cast, implicitClass, _}
+import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.RichStartElement
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader._
 import java.util.NoSuchElementException
 import javax.xml.stream.events._
 import javax.xml.stream.{Location, XMLEventReader, XMLInputFactory}
-import javax.xml.transform.Source
+import javax.xml.transform.stax.StAXSource
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.{Result, Source, TransformerFactory}
+import org.scalactic.Requirements._
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
-final class ScalaXMLEventReader(val delegate: XMLEventReader) extends AutoCloseable {
+final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable {
 
+  private lazy val transformerFactory = TransformerFactory.newInstance()
   private var atStart = true
   private var _simpleAttributeMap: SimpleAttributeMap = null
 
@@ -102,6 +107,14 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) extends AutoClosea
     e
   }
 
+//  private[xml] def parseElementAsXmlString(): String =
+//    writingString { writer ⇒
+//      parseElementInto(new StreamResult(writer))
+//    }
+//
+//  private def parseElementInto(result: Result): Unit =
+//  Liest bis zum Stream-Ende statt nur bis zum Endetag:  transformerFactory.newTransformer().transform(new StAXSource(xmlEventReader), result)
+
   def requireStartElement(name: String) = {
     require(peek.asStartElement.getName.getLocalPart == name)
   }
@@ -135,13 +148,15 @@ final class ScalaXMLEventReader(val delegate: XMLEventReader) extends AutoClosea
   }
 
   def attributeMap = {
-    if (_simpleAttributeMap == null) throw new IllegalStateException("No attributes possible here, at" + locationString)
+    requireState(_simpleAttributeMap ne null, s"No attributes possible here, at $locationString")
     _simpleAttributeMap
   }
 
   def locationString = locationToString(peek.getLocation)
 
   def peek = delegate.peek
+
+  def xmlEventReader: XMLEventReader = delegate
 }
 
 
