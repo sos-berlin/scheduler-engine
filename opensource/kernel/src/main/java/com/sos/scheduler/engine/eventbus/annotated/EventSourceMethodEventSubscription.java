@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.EventSourceEvent;
-import com.sos.scheduler.engine.data.event.Event;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -22,13 +21,13 @@ public class EventSourceMethodEventSubscription extends MethodEventSubscription 
         checkMethodParameterCount(method, 1, 2);
     }
 
-    public final boolean eventSourceMatches(EventSourceEvent e) {
-        return eventSourceClass.isAssignableFrom(e.getEventSource().getClass());
+    public final boolean eventSourceMatches(EventSourceEvent<?> e) {
+        return eventSourceClass.isAssignableFrom(e.eventSource().getClass());
     }
 
     @Override protected final void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException {
-        EventSourceEvent e = (EventSourceEvent)event;
-        getMethod().invoke(getAnnotatedObject(), e.getEvent(), e.getEventSource());
+        EventSourceEvent<?> e = (EventSourceEvent<?>)event;
+        getMethod().invoke(getAnnotatedObject(), e.event(), e.eventSource());
     }
 
     @Override public String toString() {
