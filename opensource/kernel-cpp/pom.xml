@@ -290,6 +290,11 @@
             <artifactId>enginedoc-common</artifactId>
             <version>${enginedoc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
