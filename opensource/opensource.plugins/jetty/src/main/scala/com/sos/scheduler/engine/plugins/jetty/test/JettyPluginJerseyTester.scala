@@ -30,10 +30,12 @@ trait JettyPluginJerseyTester extends HasCloser {
     val uri = new URI(uriString)
     logger.debug(s"HTTP GET $uri")
     val r = webResource.uri(uri).accept(Accept.toArray: _*)
-    if (implicitClass[A] eq classOf[xml.Elem])
-      (xml.XML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
-    else
-      r.get(implicitClass[A])
+    val result = if (implicitClass[A] eq classOf[xml.Elem])
+        (xml.XML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
+      else
+        r.get(implicitClass[A])
+    logger.debug("HTTP GET $uri => $result")
+    result
   }
 
 //  def post[A : ClassTag](uri: String, content: AnyRef, `Content-Type`: MediaType = null, Accept: Iterable[MediaType] = Nil): A = {
