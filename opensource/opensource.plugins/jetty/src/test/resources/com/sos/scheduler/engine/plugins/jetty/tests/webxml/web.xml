@@ -26,6 +26,10 @@
             <param-name>resourceBase</param-name>
             <param-value>{{SCHEDULER_WORK_URL}}</param-value>
         </init-param>
+        <init-param>
+            <param-name>dirAllowed</param-name>
+            <param-value>false</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>TEST</servlet-name>
