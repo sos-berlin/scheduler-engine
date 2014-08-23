@@ -8,10 +8,6 @@
     <servlet>
         <servlet-name>Default</servlet-name>
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-        <init-param>
-            <param-name>dirAllowed</param-name>
-            <param-value>false</param-value>
-        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>Default</servlet-name>
@@ -25,10 +21,6 @@
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>{{SCHEDULER_WORK_URL}}</param-value>
-        </init-param>
-        <init-param>
-            <param-name>dirAllowed</param-name>
-            <param-value>false</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

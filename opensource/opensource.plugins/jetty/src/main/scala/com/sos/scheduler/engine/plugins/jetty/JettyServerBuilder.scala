@@ -31,7 +31,6 @@ object JettyServerBuilder {
       webAppContext.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
       if (!servletContextHandlerHasWebXml(webAppContext)) {
         webAppContext.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
-        //TODO init-parameter dirAllowed=false
       }
       webAppContext
     }
@@ -69,13 +68,14 @@ object JettyServerBuilder {
       result
     }
 
-    def setStandardsIn(handler: ServletContextHandler, contextPath: String) {
+    def setStandardsIn(handler: ServletContextHandler, contextPath: String): Unit = {
+      handler.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false")
       handler.setContextPath(contextPath)
       for (s <- config.loginServiceOption) {
         handler.setSecurityHandler(newConstraintSecurityHandler(s, List(Config.administratorRoleName)))
       }
-      handler.addFilter(classOf[VerbRestrictionFilter], "/*", null)   // This is redundant security. Jetty itself seams to filter TRACE
-      def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
+      handler.addFilter(classOf[VerbRestrictionFilter], "/*", null)
+      def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*): Unit = {
         handler.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
       }
       addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))

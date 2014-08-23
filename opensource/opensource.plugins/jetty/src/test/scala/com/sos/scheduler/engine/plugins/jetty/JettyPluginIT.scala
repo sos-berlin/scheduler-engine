@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginIT._
 import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester.{DefaultServletMethods, GetServletMethods}
-import com.sos.scheduler.engine.plugins.jetty.test.{HttpVerbRestrictionTester, JettyPluginJerseyTester}
+import com.sos.scheduler.engine.plugins.jetty.test.{DirectoryListingTests, HttpVerbRestrictionTester, JettyPluginJerseyTester}
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
+import com.sos.scheduler.engine.test.TestEnvironment
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -11,13 +13,22 @@ import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JettyPluginIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester {
+final class JettyPluginIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester with DirectoryListingTests {
 
-  override lazy val testConfiguration = TestConfiguration(testClass = getClass, testPackage = Some(Tests.testPackage))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    testPackage = Some(Tests.testPackage),
+    cppSettings = Map(CppSettingName.htmlDir → testDirectory.getPath))
   private lazy val verbTester = new HttpVerbRestrictionTester(webResource)
 
-  for ((path, verbs) <- PathsVerbs) s"HTTP OPTIONS/TRACE $path" in {
-    verbTester.checkPathForVerbs(path, verbs)
+  "HTTP OPTIONS and TRACE" - {
+    for ((path, verbs) <- PathsVerbs) path in {
+      verbTester.checkPathForVerbs(path, verbs)
+    }
+  }
+
+  "Directory access" - {
+    addDirectoryListingTests(TestEnvironment.ConfigSubdirectoryName)
   }
 }
 

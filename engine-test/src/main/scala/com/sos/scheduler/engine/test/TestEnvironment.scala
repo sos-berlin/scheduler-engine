@@ -25,7 +25,7 @@ final class TestEnvironment(
     nameMap: Map[String, String],
     fileTransformer: ResourceToFileTransformer) {
 
-  val configDirectory = new File(directory, configSubdir)
+  val configDirectory = new File(directory, ConfigSubdirectoryName)
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
@@ -92,7 +92,7 @@ final class TestEnvironment(
 object TestEnvironment {
   val schedulerId = new SchedulerId("test")
   private val jobJavaOptions = "-Xms5m -Xmx10m"
-  private val configSubdir = "config"
+  val ConfigSubdirectoryName = "config"
 
   def apply(testConfiguration: TestConfiguration, directory: File) =
     new TestEnvironment(
