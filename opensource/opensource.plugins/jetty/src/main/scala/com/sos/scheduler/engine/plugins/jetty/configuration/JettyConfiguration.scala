@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration._
 import java.io.File
 import java.net.URL
 import org.eclipse.jetty.security.LoginService
-import org.eclipse.jetty.server.Handler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import scala.collection.immutable
 
