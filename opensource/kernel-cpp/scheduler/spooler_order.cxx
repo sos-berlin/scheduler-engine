@@ -365,7 +365,7 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
     result << order_queue->db_where_expression();
 
     Time t = order_queue->next_announced_distributed_order_time();
-    assert( t );
+    assert(!t.is_zero());
 
     string before = !t.is_never()? t.db_string( time::without_ms ) 
                                    : never_database_distributed_next_time;
