@@ -2,15 +2,12 @@ package com.sos.scheduler.engine.common.scalautil.xml
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{cast, implicitClass, _}
-import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.RichStartElement
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.{RichStartElement, getCommonXMLInputFactory}
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader._
 import java.util.NoSuchElementException
 import javax.xml.stream.events._
 import javax.xml.stream.{Location, XMLEventReader, XMLInputFactory}
-import javax.xml.transform.stax.StAXSource
-import javax.xml.transform.stream.StreamResult
-import javax.xml.transform.{Result, Source, TransformerFactory}
+import javax.xml.transform.Source
 import org.scalactic.Requirements._
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
@@ -20,15 +17,12 @@ import scala.util.{Failure, Success, Try}
 
 final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable {
 
-  private lazy val transformerFactory = TransformerFactory.newInstance()
   private var atStart = true
   private var _simpleAttributeMap: SimpleAttributeMap = null
 
   updateAttributeMap()
 
-  def close() {
-    delegate.close()
-  }
+  def close() = delegate.close()
 
   def parseDocument[A](body: ⇒ A): A = {
     eat[StartDocument]
@@ -53,14 +47,14 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
     result
   }
 
-  @deprecated("Use attribute")
-  def forEachAttribute(f: PartialFunction[(String, String), Unit]) {
+  @deprecated("Use attribute", "1.8")
+  def forEachAttribute(f: PartialFunction[(String, String), Unit]): Unit = {
     def callF(nameValue: (String, String)) = {
       try f.applyOrElse(nameValue, { o: (String, String) ⇒ sys.error(s"Unexpected XML attribute ${o._1}") })
       catch {
         case x: Exception ⇒
           val (name, value) = nameValue
-          throw new RuntimeException(s"Error in XML attribute $name='$value'>: $x", x)
+          throw new RuntimeException(s"Unparsable XML attribute $name='$value': $x", x)
       }
       attributeMap.get(nameValue._1)  // Mark as read
     }
@@ -84,7 +78,7 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
     val results = mutable.Buffer[(String, A)]()
 
     @tailrec
-    def g() {
+    def g(): Unit = {
       peek match {
         case e: StartElement ⇒
           val o = callF(e)
@@ -92,7 +86,7 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
           g()
         case e: Characters ⇒
           next()
-          require(e.getData.trim.isEmpty)
+          require(e.getData.trim.isEmpty, s"Character data not expected here: '${e.getData.trim.take(20)}'")
           g()
         case e: EndElement ⇒ mutable.Buffer[(String, A)]()
       }
@@ -107,6 +101,11 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
     e
   }
 
+//  import javax.xml.transform.{Result, TransformerFactory}
+//  import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
+//  import javax.xml.transform.stax.StAXSource
+//  import javax.xml.transform.stream.StreamResult
+//  private lazy val transformerFactory = TransformerFactory.newInstance()
 //  private[xml] def parseElementAsXmlString(): String =
 //    writingString { writer ⇒
 //      parseElementInto(new StreamResult(writer))
@@ -138,7 +137,7 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
     delegate.nextEvent()
   }
 
-  private def updateAttributeMap() {
+  private def updateAttributeMap(): Unit = {
     if (_simpleAttributeMap != null) {
       _simpleAttributeMap.requireAllAttributesRead()
     }
@@ -162,10 +161,10 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
 
 object ScalaXMLEventReader {
 
-  def parseString[A](xml: String, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parse: ScalaXMLEventReader ⇒ A): A =
+  def parseString[A](xml: String, inputFactory: XMLInputFactory = getCommonXMLInputFactory())(parse: ScalaXMLEventReader ⇒ A): A =
     parseDocument(StringSource(xml), inputFactory)(parse)
 
-  def parseDocument[A](source: Source, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parse: ScalaXMLEventReader ⇒ A): A =
+  def parseDocument[A](source: Source, inputFactory: XMLInputFactory = getCommonXMLInputFactory())(parse: ScalaXMLEventReader ⇒ A): A =
     autoClosing(new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))) { reader ⇒
       reader.eat[StartDocument]
       val result = parse(reader)
@@ -173,7 +172,7 @@ object ScalaXMLEventReader {
       result
     }
 
-  def parse[A](source: Source, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parseEvents: ScalaXMLEventReader ⇒ A): A = {
+  def parse[A](source: Source, inputFactory: XMLInputFactory = getCommonXMLInputFactory())(parseEvents: ScalaXMLEventReader ⇒ A): A = {
     autoClosing(new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))) { reader ⇒
       parseEvents(reader)
     }
@@ -208,7 +207,7 @@ object ScalaXMLEventReader {
 
     override def default(o: String) = throw new NoSuchElementException(s"XML attribute '$o' is required")
 
-    def requireAllAttributesRead() {
+    def requireAllAttributesRead(): Unit = {
       val names = keySet -- readAttributes
       if (names.nonEmpty) throw new UnparsedAttributesException(names.toImmutableSeq)
     }
@@ -248,7 +247,7 @@ object ScalaXMLEventReader {
   }
 
   final class UnparsedAttributesException private[xml](val names: immutable.Seq[String]) extends RuntimeException {
-    override def getMessage = s"Unknown XML attributes " + (names mkString ", ")
+    override def getMessage = s"Unknown XML attributes " + (names map { "'"+ _ +"'" } mkString ", ")
   }
 
   final class WrappedException(override val getMessage: String, override val getCause: Exception) extends RuntimeException

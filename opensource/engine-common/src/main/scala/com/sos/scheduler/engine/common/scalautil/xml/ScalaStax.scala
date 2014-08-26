@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.scalautil.xml
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.{ScalaThreadLocal, Logger}
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXmlBytes
 import java.io.ByteArrayInputStream
 import javax.xml.stream.XMLInputFactory
@@ -11,6 +11,7 @@ import javax.xml.transform.stream.StreamSource
 import scala.collection.JavaConversions._
 import org.w3c.dom.Element
 import scala.util.control.NonFatal
+import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 
 object ScalaStax {
   private val logger = Logger(getClass)
@@ -36,7 +37,7 @@ object ScalaStax {
         factory = Some(newDomSource)
         try {
           val result = newDomSource(element)
-          XMLInputFactory.newInstance().createXMLEventReader(result)
+          getCommonXMLInputFactory().createXMLEventReader(result)
           result
         }
         catch {
@@ -55,9 +56,15 @@ object ScalaStax {
         }
       }
 
-
     private def newDomSource(element: Element) = new DOMSource(element)
 
     private def workAroundNewDomSource(element: Element) = new StreamSource(new ByteArrayInputStream(toXmlBytes(element)))
   }
+
+  private val xmlInputFactoryTL = threadLocal { XMLInputFactory.newInstance() }
+
+  /**
+   * Fast XMLInputFactory provider - returned XMLInputFactory is mutable, do not change it.
+   */
+  def getCommonXMLInputFactory(): XMLInputFactory = xmlInputFactoryTL
 }

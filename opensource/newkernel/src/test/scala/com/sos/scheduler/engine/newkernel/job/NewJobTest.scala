@@ -1,21 +1,21 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import NewJobTest._
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent, TaskEndedEvent}
-import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventHandler, SchedulerEventBus}
-import javax.xml.stream.XMLInputFactory
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.getCommonXMLInputFactory
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.eventbus.{EventHandler, EventHandlerAnnotated, SchedulerEventBus}
+import com.sos.scheduler.engine.newkernel.job.NewJobTest._
+import com.sos.scheduler.engine.newkernel.utils.Service.withService
+import com.sos.scheduler.engine.newkernel.utils.ThreadService
 import org.joda.time.DateTimeZone
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.newkernel.utils.ThreadService
-import com.sos.scheduler.engine.newkernel.utils.Service.withService
 
 @RunWith(classOf[JUnitRunner])
 class NewJobTest extends FunSuite with EventHandlerAnnotated {
-  lazy val inputFactory = XMLInputFactory.newInstance()
+  lazy val inputFactory = getCommonXMLInputFactory()
   val callQueue = new StandardCallQueue
   val callRunner = new CallRunner(callQueue)
 

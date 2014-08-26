@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.common.scalautil.xml
 
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax._
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
-import javax.xml.stream.XMLInputFactory
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -17,6 +16,6 @@ final class ScalaStaxTest extends FreeSpec {
   "domElementToStaxSource" in {
     val domElement = loadXml("<a/>").getDocumentElement
     for (i <- 1 to 2)
-      XMLInputFactory.newInstance().createXMLEventReader(domElementToStaxSource(domElement))
+      getCommonXMLInputFactory().createXMLEventReader(domElementToStaxSource(domElement))
   }
 }
