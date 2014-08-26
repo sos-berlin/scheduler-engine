@@ -2,12 +2,19 @@ package com.sos.scheduler.engine.common.scalautil
 
 import scala.language.implicitConversions
 
+abstract class ScalaThreadLocal[A] {
+  def apply(): A
+}
+
 object ScalaThreadLocal {
-  def threadLocal[A](f: => A) = new MyThreadLocal[A] {
-    override def initialValue = f
-  }
+  def threadLocal[A](f: ⇒ A): ScalaThreadLocal[A] =
+    new ScalaThreadLocal[A] {
+      private val threadLocal = new ThreadLocal[A] {
+        override def initialValue = f
+      }
 
-  implicit def get[A](o: MyThreadLocal[A]): A = o.get
+      def apply(): A = threadLocal.get
+    }
 
-  abstract class MyThreadLocal[A] extends ThreadLocal[A]
+  implicit def get[A](o: ScalaThreadLocal[A]): A = o.apply()
 }
