@@ -11,23 +11,22 @@ GCC_VERSION_MINOR := $(shell gcc -dumpversion | cut -f2 -d.)
 GCC_VERSION_PATCH := $(shell gcc -dumpversion | cut -f3 -d.)
 GCC_HAS_PRECOMPILED_HEADERS := $(shell expr $(GCC_VERSION_MAJOR) '>=' 4 '&' $(GCC_VERSION_MINOR) '>=' 4)
 
-CWARNINGS += -Wall
+HIDDEN_CWARNINGS += -Wall
 CWARNINGS += -Wno-sign-compare
 CCPPWARNINGS += -Wno-deprecated
-#CCPPWARNINGS += -Wno-non-virtual-dtor
 HIDDEN_CCPPWARNINGS += -Wno-reorder
 HIDDEN_CCPPWARNINGS += -Wno-parentheses
 
 ifeq ($(O_DIR),Debug)
-CDEBUG     = -g -D_DEBUG
+CDEBUG = -D_DEBUG
 else
-CWARNINGS += -Wno-long-long
-CWARNINGS += -Wuninitialized
+HIDDEN_CWARNINGS += -Wno-long-long
+HIDDEN_CWARNINGS += -Wuninitialized
 endif
 
-CFLAGS    += -g
-CFLAGS    += -MD
-CFLAGS    += -fPIC
+HIDDEN_CFLAGS += -g
+HIDDEN_CFLAGS += -MD
+HIDDEN_CFLAGS += -fPIC
 CFLAGS    += $(CWARNINGS)
 
 ifeq ($(shell expr $(GCC_VERSION_MAJOR) '>=' 4 '&' $(GCC_VERSION_MINOR) '>=' 6),1)
@@ -64,5 +63,5 @@ endif
 ifeq ($(O_DIR),Debug)
 CFLAGS += $(CDEBUG)
 else
-CFLAGS += -DNDEBUG $(COPTIMIZE)
+CFLAGS += $(COPTIMIZE)
 endif

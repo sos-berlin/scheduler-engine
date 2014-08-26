@@ -411,7 +411,7 @@ void Directory::merge_new_entries( const Directory* other )
 
 void Directory::assert_ordered_list()
 {
-#   ifndef NDEBUG   // Ordnung prüfen
+#   ifdef _DEBUG
     {
         Entry_list::const_iterator a = _ordered_list.begin();
         if( a != _ordered_list.end() )  

@@ -197,10 +197,6 @@ Has_includes::~Has_includes()
         remove_includes();
     }
     catch( exception& x )  { Z_LOG( Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
-
-    //#ifndef NDEBUG
-    //    if( _configuration )  _configuration->_include_register->assert_no_has_includes( this );
-    //#endif
 }
 
 //-------------------------------------------------------------------Has_includes::register_include

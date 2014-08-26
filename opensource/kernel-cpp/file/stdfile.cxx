@@ -10,10 +10,6 @@
 #include "precomp.h"
 #include "../kram/sysdep.h"
 
-//#ifndef NDEBUG
-//#   define NDEBUG
-//#endif
-
 #if !defined _MSC_VER
 #   include <values.h>                 // MAXINT
 #endif
