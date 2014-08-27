@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test.scala
 
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.kernel.Scheduler
 import scala.reflect.ClassTag
-import scala.xml
 import scala.xml.{NodeBuffer, NodeSeq, Elem}
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 
@@ -30,7 +30,7 @@ object SchedulerTestImplicits {
 
   case class Result(string: String) {
     lazy val elem: xml.Elem =
-      xml.XML.loadString(string)
+      SafeXML.loadString(string)
 
     lazy val answer =
       elem \ "answer"
