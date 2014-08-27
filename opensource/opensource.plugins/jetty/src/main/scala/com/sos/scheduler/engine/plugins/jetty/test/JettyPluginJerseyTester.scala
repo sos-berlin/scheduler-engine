@@ -10,6 +10,7 @@ import java.net.URI
 import javax.ws.rs.core.MediaType
 import scala.reflect.ClassTag
 import java.io.Reader
+import scala.util.Try
 
 /**
  * @author Joacim Zschimmer
@@ -28,14 +29,15 @@ trait JettyPluginJerseyTester extends HasCloser {
 
   def get[A : ClassTag](uriString: String, Accept: Iterable[MediaType] = Nil): A = {
     val uri = new URI(uriString)
-    logger.debug(s"HTTP GET $uri")
     val r = webResource.uri(uri).accept(Accept.toArray: _*)
-    val result = if (implicitClass[A] eq classOf[xml.Elem])
+    val result = Try {
+      if (implicitClass[A] eq classOf[xml.Elem])
         (xml.XML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
       else
         r.get(implicitClass[A])
-    logger.debug("HTTP GET $uri => $result")
-    result
+    }
+    logger.debug(s"HTTP GET $uri => $result")
+    result.get
   }
 
 //  def post[A : ClassTag](uri: String, content: AnyRef, `Content-Type`: MediaType = null, Accept: Iterable[MediaType] = Nil): A = {
