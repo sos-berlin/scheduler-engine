@@ -26,7 +26,10 @@ import scala.sys.error
 
   private val logger = Logger(getClass)
   private val documentBuilder = threadLocal {
-    val factory = DocumentBuilderFactory.newInstance() sideEffect { _ setNamespaceAware true }
+    val factory = DocumentBuilderFactory.newInstance() sideEffect { o ⇒
+      o.setNamespaceAware(true)
+      XxeVulnerability inhibitFor o
+    }
     factory.newDocumentBuilder() sideEffect { _ setErrorHandler new ErrorHandler {
       def warning(exception: SAXParseException) = logger.debug(exception.toString, exception)
       def error(exception: SAXParseException) = throw exception

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.database
 
 import EntitiesIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
@@ -28,7 +29,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.xml.XML
 
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
@@ -111,15 +111,15 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       'startTime (null),
       'parameterXml (null)
     )
-    XML.loadString(e(0).xml) shouldEqual <task force_start="no"/>
+    SafeXML.loadString(e(0).xml) shouldEqual <task force_start="no"/>
     assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be before testStartTime=$testStartTime")
     assert(e(0).enqueueTime.getTime <= now().getMillis, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be after now")
 
-    XML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
+    SafeXML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
     new DateTime(e(1).startTime) shouldEqual new DateTime(2029, 10, 11, 22, 33, 44)
 
-    XML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
-    XML.loadString(e(2).parameterXml) shouldEqual <sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>
+    SafeXML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
+    SafeXML.loadString(e(2).parameterXml) shouldEqual <sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>
     new DateTime(e(2).startTime) shouldEqual new DateTime(2029, 11, 11, 11, 11, 11)
   }
 
