@@ -15,7 +15,7 @@ object ScalaXmls {
       }
     }
 
-    implicit class RichElem(val delegate: scala.xml.Elem) extends AnyVal {
+    implicit class RichElem(val delegate: xml.Elem) extends AnyVal {
       def toBytes: Array[Byte] = toBytes(xmlDecl = true)
 
       def toBytes(encoding: Charset = UTF_8, xmlDecl: Boolean = true): Array[Byte] = {
@@ -23,7 +23,7 @@ object ScalaXmls {
         if (xmlDecl) {
           b.append(s"<?xml version='1.0' encoding='${encoding.name}'?>")
         }
-        scala.xml.Utility.serialize(delegate, sb = b)
+        xml.Utility.serialize(delegate, sb = b)
         b.toString().getBytes(encoding)
       }
     }

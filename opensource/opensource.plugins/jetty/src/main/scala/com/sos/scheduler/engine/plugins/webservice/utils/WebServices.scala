@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.plugins.webservice.utils
 import com.google.common.base.Charsets._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants._
 import javax.ws.rs.core.{MediaType, Variant, CacheControl}
-import scala.xml.Elem
 
 object WebServices {
   private val nullLocale: java.util.Locale = null
@@ -16,7 +15,7 @@ object WebServices {
     result
   }
 
-  def wrapXmlResponse(e: Seq[Elem]) =
+  def wrapXmlResponse(e: Seq[xml.Elem]) =
     <scheduler>{e}</scheduler>
 
   def stripFromEnd(s: String, end: String) =

@@ -15,7 +15,6 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 import scala.collection.JavaConversions._
-import scala.xml.Elem
 
 /**
  * @author Joacim Zschimmer
@@ -90,7 +89,7 @@ final class SchedulerConfigurationAdapterTest extends FreeSpec {
 }
 
 private object SchedulerConfigurationAdapterTest {
-  private def toDomElement(e: Elem) = loadXml(e.toString()).getDocumentElement
+  private def toDomElement(e: xml.Elem) = loadXml(e.toString()).getDocumentElement
 
   private def mockSchedulerConfiguration(httpPort: Option[Int] = None): SchedulerConfiguration =
     mock[SchedulerConfiguration] sideEffect { o ⇒

@@ -11,7 +11,6 @@ import org.joda.time.{DateTimeZone, LocalTime, DateTime}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import scala.xml.Elem
 
 @RunWith(classOf[JUnitRunner])
 final class TimeZoneIT extends FunSuite with ScalaSchedulerTest {
@@ -31,7 +30,7 @@ final class TimeZoneIT extends FunSuite with ScalaSchedulerTest {
   private def fetchCalendarEntries() = {
     val tomorrow = now plusDays 1
     val calendar = scheduler executeXml <show_calendar what="jobs orders" from={dateTimeToXml(now)} before={dateTimeToXml(tomorrow)}/>
-    calendar.elem \ "answer" \ "calendar" \ "at" map { node => CalendarEntry(node.asInstanceOf[Elem]) }
+    calendar.elem \ "answer" \ "calendar" \ "at" map { node => CalendarEntry(node.asInstanceOf[xml.Elem]) }
   }
 }
 
@@ -52,10 +51,10 @@ private object TimeZoneIT {
     }
   }
 
-  private case class CalendarEntry(obj: SchedulerObjectId, at: DateTime, elem: Elem)
+  private case class CalendarEntry(obj: SchedulerObjectId, at: DateTime, elem: xml.Elem)
 
   private object CalendarEntry {
-    def apply(atElem: Elem) = {
+    def apply(atElem: xml.Elem) = {
       def atDateTime = DateTime.parse(atElem.attribute("at").get.text)
       atElem.attribute("job") match {
         case Some(a) => new CalendarEntry(JobPath(a.text), atDateTime, atElem)

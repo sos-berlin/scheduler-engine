@@ -15,7 +15,6 @@ import org.junit.Assert._
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import scala.collection.mutable
-import scala.xml.Elem
 import scala.xml.Utility.trim
 
 /** Ticket JS-803.
@@ -40,12 +39,12 @@ final class JS803IT extends SchedulerTest {
     }
   }
 
-  private def addOrder(orderKey: OrderKey, orderElemFunction: (OrderKey, DateTime) => Elem) {
+  private def addOrder(orderKey: OrderKey, orderElemFunction: (OrderKey, DateTime) => xml.Elem) {
     execute(orderElemFunction(orderKey, startTime))
     expectedOrders.add(orderKey.id)
   }
 
-  private def execute(command: Elem) {
+  private def execute(command: xml.Elem) {
     logger.debug("{}", trim(command))
     controller.scheduler.executeXml(command)
   }
