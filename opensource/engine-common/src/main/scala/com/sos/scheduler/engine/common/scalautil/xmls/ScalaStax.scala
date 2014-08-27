@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.common.scalautil.xml
+package com.sos.scheduler.engine.common.scalautil.xmls
 
 import com.sos.scheduler.engine.common.scalautil.{ScalaThreadLocal, Logger}
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXmlBytes

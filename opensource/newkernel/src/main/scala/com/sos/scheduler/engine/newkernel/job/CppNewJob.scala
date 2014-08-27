@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.newkernel.job
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{TaskId, TaskPersistentState}

@@ -1,9 +1,9 @@
-package com.sos.scheduler.engine.common.scalautil.xml
+package com.sos.scheduler.engine.common.scalautil.xmls
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{cast, implicitClass, _}
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.{RichStartElement, getCommonXMLInputFactory}
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.{RichStartElement, getCommonXMLInputFactory}
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
 import java.util.NoSuchElementException
 import javax.xml.stream.events._
 import javax.xml.stream.{Location, XMLEventReader, XMLInputFactory}
@@ -181,7 +181,7 @@ object ScalaXMLEventReader {
   private def locationToString(o: Location) =
     (Option(o.getSystemId) ++ Option(o.getPublicId)).flatten.mkString(":") + ":" + o.getLineNumber +":" + o.getColumnNumber
 
-  final class SimpleAttributeMap private[xml](pairs: TraversableOnce[(String, String)]) extends mutable.HashMap[String, String] {
+  final class SimpleAttributeMap private[xmls](pairs: TraversableOnce[(String, String)]) extends mutable.HashMap[String, String] {
     this ++= pairs
     private val readAttributes = mutable.HashSet[String]()
     readAttributes.sizeHint(size)
@@ -213,7 +213,7 @@ object ScalaXMLEventReader {
     }
   }
 
-  final class ConvertedElementMap[A] private[xml](pairs: immutable.IndexedSeq[(String, A)]) {
+  final class ConvertedElementMap[A] private[xmls](pairs: immutable.IndexedSeq[(String, A)]) {
 
     def one[B <: A : ClassTag]: B =
       option[B] getOrElse { throw new NoSuchElementException(s"No element for type ${implicitClass[B].getSimpleName}") }
@@ -246,7 +246,7 @@ object ScalaXMLEventReader {
       pairs collect { case (k, v) if k == elementName ⇒ v }
   }
 
-  final class UnparsedAttributesException private[xml](val names: immutable.Seq[String]) extends RuntimeException {
+  final class UnparsedAttributesException private[xmls](val names: immutable.Seq[String]) extends RuntimeException {
     override def getMessage = s"Unknown XML attributes " + (names map { "'"+ _ +"'" } mkString ", ")
   }
 

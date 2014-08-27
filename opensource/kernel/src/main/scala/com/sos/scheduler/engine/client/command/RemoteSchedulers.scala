@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.command
 
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.message.MessageCode
 import javax.xml.transform.Source
 import scala.collection.immutable

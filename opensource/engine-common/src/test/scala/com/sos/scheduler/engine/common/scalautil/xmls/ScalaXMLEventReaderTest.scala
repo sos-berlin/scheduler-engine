@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.common.scalautil.xml
+package com.sos.scheduler.engine.common.scalautil.xmls
 
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader._
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReaderTest._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReaderTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

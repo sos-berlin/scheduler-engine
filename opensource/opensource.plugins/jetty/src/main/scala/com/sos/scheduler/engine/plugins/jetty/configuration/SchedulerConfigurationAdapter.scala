@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.plugins.jetty.configuration
 import com.google.common.base.Splitter
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax.domElementToStaxSource
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, TcpPortNumber, WarEntry, WebAppContextConfiguration}
 import com.sos.scheduler.engine.plugins.jetty.configuration.PluginLoginService.Login

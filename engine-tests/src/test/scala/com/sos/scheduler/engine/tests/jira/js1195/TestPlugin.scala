@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1195
 
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax._
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEndedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand

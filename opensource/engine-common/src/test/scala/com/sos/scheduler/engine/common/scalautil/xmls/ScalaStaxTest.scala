@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.common.scalautil.xml
+package com.sos.scheduler.engine.common.scalautil.xmls
 
-import com.sos.scheduler.engine.common.scalautil.xml.ScalaStax._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

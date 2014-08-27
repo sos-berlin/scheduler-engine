@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.common.scalautil.xml
+package com.sos.scheduler.engine.common.scalautil.xmls
 
 import RichScalaXML.RichElem
 import org.junit.runner.RunWith
