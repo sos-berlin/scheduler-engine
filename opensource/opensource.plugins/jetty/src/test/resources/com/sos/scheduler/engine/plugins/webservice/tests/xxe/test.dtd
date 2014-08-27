@@ -1,0 +1,2 @@
+<!ENTITY % three SYSTEM "file:///">
+<!ENTITY % two "<!ENTITY &#37; four SYSTEM 'file:///%three;'>">
