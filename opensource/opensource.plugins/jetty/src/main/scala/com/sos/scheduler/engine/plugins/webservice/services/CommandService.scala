@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import CommandService._
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor
 import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
@@ -54,7 +55,7 @@ object CommandService {
   private def commandIsReadOnly(command: String) = ReadOnlyCommandPrefixes exists s"$command ".startsWith
 
   private def requireValidXml(xmlString: String) {
-    try xml.XML.loadString(xmlString)
+    try SafeXML.loadString(xmlString)
     catch { case e: Exception ⇒ throw new WebApplicationException(Response.Status.BAD_REQUEST) }  // Better do not call C++ with invalid XML
   }
 }

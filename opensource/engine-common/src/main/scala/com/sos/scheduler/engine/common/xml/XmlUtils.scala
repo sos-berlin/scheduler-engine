@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.io._
 import java.nio.charset.Charset
@@ -28,7 +29,10 @@ import scala.sys.error
 
   private val logger = Logger(getClass)
   private val documentBuilder = threadLocal {
-    val factory = DocumentBuilderFactory.newInstance() sideEffect { _.setNamespaceAware(true) }
+    val factory = DocumentBuilderFactory.newInstance() sideEffect { o ⇒
+      o.setNamespaceAware(true)
+      XxeVulnerability inhibitFor o
+    }
     factory.newDocumentBuilder() sideEffect {
       _.setErrorHandler(new ErrorHandler {
         def warning(exception: SAXParseException) = logger.debug(exception.toString, exception)
@@ -247,7 +251,7 @@ import scala.sys.error
   }
 
   def xmlBytesToString(bytes: Array[Byte]): String =
-    xml.XML.load(new ByteArrayInputStream(bytes)).toString()
+    SafeXML.load(new ByteArrayInputStream(bytes)).toString()
 
   def nodeListToSeq(nodeList: NodeList): immutable.Seq[Node] =
     for (i ← 0 until nodeList.getLength) yield nodeList.item(i)

@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.jetty.test
 import JettyPluginJerseyTester._
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{Logger, HasCloser}
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
@@ -32,7 +33,7 @@ trait JettyPluginJerseyTester extends HasCloser {
     val r = webResource.uri(uri).accept(Accept.toArray: _*)
     val result = Try {
       if (implicitClass[A] eq classOf[xml.Elem])
-        (xml.XML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
+      (SafeXML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
       else
         r.get(implicitClass[A])
     }
