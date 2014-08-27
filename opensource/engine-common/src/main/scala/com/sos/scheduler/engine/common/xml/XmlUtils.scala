@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.io._
 import java.nio.charset.Charset
@@ -245,5 +246,5 @@ import scala.sys.error
   }
 
   def xmlBytesToString(bytes: Array[Byte]): String =
-    xml.XML.load(new ByteArrayInputStream(bytes)).toString()
+    SafeXML.load(new ByteArrayInputStream(bytes)).toString()
 }

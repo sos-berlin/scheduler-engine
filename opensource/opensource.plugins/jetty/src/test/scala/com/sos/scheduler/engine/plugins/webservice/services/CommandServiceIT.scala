@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import CommandServiceIT._
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester.normalizeUri
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
@@ -35,7 +36,7 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
   }
 
   "POST executes a modifying command" in {
-    xml.XML.loadString(postCommand(modifyingCommand)).child(0).child(0) shouldEqual <ok/>
+    SafeXML.loadString(postCommand(modifyingCommand)).child(0).child(0) shouldEqual <ok/>
   }
 
   "GET inhibits a modifying command" in {
