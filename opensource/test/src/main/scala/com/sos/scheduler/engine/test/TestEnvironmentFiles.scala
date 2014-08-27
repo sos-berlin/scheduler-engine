@@ -29,7 +29,7 @@ final class TestEnvironmentFiles(
     resources(p) map { _.getURL }
 
   private def resources(p: ResourcePath): Iterable[Resource] =
-    resources(p, "*.xml") ++ resources(p, "*.ini")
+    ResourcePatterns flatMap { o ⇒ resources(p, o) }
 
   private def resources(p: ResourcePath, namePattern: String): Iterable[Resource] =
     resolver.getResources(s"classpath*:${p.path}/$namePattern")
@@ -47,6 +47,8 @@ final class TestEnvironmentFiles(
 }
 
 object TestEnvironmentFiles {
+  private val ResourcePatterns = List("*.xml", "*.ini", "*.dtd")
+
   def copy(
       configResourcePath: ResourcePath,
       directory: File,

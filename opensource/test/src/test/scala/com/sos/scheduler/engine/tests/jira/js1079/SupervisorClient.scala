@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1079
 
 import com.sos.scheduler.engine.common.client.SchedulerTcpConnection
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import java.io.ByteArrayInputStream
 import java.net.{DatagramPacket, InetSocketAddress, DatagramSocket}
 import org.scalatest.Matchers._
@@ -36,7 +37,7 @@ private[js1079] final class SupervisorClient(val index: Int, udpSocket: Datagram
     val p = new DatagramPacket(b, b.length)
     udpSocket setSoTimeout 15 * 1000
     udpSocket receive p
-    val receivedElem = xml.XML.load(new ByteArrayInputStream(b, 0, p.getLength))
+    val receivedElem = SafeXML.load(new ByteArrayInputStream(b, 0, p.getLength))
     receivedElem should equal (expectedElem)
   }
 }

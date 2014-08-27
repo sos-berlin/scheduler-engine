@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.test.scala
 
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.kernel.Scheduler
 import scala.reflect.ClassTag
-import scala.xml
 
 object SchedulerTestImplicits {
   implicit class ScaledScheduler(val scheduler: Scheduler) extends AnyVal {
@@ -28,7 +28,7 @@ object SchedulerTestImplicits {
 
   final case class Result(string: String) {
     lazy val elem: xml.Elem =
-      xml.XML.loadString(string)
+      SafeXML.loadString(string)
 
     lazy val answer =
       elem \ "answer"
