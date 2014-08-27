@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.common.client
 import SchedulerTcpConnection._
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.ByteStreams
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import java.io.{StringWriter, InputStream, ByteArrayInputStream}
 import java.net.{SocketAddress, Socket}
 
@@ -23,7 +24,7 @@ final class SchedulerTcpConnection(schedulerAddress: SocketAddress)
   }
 
   def sendAndReceiveXML(commandXml: xml.Elem): xml.Elem =
-    xml.XML.load(new ByteArrayInputStream(sendAndReceiveBytes(xmlToBytes(commandXml))))
+    SafeXML.load(new ByteArrayInputStream(sendAndReceiveBytes(xmlToBytes(commandXml))))
 
   def sendAndReceiveBytes(data: Array[Byte]): Array[Byte] = {
     outputStream.write(data)
