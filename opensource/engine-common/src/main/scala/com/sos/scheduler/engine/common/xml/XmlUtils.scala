@@ -26,7 +26,13 @@ import scala.sys.error
   private lazy val xPath = threadLocal { xPathFactory.newXPath() }
 
   private val logger = Logger(getClass)
-  private val documentBuilder = threadLocal { (DocumentBuilderFactory.newInstance() modifiedBy { _.setNamespaceAware(true) }).newDocumentBuilder() }
+  private val documentBuilder = threadLocal {
+    val factory = DocumentBuilderFactory.newInstance() modifiedBy { o ⇒
+      o.setNamespaceAware(true)
+      XxeVulnerability inhibitFor o
+    }
+    factory.newDocumentBuilder()
+  }
   private val transformerFactory = threadLocal { TransformerFactory.newInstance() }
 
   private var static_xPathNullPointerLogged = false
