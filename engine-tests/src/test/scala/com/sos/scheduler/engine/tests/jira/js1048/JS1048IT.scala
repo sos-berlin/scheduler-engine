@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1048
 
-import JS1048IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
-import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOption}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestEnvironment, TestSchedulerController}
+import com.sos.scheduler.engine.tests.jira.js1048.JS1048IT._
 import java.nio.file.Files
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith

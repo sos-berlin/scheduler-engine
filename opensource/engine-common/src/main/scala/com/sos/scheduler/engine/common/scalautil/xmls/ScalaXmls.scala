@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.common.scalautil
+package com.sos.scheduler.engine.common.scalautil.xmls
 
 import com.google.common.base.Charsets.UTF_8
 import java.io.File

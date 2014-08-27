@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js806
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.{InfoLogEvent, LogEvent}

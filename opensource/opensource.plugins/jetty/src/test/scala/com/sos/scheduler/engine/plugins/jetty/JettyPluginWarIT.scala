@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import com.google.common.io.Resources
-import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginWarIT._
+import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester._
 import com.sos.scheduler.engine.plugins.jetty.test.{HttpVerbRestrictionTester, JettyPluginJerseyTester}
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
