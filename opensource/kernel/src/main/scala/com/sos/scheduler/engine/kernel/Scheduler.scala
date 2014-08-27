@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.async.CallRunner
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
@@ -148,7 +149,7 @@ with HasCloser {
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]) {
     val client = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(uri))
-    val future = client.execute(scala.xml.XML.load(new ByteArrayInputStream(bytes)))
+    val future = client.execute(SafeXML.load(new ByteArrayInputStream(bytes)))
     val response: String = Await.result(future, Duration.Inf)
     System.out.println(response)
   }

@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.tests.database
 
 import EntitiesIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.filebased.{FileBasedRemovedEvent, FileBasedActivatedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction}
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}

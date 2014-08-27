@@ -33,7 +33,7 @@ trait JettyPluginJerseyTester extends HasCloser {
     val r = webResource.uri(uri).accept(Accept.toArray: _*)
     val result = Try {
       if (implicitClass[A] eq classOf[xml.Elem])
-      (SafeXML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
+        (SafeXML.load(r.get(classOf[Reader])): xml.Elem).asInstanceOf[A]
       else
         r.get(implicitClass[A])
     }

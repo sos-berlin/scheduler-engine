@@ -256,3 +256,4 @@ import scala.sys.error
   def nodeListToSeq(nodeList: NodeList): immutable.Seq[Node] =
     for (i ← 0 until nodeList.getLength) yield nodeList.item(i)
 }
+

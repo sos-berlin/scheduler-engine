@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Guice}
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClientTest._
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
@@ -76,7 +76,7 @@ private object HttpSchedulerCommandClientTest {
   private val TestTimeout = 15.seconds
 
   private def executeCommand(command: String) = {
-    xml.XML.loadString(command) match {
+    SafeXML.loadString(command) match {
       case TestCommandElem ⇒ TestResponseString
     }
   }

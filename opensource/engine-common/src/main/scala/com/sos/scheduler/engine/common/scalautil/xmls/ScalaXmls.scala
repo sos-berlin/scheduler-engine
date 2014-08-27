@@ -5,12 +5,14 @@ import java.io.File
 import java.nio.charset.Charset
 
 object ScalaXmls {
+
   object implicits {
+
     implicit class RichXmlFile(val delegate: File) extends AnyVal {
 
-      def xml = scala.xml.XML.loadFile(delegate)
+      def xml = SafeXML.loadFile(delegate)
 
-      def xml_=(o: scala.xml.Elem) {
+      def xml_=(o: scala.xml.Elem): Unit = {
         scala.xml.XML.save(delegate.getPath, o, enc = UTF_8.name, xmlDecl = true)
       }
     }
@@ -21,7 +23,7 @@ object ScalaXmls {
       def toBytes(encoding: Charset = UTF_8, xmlDecl: Boolean = true): Array[Byte] = {
         val b = new StringBuilder
         if (xmlDecl) {
-          b.append(s"<?xml version='1.0' encoding='${encoding.name}'?>")
+          b.append(s"<?xml version='1.0' encoding='${ encoding.name }'?>")
         }
         xml.Utility.serialize(delegate, sb = b)
         b.toString().getBytes(encoding)
