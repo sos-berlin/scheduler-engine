@@ -63,5 +63,6 @@ endif
 ifeq ($(O_DIR),Debug)
 CFLAGS += $(CDEBUG)
 else
+HIDDEN_CFLAGS += -DNDEBUG
 CFLAGS += $(COPTIMIZE)
 endif
