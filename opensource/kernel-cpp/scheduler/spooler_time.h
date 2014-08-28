@@ -42,7 +42,7 @@ struct Duration {
     Duration&                   operator -=                 (const Duration& o)                     { _seconds -= o._seconds; return *this; }
 
     double                      as_double                   () const                                { return _seconds; }
-    int64                       millis                      () const                                { return floor(_seconds * 1000 + 0.5); }
+    int64                       millis                      () const                                { return (int64)(floor(_seconds * 1000 + 0.5) + 0.5); }
     Duration                    rounded_to_next_second      () const                                { return Duration( floor( _seconds + 0.9995 ) ); }
     bool                        not_zero                    () const                                { return _seconds != 0.0; }
     bool                        is_zero                     () const                                { return _seconds == 0.0; }
