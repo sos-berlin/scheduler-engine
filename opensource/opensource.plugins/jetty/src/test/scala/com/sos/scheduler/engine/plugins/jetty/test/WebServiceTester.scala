@@ -16,11 +16,11 @@ final class WebServiceTester(injector: Injector) {
 
   def webResource = newAuthentifyingClient().resource(new URI(s"http://127.0.0.1:$portNumber"))
 
-  def start() {
+  def start(): Unit = {
     webServer.start()
   }
 
-  def close() {
+  def close(): Unit = {
     webServer.close()
   }
 }

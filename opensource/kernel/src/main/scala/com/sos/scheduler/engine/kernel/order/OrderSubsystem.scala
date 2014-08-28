@@ -50,13 +50,13 @@ extends FileBasedSubsystem {
 //  }
 
   @ForCpp
-  def persistNodeState(node: Node) {
+  def persistNodeState(node: Node): Unit = {
     transaction { implicit entityManager =>
       persistentStateStore.store(node.persistentState)
     }
   }
 
-  def tryRemoveOrder(k: OrderKey) {
+  def tryRemoveOrder(k: OrderKey): Unit = {
     inSchedulerThread {
       for (o <- orderOption(k))
         o.remove()
@@ -69,7 +69,7 @@ extends FileBasedSubsystem {
   def orderOption(orderKey: OrderKey): Option[Order] =
     jobChain(orderKey.jobChainPath).orderOption(orderKey.id)
 
-  def removeJobChain(o: JobChainPath) {
+  def removeJobChain(o: JobChainPath): Unit = {
     jobChain(o).remove()
   }
 

@@ -11,7 +11,7 @@ class InputStreamLogger(in: InputStream, charset: Charset, logger: Logger) exten
   //Das scheint nicht möglich zu sein. Dann wie in C++ in Dateien schreiben und diese mit Selector Lesen.
   // http://stackoverflow.com/questions/1033653
 
-  def run() {
+  def run(): Unit = {
     while (true) {
       val line = reader.readLine()
       if (line == null) return

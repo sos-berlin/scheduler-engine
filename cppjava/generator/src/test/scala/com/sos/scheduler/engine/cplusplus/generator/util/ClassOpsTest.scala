@@ -7,7 +7,7 @@ import org.junit.Assert._
 import ClassOps._
 
 class ClassOpsTest {
-  @Test def testAllInterfaces() {
+  @Test def testAllInterfaces(): Unit = {
     trait T1
     trait T2
     trait T3
@@ -18,7 +18,7 @@ class ClassOpsTest {
     assertEquals(expected, allInterfaces(classOf[TestClass]))
   }
 
-  @Test def testTypeArgumentsOfInterface() {
+  @Test def testTypeArgumentsOfInterface(): Unit = {
     trait T1[T]
     trait T2[T]
     class C extends T1[Int] with T2[String]
@@ -29,7 +29,7 @@ class ClassOpsTest {
     assertEquals(classOf[String], a.head)
   }
 
-  @Test def testParameterizedTypes() {
+  @Test def testParameterizedTypes(): Unit = {
     trait T1
     trait T2[T]
     class C extends T1 with T2[Int]

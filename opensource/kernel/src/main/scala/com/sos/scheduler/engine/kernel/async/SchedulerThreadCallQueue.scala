@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 
 final class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, spoolerC: SpoolerC, val cppThread: Thread) extends CallQueue {
 
-  def close() {
+  def close(): Unit = {
     delegate.close()
   }
 

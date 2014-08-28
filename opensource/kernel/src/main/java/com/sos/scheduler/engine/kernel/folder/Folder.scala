@@ -19,7 +19,7 @@ extends FileBased {
 
   def fileBasedType = FileBasedType.folder
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 }
 
 

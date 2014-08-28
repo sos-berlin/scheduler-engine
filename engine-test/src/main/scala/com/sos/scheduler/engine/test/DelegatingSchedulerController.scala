@@ -7,11 +7,11 @@ trait DelegatingSchedulerController extends SchedulerController {
 
   protected val delegate: SchedulerController
 
-  final def terminateScheduler() {
+  final def terminateScheduler(): Unit = {
     delegate.terminateScheduler()
   }
 
-  final def terminateAfterException(x: Throwable) {
+  final def terminateAfterException(x: Throwable): Unit = {
     delegate.terminateAfterException(x)
   }
 

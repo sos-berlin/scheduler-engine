@@ -25,18 +25,18 @@ final class JobsServiceTest extends FreeSpec with BeforeAndAfterAll with Mockito
   private lazy val injector = Guice.createInjector(
     new JerseyModule,
     new AbstractModule {
-      def configure() {
+      def configure(): Unit = {
         bind(classOf[JobsService])
         bind(classOf[JobSubsystem]) toInstance mockedJobSubsystem
       }
     })
   private lazy val tester = new WebServiceTester(injector)
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     tester.start()
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     tester.close()
   }
 

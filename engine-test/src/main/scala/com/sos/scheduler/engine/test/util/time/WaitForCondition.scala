@@ -39,7 +39,7 @@ object WaitForCondition {
   def realTimeIterator(instants: TraversableOnce[Long]): Iterator[Unit] =
     instants.toIterator map sleepUntil // toIterator führt dazu, das now() erst bei next() oder hasNext lazy aufgerufen wird.
 
-  private[time] def sleepUntil(until: Long) {
+  private[time] def sleepUntil(until: Long): Unit = {
     val w = until - DateTimeUtils.currentTimeMillis()
     if (w > 0) sleep(w)
   }

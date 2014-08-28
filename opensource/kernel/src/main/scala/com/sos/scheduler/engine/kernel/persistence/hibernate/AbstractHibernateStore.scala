@@ -16,11 +16,11 @@ with JPAStore[OBJ, KEY] {
   def tryFetch(key: KEY)(implicit em: EntityManager) =
     em.findOption[E](toEntityKey(key))(entityManifest) map toObject
 
-  def insert(o: OBJ)(implicit em: EntityManager) {
+  def insert(o: OBJ)(implicit em: EntityManager): Unit = {
     em.persist(toEntity(o))
   }
 
-  def store(o: OBJ)(implicit em: EntityManager) {
+  def store(o: OBJ)(implicit em: EntityManager): Unit = {
     o match {
       case d: HasIsDefault if d.isDefault =>
         delete(o.key)  // Den Default-Zustand speichern wir nicht
@@ -29,7 +29,7 @@ with JPAStore[OBJ, KEY] {
     }
   }
 
-  def delete(key: KEY)(implicit em: EntityManager) {
+  def delete(key: KEY)(implicit em: EntityManager): Unit = {
     em.findOption[E](toEntityKey(key))(entityManifest) foreach { e =>
       em.remove(e)
     }

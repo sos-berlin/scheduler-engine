@@ -14,12 +14,12 @@ final class SchedulerTcpConnection(schedulerAddress: SocketAddress)
   private lazy val outputStream = socket.getOutputStream
   private lazy val inputStream = socket.getInputStream
 
-  def connect() {
+  def connect(): Unit = {
     require(!socket.isConnected)
     socket.connect(schedulerAddress)
   }
 
-  def close() {
+  def close(): Unit = {
     socket.close()
   }
 

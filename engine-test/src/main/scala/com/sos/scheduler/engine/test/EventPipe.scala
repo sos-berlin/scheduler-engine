@@ -18,11 +18,11 @@ extends EventHandlerAnnotated with AutoCloseable {
 
   private val queue = new LinkedBlockingQueue[Event]
 
-  def close() {
+  def close(): Unit = {
     eventBus unregisterAnnotated this
   }
 
-  @EventHandler def add(e: Event) {
+  @EventHandler def add(e: Event): Unit = {
     queue.add(e)
   }
 

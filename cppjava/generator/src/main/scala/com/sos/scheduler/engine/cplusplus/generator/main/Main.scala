@@ -21,16 +21,16 @@ final class Main(args: Array[String]) {
     classes partition classOf[CppProxy].isAssignableFrom
   }
 
-  def apply() {
+  def apply(): Unit = {
     generateCppProxies()
     generateJavaProxies()
   }
 
-  private def generateCppProxies() {
+  private def generateCppProxies(): Unit = {
     cppproxy.Generator.generate(parameters.cppOutputDirectory, parameters.javaOutputDirectory, cppProxyInterfaces)
   }
 
-  private def generateJavaProxies() {
+  private def generateJavaProxies(): Unit = {
     for (dir <- parameters.cppOutputDirectory)
       javaproxy.Generator.generate(dir, javaProxies ++ cppProxyInterfaces, parameters.deep)
   }
@@ -38,7 +38,7 @@ final class Main(args: Array[String]) {
 
 /** Exception nicht nach stderr aus und gibt keinen Exit code zurück (s. MainWithExitCode). */
 object Main {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     new Main(args).apply()
   }
 

@@ -7,15 +7,15 @@ import org.junit.Test
 final class MavenPropertiesTest {
     val mavenProperties = new MavenProperties(getClass)
 
-    @Test def testGroupId() {
+    @Test def testGroupId(): Unit = {
         assertThat(mavenProperties.groupId, equalTo("com.sos.scheduler.engine"))
     }
 
-    @Test def testArtifactId() {
+    @Test def testArtifactId(): Unit = {
         assertThat(mavenProperties.artifactId, equalTo("cppjava.generator"))
     }
     
-    @Test def testVersion() {
+    @Test def testVersion(): Unit = {
         assert(mavenProperties.version.length >= 1)
     }
 }

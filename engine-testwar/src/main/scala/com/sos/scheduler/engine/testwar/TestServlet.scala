@@ -9,7 +9,7 @@ import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 final class TestServlet extends HttpServlet
 with HasCloser {   // Refers to external jar in parent classpath
 
-  override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
+  override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     response.setContentType("text/plain")
     response.getOutputStream.print("TestServlet")
   }

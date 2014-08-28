@@ -23,7 +23,7 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
 
   override lazy val testConfiguration = TestConfiguration(testClass = getClass, testPackage = Some(Tests.testPackage))
 
-  override protected def onBeforeSchedulerActivation() {
+  override protected def onBeforeSchedulerActivation(): Unit = {
     (testEnvironment.configDirectory / "scheduler.xml").xml = generateSchedulerConfig(warFile())
   }
 

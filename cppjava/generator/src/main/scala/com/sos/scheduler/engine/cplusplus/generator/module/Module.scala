@@ -8,7 +8,7 @@ trait Module {
     
     val codeFiles: List[CodeFile]
 
-    def writeToDirectory(d: File) {
+    def writeToDirectory(d: File): Unit = {
         require(d.getPath.nonEmpty, "Missing output directory")
         codeFiles foreach { _.writeToDirectory(d) }
     }

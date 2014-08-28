@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.{SerializerProvider, JsonSerializer}
 
 class RootViewSerializer extends JsonSerializer[RootView] {
-  def serialize(o: RootView, j: JsonGenerator, provider: SerializerProvider) {
+  def serialize(o: RootView, j: JsonGenerator, provider: SerializerProvider): Unit = {
     j.writeStartObject()
     //j.writeStringField("configurationUri", o.configurationUri.toString)
     j.writeStringField("logUri", o.logUri.toString)

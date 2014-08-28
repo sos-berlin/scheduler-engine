@@ -23,20 +23,20 @@ private[cpp] final class Operation(
   private val _isClosed = new AtomicBoolean(false)
 
   private val asyncListener = new AsyncListener {
-    def onComplete(event: AsyncEvent) {
+    def onComplete(event: AsyncEvent): Unit = {
       close()
     }
 
-    def onTimeout(event: AsyncEvent) {
+    def onTimeout(event: AsyncEvent): Unit = {
       close()
     }
 
-    def onError(event: AsyncEvent) {
+    def onError(event: AsyncEvent): Unit = {
       for (t <- Option(event.getThrowable)) logger.error(s"AsyncListener.onError: $t", t)
       close()
     }
 
-    def onStartAsync(event: AsyncEvent) {}
+    def onStartAsync(event: AsyncEvent): Unit = {}
   }
 
   /** Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
@@ -47,26 +47,26 @@ private[cpp] final class Operation(
 
   @Nullable private lazy val chunkReaderC = httpResponseC.chunk_reader
 
-  def start() {
+  def start(): Unit = {
     response.setStatus(httpResponseC.status)
     splittedHeaders(httpResponseC.header_string) foreach { h => response.setHeader(h._1, h._2) }
     if (chunkReaderC != null) continue()
     else close()
   }
 
-  def tryClose() {
+  def tryClose(): Unit = {
     try close()
     catch {
       case x: Throwable => if (schedulerIsClosed.isClosed) logger.error(x.toString) else logger.error(x.toString, x)
     }
   }
 
-  def close() {
+  def close(): Unit = {
     if (!_isClosed.getAndSet(true))
       closeHttpResponseC()
   }
 
-  private def closeHttpResponseC() {
+  private def closeHttpResponseC(): Unit = {
     try httpResponseC.close()
     finally {
       logger.debug("httpResponseC.dispose()")
@@ -74,19 +74,19 @@ private[cpp] final class Operation(
     }
   }
 
-  def continue() {
+  def continue(): Unit = {
     serveChunks()
     response.getOutputStream.flush()
     if (!isClosed) startAsync()
   }
 
-  private def startAsync() {
+  private def startAsync(): Unit = {
     val asyncConcext = request.startAsync(request, response)
     asyncConcext.setTimeout(0)  // Nie
     asyncConcext.addListener(asyncListener)
   }
 
-  def serveChunks() {
+  def serveChunks(): Unit = {
     while (!isClosed && chunkReaderC != null && chunkReaderC.next_chunk_is_ready) {
       chunkReaderC.get_next_chunk_size match {
         case 0 => close()
@@ -95,7 +95,7 @@ private[cpp] final class Operation(
     }
   }
 
-  def onNextChunkIsReady() {
+  def onNextChunkIsReady(): Unit = {
     try
       if (request.isAsyncStarted)
         request.getAsyncContext.dispatch()

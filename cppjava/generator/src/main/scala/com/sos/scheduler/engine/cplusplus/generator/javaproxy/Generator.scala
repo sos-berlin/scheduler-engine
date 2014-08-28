@@ -27,7 +27,7 @@ private class Generator(outputDirectory: File, classes: Set[Class[_]], deep: Boo
         cppClasses map { c => new JavaProxyCppModule(c, knownClasses, pch) }
     }
     
-    def apply() {
+    def apply(): Unit = {
         cppModules foreach { _.writeToDirectory(javaProxyOutputDirectory) }
         pch.writeToDirectory(javaProxyOutputDirectory)
         val makefileInclude = new MakefileInclude(prefix="javaproxy", modules=cppModules)
@@ -39,7 +39,7 @@ private class Generator(outputDirectory: File, classes: Set[Class[_]], deep: Boo
 }
 
 object Generator {
-    def generate(outputDirectory: File, classes: Set[Class[_]], deep: Boolean=false) {
+    def generate(outputDirectory: File, classes: Set[Class[_]], deep: Boolean=false): Unit = {
         new Generator(outputDirectory, classes, deep).apply()
     }
 }

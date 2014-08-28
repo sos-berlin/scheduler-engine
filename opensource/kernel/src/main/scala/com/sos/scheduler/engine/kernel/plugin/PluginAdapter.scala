@@ -22,7 +22,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
   @Nullable private var _pluginInstance: Plugin = null
 
 
-  private[plugin] final def tryClose() {
+  private[plugin] final def tryClose(): Unit = {
     for (o <- Option(_pluginInstance)) {
       try o.close()
       catch {
@@ -31,7 +31,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] final def initialize(injector: Injector, log: PrefixLog) {
+  private[plugin] final def initialize(injector: Injector, log: PrefixLog): Unit = {
     _log = log
     try {
       if(_pluginInstance != null) throw new IllegalStateException(s"$this is already initialized")
@@ -42,7 +42,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] final def prepare() {
+  private[plugin] final def prepare(): Unit = {
     try {
       if (pluginInstance.isPrepared) throw new IllegalStateException(s"$this is already prepared")
       _pluginInstance.prepare()
@@ -53,14 +53,14 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] final def tryActivate() {
+  private[plugin] final def tryActivate(): Unit = {
     try activate()
     catch {
       case NonFatal(t) => logThrowable(t)
     }
   }
 
-  private[plugin] final def activate() {
+  private[plugin] final def activate(): Unit = {
     _log = log
     try {
       if (pluginInstance.isActive) throw new IllegalStateException(s"$this is already active")
@@ -88,7 +88,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
       case _ ⇒ throw new SchedulerException("Plugin is not a " + classOf[HasCommandHandlers].getSimpleName)
     }
 
-  private def logThrowable(t: Throwable) {
+  private def logThrowable(t: Throwable): Unit = {
     log.error(toString + ": " + t + "\n" + getStackTraceAsString(t))
   }
 
@@ -116,7 +116,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
 object PluginAdapter {
   private def newPluginInstanceByDI(injector: Injector, c: Class[_ <: Plugin], configElement: Element): Plugin = {
     val module = new AbstractModule {
-      protected def configure() {
+      protected def configure(): Unit = {
         bind(classOf[Element]) annotatedWith Names.named(Plugins.configurationXMLName) toInstance configElement
       }
     }

@@ -8,7 +8,7 @@ import java.io.File
 trait ModuleKind[M <: Module] {
   def fileIsGeneratedAndCanBeDeleted(filename: String): Boolean
 
-  def removeFilesBut(dir: File, retainModules: Seq[Module]) {
+  def removeFilesBut(dir: File, retainModules: Seq[Module]): Unit = {
     requireDirectoryExists(dir)
 
     def directoryIsForeign(file: File) = file.getName startsWith "."

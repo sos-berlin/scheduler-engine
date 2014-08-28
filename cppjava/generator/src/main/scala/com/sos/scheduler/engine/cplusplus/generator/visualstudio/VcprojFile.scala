@@ -12,7 +12,7 @@ class VcprojFile(file: File, newPaths: List[String]) {
   private val encoding = Charset.forName("Windows-1252")      // Besser: Dem Original-Dokument entnehmen
   private val document = XML.loadFile(file)
 
-  def store() {
+  def store(): Unit = {
     originalPathsOption foreach { o =>
       if (o.toSet != newPaths.toSet) {
         defaultPrinter.println(file)
@@ -46,7 +46,7 @@ class VcprojFile(file: File, newPaths: List[String]) {
 
 
 object VcprojFile {
-  def update(dir: File, modules: Seq[CppModule]) {
+  def update(dir: File, modules: Seq[CppModule]): Unit = {
     val projectFilename = dir.getName + ".vcproj"   // "scheduler/scheduler.vcproj"
     val projectFile = new File(dir, projectFilename)
     if (projectFile.exists)

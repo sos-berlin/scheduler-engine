@@ -40,13 +40,13 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
 
 
   abstract class OrderContext(val orderKey: OrderKey) {
-    final def runUntilEnd() {
+    final def runUntilEnd(): Unit = {
       val eventPipe = controller.newEventPipe()
       startOrder()
       eventPipe.nextAny[OrderFinishedEvent]
     }
 
-    final def runUntilSuspendedThenReset() {
+    final def runUntilSuspendedThenReset(): Unit = {
       val eventPipe = controller.newEventPipe()
       startOrder(List(suspendedParameterName -> suspendedTrue))
       eventPipe.nextAny[OrderStepEndedEvent]
@@ -57,7 +57,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
 
     def startOrder(parameters: Iterable[(String, String)] = Nil)
 
-    final def resetOrder() {
+    final def resetOrder(): Unit = {
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} action="reset"/>
     }
 
@@ -67,7 +67,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
   }
 
   class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(jobChainPath orderKey "1") {
-    final def startOrder(parameters: Iterable[(String, String)]) {
+    final def startOrder(parameters: Iterable[(String, String)]): Unit = {
       orderParameters should equal (originalParameters)
       scheduler executeXml
           <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at="now">{paramsElem(parameters)}</modify_order>
@@ -75,7 +75,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
   }
 
   class TemporaryOrderContext(jobChainPath: JobChainPath) extends OrderContext(jobChainPath orderKey "temporary") {
-    final def startOrder(parameters: Iterable[(String, String)]) {
+    final def startOrder(parameters: Iterable[(String, String)]): Unit = {
       scheduler executeXml <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>{paramsElem(parameters)}</order>
     }
   }

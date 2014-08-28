@@ -21,7 +21,7 @@ object XmlUtil {
     "<?xml version=\"1.0\" encoding=\"" + encoding.name + "\"?>\n" +
     correctNewlinesInAttributesForScala(e.toString)
 
-  def saveAndCorrectScalaBug(file: File, document: Elem, encoding: Charset) {
+  def saveAndCorrectScalaBug(file: File, document: Elem, encoding: Charset): Unit = {
     Files.write(xmlOf(document, encoding), file, encoding)
   }
 

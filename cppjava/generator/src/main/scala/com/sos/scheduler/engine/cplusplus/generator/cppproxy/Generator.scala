@@ -22,28 +22,28 @@ private class Generator(cppOutputDirectory: Option[File], javaOutputDirectory: O
         (new JavadocJavaModule(anyPackageName) :: result._1, result._2)
     }
 
-    def apply() { 
+    def apply(): Unit = {
         javaOutputDirectory foreach generateJava
         cppOutputDirectory foreach generateJni
     }
 
-    private def generateJava(dir: File) {
+    private def generateJava(dir: File): Unit = {
         javaModules foreach { _.writeToDirectory(dir) }
         JavaModule.removeFilesBut(dir, javaModules)
     }
 
-    private def generateJni(dir: File) {
+    private def generateJni(dir: File): Unit = {
         for ((subdirectory, subJniModules) <- jniModules groupBy { _.subdirectory })
             generateJniForSubdirectory(new File(dir, subdirectory), subJniModules)
     }
 }
 
 object Generator {
-    def generate(cppOutputDirectory: Option[File], javaOutputDirectory: Option[File], interfaces: Iterable[Class[_]]) {
+    def generate(cppOutputDirectory: Option[File], javaOutputDirectory: Option[File], interfaces: Iterable[Class[_]]): Unit = {
         new Generator(cppOutputDirectory, javaOutputDirectory, interfaces).apply()
     }
 
-    private def generateJniForSubdirectory(subdir: File, subJniModules: List[JniModule]) {
+    private def generateJniForSubdirectory(subdir: File, subJniModules: List[JniModule]): Unit = {
         subJniModules foreach { _.writeToDirectory(subdir) }
 
         val registerNativeClassesModule = {

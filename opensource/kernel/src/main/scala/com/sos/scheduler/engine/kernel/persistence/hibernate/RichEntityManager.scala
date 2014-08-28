@@ -47,7 +47,7 @@ class RichEntityManager(val delegate: EntityManager) extends AnyVal {
     // Geht nicht mit Hibernate 4.1.7 (aber mit EclipseLink): f(em.unwrap(classOf[java.sql.Connection]))
     var result: Option[A] = None
     delegate.unwrap(classOf[org.hibernate.Session]).doWork(new Work {
-      def execute(connection: Connection) {
+      def execute(connection: Connection): Unit = {
         result = Some(f(connection))
       }
     })

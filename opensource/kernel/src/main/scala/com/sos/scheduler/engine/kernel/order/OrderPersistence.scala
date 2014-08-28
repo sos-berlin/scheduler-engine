@@ -19,7 +19,7 @@ trait OrderPersistence {
 
   import subsystem.{entityManagerFactory, orderStore}
 
-  @ForCpp private[order] def persistState() {
+  @ForCpp private[order] def persistState(): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       orderStore.store(persistentState)
     }

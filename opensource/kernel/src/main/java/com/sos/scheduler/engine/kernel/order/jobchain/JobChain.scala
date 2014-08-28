@@ -36,13 +36,13 @@ with UnmodifiableJobChain {
   def fileBasedType =
     FileBasedType.jobChain
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
   private implicit def entityManagerFactory =
     injector.getInstance(classOf[EntityManagerFactory])
 
   @ForCpp
-  private def loadPersistentState() {
+  private def loadPersistentState(): Unit = {
     transaction { implicit entityManager =>
       for (persistentState <- nodeStore.fetchAll(path); node <- nodeMap.get(persistentState.state)) {
         node.action = persistentState.action
@@ -53,13 +53,13 @@ with UnmodifiableJobChain {
     }
   }
 
-  @ForCpp private def persistState() {
+  @ForCpp private def persistState(): Unit = {
     transaction { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }
   }
 
-  @ForCpp private def deletePersistentState() {
+  @ForCpp private def deletePersistentState(): Unit = {
     transaction { implicit entityManager =>
       persistentStateStore.delete(path)
       nodeStore.deleteAll(path)
@@ -116,7 +116,7 @@ with UnmodifiableJobChain {
   def isStopped =
     cppProxy.is_stopped
 
-  def isStopped_=(o: Boolean) {
+  def isStopped_=(o: Boolean): Unit = {
     cppProxy.set_stopped(o)
   }
 
@@ -127,7 +127,7 @@ with UnmodifiableJobChain {
    */
   def orderLimit: Int = cppProxy.max_orders
 
-  private[order] def remove() {
+  private[order] def remove(): Unit = {
     cppProxy.remove()
   }
 }

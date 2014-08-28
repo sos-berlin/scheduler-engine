@@ -13,7 +13,7 @@ trait CodeFile {
 
     def content: String
 
-    def writeToDirectory(directory: File) {
+    def writeToDirectory(directory: File): Unit = {
         requireDirectoryExists(directory, "Missing output directory for '" + this + "': " + directory)
         writingFileAndLog(new File(directory, path), encoding) { _ write content }
     }

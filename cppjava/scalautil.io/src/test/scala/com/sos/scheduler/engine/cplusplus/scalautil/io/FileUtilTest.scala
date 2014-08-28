@@ -10,13 +10,13 @@ import org.junit._
 
 final class FileUtilTest {
 
-  @Test def testDeleteFile() {
+  @Test def testDeleteFile(): Unit = {
     val file = File.createTempFile("test", "tmp")
     deleteFile(file)
     assert(!file.exists)
   }
 
-  @Test def testDeleteFile_directory() {
+  @Test def testDeleteFile_directory(): Unit = {
     val file = File.createTempFile("test", "tmp")
     deleteFile(file)
     file.mkdir
@@ -30,15 +30,15 @@ final class FileUtilTest {
     assert(!file.exists)    // Alles aufgeräumt?
   }
 
-  @Test def testWritingFileIfDifferent() {
+  @Test def testWritingFileIfDifferent(): Unit = {
     val file = File.createTempFile("test","tmp")
-    def f(w: Writer) { w.write("TEST\n") }
+    def f(w: Writer): Unit = { w.write("TEST\n") }
     assertTrue(writingFileIfDifferent(file, Charset.defaultCharset)(f))
     assertFalse(writingFileIfDifferent(file, Charset.defaultCharset)(f))
     file.delete
   }
 
-  @Test def testListRecursive() {
+  @Test def testListRecursive(): Unit = {
     val dir = File.createTempFile("test","tmp")
     dir.delete
     dir.mkdir()

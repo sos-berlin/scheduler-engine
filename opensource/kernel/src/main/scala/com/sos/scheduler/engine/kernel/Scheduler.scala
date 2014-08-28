@@ -87,7 +87,7 @@ with HasCloser {
   }
 
   @ForCpp
-  private def initialize() {
+  private def initialize(): Unit = {
     val eventSubscription = {
       val subsystemDescriptions = injector.apply[FileBasedSubsystem.Register].descriptions
       val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
@@ -97,9 +97,9 @@ with HasCloser {
     closer { eventBus.unregisterHot(eventSubscription) }
   }
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
-  @ForCpp private def onClose() {
+  @ForCpp private def onClose(): Unit = {
     closed = true
     try {
       schedulerThreadCallQueue.close()
@@ -116,16 +116,16 @@ with HasCloser {
     }
   }
 
-  @ForCpp private def onLoad() {
+  @ForCpp private def onLoad(): Unit = {
     pluginSubsystem.initialize()
     controllerBridge.onSchedulerStarted(this)
   }
 
-  @ForCpp private def onActivate() {
+  @ForCpp private def onActivate(): Unit = {
     pluginSubsystem.activate()
   }
 
-  @ForCpp private def onActivated() {
+  @ForCpp private def onActivated(): Unit = {
     controllerBridge.onSchedulerActivated()
   }
 
@@ -147,7 +147,7 @@ with HasCloser {
     }
   }
 
-  @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]) {
+  @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
     val client = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(uri))
     val future = client.execute(SafeXML.load(new ByteArrayInputStream(bytes)))
     val response: String = Await.result(future, Duration.Inf)
@@ -157,27 +157,27 @@ with HasCloser {
   @ForCpp private def getEventSubsystem =
     injector.getInstance(classOf[EventSubsystem])
 
-  @ForCpp private def log(prefix: String, level: Int, line: String) {
+  @ForCpp private def log(prefix: String, level: Int, line: String): Unit = {
     CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line)
   }
 
-  @ForCpp private def enqueueCall(o: CppCall) {
+  @ForCpp private def enqueueCall(o: CppCall): Unit = {
     schedulerThreadCallQueue.add(o)
   }
 
-  @ForCpp private def cancelCall(o: CppCall) {
+  @ForCpp private def cancelCall(o: CppCall): Unit = {
     schedulerThreadCallQueue.tryCancel(o)
   }
 
-  @ForCpp private def threadLock() {
+  @ForCpp private def threadLock(): Unit = {
     CppProxy.threadLock.lock()
   }
 
-  @ForCpp /*private*/ def threadUnlock() {
+  @ForCpp /*private*/ def threadUnlock(): Unit = {
     CppProxy.threadLock.unlock()
   }
 
-  def terminate() {
+  def terminate(): Unit = {
     if (!isClosed) {
       try cppProxy.cmd_terminate()
       catch {
@@ -214,7 +214,7 @@ with HasCloser {
   //        cppProxy.write_to_scheduler_log(category.string(), text);
   //    }
 
-  def callCppAndDoNothing() {
+  def callCppAndDoNothing(): Unit = {
     cppProxy.tcp_port
   }
 

@@ -15,24 +15,24 @@ object FileUtils {
       def contentBytes: Array[Byte] =
         Files.toByteArray(delegate)
 
-      def contentBytes_=(o: Array[Byte]) {
+      def contentBytes_=(o: Array[Byte]): Unit = {
         Files.write(o, delegate)
       }
 
       def contentString: String = contentString(UTF_8)
 
-      def contentString_=(o: String) {
+      def contentString_=(o: String): Unit = {
         write(o, UTF_8)
       }
 
       def contentString(encoding: Charset) =
         Files.toString(delegate, encoding)
 
-      def write(string: String, encoding: Charset = UTF_8) {
+      def write(string: String, encoding: Charset = UTF_8): Unit = {
         Files.write(string, delegate, encoding)
       }
 
-      def append(o: String, encoding: Charset = UTF_8) {
+      def append(o: String, encoding: Charset = UTF_8): Unit = {
         Files.append(o, delegate, encoding)
       }
     }

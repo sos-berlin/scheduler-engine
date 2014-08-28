@@ -11,7 +11,7 @@ object TimeZones {
   //FIXME Was tun bei einer Exception, einer unbekannten Zeitzone? Besser nur vorher bekannte, numerierte nehmen
   private val localTimeZone = DateTimeZone.getDefault
 
-  def initialize() {}   // Damit localTimeZone gesetzt wird, bevor sich die Default-Zeitzone ändert.
+  def initialize(): Unit = {}   // Damit localTimeZone gesetzt wird, bevor sich die Default-Zeitzone ändert.
 
   private val timeZoneFormatter = Map(
     false -> DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ"),

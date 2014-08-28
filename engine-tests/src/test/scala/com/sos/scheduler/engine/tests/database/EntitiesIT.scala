@@ -42,7 +42,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
 
-  override def onSchedulerActivated() {
+  override def onSchedulerActivated(): Unit = {
     autoClosing(controller.newEventPipe()) { eventPipe =>
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
       eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
@@ -244,7 +244,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     entityManager.fetchSeq[TaskEntity]("select t from TaskEntity t where t.jobPath = :jobPath order by t.taskId",
       Seq("jobPath" -> jobPath.withoutStartingSlash))
 
-  private def stopJobAndWait(jobPath: JobPath) {
+  private def stopJobAndWait(jobPath: JobPath): Unit = {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
     waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { job(orderJobPath).state == JobState.stopped }
   }

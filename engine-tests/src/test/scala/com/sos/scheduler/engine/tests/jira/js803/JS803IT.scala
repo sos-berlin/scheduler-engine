@@ -26,7 +26,7 @@ final class JS803IT extends SchedulerTest {
   private val terminatedOrders = new mutable.HashSet[OrderId]
   private var startTime: DateTime = null
 
-  @Test def test() {
+  @Test def test(): Unit = {
     controller.activateScheduler()
     startTime = secondNow() plusSeconds orderDelay
     addOrder(jobChainPath orderKey "dailyOrder", addDailyOrderElem)
@@ -39,25 +39,25 @@ final class JS803IT extends SchedulerTest {
     }
   }
 
-  private def addOrder(orderKey: OrderKey, orderElemFunction: (OrderKey, DateTime) => xml.Elem) {
+  private def addOrder(orderKey: OrderKey, orderElemFunction: (OrderKey, DateTime) => xml.Elem): Unit = {
     execute(orderElemFunction(orderKey, startTime))
     expectedOrders.add(orderKey.id)
   }
 
-  private def execute(command: xml.Elem) {
+  private def execute(command: xml.Elem): Unit = {
     logger.debug("{}", trim(command))
     controller.scheduler.executeXml(command)
   }
 
-  @EventHandler def handleEvent(e: OrderTouchedEvent) {
+  @EventHandler def handleEvent(e: OrderTouchedEvent): Unit = {
     assertTrue("Order "+e.orderKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
   }
 
-  @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder) {
+  @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder): Unit = {
     assertThat("Wrong end state of order "+event.orderKey, order.state, equalTo(expectedEndState))
   }
 
-  @EventHandler def handleEvent(event: OrderFinishedEvent) {
+  @EventHandler def handleEvent(event: OrderFinishedEvent): Unit = {
     terminatedOrders.add(event.orderKey.id)
     if (terminatedOrders == expectedOrders)  controller.terminateScheduler()
   }

@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.cplusplus.generator.module.CppModule
 import java.io.File
 
 object VisualStudio {
-    def updateProjectFiles(dir: File, modules: Seq[CppModule]) {
+    def updateProjectFiles(dir: File, modules: Seq[CppModule]): Unit = {
         VcprojFile.update(dir, modules)
         VcxprojFile.update(dir, modules)
     }

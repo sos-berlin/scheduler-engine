@@ -11,7 +11,7 @@ final class CppSettings private(val valueMap: Map[CppSettingName, String]) {
 
   def apply(name: CppSettingName) = valueMap(name)
 
-  def setSettingsInCpp(cppProxy: SettingsC) {
+  def setSettingsInCpp(cppProxy: SettingsC): Unit = {
     for (e <- valueMap)
       cppProxy.set(e._1.getNumber, e._2)
   }

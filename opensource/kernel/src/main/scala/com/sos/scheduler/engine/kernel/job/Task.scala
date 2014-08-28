@@ -10,7 +10,7 @@ import javax.annotation.Nullable
 
 final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with EventSource {
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
   def job =
     cppProxy.job.getSister

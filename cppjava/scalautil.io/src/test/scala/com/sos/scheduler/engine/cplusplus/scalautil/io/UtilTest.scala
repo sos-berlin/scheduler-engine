@@ -4,19 +4,19 @@ import org.junit._
 import Util._
 
 final class UtilTest {
-    @Test def testCloseQuietly() {
+    @Test def testCloseQuietly(): Unit = {
         val a = new A
         closeQuietly(a)
         assert(a.closed)
     }
 
-    @Test def closeQuietlyShouldIgnoreException() {
+    @Test def closeQuietlyShouldIgnoreException(): Unit = {
         suppressLogging(Util.getClass){ closeQuietly(null) }
     }
 
   private class A {
         var closed = false
-        def close() {
+        def close(): Unit = {
             closed = true
         }
     }

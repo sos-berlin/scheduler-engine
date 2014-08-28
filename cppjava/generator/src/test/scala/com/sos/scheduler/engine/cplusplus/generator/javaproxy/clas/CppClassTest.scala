@@ -6,7 +6,7 @@ import org.junit._
 import org.junit.Assert._
 
 class CppClassTest {
-  @Ignore @Test def test() {
+  @Ignore @Test def test(): Unit = {
     val cppClass = new CppClass(classOf[java.lang.Boolean], Set(classOf[java.lang.Boolean]))
 
     val separator = "\n\n//------------------\n\n\n"
@@ -22,12 +22,12 @@ class CppClassTest {
 //        assertTrue( "Class erwartet, statt " + classes, classes.contains( classOf[Class[_]]) )
 //    }
 
-  @Test def testNeededClasses() {
+  @Test def testNeededClasses(): Unit = {
     val classes = neededClasses(classOf[String])
     assert(classes.contains( classOf[Object]))
   }
 
-  @Test def testWithoutOverriddenVariantMethods() {
+  @Test def testWithoutOverriddenVariantMethods(): Unit = {
     // Writer implementiert append doppelt: Appendable append(char) und Writer append(char)
 
     val appendCharMethods = classOf[Writer].getDeclaredMethods.toList filter

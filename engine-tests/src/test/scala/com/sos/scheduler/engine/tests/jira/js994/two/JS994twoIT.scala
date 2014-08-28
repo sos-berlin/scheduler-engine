@@ -16,7 +16,7 @@ final class JS994twoIT extends FunSuite with ScalaSchedulerTest {
     terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def onBeforeSchedulerActivation() {
+  override def onBeforeSchedulerActivation(): Unit = {
     eventPipe
   }
 

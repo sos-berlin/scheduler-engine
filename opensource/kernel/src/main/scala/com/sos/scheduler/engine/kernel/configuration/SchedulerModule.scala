@@ -36,7 +36,7 @@ final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerContr
 extends ScalaAbstractModule
 with HasCloser {
 
-  def configure() {
+  def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
     bindInstance(cppProxy)
     bindInstance(controllerBridge)
@@ -56,7 +56,7 @@ with HasCloser {
     bindSubsystems()
   }
 
-  private def bindSubsystems() {
+  private def bindSubsystems(): Unit = {
     provideSingleton[Folder_subsystemC] { cppProxy.folder_subsystem }
     provideSingleton[Job_subsystemC] { cppProxy.job_subsystem }
     provideSingleton[Lock_subsystemC] { cppProxy.lock_subsystem }

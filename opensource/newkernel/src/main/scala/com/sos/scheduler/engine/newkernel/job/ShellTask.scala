@@ -8,19 +8,19 @@ extends ProcessTerminatedHandler {
 
   private val process = new ShellProcess(callQueue, this)
 
-  def start() {
+  def start(): Unit = {
     process.start(script)
   }
 
-  def kill() {
+  def kill(): Unit = {
     process.kill()
   }
 
-  def end() {
+  def end(): Unit = {
     ???
   }
 
-  def onProcessTerminated() {
+  def onProcessTerminated(): Unit = {
     job.onTaskTerminated(this)
   }
 }

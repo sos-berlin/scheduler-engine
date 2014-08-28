@@ -37,11 +37,11 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  private def killTask(taskId: TaskId) {
+  private def killTask(taskId: TaskId): Unit = {
     scheduler executeXml <kill_task job={testJobPath.string} id={taskId.string} immediately="yes"/>
   }
 
-  @HotEventHandler def handleEvent(e: TaskStartedEvent, task: Task) {
+  @HotEventHandler def handleEvent(e: TaskStartedEvent, task: Task): Unit = {
     controller.getEventBus publishCold MyTaskStartedEvent(e.taskId, task.stdoutFile)
   }
 }

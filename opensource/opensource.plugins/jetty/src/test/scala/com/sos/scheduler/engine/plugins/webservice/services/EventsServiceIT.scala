@@ -51,7 +51,7 @@ object EventsServiceIT {
 
   private class ResponsePrinter(reader: ⇒ Reader) extends Thread {
     val result = new StringBuilder
-    override def run() {
+    override def run(): Unit = {
       try {
         val bufferedReader = new BufferedReader(reader)
         while (true) {

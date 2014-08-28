@@ -6,7 +6,7 @@ import org.scalatest.BeforeAndAfterAll
 trait CheckedBeforeAll {
   this: BeforeAndAfterAll =>
 
-  override protected final def beforeAll() {
+  override protected final def beforeAll(): Unit = {
     try checkedBeforeAll()
     catch {
       case x: Throwable =>
@@ -16,5 +16,5 @@ trait CheckedBeforeAll {
   }
 
   /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
-  protected def checkedBeforeAll() {}
+  protected def checkedBeforeAll(): Unit = {}
 }

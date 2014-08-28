@@ -22,7 +22,7 @@ class MainTest {
 //        def entryNameOfUrl(u: URL) = u.toString.split('!').last.replace('/','.')
 //    }
 
-  @Test def testIsClassName() {
+  @Test def testIsClassName(): Unit = {
     assert(isClassName("A"))
     assert(isClassName("a.B"))
     assert(isClassName("a.Bb"))
@@ -35,7 +35,7 @@ class MainTest {
   }
 
   // @Ignore, weil unser Maven-Artefakt unabhängig von com.sos.scheduler.engine.kernel geworden ist. Der Test sollte also auch davon unabhängig sein.
-  @Ignore @Test def testMain() {
+  @Ignore @Test def testMain(): Unit = {
     val cppProxyClassNames = List(
         "com.sos.scheduler.engine.kernel.cppproxy.SpoolerC",
         "com.sos.scheduler.engine.kernel.Scheduler")

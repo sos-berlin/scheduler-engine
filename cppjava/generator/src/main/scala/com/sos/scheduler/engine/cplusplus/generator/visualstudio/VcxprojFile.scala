@@ -34,7 +34,7 @@ class VcxprojFile(vcxprojFile: File, newIncludes: List[String]) {
       }
   }
 
-  def store() {
+  def store(): Unit = {
     updatedDocs foreach { _.store() }
   }
 
@@ -54,7 +54,7 @@ class VcxprojFile(vcxprojFile: File, newIncludes: List[String]) {
       cppClCompile.getParentElement ensuring { _.getName == "ItemGroup" }
     }
 
-    def removeIncludes(includes: Seq[String]) {
+    def removeIncludes(includes: Seq[String]): Unit = {
       def toBeRemoved(clCompile: Element) = includes contains includeAttributeString(clCompile)
       logger.debug("clCompileElements="+clCompileElements+", includes="+includes+", toBeRemoved="+(clCompileElements filter toBeRemoved))
       clCompileElements filter toBeRemoved foreach { e =>
@@ -63,7 +63,7 @@ class VcxprojFile(vcxprojFile: File, newIncludes: List[String]) {
       }
     }
 
-    def addIncludes(includes: Seq[String]) {
+    def addIncludes(includes: Seq[String]): Unit = {
       includes foreach { include =>
         val e = newClCompileElement(include)
         logger.debug("Adding element "+ xml(e))
@@ -76,7 +76,7 @@ class VcxprojFile(vcxprojFile: File, newIncludes: List[String]) {
 
     def toXml = xmlOutputter.outputString(document)
 
-    def store() {
+    def store(): Unit = {
       defaultPrinter.println(file)
       closingFinally(new FileOutputStream(file)) { output => xmlOutputter.output(document, output) }
     }
@@ -111,7 +111,7 @@ class VcxprojFile(vcxprojFile: File, newIncludes: List[String]) {
 }
 
 object VcxprojFile {
-  def update(dir: File, modules: Seq[CppModule]) {
+  def update(dir: File, modules: Seq[CppModule]): Unit = {
     val projectFilename = dir.getName + ".vcxproj"   // "scheduler/scheduler.vcxproj"
     val projectFile = new File(dir, projectFilename)
     if (projectFile.exists)

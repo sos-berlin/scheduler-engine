@@ -12,7 +12,7 @@ final class PluginLoginService private extends MappedLoginService {
 
   def loadUser(username: String) = null
 
-  def loadUsers() {}
+  def loadUsers(): Unit = {}
 }
 
 object PluginLoginService {

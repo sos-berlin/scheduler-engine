@@ -37,7 +37,7 @@ final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
     jobPropertyMap(jobPath)
   }
 
-  private def startJob(jobPath: JobPath) {
+  private def startJob(jobPath: JobPath): Unit = {
     scheduler executeXml <start_job job={jobPath.string}/>
   }
 

@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 final class ThreadService(runnable: Runnable) extends Service {
   private val threadRef = new AtomicReference[Thread]
 
-  def close() {
+  def close(): Unit = {
     for (t <- threadOption) {
       stop()
       t.join()
@@ -13,7 +13,7 @@ final class ThreadService(runnable: Runnable) extends Service {
     }
   }
 
-  protected def onStart() {
+  protected def onStart(): Unit = {
     def throwAlreadyStarted() = throw new IllegalStateException(s"$toString has been started already")
     if (threadRef.get != null) throwAlreadyStarted()
     val t = new Thread(runnable, toString)
@@ -23,7 +23,7 @@ final class ThreadService(runnable: Runnable) extends Service {
   }
 
 
-  protected def onStop() {
+  protected def onStop(): Unit = {
     for (t <- threadOption)
       t.interrupt()
   }

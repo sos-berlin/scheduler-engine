@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.cplusplus.generator.main
 
 /** Gibt Exception nach stderr aus und beendet die VM mit System.exit() */
 object MainWithExitCode {
-    def main(args: Array[String]) {
+    def main(args: Array[String]): Unit = {
         try Main.main(args)
         catch { case x: Throwable =>
             showException(x)
@@ -10,7 +10,7 @@ object MainWithExitCode {
         }
     }
 
-    private def showException(x: Throwable) {
+    private def showException(x: Throwable): Unit = {
         System.err.println("ERROR  " + x)
         //x.printStackTrace(System.err)
     }

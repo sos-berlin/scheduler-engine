@@ -29,7 +29,7 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
     checkedKillTask(remoteJobPath)
   }
 
-  private def checkedKillTask(jobPath: JobPath) {
+  private def checkedKillTask(jobPath: JobPath): Unit = {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <start_job job={jobPath.string}/>
     val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == jobPath } .taskId

@@ -107,15 +107,15 @@ class VcprojTest {
       </ItemGroup>
     </Project>)
 
-  @Test def test2008() {
+  @Test def test2008(): Unit = {
     testFunction(List(vs2008document), updated2008Doc, "Visual Studio 2008")
   }
 
-  @Test def test2010() {
+  @Test def test2010(): Unit = {
     testFunction(List(vs2010document, vs2010FilterDocument), updated2010Doc, "Visual Studio 2010")
   }
 
-  private def testFunction(testDocs: List[TestDoc], f: (List[TestDoc], List[String]) => List[Result], what: String) {
+  private def testFunction(testDocs: List[TestDoc], f: (List[TestDoc], List[String]) => List[Result], what: String): Unit = {
     val results = f(testDocs, List("new.cxx", "same.cxx"))
     for ((testDoc, r) <- testDocs zip results) {
       val failReason = what + " " + r.file.getName + " is not correctly updated"

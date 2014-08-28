@@ -23,12 +23,12 @@ extends AutoCloseable {
   private val processTerminatedCheckerCallHolder = new TimedCallHolder(callQueue)
   private var stdLoggers = Seq[ThreadService]()
 
-  def start(script: ShellScript) {
+  def start(script: ShellScript): Unit = {
     startProcess(script)
     startProcessTerminatedChecker()
   }
 
-  private def startProcess(shellScript: ShellScript) {
+  private def startProcess(shellScript: ShellScript): Unit = {
     checkState(process == null)
     starter = if (isWindows) new WindowsStarter else new UnixStarter
     val processBuilder = starter.newProcessBuilder(shellScript)
@@ -41,7 +41,7 @@ extends AutoCloseable {
     for (o <- stdLoggers) o.start()
   }
 
-  private def startProcessTerminatedChecker() {
+  private def startProcessTerminatedChecker(): Unit = {
     processTerminatedCheckerCallHolder.enqueue(Instant.now() + 100.ms, "ShellProcess.isTerminated") {
       if (isTerminated) {
         logger debug "Process terminated"
@@ -58,11 +58,11 @@ extends AutoCloseable {
     }
     catch { case _: IllegalThreadStateException => false }
 
-  def kill() {
+  def kill(): Unit = {
     process.destroy()
   }
 
-  def close() {
+  def close(): Unit = {
     try
       if (process != null) {
         process.destroy()
@@ -87,7 +87,7 @@ object ShellProcess {
     def file: File
     def newProcessBuilder(shellScript: ShellScript): ProcessBuilder
 
-    def close() {
+    def close(): Unit = {
       if (file != null)
         file.delete()   // Verzögert löschen? (s_deleting_files)
     }

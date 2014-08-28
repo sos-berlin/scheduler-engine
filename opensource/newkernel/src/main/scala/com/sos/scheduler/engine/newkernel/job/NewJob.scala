@@ -25,32 +25,32 @@ final class NewJob(
   private val tasks = mutable.HashMap[TaskId, ShellTask]()
   private var taskIdCounter = 0
 
-  def close() {
+  def close(): Unit = {
     currentIntervalSelector.close()
   }
 
-  def activate() {
+  def activate(): Unit = {
     currentIntervalSelector.start()
     startTaskAtNextStartTime()
   }
 
-  def executeCommand(o: SomeJobCommand) {
+  def executeCommand(o: SomeJobCommand): Unit = {
     o match {
       case StopJobCommand => stop()
     }
   }
 
-  def onTaskTerminated(task: ShellTask) {
+  def onTaskTerminated(task: ShellTask): Unit = {
     eventBus publish new TaskEndedEvent(task.id, path)
     startTaskAtNextStartTime()
   }
 
-  private def stop() {
+  private def stop(): Unit = {
     // Alle Tasks beenden
     // state = JobState.stopping
   }
 
-  private def startTaskAtNextStartTime() {
+  private def startTaskAtNextStartTime(): Unit = {
     schedule.nextInstant(now()) match {
       case Some(t) =>
         logger debug s"nextInstant=$t"
@@ -62,7 +62,7 @@ final class NewJob(
     }
   }
 
-  private def startScheduledTask() {
+  private def startScheduledTask(): Unit = {
     startTask()
   }
 

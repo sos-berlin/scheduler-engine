@@ -19,7 +19,7 @@ object ScalaHibernate {
   private def transaction[A](entityManager: EntityManager)(f: EntityManager => A): A = {
     val ta = entityManager.getTransaction
 
-    def tryRollback(t: Throwable) {
+    def tryRollback(t: Throwable): Unit = {
       try ta.rollback()
       catch {
         case x: Exception => logger.error("Second error in rollback ignored:", x)

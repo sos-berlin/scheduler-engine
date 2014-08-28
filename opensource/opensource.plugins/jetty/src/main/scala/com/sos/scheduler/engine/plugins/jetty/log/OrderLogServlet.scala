@@ -10,7 +10,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @Singleton
 class OrderLogServlet @Inject private(orderSubsystem: OrderSubsystem) extends GetOnlyServlet {
-  override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
+  override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val attributeName = classOf[OrderLogServlet].getName
     Option(request.getAttribute(attributeName).asInstanceOf[FileServletAsyncOperation]) match {
       case None =>

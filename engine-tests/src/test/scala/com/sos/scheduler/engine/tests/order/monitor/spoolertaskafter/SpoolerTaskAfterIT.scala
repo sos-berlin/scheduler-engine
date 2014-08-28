@@ -23,7 +23,7 @@ final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
     controller.waitForTermination(shortTimeout)
   }
 
-  @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder) {
+  @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder): Unit = {
     order.parameters(classOf[TestMonitor].getName) should equal ("exitCode=7")
     controller.terminateScheduler()
   }

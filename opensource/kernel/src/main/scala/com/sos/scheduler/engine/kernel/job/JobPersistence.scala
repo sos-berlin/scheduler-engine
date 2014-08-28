@@ -19,13 +19,13 @@ private[job] trait JobPersistence {
       jobStore.tryFetch(path).orNull
     }
 
-  @ForCpp private[job] final def persistState() {
+  @ForCpp private[job] final def persistState(): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       jobStore.store(persistentState)
     }
   }
 
-  @ForCpp private[job] final def deletePersistentState() {
+  @ForCpp private[job] final def deletePersistentState(): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       jobStore.delete(path)
     }
@@ -36,7 +36,7 @@ private[job] trait JobPersistence {
       jobStore.tryFetchAverageStepDuration(path)
     }
 
-  @ForCpp private[job] final def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
+  @ForCpp private[job] final def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       taskStore.insert(TaskPersistentState(
         TaskId(taskId),
@@ -48,13 +48,13 @@ private[job] trait JobPersistence {
     }
   }
 
-  @ForCpp private[job] final def deletePersistedTask(taskId: Int) {
+  @ForCpp private[job] final def deletePersistedTask(taskId: Int): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       taskStore.delete(TaskId(taskId))
     }
   }
 
-  @ForCpp private[job] final def loadPersistentTasks() {
+  @ForCpp private[job] final def loadPersistentTasks(): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       taskStore.fetchByJobOrderedByTaskId(path) foreach enqueueTaskPersistentState
     }

@@ -14,14 +14,14 @@ class WatchdogPluginIT extends SchedulerTest {
     private val schedulerTimeout = 15.s
     private val sleepTime = 11.s
 
-    @Test def test() {
+    @Test def test(): Unit = {
         controller.activateScheduler()
         sleep(schedulerTimeout)
         assertThat(instance(classOf[PrefixLog]).lastByLevel(SchedulerLogLevel.warning), Matchers.startsWith("SCHEDULER-721"))
         controller.terminateScheduler()
     }
 
-    @HotEventHandler def handleEvent(e: OrderFinishedEvent) {
+    @HotEventHandler def handleEvent(e: OrderFinishedEvent): Unit = {
         sleep(sleepTime)   // Wir  blockieren den Scheduler
     }
 }

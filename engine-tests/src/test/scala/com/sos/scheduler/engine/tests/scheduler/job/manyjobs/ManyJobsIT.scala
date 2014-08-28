@@ -54,11 +54,11 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  @EventHandler def handle(e: FileBasedActivatedEvent) {
+  @EventHandler def handle(e: FileBasedActivatedEvent): Unit = {
     Some(e.typedPath) collect { case p: JobPath if jobStatistics.keySet contains p => activatedJobCount += 1 }
   }
 
-  @EventHandler def handle(e: TaskStartedEvent) {
+  @EventHandler def handle(e: TaskStartedEvent): Unit = {
     taskCount += 1
     jobStatistics(e.jobPath).taskCount += 1
   }

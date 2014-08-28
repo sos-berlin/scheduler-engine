@@ -20,7 +20,7 @@ private object CppToUtf8 {
   private val commentStart = "/*".getBytes(US_ASCII)
   private val commentEnd = "*/".getBytes(US_ASCII)
 
-  def convertFileOrDirectory(file: File) {
+  def convertFileOrDirectory(file: File): Unit = {
     if (file.isDirectory) {
       val myFilter = new FilenameFilter {
         def accept(dir: File, name: String) = (extensions exists name.endsWith) || new File(dir, name).isDirectory
@@ -43,7 +43,7 @@ private object CppToUtf8 {
       convertBytes(file.contentBytes, writer)
     }
 
-  private[cpptoutf8] def convertBytes(bytes: Seq[Byte], writer: Writer) {
+  private[cpptoutf8] def convertBytes(bytes: Seq[Byte], writer: Writer): Unit = {
     for (part <- inputStreamToParts(bytes))
       writer.write(part.convertToString)
   }

@@ -32,7 +32,7 @@ final class JavaOptionsIT extends FunSuite with ScalaSchedulerTest {
     runJob(remoteJobPath)
   }
 
-  private def runJob(j: JobPath) {
+  private def runJob(j: JobPath): Unit = {
     scheduler executeXml <start_job job={j.string}/>
     eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
     instance[VariableSet].apply(j.name +".myJavaOption") should equal ("TEST")

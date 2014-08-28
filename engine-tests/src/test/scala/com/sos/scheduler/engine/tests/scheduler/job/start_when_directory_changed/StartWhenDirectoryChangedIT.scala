@@ -29,12 +29,12 @@ final class StartWhenDirectoryChangedIT extends FunSuite with ScalaSchedulerTest
   private lazy val file_ = new File(directory, "X~")
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def onBeforeSchedulerActivation() {
+  override def onBeforeSchedulerActivation(): Unit = {
     directory.mkdir()
     eventPipe
   }
 
-  override def onSchedulerActivated() {
+  override def onSchedulerActivated(): Unit = {
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
   }
 
@@ -64,7 +64,7 @@ final class StartWhenDirectoryChangedIT extends FunSuite with ScalaSchedulerTest
     }
   }
 
-  @HotEventHandler def handleEvent(e: TaskEndedEvent, task: Task) {
+  @HotEventHandler def handleEvent(e: TaskEndedEvent, task: Task): Unit = {
     e.jobPath should equal (aJobPath)
     val files = (Splitter on ";" split task.parameterValue(triggeredFilesName) map { o => new File(o) }).toSet
     instance[SchedulerEventBus] publishCold TriggerEvent(files)

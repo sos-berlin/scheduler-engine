@@ -41,7 +41,7 @@ object ResourcesAsFilesProvider {
   private final val logger = getLogger(classOf[ResourcesAsFilesProvider])
   private final val lockFileTimeoutWithSteps = TimeoutWithSteps(standardSeconds(5), millis(50))
 
-  private def copyResource(r: Resource, f: File) {
+  private def copyResource(r: Resource, f: File): Unit = {
     logger.debug("copyURLToFile("+ r.getURL +", "+ f +")")
     copyURLToFile(r.getURL, f)
     val ok = waitFromNowFor(0L to 5000 by 10) { f.setLastModified(r.lastModified) }   // Jemand verzögert das Sperren der Datei? Der Windwos-Virenscanner?

@@ -22,7 +22,7 @@ with HasCloser {
 
   private var webServer: WebServer = null
 
-  override def onActivate() {
+  override def onActivate(): Unit = {
     webServer = new WebServer(myJettyConfiguration).registerCloseable
     val portNumbersString = webServer.portNumbers mkString " "
     if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")

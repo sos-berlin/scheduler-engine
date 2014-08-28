@@ -52,7 +52,7 @@ final class CppToUtf8Test extends FreeSpec {
     file.contentString(UTF_8) shouldEqual ("//xxä-ö-ü\n" + "//Höhe Höhe\n")
   }
 
-  private def check(o: (String, String)) {
+  private def check(o: (String, String)): Unit = {
     convertToString(toBytes(o._1)) shouldEqual o._2
   }
 

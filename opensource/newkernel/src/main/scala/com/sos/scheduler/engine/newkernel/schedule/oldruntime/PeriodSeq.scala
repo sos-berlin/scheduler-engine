@@ -31,7 +31,7 @@ object PeriodSeq {
   def apply(o: Seq[OldPeriod]) =
     new PeriodSeq((o sortWith { _.begin < _.begin }).to[immutable.Seq])
 
-  private def requireOrderedAndNotOverlapping(orderedPeriods: Iterable[OldPeriod]) {
+  private def requireOrderedAndNotOverlapping(orderedPeriods: Iterable[OldPeriod]): Unit = {
     if (orderedPeriods.size > 2) {
       for (Seq(a, b) <- orderedPeriods sliding 2) {
         require(a.end <= b.begin)

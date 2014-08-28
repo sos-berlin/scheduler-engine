@@ -21,7 +21,7 @@ import scala.util.Failure
 final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterAll {
   private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val injector = Guice.createInjector(new AbstractModule {
-    override def configure() {
+    override def configure(): Unit = {
       bind(classOf[ActorSystem]) toInstance ActorSystem()
       bind(classOf[ExecutionContext]) toInstance ExecutionContext.global
     }
@@ -29,12 +29,12 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
   private lazy val server = injector.apply[TestCommandExecutorHttpServer.Factory].apply(httpPort, executeCommand)
   private lazy val client = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(s"http://$HttpInterface:$httpPort/"))
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     val future = server.start()
     Await.result(future, TestTimeout)
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     injector.apply[ActorSystem].shutdown()
   }
 

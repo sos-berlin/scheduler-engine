@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.plugins.webservice.services._
 import scala.collection.immutable
 
 class WebServicesModule extends AbstractModule {
-  def configure() {
+  def configure(): Unit = {
     for (o <- services) bind(o)
   }
 }

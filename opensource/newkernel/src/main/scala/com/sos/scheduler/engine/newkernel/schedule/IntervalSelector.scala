@@ -9,11 +9,11 @@ final class IntervalSelector(schedule: Schedule, callQueue: CallQueue) extends A
   private var currentRunnableInterval: Option[Interval] = None
   private var intervalStartCallHolder = new TimedCallHolder(callQueue)
 
-  def close() {
+  def close(): Unit = {
     intervalStartCallHolder.close()
   }
 
-  def start() {
+  def start(): Unit = {
     val n = now()
     schedule.nextInterval(n) match {
       case None =>
@@ -31,7 +31,7 @@ final class IntervalSelector(schedule: Schedule, callQueue: CallQueue) extends A
     }
   }
 
-  private def setCurrentRunnableInterval(intervalOption: Option[Interval]) {
+  private def setCurrentRunnableInterval(intervalOption: Option[Interval]): Unit = {
     intervalOption match {
       case Some(interval) =>
         currentRunnableInterval = Some(interval)

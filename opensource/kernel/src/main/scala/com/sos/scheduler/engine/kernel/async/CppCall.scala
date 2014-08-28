@@ -15,14 +15,14 @@ extends TimedCall[Unit] with Sister {
   def value =
     cppProxy.value()
 
-  def value_=(o: AnyRef) {
+  def value_=(o: AnyRef): Unit = {
     cppProxy.set_value(o)
   }
 
   def call() =
     cppProxy.call()
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
   override def toStringPrefix =
     cppProxy.obj_name

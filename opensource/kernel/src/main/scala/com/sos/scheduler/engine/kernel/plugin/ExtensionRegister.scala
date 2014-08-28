@@ -11,7 +11,7 @@ trait ExtensionRegister[A] {
   private val register = new mutable.ArrayBuffer[A]
   @volatile private var _extensions: immutable.Seq[A] = null
 
-  def addExtension(extension: A) {
+  def addExtension(extension: A): Unit = {
     synchronized {
       if (isActive || _extensions != null) throw new IllegalStateException
       register.append(extension)

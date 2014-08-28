@@ -22,7 +22,7 @@ class JS802IT extends SchedulerTest {
   private val collector = new {
     val set = mutable.HashSet[Any]()
 
-    def add(o: Any) {
+    def add(o: Any): Unit = {
       assertFalse("Duplicate event " + o, set contains o)
       set.add(o)
       if (set == Set(orderKey, jobName))
@@ -30,7 +30,7 @@ class JS802IT extends SchedulerTest {
     }
   }
 
-  @Test def test() {
+  @Test def test(): Unit = {
     controller.activateScheduler()
     startTime = secondNow() plusSeconds orderDelay
     scheduler.executeXml(orderElem(orderKey, startTime))
@@ -38,14 +38,14 @@ class JS802IT extends SchedulerTest {
     controller.waitForTermination(shortTimeout)
   }
 
-  @EventHandler def handleEvent(event: OrderTouchedEvent) {
+  @EventHandler def handleEvent(event: OrderTouchedEvent): Unit = {
     if (event.orderKey == orderKey) {
       assertTrue(s"Order ${event.orderKey} has been started before expected time $startTime", new DateTime() isAfter startTime)
       collector.add(event.orderKey)
     }
   }
 
-  @EventHandler def handleEvent(event: TaskEndedEvent) {
+  @EventHandler def handleEvent(event: TaskEndedEvent): Unit = {
     assertTrue(s"Job ${event.jobPath} has been started before expected time $startTime", new DateTime() isAfter startTime)
     if (event.jobPath.name == jobName)
       collector.add(event.jobPath.name)

@@ -59,11 +59,11 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  private def startOrderAt(at: String) {
+  private def startOrderAt(at: String): Unit = {
     scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at={at}/>
   }
 
-  private def setJobChainNodeStop(b: Boolean) {
+  private def setJobChainNodeStop(b: Boolean): Unit = {
     scheduler executeXml <job_chain_node.modify job_chain={orderKey.jobChainPath.string} state="200" action={if (b) "stop" else "process"}/>
   }
 }

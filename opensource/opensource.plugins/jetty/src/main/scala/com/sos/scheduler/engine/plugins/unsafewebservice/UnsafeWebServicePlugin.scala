@@ -15,7 +15,7 @@ object UnsafeHttpGetCommandPlugin {
   private val logger = Logger(getClass)
 
   final class WebServicesModule extends AbstractModule {
-    def configure() {
+    def configure(): Unit = {
       logger.warn("Use of UnsafeHttpGetCommandPlugin IS UNSAFE")
       bind(classOf[UnsafeCommandService])
     }

@@ -26,7 +26,7 @@ trait FileBasedSubsystem extends Subsystem {
 
   private val mutablePathSet = new mutable.HashSet[Path]
 
-  def onFileBasedEvent(e: FileBasedEvent) {
+  def onFileBasedEvent(e: FileBasedEvent): Unit = {
     val path = e.typedPath.asInstanceOf[Path]
     assert(e.typedPath.fileBasedType == fileBasedType)
     assert(path.getClass == description.pathClass, s"${path.getClass} is not expected ${description.getClass}")

@@ -12,7 +12,7 @@ object JsonRegexMatcher {
   case object AnyInt
 
   /** Wirft eine Exception, falls json nicht dem Muster entspricht. */
-  def checkRegexJson(json: String, patternMap: Map[String, Any]) {
+  def checkRegexJson(json: String, patternMap: Map[String, Any]): Unit = {
     val jsObject = json.parseJson.asJsObject
     patternMap.keySet shouldEqual jsObject.fields.keySet
     for ((name, expectedValue) <- patternMap) {

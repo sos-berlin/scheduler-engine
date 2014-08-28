@@ -26,7 +26,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
     addTests(removeBeforeReread = false)
   }
 
-  private def addTests(removeBeforeReread: Boolean) {
+  private def addTests(removeBeforeReread: Boolean): Unit = {
     "Precondition: Job chain with orders_recoverable=yes should contain orders" in {
       readJobChain(ordersAreRecoverable = true)
       for (o <- orderKeys) scheduler executeXml OrderCommand(o)
@@ -48,7 +48,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
       assertOrdersExists(shouldBeEmpty = removeBeforeReread)
     }
 
-    def readJobChain(ordersAreRecoverable: Boolean) {
+    def readJobChain(ordersAreRecoverable: Boolean): Unit = {
       if (removeBeforeReread && orderSubsystem.jobChainOption(testJobChainPath).isDefined)
         removeJobChain()
       autoClosing(controller.newEventPipe()) { eventPipe =>
@@ -57,7 +57,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
       }
     }
 
-    def removeJobChain() {
+    def removeJobChain(): Unit = {
       autoClosing(controller.newEventPipe()) { eventPipe =>
         orderSubsystem.removeJobChain(testJobChainPath)
         controller.getEventBus.dispatchEvents()
@@ -66,7 +66,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def assertOrdersExists(shouldBeEmpty: Boolean) {
+  private def assertOrdersExists(shouldBeEmpty: Boolean): Unit = {
     for (o <- orderKeys) {
       val hasNotOrder = orderSubsystem.orderOption(o).isEmpty
       if (hasNotOrder != shouldBeEmpty)

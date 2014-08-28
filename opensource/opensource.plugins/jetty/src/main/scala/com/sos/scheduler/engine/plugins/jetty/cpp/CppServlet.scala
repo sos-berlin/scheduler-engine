@@ -16,7 +16,7 @@ final class CppServlet @Inject private(
     schedulerIsClosed: SchedulerIsClosed)
   extends HttpServlet {
 
-  override def service(request: HttpServletRequest, response: HttpServletResponse) {
+  override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     if (request.getMethod == "GET" && request.getPathInfo == null) {
       response.setStatus(SC_MOVED_PERMANENTLY)
       response.setHeader("Location", request.getRequestURI +"/") // Basis muss mit Schrägstrich enden
@@ -24,17 +24,17 @@ final class CppServlet @Inject private(
       normalService(request, response)
   }
 
-  private def normalService(request: HttpServletRequest, response: HttpServletResponse) {
+  private def normalService(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val attributeName = classOf[CppServlet].getName
 
-    def startOperation() {
+    def startOperation(): Unit = {
       val operation = new Operation(request, response, schedulerHttpService, cppProxyRegister, schedulerIsClosed)
       try operation.start()
       catch { case x: Throwable => operation.tryClose(); throw x }
       if (!operation.isClosed) request.setAttribute(attributeName, operation)
     }
 
-    def continueOperation(operation: Operation) {
+    def continueOperation(operation: Operation): Unit = {
       try operation.continue()
       catch { case x: Throwable => operation.tryClose(); throw x }
       finally if (operation.isClosed) request.removeAttribute(attributeName)

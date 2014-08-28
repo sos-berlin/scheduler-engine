@@ -8,7 +8,7 @@ class SimpleIntervalTimerTest {
     val interval = 100
     val timer = new SimpleIntervalTimer(intervalMs=interval, startTime=startTime)
     
-    @Test def testNumberOfMs() {
+    @Test def testNumberOfMs(): Unit = {
         assert(timer.numberOfMs(startTime) == 0)
         assert(timer.numberOfMs(startTime+1) == 0)
         assert(timer.numberOfMs(startTime+interval-1) == 0)
@@ -16,7 +16,7 @@ class SimpleIntervalTimerTest {
         assert(timer.numberOfMs(startTime+2*interval) == 2)
     }
 
-    @Test def testNextNumberOfMs() {
+    @Test def testNextNumberOfMs(): Unit = {
         assert(timer.nextNumberOfMs(startTime) == 1)
         assert(timer.nextNumberOfMs(startTime+1) == 1)
         assert(timer.nextNumberOfMs(startTime+interval-1) == 1)
@@ -24,7 +24,7 @@ class SimpleIntervalTimerTest {
         assert(timer.nextNumberOfMs(startTime+2*interval) == 3)
     }
 
-    @Test def testMsUntilNextInterval() {
+    @Test def testMsUntilNextInterval(): Unit = {
         assert(timer.msUntilNextInterval(startTime) == interval)
         assert(timer.msUntilNextInterval(startTime+1) == interval - 1)
         assert(timer.msUntilNextInterval(startTime+interval-1) == 1)

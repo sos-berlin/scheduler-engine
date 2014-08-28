@@ -9,7 +9,7 @@ trait FutureCompletion[A] {
 
   private val promise = Promise[A]()
 
-  final override protected def onComplete(result: Try[A]) {
+  final override protected def onComplete(result: Try[A]): Unit = {
     promise complete result
   }
 

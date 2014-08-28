@@ -30,7 +30,7 @@ final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   private lazy val allDirectory = new File(controller.environment.configDirectory, "remote/_all")
   private lazy val serverTcpPort = findRandomFreeTcpPort()
 
-  override def onBeforeSchedulerActivation() {
+  override def onBeforeSchedulerActivation(): Unit = {
     val schedulerXmlString = schedulerXml(serverTcpPort).toString()
     controller.prepare()
     Files.write(schedulerXmlString, new File(controller.environment.configDirectory, "scheduler.xml"), UTF_8)
@@ -51,7 +51,7 @@ final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   }
 
   /** Auch bei den vielen Verbindungen soll com_remote.cxx noch funktionieren. */
-  private def checkTasks() {
+  private def checkTasks(): Unit = {
     val eventPipe = controller.newEventPipe()
     for (i <- 1 to 2)
       runJobAndWaitForEnd(testJobPath)

@@ -17,7 +17,7 @@ extends FileBased {
 
   def fileBasedType = FileBasedType.lock
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 }
 
 object Lock {

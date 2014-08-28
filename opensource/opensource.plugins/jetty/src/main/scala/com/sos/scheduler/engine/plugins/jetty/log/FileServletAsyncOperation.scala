@@ -15,7 +15,7 @@ final class FileServletAsyncOperation(request: HttpServletRequest, response: Htt
   private var started = false
   private var ended = false
 
-  def start(file: File) {
+  def start(file: File): Unit = {
     require(!started)
     if (file.toString.isEmpty)  throw new HttpException(javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST, "Log has no file")
     response.setStatus(HttpServletResponse.SC_OK)
@@ -25,12 +25,12 @@ final class FileServletAsyncOperation(request: HttpServletRequest, response: Htt
     started = true
   }
 
-  def close() {
+  def close(): Unit = {
     //TODO Sicherstellen, dass close() aufgerufen wird!
     in.close()
   }
 
-  def continue() {
+  def continue(): Unit = {
     require(started)
     woken.set(false)
     if (!ended && !request.isAsyncStarted) {
@@ -39,20 +39,20 @@ final class FileServletAsyncOperation(request: HttpServletRequest, response: Htt
     sendFileRemainder()
   }
 
-  def wake() {
+  def wake(): Unit = {
     require(!ended)
     if (started && !woken.getAndSet(true))
       request.getAsyncContext.dispatch()
   }
 
-  def end() {
+  def end(): Unit = {
     if (woken.get)
       ended = true
     else
       request.getAsyncContext.complete()
   }
 
-  private def sendFileRemainder() {
+  private def sendFileRemainder(): Unit = {
     val out = response.getOutputStream
     copy(in, out)
     out.flush()

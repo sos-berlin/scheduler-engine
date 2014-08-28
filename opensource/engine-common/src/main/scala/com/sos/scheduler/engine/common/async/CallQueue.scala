@@ -4,7 +4,7 @@ import java.util.NoSuchElementException
 
 trait CallQueue extends AutoCloseable {
 
-  def apply(f: ⇒ Unit) {
+  def apply(f: ⇒ Unit): Unit = {
     add(ShortTermCall { () ⇒ f })
   }
 
@@ -12,11 +12,11 @@ trait CallQueue extends AutoCloseable {
 
   def tryCancel[A](o: TimedCall[A]): Boolean
 
-  final def add(o: Runnable) {
+  final def add(o: Runnable): Unit = {
     add(ShortTermCall(o))
   }
 
-  final def remove(o: TimedCall[_]) {
+  final def remove(o: TimedCall[_]): Unit = {
     val removed = tryCancel(o)
     if (!removed) throw new NoSuchElementException(s"Unknown TimedCall '$o'")
   }

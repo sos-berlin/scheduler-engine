@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 trait HasCloserBeforeAndAfterAll extends HasCloser with BeforeAndAfterAll {
   this: Suite =>
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     closer.close()
     super.afterAll()
   }

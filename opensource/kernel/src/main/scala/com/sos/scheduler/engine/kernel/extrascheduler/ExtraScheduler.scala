@@ -25,7 +25,7 @@ extends AutoCloseable with HasCloser {
 
   onClose { isActivePromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") ) }
 
-  def start() {
+  def start(): Unit = {
     closeOnError {
       val process = startProcess()
       whenNotClosedAtShutdown {
@@ -52,9 +52,9 @@ extends AutoCloseable with HasCloser {
     processBuilder.start()
   }
 
-  private def startStdoutCollectorThread(in: InputStream) {
+  private def startStdoutCollectorThread(in: InputStream): Unit = {
     new Thread(s"Stdout collector $address") {
-      override def run() {
+      override def run(): Unit = {
         val expectedMessageCode = "SCHEDULER-902"
         try
           unbufferedInputStreamToLines(in, schedulerEncoding) { line ⇒
@@ -78,7 +78,7 @@ extends AutoCloseable with HasCloser {
     }
   }
 
-  override def close() {
+  override def close(): Unit = {
     logger.debug(s"Start closing $this")
     super.close()
     logger.debug(s"Finished closing $this")
@@ -92,7 +92,7 @@ extends AutoCloseable with HasCloser {
 private object ExtraScheduler {
   private val logger = Logger(getClass)
 
-  private def unbufferedInputStreamToLines(in: InputStream, encoding: Charset)(processLine: String ⇒ Unit) {
+  private def unbufferedInputStreamToLines(in: InputStream, encoding: Charset)(processLine: String ⇒ Unit): Unit = {
     val lineBuffer = new StringBuilder(1000)
     val i = new ReaderIterator(new InputStreamReader(in, encoding))
     try {

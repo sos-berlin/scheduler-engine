@@ -15,20 +15,20 @@ trait Plugin extends HasCloser {
     _isPrepared = false
   }
 
-  final def prepare() {
+  final def prepare(): Unit = {
     onPrepare()
     _isPrepared = true
   }
 
-  def onPrepare() {}
+  def onPrepare(): Unit = {}
 
-  final def activate() {
+  final def activate(): Unit = {
     if (!_isPrepared)  throw new IllegalStateException
     onActivate()
     _isActive = true
   }
 
-  def onActivate() {}
+  def onActivate(): Unit = {}
 
   def xmlState: String = ""
 

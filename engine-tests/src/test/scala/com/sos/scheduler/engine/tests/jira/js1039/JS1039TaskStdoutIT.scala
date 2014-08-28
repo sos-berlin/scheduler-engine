@@ -40,7 +40,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
     }).toMap
   }
 
-  protected override def onSchedulerActivated() {
+  protected override def onSchedulerActivated(): Unit = {
     scheduler executeXml <process_class name="test-remote" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
   }
 
@@ -56,7 +56,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
     result.variableMap(outOrErr) should include (s"/script $outOrErr/")
   }
 
-  private def checkJobs(testName: String, predicate: JobSetting => Boolean = _ => true)(f: (JobResult, String) => Unit) {
+  private def checkJobs(testName: String, predicate: JobSetting => Boolean = _ => true)(f: (JobResult, String) => Unit): Unit = {
     testName - {
       for (jobSetting <- JobSettings if predicate(jobSetting)) {
         s"Job ${jobSetting.jobPath.name}" - {
@@ -70,7 +70,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def shouldOccurExactlyOnce(in: String, what: String) {
+  private def shouldOccurExactlyOnce(in: String, what: String): Unit = {
     in should include (what)
     withClue(s"'$what' should occur only once:") {
       (new Regex(Pattern.quote(what)) findAllIn in).size shouldEqual 1

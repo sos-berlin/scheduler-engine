@@ -61,7 +61,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def resetOrderShouldWait(orderKey: OrderKey, scheduledAt: Option[Instant])(startOrder: ⇒ Unit) {
+  private def resetOrderShouldWait(orderKey: OrderKey, scheduledAt: Option[Instant])(startOrder: ⇒ Unit): Unit = {
     autoClosing(controller.newEventPipe()) { implicit eventPipe ⇒
       startOrder
       checkBehaviourUntilReset(orderKey)
@@ -72,7 +72,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def checkBehaviourUntilReset(orderKey: OrderKey)(implicit eventPipe: EventPipe) {
+  private def checkBehaviourUntilReset(orderKey: OrderKey)(implicit eventPipe: EventPipe): Unit = {
     if (orderKey != StandingOrderKey) // Ein Dauerauftrag überspringt den ersten Knoten ohne Event
       eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State100
     eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State200

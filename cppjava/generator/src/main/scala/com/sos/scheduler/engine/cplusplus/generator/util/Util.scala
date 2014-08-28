@@ -10,8 +10,8 @@ import java.nio.charset.Charset
 object Util {
     def inParentheses(a: Seq[_]) = a mkString ("(",", ", ")")
 
-    def writingFileAndLog(file: File, encoding: Charset)(writeFunction: Writer => Unit) {
-        def log() { defaultPrinter.println(file) }
+    def writingFileAndLog(file: File, encoding: Charset)(writeFunction: Writer => Unit): Unit = {
+        def log(): Unit = { defaultPrinter.println(file) }
         var ok = false
         try {
             writingFileIfDifferent(file, encoding)(writeFunction) match {

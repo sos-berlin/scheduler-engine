@@ -22,7 +22,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
-  override def onBeforeSchedulerActivation() {
+  override def onBeforeSchedulerActivation(): Unit = {
     for (i <- JobIncludeSettings flatMap { _.includes })
       (controller.environment.liveDirectory / i.filename).write(i.content, i.encoding)
   }

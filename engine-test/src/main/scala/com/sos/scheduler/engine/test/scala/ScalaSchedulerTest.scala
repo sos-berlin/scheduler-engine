@@ -33,7 +33,7 @@ trait ScalaSchedulerTest
   protected implicit final def implicitController =   // Scala 10.3 mag implicit controller nicht, also so
     controller
 
-  override protected final def beforeAll() {
+  override protected final def beforeAll(): Unit = {
     if (testNames.isEmpty) {
       val line = s"EMPTY TEST SUITE ${getClass.getName}"
       logger warn line
@@ -59,11 +59,11 @@ trait ScalaSchedulerTest
   }
 
   /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
-  protected def checkedBeforeAll() {}
+  protected def checkedBeforeAll(): Unit = {}
 
-  protected def onBeforeSchedulerActivation() {}
+  protected def onBeforeSchedulerActivation(): Unit = {}
 
-  protected def onSchedulerActivated() {}
+  protected def onSchedulerActivated(): Unit = {}
 
   /** Zur Bequemlichkeit.
    * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */

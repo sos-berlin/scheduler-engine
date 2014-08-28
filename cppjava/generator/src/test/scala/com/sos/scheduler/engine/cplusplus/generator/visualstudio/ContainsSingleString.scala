@@ -9,7 +9,7 @@ case class ContainsSingleString(singleString: String) extends BaseMatcher[String
       first > 0  &&  s.indexOf(singleString, first + singleString.length) == -1
   }
 
-  def describeTo(d: Description) {
+  def describeTo(d: Description): Unit = {
     d.appendText("single occurrence of " + singleString)
   }
 }

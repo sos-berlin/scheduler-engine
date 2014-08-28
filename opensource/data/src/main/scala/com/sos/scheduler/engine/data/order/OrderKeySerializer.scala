@@ -10,7 +10,7 @@ final class OrderKeySerializer extends JsonSerializer[OrderKey] {
   override def handledType =
     classOf[OrderKey]
 
-  def serialize(o: OrderKey, g: JsonGenerator, p: SerializerProvider) {
+  def serialize(o: OrderKey, g: JsonGenerator, p: SerializerProvider): Unit = {
     g.writeStartObject()
     g.writeStringField("jobChainPath", o.jobChainPath.string)
     g.writeStringField("id", o.id.string)

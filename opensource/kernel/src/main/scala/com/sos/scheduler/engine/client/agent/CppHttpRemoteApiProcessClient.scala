@@ -21,7 +21,7 @@ final class CppHttpRemoteApiProcessClient private(starter: HttpRemoteProcessStar
   @volatile private var state: State = Initialized
 
   @ForCpp
-  def startRemoteTask(schedulerApiTcpPort: Int) {
+  def startRemoteTask(schedulerApiTcpPort: Int): Unit = {
     state = Starting
     val future = starter.startRemoteTask(schedulerApiTcpPort)
     future onComplete {
@@ -39,7 +39,7 @@ final class CppHttpRemoteApiProcessClient private(starter: HttpRemoteProcessStar
   }
 
   @ForCpp
-  def closeRemoteTask() {
+  def closeRemoteTask(): Unit = {
     closeRemoteTask(kill = false)
   }
 

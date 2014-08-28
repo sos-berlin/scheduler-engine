@@ -14,7 +14,7 @@ final class WebServer(jettyConfiguration: JettyConfiguration) extends HasCloser 
 
   private def connectors: Seq[Connector] = Option(jettyServer.getConnectors) map { _.toSeq } getOrElse Nil
 
-  def start() {
+  def start(): Unit = {
     jettyServer.start()
     onClose {
       jettyServer.stop()

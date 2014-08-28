@@ -119,7 +119,7 @@ final class JS1048IT extends FreeSpec {
    }
   }
 
-  private def modifyOrders()(implicit controller: TestSchedulerController) {
+  private def modifyOrders()(implicit controller: TestSchedulerController): Unit = {
     controller.scheduler executeXml ModifyOrderCommand(SuspendOrderKey, suspended = Some(true))
     order(SuspendOrderKey) shouldBe 'suspended
     order(TitleOrderKey).title shouldEqual OriginalTitle
@@ -128,22 +128,22 @@ final class JS1048IT extends FreeSpec {
     requireDatabaseRecords(suspendedOrderExists = true, expectedTitle = Some(CommandModifiedTitle))
   }
 
-  private def removeOrderFiles(testEnvironment: TestEnvironment) {
+  private def removeOrderFiles(testEnvironment: TestEnvironment): Unit = {
     for (o <- OrderKeys)
       Files.delete(o.file(testEnvironment.liveDirectory).toPath)
   }
 
-  private def requireOriginalFileBasedOrders()(implicit controller: TestSchedulerController) {
+  private def requireOriginalFileBasedOrders()(implicit controller: TestSchedulerController): Unit = {
     order(SuspendOrderKey) should not be 'suspended
     order(TitleOrderKey).title shouldEqual OriginalTitle
   }
   
-  private def requireOrdersNotExist()(implicit controller: TestSchedulerController) {
+  private def requireOrdersNotExist()(implicit controller: TestSchedulerController): Unit = {
     orderOption(SuspendOrderKey) should not be 'defined
     orderOption(TitleOrderKey) should not be 'defined
   }
 
-  private def requireDatabaseRecords(suspendedOrderExists: Boolean, expectedTitle: Option[String])(implicit controller: TestSchedulerController) {
+  private def requireDatabaseRecords(suspendedOrderExists: Boolean, expectedTitle: Option[String])(implicit controller: TestSchedulerController): Unit = {
     transaction(entityManagerFactory) { implicit entityManager =>
       withClue(s"Existence of database record for $SuspendOrderKey:") {
         orderStore.tryFetch(SuspendOrderKey).isDefined shouldEqual suspendedOrderExists   // Wert von Suspended steckt irgendwo im XML. Prüfen wir nicht.

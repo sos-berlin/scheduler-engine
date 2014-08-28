@@ -45,7 +45,7 @@ object FileUtil {
     from.delete()
   }
 
-  def deleteFile(file: File) {
+  def deleteFile(file: File): Unit = {
     val ok = file.delete
     if (!ok) {
       if (!file.exists) throw new RuntimeException("File to be deleted does not exist: " + file)
@@ -54,12 +54,12 @@ object FileUtil {
     }
   }
 
-  def requireFileExists(f: File, argumentName: String) {
+  def requireFileExists(f: File, argumentName: String): Unit = {
     if (f.toString.isEmpty)  throw new IllegalArgumentException("Missing argument '" + argumentName + '"')
     if (!f.exists)  throw new IllegalArgumentException("Non existant file or directory for '" + argumentName + "'", new FileNotFoundException(f.toString))
   }
 
-  def requireDirectoryExists(f: File, argumentName: String = "") {
+  def requireDirectoryExists(f: File, argumentName: String = ""): Unit = {
     if (f.toString.isEmpty)  throw new IllegalArgumentException("Missing argument '" + argumentName + '"')
     if (!f.exists)  throw new IllegalArgumentException("Non existant directory for '" + argumentName + "'", new FileNotFoundException(f.toString))
     if (!f.isDirectory)  throw new IllegalArgumentException("Is not an directory for '" + argumentName + "': " + f)

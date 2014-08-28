@@ -11,7 +11,7 @@ import scala.collection.JavaConversions._
 final class VariableSet(cppProxy: Variable_setC)
 extends UnmodifiableVariableSet with Sister with Iterable[(String, String)] {
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
   override def size: Int =
     cppProxy.count
@@ -48,7 +48,7 @@ extends UnmodifiableVariableSet with Sister with Iterable[(String, String)] {
 //  private def get(name: String): Option[String] =
 //    Option(cppProxy.get_string(name))
 
-  def update(name: String, value: String) {
+  def update(name: String, value: String): Unit = {
     cppProxy.set_var(name, value)
   }
 }

@@ -9,7 +9,7 @@ import org.hamcrest.Matchers._
 class PackageOpsTest {
   import PackageOps._
 
-  @Test def testClassNamesOfPackage() {
+  @Test def testClassNamesOfPackage(): Unit = {
     // Funktioniert nur mit Klassen aus einem Jar, nicht mit Klassen im Dateisystem. Deshalb nehmen wir scala-library.jar zum Test.
     // Beim Aufruf mit eingenem Paket muss das mit mvn install zu einem Jar gemacht werden.
     val clas = classOf[CppProxy]

@@ -9,20 +9,20 @@ import javax.ws.rs.core._
 import javax.ws.rs.{GET, Path}
 
 final class JettyModule extends JerseyModule {
-  override def configureServlets() {
+  override def configureServlets(): Unit = {
     configureEngineServlets()
     configureOldCppServlet()
     super.configureServlets()
     bind(classOf[DummyService])
   }
 
-  private def configureEngineServlets() {
+  private def configureEngineServlets(): Unit = {
     serve(s"$enginePrefixPath/log") `with` classOf[MainLogServlet]
     serve(s"$enginePrefixPath/job.log") `with` classOf[JobLogServlet]
     serve(s"$enginePrefixPath/order.log") `with` classOf[OrderLogServlet]
   }
 
-  private def configureOldCppServlet() {
+  private def configureOldCppServlet(): Unit = {
     serve(s"$cppPrefixPath") `with` classOf[CppServlet]
     serve(s"$cppPrefixPath/*") `with` classOf[CppServlet]
   }

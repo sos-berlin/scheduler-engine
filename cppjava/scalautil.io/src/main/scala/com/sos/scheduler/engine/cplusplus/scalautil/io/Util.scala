@@ -26,12 +26,12 @@ object Util {
         finally if (!ok) closeQuietly(a)
     }
 
-    def closeQuietly[A <: HasClose](o: A) {
+    def closeQuietly[A <: HasClose](o: A): Unit = {
         try o.close()
         catch { case x: Exception => logger.error(x.toString, x) }
     }
 
-    def suppressLogging[A](c: Class[_])(f: => A) {
+    def suppressLogging[A](c: Class[_])(f: => A): Unit = {
 //        val lg = Logger.getLogger(Util.getClass)
 //        val originalLevel = lg.getLevel
 //        lg.setLevel(Level.OFF)

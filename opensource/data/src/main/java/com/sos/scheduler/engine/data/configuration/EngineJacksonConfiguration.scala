@@ -14,7 +14,7 @@ object EngineJacksonConfiguration {
     objectMapper
   }
 
-  def modifyObjectMapper(o: ObjectMapper) {
+  def modifyObjectMapper(o: ObjectMapper): Unit = {
     o.registerModule(DefaultScalaModule)
     o.registerModule(new GuavaModule)
   }

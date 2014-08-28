@@ -40,7 +40,7 @@ class CppXmlSchemaValidatorTest extends FreeSpec {
       validationShouldFail { validate(InvalidXmlUrl) }
     }
 
-    def validate(u: URL) {
+    def validate(u: URL): Unit = {
       autoClosing(u.openStream()) { in ⇒
         validator.validate(new StreamSource(in))
       }
@@ -59,7 +59,7 @@ object CppXmlSchemaValidatorTest {
     factory.newDocumentBuilder.parse(u.toURI.toString)
   }
 
-  private def validationShouldFail(f: => Unit) {
+  private def validationShouldFail(f: => Unit): Unit = {
     val x = intercept[SAXParseException] { f }
     x.getMessage should include ("INVALID_ATTRIBUTE")
   }

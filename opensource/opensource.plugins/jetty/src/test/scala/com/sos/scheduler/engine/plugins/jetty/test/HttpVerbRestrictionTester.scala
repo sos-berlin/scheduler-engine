@@ -11,17 +11,17 @@ import scala.collection.JavaConversions._
  */
 final class HttpVerbRestrictionTester(webResource: WebResource) {
 
-  def checkPathForVerbs(path: String, verbSet: Set[String]) {
+  def checkPathForVerbs(path: String, verbSet: Set[String]): Unit = {
     httpTraceShouldBeNotAllowed(path)
     httpOptionShouldReturnVerbs(path, verbSet)
   }
 
-  def httpTraceShouldBeNotAllowed(path: String) {
+  def httpTraceShouldBeNotAllowed(path: String): Unit = {
     webResource.path(path).method("TRACE", classOf[ClientResponse]).getClientResponseStatus should
       (equal (ClientResponse.Status.METHOD_NOT_ALLOWED) or equal (ClientResponse.Status.FORBIDDEN))
   }
 
-  def httpOptionShouldReturnVerbs(path: String, verbSet: Set[String]) {
+  def httpOptionShouldReturnVerbs(path: String, verbSet: Set[String]): Unit = {
     val response = webResource.path(path).options(classOf[ClientResponse])
     if (verbSet.isEmpty) {
       response.getClientResponseStatus shouldEqual ClientResponse.Status.METHOD_NOT_ALLOWED

@@ -31,13 +31,13 @@ extends Sister {
   private def jobPath = jobSister.path
   //var stateText = ""
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
-  @ForCpp def close() {
+  @ForCpp def close(): Unit = {
     for (j <- jobOption) j.close()
   }
 
-  @ForCpp def setXmlBytes(bytes: Array[Byte]) {
+  @ForCpp def setXmlBytes(bytes: Array[Byte]): Unit = {
     configuration = ScalaXMLEventReader.parseDocument(new StreamSource(new ByteArrayInputStream(bytes))) { reader ⇒
       JobConfigurationXMLParser.parseWithReader(timeZone)(reader)
     }
@@ -61,13 +61,13 @@ extends Sister {
     true
   }
 
-  @ForCpp def onPrepareToRemove() {
+  @ForCpp def onPrepareToRemove(): Unit = {
   }
 
   @ForCpp def canBeRemovedNow: Boolean =
     jobOption exists { _.canBeRemovedNow }
 
-  @ForCpp def onRemoveNow() {}
+  @ForCpp def onRemoveNow(): Unit = {}
 
   @ForCpp def removalError: String =
     "removelError not implemented"
@@ -81,7 +81,7 @@ extends Sister {
   @ForCpp def description: String =
     ???  //job.configuration.description
 
-  @ForCpp def setStateText(o: String) {
+  @ForCpp def setStateText(o: String): Unit = {
     stateText = o
   }
 
@@ -101,11 +101,11 @@ extends Sister {
     case _ => ???
   }
 
-  @ForCpp def stop() {
+  @ForCpp def stop(): Unit = {
     for (j <- jobOption) j executeCommand StopJobCommand
   }
 
-  @ForCpp def stopSimply() {
+  @ForCpp def stopSimply(): Unit = {
     for (j <- jobOption) j executeCommand StopJobCommand
   }
 
@@ -131,22 +131,22 @@ extends Sister {
     ???
   }
 
-  @ForCpp def onProcessIsIdle() {
+  @ForCpp def onProcessIsIdle(): Unit = {
     ???
   }
 
 
   // SCHEDULE
 
-  @ForCpp def setScheduleDOM(o: Element) {
+  @ForCpp def setScheduleDOM(o: Element): Unit = {
     ???
   }
 
-  @ForCpp def onReferencedScheduleLoaded() {
+  @ForCpp def onReferencedScheduleLoaded(): Unit = {
     ???
   }
 
-  @ForCpp def onReferencedScheduleModified() {
+  @ForCpp def onReferencedScheduleModified(): Unit = {
     ???
   }
 
@@ -164,11 +164,11 @@ extends Sister {
     job.startTask()
   }
 
-  @ForCpp def enqueueTask(o: TaskPersistentState) {
+  @ForCpp def enqueueTask(o: TaskPersistentState): Unit = {
     ???
   }
 
-  @ForCpp def removeRunningTask(taskId: Int) {
+  @ForCpp def removeRunningTask(taskId: Int): Unit = {
     ???
   }
 
@@ -193,7 +193,7 @@ extends Sister {
     ???
   }
 
-  @ForCpp def disconnectJobNode(o: Job_nodeC) {
+  @ForCpp def disconnectJobNode(o: Job_nodeC): Unit = {
     ???
   }
 
@@ -201,19 +201,19 @@ extends Sister {
     false
   }
 
-  @ForCpp def setOrderControlled() {
+  @ForCpp def setOrderControlled(): Unit = {
     ???
   }
 
-  @ForCpp def setIdleTimeout(epochMillis: Long) {
+  @ForCpp def setIdleTimeout(epochMillis: Long): Unit = {
     ???
   }
 
-  @ForCpp def onOrderPossiblyAvailable() {
+  @ForCpp def onOrderPossiblyAvailable(): Unit = {
     ???
   }
 
-  @ForCpp def signalEarlierOrder(epochMillis: Long, orderName: String, function: String) {
+  @ForCpp def signalEarlierOrder(epochMillis: Long, orderName: String, function: String): Unit = {
     ???
   }
 

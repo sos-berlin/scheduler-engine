@@ -14,24 +14,24 @@ trait HasCloser extends AutoCloseable with CloseOnError {
     _closer
   }
 
-  protected final def onCloseOrShutdown(body: ⇒ Unit) {
+  protected final def onCloseOrShutdown(body: ⇒ Unit): Unit = {
     closer.onCloseOrShutdown(body)
   }
 
-  protected final def whenNotClosedAtShutdown(body: ⇒ Unit) {
+  protected final def whenNotClosedAtShutdown(body: ⇒ Unit): Unit = {
     closer.whenNotClosedAtShutdown(body)
   }
 
   /** Registers the function for execution in close(), in reverse order of registering. */
-  protected final def onClose(f: ⇒ Unit) {
+  protected final def onClose(f: ⇒ Unit): Unit = {
     closer.register(toGuavaCloseable(f))
   }
 
-  protected final def registerAutoCloseable(autoCloseable: AutoCloseable) {
+  protected final def registerAutoCloseable(autoCloseable: AutoCloseable): Unit = {
     closer.register(toGuavaCloseable(autoCloseable))
   }
 
-  def close() {
+  def close(): Unit = {
     closer.close()
   }
 }
@@ -42,18 +42,18 @@ object HasCloser {
 
   object implicits {
     implicit class RichCloser(val delegate: Closer) extends AnyVal {
-      final def onCloseOrShutdown(body: ⇒ Unit) {
+      final def onCloseOrShutdown(body: ⇒ Unit): Unit = {
         apply(body)
         whenNotClosedAtShutdown(body)
       }
       
-      final def apply(body: ⇒ Unit) {
+      final def apply(body: ⇒ Unit): Unit = {
         delegate.register(toGuavaCloseable(body))
       }
 
-      final def whenNotClosedAtShutdown(body: ⇒ Unit) {
+      final def whenNotClosedAtShutdown(body: ⇒ Unit): Unit = {
         val hook = new Thread(s"ShutdownHook for $toString") {
-          override def run() {
+          override def run(): Unit = {
             body
           }
         }
@@ -80,7 +80,7 @@ object HasCloser {
 
   private def toGuavaCloseable(f: ⇒ Unit): GuavaCloseable =
     new GuavaCloseable {
-      def close() {
+      def close(): Unit = {
         f
       }
     }

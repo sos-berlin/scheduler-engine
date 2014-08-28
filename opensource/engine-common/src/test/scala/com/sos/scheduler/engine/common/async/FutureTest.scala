@@ -36,16 +36,16 @@ private object FutureTest {
   private class QueuedExecutionContextExecutor extends ExecutionContextExecutor {
     private val queue = mutable.UnrolledBuffer[Runnable]()
 
-    def execute(runnable: Runnable) {
+    def execute(runnable: Runnable): Unit = {
       queue += runnable
     }
 
-    def run() {
+    def run(): Unit = {
       queue foreach { r => r.run() }
       queue.remove(0, queue.size)
     }
 
-    def reportFailure(t: Throwable) {
+    def reportFailure(t: Throwable): Unit = {
       sys.error(t.toString)
     }
   }

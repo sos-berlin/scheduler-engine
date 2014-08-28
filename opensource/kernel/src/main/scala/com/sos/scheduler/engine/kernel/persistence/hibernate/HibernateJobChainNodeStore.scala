@@ -17,7 +17,7 @@ with JobChainNodeEntityConverter {
   def fetchAll(jobChainPath: JobChainPath)(implicit em: EntityManager) =
     (TypedBoundQuery("select n from JobChainNodeEntity n where ", classOf[JobChainNodeEntity]) ++ nodeCondition(jobChainPath)).getResultList map toObject
 
-  def deleteAll(jobChainPath: JobChainPath)(implicit em: EntityManager) {
+  def deleteAll(jobChainPath: JobChainPath)(implicit em: EntityManager): Unit = {
     (BoundQuery("delete from JobChainNodeEntity n where ") ++ nodeCondition(jobChainPath)).executeUpdate()
   }
 

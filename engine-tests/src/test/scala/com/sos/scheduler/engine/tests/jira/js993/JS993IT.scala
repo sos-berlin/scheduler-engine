@@ -38,14 +38,14 @@ final class JS993IT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  @EventHandler def handle(e: ErrorLogEvent) {
+  @EventHandler def handle(e: ErrorLogEvent): Unit = {
     if (e.message contains "SCHEDULER-428") {    // SCHEDULER-428  Error when reading base file ...
       e.message should include ("SCHEDULER-482")  // SCHEDULER-482  Language 'javascript' is not supported on 64 bit
       errorLogged = true
     }
   }
 
-  private def startJob(jobPath: JobPath) {
+  private def startJob(jobPath: JobPath): Unit = {
     scheduler executeXml <start_job job={jobPath.string}/>
   }
 }

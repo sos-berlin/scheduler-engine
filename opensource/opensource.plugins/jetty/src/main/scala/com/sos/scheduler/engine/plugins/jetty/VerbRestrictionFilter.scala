@@ -15,18 +15,18 @@ import scala.collection.JavaConversions._
  */
 final class VerbRestrictionFilter extends Filter {
 
-  def init(filterConfig: FilterConfig) {}
+  def init(filterConfig: FilterConfig): Unit = {}
 
-  def destroy() {}
+  def destroy(): Unit = {}
 
-  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
     request match {
       case httpRequest: HttpServletRequest ⇒ filterHttp(httpRequest, response.asInstanceOf[HttpServletResponse], chain)
       case _ ⇒ chain.doFilter(request, response)
     }
   }
 
-  private def filterHttp(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
+  private def filterHttp(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain): Unit = {
     val verb = request.getMethod
     if (!PermittedVerbs(verb)) {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED)

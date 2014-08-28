@@ -88,7 +88,7 @@ with EventSource {
     }
 
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
-  def forceFileReread() {
+  def forceFileReread(): Unit = {
     cppProxy.set_force_file_reread()
   }
 

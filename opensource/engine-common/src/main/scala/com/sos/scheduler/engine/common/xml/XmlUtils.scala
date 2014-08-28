@@ -75,7 +75,7 @@ import scala.sys.error
   def loadXml(in: InputStream): Document =
     documentBuilder.parse(in) sideEffect postInitializeDocument
 
-  private def postInitializeDocument(doc: Document) {
+  private def postInitializeDocument(doc: Document): Unit = {
     doc.setXmlStandalone(true)
   }
 
@@ -101,15 +101,15 @@ import scala.sys.error
   private def removeXmlProlog(xml: String) =
     if (xml startsWith "<?") xml.replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "") else xml
 
-  def writeXmlTo(n: Node, o: OutputStream, encoding: Charset, indent: Boolean) {
+  def writeXmlTo(n: Node, o: OutputStream, encoding: Charset, indent: Boolean): Unit = {
     writeXmlTo(n, new StreamResult(o), Some(encoding), indent = indent)
   }
 
-  def writeXmlTo(n: Node, w: Writer, indent: Boolean = false) {
+  def writeXmlTo(n: Node, w: Writer, indent: Boolean = false): Unit = {
     writeXmlTo(n, new StreamResult(w), encoding = None, indent = indent)
   }
 
-  private def writeXmlTo(node: Node, result: Result, encoding: Option[Charset], indent: Boolean) {
+  private def writeXmlTo(node: Node, result: Result, encoding: Option[Charset], indent: Boolean): Unit = {
     val transformer = transformerFactory.newTransformer()
     for (o <- encoding) transformer.setOutputProperty(ENCODING, o.name)
     transformer.setOutputProperty(OMIT_XML_DECLARATION, if (encoding.isDefined) "no" else "yes")

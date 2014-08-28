@@ -7,7 +7,7 @@ import scala.collection.JavaConversions._
 
 object CppLogger {
 
-  def log(prefix: String, level: SchedulerLogLevel, lines: String) {
+  def log(prefix: String, level: SchedulerLogLevel, lines: String): Unit = {
     if (level != SchedulerLogLevel.none) {
       val logger = LoggerFactory.getLogger("JobScheduler")
       for (line <- splitLines(lines)) {
@@ -17,7 +17,7 @@ object CppLogger {
     }
   }
 
-  private def logLine(logger: Logger, level: SchedulerLogLevel, line: String) {
+  private def logLine(logger: Logger, level: SchedulerLogLevel, line: String): Unit = {
     level match {
       case SchedulerLogLevel.error   => logger.error(line)
       case SchedulerLogLevel.warning => logger.warn(line)

@@ -61,7 +61,7 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
       result
     }
 
-    def cleanUpAfterExcecute() {
+    def cleanUpAfterExcecute(): Unit = {
       orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
       job.endTasks()   // Task kann schon beendet und Job schon gestoppt sein.
       eventPipe.nextAny[TaskClosedEvent] match { case e =>
@@ -70,7 +70,7 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
       waitForCondition(TimeoutWithSteps(millis(3000), millis(10))) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
     }
 
-    def checkAssertions(event: MyFinishedEvent) {
+    def checkAssertions(event: MyFinishedEvent): Unit = {
       assert(event.orderKey === setting.orderKey)
       assert(expected.orderStateExpectation matches event.state, "Expected OrderState="+expected.orderStateExpectation+", but was "+event.state)
       assert(event.spoolerProcessAfterParameterOption === expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
@@ -78,30 +78,30 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
       assert(messageCodes.toMap === expected.messageCodes.toMap)
     }
 
-    private def cleanUpAfterTest() {
+    private def cleanUpAfterTest(): Unit = {
       scheduler executeXml <modify_job job={setting.jobPath.string} cmd="unstop"/>
       messageCodes.clear()
     }
   }
 
-  @HotEventHandler def handleEvent(e: OrderStepEndedEvent, order: UnmodifiableOrder) {
+  @HotEventHandler def handleEvent(e: OrderStepEndedEvent, order: UnmodifiableOrder): Unit = {
     if (e.stateTransition == OrderStateTransition.keepState) {
       // Es wird kein OrderFinishedEvent geben.
       publishMyFinishedEvent(order)
     }
   }
 
-  @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder) {
+  @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder): Unit = {
     publishMyFinishedEvent(order)
   }
 
-  private def publishMyFinishedEvent(order: UnmodifiableOrder) {
+  private def publishMyFinishedEvent(order: UnmodifiableOrder): Unit = {
     controller.getEventBus.publishCold(MyFinishedEvent(
       order.key, order.state,
       Option(emptyToNull(order.parameters(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
   }
 
-  @EventHandler def handleEvent(e: LogEvent) {
+  @EventHandler def handleEvent(e: LogEvent): Unit = {
     if (Expected.logLevels contains e.level) {
       for (code <- Option(e.getCodeOrNull))
         messageCodes.addBinding(e.level, code)

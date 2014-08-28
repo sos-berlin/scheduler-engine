@@ -88,7 +88,7 @@ object ScalaJoda {
   implicit def jodaToConcurrentDuration(o: Duration) =
     new FiniteDuration(o.getMillis, TimeUnit.MILLISECONDS)
 
-  def sleep(d: Duration) {
+  def sleep(d: Duration): Unit = {
     sleep(d.getMillis)
   }
 
@@ -96,7 +96,7 @@ object ScalaJoda {
     val m = 1000000
     val until = System.nanoTime() + millis * m
     Thread.sleep(millis)
-    @tailrec def extraSleep() {
+    @tailrec def extraSleep(): Unit = {
       val remainingNanos = until - System.nanoTime()
       if (remainingNanos > 0) {
         extraSleepCount += 1

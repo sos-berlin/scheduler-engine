@@ -10,7 +10,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @Singleton
 final class JobLogServlet @Inject private(jobSubsystem: JobSubsystem) extends GetOnlyServlet {
 
-  override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
+  override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
       val job = jobSubsystem.job(JobPath.makeAbsolute(Option(request.getParameter("job")).get))
       LogServletAsyncOperation(request, response, job.log)

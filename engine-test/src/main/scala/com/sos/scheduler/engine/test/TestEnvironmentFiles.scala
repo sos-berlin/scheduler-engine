@@ -18,7 +18,7 @@ final class TestEnvironmentFiles(
   private val resolver = new PathMatchingResourcePatternResolver
   private val lastModified = now() - 3.s
 
-  private def copy() {
+  private def copy(): Unit = {
     for ((name, url) <- resourceUrls) copyResource(url, name)
   }
 
@@ -34,7 +34,7 @@ final class TestEnvironmentFiles(
   private def resources(p: ResourcePath, namePattern: String): Iterable[Resource] =
     resolver.getResources(s"classpath*:${p.path}/$namePattern")
 
-  private def copyResource(url: URL, name: String) {
+  private def copyResource(url: URL, name: String): Unit = {
     val f = new File(directory, name)
     fileTransformer.transform(url, f)
     f.setLastModified(lastModified.getMillis)
@@ -53,7 +53,7 @@ object TestEnvironmentFiles {
       configResourcePath: ResourcePath,
       directory: File,
       nameMap: Map[String, String] = Map(),
-      fileTransformer: ResourceToFileTransformer = StandardResourceToFileTransformer.singleton) {
+      fileTransformer: ResourceToFileTransformer = StandardResourceToFileTransformer.singleton): Unit = {
     new TestEnvironmentFiles(configResourcePath, directory, nameMap, fileTransformer).copy()
   }
 

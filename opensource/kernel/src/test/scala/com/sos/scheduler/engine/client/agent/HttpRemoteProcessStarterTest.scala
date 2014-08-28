@@ -20,7 +20,7 @@ import scala.concurrent.{Await, ExecutionContext}
 final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll {
   private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val injector = Guice.createInjector(new AbstractModule {
-    override def configure() {
+    override def configure(): Unit = {
       bind(classOf[ActorSystem]) toInstance ActorSystem()
       bind(classOf[ExecutionContext]) toInstance ExecutionContext.global
     }
@@ -34,12 +34,12 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
     javaClasspath = DummyJavaClasspath)
   private lazy val client = injector.apply[HttpRemoteProcessStarter.Factory].apply(conf)
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     val future = server.start()
     Await.result(future, 15.seconds)
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     injector.apply[ActorSystem].shutdown()
   }
 

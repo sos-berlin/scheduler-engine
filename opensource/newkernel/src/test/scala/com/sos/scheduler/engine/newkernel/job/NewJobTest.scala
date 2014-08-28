@@ -41,11 +41,11 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
     }
   }
 
-  @EventHandler def handle(e: TaskStartedEvent) {
+  @EventHandler def handle(e: TaskStartedEvent): Unit = {
     logger info e.toString
   }
 
-  @EventHandler def handle(e: TaskEndedEvent) {
+  @EventHandler def handle(e: TaskEndedEvent): Unit = {
     logger info e.toString
     callRunner.end()
   }

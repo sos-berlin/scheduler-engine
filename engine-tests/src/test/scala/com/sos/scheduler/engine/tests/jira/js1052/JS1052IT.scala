@@ -32,7 +32,7 @@ final class JS1052IT extends FunSuite with ScalaSchedulerTest {
       register(socket)
     }
 
-    def register(socket: Socket) {
+    def register(socket: Socket): Unit = {
       val writer = new OutputStreamWriter(socket.getOutputStream)
       val reader = new InputStreamReader(socket.getInputStream)
       writer.write("<register_remote_scheduler scheduler_id='TEST-SCHEDULER-ID' tcp_port='4444' version='1.5.3251'/>")

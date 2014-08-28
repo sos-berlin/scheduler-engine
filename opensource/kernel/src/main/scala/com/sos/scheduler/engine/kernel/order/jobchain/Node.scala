@@ -61,7 +61,7 @@ abstract class Node extends Sister with PluginXmlConfigurable {
   final def action =
     JobChainNodeAction.ofCppName(cppProxy.string_action)
 
-  final def action_=(o: JobChainNodeAction) {
+  final def action_=(o: JobChainNodeAction): Unit = {
     cppProxy.set_action_string(o.toCppName)
   }
 }

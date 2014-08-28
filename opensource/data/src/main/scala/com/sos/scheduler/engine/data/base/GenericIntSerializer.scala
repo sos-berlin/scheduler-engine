@@ -9,7 +9,7 @@ final class GenericIntSerializer extends JsonSerializer[GenericInt] {
 
   override def handledType = classOf[GenericInt]
 
-  def serialize(o: GenericInt, g: JsonGenerator, p: SerializerProvider) {
+  def serialize(o: GenericInt, g: JsonGenerator, p: SerializerProvider): Unit = {
     g.writeNumber(o.value)
   }
 }

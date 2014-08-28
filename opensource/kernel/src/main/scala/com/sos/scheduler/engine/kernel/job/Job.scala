@@ -21,7 +21,7 @@ with JobPersistence {
 
   type Path = JobPath
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
   def fileBasedType = FileBasedType.job
 
@@ -36,18 +36,18 @@ with JobPersistence {
   protected def nextStartInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_start_time_millis)
 
-  def endTasks() {
+  def endTasks(): Unit = {
     setStateCommand(JobStateCommand.endTasks)
   }
 
-  def setStateCommand(c: JobStateCommand) {
+  def setStateCommand(c: JobStateCommand): Unit = {
     schedulerThreadFuture { cppProxy.set_state_cmd(c.cppValue) } (schedulerThreadCallQueue)
   }
 
   def isPermanentlyStopped =
     cppProxy.is_permanently_stopped
 
-  private[job] def enqueueTaskPersistentState(t: TaskPersistentState) {
+  private[job] def enqueueTaskPersistentState(t: TaskPersistentState): Unit = {
     cppProxy.enqueue_taskPersistentState(t)
   }
 }

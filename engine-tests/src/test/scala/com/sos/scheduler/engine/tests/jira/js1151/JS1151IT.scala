@@ -39,7 +39,7 @@ final class JS1151IT extends FreeSpec {
     }
   }
 
-  private def checkJobChain(jobChainPath: JobChainPath, expectedClusterMemberId: String)(implicit controller: TestSchedulerController) {
+  private def checkJobChain(jobChainPath: JobChainPath, expectedClusterMemberId: String)(implicit controller: TestSchedulerController): Unit = {
     import controller._
     deleteTable("SCHEDULER_JOB_CHAINS")
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
@@ -50,7 +50,7 @@ final class JS1151IT extends FreeSpec {
     }
   }
 
-  private def checkJobChainNode(jobChainPath: JobChainPath, expectedClusterMemberId: String)(implicit controller: TestSchedulerController) {
+  private def checkJobChainNode(jobChainPath: JobChainPath, expectedClusterMemberId: String)(implicit controller: TestSchedulerController): Unit = {
     import controller._
     deleteTable("SCHEDULER_JOB_CHAIN_NODES")
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="stop"/>
@@ -61,7 +61,7 @@ final class JS1151IT extends FreeSpec {
     }
   }
 
-  private def deleteTable(name: String)(implicit controller: TestSchedulerController) {
+  private def deleteTable(name: String)(implicit controller: TestSchedulerController): Unit = {
     autoClosing(controller.newJDBCConnection()) { connection ⇒
       val statement = connection.createStatement()
       statement.execute(s"""delete from "$name"""")

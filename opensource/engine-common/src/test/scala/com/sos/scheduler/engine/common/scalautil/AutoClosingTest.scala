@@ -24,7 +24,7 @@ final class AutoClosingTest extends FreeSpec {
 
   "autoClosing with second Exception in close" in {
     class B {
-      def close() {
+      def close(): Unit = {
         throw new Exception("suppressed")
       }
     }
@@ -38,7 +38,7 @@ private object AutoClosingTest {
   private final class A {
     var closed = false
 
-    def close() {
+    def close(): Unit = {
       require(!closed)
       closed = true
     }

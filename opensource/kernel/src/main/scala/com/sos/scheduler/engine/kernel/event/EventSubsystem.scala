@@ -15,21 +15,21 @@ final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends 
 
   /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event]],
     *         weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AbstractEvent) {
+  @ForCpp private def report(e: AbstractEvent): Unit = {
     eventBus.publish(e)
   }
 
   /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtigt.]]
     * @param eventSource { @link Object} statt { @link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AbstractEvent, eventSource: AnyRef) {
+  @ForCpp private def report(e: AbstractEvent, eventSource: AnyRef): Unit = {
     eventBus.publish(e, eventSource.asInstanceOf[EventSource])
   }
 
-  @ForCpp private def checkNumberOfEventCodes(count: Int) {
+  @ForCpp private def checkNumberOfEventCodes(count: Int): Unit = {
     require(count == CppEventCode.values.length, "C++-Event_code does not match CppEventCode")
   }
 
-  @ForCpp private def reportEventClass(cppEventCode: Int, eventSource: AnyRef) {
+  @ForCpp private def reportEventClass(cppEventCode: Int, eventSource: AnyRef): Unit = {
     try {
       val o = eventSource.asInstanceOf[EventSource]
       val e = CppEventFactory.newInstance(CppEventCode.values()(cppEventCode), o)

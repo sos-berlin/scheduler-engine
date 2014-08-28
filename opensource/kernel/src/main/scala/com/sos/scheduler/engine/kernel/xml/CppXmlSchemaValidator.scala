@@ -14,7 +14,7 @@ final class CppXmlSchemaValidator @ForCpp()(urlString: String) {
   private val url = if (urlString.isEmpty) schedulerXmlSchemaUrl else new URL(urlString)
   private val validator = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(url).newValidator
 
-  @ForCpp private[xml] def validate(document: Document) {
+  @ForCpp private[xml] def validate(document: Document): Unit = {
     validator.validate(new DOMSource(document))
   }
 }

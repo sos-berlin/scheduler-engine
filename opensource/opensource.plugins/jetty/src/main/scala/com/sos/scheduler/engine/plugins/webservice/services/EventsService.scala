@@ -29,7 +29,7 @@ final class EventsService @Inject private(eventBus: EventBus) {
   private class MyStreamingOutput(eventCollector: EventCollector) extends StreamingOutput {
     eventBus.registerAnnotated(eventCollector)  // TODO Wenn write() nicht aufgerufen wird, bleibt der EventHandler registriert
 
-    def write(out: OutputStream) {
+    def write(out: OutputStream): Unit = {
       try writeEvents(out)
       catch {
         case x: InterruptedException =>
@@ -39,7 +39,7 @@ final class EventsService @Inject private(eventBus: EventBus) {
       }
     }
 
-    private def writeEvents(out: OutputStream) {
+    private def writeEvents(out: OutputStream): Unit = {
       while (eventCollector.hasNext) {
         val event = eventCollector.next()
         objectMapper.writeValue(out, event)
@@ -57,7 +57,7 @@ object EventsService {
   private class EventCollector extends AbstractIterator[Event] with EventHandlerAnnotated {
     val queue = new ArrayBlockingQueue[Event](maxQueueSize)//new mutable.SynchronizedQueue[Event]
 
-    @EventHandler def handle(e: Event) {
+    @EventHandler def handle(e: Event): Unit = {
       if (queue.size > maxQueueSize) queue.poll()
       queue.add(e)
     }

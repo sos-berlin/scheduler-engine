@@ -15,11 +15,11 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def onBeforeSchedulerActivation() {
+  override def onBeforeSchedulerActivation(): Unit = {
     eventPipe
   }
 
-  override def onSchedulerActivated() {
+  override def onSchedulerActivated(): Unit = {
     for (i <- 0 to 5)
       scheduler executeXml newOrderElem(OrderId(i.toString))
   }
@@ -89,11 +89,11 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
   private def isRelevantOrderEventClass(eventClass: Class[_ <: OrderEvent]) =
     List(classOf[OrderTouchedEvent], classOf[OrderFinishedEvent], classOf[OrderStepStartedEvent]) exists { _ isAssignableFrom eventClass }
 
-  private def modifyNode(state: OrderState, action: String) {
+  private def modifyNode(state: OrderState, action: String): Unit = {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state={state.string} action={action}/>
   }
 
-  private def resumeOrder(o: OrderKey) {
+  private def resumeOrder(o: OrderKey): Unit = {
     scheduler executeXml <modify_order job_chain={o.jobChainPath.string} order={o.id.string} suspended="false"/>
   }
 }

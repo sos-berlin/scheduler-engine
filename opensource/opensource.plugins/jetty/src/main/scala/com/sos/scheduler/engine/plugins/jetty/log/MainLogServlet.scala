@@ -9,7 +9,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @Singleton
 final class MainLogServlet @Inject private(prefixLog: PrefixLog) extends GetOnlyServlet {
 
-  override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
+  override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val operation = getOrSetAttribute(request, classOf[MainLogServlet].getName) {
       LogServletAsyncOperation(request, response, prefixLog)
     }

@@ -46,7 +46,7 @@ final class WakeWhenInPeriodIT extends FunSuite with ScalaSchedulerTest {
     assert(a contains startTimes(1))
   }
 
-  @EventHandler def handle(e: TaskStartedEvent) {
+  @EventHandler def handle(e: TaskStartedEvent): Unit = {
     if (e.jobPath == jobPath)
       startTimes += new LocalTime
   }
@@ -66,7 +66,7 @@ private object WakeWhenInPeriodIT {
     def contains(t: LocalTime) = !(t isBefore begin) && (t isBefore end)
   }
 
-  private def sleepUntil(t: LocalTime) {
+  private def sleepUntil(t: LocalTime): Unit = {
     sleep(t.getMillisOfDay - (new LocalTime).getMillisOfDay)
   }
 }

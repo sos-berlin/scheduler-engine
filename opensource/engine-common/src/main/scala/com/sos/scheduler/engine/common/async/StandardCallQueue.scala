@@ -12,7 +12,7 @@ final class StandardCallQueue extends PoppableCallQueue {
 //private val queue = mutable.UnrolledBuffer[TimedCall[_]]()    Scala 2.10.0 insert() terminiert nicht
   private var closed = false
 
-  def add[A](o: TimedCall[A]) {
+  def add[A](o: TimedCall[A]): Unit = {
     if (o.epochMillis == 0) logger.trace(s"Enqueue $o") else logger.debug(s"Enqueue at ${o.atString} $o")
     synchronized {
       if (closed) sys.error(s"CallQueue is closed. '$o' is rejected")
@@ -22,7 +22,7 @@ final class StandardCallQueue extends PoppableCallQueue {
     }
   }
 
-  def close() {
+  def close(): Unit = {
     val copy = synchronized {
       closed = true
       val result = queue.toVector

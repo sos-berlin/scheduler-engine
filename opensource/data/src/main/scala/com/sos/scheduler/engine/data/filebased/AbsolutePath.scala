@@ -20,12 +20,12 @@ trait AbsolutePath extends IsString {
     s.substring(1)
   }
 
-  final def requireIsEmptyOrAbsolute() {
+  final def requireIsEmptyOrAbsolute(): Unit = {
     if (!isEmpty)
       requireIsAbsolute()
   }
 
-  final def requireIsAbsolute() {
+  final def requireIsAbsolute(): Unit = {
     require(isAbsolute, s"Absolute path expected: $toString")
   }
 

@@ -12,7 +12,7 @@ final class ScalaJob extends Job_impl {
         true
     }
 
-    override def spooler_exit() {
+    override def spooler_exit(): Unit = {
         trace("spooler_exit")
     }
 
@@ -21,7 +21,7 @@ final class ScalaJob extends Job_impl {
         myListIterator.hasNext
     }
 
-    override def spooler_close() {
+    override def spooler_close(): Unit = {
         trace("spooler_close")
         spooler_log.log(logLevel, "spooler_close")
     }
@@ -33,15 +33,15 @@ final class ScalaJob extends Job_impl {
         myListIterator.hasNext
     }
 
-    override def spooler_on_success() {
+    override def spooler_on_success(): Unit = {
         trace("spooler_on_success")
     }
 
-    override def spooler_on_error() {
+    override def spooler_on_error(): Unit = {
         trace("spooler_on_error")
     }
 
-    private def trace(call: String) {
+    private def trace(call: String): Unit = {
         val v = "test."+ logLevel +"."+ call
         val n = spooler.variables.value(v) match {
             case "" => 0

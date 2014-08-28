@@ -13,7 +13,7 @@ final class ShowStateStressIT extends SchedulerTest {
   import ShowStateStressIT._
 
   @Ignore //TODO Test kann versagen, wenn Portnummer in scheduler.xml schon vergegeben ist.
-  @Test def test1() {
+  @Test def test1(): Unit = {
     controller.startScheduler("-e", "-log-level=warn")
     closingFinally(new Connection(new InetSocketAddress("localhost", instance(classOf[SchedulerConfiguration]).tcpPort))) { connection =>
         for (i <- 1 to 1000) connection.sendAndReceive(emptyCommand)
@@ -30,7 +30,7 @@ object ShowStateStressIT {
       </commands>
       .toString()
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     def inetSocketAddress(a: String) = {
       val b = a split ':'
       new InetSocketAddress(b(0), b(1).toInt)
@@ -47,7 +47,7 @@ object ShowStateStressIT {
     private val writer = new OutputStreamWriter(socket.getOutputStream, encoding)
     private val reader = new SplitReader(new InputStreamReader(socket.getInputStream), '\u0000')
 
-    def close() {
+    def close(): Unit = {
       socket.close()
     }
 
@@ -59,7 +59,7 @@ object ShowStateStressIT {
   }
 
   private class SplitReader(reader: Reader, separator: Char) extends Closeable {
-    def close() {
+    def close(): Unit = {
       reader.close()
     }
 

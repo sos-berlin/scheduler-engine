@@ -9,7 +9,7 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import javax.inject.Singleton
 
 class JerseyModule extends JerseyServletModule {
-  override def configureServlets() {
+  override def configureServlets(): Unit = {
     serve(s"$enginePrefixPath/*") `with` classOf[GuiceContainer]  // Route all requests through GuiceContainer
   }
 

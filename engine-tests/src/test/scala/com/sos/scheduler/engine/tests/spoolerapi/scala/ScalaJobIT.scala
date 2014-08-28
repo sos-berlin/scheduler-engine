@@ -24,7 +24,7 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
     terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def onBeforeSchedulerActivation() {
+  override def onBeforeSchedulerActivation(): Unit = {
     eventPipe
   }
 
@@ -36,7 +36,7 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  private def checkMethodCallCounters(logLevel: SchedulerLogLevel) {
+  private def checkMethodCallCounters(logLevel: SchedulerLogLevel): Unit = {
     // Der Job schreibt in scheduler.variables, wie oft der Scheduler jede Methode aufgerufen hat.
     val LevelString = logLevel.cppNumber.toString
     val result = instance[VariableSet] collect { case (VariableNamePattern(LevelString, call), value) => call -> value.toInt }

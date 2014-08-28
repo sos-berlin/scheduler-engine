@@ -37,7 +37,7 @@ final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def withDatabaseError(body: ⇒ Unit)(implicit controller: TestSchedulerController) {
+  private def withDatabaseError(body: ⇒ Unit)(implicit controller: TestSchedulerController): Unit = {
     autoClosing(controller.newJDBCConnection()) { connection ⇒
       val statement = connection.createStatement()
       val renamedTableName = s"$variablesTableName-renamed"
@@ -49,7 +49,7 @@ final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def interceptDatabaseError(body: ⇒ Unit) {
+  private def interceptDatabaseError(body: ⇒ Unit): Unit = {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-303"), MessageCode("SCHEDULER-304"))) {
       val e = intercept[SchedulerException](body)
       s"${e.getMessage} " should startWith ("SCHEDULER-304 ")

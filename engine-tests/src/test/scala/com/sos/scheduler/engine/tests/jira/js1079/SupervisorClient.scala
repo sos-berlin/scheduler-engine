@@ -15,24 +15,24 @@ private[js1079] final class SupervisorClient(val index: Int, udpSocket: Datagram
   private val myTcpPort = 10000 + index
   private val connection = new SchedulerTcpConnection(serverAddress)
 
-  def connect() {
+  def connect(): Unit = {
     connection.connect()
   }
 
-  def close() {
+  def close(): Unit = {
     try connection.close()
     finally udpSocket.close()
   }
 
-  def registerMe() {
+  def registerMe(): Unit = {
     connection sendAndReceiveXML <register_remote_scheduler tcp_port={myTcpPort.toString} udp_port={udpSocket.getLocalPort.toString} scheduler_id={schedulerId} version="1.5"/>
   }
 
-  def fetchUpdatedFiles() {
+  def fetchUpdatedFiles(): Unit = {
     connection sendAndReceiveXML <supervisor.remote_scheduler.configuration.fetch_updated_files/>
   }
 
-  def expectUdp(expectedElem: xml.Elem) {
+  def expectUdp(expectedElem: xml.Elem): Unit = {
     val b = new Array[Byte](1000)
     val p = new DatagramPacket(b, b.length)
     udpSocket setSoTimeout 15 * 1000

@@ -28,11 +28,11 @@ extends Plugin {
   private val configuration = Configuration(elem)
   private val thread1 = new Thread1
 
-  override def onActivate() {
+  override def onActivate(): Unit = {
     thread1.start()
   }
 
-  override def close() {
+  override def close(): Unit = {
     interruptAndJoinThread(thread1)
   }
 
@@ -40,7 +40,7 @@ extends Plugin {
     "<watchdogPlugin/>"
 
   private class Thread1 extends Thread {
-    override def run() {
+    override def run(): Unit = {
       untilInterruptedEvery(configuration.checkEvery) {
         val future = schedulerThreadFuture { scheduler.callCppAndDoNothing() }
         val t = new Timer(configuration.timeout)

@@ -16,7 +16,7 @@ final class JobScriptInstanceAdapterTest extends FunSuite {
     intercept[RuntimeException] { testLanguage("UNKNOWN-LANGUAGE") }
   }
 
-  private def testLanguage(language: String) {
+  private def testLanguage(language: String): Unit = {
     val script = "//"
     val bindingsLazy = new Lazy[ImmutableMap[String, AnyRef]] { protected def compute() = ImmutableMap.of()}
     new JobScriptInstanceAdapter(language, bindingsLazy, script)

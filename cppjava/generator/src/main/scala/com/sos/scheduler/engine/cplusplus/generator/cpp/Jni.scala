@@ -33,7 +33,7 @@ object Jni {
     case None => requireIsClass(t); "jobject"
   }
 
-  private def requireIsClass[A](t: Class[A]) { require(isClass(t), "Unknown type '" + t + "'") }
+  private def requireIsClass[A](t: Class[A]): Unit = { require(isClass(t), "Unknown type '" + t + "'") }
 
   def signatureString(t: Class[_]): String = metadata(t) match {
     case Some(m) => m.signature

@@ -52,7 +52,7 @@ final class JS957IT extends FreeSpec {
     }
   }
 
-  private def simulateAbort()(implicit controller: TestSchedulerController) {
+  private def simulateAbort()(implicit controller: TestSchedulerController): Unit = {
     autoClosing(controller.newJDBCConnection()) { connection ⇒
       val statement = connection.createStatement()
       statement execute """alter table "SCHEDULER_ORDERS" rename to  "SCHEDULER_ORDERS_FREEZED" """

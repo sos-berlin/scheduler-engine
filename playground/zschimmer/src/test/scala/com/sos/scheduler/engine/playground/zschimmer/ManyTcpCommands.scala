@@ -5,7 +5,7 @@ import java.io.InputStream
 import java.net.Socket
 
 object ManyTcpCommands {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val schedulerConnection = new SchedulerConnection("127.0.0.1", 4001)
     try {
       while (true) {
@@ -22,7 +22,7 @@ object ManyTcpCommands {
     val outputStream = socket.getOutputStream
     private val inputStream = socket.getInputStream
 
-    def close() {
+    def close(): Unit = {
       socket.close()
     }
 

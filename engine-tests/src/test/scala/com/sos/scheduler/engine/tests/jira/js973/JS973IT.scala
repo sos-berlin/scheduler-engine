@@ -39,7 +39,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   private lazy val processClassAgent = newAgent(3).registerCloseable
   private lazy val agents = List(aAgent, bAgent, processClassAgent)
 
-  override def checkedBeforeAll() {
+  override def checkedBeforeAll(): Unit = {
     controller.startScheduler()
     agents foreach { _.extraScheduler.start() }   // Parallel mit Test-Scheduler starten
     controller.waitUntilSchedulerIsActive()
@@ -144,30 +144,30 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     new Agent(new ExtraScheduler(args, List(TestVariableName -> testValue), tcpPort), s"*$testValue*")
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent) {
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent): Unit = {
     testOrderWithRemoteScheduler(jobChainPath, agent, agent.expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent, taskId: TaskId) {
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent, taskId: TaskId): Unit = {
     testOrderWithRemoteScheduler(jobChainPath, agent, s"${agent.expectedResult} taskId=$taskId")
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent, expectedResult: String) {
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent, expectedResult: String): Unit = {
     testOrderWithRemoteScheduler(jobChainPath, Some(SchedulerAddressString(agent.extraScheduler.address.string)), expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, remoteScheduler: Option[SchedulerAddressString], expectedResult: String) {
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, remoteScheduler: Option[SchedulerAddressString], expectedResult: String): Unit = {
     testOrderWithRemoteScheduler(newOrderKey(jobChainPath), remoteScheduler, expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddressString], expectedResult: String) {
+  private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddressString], expectedResult: String): Unit = {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       scheduler executeXml newOrder(orderKey, remoteScheduler)
       eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey }.result should startWith(expectedResult)
     }
   }
 
-  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddressString, expectedErrorCode: MessageCode) {
+  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddressString, expectedErrorCode: MessageCode): Unit = {
     val eventPipe = controller.newEventPipe()
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
@@ -181,7 +181,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   }
 
   @HotEventHandler
-  def handle(e: OrderFinishedEvent, o: UnmodifiableOrder) {
+  def handle(e: OrderFinishedEvent, o: UnmodifiableOrder): Unit = {
     controller.getEventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.parameters(ResultVariableName)))
   }
 
@@ -212,7 +212,7 @@ private object JS973IT {
   private case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
 
   private class Agent(val extraScheduler: ExtraScheduler, _expectedResult: String) extends AutoCloseable {
-    def close() {
+    def close(): Unit = {
       logger.info(s"close start $extraScheduler")
       extraScheduler.close()
       logger.info(s"close finished $extraScheduler")

@@ -4,7 +4,7 @@ import org.joda.time.Duration
 
 object Threads {
 
-  def untilInterruptedEvery(duration: Duration)(f: => Unit) {
+  def untilInterruptedEvery(duration: Duration)(f: => Unit): Unit = {
     val timer = new IntervalTimer(duration.getMillis)
     untilInterrupted {
       f
@@ -12,7 +12,7 @@ object Threads {
     }
   }
 
-  def untilInterrupted(f: => Unit) {
+  def untilInterrupted(f: => Unit): Unit = {
     try while (!Thread.interrupted) f
     catch {
       case x: InterruptedException =>
@@ -20,7 +20,7 @@ object Threads {
     }
   }
 
-  def interruptAndJoinThread(t: Thread) {
+  def interruptAndJoinThread(t: Thread): Unit = {
     t.interrupt()
     t.join()
   }

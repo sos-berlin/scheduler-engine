@@ -43,7 +43,7 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
   }
 
   "GET inhibits a modifying command" in {
-    def httpGetShouldForbid(command: String) {
+    def httpGetShouldForbid(command: String): Unit = {
       interceptHttpError(ClientResponse.Status.FORBIDDEN) {
         getCommand(command)
       }
@@ -72,7 +72,7 @@ private object CommandServiceIT {
   private val StrippedModifyingCommand = "check_folders"
   private val ModifyingCommand = s"<$StrippedModifyingCommand/>"
 
-  private def interceptHttpError(status: ClientResponse.Status)(body: ⇒ Unit) {
+  private def interceptHttpError(status: ClientResponse.Status)(body: ⇒ Unit): Unit = {
     intercept[UniformInterfaceException](body).getResponse.getClientResponseStatus shouldEqual status
   }
 }

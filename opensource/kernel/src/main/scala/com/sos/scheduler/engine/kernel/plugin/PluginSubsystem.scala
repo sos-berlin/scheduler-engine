@@ -28,7 +28,7 @@ extends Subsystem with HasCommandHandlers {
     new PluginCommandResultXmlizer(this))
 
 
-  def initialize() {
+  def initialize(): Unit = {
     pluginAdapterMap ++= newPluginAdapterSeq()
     for (p <- pluginAdapterMap.values) {
       p.initialize(injector, prefixLog)
@@ -42,34 +42,34 @@ extends Subsystem with HasCommandHandlers {
   def newPluginAdapterSeq() =
     pluginConfigurations requireDistinct { _.pluginClass } map { o => o.pluginClass -> new PluginAdapter(o) }
 
-  def close() {
+  def close(): Unit = {
     for (p <- pluginAdapterMap.values) {
       tryUnregisterEventHandler(p.pluginInstance)
       p.tryClose()
     }
   }
 
-  private def tryRegisterEventHandler(o: Plugin) {
+  private def tryRegisterEventHandler(o: Plugin): Unit = {
     o match {
       case e: EventHandlerAnnotated => eventBus.registerAnnotated(e)
       case _ =>
     }
   }
 
-  private def tryUnregisterEventHandler(o: Plugin) {
+  private def tryUnregisterEventHandler(o: Plugin): Unit = {
     o match {
       case e: EventHandlerAnnotated => eventBus.unregisterAnnotated(e)
       case _ =>
     }
   }
 
-  def activate() {
+  def activate(): Unit = {
     for (p <- pluginAdapters
          if pluginConfigurationMap(p.pluginClassName).activationMode eq ActivationMode.activateOnStart)
       p.activate()
   }
 
-  def activatePlugin(c: PluginClass) {
+  def activatePlugin(c: PluginClass): Unit = {
     pluginAdapterByClassName(c.getName).activate()
   }
 

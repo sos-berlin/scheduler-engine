@@ -9,7 +9,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse, HttpServlet}
  */
 trait GetOnlyServlet extends HttpServlet {
 
-  override protected def service(request: HttpServletRequest, response: HttpServletResponse) {
+  override protected def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     request.getMethod match {
       case "GET" | "HEAD" ⇒ super.service(request, response)
       case "OPTIONS" ⇒ response.setHeader("Allow", "OPTIONS,GET,HEAD")

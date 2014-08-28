@@ -15,18 +15,18 @@ object LogServletAsyncOperation {
     val operation = new FileServletAsyncOperation(request, response)
 
     val logSubscription = new LogSubscription {
-      def onStarted() {
+      def onStarted(): Unit = {
         logger.info("onStarted")
         operation.start(log.getFile)
       }
 
-      def onClosed() {
+      def onClosed(): Unit = {
         logger.info("onClosed")
         operation.end()
         // Unter Windows kann jetzt der Fehler SCHEDULER-291 kommen, weil die Datei noch vom Servlet geöffnet ist.
       }
 
-      def onLogged() {
+      def onLogged(): Unit = {
         operation.wake()
       }
     }
@@ -37,18 +37,18 @@ object LogServletAsyncOperation {
     asyncContext.setTimeout(0)  // 0: Nie
 
     asyncContext.addListener(new AsyncListener {
-      def onStartAsync(event: AsyncEvent) {}
+      def onStartAsync(event: AsyncEvent): Unit = {}
 
-      def onComplete(event: AsyncEvent) { close() }
+      def onComplete(event: AsyncEvent): Unit = { close() }
 
-      def onTimeout(event: AsyncEvent) { close() }
+      def onTimeout(event: AsyncEvent): Unit = { close() }
 
-      def onError(event: AsyncEvent) {
+      def onError(event: AsyncEvent): Unit = {
         logger.error("onError", event.getThrowable)
         close()
       }
 
-      private def close() {
+      private def close(): Unit = {
         log.unsubscribe(logSubscription)
         operation.close()
       }

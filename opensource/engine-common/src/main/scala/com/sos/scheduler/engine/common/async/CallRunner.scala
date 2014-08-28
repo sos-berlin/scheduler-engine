@@ -10,21 +10,21 @@ final class CallRunner(val queue: PoppableCallQueue) extends Runnable {
 
   @volatile private var ended = false
 
-  def run() {
+  def run(): Unit = {
     while (!ended) {
       sleep(nextTime - now().getMillis)
       executeMatureCalls()
     }
   }
 
-  def end() {
+  def end(): Unit = {
     queue add EndCall
   }
 
   def executeMatureCalls(n: Long = Long.MaxValue): Boolean = {
     val somethingDone = queue.isMature
 
-    @tailrec def f(n: Long) {
+    @tailrec def f(n: Long): Unit = {
       if (n == 0) {
         queue.matureHeadOption foreach { o => logger debug s"Interrupted after $n calls. next=$o" }
       } else {
@@ -55,7 +55,7 @@ object CallRunner {
   private val logger = Logger(getClass)
 
   object EndCall extends ShortTermCall[Unit] {
-    def call() {
+    def call(): Unit = {
       throw new UnsupportedOperationException
     }
   }

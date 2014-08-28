@@ -25,7 +25,7 @@ object AutoClosing {
     result
   }
 
-  private def closeAfterError[A <: HasClose](resource: A, t: Throwable) {
+  private def closeAfterError[A <: HasClose](resource: A, t: Throwable): Unit = {
     if (!NonFatal(t)) logger.error(t.toString, t)
     try resource.close()
     catch {

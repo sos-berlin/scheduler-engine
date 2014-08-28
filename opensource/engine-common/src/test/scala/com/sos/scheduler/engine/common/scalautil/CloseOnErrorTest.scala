@@ -14,12 +14,12 @@ final class CloseOnErrorTest extends FreeSpec {
   "closeOnError" in {
     class A extends CloseOnError {
       var closed = false
-      def f(error: Boolean) {
+      def f(error: Boolean): Unit = {
         closeOnError {
           if (error) sys.error("ERROR")
         }
       }
-      override def close() {
+      override def close(): Unit = {
         closed = true
       }
     }

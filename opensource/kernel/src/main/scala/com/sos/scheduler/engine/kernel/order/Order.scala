@@ -29,9 +29,9 @@ with OrderPersistence {
 
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
 
-  def onCppProxyInvalidated() {}
+  def onCppProxyInvalidated(): Unit = {}
 
-  def remove() {
+  def remove(): Unit = {
     cppProxy.java_remove()
   }
 
@@ -56,28 +56,28 @@ with OrderPersistence {
   def endState: OrderState =
     OrderState(cppProxy.end_state_string)
 
-  def endState_=(s: OrderState) {
+  def endState_=(s: OrderState): Unit = {
     cppProxy.set_end_state(s.string)
   }
 
   def priority: Int =
     cppProxy.priority
 
-  def priority_=(o: Int) {
+  def priority_=(o: Int): Unit = {
     cppProxy.set_priority(o)
   }
 
   def isSuspended: Boolean =
     cppProxy.suspended
 
-  def isSuspended_=(b: Boolean) {
+  def isSuspended_=(b: Boolean): Unit = {
     cppProxy.set_suspended(b)
   }
 
   def title: String =
     cppProxy.title
 
-  def title_=(o: String) {
+  def title_=(o: String): Unit = {
     cppProxy.set_title(o)
   }
 
