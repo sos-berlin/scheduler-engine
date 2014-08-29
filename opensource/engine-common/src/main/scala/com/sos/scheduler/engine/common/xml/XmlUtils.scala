@@ -21,7 +21,6 @@ import org.w3c.dom.{Document, Element, Node, NodeList}
 import org.xml.sax.{ErrorHandler, InputSource, SAXParseException}
 import scala.collection.JavaConversions._
 import scala.collection.immutable
-import scala.sys.error
 
 @ForCpp object XmlUtils {
   private lazy val xPathFactory = newXPathFactory()
@@ -121,17 +120,17 @@ import scala.sys.error
   }
 
   @ForCpp
-  def booleanXmlAttribute(xmlElement: Element, attributeName: String, defaultValue: Boolean): Boolean = {
+  def booleanXmlAttribute(xmlElement: Element, attributeName: String, default: Boolean): Boolean = {
     val value = xmlElement.getAttribute(attributeName)
-    booleanOptionOf(value, defaultValue) getOrElse error(s"Invalid Boolean value in <${xmlElement.getNodeName} $attributeName=${xmlQuoted(value)}>")
+    booleanOptionOf(value, default) getOrElse sys.error(s"Invalid Boolean value in <${xmlElement.getNodeName} $attributeName=${xmlQuoted(value)}>")
   }
 
-  private def booleanOptionOf(s: String, deflt: Boolean): Option[Boolean] = s match {
+  private def booleanOptionOf(s: String, default: Boolean): Option[Boolean] = s match {
     case "true" => Some(true)
     case "false" => Some(false)
     case "1" => Some(true)
     case "0" => Some(false)
-    case _ if s.isEmpty => Some(deflt)
+    case _ if s.isEmpty => Some(default)
     case _ => None
   }
 
@@ -169,7 +168,7 @@ import scala.sys.error
     new RuntimeException(s"Missing attribute <${e.getNodeName} $attributeName=...>")
 
   def elementXPath(baseNode: Node, xpathExpression: String): Element =
-    elementXPathOption(baseNode, xpathExpression) getOrElse error(s"XPath does not return an element: $xpathExpression")
+    elementXPathOption(baseNode, xpathExpression) getOrElse sys.error(s"XPath does not return an element: $xpathExpression")
 
   @Nullable
   def elementXPathOrNull(baseNode: Node, xpathExpression: String): Element =
@@ -185,14 +184,14 @@ import scala.sys.error
     0 until list.getLength map list.item map { _.asInstanceOf[Element] }
 
   def stringXPath(baseNode: Node, xpathExpression: String): String = {
-      val result = xPath.evaluate(xpathExpression, baseNode, XPathConstants.STRING).asInstanceOf[String]
-      if (result == null) error("XPath does not match: " + xpathExpression)
-      result
+    val result = xPath.evaluate(xpathExpression, baseNode, XPathConstants.STRING).asInstanceOf[String]
+    if (result == null) sys.error(s"XPath does not match: $xpathExpression")
+    result
   }
 
-  def stringXPath(baseNode: Node, xpathExpression: String, deflt: String): String = {
+  def stringXPath(baseNode: Node, xpathExpression: String, default: String): String = {
     val result = xPath.evaluate(xpathExpression, baseNode, XPathConstants.STRING).asInstanceOf[String]
-    firstNonNull(result, deflt)
+    firstNonNull(result, default)
   }
 
   def booleanXPath(baseNode: Node, xpathExpression: String): Boolean =
