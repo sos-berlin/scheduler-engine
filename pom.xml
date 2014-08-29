@@ -58,8 +58,8 @@
             <id>release</id>
             <properties>
                 <!-- Versionsbezeichnungen für die nächste Freigabe und die darauffolgende Entwicklungsversion hier einstellen -->
-                <releaseVersion>1.6.4118</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
-                <developmentVersion>1.6.4119-SNAPSHOT</developmentVersion>
+                <releaseVersion>1.6.4241</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
+                <developmentVersion>1.6.4242-SNAPSHOT</developmentVersion>
                 <tag>v${releaseVersion}</tag>
                 <ignoreSnapshots>true</ignoreSnapshots>
             </properties>
