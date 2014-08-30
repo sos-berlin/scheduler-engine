@@ -136,6 +136,7 @@ ptr<Http_server_interface> new_http_server( Scheduler* scheduler )
 
 string date_string( time_t t )
 {
+    //                  0    '    1    '    2    '
     char time_text[] = "Sun Jan 01 00:00:00 1900 GMT";
     //                  ^^^^^^^^^^^^^^^^^^^^^^^^^ wird von asctime() überschrieben
 
@@ -146,8 +147,14 @@ string date_string( time_t t )
         asctime_r( gmtime_r( &t, &tm ), time_text );
 #   endif
     
-    strcpy( time_text + sizeof time_text - 5, " GMT" );   // asctime() hat das überschrieben
-    return time_text;
+    string s = time_text;
+    string week_day = s.substr(0, 3);
+    string day = s.substr(8, 2);
+    string month = s.substr(4, 3);
+    string year = s.substr(20, 4);
+    string time = s.substr(11, 8);
+    //RFC 7231: "Tue, 15 Nov 1994 08:12:31 GMT"
+    return week_day + ", " + day + " " + month + " " + year + " " + time + " GMT"; 
 }
 
 //-----------------------------------------------------------------------get_content_type_parameter
