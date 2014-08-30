@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.common.xml
 
-import com.google.common.base.Charsets.US_ASCII
 import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.common.xml.XmlUtilsTest._
+import java.nio.charset.StandardCharsets.{ISO_8859_1, US_ASCII, UTF_16BE, UTF_8}
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 
@@ -87,6 +87,24 @@ final class XmlUtilsTest extends FreeSpec {
     assertResult(List("b", "c")) { nodeListToSeq(a.getChildNodes) map { _.getLocalName }}
     testChildElements("<root><a/>x<b><bb/></b>x<c/></root>", "a", "b", "c")
     testChildElements("<root>xx<a/>x<b><bb/></b>x<c/>xx</root>", "a", "b", "c")
+  }
+
+  "encoding and rawXmlToString" - {
+    "encoding default" in {
+      val xmlString = "<ö/>"
+      val bytes = new String(xmlString).getBytes(UTF_8)
+      assertResult(UTF_8) { encoding(bytes) }
+      assertResult(xmlString) { rawXmlToString(bytes) }
+    }
+
+    for (enc ← List(UTF_8, UTF_16BE, ISO_8859_1)) {
+      s"$enc" in {
+        val xmlString = new String(s"<?xml version='1.0' encoding='$enc'?><ö/>")
+        val bytes = xmlString.getBytes(enc)
+        assertResult(enc) { encoding(bytes) }
+        assertResult(xmlString) { rawXmlToString(bytes) }
+      }
+    }
   }
 }
 

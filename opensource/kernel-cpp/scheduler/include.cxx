@@ -1,6 +1,9 @@
 // $Id: include.cxx 13691 2008-09-30 20:42:20Z jz $
 
 #include "spooler.h"
+#include "../javaproxy/com__sos__scheduler__engine__common__xml__XmlUtils.h"
+
+typedef ::javaproxy::com::sos::scheduler::engine::common::xml::XmlUtils XmlUtilsJ;
 
 namespace sos {
 namespace scheduler {
@@ -87,10 +90,10 @@ void Include_command::initialize()
 string Include_command::read_decoded_string(bool xml_only) {
     string bytes = read_content_bytes();
     if (xml_only)
-        return xml::Document_ptr::from_xml_bytes(bytes).xml_string();
+        return XmlUtilsJ::rawXmlToString(bytes);
     else
         try {
-            return xml::Document_ptr::from_xml_bytes(bytes).xml_string();  // Vielleicht ist es doch ein XML? (JS-898, <script><include file=".xml">)
+            return XmlUtilsJ::rawXmlToString(bytes);  // XML-Codierung anwenden
         }
         catch (exception&) {
             return bytes;  // Datei wird in string_encoding codiert erwartet

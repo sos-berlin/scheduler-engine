@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.common.xml
 
-import com.google.common.base.Charsets.UTF_8
+import java.nio.charset.StandardCharsets.UTF_8
 import com.google.common.base.Objects.firstNonNull
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaStax, SafeXML}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.io._
 import java.nio.charset.Charset
@@ -14,7 +14,7 @@ import javax.annotation.Nullable
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys._
 import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.{StreamSource, StreamResult}
 import javax.xml.transform.{Result, TransformerFactory}
 import javax.xml.xpath.{XPathConstants, XPathFactory}
 import org.w3c.dom.{Document, Element, Node, NodeList}
@@ -77,6 +77,10 @@ import scala.collection.immutable
   private def postInitializeDocument(doc: Document): Unit = {
     doc.setXmlStandalone(true)
   }
+
+  @ForCpp
+  def rawXmlToString(xmlBytes: Array[Byte]): String =
+    new String(xmlBytes, encoding(xmlBytes))
 
   @ForCpp
   def toXmlBytes(n: Node, encoding: String, indent: Boolean): Array[Byte] =
@@ -254,5 +258,10 @@ import scala.collection.immutable
 
   def nodeListToSeq(nodeList: NodeList): immutable.Seq[Node] =
     for (i ← 0 until nodeList.getLength) yield nodeList.item(i)
+
+  def encoding(xmlBytes: Array[Byte]): Charset = {
+    val eventReader = ScalaStax.getCommonXMLInputFactory().createXMLStreamReader(new StreamSource(new ByteArrayInputStream(xmlBytes)))
+    Option(eventReader.getEncoding) map Charset.forName getOrElse UTF_8
+  }
 }
 

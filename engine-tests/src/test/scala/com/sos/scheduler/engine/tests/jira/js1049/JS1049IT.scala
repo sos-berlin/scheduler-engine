@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1049
 
-import JS1049IT._
-import com.google.common.base.Charsets.UTF_8
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -13,7 +11,9 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.tests.jira.js1049.JS1049IT._
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets.{UTF_16BE, UTF_8}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -23,7 +23,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   override def onBeforeSchedulerActivation(): Unit = {
-    for (i <- JobIncludeSettings flatMap { _.includes })
+    for (i ← JobIncludeSettings flatMap { _.includes })
       (controller.environment.liveDirectory / i.filename).write(i.content, i.encoding)
   }
 
@@ -36,10 +36,11 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
       job(JobPath("/test-a")).description shouldEqual "å"
     }
 
-    for (j <- JobIncludeSettings; i = j.descriptionInclude)
-      s"Include $i" in {
-        (controller.environment.liveDirectory / i.filename).contentString(i.encoding) shouldEqual i.content
-        job(j.jobPath).description shouldEqual i.content
+    for (j ← JobIncludeSettings; d = j.descriptionInclude; s = j.scriptInclude)
+      s"Include $d, $s" in {
+        (controller.environment.liveDirectory / d.filename).contentString(d.encoding) shouldEqual d.content
+        job(j.jobPath).description shouldEqual d.content
+        job(j.jobPath).scriptText shouldEqual s.content
       }
   }
 
@@ -53,7 +54,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   "XML Schema check" in {
     controller.suppressingTerminateOnError {
-      intercept[Exception] {scheduler executeXml <show_state INVALID-ATTRIBUTE="xx"/> } .getMessage should include ("INVALID-ATTRIBUTE")
+      intercept[Exception] { scheduler executeXml <show_state INVALID-ATTRIBUTE="xx"/> } .getMessage should include ("INVALID-ATTRIBUTE")
     }
   }
 
@@ -84,15 +85,18 @@ object JS1049IT {
   }
 
   private val TextIncludeJobPath = JobPath("/test-text-include")
-  private val XmlIncludeJobPath = JobPath("/test-xml-include")
   private val JobIncludeSettings = List(
     JobIncludeSetting(
       TextIncludeJobPath,
       descriptionInclude = Include("test-description.txt", schedulerEncoding, "ö"),
       scriptInclude = Include("test-script.txt", schedulerEncoding, "exit 0")),
     JobIncludeSetting(
-      XmlIncludeJobPath,
+      JobPath("/test-xml-include"),
       descriptionInclude = Include("test-description.xhtml", UTF_8, "<p>ü</p>"),
-      scriptInclude = Include("test-script.xml", UTF_8, "<p>ß</p>")))
+      scriptInclude = Include("test-script.xml", UTF_8, "<p>ß</p>")),
+    JobIncludeSetting(
+      JobPath("/test-xml-prolog-include"),
+      descriptionInclude = Include("test-description-prolog.xhtml", UTF_16BE, "<?xml version='1.0' encoding='UTF-16BE'?><p>°</p>"),
+      scriptInclude = Include("test-script-prolog.xml", UTF_16BE, "<?xml version='1.0' encoding='UTF-16BE'?><p>§</p>")))
   private val XmlPayloadOrderKey = JobChainPath("/test-xml-payload") orderKey "1"
 }

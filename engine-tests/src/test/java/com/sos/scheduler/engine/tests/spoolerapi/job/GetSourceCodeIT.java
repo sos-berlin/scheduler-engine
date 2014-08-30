@@ -19,21 +19,21 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 
 /**
- * see JS-898
+ * see JS-898, JS-1199
  */
-public class GetSourceCodeIT extends SchedulerTest {
+public final class GetSourceCodeIT extends SchedulerTest {
 
     private static final ImmutableList<String> jobs = ImmutableList.of("javascript_intern", "javascript_include");
     private static final String expectedFilename = "expected-content.xml";
 
     private int taskCount = 0;
-    private final Map<String,String> resultMap = new HashMap<String,String>();
+    private final Map<String,String> resultMap = new HashMap<>();
 
     @Test
     public void test() throws IOException {
         CommandBuilder cmd = new CommandBuilder();
         controller().prepare();
-        String expectedCode = getExpectedSourceCode().replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "").trim();  // Ohne Prolog <? ..?>
+        String expectedCode = getExpectedSourceCode();
         controller().activateScheduler();
         for (String jobName : jobs) {
             controller().scheduler().executeXml(cmd.startJobImmediately(jobName).getCommand());
@@ -51,7 +51,7 @@ public class GetSourceCodeIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
+    public void handleTaskEnded(TaskEndedEvent e) {
         String jobName = e.jobPath().name();
         String scriptCode = instance(VariableSet.class).apply(jobName).trim().replace("\r\n", "\n");
         resultMap.put(jobName,scriptCode);
