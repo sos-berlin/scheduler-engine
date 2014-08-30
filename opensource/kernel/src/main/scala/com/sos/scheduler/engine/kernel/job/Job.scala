@@ -29,6 +29,8 @@ with JobPersistence {
 
   def description: String = cppProxy.description
 
+  def scriptText: String = cppProxy.script_text()
+
   def state = JobState.valueOf(cppProxy.state_name)
 
   def needsProcess: Boolean = cppProxy.waiting_for_process

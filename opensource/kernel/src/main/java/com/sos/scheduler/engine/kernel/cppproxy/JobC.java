@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.job.Job;
 public interface JobC extends CppProxyWithSister<Job>, File_basedC<Job> {
     Job.Type sisterType = new Job.Type();
 
+    String script_text();
     String description();
     String state_name();
     void set_state_cmd(String cmd);

@@ -150,6 +150,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->job_chain_priority() > b->job_chain_priority(); }
     virtual void                on_order_possibly_available ()                                      = 0;
 
+    virtual string script_text() const = 0;
 
   private:
     Fill_zero                  _zero_;
@@ -414,6 +415,10 @@ struct Standard_job : Job
     bool                        should_start_task_because_of_min_tasks();
     int                         not_ending_tasks_count      () const;
     void                        check_min_tasks             ( const string& cause );                // Setzt _start_min_tasks
+    
+    string script_text() const { 
+        return _module? _module->read_source_script() : ""; 
+    }
 
     friend struct               Task;
     friend struct               Job_history;

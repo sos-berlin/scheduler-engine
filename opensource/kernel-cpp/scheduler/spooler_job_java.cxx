@@ -232,10 +232,14 @@ struct Java_job : Job {
     ptr<Com_job>& com_job(){ 
         z::throw_xc(Z_FUNCTION);
     }
+
+    string script_text() const { 
+        return "script_text() not implemented"; 
+    }
 };
 
 ptr<Job> new_java_job(Spooler* spooler) {
-    ptr <Java_job> result = Z_NEW(Java_job(spooler));
+    ptr<Java_job> result = Z_NEW(Java_job(spooler));
     return +result;
 }
 
