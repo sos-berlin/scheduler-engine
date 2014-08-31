@@ -69,7 +69,7 @@ private object JobPeriodIT {
     },
     new JobConfig {
       val path = JobPath("/test-api")
-      val interval = 3.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
+      val interval = 5.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
       val xmlElem =
         <job name={path.name}>
           <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
