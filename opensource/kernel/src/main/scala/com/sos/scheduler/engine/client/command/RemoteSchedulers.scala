@@ -42,8 +42,7 @@ object RemoteSchedulers {
   def errorElementToException(eventReader: ScalaXMLEventReader): XmlResponseException = {
     import eventReader._
     val (code, text) = parseElement("ERROR") {
-      (attributeMap.asConverted("code")(MessageCode.apply),
-        attributeMap.get("text"))
+      (attributeMap.getAsConverted("code")(MessageCode.apply), attributeMap.get("text"))
     }
     throw new XmlResponseException(
       code = code getOrElse MessageCode("UNKNOWN"),

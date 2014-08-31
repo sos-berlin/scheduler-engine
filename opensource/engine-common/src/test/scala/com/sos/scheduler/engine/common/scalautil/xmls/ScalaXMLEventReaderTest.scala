@@ -65,6 +65,20 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
     parseString(testXmlString)(parseA) shouldEqual A(B(), C(x = "xx", o = "DEFAULT", List(D(), D())))
   }
 
+  "asConverted" in {
+    parseString(<X int="1" empty="" wrong="xx"/>.toString()) { eventReader ⇒
+      import eventReader._
+      parseElement("X") {
+        assertResult(Some(1)) { attributeMap.getAsConverted("int") { _.toInt } }
+        assertResult(1) { attributeMap.asConverted("int") { _.toInt } }
+        assertResult(None) { attributeMap.getAsConverted("missing") { _.toInt } }
+        intercept[NoSuchElementException] { attributeMap.asConverted("missing") { _.toInt } }
+        intercept[IllegalArgumentException] { attributeMap.getAsConverted("empty") { _.toInt } }
+        intercept[IllegalArgumentException] { attributeMap.getAsConverted("wrong") { _.toInt } }
+      }
+    }
+  }
+
 //  "parseElementAsXmlString" in {
 //    val testXmlString = <A><B b="b">text<C/></B><B/></A>.toString()
 //    assertResult("""<B b="b">text<C/></B>, <B/>""") {

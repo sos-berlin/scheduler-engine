@@ -15,7 +15,7 @@ object ProcessDescriptor {
       parseElement("process") {
         ProcessDescriptor(
           processId = attributeMap("process_id"),
-          pid = attributeMap.asConverted("pid") { _.toInt } getOrElse 0)
+          pid = attributeMap.getAsConverted("pid") { _.toInt } getOrElse 0)
       }
     }
 }
