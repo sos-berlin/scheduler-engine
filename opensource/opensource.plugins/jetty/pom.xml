@@ -68,6 +68,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>engine-testwar</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
