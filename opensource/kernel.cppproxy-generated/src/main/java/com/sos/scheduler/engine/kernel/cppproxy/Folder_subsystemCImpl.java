@@ -7,6 +7,8 @@ final class Folder_subsystemCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Folder_subsystemCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -135,4 +137,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC {
     private static native boolean update_folders_now__native(long cppReference);
 
 
+    // </editor-fold>
 }

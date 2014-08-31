@@ -7,6 +7,8 @@ final class LockCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.lock.Lock>
 implements com.sos.scheduler.engine.kernel.cppproxy.LockC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private LockCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -191,4 +193,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.LockC {
     private static native byte[] source_xml_bytes__native(long cppReference);
 
 
+    // </editor-fold>
 }

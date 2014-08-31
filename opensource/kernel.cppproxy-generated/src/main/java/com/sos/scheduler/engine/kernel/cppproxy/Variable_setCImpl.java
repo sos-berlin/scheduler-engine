@@ -7,6 +7,8 @@ final class Variable_setCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.variable.VariableSet>
 implements com.sos.scheduler.engine.kernel.cppproxy.Variable_setC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Variable_setCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -71,4 +73,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Variable_setC {
     private static native void set_var__native(long cppReference, java.lang.String p0, java.lang.String p1);
 
 
+    // </editor-fold>
 }

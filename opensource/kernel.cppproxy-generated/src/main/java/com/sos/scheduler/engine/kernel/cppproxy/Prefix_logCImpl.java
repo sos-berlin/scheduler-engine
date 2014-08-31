@@ -7,6 +7,8 @@ final class Prefix_logCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.log.PrefixLog>
 implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Prefix_logCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -113,4 +115,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC {
     private static native void warn__native(long cppReference, java.lang.String p0);
 
 
+    // </editor-fold>
 }

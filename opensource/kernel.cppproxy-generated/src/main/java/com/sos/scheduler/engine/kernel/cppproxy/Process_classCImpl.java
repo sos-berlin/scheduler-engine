@@ -7,6 +7,8 @@ final class Process_classCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.processclass.ProcessClass>
 implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Process_classCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -191,4 +193,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     private static native byte[] source_xml_bytes__native(long cppReference);
 
 
+    // </editor-fold>
 }

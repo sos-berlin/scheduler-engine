@@ -7,6 +7,8 @@ final class Process_class_subsystemCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Process_class_subsystemCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -105,4 +107,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC {
     private static native java.util.ArrayList java_file_baseds__native(long cppReference);
 
 
+    // </editor-fold>
 }

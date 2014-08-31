@@ -7,6 +7,8 @@ final class SpoolerCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.Scheduler>
 implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private SpoolerCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -1203,4 +1205,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native void write_to_scheduler_log__native(long cppReference, java.lang.String p0, java.lang.String p1);
 
 
+    // </editor-fold>
 }

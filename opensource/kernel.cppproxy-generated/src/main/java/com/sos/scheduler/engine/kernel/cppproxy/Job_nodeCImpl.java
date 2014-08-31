@@ -7,6 +7,8 @@ final class Job_nodeCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.JobNode>
 implements com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Job_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -153,4 +155,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC {
     private static native java.lang.String string_order_state__native(long cppReference);
 
 
+    // </editor-fold>
 }

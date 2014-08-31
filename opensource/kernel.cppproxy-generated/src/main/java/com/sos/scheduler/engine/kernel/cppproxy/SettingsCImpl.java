@@ -7,6 +7,8 @@ final class SettingsCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private SettingsCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -243,4 +245,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native void set__native(long cppReference, int p0, java.lang.String p1);
 
 
+    // </editor-fold>
 }

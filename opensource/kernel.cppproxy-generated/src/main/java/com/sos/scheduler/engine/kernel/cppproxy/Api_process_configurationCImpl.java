@@ -7,6 +7,8 @@ final class Api_process_configurationCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Api_process_configurationCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -179,4 +181,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC {
     private static native java.lang.String controllerAddressString__native(long cppReference);
 
 
+    // </editor-fold>
 }

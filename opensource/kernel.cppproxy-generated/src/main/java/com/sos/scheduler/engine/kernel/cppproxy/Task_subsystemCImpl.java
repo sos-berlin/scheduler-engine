@@ -7,6 +7,8 @@ final class Task_subsystemCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Task_subsystemCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -43,4 +45,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC {
     private static native java.lang.String task_log__native(long cppReference, int p0);
 
 
+    // </editor-fold>
 }

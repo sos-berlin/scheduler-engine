@@ -7,6 +7,8 @@ final class DatabaseCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private DatabaseCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -27,4 +29,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties__native(long cppReference);
 
 
+    // </editor-fold>
 }

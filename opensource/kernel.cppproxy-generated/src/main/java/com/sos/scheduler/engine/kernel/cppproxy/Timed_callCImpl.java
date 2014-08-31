@@ -7,6 +7,8 @@ final class Timed_callCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.async.CppCall>
 implements com.sos.scheduler.engine.kernel.cppproxy.Timed_callC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Timed_callCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -85,4 +87,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Timed_callC {
     private static native java.lang.Object value__native(long cppReference);
 
 
+    // </editor-fold>
 }

@@ -7,6 +7,8 @@ final class Order_subsystemCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Order_subsystemCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -119,4 +121,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     private static native java.util.ArrayList java_file_baseds__native(long cppReference);
 
 
+    // </editor-fold>
 }

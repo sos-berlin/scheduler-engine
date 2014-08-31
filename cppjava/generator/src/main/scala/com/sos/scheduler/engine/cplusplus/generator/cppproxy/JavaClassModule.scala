@@ -48,8 +48,11 @@ extends JavaModule {
    |extends ${classOf[CppProxyImpl[_]].getName}<${sisterClass.getName}>
    |implements ${interface.getName} {
    |
+   |    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+   |
    |$constructor
-   |$methodsString}
+   |$methodsString    // </editor-fold>
+   |}
    |""".stripMargin
   }
 }

@@ -7,6 +7,8 @@ final class JobCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Job>
 implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private JobCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -293,4 +295,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean waiting_for_process__native(long cppReference);
 
 
+    // </editor-fold>
 }

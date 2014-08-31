@@ -7,6 +7,8 @@ final class TaskCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Task>
 implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private TaskCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -121,4 +123,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native java.lang.String stdout_path__native(long cppReference);
 
 
+    // </editor-fold>
 }

@@ -7,6 +7,8 @@ final class Job_chainCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.JobChain>
 implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private Job_chainCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -295,4 +297,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native byte[] source_xml_bytes__native(long cppReference);
 
 
+    // </editor-fold>
 }

@@ -7,6 +7,8 @@ final class HttpChunkReaderCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
 implements com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC {
 
+    // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
+
     private HttpChunkReaderCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
@@ -71,4 +73,5 @@ implements com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC {
     private static native byte[] read_from_chunk__native(long cppReference, int p0);
 
 
+    // </editor-fold>
 }
