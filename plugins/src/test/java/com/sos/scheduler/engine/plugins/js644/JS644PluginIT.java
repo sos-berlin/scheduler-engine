@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.joda.time.Duration;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,7 +23,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public final class JS644PluginIT extends SchedulerTest {
     private static final JobPath jobPath = new JobPath("/a");
     private static final JobChainPath jobChainPath = new JobChainPath("/A");
-    private static final Duration timeout = shortTimeout;
 
     enum M { jobActivated, jobchainActivated }
     private final Gate<M> gate = new Gate<M>();
@@ -34,8 +32,8 @@ public final class JS644PluginIT extends SchedulerTest {
         controller().activateScheduler();
         schedulerIsActive = true;
         modifyJobFile();
-        gate.expect(jobActivated, timeout);
-        gate.expect(jobchainActivated, timeout);
+        gate.expect(jobActivated, TestTimeout);
+        gate.expect(jobchainActivated, TestTimeout);
     }
 
     private void modifyJobFile() throws IOException {

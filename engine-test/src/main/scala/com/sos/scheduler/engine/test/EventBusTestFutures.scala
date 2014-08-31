@@ -14,13 +14,13 @@ object EventBusTestFutures {
   object implicits {
     implicit class RichEventBus(val delegate: EventBus) extends AnyVal {
 
-      def awaitingKeyedEvent[E <: KeyedEvent](key: E#Key)(f: => Unit)(implicit e: ClassTag[E], timeout: TestTimeout): E =
+      def awaitingKeyedEvent[E <: KeyedEvent](key: E#Key)(f: => Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
         try awaitingEvent2[E](predicate = _.key == key, timeout = timeout.duration)(f)(e)
         catch {
           case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, key=$key")
         }
 
-      def awaitingEvent[E <: Event](predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E], timeout: TestTimeout): E =
+      def awaitingEvent[E <: Event](predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
         awaitingEvent2[E](predicate = predicate, timeout = timeout.duration)(f)(e)
 
       private def awaitingEvent2[E <: Event](timeout: Duration, predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E]): E = {

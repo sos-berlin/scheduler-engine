@@ -27,7 +27,7 @@ public class JS868NoGlobalParamsIT extends JS868Base {
                 .addParam("RESULT_FILE",resultFile.getAbsolutePath())
                 .getCommand();
 		controller().scheduler().executeXml(cmd);
-		controller().waitForTermination(shortTimeout);
+		controller().waitForTermination();
 
         resultMap = getResultMap(resultFile);
         testAssertions();

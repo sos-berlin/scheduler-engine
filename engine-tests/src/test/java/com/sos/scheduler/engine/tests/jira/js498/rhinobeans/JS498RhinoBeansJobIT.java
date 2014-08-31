@@ -40,7 +40,7 @@ public final class JS498RhinoBeansJobIT extends SchedulerTest {
             for (String jobName : jobs) {
                 controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
             }
-            controller().waitForTermination(shortTimeout);
+            controller().waitForTermination();
             resultMap = getResultMap(resultFile);
             checkScriptOnlyJob();
             checkObjectsJob();

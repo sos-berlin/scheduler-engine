@@ -29,7 +29,7 @@ public class JS1026ShellOrderIT extends SchedulerTest {
     public void test() throws IOException {
         controller().activateScheduler();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @HotEventHandler

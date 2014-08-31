@@ -32,7 +32,7 @@ final class JS803IT extends SchedulerTest {
     addOrder(jobChainPath orderKey "dailyOrder", addDailyOrderElem)
     addOrder(jobChainPath orderKey "singleOrder", addSingleOrderElem)
     addOrder(jobChainPath orderKey "singleRuntimeOrder", addSingleRuntimeOrderElem)
-    try controller.waitForTermination(shortTimeout)
+    try controller.waitForTermination()
     finally (expectedOrders diff terminatedOrders).toList match {
       case List() =>
       case notTerminatedOrders => logger.error("Orders failed to terminate: "+ (notTerminatedOrders mkString ", "))
@@ -65,7 +65,6 @@ final class JS803IT extends SchedulerTest {
 
 object JS803IT {
   private val logger = LoggerFactory.getLogger(classOf[JS803IT])
-  private val shortTimeout = SchedulerTest.shortTimeout
   private val orderDelay = 3+1
   private val jobChainPath = JobChainPath("/super")
   private val expectedEndState = OrderState("state.nestedC.end")

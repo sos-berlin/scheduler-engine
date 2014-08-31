@@ -45,7 +45,7 @@ public final class JmsPluginIT extends SchedulerTest {
 
     @Test public void test() throws InterruptedException {
         controller().activateScheduler();
-        assertThat(resultGate.poll(shortTimeout), equalTo(true));
+        assertThat(resultGate.poll(TestTimeout), equalTo(true));
     }
 
     private final class MyListener implements MessageListener {

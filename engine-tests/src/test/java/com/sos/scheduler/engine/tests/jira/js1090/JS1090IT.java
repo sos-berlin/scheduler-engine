@@ -33,7 +33,7 @@ public final class JS1090IT extends SchedulerTest {
         controller().activateScheduler();
         String command = cmd.addOrder(jobChainPath.string(), "myId").getCommand();
         scheduler().executeXml(command);
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
         assertNotNull(logFileContent);
         assertTrue(logFileContent.contains(echoText));
     }

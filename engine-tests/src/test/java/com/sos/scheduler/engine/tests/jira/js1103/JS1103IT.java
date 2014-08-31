@@ -10,7 +10,7 @@ public final class JS1103IT extends SchedulerTest {
     @Test
     public void test() {
         controller().activateScheduler();
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @EventHandler

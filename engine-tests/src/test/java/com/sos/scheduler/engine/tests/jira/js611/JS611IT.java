@@ -19,7 +19,6 @@ import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFi
  * @see <a href="http://www.sos-berlin.com/jira/browse/JS-611">JS-611</a> */
 public final class JS611IT extends SchedulerTest {
 	private static final int maxOrderCount = 10;
-    private static final Duration myTimeout = Duration.standardSeconds(maxOrderCount * 2 + 10);
 
     private int finishedOrderCount = 0;
 
@@ -27,7 +26,7 @@ public final class JS611IT extends SchedulerTest {
         controller().activateScheduler();
         scheduler().executeXml("<scheduler_log.log_categories.set category='JS-611'/>");
         addOrders(maxOrderCount);
-        controller().waitForTermination(myTimeout);
+        controller().waitForTermination();
         checkSchedulerLog(controller().environment().schedulerLog());
     }
 

@@ -23,7 +23,7 @@ public class ProcessListIT extends SchedulerTest {
         String command = cmd.addOrder("processlist_test").getCommand();
         logger.info("command: " + command);
         controller().scheduler().executeXml(command);
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination(errorOnlyTimeout);
     }
 
     @EventHandler

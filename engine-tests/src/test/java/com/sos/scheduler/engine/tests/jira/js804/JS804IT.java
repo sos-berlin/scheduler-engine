@@ -44,7 +44,7 @@ public final class JS804IT extends SchedulerTest {
 	public void testSetback() {
 		controller().activateScheduler();
 		controller().scheduler().executeXml( util.modifyOrder(order_setback).getCommand() );
-		controller().tryWaitForTermination(shortTimeout);
+		controller().waitForTermination();
 		assertTrue("order " + order_setback + " is not in setback", result_setback);
 		assertFalse("order " + order_simple + " is in setback", result_simple);
 	}

@@ -31,7 +31,6 @@ public class StressIT extends SchedulerTest implements TaskInfoListener {
     private static final String providerUrl = "vm://localhost";
 	private static final int ESTIMATED_TASKS = 100;
 	private static final int JOB_RUNTIME_IN_SECONDS = 1;
-	private static final Duration MAX_RUNTIME = Duration.standardSeconds(60);
 
     private final CommandBuilder util = new CommandBuilder();
     private int taskFinished = 0;
@@ -59,7 +58,7 @@ public class StressIT extends SchedulerTest implements TaskInfoListener {
 					.addParam("DELAY", String.valueOf(JOB_RUNTIME_IN_SECONDS))
 					.getCommand());
 		}
-        controller().waitForTermination(MAX_RUNTIME);
+        controller().waitForTermination();
         assertEquals("only " + l.endedTasks() + " are finished - " + ESTIMATED_TASKS + " estimated.",ESTIMATED_TASKS,l.endedTasks());
         w.stop();
 	}

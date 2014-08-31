@@ -49,7 +49,7 @@ public class JS461IT extends SchedulerTest {
 		while (numberOfEvents("OrderSuspendedEvent") == 0) { Thread.sleep(100); }
 		controller().scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + JOB_CHAIN + "' state='success'/>");
 		controller().scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + JOB_CHAIN + "' suspended='no'/>");
-		controller().waitForTermination(shortTimeout);
+		controller().waitForTermination();
 		assertEvent("OrderSuspendedEvent", 1);
 		assertEvent("OrderResumedEvent", 1);
 		assertEvent("OrderFinishedEvent", 1);

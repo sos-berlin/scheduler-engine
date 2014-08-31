@@ -32,7 +32,7 @@ public final class JS1026ShellJobIT extends SchedulerTest {
         for (String jobName : jobNames) {
             controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
         }
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @HotEventHandler

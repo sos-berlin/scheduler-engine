@@ -17,7 +17,7 @@ public final class JS401IT extends SchedulerTest {
         controller().scheduler().executeXml("<add_order job_chain='chain1' id='1'/>");
         controller().scheduler().executeXml(util.startJobImmediately("job2").getCommand());
         controller().scheduler().executeXml(util.startJobImmediately("inc_max_non_exclusive").getCommand());
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @EventHandler

@@ -11,6 +11,6 @@ public class JS1104IT extends SchedulerTest {
     @Test
     public void test() throws IOException {
         controller().activateScheduler();
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 }

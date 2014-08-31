@@ -32,7 +32,7 @@ public class SimpleTest extends SchedulerTest {
         controller().activateScheduler();
         util.addOrder("jobchain1");
 		controller().scheduler().executeXml( util.getCommand() );
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
 	}
 	
 	@HotEventHandler

@@ -70,11 +70,9 @@ trait ScalaSchedulerTest
   protected final def scheduler =
     controller.scheduler
 
-  protected implicit def testTimeout: TestTimeout =
-    TestSchedulerController.implicits.testTimeout
+  protected implicit def implicitTimeout: ImplicitTimeout = TestSchedulerController.implicits.Timeout
 
-  protected final def shortTimeout: Duration =
-    TestSchedulerController.shortTimeout
+  protected final val TestTimeout: Duration = TestSchedulerController.TestTimeout
 
   final def injector =
     scheduler.injector

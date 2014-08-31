@@ -38,7 +38,7 @@ public class GetSourceCodeIT extends SchedulerTest {
         for (String jobName : jobs) {
             controller().scheduler().executeXml(cmd.startJobImmediately(jobName).getCommand());
         }
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
         for (String jobName : jobs) {
             String scriptCode = resultMap.get(jobName);
             assertEquals("<include> in job "+ jobName + " is not as expected:", expectedCode, scriptCode);

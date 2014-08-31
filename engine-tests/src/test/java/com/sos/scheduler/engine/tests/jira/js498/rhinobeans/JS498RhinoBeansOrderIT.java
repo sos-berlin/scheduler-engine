@@ -41,7 +41,7 @@ public final class JS498RhinoBeansOrderIT extends SchedulerTest {
         controller().activateScheduler();
         File resultFile = prepareResultFile();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
-        controller().waitForTermination(errorOnlyTimeout);
+        controller().waitForTermination();
         resultMap = getResultMap(resultFile);
         checkJobObjects();
         checkJobFunctions();

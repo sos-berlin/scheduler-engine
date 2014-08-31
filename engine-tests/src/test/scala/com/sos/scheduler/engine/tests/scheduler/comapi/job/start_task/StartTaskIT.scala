@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 final class StartTaskIT extends FunSuite with ScalaSchedulerTest {
 
   test("job.start_task") {
-    controller.waitForTermination(shortTimeout)
+    controller.waitForTermination()
   }
 
   @EventHandler def handle(e: TaskEndedEvent): Unit = {

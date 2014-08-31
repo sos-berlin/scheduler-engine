@@ -19,7 +19,7 @@ public final class ExtractResourcesTest extends SchedulerTest {
                 .addParam("classname", "com.sos.scheduler.engine.tests.stress.parallelorder.OrderParallelIT")
                 .getCommand();
         controller().scheduler().executeXml(command);
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @EventHandler

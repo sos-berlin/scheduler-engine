@@ -20,7 +20,7 @@ public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
         controller().activateScheduler();
         addOrders(1, "now");
         addOrders(2, "now");
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     // Startet die Aufträge verzögert. Der zweite Auftrag soll nicht erst anlaufen, wenn der erste beendet worden ist.
@@ -29,7 +29,7 @@ public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
         controller().activateScheduler();
         addOrders(1, "now+1");
         addOrders(2, "now+1");
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @Test
@@ -37,7 +37,7 @@ public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
         controller().activateScheduler();
         addOrders(1, "now+1");
         addOrders(2, "now+2");
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     private void addOrders(int id, String startAt) {

@@ -28,28 +28,28 @@ public class JS948IT extends SchedulerTest {
     public void singleWakeUpRepeat() {
         init(1, repeatJobPath);
         controller().activateScheduler();
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @Test
     public void multipleWakeUpRepeat() {
         init(2, repeatJobPath);
         controller().activateScheduler();
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @Test
     public void singleWakeUpAbsoluteRepeat() {
         init(1, absoluteRepeatJobPath);
         controller().activateScheduler();
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @Test
     public void multipleWakeUpAbsoluteRepeat() {
         init(2, absoluteRepeatJobPath);
         controller().activateScheduler();
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     private void init(int maxModifyCommands, JobPath jobPath) {

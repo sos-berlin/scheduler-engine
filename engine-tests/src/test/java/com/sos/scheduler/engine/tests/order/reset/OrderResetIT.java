@@ -24,7 +24,7 @@ public class OrderResetIT extends SchedulerTest {
         CommandBuilder cmd = new CommandBuilder();
         cmd.addOrder("chain","test");
 		scheduler().executeXml(cmd.getCommand());
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
 	}
 
     @EventHandler

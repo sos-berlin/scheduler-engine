@@ -55,7 +55,7 @@ public class JmsOrderEventsIT extends JMSConnection {
     		controller().activateScheduler();
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order2").getCommand() );
-    		controller().waitForTermination(shortTimeout);
+    		controller().waitForTermination();
 	        assertEvent("OrderTouchedEvent",2);
 	        assertEvent("OrderStateChangedEvent",4);
 	        assertEvent("OrderFinishedEvent",2);

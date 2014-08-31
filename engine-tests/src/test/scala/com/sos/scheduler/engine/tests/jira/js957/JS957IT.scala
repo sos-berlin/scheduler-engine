@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
-import com.sos.scheduler.engine.test.SchedulerTest.shortTimeout
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestSchedulerController}
@@ -58,7 +57,7 @@ final class JS957IT extends FreeSpec {
       statement execute """alter table "SCHEDULER_ORDERS" rename to  "SCHEDULER_ORDERS_FREEZED" """
       statement execute """create table "SCHEDULER_ORDERS" as select * from "SCHEDULER_ORDERS_FREEZED" """
       controller.terminateScheduler()
-      controller.waitForTermination(shortTimeout)
+      controller.waitForTermination()
       statement execute """drop table "SCHEDULER_ORDERS" """
       statement execute """alter table "SCHEDULER_ORDERS_FREEZED" rename to  "SCHEDULER_ORDERS" """
     }

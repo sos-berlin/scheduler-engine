@@ -18,6 +18,6 @@ public class JS606EmptyIT extends JS606Base {
 		controller().activateScheduler();
 		prepareTest(jobchain);
 		startOrder();
-		controller().tryWaitForTermination(shortTimeout);
+		controller().waitForTermination();
 	}
 }

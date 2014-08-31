@@ -20,7 +20,7 @@ final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
 
   test("spooler_task_after should have access to last processed order") {
     scheduler executeXml <order job_chain="/test" id="1"/>
-    controller.waitForTermination(shortTimeout)
+    controller.waitForTermination()
   }
 
   @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder): Unit = {

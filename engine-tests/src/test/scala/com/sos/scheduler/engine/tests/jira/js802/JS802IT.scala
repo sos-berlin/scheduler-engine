@@ -35,7 +35,7 @@ class JS802IT extends SchedulerTest {
     startTime = secondNow() plusSeconds orderDelay
     scheduler.executeXml(orderElem(orderKey, startTime))
     scheduler.executeXml(jobElem(jobName, startTime))
-    controller.waitForTermination(shortTimeout)
+    controller.waitForTermination()
   }
 
   @EventHandler def handleEvent(event: OrderTouchedEvent): Unit = {
@@ -53,7 +53,6 @@ class JS802IT extends SchedulerTest {
 }
 
 object JS802IT {
-  private val shortTimeout = SchedulerTest.shortTimeout
   private val orderDelay = 3 + 1
   private val orderKey = OrderKey("/a", "atOrder")
   private val jobName = "job"

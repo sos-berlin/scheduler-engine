@@ -39,7 +39,7 @@ public final class JS793IT extends SchedulerTest {
     public void myTest() {
         controller().activateScheduler();
         doJobchain(isWindows? "windows_node_parameter" :"unix_node_parameter");
-        controller().tryWaitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     private void doJobchain(String jobchainName) {

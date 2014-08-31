@@ -13,8 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
-    public static final Duration shortTimeout = TestSchedulerController.shortTimeout();
-    public static final Duration errorOnlyTimeout = TestSchedulerController.errorOnlyTimeout();
+    public static final Duration TestTimeout = TestSchedulerController.TestTimeout();
 
     private final TestSchedulerController controller;
 

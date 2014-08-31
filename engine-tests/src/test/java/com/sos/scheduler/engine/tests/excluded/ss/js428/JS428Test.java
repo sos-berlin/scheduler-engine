@@ -60,7 +60,7 @@ public class JS428Test extends SchedulerTest {
             .addParam("param2", "all steps")
         ;
         controller().scheduler().executeXml( util.getCommand() );
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
         testSpoolerVariable("job-shell-1_param1", "step 050");		// funktioniert nicht
         testSpoolerVariable("job-shell-1_param2", "all steps");		// funktioniert nicht
         testSpoolerVariable("job-api-1_param1", "step 100");
@@ -83,7 +83,7 @@ public class JS428Test extends SchedulerTest {
             .addParam("300/param1", "step 300")
             .addParam("param2", "all steps");
         controller().scheduler().executeXml( util.getCommand() );
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
         testSpoolerVariable("job-api-1_param1", "step 100");
         testSpoolerVariable("job-api-1_param2", "all steps");
         testSpoolerVariable("job-api-2_param1", "step 200");

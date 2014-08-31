@@ -37,7 +37,7 @@ public class JS801IT extends SchedulerTest {
     private void runSchedulerWithJobChain(String jobChainName) {
         controller().activateScheduler();
         scheduler().executeXml("<order job_chain='"+jobChainName+"' id='"+orderId+"'/>");
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @EventHandler public void handleEvent(OrderFinishedEvent e) {

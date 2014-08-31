@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 public final class MaxOrderIT extends SchedulerTest {
     private static final int maxOrders = 3;         // Derselbe Wert wie <job_chain max_orders="">
     private static final int addedOrderCount = 9;   // Anzahl der <add_order>
-    public static final Duration timeout = Duration.standardSeconds(60);
 
     private int runningOrderCount = 0;
     private int maxTouchedOrderCount = 0;
@@ -23,7 +22,7 @@ public final class MaxOrderIT extends SchedulerTest {
 
     @Test public void test() throws Exception {
         controller().activateScheduler();
-        controller().waitForTermination(timeout);
+        controller().waitForTermination(Duration.standardSeconds(5*60));
     }
 
     @EventHandler public void handleEvent(OrderTouchedEvent e) {

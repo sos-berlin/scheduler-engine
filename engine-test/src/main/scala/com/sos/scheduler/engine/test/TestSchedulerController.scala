@@ -110,11 +110,13 @@ with EventHandlerAnnotated {
     val previous = _scheduler
     _scheduler = delegate.waitUntilSchedulerState(SchedulerState.active)
     if (_scheduler == null) {
-      waitForTermination(shortTimeout)   // Should throw the exception causing the activation failure
+      waitForTermination()   // Should throw the exception causing the activation failure
       throw new RuntimeException("Scheduler aborted before startup")
     }
     if (previous == null && testConfiguration.terminateOnError) checkForErrorLogLine()
   }
+
+  def waitForTermination(): Unit = waitForTermination(TestTimeout)
 
   def waitForTermination(timeout: Duration): Unit = {
     val ok = tryWaitForTermination(timeout)
@@ -192,7 +194,7 @@ with EventHandlerAnnotated {
 
   /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
   def newEventPipe(): EventPipe = {
-    val result = new EventPipe(eventBus, shortTimeout.toDuration)
+    val result = new EventPipe(eventBus, TestTimeout)
     registerEventHandler(result)
     result
   }
@@ -214,9 +216,8 @@ with EventHandlerAnnotated {
 
 
 object TestSchedulerController {
-  final val shortTimeout = 15.s
   /** Long timeout elapses in case of error only. */
-  final val errorOnlyTimeout = 30.s
+  final val TestTimeout = 60.s
   private val logger = Logger(getClass)
 
   def apply(testConfiguration: TestConfiguration): TestSchedulerController = {
@@ -252,6 +253,6 @@ object TestSchedulerController {
     }
 
   object implicits {
-    implicit def testTimeout = TestTimeout(shortTimeout)
+    implicit val Timeout = ImplicitTimeout(TestTimeout)
   }
 }

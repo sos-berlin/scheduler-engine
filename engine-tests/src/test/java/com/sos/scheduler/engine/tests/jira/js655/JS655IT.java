@@ -50,13 +50,13 @@ public final class JS655IT extends SchedulerTest {
 
     private void testAddJobChain() throws Exception {
         renameJobChain(initialJobChainPath, rightJobChainPath);
-        gate.expect(jobChainActivated, shortTimeout);
+        gate.expect(jobChainActivated, TestTimeout);
         assertThat(webResource.post(String.class, "Hello!"), equalTo("Bye!"));
     }
 
     private void testRemoveJobChain() throws Exception {
         renameJobChain(rightJobChainPath, initialJobChainPath);
-        gate.expect(jobChainRemoved, shortTimeout);
+        gate.expect(jobChainRemoved, TestTimeout);
         checkWebServiceIsNotReady();
     }
 

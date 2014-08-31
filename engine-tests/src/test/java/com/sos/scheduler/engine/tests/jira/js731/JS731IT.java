@@ -17,7 +17,7 @@ public final class JS731IT extends SchedulerTest {
         controller().activateScheduler();
         String params = "<params><param name='a' value='ä'/><param name='B' value='B'/></params>";
         scheduler().executeXml("<add_order job_chain='a' id='1'>" + params + "</add_order>");
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
     }
 
     @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) {

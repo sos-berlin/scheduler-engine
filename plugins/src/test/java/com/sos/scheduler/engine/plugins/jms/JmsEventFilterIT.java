@@ -59,7 +59,7 @@ public class JmsEventFilterIT extends JMSConnection {
 	        controller().activateScheduler();
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order2").getCommand() );
-	        controller().waitForTermination(shortTimeout);
+	        controller().waitForTermination();
 	        assertEquals("two eventsToListen of " + eventsToListen.get(0) + " expected",2,resultQueue.size());
 	        assertTrue("'order1' is not in result queue",resultQueue.contains("order1"));
 	        assertTrue("'order2' is not in result queue",resultQueue.contains("order2"));

@@ -54,7 +54,7 @@ public class JS628IT extends SchedulerTest {
         String cmd = commandBuilder.addOrder(jobChain).getCommand();
             controller().scheduler().executeXml(cmd);
         }
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination();
         assertEquals("total number of events", JOB_CHAINS.length, finishedOrderCount);
         assertEquals("successfull orders", expectedSuccessCount, successCount);
         assertEquals("unsuccessfull orders", expectedErrorCount, errorCount);
