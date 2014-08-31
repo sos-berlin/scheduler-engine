@@ -23,8 +23,8 @@ class SchedulerThread extends Thread {
         CppScheduler.loadModule(f);
     }
 
-    final void startThread(ImmutableList<String> args) {
-        this.arguments = args;
+    final void startThread(Iterable<String> args) {
+        this.arguments = ImmutableList.copyOf(args);
         start();  // Thread läuft in run()
     }
 
