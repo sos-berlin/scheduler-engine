@@ -1696,7 +1696,6 @@ Job_chain::Job_chain( Scheduler* scheduler )
     _orders_are_recoverable(true),
     _visible(visible_yes),
     _max_orders(INT_MAX)
-
 {
 }
 
@@ -3207,7 +3206,7 @@ void Job_chain::set_stopped( bool is_stopped )
 bool Job_chain::is_max_orders_reached() const
 {
     return _max_orders < INT_MAX  &&  
-           _max_orders <= number_of_touched_orders_obey_max_orders();
+           _max_orders <= number_of_touched_orders_obeying_max_orders();
 }
 
 //--------------------------------------------------------------Job_chain::number_of_touched_orders
@@ -3227,7 +3226,7 @@ int Job_chain::number_of_touched_orders() const
 
 
 
-int Job_chain::number_of_touched_orders_obey_max_orders() const
+int Job_chain::number_of_touched_orders_obeying_max_orders() const
 {
     assert_is_not_distributed(Z_FUNCTION);
 
@@ -3235,7 +3234,7 @@ int Job_chain::number_of_touched_orders_obey_max_orders() const
     Z_FOR_EACH_CONST(Node_list, _node_list, it)
     {
         if (Order_queue_node* node = Order_queue_node::try_cast(*it))
-            count += node->order_queue()->number_of_touched_orders_obey_max_orders();
+            count += node->order_queue()->number_of_touched_orders_obeying_max_orders();
     }
     return count;
 }
@@ -3956,7 +3955,7 @@ int Order_queue::touched_order_count()
 
 
 
-int Order_queue::number_of_touched_orders_obey_max_orders() const
+int Order_queue::number_of_touched_orders_obeying_max_orders() const
 {
     int result = 0;
     FOR_EACH_CONST(Queue, _queue, it)
