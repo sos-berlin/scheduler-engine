@@ -31,6 +31,7 @@ namespace job {
     struct Task_ended_completed_call;
     DEFINE_SIMPLE_CALL(Task, Task_process_ended_call);
     struct Remote_task_running_call;
+    struct Task_delayed_spooler_process_call;
     struct End_task_call;
     struct Warn_longer_than_call;
     struct Task_timeout_call;
@@ -177,6 +178,7 @@ struct Task : Object,
     void                        on_call                     (const job::Task_end_completed_call&);
     void                        on_call                     (const job::Task_idle_timeout_call&);
     void                        on_call                     (const job::Remote_task_running_call&);
+    void                        on_call                     (const job::Task_delayed_spooler_process_call&);
     void                        on_call                     (const job::Task_end_with_period_call&);
     void                        on_call                     (const job::Task_locks_are_available_call&);
     void                        on_call                     (const job::Task_check_for_order_call&);

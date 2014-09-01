@@ -35,6 +35,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Task, Task_locks_are_available_call)
     DEFINE_SIMPLE_CALL(Task, Task_check_for_order_call)
     DEFINE_SIMPLE_CALL(Task, Remote_task_running_call)
+    DEFINE_SIMPLE_CALL(Task, Task_delayed_spooler_process_call)
     DEFINE_SIMPLE_CALL(Task, Task_on_success_completed_call)
     DEFINE_SIMPLE_CALL(Task, Task_on_error_completed_call)
     DEFINE_SIMPLE_CALL(Task, Task_exit_completed_call)
@@ -823,6 +824,7 @@ void Task::set_delay_spooler_process(const Duration& d)
 { 
     _log->debug("delay_spooler_process=" + d.as_string() ); 
     _next_spooler_process = Time::now() + d; 
+    _call_register.call_at<Task_delayed_spooler_process_call>(_next_spooler_process);
 }
 
 //------------------------------------------------------------------------------Task::try_hold_lock
@@ -994,6 +996,10 @@ void Task::on_call(const Task_end_completed_call&) {
 }
 
 void Task::on_call(const Remote_task_running_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_delayed_spooler_process_call&) {
     do_something();
 }
 
@@ -1531,6 +1537,10 @@ bool Task::do_something()
                         }
 
                         case s_running_waiting_for_order: {
+                            if( _next_spooler_process.not_zero() ) {
+                                set_state_direct( s_running_delayed );
+                                something_done = true;
+                            } else 
                             if( fetch_and_occupy_order( now, state_name() ) ) {
                                 set_state_direct( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
                                 loop = true;                // _order wird in step__end() wieder abgeräumt
