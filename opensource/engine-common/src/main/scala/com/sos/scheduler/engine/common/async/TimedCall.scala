@@ -39,7 +39,7 @@ trait TimedCall[A] extends Callable[A] {
   protected def onComplete(o: Try[A]): Unit = {
     o match {
       case Success(p) =>
-      case Failure(e: CancelledException) => logger.debug(s"$toString cancelled")
+      case Failure(e: CancelledException) =>
       case Failure(t) => logger.error(s"Error in TimedCall ignored: $t ($toString)", t)
     }
   }
