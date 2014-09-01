@@ -2722,6 +2722,10 @@ void Job_chain::remove_order( Order* order )
         order->_moved = true;
     }
 
+    if (untouched_is_allowed()) {   // Falls _max_orders unterschritten worden ist
+        wake_orders();
+    }
+
     check_for_replacing_or_removing();
 }
 
