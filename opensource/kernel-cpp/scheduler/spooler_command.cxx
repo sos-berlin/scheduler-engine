@@ -1718,6 +1718,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
             if( string_begins_with( path, "/<" ) )   // direct XML command, e.g. <show_state/>
             {
                 string xml = path.substr( 1 );
+                if (!string_begins_with(xml, "<show_") && !string_begins_with(xml, "<s ") && !string_begins_with(xml, "<s/")) throw http::Http_exception(http::status_403_forbidden, "");
                 http_response->set_header( "Cache-Control", "no-cache" );
                 response_body = execute( xml, "  " );  // JS-486, the security level will be checked here, too (with error message)
                 response_content_type = "text/xml";
