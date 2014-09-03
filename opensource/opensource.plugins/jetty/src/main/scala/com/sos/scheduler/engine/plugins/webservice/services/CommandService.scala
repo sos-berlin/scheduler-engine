@@ -50,7 +50,12 @@ object CommandService {
   }
 
   private def commandIsReadOnly(command: String) =
-    (command startsWith "<show_") || (command startsWith "show_") || (s"$command " startsWith "s ")
+    (command startsWith "<show_") ||
+      (s"$command " startsWith "<s ") ||
+      (command startsWith "<s>") ||
+      (command startsWith "<s/") ||
+      (command startsWith "show_") ||
+      (s"$command " startsWith "s ")
 
   private def requireValidXml(xmlString: String) {
     try SafeXML.loadString(xmlString)
