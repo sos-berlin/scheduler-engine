@@ -57,6 +57,11 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
       result should include ("<state")
     }
 
+    test("Forbidden modifying command via GET") {
+      resource.path("<update_folders/>").accept(TEXT_XML_TYPE).get(classOf[ClientResponse])
+        .getClientResponseStatus shouldEqual ClientResponse.Status.FORBIDDEN
+    }
+
     test("Alle Bitmuster "+testConf) {
       val bytes = (0 to 255 map { _.toByte }).toArray
       val filename = "test.txt"
