@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.common.xml
 
 import java.nio.charset.StandardCharsets.UTF_8
-import com.google.common.base.Objects.firstNonNull
+import com.google.common.base.MoreObjects.firstNonNull
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect

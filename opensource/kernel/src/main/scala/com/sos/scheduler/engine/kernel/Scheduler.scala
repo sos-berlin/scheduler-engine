@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel
 
-import com.google.common.base.Objects.firstNonNull
+import com.google.common.base.MoreObjects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.cpp
 
 import javax.servlet.http.HttpServletRequest
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest
-import com.google.common.base.Objects._
+import com.google.common.base.MoreObjects.firstNonNull
 import com.google.common.base.Charsets._
 import com.google.common.io.CharStreams
 import java.net.URLDecoder

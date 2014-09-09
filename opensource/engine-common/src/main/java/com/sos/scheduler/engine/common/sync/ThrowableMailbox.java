@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Throwables.propagate;
 
 public class ThrowableMailbox<T extends Throwable> {
