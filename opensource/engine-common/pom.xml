@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>junit</groupId>
-            <artifactId>junit-dep</artifactId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -102,7 +102,7 @@
         </dependency>
         <dependency>
             <groupId>io.spray</groupId>
-            <artifactId>${spray-json.artifactId}</artifactId>
+            <artifactId>spray-json_${scala.binaryVersion}</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
