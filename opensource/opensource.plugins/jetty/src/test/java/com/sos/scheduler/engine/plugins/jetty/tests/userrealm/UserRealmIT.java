@@ -10,15 +10,16 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -37,8 +38,8 @@ public class UserRealmIT extends SchedulerTest {
         controller().prepare();
         prepareEnvironment();
         controller().activateScheduler();
-        assertThat(doHttpRequest("testuser","testpassword").getClientResponseStatus(), equalTo(ClientResponse.Status.OK));
-        assertThat(doHttpRequest("invaliduser","invalidpassword").getClientResponseStatus(), equalTo(ClientResponse.Status.UNAUTHORIZED));
+        assertThat(doHttpRequest("testuser","testpassword").getStatus(), equalTo(OK.getStatusCode()));
+        assertThat(doHttpRequest("invaliduser","invalidpassword").getStatus(), equalTo(UNAUTHORIZED.getStatusCode()));
     }
 
     private ClientResponse doHttpRequest(String user, String password) throws Exception {
@@ -49,7 +50,7 @@ public class UserRealmIT extends SchedulerTest {
         c.addFilter( new HTTPBasicAuthFilter(user, password));
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        logger.debug("Response_code: {}", response.getClientResponseStatus());
+        logger.debug("Response_code: {}", response.getStatusInfo());
         // logResult(response);
         c.destroy();
         return response;

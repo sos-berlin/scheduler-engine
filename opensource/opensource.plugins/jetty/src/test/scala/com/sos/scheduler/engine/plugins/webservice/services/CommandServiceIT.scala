@@ -1,11 +1,9 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import CommandServiceIT._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester.normalizeUri
+import com.sos.scheduler.engine.plugins.webservice.services.CommandServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -73,6 +71,6 @@ private object CommandServiceIT {
   private val ModifyingCommand = s"<$StrippedModifyingCommand/>"
 
   private def interceptHttpError(status: ClientResponse.Status)(body: ⇒ Unit): Unit = {
-    intercept[UniformInterfaceException](body).getResponse.getClientResponseStatus shouldEqual status
+    intercept[UniformInterfaceException](body).getResponse.getStatus shouldEqual status.getStatusCode
   }
 }

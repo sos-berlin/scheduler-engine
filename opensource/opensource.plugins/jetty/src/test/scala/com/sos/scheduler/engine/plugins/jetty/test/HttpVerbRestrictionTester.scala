@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.test
 
 import com.google.common.base.Splitter
 import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester._
+import com.sun.jersey.api.client.ClientResponse.Status.{FORBIDDEN, METHOD_NOT_ALLOWED, OK}
 import com.sun.jersey.api.client.{ClientResponse, WebResource}
 import org.scalatest.Matchers._
 import scala.collection.JavaConversions._
@@ -17,16 +18,16 @@ final class HttpVerbRestrictionTester(webResource: WebResource) {
   }
 
   def httpTraceShouldBeNotAllowed(path: String): Unit = {
-    webResource.path(path).method("TRACE", classOf[ClientResponse]).getClientResponseStatus should
-      (equal (ClientResponse.Status.METHOD_NOT_ALLOWED) or equal (ClientResponse.Status.FORBIDDEN))
+    webResource.path(path).method("TRACE", classOf[ClientResponse]).getStatus should
+      (equal (METHOD_NOT_ALLOWED.getStatusCode) or equal (FORBIDDEN.getStatusCode))
   }
 
   def httpOptionShouldReturnVerbs(path: String, verbSet: Set[String]): Unit = {
     val response = webResource.path(path).options(classOf[ClientResponse])
     if (verbSet.isEmpty) {
-      response.getClientResponseStatus shouldEqual ClientResponse.Status.METHOD_NOT_ALLOWED
+      response.getStatus shouldEqual METHOD_NOT_ALLOWED.getStatusCode
     } else {
-      response.getClientResponseStatus shouldEqual ClientResponse.Status.OK
+      response.getStatus shouldEqual OK.getStatusCode
       val allowStrings = webResource.path(path).options(classOf[ClientResponse]).getHeaders.get("Allow")
       allowStrings.size shouldEqual 1
       (AllowSplitter split allowStrings(0)).toSet shouldEqual verbSet

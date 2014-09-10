@@ -1,19 +1,19 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
-import CppServletIT._
 import com.google.common.io.Files
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
-import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
+import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
+import com.sos.scheduler.engine.plugins.jetty.cpp.CppServletIT._
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
 import com.sos.scheduler.engine.plugins.jetty.test.{JettyPluginJerseyTester, JettyPluginTests}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sun.jersey.api.client.ClientResponse.Status._
 import com.sun.jersey.api.client.{Client, ClientResponse, UniformInterfaceException}
 import java.io.File
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
-import javax.ws.rs.core.Response.Status._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -49,7 +49,7 @@ final class CppServletIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
 
   "Forbidden modifying command via GET" in {
     get[ClientResponse]("/jobscheduler/engine-cpp/%3Cupdate_folders/%3E", Accept = List(TEXT_XML_TYPE))
-      .getClientResponseStatus shouldEqual ClientResponse.Status.FORBIDDEN
+      .getStatus shouldEqual FORBIDDEN.getStatusCode
   }
 
   "Alle Bitmuster" in {

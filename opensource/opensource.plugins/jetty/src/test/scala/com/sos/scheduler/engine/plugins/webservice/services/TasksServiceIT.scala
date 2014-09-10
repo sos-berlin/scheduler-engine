@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import TasksServiceIT._
-import com.sos.scheduler.engine.data.job.{TaskId, JobPath, TaskClosedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
+import com.sos.scheduler.engine.plugins.webservice.services.TasksServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -36,7 +36,7 @@ final class TasksServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPl
 
   "Get task log of unknown TaskId should gracefully fail" in {
     intercept[UniformInterfaceException] { getLog(TaskId(999999999)) }
-      .getResponse.getClientResponseStatus should equal (BAD_REQUEST)
+      .getResponse.getStatus should equal (BAD_REQUEST.getStatusCode)
   }
 
   private def getLog(taskId: TaskId) =

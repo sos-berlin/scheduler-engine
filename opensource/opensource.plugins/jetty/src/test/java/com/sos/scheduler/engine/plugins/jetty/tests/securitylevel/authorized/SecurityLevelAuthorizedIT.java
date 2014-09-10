@@ -3,24 +3,25 @@ package com.sos.scheduler.engine.plugins.jetty.tests.securitylevel.authorized;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.configuration.TestConfiguration;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import org.junit.Test;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
 import static com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests.contextUri;
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.FORBIDDEN;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -58,7 +59,7 @@ public class SecurityLevelAuthorizedIT extends SchedulerTest {
         webClient.addFilter(new HTTPBasicAuthFilter(userName, generalPassword));
         WebResource webResource = webClient.resource(new URI(contextUri(scheduler().injector()) + "/jobscheduler/engine-cpp/command"));
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        assertThat(response.getClientResponseStatus(), equalTo(expectedStatus));
+        assertThat(response.getStatus(), equalTo(expectedStatus.getStatusCode()));
         assertThat(response.getEntity(String.class), containsString(expectedResult));
         webClient.destroy();
     }

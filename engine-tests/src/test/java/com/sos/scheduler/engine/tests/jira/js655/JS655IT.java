@@ -14,13 +14,14 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import org.junit.Test;
-
 import java.io.File;
 import java.net.URI;
+import org.junit.Test;
 
 import static com.sos.scheduler.engine.kernel.util.Util.ignore;
-import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.*;
+import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.jobChainActivated;
+import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.jobChainRemoved;
+import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.terminated;
 import static com.sun.jersey.api.client.ClientResponse.Status.INTERNAL_SERVER_ERROR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -70,7 +71,7 @@ public final class JS655IT extends SchedulerTest {
 
     private void checkWebServiceIsNotReady() {
         ClientResponse response = webResource.post(ClientResponse.class, "Hej!");
-        assertThat(response.getClientResponseStatus(), equalTo(INTERNAL_SERVER_ERROR));
+        assertThat(response.getStatus(), equalTo(INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
     @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, JobChain jobChain) throws InterruptedException {

@@ -9,13 +9,12 @@ import com.sos.scheduler.engine.test.util.Sockets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -41,7 +40,7 @@ public class IPAuthorizationIT extends SchedulerTest {
         controller().prepare();
         prepareEnvironment();
         controller().activateScheduler();
-        assertThat(doHttpRequest().getClientResponseStatus(), equalTo(expectedStatus));
+        assertThat(doHttpRequest().getStatus(), equalTo(expectedStatus.getStatusCode()));
         controller().terminateScheduler();
     }
 
@@ -50,7 +49,7 @@ public class IPAuthorizationIT extends SchedulerTest {
         Client c = Client.create();
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        logger.debug("Response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getClientResponseStatus());
+        logger.debug("Response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getStatusInfo());
         c.destroy();
         // logResult(response);
         return response;

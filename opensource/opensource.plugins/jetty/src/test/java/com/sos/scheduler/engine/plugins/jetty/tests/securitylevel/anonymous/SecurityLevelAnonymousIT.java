@@ -5,9 +5,8 @@ import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import org.junit.Test;
-
 import java.net.URI;
+import org.junit.Test;
 
 import static com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests.contextUri;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -28,7 +27,7 @@ public final class SecurityLevelAnonymousIT extends SchedulerTest {
         Client webClient = Client.create();
         WebResource webResource = webClient.resource(new URI(contextUri(scheduler().injector()) + "/jobscheduler/engine-cpp/command"));
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        assertThat(response.getClientResponseStatus(), equalTo(expectedStatus));
+        assertThat(response.getStatus(), equalTo(expectedStatus.getStatusCode()));
         assertThat(response.getEntity(String.class), containsString(expectedResult));
         webClient.destroy();
     }

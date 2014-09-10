@@ -19,8 +19,8 @@ trait DirectoryListingTests {
         val redirectedUrl = response.getLocation.toString
         assertResult(webResource.path(path) + "/")(redirectedUrl)
         withClue(s"(redirected to $redirectedUrl)") {
-          assertResult(FORBIDDEN) {
-            get[ClientResponse](redirectedUrl).getClientResponseStatus
+          assertResult(FORBIDDEN.getStatusCode) {
+            get[ClientResponse](redirectedUrl).getStatus
           }
         }
       }
@@ -29,8 +29,8 @@ trait DirectoryListingTests {
     registerTest("Web server do not list directory content") {
       val path = s"/jobscheduler/$webDirectoryName/"
       withClue(s"Path $path") {
-        assertResult(FORBIDDEN) {
-          get[ClientResponse](path).getClientResponseStatus
+        assertResult(FORBIDDEN.getStatusCode) {
+          get[ClientResponse](path).getStatus
         }
       }
     }
