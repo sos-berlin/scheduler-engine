@@ -40,7 +40,7 @@
     </script>
 
     <monitor ordering="0" name="read-testvars2">
-        <script language="javax.script:rhino">
+        <script language="javax.script:javascript">
             <![CDATA[
                 function spooler_process_after(spooler_process_result)
                 {

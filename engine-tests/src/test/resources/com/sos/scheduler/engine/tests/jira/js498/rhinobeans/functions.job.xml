@@ -3,9 +3,11 @@
 	order="yes">
     <script language="java:javascript">
         <![CDATA[
-importClass(java.io.File);
-importClass(com.google.common.io.Files);
-importClass(java.nio.charset.Charset);
+            var imports = new JavaImporter(
+                java.io.File,
+                com.google.common.io.Files,
+                java.nio.charset.Charset
+            );
 
 function spooler_init()	{
 	log_function("spooler_init");
@@ -40,20 +42,24 @@ function spooler_on_success() {
 }
 
 function log_function( functionname ) {
-	count = spooler.variables.value(functionname) ? spooler.variables.value(functionname) : 0;
-	count++;
-	filename = spooler.configuration_directory + "/resultfile.txt";
-    Files.append(functionname + "=" + count + "\n", new File(filename), Charset.defaultCharset());
-	spooler_log.info(functionname + " called " + count + " times.");
+    with (imports) {
+        count = spooler.variables.value(functionname) ? spooler.variables.value(functionname) : 0;
+        count++;
+        filename = spooler.configuration_directory + "/resultfile.txt";
+        Files.append(functionname + "=" + count + "\n", new File(filename), Charset.defaultCharset());
+        spooler_log.info(functionname + " called " + count + " times.");
+	}
 }
         ]]>
     </script>
     <monitor name="process0" ordering="0">
         <script language="java:javascript">
             <![CDATA[
-importClass(java.io.File);
-importClass(com.google.common.io.Files);
-importClass(java.nio.charset.Charset);
+            var imports = new JavaImporter(
+                java.io.File,
+                com.google.common.io.Files,
+                java.nio.charset.Charset
+            );
 
 function spooler_task_before() {
 	log_function("spooler_task_before");
@@ -76,11 +82,13 @@ function spooler_task_after() {
 }
 
 function log_function( functionname ) {
-	count = spooler.variables.value(functionname)? spooler.variables.value(functionname) : 0;
-	count++;
-	filename = spooler.configuration_directory + "/resultfile.txt";
-    Files.append(functionname + "=" + count + "\n", new File(filename), Charset.defaultCharset());
-	spooler_log.info(functionname + " called " + count + " times.");
+    with (imports) {
+        count = spooler.variables.value(functionname)? spooler.variables.value(functionname) : 0;
+        count++;
+        filename = spooler.configuration_directory + "/resultfile.txt";
+        Files.append(functionname + "=" + count + "\n", new File(filename), Charset.defaultCharset());
+        spooler_log.info(functionname + " called " + count + " times.");
+	}
 }
             ]]>
         </script>

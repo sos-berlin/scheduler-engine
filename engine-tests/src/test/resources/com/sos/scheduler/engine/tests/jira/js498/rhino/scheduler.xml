@@ -6,7 +6,7 @@
             <param name="scheduler_script" value="*"/>
         </params>
         <scheduler_script>
-            <script language="javax.script:rhino">
+            <script language="javax.script:javascript">
                 function spooler_init() {
                     add("spooler_init")
                     return true;

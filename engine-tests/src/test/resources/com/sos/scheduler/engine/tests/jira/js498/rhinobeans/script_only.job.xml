@@ -7,12 +7,16 @@ implicitely used as 'spooler_process' and should result in the line 'script_only
 	order="no" stop_on_error="no">
     <script language="java:javascript">
         <![CDATA[
-importClass(java.io.File);
-importClass(com.google.common.io.Files);
-importClass(java.nio.charset.Charset);
+            var imports = new JavaImporter(
+                java.io.File,
+                com.google.common.io.Files,
+                java.nio.charset.Charset
+            );
 
-filename = spooler.configuration_directory + "/resultfile.txt";
-Files.append("script_only=" + spooler_job.name + "\n", new File(filename), Charset.defaultCharset());
+            with (imports) {
+                filename = spooler.configuration_directory + "/resultfile.txt";
+                Files.append("script_only=" + spooler_job.name + "\n", new File(filename), Charset.defaultCharset());
+            }
         ]]>
     </script>
     <run_time/>
