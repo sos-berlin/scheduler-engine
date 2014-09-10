@@ -105,6 +105,12 @@
             <artifactId>scala-library</artifactId>
         </dependency>
         <dependency>
+            <!-- Force our (newer) version for JSON serialization -->
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-xml_${scala.binaryVersion}</artifactId>
         </dependency>
