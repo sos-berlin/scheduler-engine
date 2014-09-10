@@ -4303,7 +4303,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     , 11, "Try_add_order"             , (Com_method_ptr)&Com_job_chain::Try_add_order      , VT_BOOL       , { VT_DISPATCH } },
     { DISPATCH_METHOD     , 12, "Add_or_replace_order"      , (Com_method_ptr)&Com_job_chain::Add_or_replace_order, VT_EMPTY     , { VT_DISPATCH } },
     { DISPATCH_METHOD     , 13, "Remove"                    , (Com_method_ptr)&Com_job_chain::Remove             , VT_EMPTY      },
-    { DISPATCH_PROPERTYPUT, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYPUT, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::put_Title          , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_BSTR },
     { DISPATCH_PROPERTYGET, 15, "Path"                      , (Com_method_ptr)&Com_job_chain::get_Path           , VT_BSTR },
     { DISPATCH_PROPERTYGET, 16, "States"                    , (Com_method_ptr)&Com_job_chain::get_States         , (VARENUM)(VT_BSTR|VT_ARRAY) },
