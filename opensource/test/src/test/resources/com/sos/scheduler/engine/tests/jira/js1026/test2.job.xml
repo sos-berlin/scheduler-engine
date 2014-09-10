@@ -41,7 +41,7 @@ stop_on_error="no">
     </script>
 
     <monitor>
-        <script language="javax.script:rhino">
+        <script language="javax.script:javascript">
             <![CDATA[
                 function spooler_process_after(spooler_process_result)
                 {

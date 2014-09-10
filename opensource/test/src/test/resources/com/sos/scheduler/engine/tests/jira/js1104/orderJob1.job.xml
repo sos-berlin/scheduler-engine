@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <job order="yes">
-    <script language="javax.script:rhino">
+    <script language="javax.script:javascript">
         <!-- dummy script, job is not executed -->
     </script>
 

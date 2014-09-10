@@ -5,7 +5,7 @@
 >
     <lock.use lock="lock1" exclusive="no"/>
 
-    <script language="javax.script:rhino">
+    <script language="javax.script:javascript">
         <![CDATA[
             function spooler_process() {
                 spooler_log.info("---------- Order Job ----------");
