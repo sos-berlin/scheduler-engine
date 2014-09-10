@@ -1,7 +1,7 @@
 package sos.spooler.jobs;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.jobapi.scripting.JobScriptInstanceAdapter;
 import sos.spooler.HasBean;
 import sos.spooler.Job_impl;
@@ -19,8 +19,8 @@ public class ScriptAdapterJob extends Job_impl {
         final Parameters p = parseLanguageParameter(language);
         adapter = new JobScriptInstanceAdapter(
                 p.language,
-                new Lazy<ImmutableMap<String,Object>>() {
-                    @Override protected ImmutableMap<String,Object> compute() {
+                new Supplier<ImmutableMap<String,Object>>() {
+                    @Override public ImmutableMap<String,Object> get() {
                         ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
                         if (spooler != null)
                             result.put("spooler", conditionalToBean(p.isUsingBean, spooler));
@@ -74,7 +74,7 @@ public class ScriptAdapterJob extends Job_impl {
     }
 
     @Override public final boolean spooler_process() throws Exception {
-        boolean defaultResult = (spooler_task.order() != null);
+        boolean defaultResult = spooler_task.order() != null;
         return adapter.callProcess(defaultResult);
     }
 
@@ -102,7 +102,7 @@ public class ScriptAdapterJob extends Job_impl {
         return adapter.callProcessAfter(spoolerProcessResult);
     }
 
-    static class Parameters {
+    static final class Parameters {
         final String language;
         final boolean isUsingBean;
 

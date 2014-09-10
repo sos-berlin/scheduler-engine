@@ -18,6 +18,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>engine-common</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

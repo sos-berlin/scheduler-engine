@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.jobapi.scripting
 
+import com.google.common.base.Supplier
 import com.google.common.collect.ImmutableMap
-import com.sos.scheduler.engine.common.Lazy
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -18,7 +18,7 @@ final class JobScriptInstanceAdapterTest extends FunSuite {
 
   private def testLanguage(language: String): Unit = {
     val script = "//"
-    val bindingsLazy = new Lazy[ImmutableMap[String, AnyRef]] { protected def compute() = ImmutableMap.of()}
+    val bindingsLazy = new Supplier[ImmutableMap[String, AnyRef]] { protected def get = ImmutableMap.of()}
     new JobScriptInstanceAdapter(language, bindingsLazy, script)
   }
 }

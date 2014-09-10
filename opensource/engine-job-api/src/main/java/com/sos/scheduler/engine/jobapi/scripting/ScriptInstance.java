@@ -2,11 +2,15 @@ package com.sos.scheduler.engine.jobapi.scripting;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.sos.scheduler.engine.common.Lazy;
 
-import javax.script.*;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import static com.google.common.base.Throwables.propagate;
 import static javax.script.ScriptContext.ENGINE_SCOPE;
@@ -27,10 +31,10 @@ public class ScriptInstance {
     //Haben wir im Task-Prozess das Logging eingestellt? private static final Logger logger = LoggerFactory.getLogger(ScriptInstance.class);
 
     private final ScriptEngine engine;
-    private final Lazy<ImmutableMap<String, Object>> bindingsLazy;
+    private final Supplier<ImmutableMap<String, Object>> bindingsLazy;
     private final String script;
 
-    public ScriptInstance(String language, Lazy<ImmutableMap<String, Object>> bindingsLazy, String script) {
+    public ScriptInstance(String language, Supplier<ImmutableMap<String, Object>> bindingsLazy, String script) {
         this.engine = newScriptEngine(language.toLowerCase());
         this.bindingsLazy = bindingsLazy;
         this.script = script;

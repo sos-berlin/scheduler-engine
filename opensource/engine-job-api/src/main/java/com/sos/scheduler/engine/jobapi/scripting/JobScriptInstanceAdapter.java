@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.jobapi.scripting;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.common.Lazy;
 
 public class JobScriptInstanceAdapter {
     private final ScriptInstance scriptInstance;
@@ -9,7 +9,7 @@ public class JobScriptInstanceAdapter {
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
     //TODO funktioniert das Scripting auch bei remote jobs?
 
-    public JobScriptInstanceAdapter(String language, Lazy<ImmutableMap<String,Object>> bindingsLazy, String script) {
+    public JobScriptInstanceAdapter(String language, Supplier<ImmutableMap<String,Object>> bindingsLazy, String script) {
         this.scriptInstance = new ScriptInstance(language, bindingsLazy, script);
     }
 

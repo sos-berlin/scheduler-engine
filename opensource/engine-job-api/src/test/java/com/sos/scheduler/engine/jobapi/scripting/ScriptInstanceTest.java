@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.jobapi.scripting;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.sos.scheduler.engine.common.Lazy;
@@ -137,8 +138,8 @@ public final class ScriptInstanceTest {
         final ImmutableMap<String, Object> completeBindings = new ImmutableMap.Builder<String,Object>()
                 .put("spooler_log", scriptLogger)
                 .putAll(bindings).build();
-        JobScriptInstanceAdapter adapter = new JobScriptInstanceAdapter(language, new Lazy<ImmutableMap<String, Object>>() {
-            @Override protected ImmutableMap<String, Object> compute() {
+        JobScriptInstanceAdapter adapter = new JobScriptInstanceAdapter(language, new Supplier<ImmutableMap<String, Object>>() {
+            @Override public ImmutableMap<String, Object> get() {
                 return completeBindings;
             }}, script);
         return new TestExecutor(adapter);
