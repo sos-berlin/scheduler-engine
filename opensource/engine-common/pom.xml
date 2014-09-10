@@ -119,5 +119,9 @@
             <groupId>org.scalactic</groupId>
             <artifactId>scalactic_${scala.binaryVersion}</artifactId>
         </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+        </dependency>
     </dependencies>
 </project>
