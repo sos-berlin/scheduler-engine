@@ -90,6 +90,7 @@
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
                             <arguments>
                                 <argument>-c++-output-directory=${basedir}</argument>
+                                <argument>-exclude=com.sos.scheduler.engine.kernel.persistence.hibernate</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>com.google.inject.Injector</argument>
                                 <argument>com.sos.scheduler.engine.common.xml.XmlUtils</argument>

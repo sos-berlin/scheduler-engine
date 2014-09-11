@@ -93,6 +93,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
+            <scope>provided</scope>  <!-- Not in production  -->
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>

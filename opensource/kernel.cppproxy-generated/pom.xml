@@ -40,6 +40,7 @@
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
                             <arguments>
                                 <argument>-java-output-directory=${project.build.sourceDirectory}</argument>
+                                <argument>-exclude=com.sos.scheduler.engine.kernel.persistence.hibernate</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                             </arguments>
                         </configuration>
