@@ -348,7 +348,7 @@ void Sql_file::prepare_open( const char* filename, Open_mode open_mode, const Fi
         }
         else 
         {
-            LOGI( "Satzbeschreibung der Tabelle " << _tablename << " wird ermittelt\n" );
+            LOGI("Determining record description of table " << _tablename << "\n");
             Any_file f;
             f.open( _seq_filename + " WHERE 1=0", Any_file::in );
             _type = +f.spec()._field_type_ptr;

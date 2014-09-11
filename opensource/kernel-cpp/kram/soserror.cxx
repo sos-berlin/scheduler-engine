@@ -1199,7 +1199,7 @@ Soserror_text soserror_texts[] =
     { "SOS-1267"                        , "vflfile: Expandierter Datensatz wird zu lang" },
     { "SOS-1268"                        , "vflfile: Die ersten Felder bilden nicht den Schlüssel" },
     { "SOS-1269"                        , "vflfile: Der Wert des Feldes $1 hat die falsche Länge $2" },
-    { "SOS-1270"                        , "Leerer Wert kann nicht in eine Zahl (Typ $1) konvertiert werden" },
+    { "SOS-1270"                        , "Number (type $1) expected, not an empty string" },
     { "SOS-1271"                        , "Dateityp file, Option -key-end=$1 nur ein Zeichen oder \"tab\" möglich" },
     { "SOS-1300"                        , "Unknown option \"$1\"" },
     { "SOS-1301"                        , "Parameter für Option \"$1\" fehlt" },
