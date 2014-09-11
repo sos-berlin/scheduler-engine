@@ -392,29 +392,48 @@ vector<string> Vm::filenames()
     if (!_filename.empty()) {
         result.push_back(_filename);
     } else {
-#       ifdef Z_WINDOWS
-            windows::Registry_key hkey;
-            windows::Registry_key version_hkey;
+        string jvm_path;
+        if (const char* java_home = getenv("JAVA_HOME")) {
+            #ifdef Z_WINDOWS
+                Z_LOG2(java_log_category, "JAVA_HOME=" << java_home << "\n");
+                jvm_path = string(java_home) + "\\jre\\bin\\server\\jvm.dll";
+            #elif defined Z_LINUX
+                Z_LOG2(java_log_category, "JAVA_HOME=" << java_home << "\n");
+                #if defined Z_64
+                    jvm_path = string(java_home) + "/jre/lib/amd64/server/libjvm.so";
+                #else
+                    jvm_path = string(java_home) + "/jre/lib/i386/server/libjvm.so";
+                #endif
+            #endif
+        }
+        if (jvm_path.empty()) {
+            #ifdef Z_WINDOWS
+                windows::Registry_key hkey;
+                windows::Registry_key version_hkey;
 
-            if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE)) {
-                string current_version = hkey.get_string("CurrentVersion", "");
-                if( current_version != "" 
-                 && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
-                {
-                    string filename = version_hkey.get_string( "RuntimeLib", "" );
-                    result.push_back(filename);
-                    string client_jvm = "\\client\\jvm.dll";
-                    if (string_ends_with(filename, client_jvm))
-                        result.push_back(filename.substr(0, filename.length() - client_jvm.length()) + "\\server\\jvm.dll");    // Java 7.0.7 64bit registriert eine ...\client\jvm.dll, installiert sie aber nicht. 2012-09-17 Zschimmer
+                if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE)) {
+                    string current_version = hkey.get_string("CurrentVersion", "");
+                    if( current_version != "" 
+                     && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
+                    {
+                        string filename = version_hkey.get_string( "RuntimeLib", "" );
+                        result.push_back(filename);
+                        string client_jvm = "\\client\\jvm.dll";
+                        if (string_ends_with(filename, client_jvm))
+                            result.push_back(filename.substr(0, filename.length() - client_jvm.length()) + "\\server\\jvm.dll");    // Java 7.0.7 64bit registriert eine ...\client\jvm.dll, installiert sie aber nicht. 2012-09-17 Zschimmer
+                    }
                 }
-            }
 
-            result.push_back("jvm.dll");
-#       elif defined Z_HPUX_PARISC
-            result.push_back("libjvm.sl");
-#       else
-            result.push_back("libjvm.so");
-#       endif
+                jvm_path = "jvm.dll";
+            #elif defined Z_HPUX_PARISC
+                jvm_path = "libjvm.sl";
+            #else
+                jvm_path = "libjvm.so";
+            #endif
+        }
+        if (!jvm_path.empty()) {
+            result.push_back(jvm_path);
+        }
     }
 
     return result;
