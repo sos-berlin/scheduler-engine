@@ -8,13 +8,13 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
-final class TemporaryJobTest extends FunSuite with ScalaSchedulerTest {
-  test("Temporary job") {
+final class TemporaryJobIT extends FreeSpec with ScalaSchedulerTest {
+  "Temporary job" in {
     val eventPipe = controller.newEventPipe()
     val jobPath = JobPath("/TEMP")
     scheduler executeXml <job name={jobPath.name} temporary="yes"><script language="shell">exit 0</script><run_time once="yes"/></job>
