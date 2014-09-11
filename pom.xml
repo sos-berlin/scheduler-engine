@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>parent</artifactId>
-        <version>1.6.4247-SNAPSHOT</version>
+        <version>1.7.3-SNAPSHOT</version>
         <relativePath>parent</relativePath>
     </parent>
 
@@ -59,7 +59,7 @@
             <properties>
                 <!-- Versionsbezeichnungen für die nächste Freigabe und die darauffolgende Entwicklungsversion hier einstellen -->
                 <releaseVersion>1.6.4246</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
-                <developmentVersion>1.6.4247-SNAPSHOT</developmentVersion>
+                <developmentVersion>1.7.3-SNAPSHOT</developmentVersion>
                 <tag>v${releaseVersion}</tag>
                 <ignoreSnapshots>true</ignoreSnapshots>
             </properties>
