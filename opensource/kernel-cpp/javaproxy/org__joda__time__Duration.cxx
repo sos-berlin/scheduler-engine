@@ -19,12 +19,15 @@ struct Duration__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__J__method;
     ::zschimmer::javabridge::Method const __constructor__JJ__method;
     ::zschimmer::javabridge::Method const __constructor__Lorg_joda_time_ReadableInstant_2Lorg_joda_time_ReadableInstant_2__method;
+    ::zschimmer::javabridge::Method const _dividedBy__J__method;
     ::zschimmer::javabridge::Method const _getStandardDays____method;
     ::zschimmer::javabridge::Method const _getStandardHours____method;
     ::zschimmer::javabridge::Method const _getStandardMinutes____method;
     ::zschimmer::javabridge::Method const _getStandardSeconds____method;
     ::zschimmer::javabridge::Static_method const _millis__J__method;
     ::zschimmer::javabridge::Method const _minus__J__method;
+    ::zschimmer::javabridge::Method const _multipliedBy__J__method;
+    ::zschimmer::javabridge::Method const _negated____method;
     ::zschimmer::javabridge::Static_method const _parse__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _plus__J__method;
     ::zschimmer::javabridge::Static_method const _standardDays__J__method;
@@ -46,12 +49,15 @@ Duration__class::Duration__class(const string& class_name) :
     ,__constructor__J__method(this, "<init>", "(J)V")
     ,__constructor__JJ__method(this, "<init>", "(JJ)V")
     ,__constructor__Lorg_joda_time_ReadableInstant_2Lorg_joda_time_ReadableInstant_2__method(this, "<init>", "(Lorg/joda/time/ReadableInstant;Lorg/joda/time/ReadableInstant;)V")
+    ,_dividedBy__J__method(this, "dividedBy", "(J)Lorg/joda/time/Duration;")
     ,_getStandardDays____method(this, "getStandardDays", "()J")
     ,_getStandardHours____method(this, "getStandardHours", "()J")
     ,_getStandardMinutes____method(this, "getStandardMinutes", "()J")
     ,_getStandardSeconds____method(this, "getStandardSeconds", "()J")
     ,_millis__J__method(this, "millis", "(J)Lorg/joda/time/Duration;")
     ,_minus__J__method(this, "minus", "(J)Lorg/joda/time/Duration;")
+    ,_multipliedBy__J__method(this, "multipliedBy", "(J)Lorg/joda/time/Duration;")
+    ,_negated____method(this, "negated", "()Lorg/joda/time/Duration;")
     ,_parse__Ljava_lang_String_2__method(this, "parse", "(Ljava/lang/String;)Lorg/joda/time/Duration;")
     ,_plus__J__method(this, "plus", "(J)Lorg/joda/time/Duration;")
     ,_standardDays__J__method(this, "standardDays", "(J)Lorg/joda/time/Duration;")
@@ -122,6 +128,15 @@ Duration::~Duration() { assign_(NULL); }
 
 
 
+::javaproxy::org::joda::time::Duration Duration::dividedBy(jlong p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].j = p0;
+    Duration__class* cls = _class.get();
+    ::javaproxy::org::joda::time::Duration result;
+    result.steal_local_ref(cls->_dividedBy__J__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
 jlong Duration::getStandardDays() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Duration__class* cls = _class.get();
@@ -161,6 +176,23 @@ jlong Duration::getStandardSeconds() const {
     Duration__class* cls = _class.get();
     ::javaproxy::org::joda::time::Duration result;
     result.steal_local_ref(cls->_minus__J__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::org::joda::time::Duration Duration::multipliedBy(jlong p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].j = p0;
+    Duration__class* cls = _class.get();
+    ::javaproxy::org::joda::time::Duration result;
+    result.steal_local_ref(cls->_multipliedBy__J__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::org::joda::time::Duration Duration::negated() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Duration__class* cls = _class.get();
+    ::javaproxy::org::joda::time::Duration result;
+    result.steal_local_ref(cls->_negated____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

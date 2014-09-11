@@ -54,12 +54,15 @@ struct Duration : ::zschimmer::javabridge::proxy_jobject< Duration >, ::javaprox
     }
   public:
 
+    ::javaproxy::org::joda::time::Duration dividedBy(jlong p0) const;
     jlong getStandardDays() const;
     jlong getStandardHours() const;
     jlong getStandardMinutes() const;
     jlong getStandardSeconds() const;
     static ::javaproxy::org::joda::time::Duration millis(jlong p0);
     ::javaproxy::org::joda::time::Duration minus(jlong p0) const;
+    ::javaproxy::org::joda::time::Duration multipliedBy(jlong p0) const;
+    ::javaproxy::org::joda::time::Duration negated() const;
     static ::javaproxy::org::joda::time::Duration parse(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
     ::javaproxy::org::joda::time::Duration plus(jlong p0) const;
     static ::javaproxy::org::joda::time::Duration standardDays(jlong p0);
