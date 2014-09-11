@@ -7,7 +7,8 @@ import scala.collection.JavaConversions._
 object PackageOps {
   private val classFilenameRegex = """^(.*)\.class""".r
 
-  def classesOfPackage(packageName: String) = classNamesOfPackage(packageName) map Class.forName
+  def classesOfPackage(packageName: String, classNameFilter: String ⇒ Boolean) =
+    classNamesOfPackage(packageName) filter classNameFilter map classForName
 
   def classNamesOfPackage(packageName: String): List[String] = {
     require(packageName.nonEmpty, "Non-root package name required")
@@ -27,4 +28,21 @@ object PackageOps {
     case classFilenameRegex(className) => Some(className.replace('/', '.'))
     case _ => None
   }
+
+  def classForName(name: String) =
+    try Class.forName(name)
+    catch {
+      case t: ClassNotFoundException ⇒
+        val u = new ClassNotFoundException(s"${t.getMessage} [class $name]", t)
+        u.setStackTrace(t.getStackTrace)
+        throw u
+      case t: ExceptionInInitializerError ⇒
+        val u = new RuntimeException(s"${t.getMessage} [class $name]", t)
+        u.setStackTrace(t.getStackTrace)
+        throw u
+      case t: LinkageError ⇒
+        val u = new LinkageError(s"${t.getMessage} [class $name]", t)
+        u.setStackTrace(t.getStackTrace)
+        throw u
+    }
 }

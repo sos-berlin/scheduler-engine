@@ -16,7 +16,9 @@ final class Main(args: Array[String]) {
 
   private val (cppProxyInterfaces, javaProxies) = {
     val (classNames, packageNames) = parameters.classOrPackageNames partition isClassName
-    val packageClasses = packageNames flatMap { Package(_).relevantClasses }
+    val packageClasses = packageNames flatMap { name ⇒
+      Package(name).relevantClasses(classNameFilter = { name ⇒ !classNameIsExcluded(parameters.excludedPackagesOrClasses)(name) })
+    }
     val classes = (classNames map Class.forName) ++ packageClasses
     classes partition classOf[CppProxy].isAssignableFrom
   }
@@ -42,8 +44,11 @@ object Main {
     new Main(args).apply()
   }
 
-  def isClassName(x: String) = {
+  private[main] def isClassName(x: String) = {
     val simpleName = ("" :: x.split('.').toList).last
     simpleName.nonEmpty && simpleName.head.isUpper
   }
+
+  private[main] def classNameIsExcluded(excludedClassOrPackageNames: Set[String])(className: String) =
+    excludedClassOrPackageNames(className) || (excludedClassOrPackageNames exists { e ⇒ className startsWith s"$e." } )
 }

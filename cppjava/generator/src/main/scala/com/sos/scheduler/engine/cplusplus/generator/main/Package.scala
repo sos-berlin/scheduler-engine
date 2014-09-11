@@ -7,8 +7,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 
 final case class Package(name: String) {
 
-  def relevantClasses = {
-    val allClasses = classesOfPackage(name)
+  def relevantClasses(classNameFilter: String ⇒ Boolean) = {
+    val allClasses = classesOfPackage(name, classNameFilter)
     require(allClasses.nonEmpty, s"Package '$name' is empty")
     val result = allClasses filter classIsRelevant
     require(result.nonEmpty, s"Package '$name' contains no relevant class:\n${info(allClasses)}")
