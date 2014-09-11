@@ -3,6 +3,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
+@SuppressWarnings("unchecked")
 final class Sink_nodeCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.SinkNode>
 implements com.sos.scheduler.engine.kernel.cppproxy.Sink_nodeC {

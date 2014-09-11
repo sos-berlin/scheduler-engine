@@ -3,6 +3,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
+@SuppressWarnings("unchecked")
 final class LockCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.lock.Lock>
 implements com.sos.scheduler.engine.kernel.cppproxy.LockC {

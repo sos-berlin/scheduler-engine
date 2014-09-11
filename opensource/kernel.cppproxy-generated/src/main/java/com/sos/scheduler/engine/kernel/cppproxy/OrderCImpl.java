@@ -3,6 +3,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
+@SuppressWarnings("unchecked")
 final class OrderCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.Order>
 implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {

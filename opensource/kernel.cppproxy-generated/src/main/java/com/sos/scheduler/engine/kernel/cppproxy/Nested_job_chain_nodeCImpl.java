@@ -3,6 +3,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
+@SuppressWarnings("unchecked")
 final class Nested_job_chain_nodeCImpl
 extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.NestedJobChainNode>
 implements com.sos.scheduler.engine.kernel.cppproxy.Nested_job_chain_nodeC {
