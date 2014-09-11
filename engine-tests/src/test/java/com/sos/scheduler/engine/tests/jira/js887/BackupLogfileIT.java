@@ -16,7 +16,7 @@ import java.io.IOException;
 
 import static com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly;
 import static java.util.Arrays.asList;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class BackupLogfileIT extends SchedulerTest {
 
@@ -58,18 +58,18 @@ public class BackupLogfileIT extends SchedulerTest {
 
     @Test
     public void test4() throws IOException {
-        doTest(tempDirWithDot,"scheduler_log","scheduler_log-old");
+        doTest(tempDirWithDot, "scheduler_log", "scheduler_log-old");
     }
 
     private void doTest(File logDir, String logfileName, String expectedName) throws IOException {
-        File logFile = new File(logDir,logfileName);
-        File expectedFile = new File(logDir,expectedName);
+        File logFile = new File(logDir, logfileName);
+        File expectedFile = new File(logDir, expectedName);
         controller().prepare();
         Files.touch(logFile);
         controller().activateScheduler(asList("-log-dir=" + logDir.getAbsolutePath(), "-log=" + logFile.getAbsolutePath()));
         controller().scheduler().executeXml(cmd.startJobImmediately("test").getCommand());
         controller().waitForTermination(timeout);
-        assertTrue("Backup file " + expectedName + " does not exist in " + logDir.getAbsolutePath(),expectedFile.exists());
+        assertTrue("Backup file " + expectedName + " does not exist in " + logDir.getAbsolutePath(), expectedFile.exists());
         String content = Files.toString(expectedFile, Charsets.UTF_8);
         assertTrue("No content of backupfile is allowed.", content.isEmpty());
     }
