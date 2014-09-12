@@ -5,6 +5,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Map;
 
 public class CommandBuilder {
 	
@@ -24,8 +26,9 @@ public class CommandBuilder {
 		StringBuilder result = new StringBuilder().append(commandPrefix);
 		if (params.size() > 0 ) {
 			result.append("<params>");
-			for (String key : params.keySet()) {
-				result.append("<param name='" + key + "' value='" + params.get(key) + "' />");
+            TreeMap<String,String> treeMap = new TreeMap(params); // sortierte Keys
+            for (Map.Entry<String,String> entry : treeMap.entrySet()) {
+				result.append("<param name='" + entry.getKey() + "' value='" + entry.getValue() + "' />");
 			}
 			result.append("</params>");
 		}
