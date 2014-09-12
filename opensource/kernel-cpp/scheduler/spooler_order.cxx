@@ -670,7 +670,7 @@ ptr<Order> Order_subsystem_impl::load_order_from_database( Transaction* outer_tr
 
 ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
-    assert( !( flag & lo_lock )  ||  outer_transaction );   // lo_lock => outer_transaction
+    if ((flag & lo_lock) && !outer_transaction) z::throw_xc(Z_FUNCTION, "lock without transaction");
 
     ptr<Order> result;
 
