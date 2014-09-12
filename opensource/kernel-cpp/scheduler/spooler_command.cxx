@@ -1304,7 +1304,6 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
                                                   : job_chain->order( id );
-
     if (!order  &&  job_chain->is_distributed()) {
         for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
             order = _spooler->order_subsystem()->load_order_from_database(&ta, job_chain_path, id, Order_subsystem::lo_lock);  // Exception, wenn von einem Scheduler belegt
@@ -1312,73 +1311,53 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     }
     assert(order);
-
-    if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
+    if (modify_order_element.getAttribute("action") == "reset") {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
         order->reset();
     }
-
-    if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
-    {
-        order->set_schedule( (File_based*)NULL, run_time_element );
+    if (xml::Element_ptr run_time_element = modify_order_element.select_node("run_time")) {
+        order->set_schedule((File_based*)NULL, run_time_element);
     }
-
-    if( xml::Element_ptr params_element = modify_order_element.select_node( "params" ) )
-    {
+    if (xml::Element_ptr params_element = modify_order_element.select_node("params")) {
         ptr<Com_variable_set> params = new Com_variable_set;
-        params->set_dom( params_element );
-        order->params()->merge( params );
+        params->set_dom(params_element);
+        order->params()->merge(params);
     }
-
-    if( xml::Element_ptr xml_payload_element = modify_order_element.select_node( "xml_payload" ) )
-    {
-        order->set_payload_xml( xml_payload_element.first_child_element() );
+    if (xml::Element_ptr xml_payload_element = modify_order_element.select_node("xml_payload")) {
+        order->set_payload_xml(xml_payload_element.first_child_element());
     }
-
-    if( priority != "" )  
-        order->set_priority( as_int( priority ) );
-
-    if( state != "" )  
-    {
-        order->assert_no_task( Z_FUNCTION );
-        order->set_state( state );
+    if (priority != "") {
+        order->set_priority(as_int(priority));
     }
-
-    if( modify_order_element.hasAttribute( "end_state" ) )
-        order->set_end_state( modify_order_element.getAttribute( "end_state" ) );
-
-    if( at != "" )  
-        order->set_at( Time::of_date_time_with_now( at, _spooler->_time_zone_name ) );
-
-    if( modify_order_element.hasAttribute( "setback" ) )
-    {
-        if( modify_order_element.bool_getAttribute( "setback" ) )
-        {
-            z::throw_xc( "SCHEDULER-351", modify_order_element.getAttribute( "setback" ) );
+    if (state != "") {
+        order->assert_no_task(Z_FUNCTION);
+        order->set_state(state);
+    }
+    if (modify_order_element.hasAttribute("end_state")) {
+        order->set_end_state(modify_order_element.getAttribute("end_state"));
+    }
+    if (at != "") {
+        order->set_at(Time::of_date_time_with_now(at, _spooler->_time_zone_name));
+    }
+    if (modify_order_element.hasAttribute("setback")) {
+        if (modify_order_element.bool_getAttribute("setback")) {
+            z::throw_xc("SCHEDULER-351", modify_order_element.getAttribute("setback"));
             //order->setback();
-        }
-        else
-        {
-            order->assert_no_task( Z_FUNCTION );
-            order->clear_setback( true );        // order->_setback_count belassen
+        } else {
+            order->assert_no_task(Z_FUNCTION);
+            order->clear_setback(true);        // order->_setback_count belassen
         }
     }
-
-    if( modify_order_element.hasAttribute( "suspended" ) )
-    {
-        order->set_suspended( modify_order_element.bool_getAttribute( "suspended" ) );
+    if (modify_order_element.hasAttribute("suspended")) {
+        order->set_suspended(modify_order_element.bool_getAttribute("suspended"));
     }
-
-    if( modify_order_element.hasAttribute( "title" ) )
-    {
-        order->set_title( modify_order_element.getAttribute( "title" ) );
+    if (modify_order_element.hasAttribute("title")) {
+        order->set_title(modify_order_element.getAttribute("title"));
     }
-
     if (job_chain && job_chain->orders_are_recoverable()) {
         order->persist();
-    
         for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
             if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
-                order->remove_from_job_chain( Order::jc_remove_from_job_chain_stack, &ta );
+                order->remove_from_job_chain(Order::jc_remove_from_job_chain_stack, &ta);
                 order->close();
             } else {
                 order->db_update(Order::update_anyway, &ta);
@@ -1387,7 +1366,6 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         }
         catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     }
-
     return _answer.createElement( "ok" );
 }
 
