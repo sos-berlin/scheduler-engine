@@ -1288,7 +1288,7 @@ void Configuration::set_dom( const xml::Element_ptr& cluster_element )
 
 ptr<Cluster_subsystem_interface> new_cluster_subsystem( Scheduler* scheduler, const Configuration& c)
 {
-    if (scheduler->settings()->_db_name == "") z::throw_xc("SCHEDULER-357");
+    if (scheduler->settings()->_db_name == "") z::throw_xc("SCHEDULER-205");
     if (c._orders_are_distributed && c._demand_exclusiveness) z::throw_xc("SCHEDULER-369", "-distributed-orders", "-exclusive");
     if (c._is_backup_member && !c._demand_exclusiveness) z::throw_xc("SCHEDULER-368", "-backup", "-exclusive");
     
