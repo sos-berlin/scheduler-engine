@@ -477,6 +477,7 @@ struct Spooler : Object,
     bool                        assert_is_still_active      ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
     bool                        check_is_active             ( Transaction* = NULL );
     void                        assert_is_activated         ( const string& function );
+    void                        do_a_heart_beat_when_needed (const string& debug_text);
 
     bool                        is_cluster                  () const                            { return _cluster != NULL; }
     bool                        cluster_is_active           ();

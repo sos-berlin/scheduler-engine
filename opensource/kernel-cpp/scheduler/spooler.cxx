@@ -2809,6 +2809,13 @@ void Spooler::check_cluster()
     check_is_active();
 }
 
+
+void Spooler::do_a_heart_beat_when_needed(const string& debug_text) {
+    if (_cluster) {
+        _cluster->do_a_heart_beat_when_needed(Z_FUNCTION);
+    } 
+}
+
 //------------------------------------------------------------------Spooler::assert_is_still_active
 
 bool Spooler::assert_is_still_active( const string& debug_function, const string& message_text, Transaction* outer_transaction )
