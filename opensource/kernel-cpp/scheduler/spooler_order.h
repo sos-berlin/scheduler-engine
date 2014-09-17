@@ -868,6 +868,7 @@ struct Job_chain : Com_job_chain,
     void                        unregister_order            ( Order* );
 
     bool                        tip_for_new_distributed_order( const Order::State& state, const Time& at );
+    void                        tip_for_new_file_order      (const Order::State&);
 
     void                        add_order_to_blacklist      ( Order* );
     void                        remove_order_from_blacklist ( Order* );
@@ -897,6 +898,8 @@ struct Job_chain : Com_job_chain,
 
     Order_subsystem_impl*       order_subsystem             () const;
 
+    vector<job_chain::Order_queue_node*> skipped_order_queue_nodes(const Order::State&) const;
+    vector<Order::State>        skipped_states              (const Order::State&) const;
     int                         number_of_touched_orders    () const;
     int                         number_of_touched_orders_obey_max_orders     () const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }

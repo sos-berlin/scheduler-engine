@@ -1347,6 +1347,13 @@ bool Order_queue_node::is_ready_for_order_processing()
 bool Order_queue_node::request_order(const Time& now, const string& cause)
 {
     bool result = order_queue()->request_order(now, cause);
+    if (!result) {
+        vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+        Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+            result = (*i)->order_queue()->request_order(now, cause);
+            if (result) break;
+        }
+    }
     return result;
 }
 
@@ -1355,15 +1362,28 @@ bool Order_queue_node::request_order(const Time& now, const string& cause)
 void Order_queue_node::withdraw_order_request()
 {
     order_queue()->withdraw_order_request();
+    vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+    Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+        (*i)->order_queue()->withdraw_order_request();
+    }
 }
 
 //---------------------------------------------------------Order_queue//---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
-    if (is_ready_for_order_processing())
-        return order_queue()->fetch_and_occupy_order(occupying_task, _job_chain->untouched_is_allowed(), now, cause);
-    else
+    if (is_ready_for_order_processing() && _action != act_next_state) {
+        Untouched_is_allowed u = _job_chain->untouched_is_allowed();
+        Order* result = order_queue()->fetch_and_occupy_order(occupying_task, u, now, cause);
+        if (!result) {
+            vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+            Z_FOR_EACH_CONST(vector<job_chain::Order_queue_node*>, skipped_nodes, i) {
+                result = (*i)->order_queue()->fetch_and_occupy_order(occupying_task, u, now, cause);
+                if (result) break;
+            }
+        }
+        return result;
+    } else
         return NULL;
 }
 
@@ -1796,6 +1816,31 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
         order_subsystem()->order_id_spaces()->disconnect_order_id_spaces( this, disconnected_job_chains );
     }
 }    
+
+
+vector<Order_queue_node*> Job_chain::skipped_order_queue_nodes(const Order::State& state) const {
+    vector<Order_queue_node*> result;
+    vector<Order::State> states = skipped_states(state);
+    Z_FOR_EACH_CONST(vector<Order::State>, states, i) {
+        if (Order_queue_node* node = Order_queue_node::try_cast(node_from_state(*i))) {
+            result.push_back(node);
+        }
+    }
+    return result;
+}
+
+vector<Order::State> Job_chain::skipped_states(const Order::State& state) const {
+    javaproxy::java::util::ArrayList arrayList = _typed_java_sister.cppSkippedStates(state.as_string());
+    int n = arrayList.size();
+    vector<Order::State> result;
+    result.reserve(n);
+    for (int i = 0; i < n; i++) {
+        javaproxy::java::lang::String s = (javaproxy::java::lang::String)arrayList.get(i);
+        if (!s) z::throw_xc(Z_FUNCTION);
+        result.push_back(Order::State((string)s));
+    }
+    return result;
+}
 
 //--------------------------------------------------------------------Job_chain::set_order_id_space
 
@@ -4195,6 +4240,15 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
 Time Order_queue::next_announced_distributed_order_time()
 { 
     return _next_announced_distributed_order_time; 
+}
+
+
+void Job_chain::tip_for_new_file_order(const Order::State& state) {
+    try {
+        if (Order_queue_node* n = Order_queue_node::try_cast(referenced_node_from_state(state))) {
+            n->order_queue()->tip_for_new_distributed_order();
+        }
+    } catch (exception& x) { log()->debug(x.what()); }  // In case of next_state loop in referenced_node_from_state
 }
 
 //-------------------------------------------------------Order_queue::tip_for_new_distributed_order

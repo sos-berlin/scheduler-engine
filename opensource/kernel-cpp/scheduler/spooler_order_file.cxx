@@ -962,8 +962,9 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     read_directory( was_notified, cause );
 
-    if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_distributed_order();
-
+    if (_new_files_index < _new_files.size()) {
+        _job_chain->tip_for_new_file_order(_next_state);
+    }
 
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
