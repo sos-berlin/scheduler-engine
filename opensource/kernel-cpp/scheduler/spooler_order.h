@@ -642,6 +642,8 @@ struct Order_queue_node : Node
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     bool                    set_action                      (Action);
     void                        wake_orders                 ();
+    bool                        request_order               (const Time& now, const string& cause);
+    void                        withdraw_order_request      ();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
     bool                        is_ready_for_order_processing ();
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
@@ -847,8 +849,8 @@ struct Job_chain : Com_job_chain,
 
     job_chain::Node*            first_node                  () const;
     job_chain::Node*            referenced_node_from_state  ( const Order::State& );
-    job_chain::Node*            node_from_state             ( const Order::State& );
-    job_chain::Node*            node_from_state_or_null     ( const Order::State& );
+    job_chain::Node*            node_from_state             ( const Order::State& ) const;
+    job_chain::Node*            node_from_state_or_null     ( const Order::State& ) const;
     job_chain::Job_node*        node_from_job               ( Job* );
     javaproxy::java::util::ArrayList java_nodes             ();
 

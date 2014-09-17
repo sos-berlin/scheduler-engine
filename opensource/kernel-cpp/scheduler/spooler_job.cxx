@@ -445,8 +445,7 @@ bool Combined_job_nodes::request_order( const Time& now, const string& cause )
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
-        Order_queue* order_queue = (*it)->order_queue();
-        result |= order_queue->request_order( now, cause );
+        result |= (*it)->request_order( now, cause );
         if( result )  break;
     }
 
@@ -456,6 +455,7 @@ bool Combined_job_nodes::request_order( const Time& now, const string& cause )
 //------------------------------------------------------Combined_job_nodes::withdraw_order_requests
 
 void Combined_job_nodes::withdraw_order_requests()
+
 {
     //Z_LOGI2( "zschimmer", obj_name() << " " << Z_FUNCTION << "\n" );
 
@@ -464,8 +464,7 @@ void Combined_job_nodes::withdraw_order_requests()
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
-        Order_queue* order_queue = (*it)->order_queue();
-        order_queue->withdraw_order_request();
+        (*it)->withdraw_order_request();
     }
 }
 

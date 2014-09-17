@@ -1342,7 +1342,22 @@ bool Order_queue_node::is_ready_for_order_processing()
     return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();
 }
 
-//---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
+//------------------------------------------------------------------Order_queue_node::request_order
+
+bool Order_queue_node::request_order(const Time& now, const string& cause)
+{
+    bool result = order_queue()->request_order(now, cause);
+    return result;
+}
+
+//--------------------------------------------------------Order_queue_node::withdraw_order_requests
+
+void Order_queue_node::withdraw_order_request()
+{
+    order_queue()->withdraw_order_request();
+}
+
+//---------------------------------------------------------Order_queue//---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
@@ -2590,7 +2605,7 @@ Node* Job_chain::referenced_node_from_state( const Order::State& state )
 
 //-----------------------------------------------------------------------Job_chain::node_from_state
 
-Node* Job_chain::node_from_state( const Order::State& state )
+Node* Job_chain::node_from_state( const Order::State& state ) const
 {
     Node* result = node_from_state_or_null( state );
     if( !result )  z::throw_xc( "SCHEDULER-149", path().to_string(), debug_string_from_variant(state) );
@@ -2599,11 +2614,11 @@ Node* Job_chain::node_from_state( const Order::State& state )
 
 //---------------------------------------------------------------Job_chain::node_from_state_or_null
 
-Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
+Node* Job_chain::node_from_state_or_null( const Order::State& order_state ) const
 {
     if( !order_state.is_missing() )
     {
-        for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
+        for( Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++ )
         {
             Node* n = *it;
             if( n->order_state() == order_state )  return n;
