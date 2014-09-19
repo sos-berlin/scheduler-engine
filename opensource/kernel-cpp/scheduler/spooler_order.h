@@ -328,6 +328,7 @@ struct Order : Com_order,
     bool                        order_is_removable_or_replaceable();
 
 
+    friend struct               job_chain::Order_queue_node;
     friend struct               Order_queue;
     friend struct               Job_chain;
 
@@ -432,7 +433,7 @@ struct Order_source : Scheduler_object, Event_operation
     virtual void                initialize              ();
     virtual void                activate                ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
-    virtual Order*              fetch_and_occupy_order  ( Task* occupying_task, const Time& now, const string& cause) = 0;
+    virtual Order*              fetch_and_occupy_order  (const Order::State&, Task* occupying_task, const Time& now, const string& cause) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -441,7 +442,7 @@ struct Order_source : Scheduler_object, Event_operation
     Fill_zero                  _zero_;
     Job_chain*                 _job_chain;
     Order::State               _next_state;
-    Order_queue*               _next_order_queue;
+    job_chain::Order_queue_node* _next_node;
 };
 
 //------------------------------------------------------------------------------------Order_sources
@@ -639,6 +640,8 @@ struct Order_queue_node : Node
   //void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    void                        register_order_source       (Order_source*);
+    void                        unregister_order_source     (Order_source*);
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     bool                    set_action                      (Action);
     void                        wake_orders                 ();
@@ -649,6 +652,8 @@ struct Order_queue_node : Node
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
 
   private:
+    typedef list< Order_source* >  Order_source_list;
+    Order_source_list             _order_source_list;                   // Muss leer sein bei ~Order_queue_node!
     ptr<Order_queue>           _order_queue;
     bool                       _order_queue_is_loaded;
 };
@@ -868,7 +873,7 @@ struct Job_chain : Com_job_chain,
     void                        unregister_order            ( Order* );
 
     bool                        tip_for_new_distributed_order( const Order::State& state, const Time& at );
-    void                        tip_for_new_file_order      (const Order::State&);
+    void                        tip_for_new_order      (const Order::State&);
 
     void                        add_order_to_blacklist      ( Order* );
     void                        remove_order_from_blacklist ( Order* );
@@ -984,8 +989,6 @@ struct Order_queue : Com_order_queue,
     void                        add_order                   ( Order*, Do_log = do_log );
     void                        remove_order                ( Order*, Do_log = do_log );
     void                        reinsert_order              ( Order* );
-    void                        register_order_source       ( Order_source* );
-    void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* ) const;
     int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
     int                         touched_order_count         ();
@@ -1029,9 +1032,6 @@ struct Order_queue : Com_order_queue,
     int                        _next_distributed_order_check_delay;
     Time                       _next_announced_distributed_order_time;  // Gültig, wenn _is_distributed_order_requested
     bool                       _has_tip_for_new_order;
-
-    typedef list< Order_source* >  Order_source_list;
-    Order_source_list             _order_source_list;                   // Muss leer sein bei ~Order_queue_node!
 };
 
 //-----------------------------------------------------------------------Job_chain_folder_interface

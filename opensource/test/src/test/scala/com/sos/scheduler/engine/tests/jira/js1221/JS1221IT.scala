@@ -21,18 +21,36 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
 
-  //TODO Test: Jobkette soll spontan auf einfallende Datei reagieren
+  private lazy val directory = createTempDir()
 
-  "file_order_source" in {
-    val directory = createTempDir()
-    val file = directory / "test"
-    onClose {
-      file.delete()
-      directory.delete()
-    }
+  onClose {
+    directory.delete()
+  }
+
+  "Existing file" in {
+    val file = newFile()
     scheduler executeXml jobChainElem(directory)
     scheduler executeXml <job_chain_node.modify job_chain="/test" state={AOrderState.string} action="next_state"/>
-    touch(file)
+    check(file)
+  }
+
+  "Added file" in {
+    val file = newFile()
+    check(file)
+  }
+
+  private object newFile {
+    private val i = Iterator.from(1)
+
+    def apply() = {
+      val file = directory / s"test-${i.next()}"
+      onClose { file.delete() }
+      touch(file)
+      file
+    }
+  }
+
+  private def check(file: File): Unit = {
     val orderKey = TestJobChainPath.orderKey(file.getPath)
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       eventPipe.nextAny[TaskStartedEvent].jobPath shouldEqual BJobPath
