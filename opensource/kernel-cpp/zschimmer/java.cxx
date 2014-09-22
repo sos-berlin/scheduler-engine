@@ -1,6 +1,7 @@
 // $Id: java.cxx 14145 2010-12-02 12:11:47Z jz $
 
 #include "zschimmer.h"
+#include <sys/stat.h>
 #include "threads.h"
 #include "z_com.h"
 #include "z_directory.h"
@@ -24,6 +25,18 @@
 #   define JVALUES_CAST(JVALUE) const_cast<jvalue*>(JVALUE)
 #else
 #   define JVALUES_CAST(JVALUE) (JVALUE)
+#endif
+
+#ifdef Z_WINDOWS
+    #define JVM_RELATIVE_PATH "\\bin\\server\\jvm.dll"
+#elif defined Z_LINUX
+    #if defined Z_64
+        #define JVM_RELATIVE_PATH "/lib/amd64/server/libjvm.so";
+    #else
+        #define JVM_RELATIVE_PATH "/lib/i386/server/libjvm.so";
+    #endif
+#else
+#   define JVM_RELATIVE_PATH JVM_PATH_IS_UNKNOWN_FOR_THIS_PLATFORM
 #endif
 
 using namespace std;
@@ -393,19 +406,17 @@ vector<string> Vm::filenames()
         result.push_back(_filename);
     } else {
         string jvm_path;
-        if (const char* java_home = getenv("JAVA_HOME")) {
-            #ifdef Z_WINDOWS
-                Z_LOG2(java_log_category, "JAVA_HOME=" << java_home << "\n");
-                jvm_path = string(java_home) + "\\jre\\bin\\server\\jvm.dll";
-            #elif defined Z_LINUX
-                Z_LOG2(java_log_category, "JAVA_HOME=" << java_home << "\n");
-                #if defined Z_64
-                    jvm_path = string(java_home) + "/jre/lib/amd64/server/libjvm.so";
-                #else
-                    jvm_path = string(java_home) + "/jre/lib/i386/server/libjvm.so";
-                #endif
-            #endif
-        }
+        #if defined Z_WINDOWS || defined Z_LINUX
+            if (const char* java_home_c = getenv("JAVA_HOME")) {
+                Z_LOG2(java_log_category, "JAVA_HOME=" << java_home_c << "\n");
+                File_path home = File_path(java_home_c);
+                File_path jdk_path = File_path(home, "jre");
+                if (jdk_path.exists()) {
+                    home = jdk_path;   // JAVA_HOME denotes a JDK, not a JRE
+                }
+                jvm_path = home + JVM_RELATIVE_PATH;
+            }
+        #endif
         if (jvm_path.empty()) {
             #ifdef Z_WINDOWS
                 windows::Registry_key hkey;
