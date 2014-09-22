@@ -1411,7 +1411,7 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
                         if (order) break;
                     }
                     if (order) {
-                        _log->info(message_string("SCHEDULER-859", _order_state, skipped_node->order_state().as_string(), _order_state));
+                        _log->info(message_string("SCHEDULER-859", _order_state, skipped_node->order_state().as_string()));
                         break;
                     }
                 }
