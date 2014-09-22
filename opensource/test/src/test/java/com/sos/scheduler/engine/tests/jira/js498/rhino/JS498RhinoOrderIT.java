@@ -43,7 +43,7 @@ public class JS498RhinoOrderIT extends SchedulerTest {
         controller().activateScheduler();
         File resultFile = prepareResultFile();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination(shortTimeout.plus(shortTimeout));
         resultMap = getResultMap(resultFile);
         checkScriptOnlyJob();
         checkJobObjects();
