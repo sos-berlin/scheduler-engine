@@ -39,8 +39,6 @@ final class JS1003IT extends FunSuite with ScalaSchedulerTest {
   private def checkBehaviour(orderKey: OrderKey)(startOrder: => Unit) {
     val eventPipe = controller.newEventPipe()
     startOrder
-    if (orderKey != standingOrderKey)  // Ein Dauerauftrag überspringt den ersten Knoten ohne Event
-      eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state100)
     eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state200)
     def order = orderSubsystem.order(orderKey)
     order.state should be (state300)
