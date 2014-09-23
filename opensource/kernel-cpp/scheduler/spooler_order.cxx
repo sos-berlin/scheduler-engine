@@ -4396,8 +4396,6 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     // Dann (alte) Aufträge aus der Datenbank
     if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angekündigt
     {
-        withdraw_distributed_order_request();
-
         if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, untouched_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
             assert(o->_is_distributed);
             if (o->_state != o->_occupied_state) {
@@ -4408,6 +4406,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
                 o->close();
             } else {
                 order = o;
+                withdraw_distributed_order_request();
             }
         }
     }
