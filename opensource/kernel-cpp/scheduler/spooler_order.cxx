@@ -673,6 +673,7 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
     assert( !( flag & lo_lock )  ||  outer_transaction );   // lo_lock => outer_transaction
 
     ptr<Order> result;
+    Xc_copy non_db_exception;
 
     //if (_spooler->settings()->_use_java_persistence) {
     //    ptr<Order> result;
@@ -698,16 +699,19 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
             result = _spooler->standing_order_subsystem()->new_order();
             result->load_record( job_chain_path, record );
             result->set_distributed();
-            if (!(flag & lo_allow_occupied) && !record.null("occupying_cluster_member_id")) z::throw_xc("SCHEDULER-379", result->obj_name(), record.as_string("occupying_cluster_member_id"));
-
-            try
-            {
-                result->load_blobs( &ta );
+            if (!(flag & lo_allow_occupied) && !record.null("occupying_cluster_member_id")) {
+                non_db_exception = z::Xc("SCHEDULER-379", result->obj_name(), record.as_string("occupying_cluster_member_id"));
+                result = NULL;
+            } else {
+                try
+                {
+                    result->load_blobs( &ta );
+                }
+                catch( exception& ) 
+                { 
+                    result = NULL;  // Jemand hat wohl den Auftrag gelöscht
+                }      
             }
-            catch( exception& ) 
-            { 
-                result = NULL;  // Jemand hat wohl den Auftrag gelöscht
-            }      
         }
     }
     catch( exception& x ) 
@@ -715,6 +719,8 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
         if( result )  result->close(),  result = NULL;
         ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_orders_tablename, x ), Z_FUNCTION ); 
     }
+
+    if (non_db_exception) throw *non_db_exception;
 
     return result;
 }
