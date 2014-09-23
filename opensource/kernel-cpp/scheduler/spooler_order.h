@@ -1062,7 +1062,8 @@ struct Order_subsystem: Object,
         lo_none,
         lo_lock = 0x01,
         lo_blacklisted = 0x02,
-        lo_blacklisted_lock = lo_blacklisted | lo_lock
+        lo_blacklisted_lock = lo_blacklisted | lo_lock,
+        lo_allow_occupied = 0x04
     };
 
                                 Order_subsystem             ( Scheduler* );

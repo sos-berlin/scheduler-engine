@@ -698,7 +698,7 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
             result = _spooler->standing_order_subsystem()->new_order();
             result->load_record( job_chain_path, record );
             result->set_distributed();
-            if( !record.null( "occupying_cluster_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_cluster_member_id" ) );
+            if (!(flag & lo_allow_occupied) && !record.null("occupying_cluster_member_id")) z::throw_xc("SCHEDULER-379", result->obj_name(), record.as_string("occupying_cluster_member_id"));
 
             try
             {

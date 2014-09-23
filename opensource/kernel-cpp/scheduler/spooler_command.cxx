@@ -1182,7 +1182,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         order = job_chain->order_or_null( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
-            order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id );
+            order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem::lo_allow_occupied);
     }
 
     if( !order  &&  _spooler->db()->opened() )
@@ -1795,7 +1795,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
                             if( !order  &&  job_chain->is_distributed() ) 
                             {
-                                order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, order_id );
+                                order = _spooler->order_subsystem()->try_load_order_from_database((Transaction*)NULL, job_chain_path, order_id, Order_subsystem::lo_allow_occupied);
 
                                 if( order )
                                 {
