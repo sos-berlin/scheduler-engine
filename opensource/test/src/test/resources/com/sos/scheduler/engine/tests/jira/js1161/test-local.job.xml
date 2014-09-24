@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
+    <script language="shell">
+        echo LOCAL-START
+        <!-- .xml, weil Test-Framework (TestEnvironmentFiles) nur .xml durchlässt. -->
+        <include live_file="test-include-1.xml"/>
+        echo MIDDLE
+        <include live_file="test-include-2.xml"/>
+        <include live_file="test-include-3.xml"/>
+        echo LOCAL-END
+    </script>
+</job>

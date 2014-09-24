@@ -123,22 +123,26 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
     // Löst die <include> auf und macht sie zu <source_part>
 
     xml::Document_ptr result = xml::Document_ptr::from_xml_string(_xml_string);
+    xml::Element_ptr document_element = result.documentElement();
 
-    DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
-    {
-        if( element.nodeName_is( "include" ) )
-        {
-            Include_command include_command ( _spooler, _file_based, element, _include_path );
-
-            try
+    for (xml::Simple_node_ptr child = document_element.firstChild(); child; child = child.nextSibling()) {
+        if (xml::Element_ptr element = xml::Element_ptr(child, ::zschimmer::xml::Element_ptr::no_xc)) {
+            if( element.nodeName_is( "include" ) )
             {
-                xml::Element_ptr part_element = result.createElement( "source_part" );
-                bool xml_only = false;
-                string s = include_command.read_decoded_string(xml_only);
-                part_element.appendChild( result.createTextNode(s));
-                element.replace_with( part_element );
+                Include_command include_command ( _spooler, _file_based, element, _include_path );
+
+                try
+                {
+                    xml::Element_ptr part_element = result.createElement( "source_part" );
+                    bool xml_only = false;
+                    string s = include_command.read_decoded_string(xml_only);
+                    part_element.appendChild( result.createTextNode(s));
+                    document_element.replaceChild(part_element, element);
+                    element = part_element;
+                    child = element;
+                }
+                catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
             }
-            catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
         }
     }
 
