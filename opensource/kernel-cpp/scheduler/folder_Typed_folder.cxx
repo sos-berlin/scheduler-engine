@@ -151,6 +151,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
     bool            is_new             = !old_file_based  ||    
                                          old_file_based->_file_is_removed;     // Datei ist wieder aufgetaucht?
 
+    _spooler->do_a_heart_beat_when_needed(Z_FUNCTION);
+
     assert( is_new || current_file_based );
 
     if( old_file_based )  

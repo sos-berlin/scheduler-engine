@@ -118,4 +118,9 @@ xml::Element_ptr File_based_subsystem::execute_xml( Command_processor* command_p
     return result;
 }
 
+
+void File_based_subsystem::do_a_heart_beat_when_needed(const string& debug_text) {
+    _spooler->do_a_heart_beat_when_needed(debug_text);
+}
+
 }}} //namespace sos::scheduler::folder
