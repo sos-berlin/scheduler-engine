@@ -585,7 +585,6 @@ void Jdbc_session::_execute_direct( const Const_area& stmt_area )
 
     if( _dbms == dbms_oracle_thin )  stmt = modify_oracle_thin_stmt( stmt );
 
-    Z_LOG2("sql", stmt << "\n");
     Z_LOG2( "jdbc", "jdbc: executeUpdate  " << stmt << flush );
 
     _row_count = _jdbc_statement.call_int_method( "executeUpdate", "(Ljava/lang/String;)I", (jstring)Local_jstring( stmt ) );
@@ -806,7 +805,6 @@ void Jdbc_file::prepare_open( const char* filename, Open_mode open_mode, const F
         _session->convert_stmt( Const_area( c_str( select_statement ), length( select_statement ) ), &stmt );
         select_statement = string( stmt.char_ptr(), length( stmt ) );
 
-        Z_LOG2("sql", "prepareStatement  " << select_statement << "\n");
         Z_LOG2( "jdbc", "jdbc: prepareStatement  " << select_statement << "\n" );
         _jdbc_statement = session()->_jdbc_connection.call_object_method("prepareStatement", "(Ljava/lang/String;)Ljava/sql/PreparedStatement;",
                                                                          (jstring)Local_jstring( select_statement ) );
