@@ -1297,10 +1297,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
                                                   : job_chain->order( id );
 
     if (!order  &&  job_chain->is_distributed()) {
-        for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
-            order = _spooler->order_subsystem()->load_order_from_database(&ta, job_chain_path, id, Order_subsystem::lo_lock);  // Exception, wenn von einem Scheduler belegt
-        }
-        catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
+        order = _spooler->order_subsystem()->load_order_from_database((Transaction*)NULL, job_chain_path, id, Order_subsystem::lo_lock);  // Exception, wenn von einem Scheduler belegt
     }
     assert(order);
 
