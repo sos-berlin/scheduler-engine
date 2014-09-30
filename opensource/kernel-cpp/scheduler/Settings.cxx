@@ -23,7 +23,7 @@ Settings::Settings()
     _max_length_of_blob_entry(INT_MAX),
     _supervisor_configuration_polling_interval(15 * 60),
     _cluster_restart_after_emergency_abort(true),
-    _use_old_microscheduling_for_jobs(false), // Funktioniert nicht in allen Fällen
+    _use_old_microscheduling_for_jobs(true), // Das neue Mikroscheduling funktioniert nicht in allen Faellen
     _use_old_microscheduling_for_tasks(true)  // JS-1140 Fehlerbehandlung in Task mit Async_operation-Kindern funktioniert nicht (weil Task async_finished() pollt)
 {
     if (SOS_LICENCE(licence_scheduler)) 
