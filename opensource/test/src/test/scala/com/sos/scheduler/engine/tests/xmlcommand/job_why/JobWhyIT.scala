@@ -6,10 +6,13 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.xmlcommand.job_why.JobWhyIT._
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.junit.JUnitRunner
 import org.w3c.dom.Element
 import scala.collection.breakOut
 
+@RunWith(classOf[JUnitRunner])
 final class JobWhyIT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val results: Map[JobPath, Element] = JobPaths .map { o ⇒ o → executeJobWhy(o) } (breakOut)
