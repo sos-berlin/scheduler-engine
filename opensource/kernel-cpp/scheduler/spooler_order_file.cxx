@@ -68,7 +68,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        initialize              ();
     void                        activate                ();
     bool                        request_order           ( const string& cause );
-    Order*                      fetch_and_occupy_order  ( Task* occupying_task, const Time& now, const string& cause);
+    Order*                      fetch_and_occupy_order  (const Order::State&, Task* occupying_task, const Time& now, const string& cause);
     void                        withdraw_order_request  ();
     string                      obj_name                () const;
 
@@ -292,10 +292,10 @@ void Directory_file_order_source::close()
 {
     close_notification();
 
-    if( _next_order_queue ) 
+    if( _next_node ) 
     {
-        _next_order_queue->unregister_order_source( this );
-        _next_order_queue = NULL;
+        _next_node->unregister_order_source( this );
+        _next_node = NULL;
     }
 
     _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ungültig sein
@@ -461,9 +461,9 @@ void Directory_file_order_source::close_notification()
 void Directory_file_order_source::initialize()
 {
     Order_source::initialize();     // Setzt _next_order_queue
-    assert( _next_order_queue );
+    assert( _next_node );
 
-    _next_order_queue->register_order_source( this );
+    _next_node->register_order_source( this );
 }
 
 //-----------------------------------------------------------Directory_file_order_source::activaate
@@ -472,7 +472,7 @@ void Directory_file_order_source::activate()
 {
     Job* next_job = NULL;
 
-    if( Job_node* job_node = Job_node::try_cast( _next_order_queue->order_queue_node() ) )
+    if( Job_node* job_node = Job_node::try_cast(_next_node) )
     {
         if( job_node->normalized_job_path() == file_order_sink_job_path )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
         next_job = job_node->job_or_null();
@@ -602,7 +602,7 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
 
 //----------------------------------------------Directory_file_order_source::fetch_and_occupy_order
 
-Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
+Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& fetching_state, Task* occupying_task, const Time& now, const string& cause)
 {
     Order* result = NULL;
 
@@ -631,7 +631,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task,
                     order = _spooler->standing_order_subsystem()->new_order();
 
                     order->set_file_path( path );
-                    order->set_state( _next_state );
+                    order->set_state(fetching_state);
 
                     string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
 
@@ -962,8 +962,9 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     read_directory( was_notified, cause );
 
-    if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_distributed_order();
-
+    if (_new_files_index < _new_files.size()) {
+        _job_chain->tip_for_new_order(_next_state);
+    }
 
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten

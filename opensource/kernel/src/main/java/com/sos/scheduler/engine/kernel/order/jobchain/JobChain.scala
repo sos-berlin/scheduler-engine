@@ -6,17 +6,20 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
+import com.sos.scheduler.engine.kernel.order.jobchain.JobChain._
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
+import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
@@ -74,6 +77,19 @@ with UnmodifiableJobChain {
 
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
+
+  /** All OrderState, which are skipped to given orderStateString */
+  @ForCpp
+  private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = {
+    val result = new java.util.ArrayList[String]
+    result.addAll(allPredecessorStates(OrderState(orderStateString)) map { _.string } )
+    result
+  }
+
+  private def allPredecessorStates(orderState: OrderState): Set[OrderState] = {
+    val edgeSet = (nodeMap.values filter { _.action == nextState } map { o ⇒ o.orderState → o.nextState }).toSet
+    allPredecessors(edgeSet, orderState)
+  }
 
   override def details = {
     val d = super.details
@@ -139,5 +155,16 @@ object JobChain {
       val injector = context.asInstanceOf[HasInjector].injector
       new JobChain(proxy, injector.apply[OrderSubsystem], injector)
     }
+  }
+
+  /** All predecessors (transitive closure) of from graph described by edges. */
+  private[jobchain] def allPredecessors[A](edges: Iterable[(A, A)], from: A) = {
+    @tailrec
+    def f(intermediateResult: Set[A]): Set[A] = {
+      val step = for (i ← intermediateResult; (a, b) ← edges if b == i) yield a
+      val result = intermediateResult ++ step
+      if (result.size > intermediateResult.size) f(result) else result
+    }
+    f(Set(from)) - from
   }
 }

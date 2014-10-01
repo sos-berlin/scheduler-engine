@@ -332,6 +332,7 @@ struct Order : Com_order,
     bool                        order_is_removable_or_replaceable();
 
 
+    friend struct               job_chain::Order_queue_node;
     friend struct               Order_queue;
     friend struct               Job_chain;
 
@@ -437,7 +438,7 @@ struct Order_source : Abstract_scheduler_object, Event_operation
     virtual void                initialize              ();
     virtual void                activate                ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
-    virtual Order*              fetch_and_occupy_order  ( Task* occupying_task, const Time& now, const string& cause) = 0;
+    virtual Order*              fetch_and_occupy_order  (const Order::State&, Task* occupying_task, const Time& now, const string& cause) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -446,7 +447,7 @@ struct Order_source : Abstract_scheduler_object, Event_operation
     Fill_zero                  _zero_;
     Job_chain*                 _job_chain;
     Order::State               _next_state;
-    Order_queue*               _next_order_queue;
+    job_chain::Order_queue_node* _next_node;
 };
 
 //------------------------------------------------------------------------------------Order_sources
@@ -650,14 +651,20 @@ struct Order_queue_node : Node
   //void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    void                        register_order_source       (Order_source*);
+    void                        unregister_order_source     (Order_source*);
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     bool                    set_action                      (Action);
     void                        wake_orders                 ();
+    bool                        request_order               (const Time& now, const string& cause);
+    void                        withdraw_order_request      ();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
     bool                        is_ready_for_order_processing ();
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
 
   private:
+    typedef list< Order_source* >  Order_source_list;
+    Order_source_list             _order_source_list;                   // Muss leer sein bei ~Order_queue_node!
     ptr<Order_queue>           _order_queue;
     bool                       _order_queue_is_loaded;
 };
@@ -862,8 +869,8 @@ struct Job_chain : Com_job_chain,
 
     job_chain::Node*            first_node                  () const;
     job_chain::Node*            referenced_node_from_state  ( const Order::State& );
-    job_chain::Node*            node_from_state             ( const Order::State& );
-    job_chain::Node*            node_from_state_or_null     ( const Order::State& );
+    job_chain::Node*            node_from_state             ( const Order::State& ) const;
+    job_chain::Node*            node_from_state_or_null     ( const Order::State& ) const;
     job_chain::Job_node*        node_from_job               ( Job* );
     javaproxy::java::util::ArrayList java_nodes             ();
 
@@ -881,6 +888,7 @@ struct Job_chain : Com_job_chain,
     void                        unregister_order            ( Order* );
 
     bool                        tip_for_new_distributed_order( const Order::State& state, const Time& at );
+    void                        tip_for_new_order      (const Order::State&);
 
     void                        add_order_to_blacklist      ( Order* );
     void                        remove_order_from_blacklist ( Order* );
@@ -910,6 +918,8 @@ struct Job_chain : Com_job_chain,
 
     Order_subsystem_impl*       order_subsystem             () const;
 
+    vector<job_chain::Order_queue_node*> skipped_order_queue_nodes(const Order::State&) const;
+    vector<Order::State>        skipped_states              (const Order::State&) const;
     int                         number_of_touched_orders    () const;
     int                         number_of_touched_orders_obeying_max_orders() const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
@@ -994,8 +1004,6 @@ struct Order_queue : Com_order_queue,
     void                        add_order                   ( Order*, Do_log = do_log );
     void                        remove_order                ( Order*, Do_log = do_log );
     void                        reinsert_order              ( Order* );
-    void                        register_order_source       ( Order_source* );
-    void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* ) const;
     int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
     int                         touched_order_count         ();
@@ -1039,9 +1047,6 @@ struct Order_queue : Com_order_queue,
     int                        _next_distributed_order_check_delay;
     Time                       _next_announced_distributed_order_time;  // Gültig, wenn _is_distributed_order_requested
     bool                       _has_tip_for_new_order;
-
-    typedef list< Order_source* >  Order_source_list;
-    Order_source_list             _order_source_list;                   // Muss leer sein bei ~Order_queue_node!
 };
 
 //-----------------------------------------------------------------------Job_chain_folder_interface
@@ -1072,7 +1077,8 @@ struct Order_subsystem: Object,
         lo_none,
         lo_lock = 0x01,
         lo_blacklisted = 0x02,
-        lo_blacklisted_lock = lo_blacklisted | lo_lock
+        lo_blacklisted_lock = lo_blacklisted | lo_lock,
+        lo_allow_occupied = 0x04
     };
 
                                 Order_subsystem             ( Scheduler* );

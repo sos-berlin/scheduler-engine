@@ -673,6 +673,7 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
     if ((flag & lo_lock) && !outer_transaction) z::throw_xc(Z_FUNCTION, "lock without transaction");
 
     ptr<Order> result;
+    Xc_copy non_db_exception;
 
     //if (_spooler->settings()->_use_java_persistence) {
     //    ptr<Order> result;
@@ -698,16 +699,19 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
             result = _spooler->standing_order_subsystem()->new_order();
             result->load_record( job_chain_path, record );
             result->set_distributed();
-            if( !record.null( "occupying_cluster_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_cluster_member_id" ) );
-
-            try
-            {
-                result->load_blobs( &ta );
+            if (!(flag & lo_allow_occupied) && !record.null("occupying_cluster_member_id")) {
+                non_db_exception = z::Xc("SCHEDULER-379", result->obj_name(), record.as_string("occupying_cluster_member_id"));
+                result = NULL;
+            } else {
+                try
+                {
+                    result->load_blobs( &ta );
+                }
+                catch( exception& ) 
+                { 
+                    result = NULL;  // Jemand hat wohl den Auftrag gelöscht
+                }      
             }
-            catch( exception& ) 
-            { 
-                result = NULL;  // Jemand hat wohl den Auftrag gelöscht
-            }      
         }
     }
     catch( exception& x ) 
@@ -715,6 +719,8 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
         if( result )  result->close(),  result = NULL;
         ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_orders_tablename, x ), Z_FUNCTION ); 
     }
+
+    if (non_db_exception) throw *non_db_exception;
 
     return result;
 }
@@ -933,10 +939,8 @@ void Order_source::initialize()
 
     if( _next_state.is_missing() )  _next_state = _job_chain->first_node()->order_state();
 
-    Order_queue_node* next_node = Order_queue_node::try_cast( _job_chain->node_from_state( _next_state ) );
-    if( !next_node )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
-    
-    _next_order_queue = next_node->order_queue();
+    _next_node = Order_queue_node::try_cast( _job_chain->node_from_state( _next_state ) );
+    if( !_next_node )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
 }
 
 //-----------------------------------------------------------------------------Order_sources::close
@@ -1315,7 +1319,8 @@ bool Order_queue_node::set_action(Action action)
 
                 case act_next_state:
                 {
-                    Order::State next_state = _job_chain->referenced_node_from_state( _order_state )->order_state();
+                    Node* next_node = _job_chain->referenced_node_from_state(_order_state);
+                    Order::State next_state = next_node->order_state();
 
                     list<Order*> order_list;
                     
@@ -1325,6 +1330,12 @@ bool Order_queue_node::set_action(Action action)
                     Z_FOR_EACH( list<Order*>, order_list, o )
                         (*o)->set_state1( next_state );
 
+                    if (Job_node* job_node = Job_node::try_cast(next_node)) {
+                        // <file_order_source>
+                        if (Job* job = job_node->job_or_null()) {
+                            job->on_order_possibly_available();
+                        }
+                    }
                     break;
                 }                            
 
@@ -1343,21 +1354,83 @@ bool Order_queue_node::is_ready_for_order_processing()
     return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();
 }
 
+//------------------------------------------------------------------Order_queue_node::request_order
+
+bool Order_queue_node::request_order(const Time& now, const string& cause)
+{
+    bool result = order_queue()->request_order(now, cause);
+    if (!result) {
+        Z_FOR_EACH(Order_source_list, _order_source_list, j) {
+            result = (*j)->request_order(cause);
+            if (result)  break;
+        }
+        // <file_order_source> aller hier herleitenden (<job_chain_node action="next_state">) Knoten:
+        vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+        Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+            Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
+                result = (*j)->request_order(cause);
+                if (result)  break;
+            }
+            if (result)  break;
+        }
+    }
+    return result;
+}
+
+//--------------------------------------------------------Order_queue_node::withdraw_order_requests
+
+void Order_queue_node::withdraw_order_request()
+{
+    order_queue()->withdraw_order_request();
+    Z_FOR_EACH(Order_source_list, _order_source_list, j) {
+        (*j)->withdraw_order_request();
+    }
+    vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+    Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+        Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
+            (*j)->withdraw_order_request();
+        }
+        (*i)->order_queue()->withdraw_order_request();
+    }
+}
+
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
-    if (!is_ready_for_order_processing())
-        return NULL;
-    else 
-    if (Order* order = order_queue()->fetch_and_occupy_order(occupying_task, _job_chain->untouched_is_allowed(), now, cause)) {
-        order->db_start_order_history();
-        order->assert_task(Z_FUNCTION);
-        order->on_occupied();
-        return order;
-    }
-    else 
-        return NULL;
+    Order* order = NULL;
+    if (is_ready_for_order_processing()) {
+        Untouched_is_allowed u = _job_chain->untouched_is_allowed();
+        order = order_queue()->fetch_and_occupy_order(occupying_task, u, now, cause);
+        if (!order && u && _action != act_next_state) {   // act_next_step erst hier prüfen, wegen JS-1122
+            Z_FOR_EACH(Order_source_list, _order_source_list, it) {
+                Order_source* order_source = *it;
+                order = order_source->fetch_and_occupy_order(_order_state, occupying_task, now, cause);
+                if (order) break;
+            }
+            if (!order) {
+                vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+                Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+                    Order_queue_node* skipped_node = *i;
+                    Z_FOR_EACH(Order_source_list, skipped_node->_order_source_list, it) {
+                        Order_source* order_source = *it;
+                        order = order_source->fetch_and_occupy_order(_order_state, occupying_task, now, cause);
+                        if (order) break;
+                    }
+                    if (order) {
+                        _log->info(message_string("SCHEDULER-859", _order_state, skipped_node->order_state().as_string()));
+                        break;
+                    }
+                }
+            }
+        }
+        if (order) {
+            order->db_start_order_history();
+            order->assert_task(Z_FUNCTION);
+            order->on_occupied();
+        }
+    } 
+    return order;
 }
 
 //--------------------------------------------------------------------Order_queue_node::dom_element
@@ -1790,6 +1863,31 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
         order_subsystem()->order_id_spaces()->disconnect_order_id_spaces( this, disconnected_job_chains );
     }
 }    
+
+
+vector<Order_queue_node*> Job_chain::skipped_order_queue_nodes(const Order::State& state) const {
+    vector<Order_queue_node*> result;
+    vector<Order::State> states = skipped_states(state);
+    Z_FOR_EACH_CONST(vector<Order::State>, states, i) {
+        if (Order_queue_node* node = Order_queue_node::try_cast(node_from_state(*i))) {
+            result.push_back(node);
+        }
+    }
+    return result;
+}
+
+vector<Order::State> Job_chain::skipped_states(const Order::State& state) const {
+    javaproxy::java::util::ArrayList arrayList = _typed_java_sister.cppSkippedStates(state.as_string());
+    int n = arrayList.size();
+    vector<Order::State> result;
+    result.reserve(n);
+    for (int i = 0; i < n; i++) {
+        javaproxy::java::lang::String s = (javaproxy::java::lang::String)arrayList.get(i);
+        if (!s) z::throw_xc(Z_FUNCTION);
+        result.push_back(Order::State((string)s));
+    }
+    return result;
+}
 
 //--------------------------------------------------------------------Job_chain::set_order_id_space
 
@@ -2600,7 +2698,7 @@ Node* Job_chain::referenced_node_from_state( const Order::State& state )
 
 //-----------------------------------------------------------------------Job_chain::node_from_state
 
-Node* Job_chain::node_from_state( const Order::State& state )
+Node* Job_chain::node_from_state( const Order::State& state ) const
 {
     Node* result = node_from_state_or_null( state );
     if( !result )  z::throw_xc( "SCHEDULER-149", path().to_string(), debug_string_from_variant(state) );
@@ -2609,11 +2707,11 @@ Node* Job_chain::node_from_state( const Order::State& state )
 
 //---------------------------------------------------------------Job_chain::node_from_state_or_null
 
-Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
+Node* Job_chain::node_from_state_or_null( const Order::State& order_state ) const
 {
     if( !order_state.is_missing() )
     {
-        for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
+        for( Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++ )
         {
             Node* n = *it;
             if( n->order_state() == order_state )  return n;
@@ -3921,18 +4019,18 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
     return element;
 }
 
-//---------------------------------------------------------------Order_queue::register_order_source
+//----------------------------------------------------------Order_queue_node::register_order_source
 
-void Order_queue::register_order_source( Order_source* order_source )
+void Order_queue_node::register_order_source( Order_source* order_source )
 {
     Z_DEBUG_ONLY( Z_FOR_EACH( Order_source_list, _order_source_list, it )  assert( *it != order_source ); )
 
     _order_source_list.push_back( order_source );
 }
 
-//-------------------------------------------------------------Order_queue::unregister_order_source
+//--------------------------------------------------------Order_queue_node::unregister_order_source
 
-void Order_queue::unregister_order_source( Order_source* order_source )
+void Order_queue_node::unregister_order_source( Order_source* order_source )
 {
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
@@ -4109,19 +4207,6 @@ bool Order_queue::request_order( const Time& now, const string& cause )
 
     if( !result )  result = has_immediately_processable_order( now );
 
-    if( !result )
-    {
-        // Dateiaufträge (File_order)
-
-        Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
-        {
-            Order_source* order_source = *it;
-            result = order_source->request_order( cause );
-            if( result )  break;
-        }
-    }
-
-
     // Jetzt prüfen wir die verteilten Aufträge.
     // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
 
@@ -4144,12 +4229,7 @@ bool Order_queue::request_order( const Time& now, const string& cause )
 
 void Order_queue::withdraw_order_request()
 {
-    Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
-    {
-        Order_source* order_source = *it;
-        order_source->withdraw_order_request();
-    }
-
+    _has_tip_for_new_order = false;
     withdraw_distributed_order_request();
 }
 
@@ -4194,6 +4274,15 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
 Time Order_queue::next_announced_distributed_order_time()
 { 
     return _next_announced_distributed_order_time; 
+}
+
+
+void Job_chain::tip_for_new_order(const Order::State& state) {
+    try {
+        if (Order_queue_node* n = Order_queue_node::try_cast(referenced_node_from_state(state))) {
+            n->order_queue()->tip_for_new_distributed_order();
+        }
+    } catch (exception& x) { log()->debug(x.what()); }  // In case of next_state loop in referenced_node_from_state
 }
 
 //-------------------------------------------------------Order_queue::tip_for_new_distributed_order
@@ -4290,6 +4379,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     const Time& now, const string& cause)
 {
     assert( occupying_task );
+    _has_tip_for_new_order = false;
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
@@ -4300,8 +4390,6 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     // Dann (alte) Aufträge aus der Datenbank
     if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angekündigt
     {
-        withdraw_distributed_order_request();
-
         if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, untouched_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
             assert(o->_is_distributed);
             if (o->_state != o->_occupied_state) {
@@ -4312,6 +4400,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
                 o->close();
             } else {
                 order = o;
+                withdraw_distributed_order_request();
             }
         }
     }

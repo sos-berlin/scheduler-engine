@@ -543,6 +543,7 @@ struct File_based_subsystem : Subsystem
     virtual void                add_file_based              ( File_based* )                         = 0;
     virtual void                remove_file_based           ( File_based* )                         = 0;
     virtual void                replace_file_based          ( File_based*, File_based* )            = 0;
+    void                        do_a_heart_beat_when_needed (const string& debug);
 
   private:
     void                        normalized_name             ( const Path& ) const;                  // Nicht implementiert! normalized_path() sollte aufgerufen werden?
@@ -585,6 +586,8 @@ struct file_based_subsystem : File_based_subsystem
 
         Z_FOR_EACH_REVERSE( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
+            do_a_heart_beat_when_needed(Z_FUNCTION);
+
             ptr<File_based> file_based = *it;
             
             try
@@ -602,6 +605,8 @@ struct file_based_subsystem : File_based_subsystem
 
         Z_FOR_EACH( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
+            do_a_heart_beat_when_needed(Z_FUNCTION);
+
             File_based* file_based = +*it;
 
             try
@@ -621,6 +626,8 @@ struct file_based_subsystem : File_based_subsystem
 
         Z_FOR_EACH( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
+            do_a_heart_beat_when_needed(Z_FUNCTION);
+
             File_based* file_based = +*it;
 
             try
@@ -640,6 +647,8 @@ struct file_based_subsystem : File_based_subsystem
 
         Z_FOR_EACH( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
+            do_a_heart_beat_when_needed(Z_FUNCTION);
+
             File_based* file_based = +*it;
 
             try

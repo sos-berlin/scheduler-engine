@@ -2406,6 +2406,14 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
             _state = job_chain->first_node()->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
         }
 
+        {
+            Node* referenced_node = job_chain->referenced_node_from_state(_state);
+            if (referenced_node != node) {
+                _log->info(message_string("SCHEDULER-859", referenced_node->order_state(), _state));
+                set_state2(referenced_node->order_state());
+                node = referenced_node;
+            }
+        }
 
         if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
 
@@ -2428,7 +2436,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
                 assert(0);
                 // db_try_insert() muss Datenbanksatz prüfen können
                 z::throw_xc(Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible");
-        }
+            }
         }
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )

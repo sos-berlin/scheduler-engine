@@ -517,9 +517,8 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 
             _is_heart_beat_late = false;
 
-            if( (Z_NDEBUG_DEBUG( _heart_beat_count == 1, _heart_beat_count >= 1 ))  &&  !its_me() )
-            {
-                _log->info( message_string( "SCHEDULER-838", _heart_beat_count ) );
+            if (!its_me()) {
+                _log->log(_heart_beat_count == 1 ? log_info : log_debug, message_string("SCHEDULER-838", _heart_beat_count));
             }
         }
         else

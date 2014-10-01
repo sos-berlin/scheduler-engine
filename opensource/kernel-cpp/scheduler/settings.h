@@ -67,6 +67,9 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
 
     void freeze() { 
         _freezed = true; 
+        if (_use_old_microscheduling_for_jobs) {
+            Z_LOG2("scheduler", "_use_old_microscheduling_for_jobs\n");
+        }
     }
 
     bool is_freezed() const {

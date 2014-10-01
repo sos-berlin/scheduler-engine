@@ -13,6 +13,7 @@
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace filebased { struct FileBased; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
+namespace javaproxy { namespace java { namespace util { struct ArrayList; }}}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
@@ -50,6 +51,7 @@ struct JobChain : ::zschimmer::javabridge::proxy_jobject< JobChain >, ::javaprox
     }
   public:
 
+    ::javaproxy::java::util::ArrayList cppSkippedStates(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void deletePersistentState() const;
     void loadPersistentState() const;
     void persistState() const;

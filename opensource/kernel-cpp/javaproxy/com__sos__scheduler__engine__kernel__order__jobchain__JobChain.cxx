@@ -6,6 +6,7 @@
 #include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
+#include "java__util__ArrayList.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
 
@@ -14,6 +15,7 @@ struct JobChain__class : ::zschimmer::javabridge::Class
     JobChain__class(const string& class_name);
    ~JobChain__class();
 
+    ::zschimmer::javabridge::Method const _cppSkippedStates__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _deletePersistentState____method;
     ::zschimmer::javabridge::Method const _loadPersistentState____method;
     ::zschimmer::javabridge::Method const _persistState____method;
@@ -25,6 +27,7 @@ const ::zschimmer::javabridge::class_factory< JobChain__class > JobChain__class:
 
 JobChain__class::JobChain__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
+    ,_cppSkippedStates__Ljava_lang_String_2__method(this, "cppSkippedStates", "(Ljava/lang/String;)Ljava/util/ArrayList;")
     ,_deletePersistentState____method(this, "deletePersistentState", "()V")
     ,_loadPersistentState____method(this, "loadPersistentState", "()V")
     ,_persistState____method(this, "persistState", "()V"){}
@@ -46,6 +49,15 @@ JobChain::~JobChain() { assign_(NULL); }
 
 
 
+
+::javaproxy::java::util::ArrayList JobChain::cppSkippedStates(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    JobChain__class* cls = _class.get();
+    ::javaproxy::java::util::ArrayList result;
+    result.steal_local_ref(cls->_cppSkippedStates__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
 
 void JobChain::deletePersistentState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;

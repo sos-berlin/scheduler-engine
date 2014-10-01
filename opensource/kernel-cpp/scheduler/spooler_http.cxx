@@ -97,7 +97,7 @@ const char allowed_html_characters[ 256 ] =
 
 struct Http_server : Http_server_interface 
 {
-                                Http_server                 ( Scheduler* scheduler )                : Http_server_interface( scheduler, type_http_server ), _zero_(this+1) {}
+                                Http_server                 ( Scheduler* scheduler )                : Http_server_interface( scheduler, type_http_server ) {}
 
     // Subsystem
     void                        close                       ()                                      {}
@@ -107,11 +107,7 @@ struct Http_server : Http_server_interface
     string                      name                        () const                                { return "http_server"; }
 
     // Http_server_interface
-    File_path                   directory                   () const                                { return _base_directory; }
-
-    Fill_zero                  _zero_;
-
-    File_path                  _base_directory;
+    File_path                   directory                   () const                                { return _spooler->settings()->_html_dir; }
 };
 
 //-------------------------------------------------------------------------------------------Z_INIT
@@ -198,7 +194,6 @@ bool Http_server::subsystem_initialize()
 
 bool Http_server::subsystem_load()
 {
-    _base_directory = _spooler->settings()->_html_dir;
     return true;
 }
 

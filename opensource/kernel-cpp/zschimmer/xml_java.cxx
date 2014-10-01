@@ -245,13 +245,6 @@ Simple_node_ptr Simple_node_ptr::replaceChild( const Simple_node_ptr& newChild, 
     return Simple_node_ptr(_nodeJ.replaceChild(newChild.ref(), oldChild.ref()));
 }
 
-//--------------------------------------------------------------------Simple_node_ptr::replace_with
-
-Simple_node_ptr Simple_node_ptr::replace_with( const Simple_node_ptr& node )
-{
-    return parentNode().replaceChild(node, *this);
-}
-
 //---------------------------------------------------------------------Simple_node_ptr::removeChild
 
 void Simple_node_ptr::removeChild( const Simple_node_ptr& child ) const 
