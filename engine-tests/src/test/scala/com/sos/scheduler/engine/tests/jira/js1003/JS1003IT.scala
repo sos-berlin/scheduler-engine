@@ -73,8 +73,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def checkBehaviourUntilReset(orderKey: OrderKey)(implicit eventPipe: EventPipe): Unit = {
-    if (orderKey != StandingOrderKey) // Ein Dauerauftrag überspringt den ersten Knoten ohne Event
-      eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State100
+    //Wird übersprungen: eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State100
     eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State200
     def order = orderSubsystem.order(orderKey)
     order.state shouldBe State300

@@ -4405,20 +4405,6 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
         }
     }
 
-
-    // Die Dateiaufträge (File_order_source)
-
-    if( !order && untouched_is_allowed)
-    {
-        Z_FOR_EACH( Order_source_list, _order_source_list, it )
-        {
-            Order_source* order_source = *it;
-            order = order_source->fetch_and_occupy_order(occupying_task, now, cause);
-            if( order )  break;
-        }
-    }
-
-    _has_tip_for_new_order = false;
     return order;
 }
 
