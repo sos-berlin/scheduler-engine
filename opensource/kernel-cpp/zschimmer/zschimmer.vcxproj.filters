@@ -379,7 +379,7 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="java.odl">
-      <Filter>Quellcodedateien</Filter>
+      <Filter>Quellcodedateien\java</Filter>
     </Midl>
   </ItemGroup>
 </Project>

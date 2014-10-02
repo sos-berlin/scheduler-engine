@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTargets="Build" ToolsVersion="4.0" xsi:schemaLocation="http://schemas.microsoft.com/developer/msbuild/2003 ">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -99,6 +99,7 @@
       <Optimization>Disabled</Optimization>
       <AssemblerOutput>All</AssemblerOutput>
       <BrowseInformation>false</BrowseInformation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
@@ -139,6 +140,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <Optimization>MaxSpeed</Optimization>
       <AssemblerOutput>All</AssemblerOutput>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
@@ -192,11 +194,8 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx" />
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx" />
-    
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx" />
@@ -205,7 +204,6 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx" />
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
@@ -240,29 +238,19 @@
     <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils.cxx" />
     <ClCompile Include="scala__Option.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskId.cxx" />
-    
-    
     <ClCompile Include="org__joda__time__Duration.cxx" />
     <ClCompile Include="org__joda__time__base__AbstractDuration.cxx" />
     <ClCompile Include="org__joda__time__base__BaseDuration.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__JobChain.cxx" />
-    
     <ClCompile Include="org__joda__time__ReadableInstant.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Timed_callC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__async__CppCall.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__common__scalautil__Resources.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__newkernel__job__CppNewJob.cxx" />
-  
-    
-    
-    
-    
     <ClCompile Include="java__lang__Class.cxx" />
     <ClCompile Include="scala__util__Try.cxx" />
-    
     <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistentState.cxx" />
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Task_subsystemC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__filebased__FileBased.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__FolderC.cxx" />
@@ -273,17 +261,9 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__ScheduleC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Standing_order_subsystemC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Schedule_subsystemC.cxx" />
-    
-    
-    
-    
-    
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__Node.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderSubsystem.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx" />
-    
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__End_nodeC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Nested_job_chain_nodeC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Sink_nodeC.cxx" />
@@ -291,15 +271,12 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__NestedJobChainNode.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__SinkNode.cxx" />
     <ClCompile Include="com__google__inject__Injector.cxx" />
-    
-    
-    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__JobNode.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__OrderQueueNode.cxx" />
-    </ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
   </ItemGroup>
