@@ -40,12 +40,12 @@ final class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
 
   test("add(at, TimedCall)") {
     var a = 0
-    val call = TimedCall(now() + 50.ms) { a += 1 }
+    val call = TimedCall(now() + 500.ms) { a += 1 }
     callQueue.add(call)
     callQueue.popMature() should equal (None)
-    sleep(10.ms)
+    sleep(100.ms)
     callQueue.popMature() should equal (None)
-    sleep(42.ms)
+    sleep(420.ms)
     val c = callQueue.popMature().get
     c should be theSameInstanceAs call
     c.onApply()
@@ -54,7 +54,7 @@ final class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
   }
 
   test("remove") {
-    val call = TimedCall(now() + 50.ms) {}
+    val call = TimedCall(now() + 500.ms) {}
     callQueue.add(call)
     callQueue.remove(call)
     callQueue.tryCancel(call) should equal (false)
