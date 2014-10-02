@@ -80,6 +80,8 @@ function cmd_windows_cleanWithRm() {
     # Weil "vcbuild.exe /clean" nicht immer l�schen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
     for c in $configurations; do :
         PATH=/bin find -type d -ipath "*/$visualStudioPlatform/$c" -execdir sh -c "rm -rf {}" \; -prune
+		# Wir löschen auch übriggebliebende Kompilate von Versionen bis v1.7:
+        PATH=/bin find -type d -ipath "*/$c" -execdir sh -c "rm -rf {}" \; -prune
     done
     rm -rf {bin,bind,ipch}/*
 }
