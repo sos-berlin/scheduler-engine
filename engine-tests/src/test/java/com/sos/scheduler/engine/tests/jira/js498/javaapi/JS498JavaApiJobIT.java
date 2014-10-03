@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js498.rhino;
+package com.sos.scheduler.engine.tests.jira.js498.javaapi;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -21,11 +21,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 
 /**
- * This is a test for scripting with the Rhino engine. The test starts different standalone jobs.
+ * This is a test for scripting with a JavaScript engine. The test starts different standalone jobs.
  */
-public final class JS498RhinoJobIT extends SchedulerTest {
+public final class JS498JavaApiJobIT extends SchedulerTest {
 
-    // private static final ImmutableList<String> jobs = ImmutableList.of("script_only", "javascript_objects_noorder", "rhino_objects_noorder", "rhino_functions_noorder");
     private static final ImmutableList<String> jobNames = ImmutableList.of(
             "script_only",
             "objects_noorder",

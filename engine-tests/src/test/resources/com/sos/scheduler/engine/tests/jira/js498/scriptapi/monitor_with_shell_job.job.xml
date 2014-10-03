@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
 	stop_on_error="no"
 >
     <script language="shell">
@@ -8,7 +8,7 @@ echo hello world
 exit 5
         ]]>
     </script>
-    <monitor name="process0" ordering="0">
+    <monitor>
         <script language="java:javascript">
             <![CDATA[
 function spooler_task_after() {
@@ -19,5 +19,4 @@ function spooler_task_after() {
             ]]>
         </script>
     </monitor>
-    <run_time/>
 </job>

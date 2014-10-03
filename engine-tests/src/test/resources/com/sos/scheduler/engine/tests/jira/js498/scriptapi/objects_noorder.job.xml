@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
-	order="yes">
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
     <script language="java:javascript">
         <![CDATA[
-            var imports = new JavaImporter(
-                java.io.File,
-                com.google.common.io.Files,
-                java.nio.charset.Charset
-            );
+var imports = new JavaImporter(
+    com.google.common.io.Files,
+    java.io.File,
+    java.nio.charset.Charset
+);
 
 function spooler_process() {
 	spooler_log.info(spooler.id +": " + spooler_job.name + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
@@ -16,15 +15,11 @@ function spooler_process() {
 	spooler.variables.set_var("parm2","value2");
 	log_object("spooler.variables.count",spooler.variables.count);
 	
-	log_object("spooler_task.order.job_chain.name",spooler_task.order.job_chain.name);
+	spooler_task.params.set_var("taskparam1","value1");
+	spooler_task.params.set_var("taskparam2","value2");
+	log_object("spooler_task.params.names",spooler_task.params.names);
 	
-	spooler_task.params.set_var("taskparam1", "value1");
-	spooler_task.params.set_var("taskparam2", "value2");
-	log_object("spooler_task.params.names", spooler_task.params.names);
-	
-	log_object("spooler_job.order_queue.length",spooler_job.order_queue.length);
-	
-	return true;
+	return false;
 }
 
 function log_object( varname, objectvalue ) {
@@ -37,18 +32,18 @@ function log_object( varname, objectvalue ) {
 }
         ]]>
     </script>
-    <monitor name="process0" ordering="0">
+    <monitor>
         <script language="java:javascript">
             <![CDATA[
-            var imports = new JavaImporter(
-                java.io.File,
-                com.google.common.io.Files,
-                java.nio.charset.Charset
-            );
+var imports = new JavaImporter(
+    com.google.common.io.Files,
+    java.io.File,
+    java.nio.charset.Charset
+);
 
 function spooler_process_after(spooler_process_result) {
-	spooler_log.warn(spooler.id +": " + spooler_job.name + " is running with task id " + spooler_task.id );   // use alle objects given by JS kernel
-	log_object("spooler_task.order.id",spooler_task.order.id);
+	spooler_log.info(spooler.id +": " + spooler_job.name + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
+	log_object("spooler_job.name",spooler_job.name);
 	return spooler_process_result;
 }
 
@@ -63,5 +58,4 @@ function log_object( varname, objectvalue ) {
             ]]>
         </script>
     </monitor>
-    <run_time/>
 </job>

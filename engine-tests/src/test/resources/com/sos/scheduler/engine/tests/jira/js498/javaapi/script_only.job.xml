@@ -8,8 +8,8 @@ implicitely used as 'spooler_process' and should result in the line 'script_only
     <script language="javax.script:javascript">
         <![CDATA[
             var imports = new JavaImporter(
-                java.io.File,
                 com.google.common.io.Files,
+                java.io.File,
                 java.nio.charset.Charset
             );
 

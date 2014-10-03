@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js498.rhino;
+package com.sos.scheduler.engine.tests.jira.js498.javaapi;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
@@ -18,7 +18,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 /**
- * This is a test for scripting with the Rhino engine. The jobchain started executes
+ * This is a test for scripting with a JavaScript engine. The jobchain started executes
  * <ul>
  *     <li>a job with all knowing API methods (including the monitors).</li>
  *     <li>a job with a range of api calls for the JobScheduler api.</li>
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
  * @author Stefan Schädlich
  * @version 1.0 - 16.12.2011 13:39:41
  */
-public class JS498RhinoOrderIT extends SchedulerTest {
+public class JS498JavaApiOrderIT extends SchedulerTest {
 
     private static final String jobchain = "chain";
 

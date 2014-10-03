@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
 	order="yes">
     <script language="java:javascript">
         <![CDATA[
-            var imports = new JavaImporter(
-                java.io.File,
-                com.google.common.io.Files,
-                java.nio.charset.Charset
-            );
+var imports = new JavaImporter(
+    com.google.common.io.Files,
+    java.io.File,
+    java.nio.charset.Charset
+);
 
 function spooler_init()	{
 	log_function("spooler_init");
@@ -52,14 +52,14 @@ function log_function( functionname ) {
 }
         ]]>
     </script>
-    <monitor name="process0" ordering="0">
+    <monitor>
         <script language="java:javascript">
             <![CDATA[
-            var imports = new JavaImporter(
-                java.io.File,
-                com.google.common.io.Files,
-                java.nio.charset.Charset
-            );
+var imports = new JavaImporter(
+    java.io.File,
+    com.google.common.io.Files,
+    java.nio.charset.Charset
+);
 
 function spooler_task_before() {
 	log_function("spooler_task_before");
@@ -93,5 +93,4 @@ function log_function( functionname ) {
             ]]>
         </script>
     </monitor>
-    <run_time/>
 </job>

@@ -8,7 +8,7 @@ echo hello world
 exit 5
         ]]>
     </script>
-    <monitor name="process0" ordering="0">
+    <monitor>
         <script language="javax.script:javascript">
             <![CDATA[
 function spooler_task_after() {
@@ -19,5 +19,4 @@ function spooler_task_after() {
             ]]>
         </script>
     </monitor>
-    <run_time/>
 </job>

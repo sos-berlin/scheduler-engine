@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js498.rhinobeans;
+package com.sos.scheduler.engine.tests.jira.js498.scriptapi;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import java.util.Map;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,9 +19,9 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 /**
- * This is a test for scripting with the Rhino engine. The test starts different standalone jobs.
+ * This is a test for scripting with a JavaScript engine. The test starts different standalone jobs.
  */
-public final class JS498RhinoBeansJobIT extends SchedulerTest {
+public final class JS498JobIT extends SchedulerTest {
 
     private static final ImmutableList<String> jobs = ImmutableList.of(
             "script_only",
@@ -29,7 +30,7 @@ public final class JS498RhinoBeansJobIT extends SchedulerTest {
     );
 
     private final CommandBuilder util = new CommandBuilder();
-    private HashMap<String,String> resultMap;
+    private Map<String,String> resultMap;
     private int taskCount = 0;
 
     @Test
@@ -55,8 +56,8 @@ public final class JS498RhinoBeansJobIT extends SchedulerTest {
         return resultFile;
     }
 
-    private HashMap<String,String> getResultMap(File resultFile) throws IOException {
-        HashMap<String,String> result = new HashMap<String, String>();
+    private Map<String,String> getResultMap(File resultFile) throws IOException {
+        Map<String,String> result = new HashMap<>();
         List<String> lines = Files.readLines(resultFile, Charset.defaultCharset());
         for(String line : lines) {
             String[] arr = line.split("=", 2);
