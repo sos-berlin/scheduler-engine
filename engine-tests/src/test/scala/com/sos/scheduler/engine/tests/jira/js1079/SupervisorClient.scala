@@ -11,7 +11,7 @@ private[js1079] final class SupervisorClient(val index: Int, udpSocket: Datagram
 
   require(udpSocket.isBound)
 
-  private val schedulerId = s"SCHEDULER-$index"
+  private val schedulerId = s"client-$index"
   private val myTcpPort = 10000 + index
   private val connection = new SchedulerTcpConnection(serverAddress)
 
