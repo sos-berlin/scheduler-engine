@@ -1,8 +1,6 @@
 // $Id: mutex.cxx 13682 2008-09-29 15:44:28Z jz $
 
 #include "zschimmer.h"
-#ifndef Z_NOTHREADS
-
 #include "mutex.h"
 #include "threads.h"
 #include "log.h"
@@ -72,8 +70,6 @@ void Mutex_guard::leave_()
 }
 
 //-------------------------------------------------------------------My_thread_only::My_thread_only
-#ifndef Z_NOTHREADS
-
 My_thread_only::My_thread_only()
 : 
     _owners_thread_id( current_thread_id() ) 
@@ -98,10 +94,6 @@ void My_thread_only::assert_is_owners_thread() const
 {
     if( !is_owners_thread() )  throw_xc( "Z-4008", _owners_thread_id, current_thread_id() );
 }
-
-#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace zschimmer
-
-#endif
