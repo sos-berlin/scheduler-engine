@@ -277,7 +277,7 @@ Connection::~Connection()
         Z_LOG( Z_FUNCTION << "  ERROR " << x.what() << "\n" );
     }
 
-    Z_DEBUG_ONLY( assert( !_in_use_by_thread_id ) );
+    Z_DEBUG_ONLY(assert(!_in_use_by_thread_id || _in_use_by_thread_id == current_thread_id()));
 }
 
 //--------------------------------------------------------------------------------Connection::close
