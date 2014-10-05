@@ -10,8 +10,6 @@
 #   include <sys/wait.h>
 #endif
 
-#define THREAD_LOCK_DUMMY( x )
-
 namespace sos {
 namespace scheduler {
 
@@ -279,10 +277,8 @@ void Task::close()
 */
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-        THREAD_LOCK_DUMMY( _terminated_events_lock ) {
-            FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
-            _terminated_events.clear();
-        }
+        FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
+        _terminated_events.clear();
 
         _closed = true;
         _history.end();    // DB-Operation, kann Exception auslösen

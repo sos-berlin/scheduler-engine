@@ -347,7 +347,6 @@ struct Task : Object,
     typed_call_register<Task>  _call_register;
     ptr<Async_operation>       _sync_operation;
 
-    Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
 
     Start_cause                _cause;
