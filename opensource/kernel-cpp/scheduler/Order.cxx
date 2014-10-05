@@ -613,9 +613,9 @@ void Order::db_show_occupation( Log_level log_level )
 
 //-----------------------------------------------------------------------------------Order::persist
 
-void Order::persist() {
+void Order::persist(Transaction* outer_transaction) {
     if (_job_chain && _job_chain->orders_are_recoverable() && !_is_in_database) {
-        db_try_insert();
+        db_try_insert(outer_transaction);
     }
 }
 
@@ -623,21 +623,20 @@ void Order::persist() {
 
 void Order::db_insert()
 {
-    bool ok = db_try_insert( true );
+    bool ok = db_try_insert((Transaction*)NULL, true);
     if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path, "in database" );
 }
 
 //-----------------------------------------------------------------------------Order::db_try_insert
 
-bool Order::db_try_insert( bool throw_exists_exception )
+bool Order::db_try_insert(Transaction* outer_transaction, bool throw_exists_exception )
 {
     bool   insert_ok               = false;
     string payload_string          = string_payload();
     bool   record_exists_error     = false;
     string record_exists_insertion;
 
-    for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-    {
+    for (Retry_nested_transaction ta (db(), outer_transaction); ta.enter_loop(); ta++) try {
         if( _is_replacement )
         {
             Any_file result_set = ta.open_result_set
@@ -707,10 +706,11 @@ bool Order::db_try_insert( bool throw_exists_exception )
             }
             catch( exception& x )     // Datensatz ist bereits vorhanden?
             {
-                ta.intermediate_rollback( Z_FUNCTION );      // Postgres verlangt nach Fehler ein Rollback
-
                 if( insert_race_retry_count > max_insert_race_retry_count )  throw;
 
+                if (!outer_transaction) {  // Nicht bei persist() von execute_modify_order(), Muss bei verteilter Auftragsbearbeitung.
+                    ta.execute("ROLLBACK", Z_FUNCTION, Transaction::ex_force);  // Postgres verlangt nach Fehler ein Rollback
+                }
                 Any_file result_set = ta.open_result_set
                     ( 
                         S() << "select " << db_text_distributed_next_time() << " as distributed_next_time" 
@@ -718,7 +718,6 @@ bool Order::db_try_insert( bool throw_exists_exception )
                                db_where_clause().where_string(), 
                         Z_FUNCTION 
                     );
-
                 if( !result_set.eof() )
                 {
                     if( throw_exists_exception )  
@@ -727,7 +726,6 @@ bool Order::db_try_insert( bool throw_exists_exception )
                         record_exists_error     = true;
                         record_exists_insertion = record.null( "distributed_next_time" )? "in database, not distributed" : "distributed";
                     }
-
                     break;
                 }
 
@@ -2442,7 +2440,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
         {
             if (!has_base_file()) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
-                is_new = db_try_insert(exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+                is_new = db_try_insert((Transaction*)NULL, exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
             }
             tip_next_node_for_new_distributed_order_state();
         }

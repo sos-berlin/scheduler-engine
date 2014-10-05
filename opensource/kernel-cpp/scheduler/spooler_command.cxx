@@ -1352,7 +1352,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order->set_title(modify_order_element.getAttribute("title"));
         }
         if (job_chain && job_chain->orders_are_recoverable()) {
-            order->persist();
+            order->persist(&ta);
             if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
                 order->remove_from_job_chain(Order::jc_remove_from_job_chain_stack, &ta);
                 order->close();
