@@ -72,7 +72,7 @@ struct File_logger : Async_operation
     typedef list< ptr<File_line_reader> >  File_line_reader_list;
 
     Fill_zero                  _zero_;
-    Mutex                      _mutex;
+    Mutex mutable              _mutex;
     Has_log*                   _log;
     File_line_reader_list      _file_line_reader_list;
     ptr<File_logger_thread>    _thread;

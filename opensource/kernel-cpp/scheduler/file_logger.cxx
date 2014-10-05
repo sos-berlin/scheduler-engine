@@ -66,7 +66,9 @@ void File_logger::add_file( const File_path& path, const string& name )
 
 void File_logger::close()
 {
-    set_async_manager( NULL );
+    Z_MUTEX(_mutex) {
+        set_async_manager( NULL );
+    }
 
     if( _thread )  
     {
@@ -76,15 +78,17 @@ void File_logger::close()
         _thread = NULL;
     }
 
-    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
-    {
-        File_line_reader* file_line_reader = *it;
+    Z_MUTEX(_mutex) {
+        Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+        {
+            File_line_reader* file_line_reader = *it;
 
-        //if( _remove_files )  file_line_reader->_file.unlink_later();
-        file_line_reader->close();
+            //if( _remove_files )  file_line_reader->_file.unlink_later();
+            file_line_reader->close();
+        }
+
+        _file_line_reader_list.clear();
     }
-
-    _file_line_reader_list.clear();
 }
 
 //-------------------------------------------------------------------------------File_logger::start
@@ -126,50 +130,51 @@ bool File_logger::flush_lines()
 
 bool File_logger::flush()
 {
-    bool   something_done = false;
-    string s;
+    bool something_done = false;
+    Z_MUTEX(_mutex) {
+        string s;
 
-    if( has_files() )
-    {
-        fflush( stdout );
-        fflush( stderr );
-
-        //#ifdef Z_WINDOWS
-        //    _commit( fileno( stdout ) );        // Debug-assert(), wenn Datei nicht geöffnet
-        //    _commit( fileno( stderr ) );        // Debug-assert(), wenn Datei nicht geöffnet
-        //#else
-        //    fsync( fileno( stdout ) );
-        //    fsync( fileno( stderr ) );
-        //#endif
-
-        // Die Ausgaben von PerlScript gehen verloren. In welchem Puffer stehen die?
-    }
-
-
-    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
-    {
-        File_line_reader* file_line_reader = *it;
-
-        while(1)
+        if( has_files() )
         {
-            s = file_line_reader->read_lines();
-            if( s == "" )  break;
-            something_done |= log_lines( s );
+            fflush( stdout );
+            fflush( stderr );
+
+            //#ifdef Z_WINDOWS
+            //    _commit( fileno( stdout ) );        // Debug-assert(), wenn Datei nicht geöffnet
+            //    _commit( fileno( stderr ) );        // Debug-assert(), wenn Datei nicht geöffnet
+            //#else
+            //    fsync( fileno( stdout ) );
+            //    fsync( fileno( stderr ) );
+            //#endif
+
+            // Die Ausgaben von PerlScript gehen verloren. In welchem Puffer stehen die?
+        }
+
+
+        Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+        {
+            File_line_reader* file_line_reader = *it;
+
+            while(1)
+            {
+                s = file_line_reader->read_lines();
+                if( s == "" )  break;
+                something_done |= log_lines( s );
+            }
+        }
+
+        Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+        {
+            File_line_reader* file_line_reader = *it;
+
+            while(1)
+            {
+                s = file_line_reader->read_remainder();
+                if( s == "" )  break;
+                something_done |= log_lines( s );
+            }
         }
     }
-
-    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
-    {
-        File_line_reader* file_line_reader = *it;
-
-        while(1)
-        {
-            s = file_line_reader->read_remainder();
-            if( s == "" )  break;
-            something_done |= log_lines( s );
-        }
-    }
-
     return something_done;
 }
 
@@ -177,13 +182,15 @@ bool File_logger::flush()
 
 void File_logger::finish()
 {
-    flush();
+    Z_MUTEX(_mutex) {
+        flush();
 
-    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
-    {
-        File_line_reader* file_line_reader = *it;
+        Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+        {
+            File_line_reader* file_line_reader = *it;
 
-        file_line_reader->close();
+            file_line_reader->close();
+        }
     }
 }
 
@@ -208,17 +215,18 @@ string File_logger::async_state_text_() const
 {
     S result;
     result << "File_logger(";
-    result << _for_object;
+    Z_MUTEX(_mutex) {
+        result << _for_object;
     
-    Z_FOR_EACH_CONST( File_line_reader_list, _file_line_reader_list, it )
-    {
-        File_line_reader* file_line_reader = *it;
-        result << ", ";
-        result << file_line_reader->_name << ": " << file_line_reader->_read_length << " bytes";
+        Z_FOR_EACH_CONST( File_line_reader_list, _file_line_reader_list, it )
+        {
+            File_line_reader* file_line_reader = *it;
+            result << ", ";
+            result << file_line_reader->_name << ": " << file_line_reader->_read_length << " bytes";
+        }
+
     }
-
     result << ")";
-
     return result;
 }
 
