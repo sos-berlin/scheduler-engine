@@ -1310,7 +1310,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         }
         assert(order);
         if (modify_order_element.getAttribute("action") == "reset") {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
-            order->reset();
+            order->reset(&ta);
         }
         if (xml::Element_ptr run_time_element = modify_order_element.select_node("run_time")) {
             order->set_schedule((File_based*)NULL, run_time_element);
@@ -1328,7 +1328,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         }
         if (state != "") {
             order->assert_no_task(Z_FUNCTION);
-            order->set_state(state);
+            order->set_state(state, &ta);
         }
         if (modify_order_element.hasAttribute("end_state")) {
             order->set_end_state(modify_order_element.getAttribute("end_state"));
@@ -1346,7 +1346,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             }
         }
         if (modify_order_element.hasAttribute("suspended")) {
-            order->set_suspended(modify_order_element.bool_getAttribute("suspended"));
+            order->set_suspended(modify_order_element.bool_getAttribute("suspended"), &ta);
         }
         if (modify_order_element.hasAttribute("title")) {
             order->set_title(modify_order_element.getAttribute("title"));

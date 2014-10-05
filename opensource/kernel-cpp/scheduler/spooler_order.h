@@ -162,8 +162,8 @@ struct Order : Com_order,
 
     void                    set_job_chain_node          ( job_chain::Node*, bool is_error_state = false );
     void                    set_state                   ( const State&, const Time& );
-    void                    set_state                   ( const State& );
-    void                    set_state1                  ( const State& );
+    void                    set_state                   (const State&, Transaction* = NULL);
+    void                    set_state1                  (const State&, Transaction* = NULL);
     void                    set_state2                  ( const State&, bool is_error_state = false );
     const State&                state                   () const                                    { return _state; }
     string                      string_state            () const                                    { return _state.as_string(); }
@@ -171,7 +171,7 @@ struct Order : Com_order,
     static void                 check_state             ( const State& );
     const State&                initial_state           () const                                    { return _initial_state; }
     string                      initial_state_string    () const                                    { return _initial_state.as_string(); }
-    void                        reset                   ();
+    void                        reset                   (Transaction* = NULL);
 
     void                    set_end_state               ( const State& );
     const State&                end_state               ()                                          { return _end_state; }
@@ -214,7 +214,7 @@ struct Order : Com_order,
     Com_job*                    com_job                 ();
 
     bool                        suspended               ()                                          { return _suspended; }
-    void                    set_suspended               ( bool b = true );
+    void                    set_suspended               (bool, Transaction* = NULL);
 
     void                    set_ignore_max_orders       (bool b)                                    { _ignore_max_orders = b; }
     bool                     is_ignore_max_orders       ()                                          { return _ignore_max_orders; }
@@ -262,7 +262,7 @@ struct Order : Com_order,
     enum Order_state_transition { post_error = 0, post_success = 1, post_keep_state = 2 };    // Wie Java OrderStateTransistion
     void                        postprocessing          ( Order_state_transition );                    // Verarbeitung nach spooler_process()
     void                        processing_error        ();
-    void                        handle_end_state        ();
+    void                        handle_end_state        (Transaction* = NULL);
     bool                        handle_end_state_of_nested_job_chain();
     void                        handle_end_state_repeat_order( const Time& );
     void                        move_to_other_nested_job_chain(const Absolute_path& nested_job_chain_path);

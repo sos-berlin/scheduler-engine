@@ -2083,18 +2083,18 @@ void Order::set_state( const State& state, const Time& start_time )
 
 //---------------------------------------------------------------------------------Order::set_state
 
-void Order::set_state( const State& state )
+void Order::set_state(const State& state, Transaction* outer_transaction)
 {
     check_state( state );
 
     clear_setback();
     if( _is_on_blacklist )  remove_from_blacklist();
-    set_state1( state );
+    set_state1(state, outer_transaction);
 }
 
 //--------------------------------------------------------------------------------Order::set_state1
 
-void Order::set_state1( const State& order_state )
+void Order::set_state1(const State& order_state, Transaction* outer_transaction)
 {
     check_state( order_state );
 
@@ -2114,7 +2114,7 @@ void Order::set_state1( const State& order_state )
 
         if( previous_state != _state  &&  ( !_job_chain_node  ||  _job_chain_node->is_type( Node::n_end ) ) )
         {
-            handle_end_state();
+            handle_end_state(outer_transaction);
         }
     }
     else  
@@ -2158,18 +2158,18 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
 //-------------------------------------------------------------------------------------Order::reset
 
-void Order::reset()
+void Order::reset(Transaction* outer_transaction)
 {
     // Für http://www.sos-berlin.com/jira/browse/JS-305 
 
     assert_no_task( Z_FUNCTION );
 
-    set_suspended( false );
+    set_suspended(false, outer_transaction);
     clear_setback();
     if (Nested_job_chain_node* first_nested_job_chain_node = Nested_job_chain_node::cast(
           _outer_job_chain_path.empty()? NULL : order_subsystem()->job_chain(_outer_job_chain_path)->node_from_state_or_null(_initial_state))) {
         if (first_nested_job_chain_node->nested_job_chain() == _job_chain)
-            set_state(_job_chain->first_node()->order_state());
+            set_state(_job_chain->first_node()->order_state(), outer_transaction);
         else {
             move_to_other_nested_job_chain(first_nested_job_chain_node->nested_job_chain_path());   // Muss ein Nested_job_chain_node sein
             _outer_job_chain_state = _initial_state;
@@ -2203,7 +2203,7 @@ void Order::set_job_chain_node( Node* node, bool is_error_state )
 
     if( node )
     {
-        if( node->is_suspending_order() )  set_suspended();
+        if( node->is_suspending_order() )  set_suspended(true);
         if( node->delay().not_zero()  &&  !at().not_zero() )  set_at_after_delay( Time::now() + node->delay() );
     }
 
@@ -2606,7 +2606,7 @@ void Order::postprocessing( Order_state_transition state_transition )
             assert( _job_chain );
 
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
-                set_suspended();
+                set_suspended(true);
             else
             if( _is_success_state )
             {
@@ -2647,7 +2647,7 @@ void Order::postprocessing( Order_state_transition state_transition )
 
 //--------------------------------------------------------------------------Order::handle_end_state
 
-void Order::handle_end_state()
+void Order::handle_end_state(Transaction* outer_transaction)
 {
     // Endzustand erreicht. 
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
@@ -2701,7 +2701,7 @@ void Order::handle_end_state()
             if( !_is_on_blacklist )
             {
                 _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
-                remove_from_job_chain();
+                remove_from_job_chain(jc_remove_from_job_chain_stack, outer_transaction);
                 close();
             }
         }
@@ -2911,7 +2911,7 @@ void Order::postprocessing2( Job* last_job )
 
 //-----------------------------------------------------------------------------Order::set_suspended
 
-void Order::set_suspended( bool suspended )
+void Order::set_suspended(bool suspended, Transaction* outer_transaction)
 {
     if( _suspended != suspended )
     {
@@ -2922,7 +2922,7 @@ void Order::set_suspended( bool suspended )
         {
             report_event_code(_suspended? orderSuspendedEvent : orderResumedEvent, java_sister());
 
-            if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain();
+            if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain(jc_remove_from_job_chain_stack, outer_transaction);
             else
             if( _is_in_order_queue )  order_queue()->reinsert_order( this );
 
