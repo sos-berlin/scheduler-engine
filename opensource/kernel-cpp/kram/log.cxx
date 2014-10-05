@@ -210,7 +210,7 @@ void log_start( const char* filename_ )
             *s << flush;
         }
 
-        THREAD_LOCK( sos_static_ptr()->_log_lock )
+        Z_MUTEX( sos_static_ptr()->_log_lock )
         {
             sos_static_ptr()->_log_ptr = s;
             //zschimmer::Log_ptr::set_stream_and_system_mutex( &sos_static_ptr()->_log_ptr, &sos_static_ptr()->_log_lock._system_mutex );     // Kein Thread darf laufen (und Log_ptr benutzen)!
@@ -224,7 +224,7 @@ void log_start( const char* filename_ )
 
 void log_stop()
 {
-    THREAD_LOCK( sos_static_ptr()->_log_lock )
+    Z_MUTEX( sos_static_ptr()->_log_lock )
     {
         zschimmer::Log_ptr::set_log_context( NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
         //zschimmer::Log_ptr::set_stream_and_system_mutex( NULL, NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
@@ -400,8 +400,8 @@ Mswin_debug_streambuf::~Mswin_debug_streambuf()
 
 int Mswin_debug_streambuf::sync()
 {
-  //THREAD_LOCK( _semaphore )
-    THREAD_LOCK( sos_static_ptr()->_log_lock )
+  //Z_MUTEX( _semaphore )
+    Z_MUTEX( sos_static_ptr()->_log_lock )
     {
         setg( 0, 0, 0 );
         return overflow();
@@ -421,8 +421,8 @@ int _Cdecl Mswin_debug_streambuf::underflow()
 
 int _Cdecl Mswin_debug_streambuf::overflow( int b )
 {
-  //THREAD_LOCK( _semaphore )
-    THREAD_LOCK( sos_static_ptr()->_log_lock )
+  //Z_MUTEX( _semaphore )
+    Z_MUTEX( sos_static_ptr()->_log_lock )
     {
         char  line [ buffer_size + 50 ];
         int text_begin = 0;               // Hier beginnt der eigentliche Text (nach den Spalten für Zeit etc.)

@@ -114,7 +114,7 @@ void Alias_file::prepare_open( const char* parameter, Open_mode open_mode, const
 
             if( !_path_read ) 
             {
-                THREAD_LOCK( hostware_mutex )
+                Z_MUTEX( hostware_mutex )
                 {
                     _path_read = true;
                     _path = read_profile_string( "", c_str( section ), "_path" );

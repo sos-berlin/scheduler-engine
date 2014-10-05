@@ -1182,7 +1182,7 @@ void Sql_select::fetch_all_and_sort()
             _orderby._field_array[ i ] = _orderby._type->field_descr_ptr( i );
         }
 
-        THREAD_LOCK( lock )
+        Z_MUTEX( lock )
         {
             if( qsort_select )  throw_xc( "SOS-SQL-64" );  // qsort_select ist static!
 

@@ -812,7 +812,7 @@ void Typelib_descr::load_typelib()
     HRESULT hr = NOERROR;;
     //static Thread_semaphore loadtypelib_lock ( "loadtypelib" );
 
-    THREAD_LOCK( hostware_mutex )
+    Z_MUTEX( hostware_mutex )
     {
         if( !_typelib ) 
         {

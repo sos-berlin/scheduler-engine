@@ -92,7 +92,7 @@ struct Thread_data
     { 
         if( _thread_index == TLS_OUT_OF_INDEXES )
         {
-            THREAD_LOCK( _lock )
+            Z_MUTEX( _lock )
             if( _thread_index == TLS_OUT_OF_INDEXES )
             {
                 LOG( "Thread_data::get TlsAlloc()\n" );

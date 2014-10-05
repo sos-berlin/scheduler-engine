@@ -324,7 +324,7 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
 
     if( !_service_status_handle )  return;
 
-    THREAD_LOCK( _set_service_lock )
+    Z_MUTEX( _set_service_lock )
     {
         DWORD stop_pending = _service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
                                           : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopf "beenden" frei bleiben. Deshalb paused.
@@ -421,7 +421,7 @@ uint My_scheduler_service::pending_watchdog_thread( void* )
             if( ret != WAIT_TIMEOUT )  break;
         }
 
-        THREAD_LOCK( _set_service_lock )
+        Z_MUTEX( _set_service_lock )
         {
             if( _current_state == state )   
             {
@@ -744,7 +744,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
 void My_scheduler_service::service_main(DWORD argc, char** argv) 
 {
-    THREAD_LOCK( _ServiceMain_lock )
+    Z_MUTEX( _ServiceMain_lock )
     {
         Z_LOGI2( "scheduler.service", "ServiceMain(argc=" << argc << ")\n" );
     
@@ -828,7 +828,7 @@ int My_scheduler_service::spooler_service( const string& service_name, int argc,
 
         Z_LOG2( "scheduler.service", "StartServiceCtrlDispatcher() OK\n" );
 
-        THREAD_LOCK( _ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
+        Z_MUTEX( _ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
 
         _spooler_service_name = "";
     }
