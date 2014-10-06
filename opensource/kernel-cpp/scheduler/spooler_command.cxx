@@ -846,8 +846,6 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     int    timeout        = element. int_getAttribute( "timeout"                     , INT_MAX );
     string member_id      = element.     getAttribute( "cluster_member_id"           );
     bool   delete_dead    = element.bool_getAttribute( "delete_dead_entry"           , false );
-
-  //string continue_excl  = element.     getAttribute( "continue_exclusive_operation", "non_backup" );
     string continue_excl  = element.bool_getAttribute( "continue_exclusive_operation" )? cluster::continue_exclusive_any 
                                                                                        : "non_backup";
     if( member_id == ""  ||  member_id == _spooler->cluster_member_id() )

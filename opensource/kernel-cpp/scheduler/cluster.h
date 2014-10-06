@@ -52,6 +52,7 @@ struct Cluster_subsystem_interface : Object, Subsystem
 
 
     virtual void            set_continue_exclusive_operation( const string& http_url )              = 0;  // Oder continue_exclusive_non_backup etc.
+    virtual void            set_scheduler_stops_because_of_error()                                  = 0;
     virtual string              my_member_id                ()                                      = 0;
     virtual int                 backup_precedence           ()                                      = 0;
     virtual bool                check_is_active             ( Transaction* = NULL )                 = 0;

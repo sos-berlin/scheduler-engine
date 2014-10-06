@@ -66,6 +66,7 @@ struct Cluster : Cluster_subsystem_interface
     // Cluster_subsystem_interface
 
     void                    set_continue_exclusive_operation( const string& http_url );             // Oder continue_exclusive_non_backup etc.
+    void                    set_scheduler_stops_because_of_error()                                  { _scheduler_stops_because_of_error = true; } 
     string                      my_member_id                ()                                      { return _cluster_member_id; }
     int                         backup_precedence           ()                                      { return _backup_precedence; }
     bool                        check_is_active             ( Transaction* );
@@ -174,6 +175,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                       _is_exclusiveness_lost;
     bool                       _is_in_error;
     bool                       _closed;
+    bool                       _scheduler_stops_because_of_error;
 
     ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
     ptr<Heart_beat>                   _heart_beat;
@@ -1335,7 +1337,7 @@ void Cluster::close()
 
         close_operations();
 
-        if( my_member_id() != "" )
+        if (my_member_id() != "" && !_scheduler_stops_because_of_error)  // Bei Abbruch wegen Exception handeln wir einfach wie bei einem Absturz und ändern unseren Datensatz nicht.
         try
         {
             if( _my_scheduler )  

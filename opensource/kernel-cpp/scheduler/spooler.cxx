@@ -2397,6 +2397,9 @@ void Spooler::try_run()
     }
     catch( exception& x ) {
         set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
+        if (_cluster) {
+            _cluster->set_scheduler_stops_because_of_error();
+        }
 
         try {
             _log->error( x.what() );
@@ -2722,21 +2725,6 @@ bool Spooler::assert_is_still_active( const string& debug_function, const string
 
     return result;
 }
-
-//--------------------------------------------------------------------------------------Spooler::ok
-
-//bool Spooler::ok( Transaction* outer_transaction )
-//{
-//    bool ok = true;
-//    
-//    if( !check_is_active( outer_transaction ) )  
-//    {
-//        ok = false;
-//        cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
-//    }
-//
-//    return ok;
-//}
 
 //-------------------------------------------------------------------------Spooler::check_is_active
 
