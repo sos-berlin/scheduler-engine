@@ -36,6 +36,7 @@
 #include "../javaproxy/org__joda__time__Duration.h"
 #include "../javaproxy/org__joda__time__ReadableInstant.h"
 #include "../javaproxy/scala__Option.h"
+#include "../javaproxy/scala__util__Try.h"
 
 namespace sos {
 namespace scheduler {
@@ -57,6 +58,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Neste
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Node NodeJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
+typedef ::javaproxy::scala::util::Try TryJ;
 
 }} //namespaces
 

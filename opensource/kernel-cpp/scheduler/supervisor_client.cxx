@@ -5,7 +5,6 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
 #include "../javaproxy/com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.h"
 #include "../javaproxy/java__lang__Class.h"
-#include "../javaproxy/scala__util__Try.h"
 
 #include <sys/stat.h>           // mkdir()
 
@@ -22,7 +21,6 @@ namespace supervisor {
 
 //-------------------------------------------------------------------------------------------------
 
-typedef ::javaproxy::scala::util::Try TryJ;
 typedef ::javaproxy::com::sos::scheduler::engine::client::command::CppHttpSchedulerCommandClient CommandClientJ;
 
 using namespace directory_observer;
