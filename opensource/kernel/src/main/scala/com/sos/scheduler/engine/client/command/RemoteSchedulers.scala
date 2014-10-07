@@ -25,6 +25,7 @@ object RemoteSchedulers {
         parseDocument {
           parseElement("spooler") {
             parseElement("answer") {
+              attributeMap.ignoreUnread()  // Attribut "time"
               forEachStartElement[A] {
                 case "ERROR" ⇒ throw errorElementToException(eventReader)
                 case _ ⇒ read(eventReader)

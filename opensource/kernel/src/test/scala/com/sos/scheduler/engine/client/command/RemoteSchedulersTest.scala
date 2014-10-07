@@ -15,24 +15,24 @@ import org.scalatest.junit.JUnitRunner
 final class RemoteSchedulersTest extends FreeSpec {
 
   "readSchedulerResponses" in {
-    val xmlString = <spooler><answer><aaa/><bbb/></answer></spooler>.toString()
+    val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><aaa/><bbb/></answer></spooler>.toString()
     readSchedulerResponses(StringSource(xmlString))(read) shouldEqual List("aaa", "bbb")
   }
 
   "readSchedulerResponses with ERROR" in {
     intercept[RuntimeException] {
-      val xmlString = <spooler><answer><ERROR text="MESSAGE"/></answer></spooler>.toString()
+      val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><ERROR text="MESSAGE"/></answer></spooler>.toString()
       readSchedulerResponses(StringSource(xmlString))(read)
     } .getMessage shouldEqual "MESSAGE"
   }
 
   "readSchedulerResponse with one element" in {
-    val xmlString = <spooler><answer><aaa/></answer></spooler>.toString()
+    val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><aaa/></answer></spooler>.toString()
     readSchedulerResponse(StringSource(xmlString))(read) shouldEqual "aaa"
   }
 
   "readSchedulerResponse with missing element" in {
-    val xmlString = <spooler><answer></answer></spooler>.toString()
+    val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"></answer></spooler>.toString()
     intercept[RuntimeException] {
       readSchedulerResponse(StringSource(xmlString))(read)
     }
@@ -40,7 +40,7 @@ final class RemoteSchedulersTest extends FreeSpec {
   }
 
   "readSchedulerResponse with too much elements" in {
-    val xmlString = <spooler><answer><aaa/><bbb/></answer></spooler>.toString()
+    val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><aaa/><bbb/></answer></spooler>.toString()
     intercept[RuntimeException] {
       readSchedulerResponse(StringSource(xmlString))(read)
     }
