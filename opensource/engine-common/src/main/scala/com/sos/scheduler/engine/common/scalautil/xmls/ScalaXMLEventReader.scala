@@ -206,6 +206,9 @@ object ScalaXMLEventReader {
 
     override def default(o: String) = throw new NoSuchElementException(s"XML attribute '$o' is required")
 
+    /** Marks all attribute as read, so that requireAllAttributesRead does not fail. */
+    def ignoreUnread(): Unit = keys foreach apply
+
     def requireAllAttributesRead(): Unit = {
       val names = keySet -- readAttributes
       if (names.nonEmpty) throw new UnparsedAttributesException(names.toImmutableSeq)

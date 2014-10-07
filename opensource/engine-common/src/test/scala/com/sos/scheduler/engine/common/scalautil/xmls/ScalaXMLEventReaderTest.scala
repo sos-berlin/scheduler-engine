@@ -100,6 +100,19 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
       .rootCause.asInstanceOf[UnparsedAttributesException].names shouldEqual List("z")
   }
 
+  "Ignore extra attributes" in {
+    val testXmlString = <C x="xx" y="yy" z="zz"/>.toString()
+    assertResult("xx") {
+      parseString(testXmlString) { eventReader: ScalaXMLEventReader ⇒
+        import eventReader._
+        parseElement("C") {
+          attributeMap.ignoreUnread()
+          attributeMap("x")
+        }
+      }
+    }
+  }
+
   "Detects missing attribute" in {
     val testXmlString = <A><B/><C><D/><D/></C></A>.toString()
     intercept[WrappedException] { parseString(testXmlString)(parseA) }
