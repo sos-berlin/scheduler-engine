@@ -60,6 +60,7 @@ struct Api_process : virtual Process {
     virtual Async_operation* close__start(bool run_independently = false) = 0;
     virtual void close__end() = 0;
     virtual void close_session() = 0;
+    virtual void check_exception() {}
 
     static ptr<Api_process> new_process(Spooler* sp, Prefix_log* log, const Api_process_configuration&);
 };

@@ -362,7 +362,11 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
             _pid = _api_process->pid();
         }
     }
-    return _api_process && _api_process->is_started();   // Exception, wenn Agent das Kommando nicht akzeptiert hat
+    if (_api_process) {
+        _api_process->check_exception();    // Exception, wenn Agent das Kommando nicht akzeptiert hat
+        return _api_process->is_started();  // false, wenn Agent noch nicht geantwortet hat.
+    } else 
+        return false;
 }
 
 

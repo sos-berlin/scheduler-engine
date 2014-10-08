@@ -710,8 +710,11 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     }
 
     public: bool is_started() {
-        if (_start_exception) throw *_start_exception;
         return _is_started;
+    }
+
+    public: void check_exception() {
+        if (_start_exception) throw *_start_exception;
     }
 
     protected: virtual void emergency_kill() {

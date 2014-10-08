@@ -329,6 +329,13 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
+        if (_state == s_waiting_for_process) {
+            if (Remote_module_instance_proxy* o = dynamic_cast<Remote_module_instance_proxy*>(+_module_instance)) {
+                if (o->is_waiting_for_remote_scheduler()) {
+                    task_element.setAttribute("waiting_for_remote_scheduler", "true");
+                }
+            }
+        }
 
         if( _enqueued_state )
         task_element.setAttribute( "enqueued_state"  , state_name( _enqueued_state ) );

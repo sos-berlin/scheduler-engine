@@ -100,7 +100,7 @@ final class CppHttpRemoteApiProcessClient private(
 }
 
 object CppHttpRemoteApiProcessClient {
-  private val TryConnectInterval = 5.s
+  private val TryConnectInterval = 30.s
   private val logger = Logger(getClass)
 
   @ForCpp def apply(injector: Injector, conf: Api_process_configurationC) = {

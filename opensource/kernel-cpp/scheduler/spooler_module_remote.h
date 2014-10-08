@@ -98,6 +98,10 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     std::list<File_path>        undeleted_files             ();
     string                      process_name                () const;
 
+    bool is_waiting_for_remote_scheduler() const {
+        return _api_process && !_api_process->is_started();
+    }
+
     Fill_zero                  _zero_;
 
     ptr<object_server::Proxy>   _remote_instance;

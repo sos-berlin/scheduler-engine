@@ -3,10 +3,11 @@ package com.sos.scheduler.engine.tests.jira.js1187
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.{alternateTcpPortRange, findRandomFreeTcpPort}
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{TaskId, JobPath}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
@@ -57,7 +58,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
     val warningFuture = controller.getEventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
     val (taskId, taskClosedFuture) = runJobFuture(UnreachableRemoteJobPath)
     Await.result(warningFuture, TestTimeout)
-    task(taskId).state shouldEqual TaskState.waiting_for_process
+    requireIsWaitingForAgent(taskId)
     scheduler executeXml <kill_task job={UnreachableRemoteJobPath.string} id={taskId.string}/>
     Await.result(taskClosedFuture, TestTimeout)
   }
@@ -67,11 +68,16 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
       val warningFuture = controller.getEventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
       val (taskId, taskClosedFuture) = runJobFuture(UnreachableRemoteJobPath)
       Await.result(warningFuture, TestTimeout)
-      task(taskId).state shouldEqual TaskState.waiting_for_process
+      requireIsWaitingForAgent(taskId)
       agent.start()
       Await.result(agent.activatedFuture, TestTimeout)
       Await.result(taskClosedFuture, TestTimeout)
     }
+  }
+
+  private def requireIsWaitingForAgent(taskId: TaskId, expected: Boolean = true): Unit = {
+    (scheduler.executeXml(<show_task id={taskId.string}/>).answer \ "task" \@ "waiting_for_remote_scheduler").toString.toBoolean shouldEqual expected
+    task(taskId).state shouldEqual TaskState.waiting_for_process
   }
 
   private def newExtraScheduler(httpPort: Int) = {
