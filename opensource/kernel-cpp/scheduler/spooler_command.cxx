@@ -1046,7 +1046,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     api_process_configuration._log_stdout_and_stderr = true;     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
     api_process_configuration._java_options = start_task_element.getAttribute("java_options");
     api_process_configuration._java_classpath = start_task_element.getAttribute("java_classpath");
-    ptr<Api_process> process = Api_process::new_process(_spooler, api_process_configuration);
+    ptr<Api_process> process = Api_process::new_process(_spooler, (Prefix_log*)NULL, api_process_configuration);
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();

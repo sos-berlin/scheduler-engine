@@ -11,6 +11,7 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace google { namespace inject { struct Injector; }}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace async { struct CppCall; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Api_process_configurationC; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
@@ -54,7 +55,7 @@ struct CppHttpRemoteApiProcessClient : ::zschimmer::javabridge::proxy_jobject< C
     static ::javaproxy::com::sos::scheduler::engine::client::agent::CppHttpRemoteApiProcessClient apply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::google::inject::Injector >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Api_process_configurationC >& p1);
     void closeRemoteTask() const;
     bool killRemoteTask() const;
-    void startRemoteTask(jint p0) const;
+    void startRemoteTask(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p2) const;
     ::javaproxy::java::lang::String toString() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

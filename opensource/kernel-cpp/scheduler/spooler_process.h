@@ -48,6 +48,7 @@ struct Process : zschimmer::Object, Scheduler_object {
 
 
 struct Api_process : virtual Process {
+    virtual bool is_started() = 0;
     virtual int exit_code() = 0;
     virtual int termination_signal() = 0;
     virtual object_server::Session* session() = 0;
@@ -60,7 +61,7 @@ struct Api_process : virtual Process {
     virtual void close__end() = 0;
     virtual void close_session() = 0;
 
-    static ptr<Api_process> new_process(Spooler* sp, const Api_process_configuration&);
+    static ptr<Api_process> new_process(Spooler* sp, Prefix_log* log, const Api_process_configuration&);
 };
 
 
@@ -150,8 +151,8 @@ struct Process_class : Process_class_configuration,
     void                        add_process                 (Process*);
     void                        remove_process              (Process*);
 
-    Process*                    new_process                 (const Api_process_configuration*);
-    Process*                    select_process_if_available (const Api_process_configuration*);
+    Process*                    new_process                 (const Api_process_configuration*, Prefix_log*);
+    Process*                    select_process_if_available (const Api_process_configuration*, Prefix_log*);
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );

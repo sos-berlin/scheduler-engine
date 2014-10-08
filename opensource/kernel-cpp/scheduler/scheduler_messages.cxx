@@ -318,6 +318,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-485", "Missing JobScheduler ID (spooler_id=\"\" or -id)" },
     { "SCHEDULER-486", "Self-referencing dependency $1" },
     { "SCHEDULER-487", "Role '$1' needed for this operation" },
+    { "SCHEDULER-488", "Waiting until Remote JobScheduler becomes accessible" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

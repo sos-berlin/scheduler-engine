@@ -4,6 +4,7 @@
 
 #include "com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.h"
 #include "com__google__inject__Injector.h"
+#include "com__sos__scheduler__engine__kernel__async__CppCall.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
@@ -18,7 +19,7 @@ struct CppHttpRemoteApiProcessClient__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Static_method const _apply__Lcom_google_inject_Injector_2Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method;
     ::zschimmer::javabridge::Method const _closeRemoteTask____method;
     ::zschimmer::javabridge::Method const _killRemoteTask____method;
-    ::zschimmer::javabridge::Method const _startRemoteTask__I__method;
+    ::zschimmer::javabridge::Method const _startRemoteTask__ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< CppHttpRemoteApiProcessClient__class > class_factory;
@@ -31,7 +32,7 @@ CppHttpRemoteApiProcessClient__class::CppHttpRemoteApiProcessClient__class(const
     ,_apply__Lcom_google_inject_Injector_2Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method(this, "apply", "(Lcom/google/inject/Injector;Lcom/sos/scheduler/engine/kernel/cppproxy/Api_process_configurationC;)Lcom/sos/scheduler/engine/client/agent/CppHttpRemoteApiProcessClient;")
     ,_closeRemoteTask____method(this, "closeRemoteTask", "()V")
     ,_killRemoteTask____method(this, "killRemoteTask", "()Z")
-    ,_startRemoteTask__I__method(this, "startRemoteTask", "(I)V")
+    ,_startRemoteTask__ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "startRemoteTask", "(ILcom/sos/scheduler/engine/kernel/async/CppCall;Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
 CppHttpRemoteApiProcessClient__class::~CppHttpRemoteApiProcessClient__class() {}
@@ -74,11 +75,13 @@ bool CppHttpRemoteApiProcessClient::killRemoteTask() const {
     return 0 != cls->_killRemoteTask____method.bool_call(get_jobject(), parameter_list);
 }
 
-void CppHttpRemoteApiProcessClient::startRemoteTask(jint p0) const {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+void CppHttpRemoteApiProcessClient::startRemoteTask(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p2) const {
+    ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
     parameter_list._jvalues[0].i = p0;
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    parameter_list._jvalues[2].l = p2.get_jobject();
     CppHttpRemoteApiProcessClient__class* cls = _class.get();
-    cls->_startRemoteTask__I__method.call(get_jobject(), parameter_list);
+    cls->_startRemoteTask__ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method.call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String CppHttpRemoteApiProcessClient::toString() const {

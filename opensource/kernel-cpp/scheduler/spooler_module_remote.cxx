@@ -342,27 +342,27 @@ Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy
 bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configuration* c)
 {
     assert(!c);
-    Api_process_configuration process_configuration;
-    process_configuration._remote_scheduler_address = _remote_scheduler_address;
-    process_configuration._environment = new Com_variable_set(*_process_environment);
-    process_configuration._java_options = _module->_java_options;
-    process_configuration._java_classpath = _module->_java_class_path;
-    process_configuration._priority = _module->_priority;
-    process_configuration._login = _module->_login;
-    process_configuration._has_api = _module->has_api();
-    process_configuration._job_name = _job_name;
-    process_configuration._task_id = _task_id;
+    if (!_api_process) {
+        Api_process_configuration process_configuration;
+        process_configuration._remote_scheduler_address = _remote_scheduler_address;
+        process_configuration._environment = new Com_variable_set(*_process_environment);
+        process_configuration._java_options = _module->_java_options;
+        process_configuration._java_classpath = _module->_java_class_path;
+        process_configuration._priority = _module->_priority;
+        process_configuration._login = _module->_login;
+        process_configuration._has_api = _module->has_api();
+        process_configuration._job_name = _job_name;
+        process_configuration._task_id = _task_id;
 
-    bool ok = Module_instance::try_to_get_process(&process_configuration);
-    if (ok) {
-        _api_process = dynamic_cast<Api_process*>(+_process);
-        if (!_api_process) z::throw_xc(Z_FUNCTION);
-        _api_process->start();
-        _pid = _api_process->pid();
-        return true;
-    } else {
-        return false;
+        bool ok = Module_instance::try_to_get_process(&process_configuration);
+        if (ok) {
+            _api_process = dynamic_cast<Api_process*>(+_process);
+            if (!_api_process) z::throw_xc(Z_FUNCTION);
+            _api_process->start();
+            _pid = _api_process->pid();
+        }
     }
+    return _api_process && _api_process->is_started();   // Exception, wenn Agent das Kommando nicht akzeptiert hat
 }
 
 

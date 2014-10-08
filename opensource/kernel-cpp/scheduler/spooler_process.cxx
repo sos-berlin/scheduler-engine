@@ -20,11 +20,12 @@ Process_class_configuration::Class_descriptor    Process_class_configuration::cl
 // Kann auch ein Thread sein.
 
 struct Abstract_process : virtual Process {
-    protected: Abstract_process(Spooler* spooler, const Api_process_configuration& c) :
+    protected: Abstract_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& c) :
         _spooler(spooler),
         _configuration(c),
         _process_id(spooler->get_next_process_id()),
-        _log(Z_NEW(Prefix_log(this)))
+        _prefix_log(Z_NEW(Prefix_log(this))),
+        _log(log? log : +_prefix_log )
     {}
 
     public: virtual ~Abstract_process() {}
@@ -59,6 +60,7 @@ struct Abstract_process : virtual Process {
     public: Spooler* const _spooler;
     public: Api_process_configuration const _configuration;
     private: Process_id const _process_id;
+    private: ptr<Prefix_log> const _prefix_log;
     private: ptr<Prefix_log> const _log;
 };
 
@@ -115,8 +117,8 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
         private: ptr<Close_operation> _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Abstract_process schließen soll
     };
 
-    protected: Abstract_api_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf),
+    protected: Abstract_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf),
         _registered_process_handle(NULL),
         _exit_code(0),
         _termination_signal(0)
@@ -163,7 +165,7 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
     }
 
     public: void start() {
-        if (is_started()) assert(0), z::throw_xc(Z_FUNCTION);
+        if (connection() != NULL) assert(0), z::throw_xc(Z_FUNCTION);
         do_start();
         #ifdef Z_WINDOWS
             if (_spooler)
@@ -175,10 +177,6 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
         _running_since = Time::now();
     }
     
-    private: bool is_started() { 
-        return connection() != NULL; 
-    }
-
     protected: virtual void do_start() = 0;
 
     protected: void fill_connection(object_server::Connection* connection) {
@@ -328,12 +326,16 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
 
 
 struct Dummy_process : Abstract_process {
-    public: Dummy_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf) 
+    public: Dummy_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf) 
     {}
 
     public: bool async_continue() {
         return false;
+    }
+
+    public: bool is_started() {
+        z::throw_xc(Z_FUNCTION);
     }
 
     public: object_server::Connection* connection() const {
@@ -355,9 +357,9 @@ struct Dummy_process : Abstract_process {
 
 
 struct Standard_local_api_process : Local_api_process, virtual Abstract_api_process {
-    Standard_local_api_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf),
-        Abstract_api_process(spooler, conf),
+    Standard_local_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf),
+        Abstract_api_process(spooler, log, conf),
         _is_killed(false)
     {}
 
@@ -404,6 +406,10 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         string s = log_categories_as_string();
         string stderr_string = "stderr";   // Log-Kategorie zum Debuggen (der String ist zum Suchen)
         return trim(replace_regex((" "+ s +" "), " "+ stderr_string +" ", " "));   // "stderr" nicht an API-Prozess, weil der das nur in eine Datei schreibt, statt auf die IDE-Konsole 
+    }
+
+    public: bool is_started() {
+        return _connection != NULL;  // Beim Aufruf stets true
     }
 
     public: bool kill() {
@@ -473,9 +479,9 @@ struct Thread_api_process : Abstract_api_process {
         ptr<Object_server> _object_server;
     };
 
-    Thread_api_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf),
-        Abstract_api_process(spooler, conf)
+    Thread_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf),
+        Abstract_api_process(spooler, log, conf)
     {}
 
     protected: void do_start() {
@@ -488,6 +494,10 @@ struct Thread_api_process : Abstract_api_process {
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
     }
     
+    public: bool is_started() {
+        return _connection != NULL;  // Beim Aufruf stets true
+    }
+
     protected: int pid() const {
         int result = 0;
         if (_com_server_thread && _connection) {
@@ -550,12 +560,13 @@ struct Async_tcp_operation : Async_operation {
 
 
 struct Abstract_remote_api_process : Abstract_api_process {
-    Abstract_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf),
-        Abstract_api_process(spooler, conf)
+    Abstract_remote_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf),
+        Abstract_api_process(spooler, log, conf)
     {}
 
     protected: void prepare_connection() {
+        assert(!_connection);
         _connection = _spooler->_connection_manager->new_connection();
         _connection->listen_on_tcp_port( INADDR_ANY );
     }
@@ -569,9 +580,9 @@ struct Abstract_remote_api_process : Abstract_api_process {
 
 
 struct Tcp_remote_api_process : Abstract_remote_api_process {
-    Tcp_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf),
-        Abstract_remote_api_process(spooler, conf),
+    Tcp_remote_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf),
+        Abstract_remote_api_process(spooler, log, conf),
         _remote_scheduler(Host_and_port(conf._remote_scheduler_address)),
         _remote_process_id(0),
         _remote_pid(0),
@@ -593,6 +604,10 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         _async_tcp_operation = Z_NEW( Async_tcp_operation( this ) );
         _async_tcp_operation->async_wake();
         _async_tcp_operation->set_async_manager( _spooler->_connection_manager );
+    }
+
+    public: bool is_started() {
+        return true; // Funktioniert so nicht (sowieso wollen wir http nutzen): _async_tcp_operation->_state == Async_tcp_operation::s_running;
     }
 
     protected: virtual void emergency_kill() {
@@ -660,17 +675,43 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
 
 
 struct Http_remote_api_process;
+DEFINE_SIMPLE_CALL(Http_remote_api_process , Start_remote_task_callback)
+DEFINE_SIMPLE_CALL(Http_remote_api_process, Waiting_callback)
 
 struct Http_remote_api_process : Abstract_remote_api_process {
-    Http_remote_api_process(Spooler* spooler, const Api_process_configuration& conf) :
-        Abstract_process(spooler, conf),
-        Abstract_remote_api_process(spooler, conf),
-        _clientJ(CppHttpRemoteApiProcessClientJ::apply(spooler->injectorJ(), _configuration.java_proxy_jobject()))
+    Http_remote_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(spooler, log, conf),
+        Abstract_remote_api_process(spooler, log, conf),
+        _clientJ(CppHttpRemoteApiProcessClientJ::apply(spooler->injectorJ(), _configuration.java_proxy_jobject())),
+        _waiting_callback(Z_NEW(Waiting_callback(this))),
+        _start_remote_task_callback(Z_NEW(Start_remote_task_callback(this))),
+        _is_started(false)
     {}
 
     protected: void do_start() {
         prepare_connection();
-        _clientJ.startRemoteTask(connection()->tcp_port());
+        _clientJ.startRemoteTask(connection()->tcp_port(), _waiting_callback->java_sister(), _start_remote_task_callback->java_sister());
+    }
+
+    public: void on_call(const Waiting_callback& call) {
+        log()->warn(Message_string("SCHEDULER-488", obj_name(), (string)((::javaproxy::java::lang::Object)call.value()).toString()));
+    }
+
+    public: void on_call(const Start_remote_task_callback& call) {
+        assert(&call == +_start_remote_task_callback);
+        try {
+            ((TryJ)call.value()).get();   // get() wirft Exception, wenn call.value() ein Failure ist
+            _is_started = true;
+        }
+        catch (exception& x) {
+            _start_exception = x;
+        }
+        _spooler->signal();
+    }
+
+    public: bool is_started() {
+        if (_start_exception) throw *_start_exception;
+        return _is_started;
     }
 
     protected: virtual void emergency_kill() {
@@ -678,6 +719,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     }
 
     public: bool kill() {
+        _spooler->cancel_call(_start_remote_task_callback);
         return _clientJ.killRemoteTask();
     }
 
@@ -694,6 +736,10 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     }
 
     private: CppHttpRemoteApiProcessClientJ _clientJ;
+    private: ptr<Waiting_callback> const _waiting_callback;
+    private: ptr<Start_remote_task_callback> const _start_remote_task_callback;
+    private: bool _is_started;
+    private: Xc_copy _start_exception;
 };
 
 //----------------------------------------------------------------Process_class_subsystem::_methods
@@ -836,20 +882,20 @@ string Async_tcp_operation::async_state_text_() const
 }
 
 
-ptr<Api_process> Api_process::new_process(Spooler* spooler, const Api_process_configuration& configuration) {
+ptr<Api_process> Api_process::new_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& configuration) {
     if (string_begins_with(configuration._remote_scheduler_address, "http://")) {
-        ptr<Http_remote_api_process> result = Z_NEW(Http_remote_api_process(spooler, configuration));
+        ptr<Http_remote_api_process> result = Z_NEW(Http_remote_api_process(spooler, log, configuration));
         return +result;
     } else
     if (!configuration._remote_scheduler_address.empty()) {       
-        ptr<Tcp_remote_api_process> result = Z_NEW(Tcp_remote_api_process(spooler, configuration));
+        ptr<Tcp_remote_api_process> result = Z_NEW(Tcp_remote_api_process(spooler, log, configuration));
         return +result;
     } else
     if (configuration._is_thread) {
-        ptr<Thread_api_process> result = Z_NEW(Thread_api_process(spooler, configuration));
+        ptr<Thread_api_process> result = Z_NEW(Thread_api_process(spooler, log, configuration));
         return +result;
     } else {
-        ptr<Standard_local_api_process> result = Z_NEW(Standard_local_api_process(spooler, configuration));
+        ptr<Standard_local_api_process> result = Z_NEW(Standard_local_api_process(spooler, log, configuration));
         return +result;
     }
 }
@@ -1257,17 +1303,17 @@ void Process_class::remove_process(Process* process)
 
 //-----------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process(const Api_process_configuration* c)
+Process* Process_class::new_process(const Api_process_configuration* c, Prefix_log* log)
 {
     assert_is_active();
     ptr<Process> process;
     if (!c) {
-        ptr<Dummy_process> p = Z_NEW(Dummy_process(_spooler, Api_process_configuration()));
+        ptr<Dummy_process> p = Z_NEW(Dummy_process(_spooler, log, Api_process_configuration()));
         process = +p;
     } else {
         Api_process_configuration conf = *c;
         conf._remote_scheduler_address = c->_remote_scheduler_address.empty()? _remote_scheduler_address : c->_remote_scheduler_address;
-        ptr<Api_process> p = Api_process::new_process(_spooler, conf);
+        ptr<Api_process> p = Api_process::new_process(_spooler, log, conf);
         process = +p;
     }
     add_process(process);
@@ -1276,14 +1322,14 @@ Process* Process_class::new_process(const Api_process_configuration* c)
 
 //-------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available(const Api_process_configuration* api_process_configuration)
+Process* Process_class::select_process_if_available(const Api_process_configuration* api_process_configuration, Prefix_log* log)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&
         _process_set.size() < _max_processes
          && _spooler->_process_count < scheduler::max_processes)
     {
-        return new_process(api_process_configuration);
+        return new_process(api_process_configuration, log);
     }
     else
         return NULL;
