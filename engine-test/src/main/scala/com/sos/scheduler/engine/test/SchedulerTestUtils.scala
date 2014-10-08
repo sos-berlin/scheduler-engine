@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.{Task, TaskSubsystem, Job, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
@@ -29,6 +29,9 @@ object SchedulerTestUtils {
 
   def orderOption(key: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
     hasInjector.injector.getInstance(classOf[OrderSubsystem]).orderOption(key)
+
+  def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
+    hasInjector.injector.getInstance(classOf[TaskSubsystem]).task(taskId)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskId = {
     runJobAndWaitForEnd(jobPath, timeout.duration)
