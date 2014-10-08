@@ -158,9 +158,10 @@ bool Async_operation::async_continue( Continue_flags flags )
         Z_LOG( Z_FUNCTION << " ERROR " << x.what() << ", " << async_state_text() << "\n" );
         
         string what = x.what2();  // JS-540 ...
-        std::string::size_type found =  what.find_first_of("server::construct   [5] [java_class_path]");
-        if(found != string::npos)
-            Z_LOG2( "scheduler", "(Reason for error could be an old version of Remote Scheduler, older than 1.3.9, year 2010): " << x.what() << "\n" );  // ... JS-540
+        string::size_type found = what.find("server::construct   [5] [java_class_path]");
+        if (found != string::npos) {
+            Z_LOG2( "scheduler", "(Reason for error could be an old version of Remote Scheduler, older than 1.3.9, year 2010): " << what << "\n" );  // ... JS-540
+        }
 
         _error = true;
         _error_name = x.name();
