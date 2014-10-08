@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler._
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler.logger
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants._
 import java.io.{File, IOException, InputStream, InputStreamReader}
+import java.net.URI
 import java.nio.charset.Charset
 import scala.collection.JavaConversions._
 import scala.collection.immutable
@@ -17,10 +18,13 @@ import scala.concurrent.Promise
 final class ExtraScheduler(
   args: immutable.Seq[String],
   env: immutable.Iterable[(String, String)],
-  tcpPort: Int)
+  httpPort: Option[Int] = None,
+  tcpPort: Option[Int] = None)
 extends AutoCloseable with HasCloser {
 
-  val address = SchedulerAddress("127.0.0.1", tcpPort)
+  private val tcpAddressOption = tcpPort map { o ⇒ SchedulerAddress("127.0.0.1", o) }
+  private val uriOption = httpPort map { o ⇒ new URI(s"http://127.0.0.1:$o") }
+  val name = (uriOption orElse tcpAddressOption getOrElse sys.error("httpPort and tcpPort not given")).toString
   private val isActivePromise = Promise[Unit]()
 
   onClose { isActivePromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") ) }
@@ -41,7 +45,9 @@ extends AutoCloseable with HasCloser {
   }
 
   private def startProcess(): Process = {
-    val processBuilder = new ProcessBuilder(args :+ s"-tcp-port=${address.port}" :+ s"-ip-address=${address.interface}")
+    val httpArgs = httpPort map { o ⇒ s"-http-port=$o" }
+    val tcpArgs = tcpAddressOption.toList flatMap { case SchedulerAddress(interface, port) ⇒ List(s"-tcp-port=$port", s"-ip-address=$interface") }
+    val processBuilder = new ProcessBuilder(args ++ httpArgs ++ tcpArgs)
     if (OperatingSystem.isUnix) {
       val name = operatingSystem.getDynamicLibraryEnvironmentVariableName
       val previous = nullToEmpty(System.getenv(name))
@@ -53,7 +59,7 @@ extends AutoCloseable with HasCloser {
   }
 
   private def startStdoutCollectorThread(in: InputStream): Unit = {
-    new Thread(s"Stdout collector $address") {
+    new Thread(s"Stdout collector $name") {
       override def run(): Unit = {
         val expectedMessageCode = "SCHEDULER-902"
         try
@@ -86,7 +92,11 @@ extends AutoCloseable with HasCloser {
 
   def isActiveFuture = isActivePromise.future
 
-  override def toString = s"ExtraScheduler($address)"
+  def uri: URI = uriOption getOrElse sys.error("httpPort not given")
+
+  def tcpAddress: SchedulerAddress = tcpAddressOption getOrElse sys.error("httpPort not given")
+
+  override def toString = s"ExtraScheduler($name)"
 }
 
 private object ExtraScheduler {

@@ -43,7 +43,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     controller.startScheduler()
     agents foreach { _.extraScheduler.start() }   // Parallel mit Test-Scheduler starten
     controller.waitUntilSchedulerIsActive()
-    scheduler executeXml <process_class name="test-c" remote_scheduler={processClassAgent.extraScheduler.address.string}/>
+    scheduler executeXml <process_class name="test-c" remote_scheduler={processClassAgent.extraScheduler.tcpAddress.string}/>
   }
 
   s"Without parameter $remoteSchedulerParameterName runs job in our scheduler" in {
@@ -141,7 +141,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
       s"-e",
       new File(controller.environment.configDirectory.getPath, "agent-scheduler.xml").getPath)
     val testValue = s"TEST-$tcpPort"
-    new Agent(new ExtraScheduler(args, List(TestVariableName -> testValue), tcpPort), s"*$testValue*")
+    new Agent(new ExtraScheduler(args, List(TestVariableName -> testValue), tcpPort=Some(tcpPort)), s"*$testValue*")
   }
 
   private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent): Unit = {
@@ -153,7 +153,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   }
 
   private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, agent: Agent, expectedResult: String): Unit = {
-    testOrderWithRemoteScheduler(jobChainPath, Some(SchedulerAddressString(agent.extraScheduler.address.string)), expectedResult)
+    testOrderWithRemoteScheduler(jobChainPath, Some(SchedulerAddressString(agent.extraScheduler.tcpAddress.string)), expectedResult)
   }
 
   private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, remoteScheduler: Option[SchedulerAddressString], expectedResult: String): Unit = {

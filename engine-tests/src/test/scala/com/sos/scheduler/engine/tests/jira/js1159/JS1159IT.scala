@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.{alternateTcpPortRange, findRandomFreeTcpPort}
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.order.{OrderEvent, OrderKey}
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
@@ -27,7 +26,6 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
 
   private lazy val agentTcpPort = findRandomFreeTcpPort()
   private lazy val agentHttpPort = findRandomFreeTcpPort(alternateTcpPortRange)
-  private lazy val agentUri = s"http://127.0.0.1:$agentHttpPort/"
   private lazy val extraScheduler = {
     val logDir = controller.environment.logDirectory / "agent"
     makeDirectory(logDir)
@@ -43,17 +41,16 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
       s"-java-options=-XX:+CreateMinidumpOnCrash",
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
-      s"-http-port=$agentHttpPort",
       s"-e",
       new File(controller.environment.configDirectory.getPath, "agent-scheduler.xml").getPath)
-    new ExtraScheduler(args = args, env = Map(), tcpPort = agentTcpPort)
+    new ExtraScheduler(args = args, env = Map(), httpPort = Some(agentHttpPort), tcpPort = Some(agentTcpPort))
   }
 
   "Start" in {
     extraScheduler.start()
     registerAutoCloseable(extraScheduler)
-    scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.address.toString}/>
-    scheduler executeXml <process_class name="agent-http" remote_scheduler={agentUri}/>
+    scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
+    scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri.toString}/>
     Await.result(extraScheduler.isActiveFuture, TestTimeout)
   }
 
@@ -68,6 +65,4 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
 
 private object JS1159IT {
   private val TestJobPaths = List("/api-http", "/api-tcp", "/shell-http", "/shell-tcp") map JobPath.apply
-
-  private case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
 }
