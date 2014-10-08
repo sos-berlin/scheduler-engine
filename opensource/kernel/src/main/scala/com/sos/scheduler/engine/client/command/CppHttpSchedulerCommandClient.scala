@@ -26,8 +26,7 @@ final class CppHttpSchedulerCommandClient @Inject private(
     newCommandClient(new URI(uri)).executeXml(xmlBytes).onComplete { o: Try[String] ⇒
       val documentTry = o map loadXml
       callQueue {
-        resultCall.value = documentTry: Try[Document]
-        resultCall.call()
+        resultCall.call(documentTry: Try[Document])
       }
     }
   }

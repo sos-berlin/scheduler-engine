@@ -19,6 +19,12 @@ extends TimedCall[Unit] with Sister {
     cppProxy.set_value(o)
   }
 
+  def call(value: AnyRef) = {
+    cppProxy.set_value(value)
+    try cppProxy.call()
+    finally cppProxy.set_value(null)
+  }
+
   def call() =
     cppProxy.call()
 
