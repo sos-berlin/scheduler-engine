@@ -1,8 +1,15 @@
 package com.sos.scheduler.engine.common.async
 
 import java.util.NoSuchElementException
+import org.joda.time.Instant
 
 trait CallQueue extends AutoCloseable {
+
+  def at[A](t: Instant)(f: ⇒ A): TimedCall[A] = {
+    val call = TimedCall(t)(f)
+    add(call)
+    call
+  }
 
   def apply(f: ⇒ Unit): Unit = {
     add(ShortTermCall { () ⇒ f })
