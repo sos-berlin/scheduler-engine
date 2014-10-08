@@ -102,6 +102,23 @@ static jobject JNICALL params(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL state_1name(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Task* o_ = has_proxy< ::sos::scheduler::Task >::of_cpp_reference(cppReference,"::sos::scheduler::Task::state_name()");
+        return env.jstring_from_string(o_->state_name());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jstring JNICALL stderr_1path(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -140,6 +157,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"log_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log_1string },
     { (char*)"order__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/OrderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order },
     { (char*)"params__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::params },
+    { (char*)"state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::state_1name },
     { (char*)"stderr_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::stderr_1path },
     { (char*)"stdout_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::stdout_1path }
 };

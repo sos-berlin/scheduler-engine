@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC
+import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
 import java.io.File
 import javax.annotation.Nullable
@@ -20,6 +21,8 @@ final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with Even
 
   def id =
     new TaskId(cppProxy.id)
+
+  def state: TaskState = TaskState.of(cppProxy.state_name)
 
   def parameterValue(name: String): String =
     cppProxy.params.get_string(name)
