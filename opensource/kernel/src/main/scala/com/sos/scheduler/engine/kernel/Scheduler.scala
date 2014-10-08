@@ -131,11 +131,13 @@ with HasCloser {
 
   /** Wird bei jedem Schleifendurchlauf aufgerufen. */
   @ForCpp private def onEnteringSleepState(): Long = {
-    val somethingDone = callRunner.executeMatureCalls()
+    val somethingDone = executeCallQueue()
     eventBus.dispatchEvents()
     val nextTime = schedulerThreadCallQueue.nextTime
     if (somethingDone) -nextTime else nextTime
   }
+
+  def executeCallQueue() = callRunner.executeMatureCalls()
 
   /** Nur für C++, zur Ausführung eines Kommandos in Java */
   @ForCpp private def javaExecuteXml(xml: String): String = {

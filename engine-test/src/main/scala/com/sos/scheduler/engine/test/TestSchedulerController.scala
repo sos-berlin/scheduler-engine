@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
@@ -161,8 +162,16 @@ with EventHandlerAnnotated {
 
   @HotEventHandler
   def handleEvent(e: ErrorLogEvent): Unit = {
-    if (testConfiguration.terminateOnError && !(e.codeOption exists testConfiguration.ignoreError) && !errorLogEventIsTolerated(e) && !testConfiguration.errorLogEventIsTolerated(e))
-      terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
+    // Kann ein anderer Thread sein: C++ Heart_beat_watchdog_thread Abbruchmeldung SCHEDULER-386
+    if (testConfiguration.terminateOnError &&
+      !(e.codeOption exists testConfiguration.ignoreError) &&
+      !errorLogEventIsTolerated(e) &&
+      !testConfiguration.errorLogEventIsTolerated(e))
+    {
+      instance[SchedulerThreadCallQueue].apply {
+        terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
+      }
+    }
   }
 
   @EventHandler @HotEventHandler

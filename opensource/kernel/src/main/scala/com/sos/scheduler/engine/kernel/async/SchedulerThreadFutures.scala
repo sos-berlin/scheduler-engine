@@ -9,10 +9,13 @@ import scala.concurrent.{Await, Future}
 object SchedulerThreadFutures {
 
   def inSchedulerThread[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): A =
-    if (currentThread == schedulerThreadCallQueue.cppThread)
+    if (isInSchedulerThread)
       f
     else
       Await.result(schedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf)   // Vielleicht mit close() in Scheduler gelöst: FIXME Bei Scheduler-Ende kann es noch passieren, dass die Future nicht endet. Tests terminieren damit nicht. Eigentlich sollte tryCancel() wirken.
+
+  def isInSchedulerThread(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) =
+    currentThread == schedulerThreadCallQueue.cppThread
 
   /** Future, der f als TimedCall in schedulerThreadCallQueue ausführt. */
   def schedulerThreadFuture[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =

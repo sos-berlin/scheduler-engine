@@ -21,11 +21,14 @@ public final class ErrorLogIT extends SchedulerTest {
     @Test public void errorLogLineShouldThrowException() {
         controller().activateScheduler();
         instance(PrefixLog.class).error("TEST-ERROR");
+        boolean ok = false;
         try {
+            scheduler().executeCallQueue();
             controller().close();
-            fail("Missing Exception for error log line");
-        } catch(Exception x) {
-            logger.debug("Okay: {}", x);
+        } catch (Exception x) {
+            logger.debug("Expected: " + x);
+            ok = true;
         }
+        if (!ok) fail("Missing Exception for error log line");
     }
 }
