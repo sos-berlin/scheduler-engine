@@ -25,9 +25,9 @@ extends AutoCloseable with HasCloser {
   private val tcpAddressOption = tcpPort map { o ⇒ SchedulerAddress("127.0.0.1", o) }
   private val uriOption = httpPort map { o ⇒ new URI(s"http://127.0.0.1:$o") }
   val name = (uriOption orElse tcpAddressOption getOrElse sys.error("httpPort and tcpPort not given")).toString
-  private val isActivePromise = Promise[Unit]()
+  private val activatedPromise = Promise[Unit]()
 
-  onClose { isActivePromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") ) }
+  onClose { activatedPromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") ) }
 
   def start(): Unit = {
     closeOnError {
@@ -65,8 +65,8 @@ extends AutoCloseable with HasCloser {
         try
           unbufferedInputStreamToLines(in, schedulerEncoding) { line ⇒
             logger.info(line)
-            if (!isActivePromise.isCompleted && (line contains s" $expectedMessageCode ") && (line contains " state=running"))
-              isActivePromise.success(())
+            if (!activatedPromise.isCompleted && (line contains s" $expectedMessageCode ") && (line contains " state=running"))
+              activatedPromise.success(())
           }
         catch {
           case t: Throwable ⇒
@@ -74,7 +74,7 @@ extends AutoCloseable with HasCloser {
             throw t
         }
         finally
-          isActivePromise.tryFailure(new RuntimeException(s"ExtraScheduler has not started successfully with message $expectedMessageCode"))
+          activatedPromise.tryFailure(new RuntimeException(s"ExtraScheduler has not started successfully with message $expectedMessageCode"))
       }
       start()
       onClose {
@@ -90,7 +90,7 @@ extends AutoCloseable with HasCloser {
     logger.debug(s"Finished closing $this")
   }
 
-  def isActiveFuture = isActivePromise.future
+  def activatedFuture = activatedPromise.future
 
   def uri: URI = uriOption getOrElse sys.error("httpPort not given")
 

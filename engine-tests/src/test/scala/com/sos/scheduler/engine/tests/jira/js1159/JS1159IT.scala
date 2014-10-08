@@ -38,7 +38,6 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
       s"-log-dir=$logDir",
       s"-log-level=debug9",
       s"-log=${logDir / "scheduler.log"}",
-      s"-java-options=-XX:+CreateMinidumpOnCrash",
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
       s"-e",
@@ -51,7 +50,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
     registerAutoCloseable(extraScheduler)
     scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
     scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri.toString}/>
-    Await.result(extraScheduler.isActiveFuture, TestTimeout)
+    Await.result(extraScheduler.activatedFuture, TestTimeout)
   }
 
   TestJobPaths foreach { jobPath ⇒

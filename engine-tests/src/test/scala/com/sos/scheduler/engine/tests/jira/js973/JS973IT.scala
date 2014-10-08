@@ -219,7 +219,7 @@ private object JS973IT {
     }
 
     def expectedResult = {
-      Await.result(extraScheduler.isActiveFuture, ExtraSchedulerTimeout.toScalaDuration)
+      Await.result(extraScheduler.activatedFuture, ExtraSchedulerTimeout.toScalaDuration)
       _expectedResult
     }
   }
