@@ -78,7 +78,7 @@ public class ThreadLock {
             if (!locked) {
                 logger.warn("Waiting for Scheduler ThreadLock, currently acquired by "+lockingThreadString());
                 super.lock();
-                logger.warn("Scheduler ThreadLock acquired after waiting {}ms", t - currentTimeMillis());
+                logger.warn("Scheduler ThreadLock acquired after waiting {}ms", currentTimeMillis() - t);
             }
         }
 
@@ -89,7 +89,7 @@ public class ThreadLock {
             } else {
                 StringWriter stringWriter = new StringWriter();
                 PrintWriter w = new PrintWriter(stringWriter);
-                w.print(t.toString());
+                w.print(t);
                 w.print(", current stack trace:\n");
                 Exception x = new Exception() {};
                 x.setStackTrace(t.getStackTrace());

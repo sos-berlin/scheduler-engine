@@ -3,11 +3,10 @@ package com.sos.scheduler.engine.tests.jira.js1187
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.{alternateTcpPortRange, findRandomFreeTcpPort}
-import com.sos.scheduler.engine.data.job.{TaskId, JobPath}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
@@ -19,7 +18,6 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js1187.JS1187IT._
-import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -94,8 +92,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
       s"-log=${logDir / "scheduler.log"}",
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
-      s"-e",
-      new File(controller.environment.configDirectory.getPath, "agent-scheduler.xml").getPath)
+      (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
     new ExtraScheduler(args = args, env = Map(), httpPort = Some(httpPort))
   }
 }

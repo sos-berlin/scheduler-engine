@@ -11,7 +11,6 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js1159.JS1159IT._
-import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FreeSpec}
@@ -40,8 +39,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
       s"-log=${logDir / "scheduler.log"}",
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
-      s"-e",
-      new File(controller.environment.configDirectory.getPath, "agent-scheduler.xml").getPath)
+      (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
     new ExtraScheduler(args = args, env = Map(), httpPort = Some(agentHttpPort), tcpPort = Some(agentTcpPort))
   }
 
