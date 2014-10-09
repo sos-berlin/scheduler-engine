@@ -39,19 +39,25 @@ final class CppHttpRemoteApiProcessClient private(
         case success@Success(o) ⇒
           processDescriptorOption = Some(o.processDescriptor)
           state = Started
-          logger.info(s"Process on agent $agentUri started, processId: $o")
-          resultCall.call(success)
+          logger.debug(s"Process on agent $agentUri started, processId: $o")
+          callQueue {
+            resultCall.call(success)
+          }
         case failure@Failure(throwable) ⇒
           throwable match {
             case e: spray.can.Http.ConnectionAttemptFailedException if state == Starting ⇒
-              waitingCall.call(e)
+              callQueue {
+                waitingCall.call(e)
+              }
               timedCallAtomic set callQueue.at(now + TryConnectInterval) {
                 loop()
               }
             case _ ⇒
               state = StartFailed(throwable)
               logger.debug(s"Process on agent $agentUri could not be started: $throwable")
-              resultCall.call(failure)
+              callQueue {
+                resultCall.call(failure)
+              }
           }
       }
     }
