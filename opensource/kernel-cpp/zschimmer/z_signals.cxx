@@ -238,7 +238,7 @@ int signal_code_from_name_or_0( const string& name, bool* unknown_in_this_os_onl
         }
     }
 
-    if( unknown_in_this_os_only )  unknown_in_this_os_only = false;
+    // Not in use??? if( unknown_in_this_os_only )  *unknown_in_this_os_only = false;
     return 0;
 }
 
