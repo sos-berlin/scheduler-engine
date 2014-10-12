@@ -13,7 +13,7 @@ import java.net.URI
 import java.nio.charset.Charset
 import scala.collection.JavaConversions._
 import scala.collection.immutable
-import scala.concurrent.Promise
+import scala.concurrent.{Future, Promise}
 
 final class ExtraScheduler(
   args: immutable.Seq[String],
@@ -27,9 +27,14 @@ extends AutoCloseable with HasCloser {
   val name = (uriOption orElse tcpAddressOption getOrElse sys.error("httpPort and tcpPort not given")).toString
   private val activatedPromise = Promise[Unit]()
 
-  onClose { activatedPromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") ) }
+  onClose {
+    activatedPromise.tryFailure(new IllegalStateException("ExtraScheduler has been closed") )
+  }
 
-  def start(): Unit = {
+  /**
+   * @return Future, successful when ExtraScheduler is active and therefore ready to use (same as activatedFuture).
+   */
+  def start(): Future[Unit] = {
     closeOnError {
       val process = startProcess()
       whenNotClosedAtShutdown {
@@ -42,6 +47,7 @@ extends AutoCloseable with HasCloser {
         process.waitFor()
       }
     }
+    activatedFuture
   }
 
   private def startProcess(): Process = {
@@ -90,6 +96,9 @@ extends AutoCloseable with HasCloser {
     logger.debug(s"Finished closing $this")
   }
 
+  /**
+   * @return Future, successful when ExtraScheduler is active and therefore ready to use
+   */
   def activatedFuture = activatedPromise.future
 
   def uri: URI = uriOption getOrElse sys.error("httpPort not given")
