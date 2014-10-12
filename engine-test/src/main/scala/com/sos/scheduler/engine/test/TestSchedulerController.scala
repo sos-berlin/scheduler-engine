@@ -185,8 +185,7 @@ with EventHandlerAnnotated {
   final def instance[A](implicit c: ClassTag[A]): A =
     injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
 
-  final def injector =
-    scheduler.injector
+  final def injector = _scheduler.injector
 
   /** Eine Exception in runnable beendet den Scheduler. */
   def newThread(runnable: Runnable) =
