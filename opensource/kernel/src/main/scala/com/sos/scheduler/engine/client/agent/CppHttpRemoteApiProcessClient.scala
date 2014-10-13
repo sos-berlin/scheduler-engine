@@ -26,18 +26,16 @@ final class CppHttpRemoteApiProcessClient private(
 
   private val startFutureAtomic = new AtomicReference[Future[HttpRemoteProcess]]
   private val timedCallAtomic = new AtomicReference[TimedCall[Unit]]
-  @volatile private var processDescriptorOption: Option[ProcessDescriptor] = None
   @volatile private var state: State = Initialized
 
   @ForCpp
   def startRemoteTask(schedulerApiTcpPort: Int, waitingCall: CppCall, resultCall: CppCall): Unit = {
     state = Starting
     def loop(): Unit = {
-      val future = starter.startRemoteTask(schedulerApiTcpPort)
+      val future = starter.startRemoteTask(schedulerApiTcpPort, conf, agentUri.toString)
       startFutureAtomic.set(future)
       future onComplete {
         case success@Success(o) ⇒
-          processDescriptorOption = Some(o.processDescriptor)
           state = Started
           logger.debug(s"Process on agent $agentUri started, processId: $o")
           callQueue {
@@ -92,7 +90,7 @@ final class CppHttpRemoteApiProcessClient private(
               state = Closed
             case Failure(t) ⇒
               state = CloseFailed(t)
-              logger.error(s"Process $processDescriptorOption on agent $agentUri could not be closed: $t")
+              logger.error(s"Process $httpRemoteProcess on agent $agentUri could not be closed: $t")
           }
       }
       true
@@ -112,7 +110,7 @@ object CppHttpRemoteApiProcessClient {
   @ForCpp def apply(injector: Injector, conf: Api_process_configurationC) = {
     val c = ApiProcessConfiguration(conf)
     new CppHttpRemoteApiProcessClient(
-      injector.apply[HttpRemoteProcessStarter.Factory].apply(c),
+      injector.apply[HttpRemoteProcessStarter],
       injector.apply[SchedulerThreadCallQueue],
       c)
   }
