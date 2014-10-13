@@ -446,6 +446,8 @@ File_based* File_based::replace_now()
     {
         // this ist ungültig
     }
+    if (jobject sister = new_file_based->java_sister())
+        new_file_based->report_event_code(fileBasedReplacedEvent, sister);
 
     //SS: replacement->report_event_replace ... (weil "this" ungültig)
     new_file_based->activate();

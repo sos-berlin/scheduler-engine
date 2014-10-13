@@ -804,8 +804,8 @@ struct file_based_subsystem : File_based_subsystem
         _file_based_map[ casted_old_file_based->normalized_path() ] = casted_new_file_based;
         increment_file_based_version();
 
-        if (jobject sister = new_file_based->java_sister())
-            report_event_code(fileBasedReplacedEvent, sister);
+        //if (jobject sister = new_file_based->java_sister())
+        //    report_event_code(fileBasedReplacedEvent, sister);
     }
 
 
