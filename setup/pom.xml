@@ -323,7 +323,7 @@ call prepare-setup.sh <version> to use this pom
                                     <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                                 </manifest>
                                 <manifestEntries>
-                                    <Architechture>${osArch}</Architechture>
+                                    <Architechture>${setup.platform}</Architechture>
                                 </manifestEntries>
                             </archive>
                         </configuration>
