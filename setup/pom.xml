@@ -272,7 +272,7 @@ call prepare-setup.sh <version> to use this pom
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/setup/scheduler/doc/de</outputDirectory>
+                            <outputDirectory>${project.build.directory}/setup/scheduler/doc/de/reference</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.build.directory}/workspace/scheduler/enginedoc/doc.de</directory>
@@ -290,7 +290,7 @@ call prepare-setup.sh <version> to use this pom
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/setup/scheduler/doc/en</outputDirectory>
+                            <outputDirectory>${project.build.directory}/setup/scheduler/doc/en/reference</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.build.directory}/workspace/scheduler/enginedoc/doc.en</directory>
