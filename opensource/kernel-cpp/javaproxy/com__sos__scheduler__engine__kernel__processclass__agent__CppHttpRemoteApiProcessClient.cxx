@@ -2,21 +2,18 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.h"
-#include "com__google__inject__Injector.h"
+#include "com__sos__scheduler__engine__kernel__processclass__agent__CppHttpRemoteApiProcessClient.h"
 #include "com__sos__scheduler__engine__kernel__async__CppCall.h"
-#include "com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace client { namespace agent { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace processclass { namespace agent { 
 
 struct CppHttpRemoteApiProcessClient__class : ::zschimmer::javabridge::Class
 {
     CppHttpRemoteApiProcessClient__class(const string& class_name);
    ~CppHttpRemoteApiProcessClient__class();
 
-    ::zschimmer::javabridge::Static_method const _apply__Lcom_google_inject_Injector_2Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method;
     ::zschimmer::javabridge::Method const _closeRemoteTask____method;
     ::zschimmer::javabridge::Method const _killRemoteTask____method;
     ::zschimmer::javabridge::Method const _startRemoteTask__ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
@@ -25,11 +22,10 @@ struct CppHttpRemoteApiProcessClient__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< CppHttpRemoteApiProcessClient__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< CppHttpRemoteApiProcessClient__class > CppHttpRemoteApiProcessClient__class::class_factory ("com.sos.scheduler.engine.client.agent.CppHttpRemoteApiProcessClient");
+const ::zschimmer::javabridge::class_factory< CppHttpRemoteApiProcessClient__class > CppHttpRemoteApiProcessClient__class::class_factory ("com.sos.scheduler.engine.kernel.processclass.agent.CppHttpRemoteApiProcessClient");
 
 CppHttpRemoteApiProcessClient__class::CppHttpRemoteApiProcessClient__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_apply__Lcom_google_inject_Injector_2Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method(this, "apply", "(Lcom/google/inject/Injector;Lcom/sos/scheduler/engine/kernel/cppproxy/Api_process_configurationC;)Lcom/sos/scheduler/engine/client/agent/CppHttpRemoteApiProcessClient;")
     ,_closeRemoteTask____method(this, "closeRemoteTask", "()V")
     ,_killRemoteTask____method(this, "killRemoteTask", "()Z")
     ,_startRemoteTask__ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "startRemoteTask", "(ILcom/sos/scheduler/engine/kernel/async/CppCall;Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
@@ -52,16 +48,6 @@ CppHttpRemoteApiProcessClient::~CppHttpRemoteApiProcessClient() { assign_(NULL);
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::client::agent::CppHttpRemoteApiProcessClient CppHttpRemoteApiProcessClient::apply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::google::inject::Injector >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Api_process_configurationC >& p1) {
-    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    parameter_list._jvalues[1].l = p1.get_jobject();
-    CppHttpRemoteApiProcessClient__class* cls = CppHttpRemoteApiProcessClient__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::client::agent::CppHttpRemoteApiProcessClient result;
-    result.steal_local_ref(cls->_apply__Lcom_google_inject_Injector_2Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method.jobject_call(cls->get_jclass(), parameter_list));
-    return result;
-}
 
 void CppHttpRemoteApiProcessClient::closeRemoteTask() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
@@ -103,4 +89,4 @@ void CppHttpRemoteApiProcessClient::Lazy_class::initialize() const {
 }
 
 
-}}}}}}}
+}}}}}}}}

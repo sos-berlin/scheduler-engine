@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.client.agent.HttpRemoteProcessStarterTest._
 import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import java.net.URI
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
@@ -29,7 +28,6 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
   private lazy val commandExecutor = new CommandExecutor
   private lazy val server = injector.apply[TestCommandExecutorHttpServer.Factory].apply(httpPort, commandExecutor)
   private lazy val conf = ApiProcessConfiguration(
-    remoteSchedulerUri = new URI("http://127.0.0.1:0"),
     hasApi = false,
     javaOptions = DummyJavaOptions,
     javaClasspath = DummyJavaClasspath)

@@ -17,6 +17,8 @@ extends FileBasedSubsystem{
   type ThisFile_basedC = Process_classC
 
   val description = ProcessClassSubsystem
+
+  def processClass(path: ProcessClassPath) = fileBased(path)
 }
 
 object ProcessClassSubsystem extends FileBasedSubsystem.AbstractDesription[ProcessClassSubsystem, ProcessClassPath, ProcessClass] {

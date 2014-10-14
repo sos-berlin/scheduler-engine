@@ -8,11 +8,13 @@ import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
+import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
@@ -35,6 +37,9 @@ object SchedulerTestUtils {
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     hasInjector.injector.apply[TaskSubsystem].task(taskId)
+
+  def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
+    hasInjector.injector.apply[ProcessClassSubsystem].processClass(path)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskId = {
     runJobAndWaitForEnd(jobPath, timeout.duration)
