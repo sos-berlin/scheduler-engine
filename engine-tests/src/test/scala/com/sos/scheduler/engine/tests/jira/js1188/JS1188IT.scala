@@ -40,8 +40,8 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val tcpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
-  private lazy val agentRefs = List.fill(n) { new AgentRef().registerCloseable }
+  private lazy val tcpPort = findRandomFreeTcpPort()
+  private lazy val agentRefs = List.fill(n) { new AgentRef() }
   private var waitingTaskClosedFuture: Future[TaskClosedEvent] = null
   private var waitingStopwatch: Stopwatch = null
 
@@ -108,15 +108,21 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Replacing configuration file .process_class.xml" in {
-    assertResult(List(Agent(0, "http://xxx"), Agent(1, "http://yyy"))) {
-      processClass(AProcessClassPath).agents
-    }
-    controller.getEventBus.awaitingKeyedEvent[FileBasedReplacedEvent](AProcessClassPath) {
-      Files.copy(testEnvironment.fileFromPath(BProcessClassPath), testEnvironment.fileFromPath(AProcessClassPath))
-      instance[FolderSubsystem].updateFolders()
-    }
-    assertResult(List(Agent(0, "http://aaa"), Agent(1, "http://bbb"))) {
-      processClass(AProcessClassPath).agents
+    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      assertResult(List("http://127.0.0.254:1", "http://127.0.0.253:1")) {
+        processClass(ReplaceProcessClassPath).agents map { _.address }
+      }
+      val (_, jobFuture) = runJobFuture(ATestJobPath)
+      eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
+      controller.getEventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
+        testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", List(agentRefs(1)))
+        instance[FolderSubsystem].updateFolders()
+      }
+      assertResult(List(agentRefs(1).uri)) {
+        processClass(ReplaceProcessClassPath).agents map { _.address }
+      }
+      // Job should run now with new process class configuration denoting an accessible agent
+      awaitResult(jobFuture)
     }
   }
 
@@ -133,7 +139,6 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def newAgent(agentRef: AgentRef) = {
-    //agentRef.reservingSocket.close()
     val logDir = controller.environment.logDirectory / s"agent-${agentRef.port}"
     makeDirectory(logDir)
     val args = List(
@@ -153,18 +158,17 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS1188IT {
+  private val AgentTcpPortRange = 53000 until 54000   // Ports must be free for several minutes to test inaccessible (not running) agents
   private val n = 4
   private val TestJobPath = JobPath("/test")
-  private val AProcessClassPath = ProcessClassPath("/test-a")
-  private val BProcessClassPath = ProcessClassPath("/test-b")
+  private val ATestJobPath = JobPath("/test-a")
+  private val ReplaceProcessClassPath = ProcessClassPath("/test-replace")
   private val InaccessibleAgentMessageCode = MessageCode("SCHEDULER-488")
   private val WaitingForAgentMessageCode = MessageCode("SCHEDULER-489")
 
-  private class AgentRef extends AutoCloseable {
-    val port = findRandomFreeTcpPort(alternateTcpPortRange)
-    //val reservingSocket = new ServerSocket(port, 1)
+  private class AgentRef {
+    val port = findRandomFreeTcpPort(AgentTcpPortRange)
     def uri = s"http://127.0.0.1:$port"
-    def close(): Unit = ()//reservingSocket.close()
   }
 
   private def processClassXml(name: String, agentRefs: Seq[AgentRef]) =
