@@ -1864,7 +1864,7 @@ void Object_entry::close()
 
     //Z_DEBUG_ONLY( if( _iunknown )  Z_LOG( "com_remote: Object_entry(" << _id << ") == " << *this << "  " << ( _table_is_owner? "Release()\n" : "\n" ) ); )
 
-    if( _table_is_owner && _iunknown )  iunknown->Release(); 
+    if( _table_is_owner && iunknown )  iunknown->Release();
 }
 
 //--
@@ -4059,6 +4059,11 @@ STDMETHODIMP Proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, WORD flags
 STDMETHODIMP Proxy::Invoke_from_any_thread( DISPID dispid, const IID& iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* errarg )
 {
     HRESULT hr;
+
+    if (_connection->_new_error) {
+        Z_LOG("Proxy::Invoke_from_any_thread(): _connection->_new_error\n");
+        return E_FAIL;
+    }
 
     try
     {
