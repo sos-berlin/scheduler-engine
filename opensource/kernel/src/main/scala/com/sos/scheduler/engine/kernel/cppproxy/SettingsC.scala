@@ -52,4 +52,7 @@ trait SettingsC extends CppProxy {
 
   @CppField
   def _http_port: Int
+
+  @CppField
+  def _remote_scheduler_connect_retry_delay: Int
 }

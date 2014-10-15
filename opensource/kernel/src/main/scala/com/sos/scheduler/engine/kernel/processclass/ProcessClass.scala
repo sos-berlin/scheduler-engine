@@ -8,22 +8,26 @@ import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC}
+import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.processclass.ProcessClass._
 import com.sos.scheduler.engine.kernel.processclass.agent.{Agent, CppHttpRemoteApiProcessClient}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollection
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import org.joda.time.Duration
 import org.scalactic.Requirements._
 import org.w3c.dom
 import scala.collection.immutable
+import scala.math.max
 
 @ForCpp
 final class ProcessClass private(
   protected[this] val cppProxy: Process_classC,
   protected val subsystem: ProcessClassSubsystem,
   callQueue: SchedulerThreadCallQueue,
-  newCppHttpRemoteApiProcessClient: CppHttpRemoteApiProcessClient.Factory)
+  newCppHttpRemoteApiProcessClient: CppHttpRemoteApiProcessClient.Factory,
+  /** Verzögerung für nicht erreichbare Agents - erst nach Scheduler-Aktivierung (Settings::freeze) nutzbar. */
+  val agentConnectRetryDelayLazy: () ⇒ Duration)
 extends FileBased {
 
   type Path = ProcessClassPath
@@ -52,7 +56,7 @@ extends FileBased {
     _failableAgents = null
     if (_config.agents.nonEmpty) {
       // TODO Noch laufende Anwendungen von failableAgents abbrechen - die laufen solange, bis ein Agent erreichbar ist.
-      _failableAgents = new FailableCollection(_config.agents, InaccessibleAgentDelay)
+      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy())
     }
   }
 
@@ -77,8 +81,6 @@ extends FileBased {
 }
 
 object ProcessClass {
-  val InaccessibleAgentDelay = 30.s
-
   final class Type extends SisterType[ProcessClass, Process_classC] {
     def sister(proxy: Process_classC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
@@ -86,7 +88,8 @@ object ProcessClass {
         proxy,
         injector.apply[ProcessClassSubsystem],
         injector.apply[SchedulerThreadCallQueue],
-        injector.apply[CppHttpRemoteApiProcessClient.Factory])
+        injector.apply[CppHttpRemoteApiProcessClient.Factory],
+        agentConnectRetryDelayLazy = () ⇒ max(1, injector.apply[SpoolerC].settings()._remote_scheduler_connect_retry_delay).s)
     }
   }
 

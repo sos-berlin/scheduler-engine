@@ -30,7 +30,9 @@ public enum CppSettingName {
 
     roles(13),
 
-    httpPort(14);
+    httpPort(14),
+
+    agentConnectRetryDelay(15);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;
