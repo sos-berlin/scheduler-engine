@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.test
 
 import _root_.scala.collection.JavaConversions._
 import _root_.scala.reflect.ClassTag
-import _root_.scala.sys.error
 import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
@@ -26,6 +25,7 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.sql.{Connection, DriverManager}
 import org.joda.time.Duration
+import org.scalactic.Requirements._
 
 abstract class TestSchedulerController
 extends DelegatingSchedulerController
@@ -99,10 +99,7 @@ with EventHandlerAnnotated {
   }
 
   def scheduler: Scheduler = {
-    if (_scheduler == null) {
-      automaticStart()
-      waitUntilSchedulerIsActive()
-    }
+    requireState(_scheduler != null, "Scheduler is not active yet")
     _scheduler
   }
 
@@ -131,16 +128,9 @@ with EventHandlerAnnotated {
     }
   }
 
-  private def automaticStart(): Unit = {
-    if (!delegate.isStarted) {
-      if (Thread.currentThread ne thread)  throw new IllegalStateException("TestSchedulerController.automaticStart() must be called in constructing thread")
-      error("JobScheduler is not active yet")
-    }
-  }
-
   private def checkForErrorLogLine(): Unit = {
     val lastErrorLine = _scheduler.instance[PrefixLog].lastByLevel(SchedulerLogLevel.error)
-    if (!lastErrorLine.isEmpty) error("Test terminated after error log line: " + lastErrorLine)
+    if (!lastErrorLine.isEmpty) sys.error("Test terminated after error log line: " + lastErrorLine)
   }
 
   def suppressingTerminateOnError[A](f: ⇒ A): A =
@@ -185,7 +175,7 @@ with EventHandlerAnnotated {
   final def instance[A](implicit c: ClassTag[A]): A =
     injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
 
-  final def injector = _scheduler.injector
+  final def injector = scheduler.injector
 
   /** Eine Exception in runnable beendet den Scheduler. */
   def newThread(runnable: Runnable) =
