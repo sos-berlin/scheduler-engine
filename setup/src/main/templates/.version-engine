@@ -1,0 +1,5 @@
+#build information
+
+version=${project.version}
+platform=${setup.platform}
+builddate=${build.timestamp}
