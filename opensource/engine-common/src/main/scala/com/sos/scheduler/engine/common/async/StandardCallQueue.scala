@@ -41,7 +41,7 @@ class StandardCallQueue extends PoppableCallQueue {
         case i ⇒ Some(queue.remove(i))
       }
     }
-    for (o <- cancelled) o.onCancel()
+    for (o <- cancelled) o.onCancel()   // FIXME onCancel() wird im Thread von cancel() ausgeführt, nicht im CallRunner-Thread.
     cancelled.isDefined
   }
 
