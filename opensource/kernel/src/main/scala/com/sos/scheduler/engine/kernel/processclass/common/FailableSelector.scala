@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
+import com.sos.scheduler.engine.common.async.FutureCompletion.futureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
 import org.joda.time.{Duration, Instant}
@@ -18,7 +20,7 @@ class FailableSelector[Failable, Result](
 
   import callQueue.implicits.executionContext
 
-  private[this] var timedCall: TimedCall[Unit] = null
+  @volatile private[this] var timedCall: TimedCall[Unit] = null
   @volatile private[this] var selected: Option[Failable] = None
   @volatile private[this] var cancelled = false
   private[this] val promise = Promise[(Failable, Result)]()
@@ -30,23 +32,31 @@ class FailableSelector[Failable, Result](
       if (delay > 0.s) {
         callbacks.onDelay(delay, failable)
       }
-      timedCall = callQueue.at(now + delay) {
+      val t = futureTimedCall[Unit](now + delay) {
         selected = Some(failable)
         catchInFuture { callbacks.apply(failable) } onComplete {
           case Success(Success(result)) ⇒
             failables.clearFailure(failable)
             promise.success(failable → result)
+          case x if cancelled ⇒
+            logger.debug(s"$x")
+            promise.failure(new CancelledException)
           case Success(Failure(throwable)) ⇒   // Tolerated failure
             failables.setFailure(failable, throwable)
-            if (cancelled) {
-              promise.failure(throwable)
-            } else {
-              loopUntilConnected()
-            }
-          case Failure(throwable) ⇒   // Failure lets abort FailableSelector
+            loopUntilConnected()
+          case x @ Failure(_: TimedCall.CancelledException) ⇒
+            logger.debug(s"$x")
+            promise.failure(new CancelledException)
+          case x @ Failure(throwable) ⇒   // Failure lets abort FailableSelector
             failables.setFailure(failable, throwable)
             promise.failure(throwable)
         }
+      }
+      callQueue.add(t)
+      timedCall = t
+      t.future onFailure {
+        case throwable: TimedCall.CancelledException ⇒ promise.tryFailure(new CancelledException)
+        case throwable ⇒ promise.tryFailure(throwable)
       }
     }
     loopUntilConnected()
@@ -62,12 +72,16 @@ class FailableSelector[Failable, Result](
 
   final def future = promise.future
 
+  final def isCancelled = cancelled
+
   final override def toString = s"FailableSelector ${selected getOrElse "(none)"}"
 
   protected def now = Instant.now()
 }
 
 object FailableSelector {
+  private val logger = Logger(getClass)
+
   trait Callbacks[Failable, Result] {
     /**
      * @return Future resulting in
@@ -84,4 +98,6 @@ object FailableSelector {
     catch {
       case NonFatal(t) ⇒ Promise[Result]().failure(t).future
     }
+
+  final class CancelledException private[FailableSelector] extends RuntimeException
 }

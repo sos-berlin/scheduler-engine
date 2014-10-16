@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.test
 import _root_.scala.collection.generic.CanBuildFrom
 import _root_.scala.concurrent.{Await, ExecutionContext, Future}
 import _root_.scala.language.higherKinds
+import _root_.scala.util.Try
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
@@ -68,7 +69,11 @@ object SchedulerTestUtils {
 
   implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = hasInjector.injector.apply[ExecutionContext]
 
-  def awaitResult[A](o: Future[A])(implicit timeout: ImplicitTimeout) = Await.result(o, timeout.concurrentDuration)
+  def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = awaitCompletion(f).get
+
+  def awaitFailure[A](f: Future[A])(implicit t: ImplicitTimeout): Throwable = awaitCompletion(f).failed.get
+
+  def awaitCompletion[A](f: Future[A])(implicit t: ImplicitTimeout): Try[A] = Await.ready(f, t.concurrentDuration).value.get
 
   def awaitResults[A, M[X] <: TraversableOnce[X]](o: M[Future[A]])
       (implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext, timeout: ImplicitTimeout) =

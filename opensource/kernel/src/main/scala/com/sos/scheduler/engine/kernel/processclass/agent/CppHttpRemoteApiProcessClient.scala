@@ -16,38 +16,72 @@ import scala.util.{Failure, Success}
  */
 @ForCpp
 final class CppHttpRemoteApiProcessClient private(
-  failableAgents: FailableCollection[Agent],
-  apiProcessConfiguration: ApiProcessConfiguration,
-  starter: HttpRemoteProcessStarter,
-  callQueue: SchedulerThreadCallQueue) {
+  apiProcessConfiguration: ApiProcessConfiguration, schedulerApiTcpPort: Int, warningCall: CppCall, resultCall: CppCall,
+  starter: HttpRemoteProcessStarter, callQueue: SchedulerThreadCallQueue)
+extends AutoCloseable {
 
   import callQueue.implicits.executionContext
 
-  @volatile private[this] var agentSelector: FailableSelector[Agent, HttpRemoteProcess] = null
-
-  @ForCpp
-  def startRemoteTask(schedulerApiTcpPort: Int, warningCall: CppCall, resultCall: CppCall): Unit = {
-    val callbacks = new FailableSelector.Callbacks[Agent, HttpRemoteProcess] {
-      def apply(agent: Agent) = {
-        val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, remoteUri = agent.address)
-        future map Success.apply recoverWith {
-          case e: spray.can.Http.ConnectionAttemptFailedException ⇒
-            warningCall.call(e)
-            Future { Failure(e) }
-        }
+  private object callbacks extends FailableSelector.Callbacks[Agent, HttpRemoteProcess] {
+    def apply(agent: Agent) = {
+      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, remoteUri = agent.address)
+      future map Success.apply recoverWith {
+        case e: spray.can.Http.ConnectionAttemptFailedException ⇒
+          warningCall.call(e)
+          Future { Failure(e) }
       }
-
-      def onDelay(delay: Duration, agent: Agent) =
-        warningCall.call(null)
     }
-    agentSelector = new FailableSelector(failableAgents, callbacks, callQueue)
-    agentSelector.start() onComplete {
+
+    def onDelay(delay: Duration, agent: Agent) = warningCall.call(null)
+  }
+  private[this] var agentSelector: AgentSelector = null
+  private[this] var waitStopped = false
+
+  def close(): Unit = {
+    if (agentSelector != null) {
+      agentSelector.cancel()
+    }
+  }
+
+  def startRemoteTask(failableAgents: FailableAgents): Unit = {
+    agentSelector = startNewAgentSelector(failableAgents)
+  }
+
+  def changeFailableAgents(failableAgents: FailableAgents): Unit = {
+    val a = agentSelector
+    agentSelector.future onFailure { case t ⇒
+      logger.debug(s"$t")
+      agentSelector = startNewAgentSelector(failableAgents)
+    }
+    a.cancel()
+  }
+
+  private def startNewAgentSelector(failableAgents: FailableAgents) = {
+    val result = new AgentSelector(failableAgents, callbacks, callQueue)
+    result.start() onComplete {
       case Success((agent, httpRemoteProcess)) ⇒
         logger.debug(s"Process on agent $agent started: $httpRemoteProcess")
         resultCall.call(Success(()))
-      case Failure(throwable) ⇒
-        logger.debug(s"Process on $agentSelector could not be started: $throwable")
+      case x @ Failure(throwable) if waitStopped ⇒
+        logger.debug(s"Waiting for agent has been stopped: $throwable")
         resultCall.call(Failure(throwable))
+      case x @ Failure(_: FailableSelector.CancelledException) ⇒
+        logger.debug(s"$x")
+      case x @ Failure(throwable) ⇒
+        if (result.isCancelled) {
+          logger.debug(s"$x")
+        } else {
+          logger.debug(s"Process on $result could not be started: $throwable")
+          resultCall.call(Failure(throwable))
+        }
+    }
+    result
+  }
+
+  def stopTaskWaitingForAgent(): Unit = {
+    waitStopped = true
+    if (agentSelector != null) {
+      agentSelector.cancel()
     }
   }
 
@@ -60,13 +94,13 @@ final class CppHttpRemoteApiProcessClient private(
     closeRemoteTask(kill = true)
 
   private def closeRemoteTask(kill: Boolean): Boolean = {
+    // TODO Race condition? Wenn das <start>-Kommando gerade rübergeschickt wird, startet der Prozess und verbindet sich
+    // mit einem com_remote-Port. Der aber ist vielleicht schon von der nächsten Task, zu gerade gestartet wird.
+    // Wird die dann gestört? Wenigstens ist es wenig wahrscheinlich.
     agentSelector match {
       case null ⇒ false
       case _ ⇒
         agentSelector.cancel()
-        // TODO Race condition? Wenn das <start>-Kommando gerade rübergeschickt wird, startet der Prozess und verbindet sich
-        // mit einem com_remote-Port. Der aber ist vielleicht schon von der nächsten Task, zu gerade gestartet wird.
-        // Wird die dann gestört? Wenigstens ist es wenig wahrscheinlich.
         agentSelector.future onSuccess {
           case (agent, httpRemoteProcess) ⇒
             httpRemoteProcess.closeRemoteTask(kill = kill) onFailure {
@@ -79,14 +113,23 @@ final class CppHttpRemoteApiProcessClient private(
   }
 
   @ForCpp
-  override def toString = if (agentSelector != null) agentSelector.toString else "CppHttpRemoteApiProcessClient"
+  override def toString = if (agentSelector != null) agentSelector.toString else "CppHttpRemoteApiProcessClient (not started)"
 }
 
 object CppHttpRemoteApiProcessClient {
+  private type AgentSelector = FailableSelector[Agent, HttpRemoteProcess]
+  private type FailableAgents = FailableCollection[Agent]
+
   private val logger = Logger(getClass)
 
   final class Factory @Inject private(httpRemoteProcessStarter: HttpRemoteProcessStarter, callQueue: SchedulerThreadCallQueue) {
-    def apply(failableAgents: FailableCollection[Agent], conf: ApiProcessConfiguration) =
-      new CppHttpRemoteApiProcessClient(failableAgents, conf, httpRemoteProcessStarter, callQueue)
+    def apply(apiProcessConfiguration: ApiProcessConfiguration, schedulerApiTcpPort: Int, warningCall: CppCall, resultCall: CppCall) =
+      new CppHttpRemoteApiProcessClient(
+        apiProcessConfiguration,
+        schedulerApiTcpPort,
+        warningCall = warningCall,
+        resultCall = resultCall,
+        httpRemoteProcessStarter,
+        callQueue)
   }
 }

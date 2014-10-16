@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.kernel.processclass
 
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.processclass.ProcessClass._
@@ -17,7 +18,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import org.joda.time.Duration
 import org.scalactic.Requirements._
 import org.w3c.dom
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 import scala.math.max
 
 @ForCpp
@@ -34,12 +35,15 @@ extends FileBased {
 
   private[this] var _config = Configuration(None, immutable.IndexedSeq())
   private[this] var _failableAgents: FailableCollection[Agent] = null
+  private[this] val clients = mutable.HashSet[CppHttpRemoteApiProcessClient]()
 
   def stringToPath(o: String) = ProcessClassPath(o)
 
   def fileBasedType = FileBasedType.processClass
 
-  def onCppProxyInvalidated() = {}
+  def onCppProxyInvalidated(): Unit = {
+    for (c ← clients) logger.error(s"CppHttpRemoteApiProcessClient has not been removed: $c")
+  }
 
   @ForCpp
   def processConfigurationDomElement(element: dom.Element): Unit = {
@@ -55,8 +59,15 @@ extends FileBased {
     _config = c
     _failableAgents = null
     if (_config.agents.nonEmpty) {
-      // TODO Noch laufende Anwendungen von failableAgents abbrechen - die laufen solange, bis ein Agent erreichbar ist.
       _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy())
+      for (c ← clients) {
+        c.changeFailableAgents(_failableAgents)
+      }
+    } else {
+      // Kein remote_scheduler mehr? Dann brechen wir alle auf einen remote_scheduler wartendenen Tasks ab. C++ wird sie nicht neu starten.
+      for (c ← clients) {
+        c.stopTaskWaitingForAgent()
+      }
     }
   }
 
@@ -64,8 +75,23 @@ extends FileBased {
   def hasMoreAgents = config.moreAgents.nonEmpty
 
   @ForCpp
-  def newCppHttpRemoteApiProcessClient(conf: Api_process_configurationC): CppHttpRemoteApiProcessClient =
-    newCppHttpRemoteApiProcessClient(failableAgents, apiProcessConfiguration(conf))
+  def startCppHttpRemoteApiProcessClient(
+    conf: Api_process_configurationC,
+    schedulerApiTcpPort: Int,
+    warningCall: CppCall,
+    resultCall: CppCall): CppHttpRemoteApiProcessClient =
+  {
+    val r = newCppHttpRemoteApiProcessClient(apiProcessConfiguration(conf), schedulerApiTcpPort, warningCall, resultCall)
+    clients += r
+    r.startRemoteTask(failableAgents)
+    r
+  }
+
+  @ForCpp
+  def removeCppHttpRemoteApiProcessClient(client: CppHttpRemoteApiProcessClient): Unit = {
+    try client.close()
+    finally clients -= client
+  }
 
   def agents: immutable.Seq[Agent] = config.agents
 
@@ -81,6 +107,8 @@ extends FileBased {
 }
 
 object ProcessClass {
+  private val logger = Logger(getClass)
+
   final class Type extends SisterType[ProcessClass, Process_classC] {
     def sister(proxy: Process_classC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector

@@ -682,22 +682,29 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     Http_remote_api_process(Process_class* process_class, Prefix_log* log, const Api_process_configuration& conf) :
         Abstract_process(process_class->spooler(), log, conf),
         Abstract_remote_api_process(process_class->spooler(), log, conf),
-        _clientJ(process_class->typed_java_sister().newCppHttpRemoteApiProcessClient(_configuration.java_proxy_jobject())),
+        _process_class(process_class),
         _waiting_callback(Z_NEW(Waiting_callback(this))),
         _start_remote_task_callback(Z_NEW(Start_remote_task_callback(this))),
         _is_started(false)
     {}
 
+    ~Http_remote_api_process() {
+        if (_clientJ) {
+            _process_class->typed_java_sister().removeCppHttpRemoteApiProcessClient(_clientJ);
+        }
+    }
+
     protected: void do_start() {
         prepare_connection();
-        _clientJ.startRemoteTask(connection()->tcp_port(), _waiting_callback->java_sister(), _start_remote_task_callback->java_sister());
+        _clientJ = _process_class->typed_java_sister().startCppHttpRemoteApiProcessClient(
+            _configuration.java_proxy_jobject(), connection()->tcp_port(), _waiting_callback->java_sister(), _start_remote_task_callback->java_sister());
     }
 
     public: void on_call(const Waiting_callback& call) {
         if (::javaproxy::java::lang::Object exception = (::javaproxy::java::lang::Object)call.value()) {
             log()->warn(Message_string("SCHEDULER-488", obj_name(), (string)(exception.toString())));   // "Remote JobScheduler unreachable"
         } else {
-            log()->warn(Message_string("SCHEDULER-489", obj_name()));   // "Waiting"
+            log()->warn(Message_string("SCHEDULER-489"));   // "Waiting"
         }
     }
 
@@ -721,7 +728,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         if (_start_exception) throw *_start_exception;
     }
 
-    protected: virtual void emergency_kill() {
+    protected: void emergency_kill() {
         // Nicht möglich, weil kill() asynchron über HTTP geht.
     }
 
@@ -730,18 +737,21 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         return _clientJ.killRemoteTask();
     }
 
-    public: string obj_name() const {
-        return _clientJ.toString();
+    protected: string async_state_text() const {
+        return obj_name();
     }
 
-    protected: virtual string async_state_text() const {
-        return _clientJ.toString();
+    public: string obj_name() const {
+        return _clientJ? (string)_clientJ.toString() : (string)"Http_remote_api_process";
     }
 
     protected: void on_closing_remote_process() {
-        return _clientJ.closeRemoteTask();
+        if (_clientJ) {
+            _clientJ.closeRemoteTask();
+        }
     }
 
+    private: Process_class* const _process_class;
     private: CppHttpRemoteApiProcessClientJ _clientJ;
     private: ptr<Waiting_callback> const _waiting_callback;
     private: ptr<Start_remote_task_callback> const _start_remote_task_callback;

@@ -104,14 +104,33 @@ final class FailableSelectorTest extends FreeSpec {
     verifyNoMoreInteractions(callbacks)
   }
 
-  private def runSelector(): Future[(Failable, Result)] = {
-    val selector = new FailableSelector(failables, callbacks, callQueue) {
-      override def now = _now
-    }
+  "cancel 1" in {
+    val selector = newFailableSelector()
     val future = selector.start()
+    selector.cancel()
+    callRunner.executeMatureCalls()
+    future.value.get.failed.get shouldBe a [FailableSelector.CancelledException]
+  }
+
+  "cancel 2" in {
+    val selector = newFailableSelector()
+    val future = selector.start()
+    callRunner.executeMatureCalls()
+    selector.cancel()
+    callRunner.executeMatureCalls()
+    future.value.get.failed.get shouldBe a [FailableSelector.CancelledException]
+  }
+
+  private def runSelector(): Future[(Failable, Result)] = {
+    val future = newFailableSelector().start()
     callRunner.executeMatureCalls()
     future
   }
+
+  private def newFailableSelector() =
+    new FailableSelector(failables, callbacks, callQueue) {
+      override def now = _now
+    }
 }
 
 private object FailableSelectorTest {

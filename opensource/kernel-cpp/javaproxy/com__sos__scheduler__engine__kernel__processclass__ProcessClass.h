@@ -10,6 +10,7 @@
 #include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace async { struct CppCall; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Api_process_configurationC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace filebased { struct FileBased; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace processclass { namespace agent { struct CppHttpRemoteApiProcessClient; }}}}}}}}
@@ -54,9 +55,10 @@ struct ProcessClass : ::zschimmer::javabridge::proxy_jobject< ProcessClass >, ::
   public:
 
     bool hasMoreAgents() const;
-    ::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient newCppHttpRemoteApiProcessClient(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Api_process_configurationC >& p0) const;
     void processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const;
+    void removeCppHttpRemoteApiProcessClient(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient >& p0) const;
     void replaceWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::processclass::ProcessClass >& p0) const;
+    ::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient startCppHttpRemoteApiProcessClient(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Api_process_configurationC >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p3) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__processclass__ProcessClass.h"
+#include "com__sos__scheduler__engine__kernel__async__CppCall.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.h"
 #include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "com__sos__scheduler__engine__kernel__processclass__agent__CppHttpRemoteApiProcessClient.h"
@@ -18,9 +19,10 @@ struct ProcessClass__class : ::zschimmer::javabridge::Class
    ~ProcessClass__class();
 
     ::zschimmer::javabridge::Method const _hasMoreAgents____method;
-    ::zschimmer::javabridge::Method const _newCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method;
     ::zschimmer::javabridge::Method const _processConfigurationDomElement__Lorg_w3c_dom_Element_2__method;
+    ::zschimmer::javabridge::Method const _removeCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_processclass_agent_CppHttpRemoteApiProcessClient_2__method;
     ::zschimmer::javabridge::Method const _replaceWith__Lcom_sos_scheduler_engine_kernel_processclass_ProcessClass_2__method;
+    ::zschimmer::javabridge::Method const _startCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
 
     static const ::zschimmer::javabridge::class_factory< ProcessClass__class > class_factory;
 };
@@ -30,9 +32,10 @@ const ::zschimmer::javabridge::class_factory< ProcessClass__class > ProcessClass
 ProcessClass__class::ProcessClass__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_hasMoreAgents____method(this, "hasMoreAgents", "()Z")
-    ,_newCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method(this, "newCppHttpRemoteApiProcessClient", "(Lcom/sos/scheduler/engine/kernel/cppproxy/Api_process_configurationC;)Lcom/sos/scheduler/engine/kernel/processclass/agent/CppHttpRemoteApiProcessClient;")
     ,_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method(this, "processConfigurationDomElement", "(Lorg/w3c/dom/Element;)V")
-    ,_replaceWith__Lcom_sos_scheduler_engine_kernel_processclass_ProcessClass_2__method(this, "replaceWith", "(Lcom/sos/scheduler/engine/kernel/processclass/ProcessClass;)V"){}
+    ,_removeCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_processclass_agent_CppHttpRemoteApiProcessClient_2__method(this, "removeCppHttpRemoteApiProcessClient", "(Lcom/sos/scheduler/engine/kernel/processclass/agent/CppHttpRemoteApiProcessClient;)V")
+    ,_replaceWith__Lcom_sos_scheduler_engine_kernel_processclass_ProcessClass_2__method(this, "replaceWith", "(Lcom/sos/scheduler/engine/kernel/processclass/ProcessClass;)V")
+    ,_startCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "startCppHttpRemoteApiProcessClient", "(Lcom/sos/scheduler/engine/kernel/cppproxy/Api_process_configurationC;ILcom/sos/scheduler/engine/kernel/async/CppCall;Lcom/sos/scheduler/engine/kernel/async/CppCall;)Lcom/sos/scheduler/engine/kernel/processclass/agent/CppHttpRemoteApiProcessClient;"){}
 
 ProcessClass__class::~ProcessClass__class() {}
 
@@ -58,15 +61,6 @@ bool ProcessClass::hasMoreAgents() const {
     return 0 != cls->_hasMoreAgents____method.bool_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient ProcessClass::newCppHttpRemoteApiProcessClient(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Api_process_configurationC >& p0) const {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    ProcessClass__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient result;
-    result.steal_local_ref(cls->_newCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
 void ProcessClass::processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
@@ -74,11 +68,30 @@ void ProcessClass::processConfigurationDomElement(const ::zschimmer::javabridge:
     cls->_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method.call(get_jobject(), parameter_list);
 }
 
+void ProcessClass::removeCppHttpRemoteApiProcessClient(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    ProcessClass__class* cls = _class.get();
+    cls->_removeCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_processclass_agent_CppHttpRemoteApiProcessClient_2__method.call(get_jobject(), parameter_list);
+}
+
 void ProcessClass::replaceWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::processclass::ProcessClass >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     ProcessClass__class* cls = _class.get();
     cls->_replaceWith__Lcom_sos_scheduler_engine_kernel_processclass_ProcessClass_2__method.call(get_jobject(), parameter_list);
+}
+
+::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient ProcessClass::startCppHttpRemoteApiProcessClient(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Api_process_configurationC >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p3) const {
+    ::zschimmer::javabridge::raw_parameter_list<4> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].i = p1;
+    parameter_list._jvalues[2].l = p2.get_jobject();
+    parameter_list._jvalues[3].l = p3.get_jobject();
+    ProcessClass__class* cls = _class.get();
+    ::javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient result;
+    result.steal_local_ref(cls->_startCppHttpRemoteApiProcessClient__Lcom_sos_scheduler_engine_kernel_cppproxy_Api_1process_1configurationC_2ILcom_sos_scheduler_engine_kernel_async_CppCall_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method.jobject_call(get_jobject(), parameter_list));
+    return result;
 }
 
 

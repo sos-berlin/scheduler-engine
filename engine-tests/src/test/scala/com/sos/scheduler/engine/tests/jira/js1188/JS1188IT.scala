@@ -11,16 +11,17 @@ import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.filebased.FileBasedReplacedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
-import com.sos.scheduler.engine.data.log.WarningLogEvent
+import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.TaskState
+import com.sos.scheduler.engine.kernel.job.{JobState, TaskState}
+import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitResult, awaitResults, executionContext, processClass, runJobAndWaitForEnd, runJobFuture, task}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitResults, awaitSuccess, executionContext, job, processClass, runJobAndWaitForEnd, runJobFuture, task}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -30,7 +31,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.Vector.fill
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 import scala.concurrent.Future
 
 /**
@@ -41,6 +42,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val tcpPort = findRandomFreeTcpPort()
   private lazy val agentRefs = List.fill(n) { new AgentRef() }
+  private lazy val runningAgents = mutable.Map[AgentRef, ExtraScheduler]()
   private var waitingTaskClosedFuture: Future[TaskClosedEvent] = null
   private var waitingStopwatch: Stopwatch = null
 
@@ -89,7 +91,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
   "After starting 2 agents and after process class has waited the third cycle, the waiting task can be finished" in {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       startAndWaitForAgents(agentRefs(1), agentRefs(3)) // Start 2 out of n agents
-      awaitResult(waitingTaskClosedFuture) // Waiting task has finally finished
+      awaitSuccess(waitingTaskClosedFuture) // Waiting task has finally finished
       waitingStopwatch.duration should be > 3 * AgentConnectRetryDelay
       // Agent 0 is still unreachable
       assertResult(List(Some(InaccessibleAgentMessageCode))) {
@@ -98,7 +100,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  "And more tasks start immediately before reaching next probe time after agentConnectRetryDelay" in {
+  "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time" in {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       val stopwatch = new Stopwatch
       for (_ ← 1 to 2*n + 1) runJobAndWaitForEnd(AgentsJobPath)
@@ -122,14 +124,44 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       // Job should run now with new process class configuration denoting an accessible agent
-      awaitResult(jobFuture)
+      awaitSuccess(jobFuture)
+    }
+  }
+
+  "Replacing configuration file .process_class.xml, removing remote_schedulers" in {
+    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      assertResult(List(agentRefs(1).uri)) {
+        processClass(ReplaceProcessClassPath).agents map { _.address }
+      }
+      for (a ← runningAgents.values) {
+        a.close()
+      }
+      val (_, jobFuture) = runJobFuture(ReplaceTestJobPath)
+      eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
+      def expectedErrorLogEvent(e: ErrorLogEvent) =
+        e.codeOption == Some(MessageCode("SCHEDULER-280")) ||
+        e.codeOption == Some(MessageCode("Z-JAVA-105")) && (e.message contains classOf[FailableSelector.CancelledException].getName)
+      controller.toleratingErrorLogEvent(expectedErrorLogEvent) {
+        controller.getEventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
+          testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", Nil)
+          instance[FolderSubsystem].updateFolders()
+        }
+        assertResult(Nil) {
+          processClass(ReplaceProcessClassPath).agents map { _.address }
+        }
+        awaitSuccess(jobFuture)
+      }
+      // Job should run fail with SCHEDULER-280 because the new process class has no longer remote scheduler
+      assert(eventPipe.queued[ErrorLogEvent] exists { _.codeOption == Some(MessageCode("SCHEDULER-280")) })
+      assert(job(ReplaceTestJobPath).state == JobState.stopped)
     }
   }
 
   private def startAndWaitForAgents(agentRefs: AgentRef*)(implicit closer: Closer): Unit = {
     awaitResults(
       for (a ← agentRefs) yield {
-        newAgent(a).registerCloseable.start()
+        runningAgents(a) = newAgent(a).registerCloseable
+        runningAgents(a).start()
       })
   }
 

@@ -10,7 +10,6 @@
 #include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace async { struct CppCall; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -52,7 +51,6 @@ struct CppHttpRemoteApiProcessClient : ::zschimmer::javabridge::proxy_jobject< C
 
     void closeRemoteTask() const;
     bool killRemoteTask() const;
-    void startRemoteTask(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p2) const;
     ::javaproxy::java::lang::String toString() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
