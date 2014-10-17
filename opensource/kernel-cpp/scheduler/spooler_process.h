@@ -109,6 +109,8 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
 
   protected: 
+    protected: virtual bool is_http_or_multiple(const string& remote_scheduler_address) const = 0;
+
     Fill_zero                  _zero_;
 
     int                        _max_processes;
@@ -174,6 +176,8 @@ struct Process_class : Process_class_configuration,
     const ProcessClassJ& typed_java_sister() const {
         return _typed_java_sister;
     }
+
+    protected: bool is_http_or_multiple(const string& remote_scheduler_address) const;
 
   private:
     friend struct               Process_class_subsystem;

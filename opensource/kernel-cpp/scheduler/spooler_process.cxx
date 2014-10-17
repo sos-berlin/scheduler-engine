@@ -1122,7 +1122,15 @@ STDMETHODIMP Process_class_configuration::put_Remote_scheduler( BSTR remote_sche
 
     try
     {
-        set_remote_scheduler_address(string_from_bstr(remote_scheduler_bstr));
+        string remote_scheduler = string_from_bstr(remote_scheduler_bstr);
+        if (is_http_or_multiple(_remote_scheduler_address)) 
+            return E_ACCESSDENIED;
+        else
+        if (is_http_or_multiple(remote_scheduler)) 
+            return E_INVALIDARG;
+        else {
+            set_remote_scheduler_address(remote_scheduler);
+        }
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -1325,7 +1333,7 @@ Process* Process_class::new_process(const Api_process_configuration* c, Prefix_l
     } else {
         Api_process_configuration conf = *c;
         conf._remote_scheduler_address = c->_remote_scheduler_address.empty()? _remote_scheduler_address : c->_remote_scheduler_address;
-        if (string_begins_with(conf._remote_scheduler_address, "http://") || typed_java_sister().hasMoreAgents()) {
+        if (is_http_or_multiple(conf._remote_scheduler_address)) {
             ptr<Http_remote_api_process> p = Z_NEW(Http_remote_api_process(this, log, conf));
             process = +p;
         } else 
@@ -1339,6 +1347,12 @@ Process* Process_class::new_process(const Api_process_configuration* c, Prefix_l
     }
     add_process(process);
     return process;
+}
+
+
+bool Process_class::is_http_or_multiple(const string& remote_scheduler_address) const {
+    // hasMoreAgents() setzt HTTP voraus.
+    return string_begins_with(remote_scheduler_address, "http://") || typed_java_sister().hasMoreAgents();
 }
 
 //-------------------------------------------------------Process_class::select_process_if_available
