@@ -427,6 +427,12 @@ void Database_order_detector::request_order()
     set_alarm();
 }
 
+void Order_subsystem_impl::wake_distributed_order_processing() {
+    if (_database_order_detector) {
+        _database_order_detector->set_alarm();
+    }
+}
+
 //------------------------------------------------------------------------------new_order_subsystem
 
 ptr<Order_subsystem> new_order_subsystem( Scheduler* scheduler )
@@ -1177,7 +1183,7 @@ void Node::set_action_complete(const string& action) {
     if (ok) {
         database_record_store();
         if (cluster::Cluster_subsystem_interface* cluster = spooler()->_cluster)
-            cluster->tip_all_other_members_for_job_chain_node(_job_chain->path(), _order_state.as_string());
+            cluster->tip_all_other_members_for_job_chain_or_node(_job_chain->path(), _order_state.as_string());
     }
 }
 
@@ -1587,6 +1593,16 @@ void Order_queue_node::wake_orders()
 {
     if( Order* order = _order_queue->first_processable_order() )
         order->handle_changed_processable_state();
+}
+
+//----------------------------------------------------------------------------Job_node::wake_orders
+
+void Job_node::wake_orders()
+{
+    if (_job) {
+        _job->on_order_possibly_available();
+    }
+    Order_queue_node::wake_orders();
 }
 
 //----------------------------------------------------------------------------Job_node::dom_element
@@ -2062,7 +2078,7 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
 
     if( element.nodeName_is( "job_chain.modify" ) )
     {
-        if( _is_distributed )  z::throw_xc( "SCHEDULER-384", obj_name(), "job_chain.modify" );
+        //if( _is_distributed )  z::throw_xc( "SCHEDULER-384", obj_name(), "job_chain.modify" );
 
         string new_state = element.getAttribute( "state" );
         
@@ -2081,15 +2097,20 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
             z::throw_xc( "SCHEDULER-391", "state", new_state, "running, stopped" );
 
         database_record_store();
+        if (cluster::Cluster_subsystem_interface* cluster = spooler()->_cluster) {
+            cluster->tip_all_other_members_for_job_chain_or_node(path(), "");
+        }
         return command_processor->_answer.createElement( "ok" );
     }
     else
     if (element.nodeName_is("job_chain.check_distributed")) {
-        string order_state = element.getAttribute_mandatory("order_state");
-        Node* node = node_from_state(Order::State(order_state));
         order_subsystem()->reread_distributed_job_chain_from_database(this);
-        order_subsystem()->reread_distributed_job_chain_nodes_from_database(this, node);
-        tip_for_new_distributed_order(order_state, Time(0));
+        string order_state = element.getAttribute_mandatory("order_state");
+        if (order_state != "") {
+            Node* node = node_from_state(Order::State(order_state));
+            order_subsystem()->reread_distributed_job_chain_nodes_from_database(this, node);
+            tip_for_new_distributed_order(order_state, Time(0));
+        }
         return command_processor->_answer.createElement( "ok" );
     }
     else
@@ -3364,6 +3385,9 @@ void Job_chain::wake_orders()
 {
     if( _state == s_active  &&  !_is_stopped ) {
         Z_FOR_EACH( Node_list, _node_list, n )  (*n)->wake_orders();
+    }
+    if (order_subsystem()->orders_are_distributed() && !_is_stopped) {
+        order_subsystem()->wake_distributed_order_processing();
     }
 }
 

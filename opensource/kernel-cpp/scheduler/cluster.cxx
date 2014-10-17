@@ -81,8 +81,8 @@ struct Cluster : Cluster_subsystem_interface
     bool                        delete_dead_scheduler_record( const string& cluster_member_id );
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only );
     string                      tip_for_new_distributed_order(const Absolute_path&, const string& order_state);
-    string                      tip_for_job_chain_node      (const string& cluster_member_id, const Absolute_path&, const string& order_state);
-    void                        tip_all_other_members_for_job_chain_node(const Absolute_path&, const string& order_state);
+    string                      tip_for_job_chain_or_node   (const string& cluster_member_id, const Absolute_path&, const string& order_state);
+    void                        tip_all_other_members_for_job_chain_or_node(const Absolute_path&, const string& order_state);
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
 
@@ -2443,7 +2443,7 @@ string Cluster::tip_for_new_distributed_order(const Absolute_path& job_chain_pat
     try {
         string member_id = least_busy_member_id();
         if (member_id != _cluster_member_id) {
-            string url = tip_for_job_chain_node(member_id, job_chain_path, order_state);
+            string url = tip_for_job_chain_or_node(member_id, job_chain_path, order_state);
             return url;
         }
     } catch (exception& x) {
@@ -2454,14 +2454,14 @@ string Cluster::tip_for_new_distributed_order(const Absolute_path& job_chain_pat
 
 //------------------------------------------------Cluster::tip_all_other_members_for_job_chain_node
 
-void Cluster::tip_all_other_members_for_job_chain_node(const Absolute_path& job_chain_path, const string& order_state)
+void Cluster::tip_all_other_members_for_job_chain_or_node(const Absolute_path& job_chain_path, const string& order_state)
 {
     try {
         vector<string> ids = fetch_all_member_ids();
         for (vector<string>::iterator i = ids.begin(); i != ids.end(); i++) {
             string member_id = *i;
             if (member_id != _cluster_member_id)
-                tip_for_job_chain_node(member_id, job_chain_path, order_state);
+                tip_for_job_chain_or_node(member_id, job_chain_path, order_state);
         }
     }
     catch (exception& x) {
@@ -2471,7 +2471,7 @@ void Cluster::tip_all_other_members_for_job_chain_node(const Absolute_path& job_
 
 //------------------------------------------------------------------Cluster::tip_for_job_chain_node
 
-string Cluster::tip_for_job_chain_node(const string& member_id, const Absolute_path& job_chain_path, const string& order_state)
+string Cluster::tip_for_job_chain_or_node(const string& member_id, const Absolute_path& job_chain_path, const string& order_state)
 {
     string url = http_url_of_member_id(member_id);
     if (Regex_submatches m = Regex("http://([^:]+:[0-9]+)").match_subresults(url)) {

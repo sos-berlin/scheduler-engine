@@ -655,7 +655,7 @@ struct Order_queue_node : Node
     void                        unregister_order_source     (Order_source*);
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     bool                    set_action                      (Action);
-    void                        wake_orders                 ();
+    virtual void                wake_orders                 ();
     bool                        request_order               (const Time& now, const string& cause);
     void                        withdraw_order_request      ();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
@@ -707,6 +707,7 @@ struct Job_node : Order_queue_node,
 
     void                        connect_job                 ( Job* );
     void                        disconnect_job              ();
+    void wake_orders();
 
   private:
     friend struct               order::Job_chain;           // add_job_node()

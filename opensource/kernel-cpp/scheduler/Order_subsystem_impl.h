@@ -146,6 +146,7 @@ struct Order_subsystem_impl : Order_subsystem
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
 
+    void wake_distributed_order_processing();
 
     Fill_zero                  _zero_;
     Order_id_spaces            _order_id_spaces;
