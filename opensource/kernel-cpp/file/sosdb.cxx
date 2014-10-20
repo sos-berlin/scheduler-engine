@@ -635,7 +635,7 @@ string Sos_database_session::convert_texttimestamp( const char** pp, const char*
             return "str_replace(CONVERT(VARCHAR(19)," + arg + ",23),'T',' ')";
 
         case dbms_h2:
-            return "((" + arg + ")||'')";   // Funktioniert mit neutralem Locale (LANG=en_US.UTF-8). Bei de_DE liefert H2 ein Dezimalkomma vor den Millisekunden, was zum Fehler führt.
+            return "regexp_replace((" + arg + ")||'','\\.0+$','')";   // Funktioniert mit neutralem Locale (LANG=en_US.UTF-8). Bei de_DE liefert H2 ein Dezimalkomma vor den Millisekunden, was zum Fehler führt.
             //return "formatdatetime(" + arg + ",'yyyy-MM-dd HH:mm:ss','en');
 
         default: 

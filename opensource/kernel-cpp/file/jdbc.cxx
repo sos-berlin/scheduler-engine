@@ -926,6 +926,10 @@ void Jdbc_file::describe_columns()
         if( display_size <= 0  &&  precision <= 0 )  
             display_size = 1024;    // Wenigstens PostgresQL liefert bei String-Funktion keine vernünftige Länge.  2009-02-27
 
+        if (this->_session->_dbms == dbms_h2 && precision == 0x7FFFFFFF) {
+            display_size = 1024;
+        }
+
         if( precision == 0  &&  display_size > 0 )  precision = display_size;
 
 
