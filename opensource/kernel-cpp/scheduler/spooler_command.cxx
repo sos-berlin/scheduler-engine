@@ -1352,7 +1352,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if (job_chain && job_chain->orders_are_recoverable()) {
         order->persist();
         for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
-            if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
+            if (order->finished() && !order->is_file_based() && !order->is_on_blacklist()) {
                 order->remove_from_job_chain(Order::jc_remove_from_job_chain_stack, &ta);
                 order->close();
             } else {

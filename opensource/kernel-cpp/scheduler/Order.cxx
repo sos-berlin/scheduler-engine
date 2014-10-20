@@ -2676,7 +2676,7 @@ void Order::handle_end_state()
 
         report_event_code(orderFinishedEvent, java_sister());
 
-        if( ( has_base_file()  ||  !next_start.is_never()  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
+        if( ( is_file_based()  ||  !next_start.is_never()  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
            (s != _initial_state || _initial_state == _end_state) )   // JS-730  
         {
             _is_touched = false;

@@ -599,17 +599,17 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
     result.setAttribute( "state", file_based_state_name() );
 
-    if( has_base_file() )
-    {
-        result.setAttribute_optional( "file", _base_file_info._path );
-        if( _file_is_removed )  result.setAttribute( "removed", "yes" );
-
+    if (is_file_based()) {
         Time t;
-        t.set_utc( _base_file_info._last_write_time );
-        result.setAttribute( "last_write_time", t.xml_value() );
-
-        if( base_file_has_error() )  result.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
+        t.set_utc(_base_file_info._last_write_time);
+        result.setAttribute("last_write_time", t.xml_value());
+        if( has_base_file() ) {
+            result.setAttribute_optional( "file", _base_file_info._path );
+            if( _file_is_removed )  result.setAttribute( "removed", "yes" );
+            if( base_file_has_error() )  result.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
+        }
     }
+
 
     if( has_includes() )  result.appendChild( Has_includes::dom_element( document, show_what ) );
 
