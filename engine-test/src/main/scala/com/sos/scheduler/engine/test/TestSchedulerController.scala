@@ -39,7 +39,7 @@ with EventHandlerAnnotated {
 
   private val testName = testConfiguration.testClass.getName
   protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
-  private val eventBus: SchedulerEventBus = getEventBus
+  val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
