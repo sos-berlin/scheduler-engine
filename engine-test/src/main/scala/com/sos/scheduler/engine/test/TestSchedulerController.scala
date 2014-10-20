@@ -158,9 +158,7 @@ with EventHandlerAnnotated {
       !errorLogEventIsTolerated(e) &&
       !testConfiguration.errorLogEventIsTolerated(e))
     {
-      instance[SchedulerThreadCallQueue].apply {
-        terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
-      }
+      terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
     }
   }
 

@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -179,11 +179,16 @@ with HasCloser {
 
   def terminate(): Unit = {
     if (!isClosed) {
-      try cppProxy.cmd_terminate()
-      catch {
-        case x: CppProxyInvalidatedException ⇒
-          logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed")
+      directOrSchedulerThreadFuture {
+        if (!isClosed) {
+          try cppProxy.cmd_terminate()
+          catch {
+            case x: CppProxyInvalidatedException ⇒
+              logger.trace("Scheduler.terminate() ignored because C++ object has already been destroyed")
+          }
+        }
       }
+      // Return immediately, discarding the future
     }
   }
 
