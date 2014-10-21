@@ -661,20 +661,16 @@ bool Order_subsystem_impl::has_any_order()
     return false;
 }
 
-//---------------------------------------------------Order_subsystem_impl::load_order_from_database
 
-ptr<Order> Order_subsystem_impl::load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
-    ptr<Order> result = try_load_order_from_database( outer_transaction, job_chain_path, order_id, flag );
-
+    ptr<Order> result = try_load_distributed_order_from_database( outer_transaction, job_chain_path, order_id, flag );
     if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_path );
-
     return result;
 }
 
-//-----------------------------------------------Order_subsystem_impl::try_load_order_from_database
 
-ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::try_load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
     if ((flag & lo_lock) && !outer_transaction) z::throw_xc(Z_FUNCTION, "lock without transaction");
 

@@ -956,7 +956,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
 
     try
     {
-        if( ptr<Order> modified_order = order_subsystem()->try_load_order_from_database( outer_transaction, _job_chain_path, _id, Order_subsystem_impl::lo_lock ) )
+        if( ptr<Order> modified_order = order_subsystem()->try_load_distributed_order_from_database( outer_transaction, _job_chain_path, _id, Order_subsystem_impl::lo_lock ) )
         {
             if( modified_order->_is_replacement )
             {
