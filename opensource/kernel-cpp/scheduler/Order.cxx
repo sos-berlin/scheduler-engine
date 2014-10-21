@@ -661,7 +661,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
                 else
                 {
                     _replaced_order_occupator = record.as_string( "occupying_cluster_member_id" );
-                    _log->info( message_string( "SCHEDULER-942", "Scheduler member " + record.as_string( "occupying_cluster_member_id" ), "replaced order" ) );
+                    _log->info( message_string( "SCHEDULER-941", "Scheduler member " + record.as_string( "occupying_cluster_member_id" ), "replaced order" ) );
                 }
 
                 ta.execute_single( db_update_stmt().make_delete_stmt(), Z_FUNCTION );
