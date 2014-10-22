@@ -214,6 +214,9 @@ bool Folder_subsystem::handle_folders(const Duration& minimum_age, bool update_n
 
             if( directory )
             {
+                if (update_now) {
+                    directory->withdraw_aging_deep();
+                }
                 something_changed = _root_folder->adjust_with_directory( directory );
             }
             
