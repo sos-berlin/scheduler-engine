@@ -238,8 +238,11 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                             else {
                                 old_file_based->prepare_to_replace();
                                 if( old_file_based->can_be_replaced_now() ) {
-                                    file_based = old_file_based->replace_now();     
-                                    assert( !file_based->replacement() );
+                                    File_based* replacement = old_file_based->replace_now();     
+                                    if (replacement) {
+                                        file_based = replacement;
+                                        assert( !file_based->replacement() );
+                                    }
                                 }
                             }
                         }

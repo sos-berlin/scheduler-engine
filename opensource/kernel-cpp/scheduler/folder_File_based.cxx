@@ -341,8 +341,8 @@ bool File_based::replace_with( File_based* file_based_replacement )
 
     if( can_be_replaced_now() )
     {
-        replace_now();
-        result = true;
+        File_based* replacement = replace_now();
+        result = replacement != NULL;
     }
     else  
         log()->info( message_string( "SCHEDULER-888", subsystem()->object_type_name() ) );
@@ -370,8 +370,13 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
                 
                 if( ok  &&  can_be_replaced_now() )
                 {
-                    if( when_to_act == act_now )  replace_now();
-                                            else  typed_folder()->add_to_replace_or_remove_candidates( *this );
+                    File_based* replacement = NULL;
+                    if( when_to_act == act_now ) {
+                        replacement = replace_now();
+                    }
+                    if (!replacement) {
+                        typed_folder()->add_to_replace_or_remove_candidates(*this);
+                    }
                 }
             }
             else
@@ -412,7 +417,7 @@ File_based* File_based::on_replace_now()
 {
     Typed_folder*   typed_folder = this->typed_folder();
     ptr<File_based> replacement  = this->replacement();
-
+    assert(replacement);
     assert( can_be_replaced_now() );
 
     typed_folder->remove_file_based( this );
@@ -433,24 +438,26 @@ File_based* File_based::replace_now()
     Base_file_info file_info = replacement->base_file_info();
 
     File_based* new_file_based = on_replace_now();
+    if (!new_file_based) {
+        log()->info(message_string("SCHEDULER-888", subsystem()->object_type_name()));   // "Cannot be replaced now"
+    } else {
+        if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
+        {                                       
+            set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
+            _source_xml_bytes  = replacement->_source_xml_bytes;
+            _base_file_xc      = zschimmer::Xc();
+            _base_file_xc_time = 0;
+            if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
+        }
+        else
+        {
+            // this ist ungültig
+        }
+        if (jobject sister = new_file_based->java_sister())
+            new_file_based->report_event_code(fileBasedReplacedEvent, sister);
 
-    if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
-    {                                       
-        set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
-        _source_xml_bytes  = replacement->_source_xml_bytes;
-        _base_file_xc      = zschimmer::Xc();
-        _base_file_xc_time = 0;
-        if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
+        new_file_based->activate();
     }
-    else
-    {
-        // this ist ungültig
-    }
-    if (jobject sister = new_file_based->java_sister())
-        new_file_based->report_event_code(fileBasedReplacedEvent, sister);
-
-    //SS: replacement->report_event_replace ... (weil "this" ungültig)
-    new_file_based->activate();
     return new_file_based;
 }
 
