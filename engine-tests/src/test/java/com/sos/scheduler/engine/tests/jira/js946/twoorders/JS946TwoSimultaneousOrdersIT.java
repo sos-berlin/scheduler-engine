@@ -27,16 +27,16 @@ public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
     @Test
     public void testScheduledAtSameTime() {
         controller().activateScheduler();
-        addOrders(1, "now+2");
-        addOrders(2, "now+2");
+        addOrders(1, "now+1");
+        addOrders(2, "now+1");
         controller().waitForTermination();
     }
 
     @Test
     public void testScheduledAtDifferentTimes() {
         controller().activateScheduler();
-        addOrders(1, "now+2");
-        addOrders(2, "now+4");
+        addOrders(1, "now");
+        addOrders(2, "now+1");
         controller().waitForTermination();
     }
 
