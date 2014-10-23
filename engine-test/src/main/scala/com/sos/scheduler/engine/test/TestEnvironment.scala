@@ -50,8 +50,8 @@ final class TestEnvironment(
   private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Seq[String] = {
     List(
       cppBinaries.file(CppBinary.exeFilename).getPath,
-      s"-job-java-options=$jobJavaOptions",
-      s"-id=$schedulerId",
+      s"-job-java-options=$JobJavaOptions",
+      s"-id=$TestSchedulerId",
       s"-sos.ini=$sosIniFile",
       s"-ini=$iniFile",
       s"-log-level=debug9",
@@ -90,8 +90,8 @@ final class TestEnvironment(
 
 
 object TestEnvironment {
-  val schedulerId = new SchedulerId("test")
-  private val jobJavaOptions = "-Xms5m -Xmx10m"
+  val TestSchedulerId = new SchedulerId("test")
+  private val JobJavaOptions = "-Xms5m -Xmx10m"
   val ConfigSubdirectoryName = "config"
 
   def apply(testConfiguration: TestConfiguration, directory: File) =

@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.t
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
 import com.sos.scheduler.engine.persistence.entities._
-import com.sos.scheduler.engine.test.TestEnvironment.schedulerId
+import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -72,7 +72,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     taskHistoryEntities(0) match { case e =>
       e should have (
         'id (firstTaskHistoryEntityId),
-        'schedulerId (schedulerId.string),
+        'schedulerId (TestSchedulerId.string),
         'clusterMemberId (null),
         'endTime (null),
         'jobPath ("(Spooler)"),
@@ -90,7 +90,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     taskHistoryEntities(1) match { case e =>
       e should have (
         'id (firstTaskHistoryEntityId + 1),
-        'schedulerId (schedulerId.string),
+        'schedulerId (TestSchedulerId.string),
         'clusterMemberId (null),
         'jobPath (orderJobPath.withoutStartingSlash),
         'cause ("order"),
@@ -109,7 +109,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
     e(0) should have (
       'taskId (firstTaskHistoryEntityId + 2),
-      'schedulerId (schedulerId.string),
+      'schedulerId (TestSchedulerId.string),
       'clusterMemberId (null),
       'jobPath (simpleJobPath.withoutStartingSlash),
       'startTime (null),
@@ -150,7 +150,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     stopJobAndWait(orderJobPath)
     tryFetchJobEntity(orderJobPath).get match { case e =>
       e should have (
-        'schedulerId (schedulerId.string),
+        'schedulerId (TestSchedulerId.string),
         'clusterMemberId ("-"),
         'jobPath (orderJobPath.withoutStartingSlash),
         'stopped (true),
@@ -169,7 +169,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
     tryFetchJobChainEntity(jobChainPath).get should have (
-      'schedulerId (schedulerId.string),
+      'schedulerId (TestSchedulerId.string),
       'clusterMemberId ("-"),
       'jobChainPath (jobChainPath.withoutStartingSlash),
       'stopped (true)
@@ -186,7 +186,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="300" action="stop"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
       nodes should have size 2
-      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
+      for (n <- nodes) n should have ('schedulerId (TestSchedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
       nodes(0) should have ('orderState ("200"), 'action ("next_state"))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
     }
@@ -194,7 +194,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
       nodes should have size 2
-      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
+      for (n <- nodes) n should have ('schedulerId (TestSchedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
       nodes(0) should have ('orderState ("200"), 'action (null))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
     }
@@ -230,7 +230,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def tryFetchJobEntity(jobPath: JobPath) =
-    entityManager.findOption[JobEntity](JobEntityKey(schedulerId.string, "-", jobPath.withoutStartingSlash))
+    entityManager.findOption[JobEntity](JobEntityKey(TestSchedulerId.string, "-", jobPath.withoutStartingSlash))
 
   def tryFetchJobChainEntity(path: JobChainPath) =
     entityManager.fetchOption[JobChainEntity]("select j from JobChainEntity j where j.jobChainPath = :jobChainPath",
