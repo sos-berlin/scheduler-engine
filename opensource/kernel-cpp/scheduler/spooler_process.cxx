@@ -119,7 +119,7 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
 
     protected: Abstract_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
         Abstract_process(spooler, log, conf),
-        _registered_process_handle(NULL),
+        _registered_process_handle((Process_handle)0),
         _exit_code(0),
         _termination_signal(0)
     {}
