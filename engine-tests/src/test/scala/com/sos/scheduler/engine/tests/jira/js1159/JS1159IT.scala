@@ -40,7 +40,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
       (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
-    new ExtraScheduler(args = args, env = Map(), httpPort = Some(agentHttpPort), tcpPort = Some(agentTcpPort))
+    new ExtraScheduler(args = args, httpPort = Some(agentHttpPort), tcpPort = Some(agentTcpPort))
   }
 
   "Start" in {

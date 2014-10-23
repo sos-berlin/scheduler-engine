@@ -17,7 +17,7 @@ import scala.concurrent.{Future, Promise}
 
 final class ExtraScheduler(
   args: immutable.Seq[String],
-  env: immutable.Iterable[(String, String)],
+  env: immutable.Iterable[(String, String)] = Nil,
   httpPort: Option[Int] = None,
   tcpPort: Option[Int] = None)
 extends AutoCloseable with HasCloser {
