@@ -72,7 +72,7 @@ call prepare-setup.sh <version> to use this pom
                                 <configuration>
                                     <inherited>false</inherited>
                                     <target name="purge local repository">
-                                    <delete dir="${user.home}/.m2/repository//com/sos/scheduler/engine" />
+                                        <delete dir="${user.home}/.m2/repository//com/sos/scheduler/engine" />
                                     </target>
                                 </configuration>
                                 <goals>
