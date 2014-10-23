@@ -1320,19 +1320,10 @@ bool Order::can_be_removed_now()
 
 //-----------------------------------------------------------------------------Order::on_remove_now
 
-void Order::on_remove_now()
+bool Order::on_remove_now()
 {
     remove_from_job_chain();
-
-    //if( _order )
-    //{
-    //    ptr<Order> order = _order;
-    //    
-    //    _order->connect_with_standing_order( NULL );    // Verbindung zwischen Order und Standing_order lösen,
-    //    _order = NULL;                                  // dass remove_job_chain() nicht check_for_replacing_or_removing() rufe!
-    //                                        
-    //    order->remove_from_job_chain();
-    //}
+    return true;
 }
 
 //----------------------------------------------------------------------Order::on_requisite_removed

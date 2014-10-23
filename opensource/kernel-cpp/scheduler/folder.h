@@ -248,7 +248,7 @@ struct File_based : Abstract_scheduler_object,
     bool                        remove                      ( Remove_flag = rm_standard );
     void                        remove_base_file            ();
 
-    void                        remove_now                  ();
+    bool                        remove_now                  ();
     File_based*                 replace_now                 ();
 
     void                        handle_event                ( Base_file_event );
@@ -262,7 +262,7 @@ struct File_based : Abstract_scheduler_object,
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
 
-    virtual void                on_remove_now               ();
+    virtual bool                on_remove_now               ();
     virtual void                on_prepare_to_remove        ();
     virtual bool                can_be_removed_now          ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ();

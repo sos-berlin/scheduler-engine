@@ -3096,9 +3096,10 @@ void Job_chain::on_prepare_to_remove()
 
 //-------------------------------------------------------------------------Job_chain::on_remove_now
 
-void Job_chain::on_remove_now()
+bool Job_chain::on_remove_now()
 {
     if( remove_flag() != rm_temporary )  database_record_remove();
+    return true;
 }
 
 //--------------------------------------------------------------------Job_chain::can_be_removed_now

@@ -94,7 +94,7 @@ struct Order : Com_order,
     bool                        on_activate                 ();
 
     bool                        can_be_removed_now          ();
-    void                        on_remove_now               ();
+    bool                        on_remove_now               ();
     Order*                      on_replace_now              ();
 
 
@@ -823,7 +823,7 @@ struct Job_chain : Com_job_chain,
 
     void                        on_prepare_to_remove        ();
     bool                        can_be_removed_now          ();
-    void                        on_remove_now               ();
+    bool                        on_remove_now               ();
     zschimmer::Xc               remove_error                ();
 
     void                        prepare_to_replace          ();

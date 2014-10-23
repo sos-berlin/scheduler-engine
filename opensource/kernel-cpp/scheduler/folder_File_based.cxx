@@ -248,19 +248,23 @@ void File_based::on_prepare_to_remove()
 
 //------------------------------------------------------------------------File_based::on_remove_now
 
-void File_based::on_remove_now()
+bool File_based::on_remove_now()
 {
+    return true;
 }
 
 //---------------------------------------------------------------------------File_based::remove_now
 
-void File_based::remove_now()
+bool File_based::remove_now()
 {
     ptr<File_based> me = this;
 
-    on_remove_now();
-    typed_folder()->remove_file_based( this );
-    subsystem()->dependencies()->announce_requisite_removed( this ); 
+    bool removed = on_remove_now();
+    if (removed) {
+        typed_folder()->remove_file_based( this );
+        subsystem()->dependencies()->announce_requisite_removed( this ); 
+    }
+    return removed;
 }
 
 //-------------------------------------------------------------------------------File_based::remove
@@ -285,8 +289,7 @@ bool File_based::remove( Remove_flag remove_flag )
     {
         _remove_xc = zschimmer::Xc();
 
-        remove_now();
-        result = true;
+        result = remove_now();
     }
     else  
     {
@@ -382,8 +385,13 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
             else
             if( is_to_be_removed()  &&  can_be_removed_now() )
             {
-                if( when_to_act == act_now )  remove_now();
-                                        else  typed_folder()->add_to_replace_or_remove_candidates( *this );
+                bool removed = false;
+                if( when_to_act == act_now ) {
+                    removed = remove_now();
+                }
+                if (!removed) {
+                    typed_folder()->add_to_replace_or_remove_candidates( *this );
+                }
             }
         }
     }

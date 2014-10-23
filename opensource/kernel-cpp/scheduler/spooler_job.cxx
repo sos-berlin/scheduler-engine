@@ -1327,9 +1327,10 @@ bool Standard_job::can_be_removed_now()
 
 //----------------------------------------------------------------------Standard_job::on_remove_now
 
-void Standard_job::on_remove_now()
+bool Standard_job::on_remove_now()
 {
     if( remove_flag() != rm_temporary )  database_record_remove();
+    return true;
 }
 
 //-----------------------------------------------------------------------Standard_job::remove_error
