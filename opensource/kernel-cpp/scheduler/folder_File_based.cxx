@@ -606,6 +606,14 @@ void File_based::set_dom(const xml::Element_ptr&)
     z::throw_xc("set_dom() not implemented");   // Entweder set_xml() oder set_dom() überschreiben!
 }
 
+
+void File_based::set_last_write_time(const xml::Element_ptr& element) {
+    if (element.hasAttribute("last_write_time")) {
+        if (_base_file_info._last_write_time) z::throw_xc(Z_FUNCTION);
+        _base_file_info._last_write_time = Time::of_utc_date_time(element.getAttribute("last_write_time")).as_utc_time_t();
+    }
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )

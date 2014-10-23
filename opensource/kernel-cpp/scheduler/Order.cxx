@@ -1420,6 +1420,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         }
         else
         */
+        if (e.nodeName_is("file_based")) {
+            set_last_write_time(e);
+        } else 
         if( e.nodeName_is( "params" ) )
         { 
             set_params( e, variable_set_map );

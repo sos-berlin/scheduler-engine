@@ -282,6 +282,7 @@ struct File_based : Abstract_scheduler_object,
   protected:
     void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
     void                    set_file_based_state            ( State );
+    void set_last_write_time(const xml::Element_ptr&);
 
     Fill_zero                  _zero_;
     Visibility                 _visible;
