@@ -17,6 +17,7 @@ call prepare-setup.sh <version> to use this pom
         <!-- see http://rterp.wordpress.com/2012/03/16/stamping-version-number-and-build-time-in-properties-file-with-maven/ for details -->
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <artifacts.jetty>aopalliance,jackson-core,jackson-databind,jackson-datatype-guava,jackson-jaxrs-base,jackson-jaxrs-json-provider,jackson-module-jaxb-annotations,jackson-module-scala_2.11,javax.persistence,javax.servlet,jersey-client,jersey-core,jersey-guice,jersey-server,jersey-servlet,jetty-client,jetty-continuation,jetty-http,jetty-io,jetty-security,jetty-server,jetty-servlet,jetty-servlets,jetty-util,jetty-webapp,jetty-xml</artifacts.jetty>
     </properties>
 
     <artifactId>setup</artifactId>
@@ -24,7 +25,7 @@ call prepare-setup.sh <version> to use this pom
     <name>${project.artifactId}</name>
 
     <profiles>
-        <!-- this profile is for preparing the setup for a given version on a given platform, e.g.
+        <!-- this profile is for preparing the setup for a given version on a given platform,e.g.
               mvn install -Pprepare-platform -Dengine.platform=windows-x86
         -->
         <profile>
@@ -126,8 +127,23 @@ call prepare-setup.sh <version> to use this pom
                         </goals>
                         <configuration>
                            <outputDirectory>${project.build.directory}/setup/scheduler/lib</outputDirectory>
-                           <excludeGroupIds>com.sos.scheduler.engine</excludeGroupIds>
+                           <excludeGroupIds>com.sos.scheduler.engine,org.hibernate</excludeGroupIds>
+                           <excludeArtifactIds>${artifacts.jetty},${artifacts.lib.ignore}</excludeArtifactIds>
                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+          
+                    <!-- copy jetty jars -->
+                    <execution>
+                        <id>copy-jetty</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                        <outputDirectory>${project.build.directory}/setup/scheduler/lib/jetty_ext</outputDirectory>
+                            <includeArtifactIds>${artifacts.jetty}</includeArtifactIds>
+                            <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
 
@@ -323,7 +339,7 @@ call prepare-setup.sh <version> to use this pom
                                     <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                                 </manifest>
                                 <manifestEntries>
-                                    <Architechture>${osArch}</Architechture>
+                                    <Architechture>${setup.platform}</Architechture>
                                 </manifestEntries>
                             </archive>
                         </configuration>
