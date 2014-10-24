@@ -96,6 +96,7 @@ struct Order : Com_order,
     bool                        can_be_removed_now          ();
     bool                        on_remove_now               ();
     Order*                      on_replace_now              ();
+    bool                        try_delete_distributed      (ptr<Order>* removed_order = NULL);
 
 
     // Dependant
@@ -270,6 +271,7 @@ struct Order : Com_order,
     void                        on_carried_out          ();
     void                        prepare_for_next_roundtrip();
     void                        restore_initial_settings();
+    void                        check_for_replacing_or_removing_with_distributed(When_to_act = act_later);
 
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* );
     void                        set_identification_attributes( const xml::Element_ptr& );
@@ -1040,6 +1042,8 @@ struct Order_queue : Com_order_queue,
     bool                       _is_loaded;
 
   private:
+    void check_orders_for_replacing_or_removing(File_based::When_to_act);
+
     ptr<Com_order_queue>       _com_order_queue;
     Job_chain*                 _job_chain;
     job_chain::Order_queue_node* _order_queue_node;         // 1:1-Beziehung, _order_queue_node->order_queue() == this

@@ -4402,6 +4402,8 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     assert( occupying_task );
     _has_tip_for_new_order = false;
 
+    check_orders_for_replacing_or_removing(File_based::act_now);
+
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
     ptr<Order> order = first_immediately_processable_order(untouched_is_allowed, now);
@@ -4427,6 +4429,25 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     }
 
     return order;
+}
+
+
+void Order_queue::check_orders_for_replacing_or_removing(File_based::When_to_act when_to_act) {
+    // Für den Fall, dass die Konfigurationsdatei eines verteilten Auftrags geändert worden war, als der Auftrag auf einem anderen Scheduler ausgeführt wurde,
+    // dieser Scheduler also seitdem nichts mehr mit dem Auftrag zu tun hatte. 
+    // Dann holen wir jetzt die anstehende Ersetzung der Konfigurationsdatei nach.
+    if (_order_queue_node) {
+        string normalized_job_chain_path = _spooler->order_subsystem()->normalized_path(_job_chain->path());
+        Standing_order_subsystem::File_based_map order_map = _spooler->standing_order_subsystem()->_file_based_map;
+        Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, order_map, i) {
+            Order* o = i->second;
+            if (_spooler->order_subsystem()->normalized_path(o->_job_chain_path) == normalized_job_chain_path && 
+                o->_state == _order_queue_node->order_state()) 
+            {
+                o->check_for_replacing_or_removing_with_distributed(when_to_act);
+            }
+        }
+    }
 }
 
 //--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database

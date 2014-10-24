@@ -1270,8 +1270,6 @@ bool Order::on_activate()
 
     if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( _file_based_job_chain_name ) )
     {
-        if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
-
         if (!_spooler->standing_order_subsystem()->is_activating())  // Nicht, wenn der Auftrag vom Standing_order_subsystem aktiviert wird. TODO: Der Zeitstempelvergleich aus add_order_from_database_record() sollte mit Typed_folder::on_base_file_changed() zusammenfallen.
         {
             job_chain->db_try_delete_non_distributed_order(NULL, _id.as_string());   // Den Datenbanksatz verwerfen wir. Die geänderte File_based .order.xml gilt.
@@ -1322,8 +1320,15 @@ bool Order::can_be_removed_now()
 
 bool Order::on_remove_now()
 {
-    remove_from_job_chain();
-    return true;
+    if (_is_distributed) {
+        if (is_loaded()) {
+            return try_delete_distributed();
+        } else
+            return false;
+    } else {
+        remove_from_job_chain();
+        return true;
+    }
 }
 
 //----------------------------------------------------------------------Order::on_requisite_removed
@@ -1336,8 +1341,47 @@ void Order::on_requisite_removed( File_based* )
 //----------------------------------------------------------------------------Order::on_replace_now
 
 Order* Order::on_replace_now() {
-    replacement()->_suspended = _suspended;
-    return static_cast<Order*>(My_file_based::on_replace_now());
+    bool ok;
+    if (_is_distributed) {
+        if (is_loaded()) {
+            ptr<Order> removed_order;
+            ok = try_delete_distributed(&removed_order);
+            if (removed_order) {
+                replacement()->_suspended = _suspended;
+            }
+        } else {
+            ok = false;
+        }
+    } else {
+        replacement()->_suspended = _suspended;
+        ok = true;
+    }
+    return ok? static_cast<Order*>(My_file_based::on_replace_now()) : NULL;
+}
+
+
+bool Order::try_delete_distributed(ptr<Order>* removed_order) {
+    bool ok = false;
+    if (removed_order) *removed_order = (Order*)NULL;
+    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+        try {
+            ptr<Order> o = order_subsystem()->try_load_distributed_order_from_database(&ta, _job_chain_path, _id, Order_subsystem::lo_lock);  // Exception if occupied
+            ok = !o || !o->is_touched();
+            if (ok) {
+                ta.execute(db_update_stmt().make_delete_stmt(), Z_FUNCTION);
+            }
+            ta.commit(Z_FUNCTION);
+            if (removed_order) *removed_order = o;
+        }
+        catch (exception& x) { 
+            if (string_begins_with(x.what(), "SCHEDULER-379 ")) { // "Order is occupied"
+                log()->info(x.what());
+            }
+            else throw;
+        }
+    }
+    catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
+    return ok;
 }
 
 //-----------------------------------------------------------------------------------Order::set_dom
@@ -1401,7 +1445,6 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
     if( setback != "" )  _setback = Time::of_utc_date_time( setback );
 
-
     DOM_FOR_EACH_ELEMENT( element, e )  
     {
         /*
@@ -1421,7 +1464,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         else
         */
         if (e.nodeName_is("file_based")) {
-            set_last_write_time(e);
+            if (!base_file_info()._last_write_time) {
+                set_last_write_time(e);
+            }
         } else 
         if( e.nodeName_is( "params" ) )
         { 
@@ -2435,7 +2480,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
         {
-            if (!has_base_file()) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
+            if (!has_base_file() || _is_distributed) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
                 is_new = db_try_insert(exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
             }
             tip_next_node_for_new_distributed_order_state();
@@ -2822,7 +2867,19 @@ void Order::on_carried_out()
 {
     order_subsystem()->count_finished_orders();
     prepare_for_next_roundtrip();
+    check_for_replacing_or_removing_with_distributed(act_now);     // Kann Auftrag aus der Jobkette nehmen
+}
+
+
+void Order::check_for_replacing_or_removing_with_distributed(When_to_act when_to_act) {
     check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
+    if (_is_distributed && _job_chain_path != "" && _id.as_string() != "") {
+        if (Order* o = _spooler->standing_order_subsystem()->order_or_null(_job_chain_path, _id.as_string())) {
+            if (o != this) {    // Always true?
+                o->check_for_replacing_or_removing(when_to_act);
+            }
+        }
+    }
 }
 
 //----------------------------------------------------------------Order::prepare_for_next_roundtrip
