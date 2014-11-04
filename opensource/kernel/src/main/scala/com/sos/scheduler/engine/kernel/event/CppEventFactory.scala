@@ -50,6 +50,12 @@ import com.sos.scheduler.engine.kernel.order.Order
       case `orderFinishedEvent` =>
         new OrderFinishedEvent(eventSource.asInstanceOf[Order].key)
 
+      case `orderNestedTouchedEvent` =>
+        new OrderNestedTouchedEvent(eventSource.asInstanceOf[Order].key)
+
+      case `orderNestedFinishedEvent` =>
+        new OrderNestedFinishedEvent(eventSource.asInstanceOf[Order].key)
+
       case `orderSuspendedEvent` =>
         new OrderSuspendedEvent(eventSource.asInstanceOf[Order].key)
 
