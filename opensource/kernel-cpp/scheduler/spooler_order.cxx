@@ -3312,8 +3312,29 @@ void Job_chain::set_stopped( bool is_stopped )
 
 bool Job_chain::is_max_orders_reached() const
 {
+    bool count_touched_in_current_job_chain = true;
     return _max_orders < INT_MAX  &&  
-           _max_orders <= number_of_touched_orders_obeying_max_orders();
+           _max_orders <= number_of_touched_orders_obeying_max_orders(count_touched_in_current_job_chain);
+}
+
+
+bool Job_chain::is_below_this_outer_job_chain_max_orders() const {
+    if (!is_max_orders_set()) 
+        return true;
+    else {
+        int count = 0;
+        Z_FOR_EACH_CONST(Job_chain::Node_list, _node_list, it) {
+            if (Nested_job_chain_node* node = Nested_job_chain_node::try_cast(*it)) {
+                if (Job_chain* j = node->nested_job_chain()) {
+                    bool count_touched_in_current_job_chain = false;
+                    count += j->number_of_touched_orders_obeying_max_orders(count_touched_in_current_job_chain);
+                }
+                else
+                    return false;   // Innere Jobkette unbekannt
+            }
+        }
+        return count < max_orders();
+    }
 }
 
 //--------------------------------------------------------------Job_chain::number_of_touched_orders
@@ -3333,7 +3354,7 @@ int Job_chain::number_of_touched_orders() const
 
 
 
-int Job_chain::number_of_touched_orders_obeying_max_orders() const
+int Job_chain::number_of_touched_orders_obeying_max_orders(bool count_touched_in_current_job_chain) const
 {
     assert_is_not_distributed(Z_FUNCTION);
 
@@ -3341,7 +3362,7 @@ int Job_chain::number_of_touched_orders_obeying_max_orders() const
     Z_FOR_EACH_CONST(Node_list, _node_list, it)
     {
         if (Order_queue_node* node = Order_queue_node::try_cast(*it))
-            count += node->order_queue()->number_of_touched_orders_obeying_max_orders();
+            count += node->order_queue()->number_of_touched_orders_obeying_max_orders(count_touched_in_current_job_chain);
     }
     return count;
 }
@@ -4062,13 +4083,13 @@ int Order_queue::touched_order_count()
 
 
 
-int Order_queue::number_of_touched_orders_obeying_max_orders() const
+int Order_queue::number_of_touched_orders_obeying_max_orders(bool count_touched_in_current_job_chain) const
 {
     int result = 0;
     FOR_EACH_CONST(Queue, _queue, it)
     {
         Order* order = *it;
-        if (!order->_ignore_max_orders && order->is_touched_in_current_job_chain()) result++;
+        if (!order->_ignore_max_orders && (count_touched_in_current_job_chain? order->is_touched_in_current_job_chain() : order->is_touched())) result++;
     }
     return result;
 }
@@ -4349,6 +4370,7 @@ Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed unt
         Order* order = *o;
         if (order->is_immediately_processable(now)) {
             if (order->is_ignore_max_orders() || 
+                (order->is_touched() || is_below_outer_chain_max_orders(order->_outer_job_chain_path)) &&
                 (order->is_touched_in_current_job_chain() || untouched_is_allowed)) {
                 result = order;
                 result->_setback = Time(0);
@@ -4362,6 +4384,17 @@ Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed unt
     if( result )  assert( !result->_is_distributed );
 
     return result;
+}
+
+
+bool Order_queue::is_below_outer_chain_max_orders(const Absolute_path& outer_job_chain_path) const {
+    if (outer_job_chain_path.empty())
+        return true;  // No outer jobchain, no outer limit
+    else
+    if (Job_chain* outer_chain = order_subsystem()->job_chain_or_null(outer_job_chain_path)) 
+        return outer_chain->is_below_this_outer_job_chain_max_orders();
+    else
+        return false;   // Jobkette unbekannt? Dann könnte das Limit erreicht sein - wir wissen es erst, wenn die Jobkette da ist.
 }
 
 //---------------------------------------------------------------------Order_queue::why_dom_element

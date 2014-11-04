@@ -143,7 +143,7 @@ struct Order : Com_order,
     bool is_touched_in_current_job_chain() const { 
         return _outer_job_chain_path.empty()? _is_touched : _is_nested_touched; 
     }
-   
+
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -912,11 +912,12 @@ struct Job_chain : Com_job_chain,
     vector<job_chain::Order_queue_node*> skipped_order_queue_nodes(const Order::State&) const;
     vector<Order::State>        skipped_states              (const Order::State&) const;
     int                         number_of_touched_orders    () const;
-    int                         number_of_touched_orders_obeying_max_orders() const;
+    int                         number_of_touched_orders_obeying_max_orders(bool count_touched_in_current_job_chain) const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
     Untouched_is_allowed        untouched_is_allowed        () const                                { return is_max_orders_reached()? untouched_not_allowed : untouched_allowed; }
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
+    bool                        is_below_this_outer_job_chain_max_orders() const;
     int                         max_orders                  () const                                { return _max_orders; }
     bool                        is_ready_for_order_processing() const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
@@ -998,10 +999,11 @@ struct Order_queue : Com_order_queue,
     int                         order_count                 ( Read_transaction* ) const;
     int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
     int                         touched_order_count         ();
-    int                         number_of_touched_orders_obeying_max_orders() const;
+    int                         number_of_touched_orders_obeying_max_orders(bool count_touched_in_current_job_chain) const;
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
     Order*                      first_immediately_processable_order(Untouched_is_allowed, const Time& now ) const;
+    bool                        is_below_outer_chain_max_orders(const Absolute_path& outer_job_chain_path) const;
     Order*                      fetch_order                 ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed, const Time& now);
     bool                        has_immediately_processable_order( const Time& now = Time(0) );

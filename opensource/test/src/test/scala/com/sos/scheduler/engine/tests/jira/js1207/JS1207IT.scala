@@ -38,10 +38,10 @@ final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
     runOrders(UnlimitedOuterJobChainPath, expectedMaxima, n = 7) shouldEqual expectedMaxima
   }
 
-  "JS-1207 limited outer and inner jobchains - max_order in outer jobchain is still not respected" in {
+  "JS-1207 limited outer and inner jobchains" in {
     val expectedMaxima = Map(
-      LimitedOuterJobChainPath → 7,
-      AInnerJobChainPath → 3,
+      LimitedOuterJobChainPath → 2,
+      AInnerJobChainPath → 2,
       BInnerJobChainPath → 2,
       CInnerJobChainPath → 1
     )
