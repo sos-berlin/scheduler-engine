@@ -18,4 +18,6 @@ public enum CppEventCode {
     orderSetBackEvent,
 
     orderStepStartedEvent,
+    orderNestedTouchedEvent,
+    orderNestedFinishedEvent
 }

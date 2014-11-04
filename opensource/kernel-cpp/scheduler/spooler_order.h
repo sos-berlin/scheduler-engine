@@ -137,7 +137,7 @@ struct Order : Com_order,
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
 
-    void                        touch                   ()                                          { _is_touched = true; }
+    void                        touch                   (Task*);
     bool                        is_touched              () const                                    { return _is_touched; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
@@ -363,6 +363,7 @@ struct Order : Com_order,
     ptr<Web_service>           _web_service;
 
     bool                       _is_touched;             // Von einer Task berührt
+    bool                       _is_nested_touched;      // Falls nested job chain: Gestartet innerhalb einer inneren job chain. Sonst false
     int                        _setback_count;
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;

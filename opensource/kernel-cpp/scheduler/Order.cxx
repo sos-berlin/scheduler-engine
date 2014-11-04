@@ -328,13 +328,23 @@ void Order::occupy_for_task( Task* task, const Time& now )
     _task           = task;
     if( !_start_time )  _start_time = now;      
 
+    touch(task);
+}
 
-    bool was_touched = _is_touched;
-    touch();
-    if (!was_touched) {
-        if( _http_operation )  _http_operation->on_first_order_processing( task );
+
+void Order::touch(Task* task)
+{ 
+    if (!_is_touched) {
+        _is_touched = true; 
+        if (_http_operation) {
+            _http_operation->on_first_order_processing(task);
+        }
         order_subsystem()->count_started_orders();
         report_event_code(orderTouchedEvent, java_sister());
+    }
+    if (!_outer_job_chain_path.empty() &&  !_is_nested_touched) {
+        _is_nested_touched = true; 
+        report_event_code(orderNestedTouchedEvent, java_sister());
     }
 }
 
@@ -1377,6 +1387,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_touched = element.bool_getAttribute( "touched" );
+    if (_is_touched) {
+        _is_nested_touched = element.bool_getAttribute("nested_touched");
+    }
 
 
     if( element.hasAttribute( "suspended" ) )
@@ -1643,6 +1656,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( _is_replacement  )  result.setAttribute( "replacement" , "yes" ),
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( _is_touched      )  result.setAttribute( "touched"     , "yes" );
+    if (_is_nested_touched) result.setAttribute("nested_touched", "yes");
 
     if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().xml_value() );
     if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().xml_value() );
@@ -2157,6 +2171,7 @@ void Order::reset()
         set_state( _initial_state );
     }
     set_next_start_time();
+    _is_nested_touched = false;
     _is_touched = false;
     prepare_for_next_roundtrip();
 }
@@ -2708,7 +2723,8 @@ bool Order::handle_end_state_of_nested_job_chain()
     Z_DEBUG_ONLY( assert( !_is_distributed ) );
 
     bool end_state_reached = false;
-
+    _is_nested_touched = false;
+    report_event_code(orderNestedFinishedEvent, java_sister());
     try
     {
         if( _outer_job_chain_state == _end_state )
