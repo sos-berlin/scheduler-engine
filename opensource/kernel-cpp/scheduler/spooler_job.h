@@ -97,7 +97,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     string                      profile_section             ();
 
     virtual void                on_prepare_to_remove        ()                                      = 0;
-    virtual void                on_remove_now               ()                                      = 0;
+    virtual bool                on_remove_now               ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ()                                      = 0;
 
     virtual int                 max_order_setbacks          () const                                = 0;
@@ -270,7 +270,7 @@ struct Standard_job : Job
     string                      title                       ()                                      { return _title; }
 
     void                        on_prepare_to_remove        ();
-    void                        on_remove_now               ();
+    bool                        on_remove_now               ();
     zschimmer::Xc               remove_error                ();
 
   //void                        prepare_to_replace          ();

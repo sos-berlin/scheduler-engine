@@ -31,12 +31,12 @@ object FutureCompletion {
     call.future
   }
 
-  /** TimedCall als Future, nicht in eine [[com.sos.scheduler.engine.common.async.CallQueue]] eingehängt. */
-  private[async] def futureCall[A](f: => A): FutureCall[A] =
+  /** TimedCall als Future, nicht in eine [[CallQueue]] eingehängt. */
+  def futureCall[A](f: => A): FutureCall[A] =
     futureTimedCall(TimedCall.shortTerm)(f)
 
-  /** TimedCall als Future, nicht in eine [[com.sos.scheduler.engine.common.async.CallQueue]] eingehängt. */
-  private[async] def futureTimedCall[A](at: Instant)(f: => A): FutureCall[A] =
+  /** TimedCall als Future, nicht in eine [[CallQueue]] eingehängt. */
+  def futureTimedCall[A](at: Instant)(f: => A): FutureCall[A] =
     new TimedCall[A] with FutureCompletion[A] {
       def epochMillis = at.getMillis
       def call(): A = f

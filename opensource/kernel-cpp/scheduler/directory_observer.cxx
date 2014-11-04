@@ -62,14 +62,6 @@ Directory* Directory_tree::directory_or_null( const string& name )
     return result;
 }
 
-//-------------------------------------------------------------------Directory_tree::withdraw_aging
-
-void Directory_tree::withdraw_aging()
-{
-    reset_aging();
-    _root_directory->withdraw_aging_deep();
-}
-
 //----------------------------------------------------Directory_entry::normalized_less_dereferenced
 
 bool Directory_entry::normalized_less_dereferenced( const Directory_entry* a, const Directory_entry* b )

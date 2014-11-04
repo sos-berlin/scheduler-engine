@@ -1,9 +1,9 @@
 #include "spooler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
-#include "../javaproxy/com__sos__scheduler__engine__client__agent__CppHttpRemoteApiProcessClient.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__processclass__agent__CppHttpRemoteApiProcessClient.h"
 
-typedef javaproxy::com::sos::scheduler::engine::client::agent::CppHttpRemoteApiProcessClient CppHttpRemoteApiProcessClientJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::processclass::agent::CppHttpRemoteApiProcessClient CppHttpRemoteApiProcessClientJ;
 
 namespace sos {
 namespace scheduler {
@@ -119,7 +119,7 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
 
     protected: Abstract_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
         Abstract_process(spooler, log, conf),
-        _registered_process_handle(NULL),
+        _registered_process_handle((Process_handle)0),
         _exit_code(0),
         _termination_signal(0)
     {}
@@ -679,22 +679,33 @@ DEFINE_SIMPLE_CALL(Http_remote_api_process , Start_remote_task_callback)
 DEFINE_SIMPLE_CALL(Http_remote_api_process, Waiting_callback)
 
 struct Http_remote_api_process : Abstract_remote_api_process {
-    Http_remote_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
-        Abstract_process(spooler, log, conf),
-        Abstract_remote_api_process(spooler, log, conf),
-        _clientJ(CppHttpRemoteApiProcessClientJ::apply(spooler->injectorJ(), _configuration.java_proxy_jobject())),
+    Http_remote_api_process(Process_class* process_class, Prefix_log* log, const Api_process_configuration& conf) :
+        Abstract_process(process_class->spooler(), log, conf),
+        Abstract_remote_api_process(process_class->spooler(), log, conf),
+        _process_class(process_class),
         _waiting_callback(Z_NEW(Waiting_callback(this))),
         _start_remote_task_callback(Z_NEW(Start_remote_task_callback(this))),
         _is_started(false)
     {}
 
+    ~Http_remote_api_process() {
+        if (_clientJ) {
+            _process_class->typed_java_sister().removeCppHttpRemoteApiProcessClient(_clientJ);
+        }
+    }
+
     protected: void do_start() {
         prepare_connection();
-        _clientJ.startRemoteTask(connection()->tcp_port(), _waiting_callback->java_sister(), _start_remote_task_callback->java_sister());
+        _clientJ = _process_class->typed_java_sister().startCppHttpRemoteApiProcessClient(
+            _configuration.java_proxy_jobject(), connection()->tcp_port(), _waiting_callback->java_sister(), _start_remote_task_callback->java_sister());
     }
 
     public: void on_call(const Waiting_callback& call) {
-        log()->warn(Message_string("SCHEDULER-488", obj_name(), (string)((::javaproxy::java::lang::Object)call.value()).toString()));
+        if (::javaproxy::java::lang::Object exception = (::javaproxy::java::lang::Object)call.value()) {
+            log()->warn(Message_string("SCHEDULER-488", obj_name(), (string)(exception.toString())));   // "Remote JobScheduler unreachable"
+        } else {
+            log()->warn(Message_string("SCHEDULER-489"));   // "Waiting"
+        }
     }
 
     public: void on_call(const Start_remote_task_callback& call) {
@@ -717,7 +728,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         if (_start_exception) throw *_start_exception;
     }
 
-    protected: virtual void emergency_kill() {
+    protected: void emergency_kill() {
         // Nicht möglich, weil kill() asynchron über HTTP geht.
     }
 
@@ -726,18 +737,21 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         return _clientJ.killRemoteTask();
     }
 
-    public: string obj_name() const {
-        return "Http_remote_api_process " + short_name() + " " + (string)_clientJ.toString();
+    protected: string async_state_text() const {
+        return obj_name();
     }
 
-    protected: virtual string async_state_text() const {
-        return _clientJ.toString();
+    public: string obj_name() const {
+        return _clientJ? (string)_clientJ.toString() : (string)"Http_remote_api_process";
     }
 
     protected: void on_closing_remote_process() {
-        return _clientJ.closeRemoteTask();
+        if (_clientJ) {
+            _clientJ.closeRemoteTask();
+        }
     }
 
+    private: Process_class* const _process_class;
     private: CppHttpRemoteApiProcessClientJ _clientJ;
     private: ptr<Waiting_callback> const _waiting_callback;
     private: ptr<Start_remote_task_callback> const _start_remote_task_callback;
@@ -886,14 +900,6 @@ string Async_tcp_operation::async_state_text_() const
 
 
 ptr<Api_process> Api_process::new_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& configuration) {
-    if (string_begins_with(configuration._remote_scheduler_address, "http://")) {
-        ptr<Http_remote_api_process> result = Z_NEW(Http_remote_api_process(spooler, log, configuration));
-        return +result;
-    } else
-    if (!configuration._remote_scheduler_address.empty()) {       
-        ptr<Tcp_remote_api_process> result = Z_NEW(Tcp_remote_api_process(spooler, log, configuration));
-        return +result;
-    } else
     if (configuration._is_thread) {
         ptr<Thread_api_process> result = Z_NEW(Thread_api_process(spooler, log, configuration));
         return +result;
@@ -1023,7 +1029,7 @@ void Async_tcp_operation::close_remote_task( bool kill )
 Process_class_configuration::Process_class_configuration( Scheduler* scheduler, const string& name )
 : 
     Idispatch_implementation( &class_descriptor ),
-    file_based<Process_class_configuration,Process_class_folder,Process_class_subsystem>( scheduler->process_class_subsystem(), static_cast< spooler_com::Iprocess_class* >( this ), type_process_class ),
+    file_based<Process_class,Process_class_folder,Process_class_subsystem>( scheduler->process_class_subsystem(), static_cast< spooler_com::Iprocess_class* >( this ), type_process_class ),
     _zero_(this+1),
     _max_processes(30)
 { 
@@ -1065,18 +1071,19 @@ string Process_class_configuration::obj_name() const
     return result;
 }
 
-//-------------------------------------------------------------Process_class_configuration::set_dom
+//---------------------------------------------------------------------------Process_class::set_dom
 
-void Process_class_configuration::set_dom( const xml::Element_ptr& e )
+void Process_class::set_dom( const xml::Element_ptr& element )
 {
-    if( !e )  return;
-    if( !e.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", e.nodeName() );
+    if( !element )  return;
+    if( !element.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", element.nodeName() );
 
-    string name = e.getAttribute( "name" );
+    string name = element.getAttribute( "name" );
     if( name != "" )  set_name( name );         // Leere Name steht für die Default-Prozessklasse
 
-    set_max_processes((int)e.uint_getAttribute("max_processes", _max_processes));
-    set_remote_scheduler_address(e.getAttribute("remote_scheduler", _remote_scheduler_address));
+    set_max_processes((int)element.uint_getAttribute("max_processes", _max_processes));
+    set_remote_scheduler_address(element.getAttribute("remote_scheduler", _remote_scheduler_address));
+    typed_java_sister().processConfigurationDomElement(element);
 }
 
 //---------------------------------------------------------Process_class_configuration::dom_element
@@ -1115,7 +1122,15 @@ STDMETHODIMP Process_class_configuration::put_Remote_scheduler( BSTR remote_sche
 
     try
     {
-        set_remote_scheduler_address(string_from_bstr(remote_scheduler_bstr));
+        string remote_scheduler = string_from_bstr(remote_scheduler_bstr);
+        if (is_http_or_multiple(_remote_scheduler_address)) 
+            return E_ACCESSDENIED;
+        else
+        if (is_http_or_multiple(remote_scheduler)) 
+            return E_INVALIDARG;
+        else {
+            set_remote_scheduler_address(remote_scheduler);
+        }
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -1158,7 +1173,8 @@ Process_class::Process_class( Scheduler* scheduler, const string& name )
 :
     Process_class_configuration( scheduler, name ),
     javabridge::has_proxy<Process_class>(spooler()),
-    _zero_(this+1)
+    _zero_(this+1),
+    _typed_java_sister(java_sister())
 {
 }
 
@@ -1249,6 +1265,7 @@ bool Process_class::can_be_replaced_now()
 Process_class* Process_class::on_replace_now()
 {
     set_configuration( *replacement() );
+    _typed_java_sister.replaceWith(replacement()->_typed_java_sister);
     set_replacement( NULL );
 
     return this;
@@ -1316,11 +1333,26 @@ Process* Process_class::new_process(const Api_process_configuration* c, Prefix_l
     } else {
         Api_process_configuration conf = *c;
         conf._remote_scheduler_address = c->_remote_scheduler_address.empty()? _remote_scheduler_address : c->_remote_scheduler_address;
-        ptr<Api_process> p = Api_process::new_process(_spooler, log, conf);
-        process = +p;
+        if (is_http_or_multiple(conf._remote_scheduler_address)) {
+            ptr<Http_remote_api_process> p = Z_NEW(Http_remote_api_process(this, log, conf));
+            process = +p;
+        } else 
+        if (!conf._remote_scheduler_address.empty()) {       
+            ptr<Tcp_remote_api_process> p = Z_NEW(Tcp_remote_api_process(spooler(), log, conf));
+            process = +p;
+        } else {
+            ptr<Api_process> p = Api_process::new_process(_spooler, log, conf);
+            process = +p;
+        }
     }
     add_process(process);
     return process;
+}
+
+
+bool Process_class::is_http_or_multiple(const string& remote_scheduler_address) const {
+    // hasMoreAgents() setzt HTTP voraus.
+    return string_begins_with(remote_scheduler_address, "http://") || typed_java_sister().hasMoreAgents();
 }
 
 //-------------------------------------------------------Process_class::select_process_if_available

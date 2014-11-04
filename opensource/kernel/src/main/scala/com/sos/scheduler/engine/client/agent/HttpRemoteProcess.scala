@@ -6,14 +6,16 @@ import com.sos.scheduler.engine.client.command.RemoteSchedulers._
 import com.sos.scheduler.engine.common.scalautil.xmls.StringSource
 import scala.concurrent.{ExecutionContext, Future}
 
-/** A remote process started by [[HttpRemoteProcessStarter]].
+/**
+ * A remote process started by [[HttpRemoteProcessStarter]].
  * @author Joacim Zschimmer
  */
-final class HttpRemoteProcess(client: HttpSchedulerCommandClient, val processDescriptor: ProcessDescriptor)(implicit executionContext: ExecutionContext) {
+final class HttpRemoteProcess(client: HttpSchedulerCommandClient, uri: String, processDescriptor: ProcessDescriptor)
+  (implicit executionContext: ExecutionContext) {
 
   def closeRemoteTask(kill: Boolean): Future[Unit] = {
     val command = <remote_scheduler.remote_task.close process_id={processDescriptor.processId} kill={if (kill) true.toString else null}/>
-    client.execute(command) map CloseResult.fromXml
+    client.execute(uri, command) map CloseResult.fromXml
   }
 
   override def toString = s"${getClass.getSimpleName}(processId=${processDescriptor.processId} pid=${processDescriptor.pid})"

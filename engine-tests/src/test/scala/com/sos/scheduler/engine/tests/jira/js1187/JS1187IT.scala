@@ -93,7 +93,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
       (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
-    new ExtraScheduler(args = args, env = Map(), httpPort = Some(httpPort))
+    new ExtraScheduler(args = args, httpPort = Some(httpPort))
   }
 }
 

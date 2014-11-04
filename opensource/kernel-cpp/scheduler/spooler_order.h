@@ -94,8 +94,9 @@ struct Order : Com_order,
     bool                        on_activate                 ();
 
     bool                        can_be_removed_now          ();
-    void                        on_remove_now               ();
+    bool                        on_remove_now               ();
     Order*                      on_replace_now              ();
+    bool                        try_delete_distributed      (ptr<Order>* removed_order = NULL);
 
 
     // Dependant
@@ -270,6 +271,7 @@ struct Order : Com_order,
     void                        on_carried_out          ();
     void                        prepare_for_next_roundtrip();
     void                        restore_initial_settings();
+    void                        check_for_replacing_or_removing_with_distributed(When_to_act = act_later);
 
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* );
     void                        set_identification_attributes( const xml::Element_ptr& );
@@ -655,7 +657,7 @@ struct Order_queue_node : Node
     void                        unregister_order_source     (Order_source*);
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     bool                    set_action                      (Action);
-    void                        wake_orders                 ();
+    virtual void                wake_orders                 ();
     bool                        request_order               (const Time& now, const string& cause);
     void                        withdraw_order_request      ();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
@@ -707,6 +709,7 @@ struct Job_node : Order_queue_node,
 
     void                        connect_job                 ( Job* );
     void                        disconnect_job              ();
+    void wake_orders();
 
   private:
     friend struct               order::Job_chain;           // add_job_node()
@@ -822,7 +825,7 @@ struct Job_chain : Com_job_chain,
 
     void                        on_prepare_to_remove        ();
     bool                        can_be_removed_now          ();
-    void                        on_remove_now               ();
+    bool                        on_remove_now               ();
     zschimmer::Xc               remove_error                ();
 
     void                        prepare_to_replace          ();
@@ -1039,6 +1042,8 @@ struct Order_queue : Com_order_queue,
     bool                       _is_loaded;
 
   private:
+    void check_orders_for_replacing_or_removing(File_based::When_to_act);
+
     ptr<Com_order_queue>       _com_order_queue;
     Job_chain*                 _job_chain;
     job_chain::Order_queue_node* _order_queue_node;         // 1:1-Beziehung, _order_queue_node->order_queue() == this
@@ -1093,8 +1098,8 @@ struct Order_subsystem: Object,
     virtual void                reread_distributed_job_chain_nodes_from_database(Job_chain* which_job_chain = NULL, job_chain::Node* which_node = NULL) = 0;
 
     virtual void                request_order               ()                                      = 0;
-    virtual ptr<Order>          load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
-    virtual ptr<Order>      try_load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual ptr<Order>          load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual ptr<Order>      try_load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
     virtual string              order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id ) = 0;
 
     virtual bool                has_any_order               ()                                      = 0;

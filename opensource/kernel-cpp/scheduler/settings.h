@@ -42,7 +42,9 @@ enum Setting_name {
     
     setting_roles = 13,
 
-    setting_http_port = 14
+    setting_http_port = 14,
+
+    settings_remote_scheduler_connect_retry_delay = 15
 };
 
 
@@ -93,6 +95,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     bool                       _always_create_database_tables;  // For tests only to suppress java error messages
     std::set<Role>             _roles;
     int                        _http_port;
+    int _remote_scheduler_connect_retry_delay;
 };
 
 }} //namespace sos::scheduler

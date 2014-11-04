@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
-import java.net.URI
 import org.scalatest.Matchers._
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.duration._
@@ -27,7 +26,8 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
     }
   })
   private lazy val server = injector.apply[TestCommandExecutorHttpServer.Factory].apply(httpPort, executeCommand)
-  private lazy val client = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(s"http://$HttpInterface:$httpPort/"))
+  private lazy val client = injector.apply[HttpSchedulerCommandClient]
+  private lazy val uri = s"http://$HttpInterface:$httpPort/"
 
   override def beforeAll(): Unit = {
     val future = server.start()
@@ -39,17 +39,17 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
   }
 
   "execute" in {
-    val startFuture = client.execute(TestCommandElem)
+    val startFuture = client.execute(uri, TestCommandElem)
     Await.result(startFuture, Duration.Inf) shouldEqual TestResponseString
   }
 
   "executeXml" in {
-    val startFuture = client.executeXml(TestCommandElem.toBytes(schedulerEncoding))
+    val startFuture = client.executeXml(uri, TestCommandElem.toBytes(schedulerEncoding))
     Await.result(startFuture, Duration.Inf) shouldEqual TestResponseString
   }
 
   "Server error" in {
-    val startFuture = client.execute(<INVALID/>)
+    val startFuture = client.execute(uri, <INVALID/>)
     Await.ready(startFuture, TestTimeout).value.get match {
       case Failure(t) ⇒ // Okay
       case o ⇒ fail(o.toString)
@@ -58,8 +58,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
 
   "Client error" in {
     val errorPort = findRandomFreeTcpPort()
-    val errorClient = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(s"http://$HttpInterface:$errorPort/"))
-    val startFuture = errorClient.execute(<INVALID/>)
+    val startFuture = client.execute(s"http://$HttpInterface:$errorPort/", <INVALID/>)
     Await.ready(startFuture, TestTimeout).value.get match {
       case Failure(t) ⇒ // Okay
       case o ⇒ fail(o.toString)

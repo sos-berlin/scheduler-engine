@@ -16,11 +16,12 @@ import spray.httpx.marshalling.Marshaller
  * HTTP client for JobScheduler command webservice.
  * @author Joacim Zschimmer
  */
-final class HttpSchedulerCommandClient private[command](baseUri: Uri)(implicit actorSystem: ActorSystem) {
+@Singleton
+final class HttpSchedulerCommandClient @Inject private(implicit actorSystem: ActorSystem) {
 
   import actorSystem.dispatcher
   private implicit val timeout = 60.seconds
-  private val commandUri = baseUri.path match {
+  private def commandUri(baseUri: Uri) = baseUri.path match {
     case Path.Empty | Path.SingleSlash ⇒ baseUri.copy(path = Path("/jobscheduler/engine/command"))
     case _ ⇒ throw new IllegalArgumentException(s"Invalid JobScheduler URL: $baseUri")
   }
@@ -34,25 +35,17 @@ final class HttpSchedulerCommandClient private[command](baseUri: Uri)(implicit a
   /**
    * @return XML response
    */
-  def executeXml(xmlBytes: Array[Byte]): Future[String] =
-    pipeline(Post(commandUri, XmlBytes(xmlBytes))(XmlBytesMarshaller))
+  def executeXml(baseUri: Uri, xmlBytes: Array[Byte]): Future[String] =
+    pipeline(Post(commandUri(baseUri), XmlBytes(xmlBytes))(XmlBytesMarshaller))
 
   /**
    * @return XML response
    */
-  def execute(elem: xml.Elem): Future[String] =
-    pipeline(Post(commandUri, elem))
+  def execute(baseUri: Uri, elem: xml.Elem): Future[String] =
+    pipeline(Post(commandUri(baseUri), elem))
 }
 
 object HttpSchedulerCommandClient {
-
-  @Singleton
-  final class Factory @Inject private(actorSystem: ActorSystem) {
-    def apply(uri: java.net.URI) = new HttpSchedulerCommandClient(Uri(uri.toString))(actorSystem)
-
-    def forUri(uri: String) = new HttpSchedulerCommandClient(Uri(uri))(actorSystem)
-  }
-
   final case class XmlBytes(bytes: Array[Byte])
 
   private implicit val XmlBytesMarshaller = Marshaller.of[XmlBytes](`application/xml`) { (value, contentType, ctx) ⇒

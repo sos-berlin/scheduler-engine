@@ -38,17 +38,14 @@ struct Directory_tree : Abstract_scheduler_object,
                                ~Directory_tree              ();
 
     file::File_path             directory_path              () const                                { return _directory_path; }
-  //bool                        read                        ();
     double                      last_change_at              () const                                { return _last_change_at; }
     double                      refresh_aged_entries_at     () const                                { return _refresh_aged_entries_at; }
     Directory*                  directory_or_null           ( const string& name );
     Directory*                  root_directory              () const                                { return _root_directory; }
-  //void                        refresh_aged_entries        ();
 
     void                        set_last_change_at          ( double t )                            { _last_change_at = t; }
     void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
     void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
-    void                        withdraw_aging              ();
     Configuration_origin        configuration_origin        () const                                { return _configuration_origin; }
     void                    set_is_watched                  ()                                      { _is_watched = true; }
     bool                        is_watched                  () const                                { return _is_watched; }

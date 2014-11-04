@@ -1,37 +1,46 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.concurrent.{Await, Future}
+import _root_.scala.collection.generic.CanBuildFrom
+import _root_.scala.concurrent.{Await, ExecutionContext, Future}
+import _root_.scala.language.higherKinds
+import _root_.scala.util.Try
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.job.{Task, TaskSubsystem, Job, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
+import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
+import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.joda.time.Duration
 
 object SchedulerTestUtils {
 
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
-    hasInjector.injector.getInstance(classOf[JobSubsystem]).job(jobPath)
+    hasInjector.injector.apply[JobSubsystem].job(jobPath)
 
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
-    hasInjector.injector.getInstance(classOf[OrderSubsystem]).jobChain(jobChainPath)
+    hasInjector.injector.apply[OrderSubsystem].jobChain(jobChainPath)
 
   def order(key: OrderKey)(implicit hasInjector: HasInjector): Order =
-    hasInjector.injector.getInstance(classOf[OrderSubsystem]).order(key)
+    hasInjector.injector.apply[OrderSubsystem].order(key)
 
   def orderOption(key: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
-    hasInjector.injector.getInstance(classOf[OrderSubsystem]).orderOption(key)
+    hasInjector.injector.apply[OrderSubsystem].orderOption(key)
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
-    hasInjector.injector.getInstance(classOf[TaskSubsystem]).task(taskId)
+    hasInjector.injector.apply[TaskSubsystem].task(taskId)
+
+  def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
+    hasInjector.injector.apply[ProcessClassSubsystem].processClass(path)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskId = {
     runJobAndWaitForEnd(jobPath, timeout.duration)
@@ -49,7 +58,7 @@ object SchedulerTestUtils {
       val taskId = startJob(jobPath)
       // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst ginge es verloren.
       val future = controller.getEventBus.keyedEventFuture[TaskClosedEvent](taskId)
-      Tuple2(taskId, future)
+      (taskId, future)
     }
   }
 
@@ -57,6 +66,18 @@ object SchedulerTestUtils {
     val response = controller.scheduler executeXml <start_job job={jobPath.string}/>
     TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
   }
+
+  implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = hasInjector.injector.apply[ExecutionContext]
+
+  def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = awaitCompletion(f).get
+
+  def awaitFailure[A](f: Future[A])(implicit t: ImplicitTimeout): Throwable = awaitCompletion(f).failed.get
+
+  def awaitCompletion[A](f: Future[A])(implicit t: ImplicitTimeout): Try[A] = Await.ready(f, t.concurrentDuration).value.get
+
+  def awaitResults[A, M[X] <: TraversableOnce[X]](o: M[Future[A]])
+      (implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext, timeout: ImplicitTimeout) =
+    Await.result(Future.sequence(o)(cbf, ec), TestTimeout)
 
 //  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
 //    * Eine Fehlermeldung im Hauptprotokoll führt gewöhnlich zum Abbruch des Tests.

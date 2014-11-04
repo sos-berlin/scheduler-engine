@@ -5,14 +5,19 @@ import java.lang.Thread.currentThread
 import org.joda.time.Instant
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 object SchedulerThreadFutures {
 
   def inSchedulerThread[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): A =
+    Await.result(directOrSchedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf)
+
+  /** Executes f, directly if in JobScheduler thread, else by CallQueue. */
+  def directOrSchedulerThreadFuture[A](f: ⇒ A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =
     if (isInSchedulerThread)
-      f
+      Future.fromTry(Try { f })
     else
-      Await.result(schedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf)   // Vielleicht mit close() in Scheduler gelöst: FIXME Bei Scheduler-Ende kann es noch passieren, dass die Future nicht endet. Tests terminieren damit nicht. Eigentlich sollte tryCancel() wirken.
+      schedulerThreadFuture(f)(schedulerThreadCallQueue)
 
   def isInSchedulerThread(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) =
     currentThread == schedulerThreadCallQueue.cppThread

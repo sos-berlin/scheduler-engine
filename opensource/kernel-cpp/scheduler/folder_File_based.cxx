@@ -248,19 +248,23 @@ void File_based::on_prepare_to_remove()
 
 //------------------------------------------------------------------------File_based::on_remove_now
 
-void File_based::on_remove_now()
+bool File_based::on_remove_now()
 {
+    return true;
 }
 
 //---------------------------------------------------------------------------File_based::remove_now
 
-void File_based::remove_now()
+bool File_based::remove_now()
 {
     ptr<File_based> me = this;
 
-    on_remove_now();
-    typed_folder()->remove_file_based( this );
-    subsystem()->dependencies()->announce_requisite_removed( this ); 
+    bool removed = on_remove_now();
+    if (removed) {
+        typed_folder()->remove_file_based( this );
+        subsystem()->dependencies()->announce_requisite_removed( this ); 
+    }
+    return removed;
 }
 
 //-------------------------------------------------------------------------------File_based::remove
@@ -285,8 +289,7 @@ bool File_based::remove( Remove_flag remove_flag )
     {
         _remove_xc = zschimmer::Xc();
 
-        remove_now();
-        result = true;
+        result = remove_now();
     }
     else  
     {
@@ -341,8 +344,8 @@ bool File_based::replace_with( File_based* file_based_replacement )
 
     if( can_be_replaced_now() )
     {
-        replace_now();
-        result = true;
+        File_based* replacement = replace_now();
+        result = replacement != NULL;
     }
     else  
         log()->info( message_string( "SCHEDULER-888", subsystem()->object_type_name() ) );
@@ -370,15 +373,25 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
                 
                 if( ok  &&  can_be_replaced_now() )
                 {
-                    if( when_to_act == act_now )  replace_now();
-                                            else  typed_folder()->add_to_replace_or_remove_candidates( *this );
+                    File_based* replacement = NULL;
+                    if( when_to_act == act_now ) {
+                        replacement = replace_now();
+                    }
+                    if (!replacement) {
+                        typed_folder()->add_to_replace_or_remove_candidates(*this);
+                    }
                 }
             }
             else
             if( is_to_be_removed()  &&  can_be_removed_now() )
             {
-                if( when_to_act == act_now )  remove_now();
-                                        else  typed_folder()->add_to_replace_or_remove_candidates( *this );
+                bool removed = false;
+                if( when_to_act == act_now ) {
+                    removed = remove_now();
+                }
+                if (!removed) {
+                    typed_folder()->add_to_replace_or_remove_candidates( *this );
+                }
             }
         }
     }
@@ -412,7 +425,7 @@ File_based* File_based::on_replace_now()
 {
     Typed_folder*   typed_folder = this->typed_folder();
     ptr<File_based> replacement  = this->replacement();
-
+    assert(replacement);
     assert( can_be_replaced_now() );
 
     typed_folder->remove_file_based( this );
@@ -433,22 +446,26 @@ File_based* File_based::replace_now()
     Base_file_info file_info = replacement->base_file_info();
 
     File_based* new_file_based = on_replace_now();
+    if (!new_file_based) {
+        log()->info(message_string("SCHEDULER-888", subsystem()->object_type_name()));   // "Cannot be replaced now"
+    } else {
+        if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
+        {                                       
+            set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
+            _source_xml_bytes  = replacement->_source_xml_bytes;
+            _base_file_xc      = zschimmer::Xc();
+            _base_file_xc_time = 0;
+            if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
+        }
+        else
+        {
+            // this ist ungültig
+        }
+        if (jobject sister = new_file_based->java_sister())
+            new_file_based->report_event_code(fileBasedReplacedEvent, sister);
 
-    if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
-    {                                       
-        set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
-        _source_xml_bytes  = replacement->_source_xml_bytes;
-        _base_file_xc      = zschimmer::Xc();
-        _base_file_xc_time = 0;
-        if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
+        new_file_based->activate();
     }
-    else
-    {
-        // this ist ungültig
-    }
-
-    //SS: replacement->report_event_replace ... (weil "this" ungültig)
-    new_file_based->activate();
     return new_file_based;
 }
 
@@ -589,6 +606,14 @@ void File_based::set_dom(const xml::Element_ptr&)
     z::throw_xc("set_dom() not implemented");   // Entweder set_xml() oder set_dom() überschreiben!
 }
 
+
+void File_based::set_last_write_time(const xml::Element_ptr& element) {
+    if (element.hasAttribute("last_write_time")) {
+        if (_base_file_info._last_write_time) z::throw_xc(Z_FUNCTION);
+        _base_file_info._last_write_time = Time::of_utc_date_time(element.getAttribute("last_write_time")).as_utc_time_t();
+    }
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
@@ -597,17 +622,17 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
     result.setAttribute( "state", file_based_state_name() );
 
-    if( has_base_file() )
-    {
-        result.setAttribute_optional( "file", _base_file_info._path );
-        if( _file_is_removed )  result.setAttribute( "removed", "yes" );
-
+    if (is_file_based()) {
         Time t;
-        t.set_utc( _base_file_info._last_write_time );
-        result.setAttribute( "last_write_time", t.xml_value() );
-
-        if( base_file_has_error() )  result.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
+        t.set_utc(_base_file_info._last_write_time);
+        result.setAttribute("last_write_time", t.xml_value());
+        if( has_base_file() ) {
+            result.setAttribute_optional( "file", _base_file_info._path );
+            if( _file_is_removed )  result.setAttribute( "removed", "yes" );
+            if( base_file_has_error() )  result.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
+        }
     }
+
 
     if( has_includes() )  result.appendChild( Has_includes::dom_element( document, show_what ) );
 

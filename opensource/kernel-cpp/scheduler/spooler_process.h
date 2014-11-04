@@ -4,6 +4,9 @@
 #define __SPOOLER_PROCESS_H
 
 #include "../zschimmer/com_remote.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__processclass__ProcessClass.h"
+
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::processclass::ProcessClass ProcessClassJ;
 
 namespace sos {
 namespace scheduler {
@@ -76,7 +79,7 @@ struct Local_api_process : virtual Api_process {
 //----------------------------------------------------------------------Process_class_configuration
 
 struct Process_class_configuration : idispatch_implementation< Process_class, spooler_com::Iprocess_class >,
-                                     file_based< Process_class_configuration, Process_class_folder, Process_class_subsystem >
+                                     file_based< Process_class, Process_class_folder, Process_class_subsystem >
 {
                                 Process_class_configuration ( Scheduler*, const string& name = "" );
 
@@ -89,11 +92,9 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
 
     virtual void            set_remote_scheduler_address    ( const string& );
     const string&               remote_scheduler_address    () const                                { return _remote_scheduler_address; }
-    bool                        is_remote_host              () const                                { return !_remote_scheduler_address.empty(); }
 
     string                      obj_name                    () const;
 
-    void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     // spooler_com::Iprocess_class:
@@ -108,6 +109,8 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
 
   protected: 
+    protected: virtual bool is_http_or_multiple(const string& remote_scheduler_address) const = 0;
+
     Fill_zero                  _zero_;
 
     int                        _max_processes;
@@ -164,6 +167,18 @@ struct Process_class : Process_class_configuration,
     Process_set&                process_set                 () { return _process_set; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    void set_dom(const xml::Element_ptr&);
+
+    bool is_remote_host() const { 
+        return !_remote_scheduler_address.empty() || typed_java_sister().hasMoreAgents(); 
+    }
+
+    const ProcessClassJ& typed_java_sister() const {
+        return _typed_java_sister;
+    }
+
+    protected: bool is_http_or_multiple(const string& remote_scheduler_address) const;
+
   private:
     friend struct               Process_class_subsystem;
 
@@ -174,6 +189,7 @@ struct Process_class : Process_class_configuration,
 
     Process_set                _process_set;
     int                        _process_set_version;
+    ProcessClassJ _typed_java_sister;
 };
 
 //-----------------------------------------------------------------------------Process_class_folder

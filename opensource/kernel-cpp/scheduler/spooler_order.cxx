@@ -427,6 +427,12 @@ void Database_order_detector::request_order()
     set_alarm();
 }
 
+void Order_subsystem_impl::wake_distributed_order_processing() {
+    if (_database_order_detector) {
+        _database_order_detector->set_alarm();
+    }
+}
+
 //------------------------------------------------------------------------------new_order_subsystem
 
 ptr<Order_subsystem> new_order_subsystem( Scheduler* scheduler )
@@ -655,20 +661,16 @@ bool Order_subsystem_impl::has_any_order()
     return false;
 }
 
-//---------------------------------------------------Order_subsystem_impl::load_order_from_database
 
-ptr<Order> Order_subsystem_impl::load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
-    ptr<Order> result = try_load_order_from_database( outer_transaction, job_chain_path, order_id, flag );
-
+    ptr<Order> result = try_load_distributed_order_from_database( outer_transaction, job_chain_path, order_id, flag );
     if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_path );
-
     return result;
 }
 
-//-----------------------------------------------Order_subsystem_impl::try_load_order_from_database
 
-ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::try_load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
     if ((flag & lo_lock) && !outer_transaction) z::throw_xc(Z_FUNCTION, "lock without transaction");
 
@@ -1177,7 +1179,7 @@ void Node::set_action_complete(const string& action) {
     if (ok) {
         database_record_store();
         if (cluster::Cluster_subsystem_interface* cluster = spooler()->_cluster)
-            cluster->tip_all_other_members_for_job_chain_node(_job_chain->path(), _order_state.as_string());
+            cluster->tip_all_other_members_for_job_chain_or_node(_job_chain->path(), _order_state.as_string());
     }
 }
 
@@ -1587,6 +1589,16 @@ void Order_queue_node::wake_orders()
 {
     if( Order* order = _order_queue->first_processable_order() )
         order->handle_changed_processable_state();
+}
+
+//----------------------------------------------------------------------------Job_node::wake_orders
+
+void Job_node::wake_orders()
+{
+    if (_job) {
+        _job->on_order_possibly_available();
+    }
+    Order_queue_node::wake_orders();
 }
 
 //----------------------------------------------------------------------------Job_node::dom_element
@@ -2062,7 +2074,7 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
 
     if( element.nodeName_is( "job_chain.modify" ) )
     {
-        if( _is_distributed )  z::throw_xc( "SCHEDULER-384", obj_name(), "job_chain.modify" );
+        //if( _is_distributed )  z::throw_xc( "SCHEDULER-384", obj_name(), "job_chain.modify" );
 
         string new_state = element.getAttribute( "state" );
         
@@ -2081,15 +2093,20 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
             z::throw_xc( "SCHEDULER-391", "state", new_state, "running, stopped" );
 
         database_record_store();
+        if (cluster::Cluster_subsystem_interface* cluster = spooler()->_cluster) {
+            cluster->tip_all_other_members_for_job_chain_or_node(path(), "");
+        }
         return command_processor->_answer.createElement( "ok" );
     }
     else
     if (element.nodeName_is("job_chain.check_distributed")) {
-        string order_state = element.getAttribute_mandatory("order_state");
-        Node* node = node_from_state(Order::State(order_state));
         order_subsystem()->reread_distributed_job_chain_from_database(this);
-        order_subsystem()->reread_distributed_job_chain_nodes_from_database(this, node);
-        tip_for_new_distributed_order(order_state, Time(0));
+        string order_state = element.getAttribute_mandatory("order_state");
+        if (order_state != "") {
+            Node* node = node_from_state(Order::State(order_state));
+            order_subsystem()->reread_distributed_job_chain_nodes_from_database(this, node);
+            tip_for_new_distributed_order(order_state, Time(0));
+        }
         return command_processor->_answer.createElement( "ok" );
     }
     else
@@ -3079,9 +3096,10 @@ void Job_chain::on_prepare_to_remove()
 
 //-------------------------------------------------------------------------Job_chain::on_remove_now
 
-void Job_chain::on_remove_now()
+bool Job_chain::on_remove_now()
 {
     if( remove_flag() != rm_temporary )  database_record_remove();
+    return true;
 }
 
 //--------------------------------------------------------------------Job_chain::can_be_removed_now
@@ -3364,6 +3382,9 @@ void Job_chain::wake_orders()
 {
     if( _state == s_active  &&  !_is_stopped ) {
         Z_FOR_EACH( Node_list, _node_list, n )  (*n)->wake_orders();
+    }
+    if (order_subsystem()->orders_are_distributed() && !_is_stopped) {
+        order_subsystem()->wake_distributed_order_processing();
     }
 }
 
@@ -4381,6 +4402,8 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     assert( occupying_task );
     _has_tip_for_new_order = false;
 
+    check_orders_for_replacing_or_removing(File_based::act_now);
+
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
     ptr<Order> order = first_immediately_processable_order(untouched_is_allowed, now);
@@ -4406,6 +4429,25 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     }
 
     return order;
+}
+
+
+void Order_queue::check_orders_for_replacing_or_removing(File_based::When_to_act when_to_act) {
+    // Für den Fall, dass die Konfigurationsdatei eines verteilten Auftrags geändert worden war, als der Auftrag auf einem anderen Scheduler ausgeführt wurde,
+    // dieser Scheduler also seitdem nichts mehr mit dem Auftrag zu tun hatte. 
+    // Dann holen wir jetzt die anstehende Ersetzung der Konfigurationsdatei nach.
+    if (_order_queue_node) {
+        string normalized_job_chain_path = _spooler->order_subsystem()->normalized_path(_job_chain->path());
+        Standing_order_subsystem::File_based_map order_map = _spooler->standing_order_subsystem()->_file_based_map;
+        Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, order_map, i) {
+            Order* o = i->second;
+            if (_spooler->order_subsystem()->normalized_path(o->_job_chain_path) == normalized_job_chain_path && 
+                o->_state == _order_queue_node->order_state()) 
+            {
+                o->check_for_replacing_or_removing_with_distributed(when_to_act);
+            }
+        }
+    }
 }
 
 //--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database

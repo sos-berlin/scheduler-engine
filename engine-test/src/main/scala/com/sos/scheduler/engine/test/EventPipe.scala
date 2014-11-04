@@ -1,17 +1,17 @@
 package com.sos.scheduler.engine.test
 
-import EventPipe._
 import _root_.scala.annotation.tailrec
+import _root_.scala.collection.{immutable, mutable}
 import _root_.scala.reflect.ClassTag
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
+import com.sos.scheduler.engine.test.EventPipe._
+import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import org.joda.time.Instant.now
-import org.joda.time.{ReadableDuration, Duration}
+import org.joda.time.{Duration, ReadableDuration}
 
 final class EventPipe(eventBus: EventBus, defaultTimeout: Duration)
 extends EventHandlerAnnotated with AutoCloseable {
@@ -37,6 +37,14 @@ extends EventHandlerAnnotated with AutoCloseable {
 
   def nextWithTimeoutAndCondition[E <: Event : ClassTag](timeout: Duration)(condition: E ⇒ Boolean): E =
     nextEvent[E](timeout, condition)
+
+  /** @return All so far queued events of type E. */
+  def queued[E <: Event : ClassTag]: immutable.Seq[E] = {
+    val result = mutable.ListBuffer[E]()
+    try while (true) result += nextEvent2(0.s, everyEvent, implicitClass[E])
+    catch { case _: TimeoutException ⇒ }
+    result.toList
+  }
 
   private def nextEvent[E <: Event : ClassTag](timeout: Duration, predicate: E ⇒ Boolean): E =
     nextEvent2(timeout, predicate, implicitClass[E])

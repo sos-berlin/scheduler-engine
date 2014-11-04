@@ -162,6 +162,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native boolean _order_distributed_balanced__native(long cppReference);
 
 
+    @Override public int _remote_scheduler_connect_retry_delay() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return _remote_scheduler_connect_retry_delay__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int _remote_scheduler_connect_retry_delay__native(long cppReference);
+
+
     @Override public int _supervisor_configuration_polling_interval() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

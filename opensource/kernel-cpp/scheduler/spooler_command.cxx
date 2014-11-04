@@ -1189,7 +1189,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         order = job_chain->order_or_null( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
-            order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem::lo_allow_occupied);
+            order = _spooler->order_subsystem()->try_load_distributed_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem::lo_allow_occupied);
     }
 
     if( !order  &&  _spooler->db()->opened() )
@@ -1304,7 +1304,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
                                                   : job_chain->order( id );
     if (!order  &&  job_chain->is_distributed()) {
         // FIXME Order_subsystem::lo_lock JS-1218 <modify_order> on distributed order does not lock order against concurrent modification
-        order = _spooler->order_subsystem()->load_order_from_database((Transaction*)NULL, job_chain_path, id);  // Exception, wenn von einem Scheduler belegt
+        order = _spooler->order_subsystem()->load_distributed_order_from_database((Transaction*)NULL, job_chain_path, id);  // Exception, wenn von einem Scheduler belegt
     }
     assert(order);
     if (modify_order_element.getAttribute("action") == "reset") {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
@@ -1352,7 +1352,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if (job_chain && job_chain->orders_are_recoverable()) {
         order->persist();
         for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
-            if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
+            if (order->finished() && !order->is_file_based() && !order->is_on_blacklist()) {
                 order->remove_from_job_chain(Order::jc_remove_from_job_chain_stack, &ta);
                 order->close();
             } else {
@@ -1401,7 +1401,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             //if( ta.record_count() == 0 )
             //{
             //    // Sollte Exception auslösen: nicht da oder belegt
-            //    _spooler->order_subsystem()->load_order_from_database( job_chain_path, id );
+            //    _spooler->order_subsystem()->load_distributed_order_from_database( job_chain_path, id );
             //    
             //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
             //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
@@ -1778,7 +1778,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
                             if( !order  &&  job_chain->is_distributed() ) 
                             {
-                                order = _spooler->order_subsystem()->try_load_order_from_database((Transaction*)NULL, job_chain_path, order_id, Order_subsystem::lo_allow_occupied);
+                                order = _spooler->order_subsystem()->try_load_distributed_order_from_database((Transaction*)NULL, job_chain_path, order_id, Order_subsystem::lo_allow_occupied);
 
                                 if( order )
                                 {

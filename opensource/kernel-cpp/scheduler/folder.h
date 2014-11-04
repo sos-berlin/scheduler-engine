@@ -197,6 +197,7 @@ struct File_based : Abstract_scheduler_object,
     Typed_folder*               typed_folder                () const                                { return _typed_folder; }
     Folder*                     folder                      () const;
     bool                        has_base_file               () const                                { return _base_file_info._filename != ""; }
+    bool                        is_file_based               () const                                { return _base_file_info._last_write_time != 0; }  // Verteilte Aufträge können dateibasiert, aber auf einem Scheduler ohne Datei sein.
     const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
     bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
     const zschimmer::Xc&        base_file_exception         () const                                { return _base_file_xc; }
@@ -247,7 +248,7 @@ struct File_based : Abstract_scheduler_object,
     bool                        remove                      ( Remove_flag = rm_standard );
     void                        remove_base_file            ();
 
-    void                        remove_now                  ();
+    bool                        remove_now                  ();
     File_based*                 replace_now                 ();
 
     void                        handle_event                ( Base_file_event );
@@ -261,7 +262,7 @@ struct File_based : Abstract_scheduler_object,
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
 
-    virtual void                on_remove_now               ();
+    virtual bool                on_remove_now               ();
     virtual void                on_prepare_to_remove        ();
     virtual bool                can_be_removed_now          ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ();
@@ -281,6 +282,7 @@ struct File_based : Abstract_scheduler_object,
   protected:
     void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
     void                    set_file_based_state            ( State );
+    void set_last_write_time(const xml::Element_ptr&);
 
     Fill_zero                  _zero_;
     Visibility                 _visible;
@@ -804,8 +806,8 @@ struct file_based_subsystem : File_based_subsystem
         _file_based_map[ casted_old_file_based->normalized_path() ] = casted_new_file_based;
         increment_file_based_version();
 
-        if (jobject sister = new_file_based->java_sister())
-            report_event_code(fileBasedReplacedEvent, sister);
+        //if (jobject sister = new_file_based->java_sister())
+        //    report_event_code(fileBasedReplacedEvent, sister);
     }
 
 

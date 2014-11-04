@@ -59,8 +59,9 @@ struct Java_job : Job {
         return _cppNewJobJ.canBeRemovedNow();
     }
 
-    void on_remove_now() {
-        return _cppNewJobJ.onRemoveNow();
+    bool on_remove_now() {
+        _cppNewJobJ.onRemoveNow();
+        return true;
     }
 
     z::Xc remove_error() {

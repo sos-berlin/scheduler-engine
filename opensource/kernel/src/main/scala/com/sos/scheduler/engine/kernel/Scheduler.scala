@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -32,11 +32,10 @@ import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
-import com.sos.scheduler.engine.kernel.util.{ResourcePath, MavenProperties}
+import com.sos.scheduler.engine.kernel.util.MavenProperties
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
-import java.net.URI
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
@@ -150,8 +149,7 @@ with HasCloser {
   }
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
-    val client = injector.apply[HttpSchedulerCommandClient.Factory].apply(new URI(uri))
-    val future = client.execute(SafeXML.load(new ByteArrayInputStream(bytes)))
+    val future = injector.apply[HttpSchedulerCommandClient].execute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
     val response: String = Await.result(future, Duration.Inf)
     System.out.println(response)
   }
@@ -181,11 +179,16 @@ with HasCloser {
 
   def terminate(): Unit = {
     if (!isClosed) {
-      try cppProxy.cmd_terminate()
-      catch {
-        case x: CppProxyInvalidatedException ⇒
-          logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed")
+      directOrSchedulerThreadFuture {
+        if (!isClosed) {
+          try cppProxy.cmd_terminate()
+          catch {
+            case x: CppProxyInvalidatedException ⇒
+              logger.trace("Scheduler.terminate() ignored because C++ object has already been destroyed")
+          }
+        }
       }
+      // Return immediately, discarding the future
     }
   }
 

@@ -187,6 +187,23 @@ static jboolean JNICALL _1order_1distributed_1balanced(JNIEnv* jenv, jobject, jl
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jint JNICALL _1remote_1scheduler_1connect_1retry_1delay(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_remote_scheduler_connect_retry_delay()");
+        return (o_->_remote_scheduler_connect_retry_delay);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jint JNICALL _1supervisor_1configuration_1polling_1interval(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -297,6 +314,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"_keep_order_content_on_reschedule__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1keep_1order_1content_1on_1reschedule },
     { (char*)"_max_length_of_blob_entry__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1max_1length_1of_1blob_1entry },
     { (char*)"_order_distributed_balanced__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1order_1distributed_1balanced },
+    { (char*)"_remote_scheduler_connect_retry_delay__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1remote_1scheduler_1connect_1retry_1delay },
     { (char*)"_supervisor_configuration_polling_interval__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1supervisor_1configuration_1polling_1interval },
     { (char*)"_use_java_persistence__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1java_1persistence },
     { (char*)"_use_old_microscheduling_for_jobs__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1jobs },
