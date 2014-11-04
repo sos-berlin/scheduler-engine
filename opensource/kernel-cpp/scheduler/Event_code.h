@@ -23,6 +23,8 @@ enum Event_code {
     orderSetBackEvent,
 
     orderStepStartedEvent,
+    orderNestedTouchedEvent,
+    orderNestedFinishedEvent,
 
     // Endemarke:
     end_event_code
