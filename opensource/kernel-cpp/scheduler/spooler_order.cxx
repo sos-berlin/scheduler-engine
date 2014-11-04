@@ -4068,7 +4068,7 @@ int Order_queue::number_of_touched_orders_obeying_max_orders() const
     FOR_EACH_CONST(Queue, _queue, it)
     {
         Order* order = *it;
-        if (order->is_touched() && !order->_ignore_max_orders) result++;
+        if (!order->_ignore_max_orders && order->is_touched_in_current_job_chain()) result++;
     }
     return result;
 }
@@ -4347,12 +4347,13 @@ Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed unt
     Z_FOR_EACH_CONST( Queue, _queue, o )
     {
         Order* order = *o;
-
-        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed || order->is_touched() || order->is_ignore_max_orders()))
-        {
-            result = order;
-            result->_setback = Time(0);
-            break;
+        if (order->is_immediately_processable(now)) {
+            if (order->is_ignore_max_orders() || 
+                (order->is_touched_in_current_job_chain() || untouched_is_allowed)) {
+                result = order;
+                result->_setback = Time(0);
+                break;
+            }
         }
 
         if( order->_setback > now )  break;

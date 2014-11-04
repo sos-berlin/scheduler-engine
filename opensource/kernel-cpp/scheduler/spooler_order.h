@@ -139,6 +139,11 @@ struct Order : Com_order,
 
     void                        touch                   (Task*);
     bool                        is_touched              () const                                    { return _is_touched; }
+
+    bool is_touched_in_current_job_chain() const { 
+        return _outer_job_chain_path.empty()? _is_touched : _is_nested_touched; 
+    }
+   
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
