@@ -8,11 +8,11 @@ import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.data.event.AbstractEvent;
 import org.junit.Test;
 
-public final class SchedulerEventBusTest {
+public final class SchedulerEventBusJavaTest {
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
     private final Annotated annotated = new Annotated();
 
-    public SchedulerEventBusTest() {
+    public SchedulerEventBusJavaTest() {
         eventBus.registerAnnotated(annotated);
     }
 
