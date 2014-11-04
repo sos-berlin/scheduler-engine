@@ -68,7 +68,7 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     protected final synchronized ImmutableCollection<Call> calls(Event e) {
-        Class<? extends Event> realEventClass = (e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e).getClass();
+        Class<? extends Event> realEventClass = (e instanceof EventSourceEvent<?>? ((EventSourceEvent<?>)e).event() : e).getClass();
         ImmutableList.Builder<Call> result = null;
         for (Class<? extends Event> c: allSuperEventClasses(realEventClass)) {
             for (EventSubscription s: subscribers.get(c)) {
@@ -86,7 +86,7 @@ public abstract class AbstractEventBus implements EventBus {
     private static boolean matches(EventSubscription s, Event e) {
         return !(s instanceof EventSourceMethodEventSubscription) ||
                 e instanceof EventSourceEvent &&
-                        ((EventSourceMethodEventSubscription)s).eventSourceMatches((EventSourceEvent) e);
+                        ((EventSourceMethodEventSubscription)s).eventSourceMatches((EventSourceEvent<?>)e);
     }
 
     public final boolean publishNow(Event e) {
