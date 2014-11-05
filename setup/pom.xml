@@ -127,7 +127,7 @@ call prepare-setup.sh <version> to use this pom
                         </goals>
                         <configuration>
                            <outputDirectory>${project.build.directory}/setup/scheduler/lib</outputDirectory>
-                           <excludeGroupIds>com.sos.scheduler.engine,org.hibernate</excludeGroupIds>
+                           <excludeGroupIds>com.sos.scheduler.engine,org.hibernate,org.jboss,dom4j,org.javassist,antlr</excludeGroupIds>
                            <excludeArtifactIds>${artifacts.jetty},${artifacts.lib.ignore}</excludeArtifactIds>
                            <includeScope>runtime</includeScope>
                         </configuration>
