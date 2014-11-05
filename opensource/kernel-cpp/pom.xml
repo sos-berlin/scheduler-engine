@@ -20,6 +20,27 @@
 
     <build>
         <plugins>
+        
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <executions>
+                  <execution>
+                      <id>aggregate-sources</id>
+                      <phase>initialize</phase>
+                      <goals>
+                          <goal>single</goal>
+                      </goals>
+                      <configuration>
+                          <descriptors>
+                            <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
+                          </descriptors>
+                          <appendAssemblyId>true</appendAssemblyId>
+                      </configuration>
+                  </execution>
+                </executions>
+            </plugin>
+                
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
