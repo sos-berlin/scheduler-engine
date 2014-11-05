@@ -299,31 +299,30 @@
     </dependencies>
 
     <profiles>
-
         <profile>
             <id>cpp-sources</id>
             <build>
-              <plugins>
-                <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-assembly-plugin</artifactId>
-                  <executions>
-                      <execution>
-                          <id>aggregate-sources</id>
-                          <phase>generate-sources</phase>
-                          <goals>
-                              <goal>single</goal>
-                          </goals>
-                          <configuration>
-                              <descriptors>
-                                <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
-                              </descriptors>
-                              <appendAssemblyId>true</appendAssemblyId>
-                          </configuration>
-                      </execution>
-                    </executions>
-                </plugin>
-              </plugins>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>aggregate-sources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
+                                    </descriptors>
+                                    <appendAssemblyId>true</appendAssemblyId>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
 

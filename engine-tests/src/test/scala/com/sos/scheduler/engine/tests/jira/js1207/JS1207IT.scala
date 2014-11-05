@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.test.SchedulerTestUtils.awaitSuccess
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js1207.JS1207IT._
@@ -16,8 +17,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Promise}
+import scala.concurrent.Promise
 
 /**
  * JS-1198 und JS-1207 max_orders in nested jobchains.
@@ -87,8 +87,7 @@ final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
         // Run as single batch for immediate processing
         for (i ← 1 to n) scheduler executeXml OrderCommand(outerJobchainPath orderKey OrderId(s"TEST-ORDER-$i"))
       }
-      //v1.8 awaitSuccess(promise.future)
-      Await.result(promise.future, 60.seconds)
+      awaitSuccess(promise.future)
       for ((jobchainPath, statistics) ← counters) withClue(s"$jobchainPath: ") {
         statistics.running shouldEqual 0
         statistics.inStep shouldEqual 0

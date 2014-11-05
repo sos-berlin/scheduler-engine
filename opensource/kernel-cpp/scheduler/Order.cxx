@@ -2446,7 +2446,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         }
 
         Node* node = job_chain->node_from_state( _state );
-
+        bool suspend = node->is_suspending_order();
 
         if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
 
@@ -2457,7 +2457,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
             _outer_job_chain_path = Absolute_path( root_path, job_chain->path() );
             _outer_job_chain_state = _state;
             job_chain = n->nested_job_chain();
-            _state = job_chain->first_node()->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
+            node = job_chain->first_node();
+            _state = node->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
         }
 
         {
@@ -2466,12 +2467,13 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
                 _log->info(message_string("SCHEDULER-859", referenced_node->order_state(), _state));
                 set_state2(referenced_node->order_state());
                 node = referenced_node;
+                suspend |= node->is_suspending_order();
             }
         }
 
         if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
 
-        if( node->is_suspending_order() )  {
+        if (suspend) {
             _suspended = true;   
             report_event_code(orderSuspendedEvent, java_sister());
         }
