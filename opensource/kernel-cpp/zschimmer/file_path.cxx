@@ -484,12 +484,12 @@ bool File_path::exists() const
     // Die Datei kann schon gelöscht sein (wenigstens bem Zugriff übers Netzwerk)
     // GetFileAttributes( path.c_str() ) != -1;
 
-    struct stat s;
+    OS_specific_file_stat s;
     string      path = *this;
     
     while( path != ""  &&  ( *path.rbegin() == '/'  ||  *path.rbegin() == Z_DIR_SEPARATOR[0] ) )  path.erase( path.length() - 1 );
 
-    int err = ::stat( path.c_str(), &s );
+    int err = file_status(path.c_str(), &s);
     return !err;
 }
 
@@ -729,7 +729,7 @@ void File_info::call_stat()
 bool File_info::try_call_stat()
 {
     bool         result              = false;
-    struct stat  stat_buf;
+    OS_specific_file_stat stat_buf;
     string       path                = _file_path;
     bool         should_be_directory = false;
 
@@ -742,7 +742,7 @@ bool File_info::try_call_stat()
         should_be_directory = true;
     }
 
-    int error = stat( _file_path.c_str(), &stat_buf );
+    int error = file_status(_file_path.c_str(), &stat_buf);
     if( !error )
     {
         read_stat( stat_buf );
@@ -760,11 +760,11 @@ bool File_info::try_call_stat()
 
 void File_info::call_fstat( int file_handle )
 {
-    struct stat  stat_buf;
+    OS_specific_file_stat stat_buf;
 
     memset( &stat_buf, 0, sizeof stat_buf );
 
-    int error = fstat( file_handle, &stat_buf );
+    int error = file_status(file_handle, &stat_buf);
     if( error )  throw_errno( errno, "stat", _file_path.c_str() );
 
     read_stat( stat_buf );
@@ -772,7 +772,7 @@ void File_info::call_fstat( int file_handle )
 
 //-----------------------------------------------------------------------------File_info::read_stat
 
-void File_info::read_stat( const struct stat& stat_buf )
+void File_info::read_stat(const OS_specific_file_stat& stat_buf)
 {
     set_create_time     ( stat_buf.st_ctime );
     set_last_write_time ( stat_buf.st_mtime );
