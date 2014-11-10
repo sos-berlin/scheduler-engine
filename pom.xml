@@ -93,7 +93,7 @@
                                     <packaging>jar</packaging>
                                     <classifier>sources</classifier>
                                     <file>
-                                        ${project.build.directory}/${project.artifactId}-${project.version}-sources.jar
+                                        ${project.build.directory}/${project.artifactId}-sources.jar
                                     </file>
                                     <repositoryId>${source.repo}</repositoryId>
                                     <url>${repositoryBase}/${source.repo}</url>
