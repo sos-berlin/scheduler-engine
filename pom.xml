@@ -95,6 +95,7 @@
                                     <file>
                                         ${project.build.directory}/${project.artifactId}-sources.jar
                                     </file>
+                                    <generatePom>false</generatePom>
                                     <repositoryId>${source.repo}</repositoryId>
                                     <url>${repositoryBase}/${source.repo}</url>
                                 </configuration>
