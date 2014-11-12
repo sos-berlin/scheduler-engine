@@ -21,6 +21,7 @@
                 <exclude>**/*.iml</exclude>
                 <exclude>**/*.sdf</exclude>
                 <exclude>**/*.suo</exclude>
+                <exclude>**/*.gch</exclude>
                 <exclude>scheduler/tests/**</exclude>
             </excludes>
         </fileSet>
