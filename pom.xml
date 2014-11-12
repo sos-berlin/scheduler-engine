@@ -88,10 +88,9 @@
                                 <inherited>false</inherited>
                                 <configuration>
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
+                                    <artifactId>${project.artifactId}-sources</artifactId>
                                     <version>${project.version}</version>
                                     <packaging>jar</packaging>
-                                    <classifier>sources</classifier>
                                     <file>
                                         ${project.build.directory}/${project.artifactId}-sources.jar
                                     </file>
