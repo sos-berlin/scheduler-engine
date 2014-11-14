@@ -134,7 +134,8 @@ double double_time_t_from_filetime( const FILETIME& filetime )
 
 time_t time_t_from_filetime( const FILETIME& filetime )
 {
-    return (time_t)double_time_t_from_filetime( filetime );
+    uint64 filetime64 = ((uint64)filetime.dwHighDateTime << 32) + filetime.dwLowDateTime;
+    return (filetime64 - base_filetime) / 10000000;
 }
 
 //-----------------------------------------------------------------------------filetime_from_time_t

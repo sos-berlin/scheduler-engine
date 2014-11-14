@@ -2,7 +2,8 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
     <params>
-        <include live_file="test-include.xml"/>
+        <include live_file="test-a-include.xml"/>
+        <include live_file="test-b-include.xml"/>
     </params>
     <script language="shell">exit 0</script>
 </job>

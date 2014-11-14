@@ -1322,7 +1322,21 @@ int file_status(const char* path, OS_specific_file_stat* stat_buf)
 int file_status(int file_des, OS_specific_file_stat* stat_buf)
 {
     #if defined Z_WINDOWS
-        return ::_fstati64(file_des, stat_buf);
+        int ret = ::_fstati64(file_des, stat_buf);
+        if (ret == 0) {
+            // JS-1141 GetFileTime verrechnet nach Sommerzeitumstellung eine Stunde. Wir rechnen selbst, ohne Sommerzeitumstellung.
+            errno = 0;
+            FILETIME creation_time, last_access_time, last_write_time;
+            int ok = GetFileTime((HANDLE)_get_osfhandle(file_des), &creation_time, &last_access_time, &last_write_time);
+            if (!ok) {
+                ret = 1;
+            } else {
+                stat_buf->st_ctime = windows::time_t_from_filetime(creation_time);
+                stat_buf->st_atime = windows::time_t_from_filetime(last_access_time);
+                stat_buf->st_mtime = windows::time_t_from_filetime(last_write_time);
+            }
+        }
+        return ret;
     #else
         return ::fstat(file_des, stat_buf);
     #endif
