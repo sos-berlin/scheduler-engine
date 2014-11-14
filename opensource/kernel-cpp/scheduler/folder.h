@@ -885,6 +885,8 @@ struct Folder_subsystem : Object,
     double                     _last_change_at;
 
     vector<Configuration>      _configurations;
+
+    bool                       _in_recursion;
 };
 
 
