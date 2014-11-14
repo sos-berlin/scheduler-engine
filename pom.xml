@@ -75,33 +75,6 @@
                         </executions>
                     </plugin>
 
-                    <!-- To deploy the aggregated sources -->
-                    <plugin>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>deploy-sources</id>
-                                <goals>
-                                    <goal>deploy-file</goal>
-                                </goals>
-                                <phase>deploy</phase>
-                                <inherited>false</inherited>
-                                <configuration>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}-sources</artifactId>
-                                    <version>${project.version}</version>
-                                    <packaging>jar</packaging>
-                                    <file>
-                                        ${project.build.directory}/${project.artifactId}-sources.jar
-                                    </file>
-                                    <generatePom>false</generatePom>
-                                    <repositoryId>${source.repo}</repositoryId>
-                                    <url>${repositoryBase}/${source.repo}</url>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
                 </plugins>
 
             </build>
