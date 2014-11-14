@@ -22,6 +22,15 @@
                 <exclude>**/*.sdf</exclude>
                 <exclude>**/*.suo</exclude>
                 <exclude>**/*.gch</exclude>
+                <exclude>**/*.opensdf</exclude>
+                <exclude>**/*.exp</exclude>
+                <exclude>**/*.lib</exclude>
+                <exclude>**/*.ncb</exclude>
+                <exclude>/scripting_engine/spidermonkey_h.h</exclude>
+                <exclude>/scripting_engine/spidermonkey_i.c</exclude>
+                <exclude>/scripting_engine/spidermonkey.aps</exclude>
+                <exclude>/zschimmer/java_h.h</exclude>
+                <exclude>/zschimmer/java_i.c</exclude>
                 <exclude>scheduler/tests/**</exclude>
             </excludes>
         </fileSet>
