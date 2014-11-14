@@ -1324,7 +1324,7 @@ int file_status(int file_des, OS_specific_file_stat* stat_buf)
     #if defined Z_WINDOWS
         int ret = ::_fstati64(file_des, stat_buf);
         if (ret == 0) {
-            // JS-1141 GetFileTime verrechnet nach Sommerzeitumstellung eine Stunde. Wir rechnen selbst, ohne Sommerzeitumstellung.
+            // JS-1141 _fstati64 verrechnet nach Sommerzeitumstellung eine Stunde. Wir rechnen selbst, ohne Sommerzeitumstellung.
             errno = 0;
             FILETIME creation_time, last_access_time, last_write_time;
             int ok = GetFileTime((HANDLE)_get_osfhandle(file_des), &creation_time, &last_access_time, &last_write_time);
