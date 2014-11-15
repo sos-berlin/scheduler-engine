@@ -13,15 +13,14 @@ import java.net.URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class CommandBuilderTest {
+public final class CommandBuilderTest {
+
+    private static final String expectedBuildCommandAddOrder = "com/sos/scheduler/engine/test/util/CommandBuilder-expectedAddOrder.txt";
+    private static final String expectedBuildCommandAddOrderWithParams = "com/sos/scheduler/engine/test/util/CommandBuilder-expectedAddOrderWithParams.txt";
+    private static final String expectedBuildCommandAddOrderWithParams2 = "com/sos/scheduler/engine/test/util/CommandBuilder-expectedAddOrderWithParams2.txt";
+    private static final String expectedBuildCommandStartJobImmidiately = "com/sos/scheduler/engine/test/util/CommandBuilder-expectedStartJobImmediately.txt";
 
     private final CommandBuilder util = new CommandBuilder();
-
-    private static final String packageRoot = "com/sos/scheduler/engine/test/util/";
-    private static final String expectedBuildCommandAddOrder = packageRoot + "expectedBuildCommandAddOrder.txt";
-    private static final String expectedBuildCommandAddOrderWithParams = packageRoot + "expectedBuildCommandAddOrderWithParams.txt";
-    private static final String expectedBuildCommandAddOrderWithParams2 = packageRoot + "expectedBuildCommandAddOrderWithParams2.txt";
-    private static final String expectedBuildCommandStartJobImmidiately = packageRoot + "expectedBuildCommandStartJobImmidiately.txt";
 
     @Test
     public void addOrderTest() throws IOException {
@@ -50,7 +49,7 @@ public class CommandBuilderTest {
     }
 
     @Test
-    public void showCalendarTest() throws IOException {
+    public void showCalendarTest() {
         int duration = 60;
         String command = util.showCalendar(duration, What.orders).getCommand();
         DateTime begin = util.getLastBegin();
@@ -69,5 +68,4 @@ public class CommandBuilderTest {
         String expectedCommand = Resources.toString(expectedURL, SchedulerConstants.defaultEncoding);
         assertEquals(expectedCommand,command);
     }
-
 }

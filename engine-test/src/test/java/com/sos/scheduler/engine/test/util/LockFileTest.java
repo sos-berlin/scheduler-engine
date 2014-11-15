@@ -11,7 +11,7 @@ import java.util.Observer;
 
 public class LockFileTest implements Observer {
 	
-	private final static String lockfile = "com/sos/scheduler/engine/test/util/fileToLock.txt";
+	private final static String lockfile = "com/sos/scheduler/engine/test/util/LogFile.txt";
 	private RuntimeException result = null;
 
 	/**
