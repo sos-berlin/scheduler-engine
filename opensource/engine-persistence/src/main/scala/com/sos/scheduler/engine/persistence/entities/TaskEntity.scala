@@ -1,10 +1,6 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import com.google.common.base.Strings.{emptyToNull, nullToEmpty}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskPersistentState}
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
-import com.sos.scheduler.engine.persistence.SchedulerDatabases._
-import java.util.{Date => JavaDate}
+import java.util.{Date ⇒ JavaDate}
 import javax.annotation.Nullable
 import javax.persistence.TemporalType._
 import javax.persistence._
@@ -40,7 +36,7 @@ class TaskEntity {
   @Column(name=""""ENQUEUE_TIME"""") @Temporal(TIMESTAMP) @Nullable   // Entgegen der Tabellendefinition ist das Feld immer gefüllt.
   var enqueueTime: JavaDate = _
 
-  @Column(name=""""START_AT_TIME"""", nullable=false) @Temporal(TIMESTAMP)
+  @Column(name=""""START_AT_TIME"""") @Temporal(TIMESTAMP)
   var startTime: JavaDate = _
 
   @Column(name=""""PARAMETERS"""") @Lob @Nullable
