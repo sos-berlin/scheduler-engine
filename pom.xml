@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>engine</artifactId>
@@ -17,6 +18,9 @@
 
     <properties>
         <sos.jars.version>2136</sos.jars.version>            <!-- verwendete Version der jar Files der SOS, vorher mit setup/deploy-sos-jars deployen: ant -f deploy-sos-jars.xml -Djar.version=x.x.xx.xxxx -->
+
+        <!-- To deploy the aggregated sources into the release repository set -Dsource-repo=sos-release -->
+        <source.repo>snapshots</source.repo>
     </properties>
 
     <modules>
@@ -46,7 +50,34 @@
             </plugin>
         </plugins>
     </build>
-	
+
+    <!-- Merge von v1.7 - Soll das auch in die v1.8?
+    <profiles>
+        <profile>
+        <!- - This profile is for collecting the sources of all artifacts in one jar (in the install phase). In case of deployment the sources will also deployed - ->
+            <id>collect-sources</id>
+            <build>
+                <plugins>
+                    <!- - Aggregate the source of all artifacts - ->
+                    <plugin>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>aggregate-sources</id>
+                                <goals>
+                                    <goal>aggregate</goal>
+                                </goals>
+                                <phase>deploy</phase>
+                                <inherited>false</inherited>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profile>
+    -->
+
     <scm>
         <!-- Falls release:prepare <scm> geändert hat (die Versionsbezeichnungen angehängt hat), so soll es für Snapshot aussehen:
         <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>

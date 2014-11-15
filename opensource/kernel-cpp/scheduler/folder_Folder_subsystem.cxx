@@ -179,6 +179,9 @@ xml::Element_ptr Folder_subsystem::execute_xml( const xml::Element_ptr& element 
 
 bool Folder_subsystem::handle_folders(const Duration& minimum_age, bool update_now)
 {
+    if (_in_recursion) z::throw_xc("SCHEDULER-184"); // JS-1176
+    In_recursion in_recursion = &_in_recursion;
+
     bool something_changed = false;
 
     if( subsystem_state() == subsys_loaded  ||

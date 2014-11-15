@@ -15,7 +15,6 @@
 #endif
 
 
-
 namespace zschimmer {
 
 struct Has_log;
@@ -55,6 +54,9 @@ string                          directory_of_path           ( const string& path
 string                          filename_of_path            ( const string& path );
 string                          basename_of_path            ( const string& path );
 string                          extension_of_path           ( const string& path );
+
+int                             file_status                 (const char* path, OS_specific_file_stat* stat_buf);
+int                             file_status                 (int file_des, OS_specific_file_stat* stat_buf);
 
 //----------------------------------------------------------------------------------------File_base
 

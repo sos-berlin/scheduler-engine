@@ -3,10 +3,9 @@
 #ifndef __ZSCHIMMER_FILE_PATH_H
 #define __ZSCHIMMER_FILE_PATH_H
 
+#include <sys/stat.h>
 #include "message.h"
-
-
-struct stat;
+#include "system.h"
 
 
 namespace zschimmer {
@@ -14,6 +13,12 @@ namespace zschimmer {
 struct Has_log;
 
 namespace file {
+
+#if defined Z_WINDOWS
+    typedef struct _stati64 OS_specific_file_stat;
+#else
+    typedef struct stat OS_specific_file_stat;
+#endif
 
 //-------------------------------------------------------------------------------------------------
 
@@ -102,7 +107,7 @@ struct File_info : Object
 
     bool                        try_call_stat               ();
     void                        call_stat                   ();
-    void                        read_stat                   ( const struct stat& );
+    void                        read_stat                   ( const OS_specific_file_stat& );
     void                        call_fstat                  ( int file_handle );
 
 

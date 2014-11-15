@@ -974,7 +974,7 @@ Bool is_absolute_filename( const char* filename )
 bool file_exists( const Sos_string& filename )
 {
 #   if defined SYSTEM_WIN
-        struct ::_stat st;
+        struct _stati64 st;
 #    else
         struct stat st;
 #   endif
@@ -982,7 +982,7 @@ bool file_exists( const Sos_string& filename )
     memset( &st, 0, sizeof st );
 
 #   if defined SYSTEM_WIN
-        int err = ::_stat( c_str(filename), &st );
+        int err = ::_stati64(c_str(filename), &st);
 #    else
         int err = ::stat( c_str(filename), &st );
 #   endif
