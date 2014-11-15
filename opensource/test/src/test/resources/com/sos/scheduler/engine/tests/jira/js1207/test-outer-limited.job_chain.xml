@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
-    max_orders="2"
->
-    <job_chain_node.job_chain state="10" job_chain="test-inner-a"/>
-    <job_chain_node.job_chain state="20" job_chain="test-inner-b"/>
-    <job_chain_node.job_chain state="30" job_chain="test-inner-c"/>
-</job_chain>
