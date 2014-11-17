@@ -758,41 +758,22 @@ void Communication::remove_connection( Connection* connection )
 int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const string& tcp_or_udp )
 {
     int ret;
-    int true_ = 1;
-
     string port_name = tcp_or_udp + "-port " + as_string( ntohs( sa->sin_port ) );
 
-    if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
-    {
-        // Zutun: Beachte Unterschied zwischen SO_REUSEPORT und SO_REUSEADDR (http://www.unixguide.net/network/socketfaq/4.11.shtml)
-        // und wie Windows und Unix sie auf ihre Weise behandeln.
-        // Siehe http://msdn.microsoft.com/en-us/library/ms740621(VS.85).aspx
-        // Es scheint so zu sein, dass unter Unix (Suse 9.1, HP-UX 11 Itanium) SO_REUSEADDR ungefährlich ist und diese FIN_WAIT_2-Wartezeit vermeidet.
+    #if !defined Z_WINDOWS
+        if (_spooler->_reuse_addr) {  // Normally true
+            // Beachte Unterschied zwischen SO_REUSEPORT und SO_REUSEADDR (http://www.unixguide.net/network/socketfaq/4.11.shtml)
+            // und wie Windows und Unix sie auf ihre Weise behandeln.
+            // Siehe http://msdn.microsoft.com/en-us/library/ms740621(VS.85).aspx
 
-        // Unter Windows sollte SO_EXCLUSIVEADDRUSE gesetzt werden, damit der Port exklusiv dem Scheduler zugeordnet bleibt.
-        // Aber dann bekommen wir anscheinend das FIN_WAIT_2-Problem beim Neustart des Schedulers.
-
-        // Unter Unix (Suse 9.1) wirkt SO_REUSEADDR offenbar nur, wenn der vorherige und der neue Scheduler diese Option setzen.
-        // Gleichzeitiger Start wird dennoch abgewiesen, so dass ein SO_EXCLUSIVEADDRUSE wie unter Windows nicht gebraucht wird.
-
-        // Könnte eine Lösung des FIN_WAIT_2-Problems sein:
-        // shutdown( socket, SHUT_WR );                             // EOF senden
-        // while( 0 == recv( socket, buffer, sizeof buffer ) );     // Warten, bis Gegenstelle EOF gesendet hat
-        // close( socket );
-
-        // Vielleicht kann man SO_REUSEADDR noch setzen, wenn die recv-Schleife nicht in einer Frist endet.
-        // Der nächste Scheduler öffnet dann erst ohne SO_REUSEADDR, und wenn er den Port nicht bekommt, mit SO_REUSEADDR (mit Meldung).
-        // Das vielleicht nur fürs bind(), danach SO_REUSEADDR wieder zurücknehmen.
-        
-        // Offene http://../show_log?-Ausgaben vorher vielleicht noch ausgeben.
-
-        _spooler->log()->warn( message_string( "SCHEDULER-288", port_name ) );
-        z::Log_ptr log ( "scheduler" );
-        log << "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  ";
-        ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
-        log << "ret=" << ret;  if( ret == SOCKET_ERROR )  log << "  errno=" << errno << "  "  << z_strerror(errno);
-        log << "\n";
-    }
+            z::Log_ptr log ( "scheduler" );
+            log << "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  ";
+            int true_ = 1;
+            ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+            log << "ret=" << ret;  if( ret == SOCKET_ERROR )  log << "  errno=" << errno << "  "  << z_strerror(errno);
+            log << "\n";
+        }
+    #endif
 
     bool print_dots = isatty( fileno(stderr) ) && isatty( fileno(stdin) );
 

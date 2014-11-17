@@ -603,7 +603,7 @@ struct Spooler : Object,
     bool                       _tcp_port_as_option_set;
     int                        _udp_port;                   // <config udp=...>
     bool                       _udp_port_as_option_set;
-    bool                       _reuse_port;
+    bool                       _reuse_addr;
     Host                       _ip_address;
     bool                       _ip_address_as_option_set;
     string                     _version;

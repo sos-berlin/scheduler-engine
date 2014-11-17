@@ -144,7 +144,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-284", "Ignoring cmd='$1' because job is to be removed" },
     { "SCHEDULER-285", "Max. $1 history records are being read" },
     { "SCHEDULER-287", "TCP connection not allowed" },
-    { "SCHEDULER-288", "-reuse-port (SO_REUSEADDR): using $1, but another application can use it too" },
     { "SCHEDULER-289", "$1 is blocked. Trying a further $2 seconds before giving up" },
     { "SCHEDULER-290", "Timeout: No job started to execute $1, cancelling order and HTTP operation" },
     { "SCHEDULER-291", "Error when removing protocol file: $1" },

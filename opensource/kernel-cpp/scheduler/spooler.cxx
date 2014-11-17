@@ -696,7 +696,8 @@ Spooler::Spooler(jobject java_main_context)
     _configuration_directories(confdir__max+1),
     _configuration_directories_as_option_set(confdir__max+1),
     _max_micro_step_time(Duration(10)),
-    _call_register(this)
+    _call_register(this),
+    _reuse_addr(true)
 {
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
@@ -1573,7 +1574,7 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.with_value( "port"             ) )  _tcp_port = _udp_port = opt.as_int(),  _tcp_port_as_option_set = _udp_port_as_option_set = true;
             else
-            if( opt.flag      ( "reuse-port"       ) )  _reuse_port = opt.set();
+            if( opt.flag      ( "reuse-port"       ) )  _reuse_addr = opt.set();
             else
             if( opt.with_value( "http-port"         ) )  modifiable_settings()->set(setting_http_port, as_string(opt.as_int()));
             else
