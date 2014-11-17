@@ -69,7 +69,6 @@
                                 <goals>
                                     <goal>aggregate</goal>
                                 </goals>
-                                <phase>deploy</phase>
                                 <inherited>false</inherited>
                             </execution>
                         </executions>
