@@ -11,19 +11,21 @@ import org.joda.time.Duration
 
 object EventBusTestFutures {
 
+  val EveryEvent: Event ⇒ Boolean = _ ⇒ true
+
   object implicits {
     implicit class RichEventBus(val delegate: EventBus) extends AnyVal {
 
-      def awaitingKeyedEvent[E <: KeyedEvent](key: E#Key)(f: => Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
+      def awaitingKeyedEvent[E <: KeyedEvent](key: E#Key)(f: ⇒ Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
         try awaitingEvent2[E](predicate = _.key == key, timeout = timeout.duration)(f)(e)
         catch {
           case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, key=$key")
         }
 
-      def awaitingEvent[E <: Event](predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
+      def awaitingEvent[E <: Event](predicate: E ⇒ Boolean = EveryEvent)(f: ⇒ Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
         awaitingEvent2[E](predicate = predicate, timeout = timeout.duration)(f)(e)
 
-      private def awaitingEvent2[E <: Event](timeout: Duration, predicate: E => Boolean = (_: E) => true)(f: => Unit)(implicit e: ClassTag[E]): E = {
+      def awaitingEvent2[E <: Event](timeout: Duration, predicate: E ⇒ Boolean = EveryEvent)(f: ⇒ Unit)(implicit e: ClassTag[E]): E = {
         val future = eventFuture[E](predicate = predicate)(e)
         f
         try Await.result(future, timeout)
@@ -37,9 +39,9 @@ object EventBusTestFutures {
         eventFuture[E](predicate = _.key == key)
 
       /** @return Future, der mit dem nächsten Event E und dem erfüllten Prädikat erfolgreich endet. */
-      def eventFuture[E <: Event](predicate: E => Boolean = (_: E) => true)(implicit e: ClassTag[E]): Future[E] = {
+      def eventFuture[E <: Event](predicate: E ⇒ Boolean = EveryEvent)(implicit e: ClassTag[E]): Future[E] = {
         val promise = Promise[E]()
-        lazy val eventSubscription: EventSubscription = EventSubscription[E] { e =>
+        lazy val eventSubscription: EventSubscription = EventSubscription[E] { e ⇒
           if (predicate(e)) {
             promise.success(e)
             delegate unregister eventSubscription
