@@ -15,7 +15,7 @@ final class HttpRemoteProcess(client: HttpSchedulerCommandClient, uri: String, p
 
   def closeRemoteTask(kill: Boolean): Future[Unit] = {
     val command = <remote_scheduler.remote_task.close process_id={processDescriptor.processId} kill={if (kill) true.toString else null}/>
-    client.execute(uri, command) map CloseResult.fromXml
+    client.uncheckedExecute(uri, command) map CloseResult.fromXml
   }
 
   override def toString = s"${getClass.getSimpleName}(processId=${processDescriptor.processId} pid=${processDescriptor.pid})"

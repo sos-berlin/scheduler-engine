@@ -149,7 +149,7 @@ with HasCloser {
   }
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
-    val future = injector.apply[HttpSchedulerCommandClient].execute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
+    val future = injector.apply[HttpSchedulerCommandClient].uncheckedExecute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
     val response: String = Await.result(future, Duration.Inf)
     System.out.println(response)
   }

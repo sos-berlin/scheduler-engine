@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 final class HttpRemoteProcessStarter @Inject private(client: HttpSchedulerCommandClient)(implicit executionContext: ExecutionContext) {
 
   def startRemoteTask(schedulerApiTcpPort: Int, configuration: ApiProcessConfiguration, remoteUri: String): Future[HttpRemoteProcess] =
-    (client.execute(remoteUri, configuration.startRemoteTaskXmlElem(schedulerApiTcpPort))
+    (client.uncheckedExecute(remoteUri, configuration.startRemoteTaskXmlElem(schedulerApiTcpPort))
       map ProcessDescriptor.fromXml
       map { o ⇒ new HttpRemoteProcess(client, remoteUri, o) })
 }

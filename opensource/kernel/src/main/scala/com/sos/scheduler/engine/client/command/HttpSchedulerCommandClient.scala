@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient._
+import com.sos.scheduler.engine.client.command.RemoteSchedulers.checkResponseForError
+import com.sos.scheduler.engine.common.scalautil.xmls.StringSource
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -32,16 +34,35 @@ final class HttpSchedulerCommandClient @Inject private(implicit actorSystem: Act
     decode(Gzip) ~>
     unmarshal[String]
 
-  /**
+
+  /** Like unchechedExecuteXml, but fails when response contains an ERROR element.
    * @return XML response
    */
   def executeXml(baseUri: Uri, xmlBytes: Array[Byte]): Future[String] =
+    uncheckedExecuteXml(baseUri, xmlBytes) map { response ⇒
+      checkResponseForError(StringSource(response))
+      response
+    }
+
+  /** Like unchechedExecuteXml, but fails when response contains an ERROR element.
+   * @return XML response
+   */
+  def execute(baseUri: Uri, elem: xml.Elem): Future[String] =
+    uncheckedExecute(baseUri, elem) map { response ⇒
+      checkResponseForError(StringSource(response))
+      response
+    }
+
+  /**
+   * @return XML response
+   */
+  def uncheckedExecuteXml(baseUri: Uri, xmlBytes: Array[Byte]): Future[String] =
     pipeline(Post(commandUri(baseUri), XmlBytes(xmlBytes))(XmlBytesMarshaller))
 
   /**
    * @return XML response
    */
-  def execute(baseUri: Uri, elem: xml.Elem): Future[String] =
+  def uncheckedExecute(baseUri: Uri, elem: xml.Elem): Future[String] =
     pipeline(Post(commandUri(baseUri), elem))
 }
 

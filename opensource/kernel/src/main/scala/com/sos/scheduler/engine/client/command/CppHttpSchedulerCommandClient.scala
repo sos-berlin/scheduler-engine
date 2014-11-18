@@ -22,7 +22,7 @@ final class CppHttpSchedulerCommandClient @Inject private(
 
   @ForCpp
   def postXml(uri: String, xmlBytes: Array[Byte], resultCall: CppCall): Unit = {
-    commandClient.executeXml(uri, xmlBytes).onComplete { o: Try[String] ⇒
+    commandClient.uncheckedExecuteXml(uri, xmlBytes).onComplete { o: Try[String] ⇒
       val documentTry = o map loadXml
       callQueue {
         resultCall.call(documentTry: Try[Document])
