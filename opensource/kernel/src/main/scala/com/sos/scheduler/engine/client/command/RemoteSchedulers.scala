@@ -11,6 +11,8 @@ import scala.collection.immutable
  */
 object RemoteSchedulers {
 
+  def checkResponseForError(source: Source): Unit = readSchedulerResponses(source)(readAnythingAndIgnore)
+
   def readSchedulerResponse[A](source: Source)(read: ScalaXMLEventReader ⇒ A): A = {
     val answers = readSchedulerResponses(source)(read)
     if (answers.isEmpty) sys.error("Incomplete XML response")
@@ -43,6 +45,7 @@ object RemoteSchedulers {
   def errorElementToException(eventReader: ScalaXMLEventReader): XmlResponseException = {
     import eventReader._
     val (code, text) = parseElement("ERROR") {
+      attributeMap.ignoreUnread()
       (attributeMap.getAsConverted("code")(MessageCode.apply), attributeMap.get("text"))
     }
     throw new XmlResponseException(
@@ -51,4 +54,14 @@ object RemoteSchedulers {
   }
 
   final case class XmlResponseException(code: MessageCode, override val getMessage: String) extends RuntimeException
+
+  private def readAnythingAndIgnore(eventReader: ScalaXMLEventReader): Unit = {
+    import eventReader._
+    forEachStartElement {
+      case _ ⇒ parseElement() {
+        attributeMap.ignoreUnread()
+        readAnythingAndIgnore(eventReader)
+      }
+    }
+  }
 }

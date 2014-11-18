@@ -14,6 +14,16 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class RemoteSchedulersTest extends FreeSpec {
 
+  "checkForError without error" in {
+    val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><aaa/><bbb/></answer></spooler>.toString()
+    checkResponseForError(StringSource(xmlString))
+  }
+
+  "checkForError" in {
+    val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><ERROR text="TEST"/></answer></spooler>.toString()
+    intercept[XmlResponseException] { checkResponseForError(StringSource(xmlString)) } .getMessage should include ("TEST")
+  }
+
   "readSchedulerResponses" in {
     val xmlString = <spooler><answer time="2014-10-07T10:43:07.191Z"><aaa/><bbb/></answer></spooler>.toString()
     readSchedulerResponses(StringSource(xmlString))(read) shouldEqual List("aaa", "bbb")
