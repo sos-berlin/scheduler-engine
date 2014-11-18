@@ -27,11 +27,7 @@ trait ScalaSchedulerTest
   protected final lazy val testEnvironment =
     TestEnvironment(testConfiguration, testDirectory)
 
-  protected lazy final val controller =
-    TestSchedulerController(testConfiguration, testEnvironment).registerCloseable
-
-  protected implicit final def implicitController =   // Scala 10.3 mag implicit controller nicht, also so
-    controller
+  protected implicit lazy final val controller = TestSchedulerController(testConfiguration, testEnvironment).registerCloseable
 
   override protected final def beforeAll(): Unit = {
     if (testNames.isEmpty) {
