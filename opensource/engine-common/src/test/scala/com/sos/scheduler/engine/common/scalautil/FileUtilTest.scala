@@ -34,29 +34,29 @@ final class FileUtilTest extends FreeSpec with BeforeAndAfterAll {
 
   "contentString" in {
     file.contentString = TestString
-    assert(file.contentString == TestString)
-    assert(new String(Files.readAllBytes(file), UTF_8) == TestString)
+    file.contentString shouldEqual TestString
+    new String(Files.readAllBytes(file), UTF_8) shouldEqual TestString
   }
 
   "contentBytes" in {
-    assert(file.contentBytes.toVector == TestBytes)
+    file.contentBytes shouldEqual TestBytes
     file.contentBytes = Array[Byte](1, 2)
-    assert(file.contentBytes.toVector == Vector[Byte](1, 2))
+    file.contentBytes shouldEqual Vector[Byte](1, 2)
   }
 
   "write" in {
     file.write(TestString, UTF_16BE)
-    assert(file.contentBytes.toVector == TestString.getBytes(UTF_16BE).toVector)
+    file.contentBytes shouldEqual TestString.getBytes(UTF_16BE)
   }
 
   "append" in {
     file.append("X", UTF_16BE)
-    assert(file.contentString(UTF_16BE) == TestString + "X")
+    file.contentString(UTF_16BE) shouldEqual TestString + "X"
   }
 }
 
 private object FileUtilTest {
   private val TestString = "AÅ"
-  private val TestBytes = TestString.getBytes(UTF_8).toVector
+  private val TestBytes = TestString.getBytes(UTF_8)
   assert(TestBytes.length == 3)
 }
