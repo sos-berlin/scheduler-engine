@@ -56,12 +56,23 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
   }
 
   "ScalaXMLEventReader" in {
-    val testXmlString = <A><B/><C x="xx" optional="oo"><D/><D/></C></A>.toString()
+    val testXmlString = <A><AA><B/><C x="xx" optional="oo"><D/><D/></C></AA></A>.toString()
     parseString(testXmlString)(parseA) shouldEqual A(B(), C(x = "xx", o = "oo", List(D(), D())))
   }
 
+  "Whitespace is ignored" in {
+    val testXmlString =
+      <A>
+        <AA>
+          <B/>
+          <C x="xx" optional="oo"/>
+        </AA>
+      </A>.toString()
+    parseString(testXmlString)(parseA) shouldEqual A(B(), C(x = "xx", o = "oo", Nil))
+  }
+
   "Optional attribute" in {
-    val testXmlString = <A><B/><C x="xx"><D/><D/></C></A>.toString()
+    val testXmlString = <A><AA><B/><C x="xx"><D/><D/></C></AA></A>.toString()
     parseString(testXmlString)(parseA) shouldEqual A(B(), C(x = "xx", o = "DEFAULT", List(D(), D())))
   }
 
@@ -80,7 +91,7 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
   }
 
 //  "parseElementAsXmlString" in {
-//    val testXmlString = <A><B b="b">text<C/></B><B/></A>.toString()
+//    val testXmlString = <A><AA><B b="b">text<C/></B><B/></AA></A>.toString()
 //    assertResult("""<B b="b">text<C/></B>, <B/>""") {
 //      parseString(testXmlString) { eventReader ⇒
 //        import eventReader._
@@ -95,7 +106,7 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
 //  }
 
   "Detects extra attribute" in {
-    val testXmlString = <A><B/><C x="xx" optional="oo" z="zz"><D/><D/></C></A>.toString()
+    val testXmlString = <A><AA><B/><C x="xx" optional="oo" z="zz"><D/><D/></C></AA></A>.toString()
     intercept[WrappedException] { parseString(testXmlString)(parseA) }
       .rootCause.asInstanceOf[UnparsedAttributesException].names shouldEqual List("z")
   }
@@ -114,23 +125,23 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
   }
 
   "Detects missing attribute" in {
-    val testXmlString = <A><B/><C><D/><D/></C></A>.toString()
+    val testXmlString = <A><AA><B/><C><D/><D/></C></AA></A>.toString()
     intercept[WrappedException] { parseString(testXmlString)(parseA) }
       .rootCause.asInstanceOf[NoSuchElementException]
   }
 
   "Detects extra element" in {
-    val testXmlString = <A><B/><C x="xx"><D/><D/></C><EXTRA/></A>.toString()
+    val testXmlString = <A><AA><B/><C x="xx"><D/><D/></C><EXTRA/></AA></A>.toString()
     intercept[WrappedException] { parseString(testXmlString)(parseA) }
   }
 
   "Detects extra repeating element" in {
-    val testXmlString = <A><B/><C x="xx"><D/><D/><EXTRA/></C></A>.toString()
+    val testXmlString = <A><AA><B/><C x="xx"><D/><D/><EXTRA/></C></AA></A>.toString()
     intercept[WrappedException] { parseString(testXmlString)(parseA) }
   }
 
   "Detects missing element" in {
-    val testXmlString = <A><C x="xx"><D/><D/></C></A>.toString()
+    val testXmlString = <A><AA><C x="xx"><D/><D/></C></AA></A>.toString()
     intercept[Exception] { parseString(testXmlString)(parseA) }
       .rootCause.asInstanceOf[NoSuchElementException]
   }
@@ -154,11 +165,13 @@ private object ScalaXMLEventReaderTest {
       }
 
     parseElement("A") {
-      val children = forEachStartElement {
-        case "B" ⇒ parseElement() { B() }
-        case "C" ⇒ parseC()
+      parseElement("AA") {
+        val children = forEachStartElement {
+          case "B" ⇒ parseElement() { B() }
+          case "C" ⇒ parseC()
+        }
+        A(children.one[B]("B"), children.one[C])
       }
-      A(children.one[B]("B"), children.one[C])
     }
   }
 }

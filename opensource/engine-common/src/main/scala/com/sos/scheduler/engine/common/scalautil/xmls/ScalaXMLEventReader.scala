@@ -6,9 +6,10 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.{RichStartElemen
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
 import java.util.NoSuchElementException
 import javax.xml.stream.events._
-import javax.xml.stream.{Location, XMLEventReader, XMLInputFactory}
+import javax.xml.stream.{EventFilter, Location, XMLEventReader, XMLInputFactory}
 import javax.xml.transform.Source
 import org.scalactic.Requirements._
+import scala.PartialFunction._
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
@@ -83,10 +84,6 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
           val o = callF(e)
           results += e.getName.toString -> o
           g()
-        case e: Characters ⇒
-          next()
-          require(e.getData.trim.isEmpty, s"Character data not expected here: '${e.getData.trim.take(20)}'")
-          g()
         case e: EndElement ⇒ mutable.Buffer[(String, A)]()
       }
     }
@@ -152,7 +149,14 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
 
   def locationString = locationToString(peek.getLocation)
 
-  def peek = delegate.peek
+  @tailrec
+  def peek: XMLEvent =
+    delegate.peek match {
+      case e: Characters if e.isWhiteSpace ⇒
+        delegate.nextEvent()
+        peek
+      case e ⇒ e
+    }
 
   def xmlEventReader: XMLEventReader = delegate
 }
@@ -164,7 +168,7 @@ object ScalaXMLEventReader {
     parseDocument(StringSource(xml), inputFactory)(parse)
 
   def parseDocument[A](source: Source, inputFactory: XMLInputFactory = getCommonXMLInputFactory())(parse: ScalaXMLEventReader ⇒ A): A =
-    autoClosing(new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))) { reader ⇒
+    autoClosing(new ScalaXMLEventReader(newXMLEventReader(inputFactory, source))) { reader ⇒
       reader.eat[StartDocument]
       val result = parse(reader)
       reader.eat[EndDocument]
@@ -172,9 +176,17 @@ object ScalaXMLEventReader {
     }
 
   def parse[A](source: Source, inputFactory: XMLInputFactory = getCommonXMLInputFactory())(parseEvents: ScalaXMLEventReader ⇒ A): A = {
-    autoClosing(new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))) { reader ⇒
+    autoClosing(new ScalaXMLEventReader(newXMLEventReader(inputFactory, source))) { reader ⇒
       parseEvents(reader)
     }
+  }
+
+  private def newXMLEventReader(inputFactory: XMLInputFactory, source: Source) =
+    inputFactory.createXMLEventReader(source)
+    //inputFactory.createFilteredReader(inputFactory.createXMLEventReader(source), IgnoreWhitespaceFilter)
+
+  object IgnoreWhitespaceFilter extends EventFilter {
+    def accept(e: XMLEvent) = cond(e) { case e: Characters ⇒ !e.isWhiteSpace }
   }
 
   private def locationToString(o: Location) =
