@@ -50,7 +50,7 @@
                     <dependency>
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>cppjava.generator</artifactId>
-                        <version>${cplusplusVersion}</version>
+                        <version>${project.cplusplusVersion}</version>
                         <scope>compile</scope>
                     </dependency>
                     <dependency>
