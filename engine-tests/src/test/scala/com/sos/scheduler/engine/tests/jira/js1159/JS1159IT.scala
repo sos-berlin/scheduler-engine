@@ -47,7 +47,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
     extraScheduler.start()
     registerAutoCloseable(extraScheduler)
     scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
-    scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri.toString}/>
+    scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri}/>
     Await.result(extraScheduler.activatedFuture, TestTimeout)
   }
 
