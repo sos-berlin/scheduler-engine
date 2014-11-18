@@ -34,7 +34,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].tryFetch(TestOrderKey).get.title shouldEqual OriginalTitle
+      instance[HibernateOrderStore].fetch(TestOrderKey).title shouldEqual OriginalTitle
     }
   }
 
@@ -42,7 +42,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(OriginalTitle, AChangedTitle)
     instance[FolderSubsystem].updateFolders()
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].tryFetch(TestOrderKey).get.title shouldEqual AChangedTitle
+      instance[HibernateOrderStore].fetch(TestOrderKey).title shouldEqual AChangedTitle
     }
     controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
@@ -57,13 +57,13 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
     instance[FolderSubsystem].updateFolders()
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].tryFetch(TestOrderKey).get should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
+      instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
     }
     controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
       scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="process"/>
     }
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].tryFetch(TestOrderKey).get should have ('stateOption(Some(FirstState)), 'title(BChangedTitle))
+      instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(FirstState)), 'title(BChangedTitle))
     }
   }
 
