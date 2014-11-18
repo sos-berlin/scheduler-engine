@@ -5,12 +5,13 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.WarningLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import com.sos.scheduler.engine.test.database.H2DatabaseServer
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1176.JS1176IT._
 import com.sun.jersey.api.client.Client
@@ -28,16 +29,21 @@ import scala.concurrent.{Await, Future, Promise}
 @RunWith(classOf[JUnitRunner])
 final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
 
-  private val httpPort = findRandomFreeTcpPort()
-  private val databaseServer = new RestartableH2DatabaseServer(testEnvironment.databaseDirectory).registerCloseable
+  private lazy val List(httpPort, databaseTcpPort) = findRandomFreeTcpPorts(2)
+  private val databaseConfiguration = new H2DatabaseServer.Configuration {
+    def directory = testEnvironment.databaseDirectory
+    def tcpPort = databaseTcpPort
+  }
+  private lazy val databaseServer = new H2DatabaseServer(databaseConfiguration)
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-tcp-port=$httpPort"),
-    database = Some(databaseServer.databaseConfiguration))
-
+    database = Some(databaseConfiguration))
 
   override protected def onBeforeSchedulerActivation(): Unit = {
     databaseServer.start()
   }
+
+  closer(databaseServer)  // Nach dem Scheduler schließen, damit der beim Herunterfahren noch an die Datenbank herankommt.
 
   private implicit def implicitCallQueue: SchedulerThreadCallQueue = instance[SchedulerThreadCallQueue]
 
