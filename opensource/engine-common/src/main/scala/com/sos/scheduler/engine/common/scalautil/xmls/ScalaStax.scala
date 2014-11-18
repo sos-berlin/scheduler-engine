@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.common.scalautil.xmls
 
-import com.sos.scheduler.engine.common.scalautil.{ScalaThreadLocal, Logger}
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXmlBytes
 import java.io.ByteArrayInputStream
 import javax.xml.stream.XMLInputFactory
@@ -8,10 +9,9 @@ import javax.xml.stream.events.{Attribute, StartElement}
 import javax.xml.transform.Source
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamSource
-import scala.collection.JavaConversions._
 import org.w3c.dom.Element
+import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
-import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 
 object ScalaStax {
   private val logger = Logger(getClass)
