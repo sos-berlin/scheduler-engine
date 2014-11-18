@@ -4,8 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.{alternateTcpPortRange, findRandomFreeTcpPort}
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -31,8 +30,7 @@ import scala.concurrent.Await
 @RunWith(classOf[JUnitRunner])
 final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val tcpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
-  private lazy val agentHttpPort = findRandomFreeTcpPort(alternateTcpPortRange)
+  private lazy val Seq(tcpPort, agentHttpPort) = findRandomFreeTcpPorts(2)
   private lazy val agentUri = s"http://127.0.0.1:$agentHttpPort"
 
   protected override lazy val testConfiguration = TestConfiguration(

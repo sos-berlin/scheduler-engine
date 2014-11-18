@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1159
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.{alternateTcpPortRange, findRandomFreeTcpPort}
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.main.CppBinary
@@ -23,8 +23,7 @@ import scala.concurrent.Await
 @RunWith(classOf[JUnitRunner])
 final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfter {
 
-  private lazy val agentTcpPort = findRandomFreeTcpPort()
-  private lazy val agentHttpPort = findRandomFreeTcpPort(alternateTcpPortRange)
+  private lazy val Seq(agentTcpPort, agentHttpPort) = findRandomFreeTcpPorts(2)
   private lazy val extraScheduler = {
     val logDir = controller.environment.logDirectory / "agent"
     makeDirectory(logDir)
