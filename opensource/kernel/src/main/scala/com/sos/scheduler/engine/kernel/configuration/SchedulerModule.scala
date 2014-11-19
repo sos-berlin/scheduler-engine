@@ -5,6 +5,7 @@ import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
@@ -30,11 +31,15 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext
+import scala.reflect.ClassTag
 
 final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
 extends ScalaAbstractModule
 with HasCloser {
+
+  private val lazyBoundCppSingletons = mutable.Buffer[Class[_]]()
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
@@ -42,29 +47,35 @@ with HasCloser {
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
-    bindInstance(controllerBridge.getEventBus: SchedulerEventBus )
+    bindInstance(controllerBridge.getEventBus: SchedulerEventBus)
     bind(classOf[SchedulerConfiguration]) toProvider classOf[SchedulerConfiguration.InjectProvider]
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
     bindInstance(cppProxy.log.getSister: PrefixLog )
-    provideSingleton { new SchedulerId(cppProxy.id) }
-    provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
-    provideSingleton { new DatabaseSubsystem(cppProxy.db) }
-    provideSingleton { cppProxy.variables.getSister: VariableSet }
+    provideCppSingleton { new SchedulerId(cppProxy.id) }
+    provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
+    provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
+    provideCppSingleton { cppProxy.variables.getSister: VariableSet }
     provideSingleton[ActorSystem] { newActorSystem(closer) }
     provideSingleton[ExecutionContext] { ExecutionContext.global }
     bindSubsystems()
+    bindInstance(LazyBoundCppSingletons(lazyBoundCppSingletons.toVector))
   }
 
   private def bindSubsystems(): Unit = {
-    provideSingleton[Folder_subsystemC] { cppProxy.folder_subsystem }
-    provideSingleton[Job_subsystemC] { cppProxy.job_subsystem }
-    provideSingleton[Lock_subsystemC] { cppProxy.lock_subsystem }
-    provideSingleton[Order_subsystemC] { cppProxy.order_subsystem }
-    provideSingleton[Process_class_subsystemC] { cppProxy.process_class_subsystem }
-    provideSingleton[Schedule_subsystemC] { cppProxy.schedule_subsystem }
-    provideSingleton[Task_subsystemC] { cppProxy.task_subsystem }
-    provideSingleton[Standing_order_subsystemC] { cppProxy.standing_order_subsystem }
+    provideCppSingleton[Folder_subsystemC] { cppProxy.folder_subsystem }
+    provideCppSingleton[Job_subsystemC] { cppProxy.job_subsystem }
+    provideCppSingleton[Lock_subsystemC] { cppProxy.lock_subsystem }
+    provideCppSingleton[Order_subsystemC] { cppProxy.order_subsystem }
+    provideCppSingleton[Process_class_subsystemC] { cppProxy.process_class_subsystem }
+    provideCppSingleton[Schedule_subsystemC] { cppProxy.schedule_subsystem }
+    provideCppSingleton[Task_subsystemC] { cppProxy.task_subsystem }
+    provideCppSingleton[Standing_order_subsystemC] { cppProxy.standing_order_subsystem }
+  }
+
+  private def provideCppSingleton[A <: AnyRef : ClassTag](provider: ⇒ A) = {
+    lazyBoundCppSingletons += implicitClass[A]
+    provideSingleton(provider)
   }
 
   @Provides @Singleton def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =
@@ -90,4 +101,6 @@ with HasCloser {
 object SchedulerModule {
   private def commandHandlers(objects: Iterable[AnyRef]): Iterable[CommandHandler] =
     (objects collect { case o: HasCommandHandlers => o.commandHandlers: Iterable[CommandHandler] }).flatten
+
+  final case class LazyBoundCppSingletons(interfaces: Vector[Class[_]])
 }

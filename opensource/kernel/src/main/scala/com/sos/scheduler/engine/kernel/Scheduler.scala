@@ -23,6 +23,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSch
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
+import com.sos.scheduler.engine.kernel.configuration.SchedulerModule.LazyBoundCppSingletons
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
@@ -121,7 +122,13 @@ with HasCloser {
   }
 
   @ForCpp private def onActivate(): Unit = {
+    initializeCppDependencySingletons()
     pluginSubsystem.activate()
+  }
+
+  private def initializeCppDependencySingletons(): Unit = {
+    // Eagerly call all C++ providers now to avoid later deadlock (Scheduler lock and DI lock)
+    for (o ← injector.apply[LazyBoundCppSingletons].interfaces) injector.getInstance(o)
   }
 
   @ForCpp private def onActivated(): Unit = {
