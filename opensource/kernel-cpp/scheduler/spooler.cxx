@@ -847,8 +847,12 @@ string Spooler::http_url() const
     if( _tcp_port )  
     {
         result << "http://";
-
-        if( _ip_address_as_option_set )  result << _ip_address.name();
+        if (_ip_address_as_option_set) {
+            if (_ip_address.ip_string() == "127.0.0.1")
+                result << _ip_address.ip_string();   // "127.0.0.1" für die Tests (gerne immer IP-Nummer, aber it 
+            else 
+                result << _ip_address.name();
+        }
         else result << _complete_hostname;
 
         result << ":" << _tcp_port;
@@ -1582,7 +1586,7 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
             else
-            if( opt.with_value( "ip-address"       ) )  _ip_address = opt.value(),  _ip_address.resolve_name(),  _ip_address_as_option_set = true;
+            if( opt.with_value( "ip-address"       ) )  _ip_address = opt.value(),  _ip_address.resolve_name(),  _ip_address_as_option_set = !opt.value().empty();
             else
             if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set(),  _ignore_process_classes_set = true;
             else
