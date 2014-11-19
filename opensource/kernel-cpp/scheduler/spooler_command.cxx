@@ -1303,8 +1303,16 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
                                                   : job_chain->order( id );
     if (!order  &&  job_chain->is_distributed()) {
-        // FIXME Order_subsystem::lo_lock JS-1218 <modify_order> on distributed order does not lock order against concurrent modification
-        order = _spooler->order_subsystem()->load_distributed_order_from_database((Transaction*)NULL, job_chain_path, id);  // Exception, wenn von einem Scheduler belegt
+        string occupying_cluster_member_id;
+        try {
+            // FIXME Order_subsystem::lo_lock JS-1218 <modify_order> on distributed order does not lock order against concurrent modification
+            order = _spooler->order_subsystem()->load_distributed_order_from_database((Transaction*)NULL, job_chain_path, id, (Order_subsystem::Load_order_flags)0, &occupying_cluster_member_id);  // Exception, wenn von einem Scheduler belegt
+        } catch (const Xc& x) {
+            if (string(x.code()) == "SCHEDULER-379") {  // Order is occupied? (in cluster)
+                _spooler->_cluster->post_command_to_cluster_member(modify_order_element, occupying_cluster_member_id); 
+            } 
+            throw;  // Fehler trotzdem melden
+        }
     }
     assert(order);
     if (modify_order_element.getAttribute("action") == "reset") {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.

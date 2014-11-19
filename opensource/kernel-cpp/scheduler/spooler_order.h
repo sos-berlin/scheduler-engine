@@ -1106,8 +1106,8 @@ struct Order_subsystem: Object,
     virtual void                reread_distributed_job_chain_nodes_from_database(Job_chain* which_job_chain = NULL, job_chain::Node* which_node = NULL) = 0;
 
     virtual void                request_order               ()                                      = 0;
-    virtual ptr<Order>          load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
-    virtual ptr<Order>      try_load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual ptr<Order>          load_distributed_order_from_database(Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none, string* occupying_cluster_member_id = NULL) = 0;
+    virtual ptr<Order>      try_load_distributed_order_from_database(Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none, string* occupying_cluster_member_id = NULL) = 0;
     virtual string              order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id ) = 0;
 
     virtual bool                has_any_order               ()                                      = 0;

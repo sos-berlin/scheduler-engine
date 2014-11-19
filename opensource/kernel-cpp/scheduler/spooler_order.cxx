@@ -662,15 +662,15 @@ bool Order_subsystem_impl::has_any_order()
 }
 
 
-ptr<Order> Order_subsystem_impl::load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag, string* occupying_cluster_member_id)
 {
-    ptr<Order> result = try_load_distributed_order_from_database( outer_transaction, job_chain_path, order_id, flag );
+    ptr<Order> result = try_load_distributed_order_from_database(outer_transaction, job_chain_path, order_id, flag, occupying_cluster_member_id);
     if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_path );
     return result;
 }
 
 
-ptr<Order> Order_subsystem_impl::try_load_distributed_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::try_load_distributed_order_from_database(Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag, string* occupying_cluster_member_id)
 {
     if ((flag & lo_lock) && !outer_transaction) z::throw_xc(Z_FUNCTION, "lock without transaction");
 
@@ -701,6 +701,9 @@ ptr<Order> Order_subsystem_impl::try_load_distributed_order_from_database( Trans
             result = _spooler->standing_order_subsystem()->new_order();
             result->load_record( job_chain_path, record );
             result->set_distributed();
+            if (occupying_cluster_member_id) {
+                *occupying_cluster_member_id = record.as_string("occupying_cluster_member_id");
+            }
             if (!(flag & lo_allow_occupied) && !record.null("occupying_cluster_member_id")) {
                 non_db_exception = z::Xc("SCHEDULER-379", result->obj_name(), record.as_string("occupying_cluster_member_id"));
                 result = NULL;

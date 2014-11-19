@@ -107,8 +107,8 @@ struct Order_subsystem_impl : Order_subsystem
     void                        reread_distributed_job_chain_nodes_from_database(Job_chain* which_job_chain, job_chain::Node* which_node);
 
     void                        request_order               ();
-    ptr<Order>                  load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags );
-    ptr<Order>              try_load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags );
+    ptr<Order>                  load_distributed_order_from_database(Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags, string* occupying_cluster_member_id = NULL);
+    ptr<Order>              try_load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags, string* occupying_cluster_member_id = NULL);
 
     bool                        has_any_order               ();
     int                         order_count                 ( Read_transaction* ) const;

@@ -83,6 +83,7 @@ struct Cluster : Cluster_subsystem_interface
     string                      tip_for_new_distributed_order(const Absolute_path&, const string& order_state);
     string                      tip_for_job_chain_or_node   (const string& cluster_member_id, const Absolute_path&, const string& order_state);
     void                        tip_all_other_members_for_job_chain_or_node(const Absolute_path&, const string& order_state);
+    void                        post_command_to_cluster_member(const xml::Element_ptr&, const string& member_id);
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
 
@@ -2492,6 +2493,22 @@ string Cluster::tip_for_job_chain_or_node(const string& member_id, const Absolut
         }
     }
     return "";
+}
+
+
+void Cluster::post_command_to_cluster_member(const xml::Element_ptr& e, const string& member_id) {
+    if (member_id != _cluster_member_id) {
+        string url = http_url_of_member_id(member_id);
+        if (Regex_submatches m = Regex("http://([^:]+:[0-9]+)").match_subresults(url)) {
+            Host_and_port host_and_port(m[1]);
+            xml::Xml_string_writer xml_writer;
+            xml_writer.set_encoding(string_encoding);
+            xml_writer.write_prolog();
+            xml_writer.write_element(e);
+            _log->info(S() << "Forwarding command via UDP to " << host_and_port << ": " << xml_writer.to_string());
+            send_udp_message(host_and_port, xml_writer.to_string());
+        }
+    }
 }
 
 //--------------------------------------------------------------------Cluster::least_busy_member_id
