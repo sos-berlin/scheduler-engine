@@ -12,6 +12,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import org.joda.time.Duration
 import org.scalactic.Requirements._
+import scala.collection.JavaConversions._
 
 /**
  * Steuert den [[SchedulerThread]].
@@ -28,7 +29,7 @@ final class SchedulerThreadController(val name: String, cppSettings: CppSettings
   def loadModule(cppModuleFile: File): Unit =
     SchedulerThread.loadModule(cppModuleFile)
 
-  def startScheduler(args: java.lang.Iterable[String]): Unit = {
+  def startScheduler(args: String*): Unit = {
     checkIsNotStarted()
     controllerBridge.start()
     thread.startThread(args)

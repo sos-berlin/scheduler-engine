@@ -14,7 +14,7 @@ final class ShowStateStressIT extends SchedulerTest {
 
   @Ignore //TODO Test kann versagen, wenn Portnummer in scheduler.xml schon vergegeben ist.
   @Test def test1(): Unit = {
-    controller.startScheduler("-e", "-log-level=warn")
+    controller.activateScheduler()
     closingFinally(new Connection(new InetSocketAddress("localhost", instance(classOf[SchedulerConfiguration]).tcpPort))) { connection =>
         for (i <- 1 to 1000) connection.sendAndReceive(emptyCommand)
     }

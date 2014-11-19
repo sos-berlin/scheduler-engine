@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
@@ -40,7 +39,6 @@ with EventHandlerAnnotated {
   private val testName = testConfiguration.testClass.getName
   protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
   val eventBus: SchedulerEventBus = getEventBus
-  private val thread = Thread.currentThread
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
   private var isPrepared: Boolean = false
@@ -75,9 +73,6 @@ with EventHandlerAnnotated {
     waitUntilSchedulerIsActive()
   }
 
-  def startScheduler(args: java.lang.Iterable[String]): Unit =
-    startScheduler(iterableAsScalaIterable(args).toSeq)
-
   def startScheduler(args: String*): Unit = {
     prepare()
     val extraOptions = nullToEmpty(System.getProperty(classOf[TestSchedulerController].getName + ".options"))
@@ -86,7 +81,7 @@ with EventHandlerAnnotated {
         Splitter.on(",").omitEmptyStrings.split(extraOptions) ++
         testConfiguration.mainArguments ++
         args
-    delegate.startScheduler(allArgs)
+    delegate.startScheduler(allArgs: _*)
   }
 
   def prepare(): Unit = {
