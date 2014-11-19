@@ -213,6 +213,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <UseUnicodeForAssemblerListing>
       </UseUnicodeForAssemblerListing>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0407</Culture>

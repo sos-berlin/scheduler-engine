@@ -126,6 +126,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <UseUnicodeForAssemblerListing>
       </UseUnicodeForAssemblerListing>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Lib>
       <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
