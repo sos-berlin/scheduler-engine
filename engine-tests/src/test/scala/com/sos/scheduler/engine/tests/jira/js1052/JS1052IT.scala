@@ -32,7 +32,7 @@ final class JS1052IT extends FreeSpec with ScalaSchedulerTest {
       val b = new Array[Byte](1000)
       val length = socket.getInputStream.read(b)
       assert(length > 0)
-      val len = if (b(length - 1) == '\0') length -1 else length
+      val len = if (b(length - 1) == '\u0000') length -1 else length
       RemoteSchedulers.checkResponseForError(new StreamSource(new ByteArrayInputStream(b, 0, len)))
     }
 

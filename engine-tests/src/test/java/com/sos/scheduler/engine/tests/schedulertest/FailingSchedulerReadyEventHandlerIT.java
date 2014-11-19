@@ -12,11 +12,6 @@ public final class FailingSchedulerReadyEventHandlerIT extends SchedulerTest {
         controller().close();
     }
 
-    @Test(expected=TestError.class) public void startTest() {
-        controller().activateScheduler();
-        controller().close();
-    }
-
     @HotEventHandler public void handleEvent(SchedulerReadyEvent e) {
         throw new TestError();
     }
