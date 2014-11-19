@@ -157,7 +157,7 @@ void Xml_writer::write_prolog()
 {
     write_through( "<?xml version=\"1.0\"" );
     if( _encoding != "" )  set_attribute( "encoding", _encoding );
-    write_through( "?>\n" );
+    write_through( "?>" );
 }
 
 //----------------------------------------------------------------------------Xml_writer::close_tag
