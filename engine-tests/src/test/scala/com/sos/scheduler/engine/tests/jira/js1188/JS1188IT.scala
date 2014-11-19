@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.filebased.FileBasedReplacedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
@@ -40,8 +40,8 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val tcpPort = findRandomFreeTcpPort()
-  private lazy val agentRefs = List.fill(n) { new AgentRef() }
+  private lazy val tcpPort :: agentTcpPorts = findRandomFreeTcpPorts(1 + n)
+  private lazy val agentRefs = agentTcpPorts map AgentRef ensuring { _.size == n }
   private lazy val runningAgents = mutable.Map[AgentRef, ExtraScheduler]()
   private var waitingTaskClosedFuture: Future[TaskClosedEvent] = null
   private var waitingStopwatch: Stopwatch = null
@@ -205,8 +205,7 @@ private object JS1188IT {
   private val InaccessibleAgentMessageCode = MessageCode("SCHEDULER-488")
   private val WaitingForAgentMessageCode = MessageCode("SCHEDULER-489")
 
-  private class AgentRef {
-    val port = findRandomFreeTcpPort(AgentTcpPortRange)
+  private case class AgentRef(port: Int) {
     def uri = s"http://127.0.0.1:$port"
   }
 
