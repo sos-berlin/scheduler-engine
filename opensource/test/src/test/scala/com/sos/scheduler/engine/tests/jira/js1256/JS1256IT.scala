@@ -22,7 +22,7 @@ final class JS1256IT extends FreeSpec with ScalaSchedulerTest {
   s"file_order_source with 4GB file - $FileSize bytes" in {
     autoClosing(Closer.create()) { implicit closer ⇒
       val directory = testEnvironment.newFileOrderSourceDirectory()
-      val bigFile = directory / s"${classOf[JS1256IT].getName}.tmp"
+      val bigFile = directory / "JS-1256.tmp"
       onClose { bigFile.delete() }
       allocateFile(bigFile, FileSize)
       autoClosing(controller.newEventPipe()) { eventPipe ⇒
