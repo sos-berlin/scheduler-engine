@@ -41,8 +41,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
 
   override protected def onBeforeSchedulerActivation(): Unit = {
     // Change modification timestamps to other daylight saving time period, 4 to 8 months ago
-    aIncludeFile.setLastModified((now() - (4*30).days).getMillis)
-    bIncludeFile.setLastModified((now() - (8*30).days).getMillis)
+    modifyIncludes(-1)
     watchdog.start()
   }
 
@@ -56,8 +55,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
 
   "Job is older than include" in {
     controller.getEventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
-      jobFile.setLastModified(currentTimeMillis() - 10000)
-      aIncludeFile.setLastModified(currentTimeMillis())
+      modifyIncludes(+1)
       Thread.sleep(2500)
       instance[FolderSubsystem].updateFolders()
     }
@@ -66,12 +64,16 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
 
   "Job is newer than include" in {
     controller.getEventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
-      jobFile.setLastModified(currentTimeMillis())
-      aIncludeFile.setLastModified(currentTimeMillis() - 10000)
+      modifyIncludes(-1)
       Thread.sleep(2500)
       instance[FolderSubsystem].updateFolders()
     }
     runJobAndWaitForEnd(TestJobPath)
+  }
+
+  private def modifyIncludes(sign: Int): Unit = {
+    aIncludeFile.setLastModified((now() + sign * (4*30).days).getMillis)
+    bIncludeFile.setLastModified((now() + sign * (8*30).days).getMillis)
   }
 
   private def jobFile = testEnvironment.fileFromPath(TestJobPath)

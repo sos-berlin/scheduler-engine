@@ -265,16 +265,20 @@ file::File_info* Has_includes::changed_included_file_info()
                     if( directory_entry->_file_info->last_write_time() != file_info->last_write_time() )  
                     {
                         result = directory_entry->_file_info;  // Datei geändert
+                        Z_LOG2("scheduler", Z_FUNCTION << " " << file_info->path() << " " << Time::of_time_t(file_info->last_write_time()).utc_string() << 
+                            ", was " << Time::of_time_t(directory_entry->_file_info->last_write_time()).utc_string() << "\n");
                     }
                 }
             }
             else
-            if( file_info )  result = file_info;      // Datei ist gelöscht (oder sollte das ignoriert werden, sodass der Job weiterläuft?)
+            if (file_info) {
+                result = file_info;      // Datei ist gelöscht (oder sollte das ignoriert werden, sodass der Job weiterläuft?)
+                Z_LOG2("scheduler", Z_FUNCTION << " " << file_info->path() << " has been deleted\n");
+            }
 
             if( result )  break;
         }
     }
-
     return result;
 }
 
