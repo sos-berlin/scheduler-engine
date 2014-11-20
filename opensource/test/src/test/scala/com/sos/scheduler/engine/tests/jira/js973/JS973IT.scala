@@ -41,8 +41,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
     scheduler executeXml <process_class name="test-c" remote_scheduler={processClassSlave.extraScheduler.address.string}/>
   }
 
-  override def afterAll() {
-    super.afterAll()
+  onClose {
     slaves foreach { _.close() }
   }
 
