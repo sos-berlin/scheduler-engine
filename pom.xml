@@ -62,6 +62,7 @@
                     <!-- Aggregate the source of all artifacts -->
                     <plugin>
                         <artifactId>maven-source-plugin</artifactId>
+                        <version>2.4</version>
                         <executions>
                             <execution>
                                 <id>aggregate-sources</id>
