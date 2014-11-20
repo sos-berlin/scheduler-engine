@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1221
 
-import com.google.common.io.Files.{createTempDir, touch}
+import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
@@ -16,16 +16,13 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
+ * JS-1221 &lt;job_chain_nody.modify action="next_state"> auf ersten Knoten nach &lt;file_order_source>.
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
 final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val directory = createTempDir()
-
-  onClose {
-    directory.delete()
-  }
+  private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
 
   "Existing file" in {
     val file = newFile()

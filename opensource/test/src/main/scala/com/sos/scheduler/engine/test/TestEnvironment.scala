@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.test
 
 import TestEnvironment._
 import _root_.scala.collection.immutable
+import _root_.scala.collection.mutable
 import com.google.common.base.Strings.nullToEmpty
-import com.google.common.io.Files
+import com.google.common.io.{Files ⇒ GuavaFiles}
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecursivly
-import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
+import com.sos.scheduler.engine.common.system.Files.{removeDirectoryRecursivly, removeDirectoryContentRecursivly, makeDirectories, makeDirectory}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
 import com.sos.scheduler.engine.data.filebased.TypedPath
@@ -18,20 +18,27 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
+import java.nio.file.Files
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(
     resourcePath: ResourcePath,
     val directory: File,
     nameMap: Map[String, String],
-    fileTransformer: ResourceToFileTransformer) {
+    fileTransformer: ResourceToFileTransformer)
+extends AutoCloseable {
 
   val configDirectory = new File(directory, configSubdir)
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
   val databaseDirectory = directory
+  val deletableTemporaryDirectories = mutable.Buffer[File]()
   private var isPrepared = false
+
+  def close(): Unit = {
+    deletableTemporaryDirectories foreach removeDirectoryRecursivly
+  }
 
   private[test] def prepare() {
     if (!isPrepared) {
@@ -75,7 +82,7 @@ final class TestEnvironment(
     new File(logDirectory, s"order.${orderKey.jobChainPath.withoutStartingSlash}.${orderKey.id.string}.log")
 
   def taskLogFileString(jobPath: JobPath): String =
-    Files.toString(taskLogFile(jobPath), schedulerEncoding)
+    GuavaFiles.toString(taskLogFile(jobPath), schedulerEncoding)
 
   /** @return Pfad einer Task-Potokolldatei für einfachen JobPath. */
   def taskLogFile(jobPath: JobPath) =
@@ -83,6 +90,18 @@ final class TestEnvironment(
 
   def subdirectory(name: String) =
     new File(directory, name) sideEffect makeDirectory
+
+  /** @return a temporary directory for use in &lt;file_order_source>.
+    *         Under Windows, which allows not more than 250 character in a file path (the order log file),
+    *         the directory is placed in the original Windows temporary directory as denoted by the environment variable TEMP. */
+  def newFileOrderSourceDirectory(): File =
+    (if (OperatingSystem.isWindows) sys.env.get("TEMP") else None) match {
+      case Some(t) ⇒
+        Files.createTempDirectory(new File(t).toPath, "sos-").toFile
+          .sideEffect { o ⇒ deletableTemporaryDirectories += o }
+      case None ⇒
+        Files.createTempDirectory(null).toFile  // Directory based in java.io.tmpdir, which is modified by Maven pom.xml (target)
+    }
 }
 
 

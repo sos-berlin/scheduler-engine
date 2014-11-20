@@ -92,8 +92,8 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "File_order_sink_module::create_instance_impl" in {
-    val fileOrdersDir = Files.createTempDirectory("test")
-    val orderFile = fileOrdersDir.toFile / "test.txt"
+    val fileOrdersDir = testEnvironment.newFileOrderSourceDirectory()
+    val orderFile = fileOrdersDir / "test.txt"
     orderFile.write("test")
     val jobChainPath = JobChainPath("/test-file-order")
     val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
@@ -105,7 +105,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
           <file_order_sink state="end" remove="yes"/>
         </job_chain>
     }
-    Files.delete(fileOrdersDir)
+    Files.delete(fileOrdersDir.toPath)
   }
 
   //test("Not in a cluster") {}
