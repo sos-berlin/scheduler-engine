@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1141
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.job.JobPath
@@ -22,10 +23,31 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
 
+  private val watchdog = new Thread {
+    override def run(): Unit = {
+      val timeout = 60000
+      try {
+        Thread.sleep(timeout)
+        val msg = s"Exiting Java-VM due to non-terminating JobScheduler start after ${timeout}ms"
+        logger.error(msg)
+        System.err.println(msg)
+        System.exit(99)
+      }
+      catch {
+        case _: InterruptedException ⇒
+      }
+    }
+  }
+
   override protected def onBeforeSchedulerActivation(): Unit = {
     // Change modification timestamps to other daylight saving time period, 4 to 8 months ago
     aIncludeFile.setLastModified((now() - (4*30).days).getMillis)
     bIncludeFile.setLastModified((now() - (8*30).days).getMillis)
+    watchdog.start()
+  }
+
+  onClose {
+    watchdog.interrupt()
   }
 
   "At start, included file is from other day light saving time period" in {
@@ -61,4 +83,5 @@ private object JS1141IT {
   private val TestJobPath = JobPath("/test")
   private val TestAIncludeName = "test-a-include.xml"
   private val TestBIncludeName = "test-b-include.xml"
+  private val logger = Logger(getClass)
 }
