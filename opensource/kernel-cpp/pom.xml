@@ -20,7 +20,6 @@
 
     <build>
         <plugins>
-
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -304,34 +303,33 @@
     </dependencies>
 
     <profiles>
-
         <profile>
             <id>collect-sources</id>
             <build>
-              <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>aggregate-cpp-sources</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                            <configuration>
-                                <descriptors>
-                                  <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
-                                </descriptors>
-                                <appendAssemblyId>true</appendAssemblyId>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-              </plugins>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>aggregate-cpp-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
+                                    </descriptors>
+                                    <appendAssemblyId>true</appendAssemblyId>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
-        
+
         <profile>
             <id>kernelcpp.clean.skip</id>
             <!-- Das funktionniert nicht. Es soll die langwierige Neukompilierung des C++-Codes verhindern. -->
