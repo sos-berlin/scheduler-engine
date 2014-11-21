@@ -170,10 +170,17 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element, i
                     xml::Element_ptr e = element.append_new_element( "requisite" );
                     e.setAttribute( "type", subsystem->object_type_name() );
                     e.setAttribute( "path", path );
-
-                    if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
                     result++;
-                    if( requisite )  result += requisite->append_requisite_dom_elements(element, nesting + 1);     // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+                    // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+                    result += requisite->append_requisite_dom_elements(element, nesting + 1);
+                }
+                else
+                if (!requisite || !requisite->is_active_and_not_to_be_removed()) {
+                    xml::Element_ptr e = element.append_new_element("requisite");
+                    e.setAttribute("type", subsystem->object_type_name());
+                    e.setAttribute("path", path);
+                    e.setAttribute("is_missing", "yes");
+                    result++;
                 }
             }
         }

@@ -17,7 +17,16 @@ const int    max_insert_race_retry_count                = 5;                    
 
 struct Order_schedule_use : Schedule_use
 {
-                                Order_schedule_use          ( Order* order )                        : Schedule_use(order), _order(order) {}
+    Order_schedule_use(Order* order) : 
+        Schedule_use(order),
+        _order(order) 
+    {
+        _order->add_accompanying_dependant(this);
+    }
+
+    ~Order_schedule_use() {
+        _order->remove_accompanying_dependant(this);
+    }
 
     void                        on_schedule_loaded          ()                                      { return _order->on_schedule_loaded(); }
     void                        on_schedule_modified        ()                                      { return _order->on_schedule_modified(); }
