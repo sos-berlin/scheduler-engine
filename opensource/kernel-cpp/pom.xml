@@ -20,7 +20,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -300,7 +299,6 @@
     </dependencies>
 
     <profiles>
-
         <profile>
             <build>
                 <plugins>
@@ -324,6 +322,7 @@
                 </plugins>
             </build>
         </profile>
+        
         <profile>
             <id>kernelcpp.clean.skip</id>
             <!-- Das funktionniert nicht. Es soll die langwierige Neukompilierung des C++-Codes verhindern. -->
