@@ -25,7 +25,7 @@ trait ScalaSchedulerTest
     TestConfiguration(testClass = getClass)
 
   protected final lazy val testEnvironment =
-    TestEnvironment(testConfiguration, testDirectory)
+    TestEnvironment(testConfiguration, testDirectory).registerCloseable
 
   protected implicit lazy final val controller = TestSchedulerController(testConfiguration, testEnvironment).registerCloseable
 

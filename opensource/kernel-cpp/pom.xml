@@ -20,25 +20,6 @@
 
     <build>
         <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-assembly-plugin</artifactId>
-              <executions>
-                  <execution>
-                      <id>aggregate-sources</id>
-                      <phase>deploy</phase>
-                      <goals>
-                          <goal>single</goal>
-                      </goals>
-                      <configuration>
-                          <descriptors>
-                            <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
-                          </descriptors>
-                          <appendAssemblyId>true</appendAssemblyId>
-                      </configuration>
-                  </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,7 +81,7 @@
                 <executions>
                     <execution>
                         <id>Generate Java proxies</id>
-                        <phase>generate-sources</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
@@ -173,18 +154,18 @@
                         Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. Lösung: mvn clean install. -->
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>cppjava.generator</artifactId>
-                        <version>${cplusplusVersion}</version>
+                        <version>${project.cplusplusVersion}</version>
                         <scope>compile</scope>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
                         <artifactId>kernel</artifactId>
-                        <version>${cplusplusVersion}</version>
+                        <version>${project.cplusplusVersion}</version>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
                         <artifactId>engine-newkernel</artifactId>
-                        <version>${cplusplusVersion}</version>
+                        <version>${project.cplusplusVersion}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -319,8 +300,8 @@
     </dependencies>
 
     <profiles>
+
         <profile>
-            <id>cpp-sources</id>
             <build>
                 <plugins>
                     <plugin>
@@ -328,8 +309,6 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>aggregate-sources</id>
-                                <phase>generate-sources</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
@@ -345,7 +324,6 @@
                 </plugins>
             </build>
         </profile>
-
         <profile>
             <id>kernelcpp.clean.skip</id>
             <!-- Das funktionniert nicht. Es soll die langwierige Neukompilierung des C++-Codes verhindern. -->
