@@ -8,12 +8,15 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.test.database.H2DatabaseServer.Configuration
 import java.nio.file.Files
 import java.sql.DriverManager
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class H2DatabaseServerTest extends FreeSpec with HasCloser {
 
   "Start and stop database" in {
@@ -25,7 +28,7 @@ final class H2DatabaseServerTest extends FreeSpec with HasCloser {
       }
       autoClosing(new H2DatabaseServer(conf)) { server ⇒
         server.start()
-        autoClosing(DriverManager.getConnection(server.jdbcUrl)) { connection ⇒
+        autoClosing(DriverManager.getConnection(conf.jdbcUrl)) { connection ⇒
           connection.createStatement().executeUpdate("create table test (a int)")
         }
         dbDirectory.listFiles shouldEqual List(server.file)

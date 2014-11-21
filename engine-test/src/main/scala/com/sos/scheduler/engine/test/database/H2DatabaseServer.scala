@@ -23,8 +23,6 @@ final class H2DatabaseServer(configuration: H2DatabaseServer.Configuration) exte
 
   def stop(): Unit = server.stop()
 
-  def jdbcUrl = configuration.jdbcUrl
-
   protected[database] def file = directory / s"$name.mv.db"
 
   override def toString = s"H2DatabaseServer(${server.getStatus}})"
@@ -35,6 +33,7 @@ object H2DatabaseServer {
     private val name = s"database-$tcpPort"
     lazy val jdbcUrl = s"jdbc:h2:tcp://127.0.0.1:$tcpPort/$directory/$name"
 
+    def hostwarePath = s"jdbc -class=$jdbcClassName $jdbcUrl"
     def jdbcClassName = "org.h2.Driver"
     def testJdbcUrl(ignoredName: String, ignoredDirectory: File) = jdbcUrl
 
