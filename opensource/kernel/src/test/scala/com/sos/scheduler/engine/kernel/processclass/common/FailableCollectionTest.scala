@@ -3,11 +3,14 @@ package com.sos.scheduler.engine.kernel.processclass.common
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollectionTest._
 import org.joda.time.{Duration, Instant}
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class FailableCollectionTest extends FreeSpec {
 
   "Requirements" - {

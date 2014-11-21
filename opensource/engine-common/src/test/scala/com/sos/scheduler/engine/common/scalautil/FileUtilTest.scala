@@ -5,13 +5,15 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import java.io.File
 import java.nio.charset.StandardCharsets.{UTF_16BE, UTF_8}
 import java.nio.file.{Files, Path}
+import org.junit.runner.RunWith
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
-
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class FileUtilTest extends FreeSpec with BeforeAndAfterAll {
 
   private lazy val file = Files.createTempFile("FileUtilTest-", ".tmp").toFile

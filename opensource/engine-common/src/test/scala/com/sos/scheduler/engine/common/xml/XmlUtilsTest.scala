@@ -3,9 +3,12 @@ package com.sos.scheduler.engine.common.xml
 import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.common.xml.XmlUtilsTest._
 import java.nio.charset.StandardCharsets.{ISO_8859_1, US_ASCII, UTF_16BE, UTF_8}
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 final class XmlUtilsTest extends FreeSpec {
 
   "loadXml String" in {

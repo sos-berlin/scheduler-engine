@@ -1,12 +1,15 @@
 package com.sos.scheduler.engine.common.utils
 
 import com.sos.scheduler.engine.common.utils.SingleThreadedTest._
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.concurrent.AsyncAssertions.Waiter
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class SingleThreadedTest extends FreeSpec {
 
   private val a = new A

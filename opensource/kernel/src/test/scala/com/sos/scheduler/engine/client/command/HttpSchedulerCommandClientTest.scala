@@ -9,7 +9,9 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.typesafe.config.ConfigFactory
+import org.junit.runner.RunWith
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -18,6 +20,7 @@ import scala.util.Failure
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterAll {
 
   private lazy val httpPort = findRandomFreeTcpPort()
