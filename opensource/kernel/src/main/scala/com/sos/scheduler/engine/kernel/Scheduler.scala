@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
+import org.joda.time.DateTimeZone
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.Instant.now
 import scala.collection.JavaConversions._
@@ -251,6 +252,10 @@ with HasCloser {
 object Scheduler {
   private val logger = Logger(getClass)
   private val mavenProperties = new MavenProperties("com/sos/scheduler/engine/kernel/maven.properties")
+  private val _defaultTimezoneId = DateTimeZone.getDefault.getID
+
+  @ForCpp
+  def defaultTimezoneId: String = _defaultTimezoneId
 
   @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)

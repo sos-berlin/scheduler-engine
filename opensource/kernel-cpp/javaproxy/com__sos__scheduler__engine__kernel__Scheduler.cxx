@@ -21,6 +21,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Static_method const _buildVersion____method;
     ::zschimmer::javabridge::Method const _cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
+    ::zschimmer::javabridge::Static_method const _defaultTimezoneId____method;
     ::zschimmer::javabridge::Method const _enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _initialize____method;
@@ -46,6 +47,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_buildVersion____method(this, "buildVersion", "()Ljava/lang/String;")
     ,_cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "cancelCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
+    ,_defaultTimezoneId____method(this, "defaultTimezoneId", "()Ljava/lang/String;")
     ,_enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "enqueueCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_initialize____method(this, "initialize", "()V")
@@ -93,6 +95,14 @@ void Scheduler::cancelCall(const ::zschimmer::javabridge::proxy_jobject< ::javap
     parameter_list._jvalues[0].l = p0.get_jobject();
     Scheduler__class* cls = _class.get();
     cls->_cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method.call(get_jobject(), parameter_list);
+}
+
+::javaproxy::java::lang::String Scheduler::defaultTimezoneId() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = Scheduler__class::class_factory.clas();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_defaultTimezoneId____method.jobject_call(cls->get_jclass(), parameter_list));
+    return result;
 }
 
 void Scheduler::enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const {

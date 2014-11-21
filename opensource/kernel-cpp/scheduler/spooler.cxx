@@ -1756,6 +1756,9 @@ void Spooler::load()
     load_config( _config_element_to_load, _config_source_filename );
     modifiable_settings()->set_from_variables(*_variables);
     _settings->freeze(); // Von Scheduler.java befüllt
+    if (_time_zone_name == "") {
+        _time_zone_name = SchedulerJ::defaultTimezoneId();
+    }
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();

@@ -57,6 +57,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
 
     static ::javaproxy::java::lang::String buildVersion();
     void cancelCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
+    static ::javaproxy::java::lang::String defaultTimezoneId();
     void enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
     void initialize() const;
