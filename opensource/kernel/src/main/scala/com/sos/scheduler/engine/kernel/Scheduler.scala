@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
-import com.sos.scheduler.engine.common.async.CallRunner
+import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
@@ -187,14 +187,18 @@ with HasCloser {
 
   def terminate(): Unit = {
     if (!isClosed) {
-      directOrSchedulerThreadFuture {
-        if (!isClosed) {
-          try cppProxy.cmd_terminate()
-          catch {
-            case x: CppProxyInvalidatedException ⇒
-              logger.trace("Scheduler.terminate() ignored because C++ object has already been destroyed")
+      try
+        directOrSchedulerThreadFuture {
+          if (!isClosed) {
+            try cppProxy.cmd_terminate()
+            catch {
+              case x: CppProxyInvalidatedException ⇒
+                logger.trace("Scheduler.terminate() ignored because C++ object has already been destroyed")
+            }
           }
         }
+      catch {
+        case e: CallQueue.ClosedException ⇒ logger.debug(s"Ignored: $e")
       }
       // Return immediately, discarding the future
     }

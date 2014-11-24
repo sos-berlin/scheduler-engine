@@ -38,7 +38,7 @@ public class CppScheduler {
         name = controllerBridge.getName();
         boolean ok  = onlyInstance.compareAndSet(null, this);
         if (!ok)
-            throw new RuntimeException("Running "+ onlyInstance.get() +" hinders start of "+this);
+            throw new RuntimeException("Running "+ onlyInstance.get() +" blocks start of "+this);
         try {
             return run2(arguments, argumentLine, controllerBridge);
         }

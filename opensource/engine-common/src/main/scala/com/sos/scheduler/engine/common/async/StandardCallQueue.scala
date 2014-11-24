@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.async
 
-import StandardCallQueue._
+import com.sos.scheduler.engine.common.async.StandardCallQueue._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import scala.collection.mutable
 import scala.language.existentials
@@ -14,7 +14,7 @@ class StandardCallQueue extends PoppableCallQueue {
   final def add[A](o: TimedCall[A]): Unit = {
     if (o.epochMillis == 0) logger.trace(s"Enqueue $o") else logger.debug(s"Enqueue at ${o.atString} $o")
     synchronized {
-      if (closed) sys.error(s"CallQueue is closed. '$o' is rejected")
+      if (closed) throw new CallQueue.ClosedException(s"CallQueue is closed. '$o' is rejected")
       val i = positionAfter(o.epochMillis)
       if (i < queue.size) queue.insert(i, o)
       else queue.append(o)  // Scala 2.10.0: queue.insert(queue.size, x) geht in eine Schleife

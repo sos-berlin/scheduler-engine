@@ -51,4 +51,6 @@ trait CallQueue extends AutoCloseable {
 
 object CallQueue {
   private val logger = Logger(getClass)
+
+  final class ClosedException(override val getMessage: String) extends IllegalStateException
 }
