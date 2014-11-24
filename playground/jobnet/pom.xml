@@ -19,6 +19,10 @@
     <name>${project.artifactId}</name>
     <inceptionYear>2012</inceptionYear>
 
+    <properties>
+        <sos.jars.version>2136</sos.jars.version>
+    </properties>
+
     <build>
     
         <!-- test in package com.sos.jobnet will run with parameter -Dtest=... only -->
