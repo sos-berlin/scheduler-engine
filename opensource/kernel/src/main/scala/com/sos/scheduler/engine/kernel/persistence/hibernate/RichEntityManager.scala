@@ -2,17 +2,19 @@ package com.sos.scheduler.engine.kernel.persistence.hibernate
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import java.sql.{Connection, PreparedStatement}
 import javax.persistence.EntityManager
 import org.hibernate.jdbc.Work
 import scala.collection.immutable
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+
 
 class RichEntityManager(val delegate: EntityManager) extends AnyVal {
-  def findOption[E](key: AnyRef)(implicit c: ClassTag[E]): Option[E] =
-    findOption(key, c.runtimeClass.asInstanceOf[Class[E]])
+
+  def findOption[E : ClassTag](key: AnyRef): Option[E] =
+    findOption(key, implicitClass[E])
 
   def findOption[E](key: AnyRef, clas: Class[E]): Option[E] =
     Option(delegate.find(clas, key))
@@ -49,6 +51,7 @@ class RichEntityManager(val delegate: EntityManager) extends AnyVal {
     delegate.unwrap(classOf[org.hibernate.Session]).doWork(new Work {
       def execute(connection: Connection): Unit = {
         result = Some(f(connection))
+
       }
     })
     result.get
@@ -56,5 +59,5 @@ class RichEntityManager(val delegate: EntityManager) extends AnyVal {
 }
 
 object RichEntityManager {
-  implicit def toRichEntityManager(e: EntityManager) = new RichEntityManager(e)
+  implicit def toRichEntityManager(e: EntityManager): RichEntityManager = new RichEntityManager(e)
 }

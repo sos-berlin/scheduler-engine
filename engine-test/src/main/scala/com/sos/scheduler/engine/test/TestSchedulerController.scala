@@ -165,8 +165,7 @@ with EventHandlerAnnotated {
     }
   }
 
-  final def instance[A](implicit c: ClassTag[A]): A =
-    injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
+  final def instance[A : ClassTag]: A = injector.apply[A]
 
   final def injector = scheduler.injector
 
