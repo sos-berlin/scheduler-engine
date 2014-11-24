@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period
 
-import WakeWhenInPeriodIT._
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period.WakeWhenInPeriodIT._
 import org.joda.time.DateTimeConstants.MILLIS_PER_DAY
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
@@ -13,7 +13,6 @@ import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import com.sos.scheduler.engine.common.time.ScalaJoda._
 
 /** JS-948 */
 @RunWith(classOf[JUnitRunner])

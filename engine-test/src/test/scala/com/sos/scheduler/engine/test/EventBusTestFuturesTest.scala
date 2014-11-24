@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.concurrent.Await
-import _root_.scala.concurrent.duration.FiniteDuration
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventBus
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -11,6 +9,8 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import scala.concurrent.Await
+import scala.concurrent.duration.FiniteDuration
 
 @RunWith(classOf[JUnitRunner])
 final class EventBusTestFuturesTest extends FreeSpec {

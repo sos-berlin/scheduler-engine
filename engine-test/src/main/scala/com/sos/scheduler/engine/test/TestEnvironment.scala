@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.collection.{immutable, mutable}
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
@@ -18,6 +17,7 @@ import com.sos.scheduler.engine.test.TestEnvironment._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
 import java.nio.file.Files
+import scala.collection.{immutable, mutable}
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(

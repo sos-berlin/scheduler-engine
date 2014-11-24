@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.tests.jira.js1029
 
-import JS1029IT._
 import com.sos.scheduler.engine.common.system.Files.removeFile
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1029.JS1029IT._
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

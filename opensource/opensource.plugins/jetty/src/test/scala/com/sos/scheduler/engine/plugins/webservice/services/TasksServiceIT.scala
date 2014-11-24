@@ -5,8 +5,7 @@ import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.plugins.webservice.services.TasksServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST
 import com.sun.jersey.api.client.UniformInterfaceException
 import javax.ws.rs.core.MediaType._

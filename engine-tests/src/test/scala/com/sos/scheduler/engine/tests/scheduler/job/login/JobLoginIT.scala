@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.tests.scheduler.job.login
 
-import JobLoginIT._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.job.login.JobLoginIT._
 import java.util.regex.Pattern
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

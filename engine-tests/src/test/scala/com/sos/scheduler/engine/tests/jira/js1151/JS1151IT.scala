@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1151
 
-import JS1151IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.persistence.entities.{JobChainEntity, JobChainNodeEntity}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestSchedulerController}
+import com.sos.scheduler.engine.tests.jira.js1151.JS1151IT._
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

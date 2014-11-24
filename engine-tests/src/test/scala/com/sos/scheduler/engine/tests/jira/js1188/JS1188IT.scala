@@ -23,8 +23,7 @@ import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitResults, awaitSuccess, executionContext, job, processClass, runJobAndWaitForEnd, runJobFuture, task}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1188.JS1188IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -195,7 +194,6 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS1188IT {
-  private val AgentTcpPortRange = 53000 until 54000   // Ports must be free for several minutes to test inaccessible (not running) agents
   private val AgentConnectRetryDelay = 15.s
   private val n = 4
   private val AgentsProcessClassPath = ProcessClassPath("/agents")

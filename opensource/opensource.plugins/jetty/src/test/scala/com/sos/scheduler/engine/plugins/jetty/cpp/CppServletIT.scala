@@ -7,8 +7,7 @@ import com.sos.scheduler.engine.plugins.jetty.cpp.CppServletIT._
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
 import com.sos.scheduler.engine.plugins.jetty.test.{JettyPluginJerseyTester, JettyPluginTests}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sun.jersey.api.client.ClientResponse.Status._
 import com.sun.jersey.api.client.{Client, ClientResponse, UniformInterfaceException}
 import java.io.File

@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
-import JS803IT._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
+import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.SchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.tests.jira.js803.JS803IT._
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.joda.time.DateTime

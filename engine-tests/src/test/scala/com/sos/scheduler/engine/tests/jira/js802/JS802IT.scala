@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js802
 
-import JS802IT._
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
-import com.sos.scheduler.engine.data.order.{OrderTouchedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.SchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.tests.jira.js802.JS802IT._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._

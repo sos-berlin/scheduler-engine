@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.tests.scheduler.runtime.timezone
 
-import TimeZoneIT._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.runtime.timezone.TimeZoneIT._
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTimeZone, LocalTime, DateTime}
+import org.joda.time.{DateTime, DateTimeZone, LocalTime}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

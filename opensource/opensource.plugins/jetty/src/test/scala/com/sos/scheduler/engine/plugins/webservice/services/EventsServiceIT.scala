@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import EventsServiceIT._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
+import com.sos.scheduler.engine.plugins.webservice.services.EventsServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import java.io.{BufferedReader, IOException, Reader}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

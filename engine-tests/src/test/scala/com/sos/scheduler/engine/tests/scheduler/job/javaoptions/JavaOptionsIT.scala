@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.tests.scheduler.job.javaoptions
 
-import JavaOptionsIT._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.util.Sockets.findAvailablePort
+import com.sos.scheduler.engine.tests.scheduler.job.javaoptions.JavaOptionsIT._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._

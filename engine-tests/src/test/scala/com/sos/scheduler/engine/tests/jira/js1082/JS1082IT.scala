@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1082
 
-import JS1082IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -10,7 +9,8 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity
 import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
 import com.sos.scheduler.engine.test.TestSchedulerController
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1082.JS1082IT._
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

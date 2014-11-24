@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js616
 
-import JS616IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderFinishedEvent}
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js616.JS616IT._
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant.now
 import org.joda.time.format.ISODateTimeFormat

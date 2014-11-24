@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.tests.scheduler.job.period
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.period.JobPeriodIT._
 import org.joda.time.Instant.now
 import org.joda.time.{DateTimeZone, Duration, Instant}

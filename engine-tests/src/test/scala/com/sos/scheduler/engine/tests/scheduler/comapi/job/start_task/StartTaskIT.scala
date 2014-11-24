@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.job.start_task
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
@@ -19,7 +18,7 @@ final class StartTaskIT extends FunSuite with ScalaSchedulerTest {
 
   @EventHandler def handle(e: TaskEndedEvent): Unit = {
     if (e.jobPath == JobPath("/test-b")) {
-      scheduler.instance[VariableSet].apply("test-b") should equal ("TEST-TEST")
+      instance[VariableSet].apply("test-b") should equal ("TEST-TEST")
       controller.terminateScheduler()
     }
   }

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1227
 
 import com.sos.scheduler.engine.test.database.H2DatabaseServer
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 
 /**
  * Mixin for [[ScalaSchedulerTest]] providing a database to be shared among multiple schedulers.

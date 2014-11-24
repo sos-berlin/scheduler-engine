@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1079
 
-import JS1079IT._
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1079.JS1079IT._
 import java.io.File
 import java.net._
 import org.junit.runner.RunWith

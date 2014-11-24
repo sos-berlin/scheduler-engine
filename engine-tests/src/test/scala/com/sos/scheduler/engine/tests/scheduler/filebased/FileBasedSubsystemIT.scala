@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.scheduler.filebased
 
-import FileBasedSubsystemIT._
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaCollections.emptyToNone
 import com.sos.scheduler.engine.common.time.ScalaJoda._
@@ -22,7 +21,8 @@ import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, StandingOrd
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.filebased.FileBasedSubsystemIT._
 import org.joda.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

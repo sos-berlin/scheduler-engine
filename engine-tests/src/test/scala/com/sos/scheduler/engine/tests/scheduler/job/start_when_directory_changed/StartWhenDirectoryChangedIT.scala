@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed
 
-import StartWhenDirectoryChangedIT._
 import com.google.common.base.Splitter
 import com.google.common.io.Files.{move, touch}
 import com.sos.scheduler.engine.common.scalautil.Logger
@@ -8,11 +7,11 @@ import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
-import com.sos.scheduler.engine.eventbus.{SchedulerEventBus, HotEventHandler}
+import com.sos.scheduler.engine.eventbus.{HotEventHandler, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.EventPipe.TimeoutException
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.StartWhenDirectoryChangedIT._
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

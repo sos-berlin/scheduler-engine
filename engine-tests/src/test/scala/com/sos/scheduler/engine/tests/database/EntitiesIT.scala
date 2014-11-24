@@ -1,26 +1,25 @@
 package com.sos.scheduler.engine.tests.database
 
-import EntitiesIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.filebased.{FileBasedRemovedEvent, FileBasedActivatedEvent}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction}
-import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
-import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
+import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
-import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import com.sos.scheduler.engine.tests.database.EntitiesIT._
 import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
@@ -38,7 +37,6 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     cppSettings = CppSettings.TestMap + (CppSettingName.useJavaPersistence -> true.toString))
 
   private val testStartTime = now() withMillisOfSecond 0
-  private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
 
@@ -53,16 +51,14 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
       simpleJob.forceFileReread()
-      scheduler.instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
     }
   }
 
-  private def simpleJob =
-    scheduler.instance[JobSubsystem].job(simpleJobPath)
+  private def simpleJob = instance[JobSubsystem].job(simpleJobPath)
 
-  private def entityManager =
-    instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
+  private def entityManager = instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
   test("TaskHistoryEntity") {
     taskHistoryEntities should have size 2

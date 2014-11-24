@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidated
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
+import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
@@ -204,6 +205,16 @@ with HasCloser {
     }
   }
 
+  def executeXmls(e: Iterable[scala.xml.NodeBuffer]): Result = executeXmlString(<commands>{e}</commands>.toString())
+
+  def executeXml(o: XmlCommand): Result = executeXmlString(o.xmlString)
+
+  def executeXmls(e: scala.xml.NodeSeq): Result = executeXmlString(<commands>{e}</commands>.toString())
+
+  def executeXml(e: scala.xml.Elem): Result = executeXmlString(e.toString())
+
+  private def executeXmlString(o: String) = Result(executeXml(o))
+
   /** Löst bei einem ERROR-Element eine Exception aus. */
   def executeXml(xml: String): String = {
     val result = uncheckedExecuteXml(xml)
@@ -281,4 +292,9 @@ object Scheduler {
       catch { case e: NoSuchElementException ⇒ "" }
     else
       ""
+
+  final case class Result(string: String) {
+    lazy val elem: scala.xml.Elem = SafeXML.loadString(string)
+    lazy val answer = elem \ "answer"
+  }
 }

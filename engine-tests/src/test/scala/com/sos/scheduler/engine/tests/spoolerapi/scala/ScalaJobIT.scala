@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
-import ScalaJobIT._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.scala._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.spoolerapi.scala.ScalaJobIT._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.Matchers.{value => _, _ }
+import org.scalatest.Matchers.{value ⇒ _, _}
 import org.scalatest.junit.JUnitRunner
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.

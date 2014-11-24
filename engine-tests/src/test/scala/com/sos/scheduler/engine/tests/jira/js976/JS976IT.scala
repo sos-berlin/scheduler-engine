@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js976
 
-import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, DefaultDatabaseConfiguration, TestConfiguration}
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, HostwareDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

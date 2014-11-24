@@ -3,10 +3,9 @@ package com.sos.scheduler.engine.tests.jira.js1039
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1039.JS1039TaskStdoutIT._
 import java.util.regex.Pattern
 import org.junit.runner.RunWith
@@ -28,7 +27,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"))
-  private lazy val schedulerVariables = scheduler.instance[VariableSet]
+  private lazy val schedulerVariables = instance[VariableSet]
 
   private lazy val jobResults: Map[JobPath, JobResult] = {
     (JobSettings map { _.jobPath } map { jobPath =>

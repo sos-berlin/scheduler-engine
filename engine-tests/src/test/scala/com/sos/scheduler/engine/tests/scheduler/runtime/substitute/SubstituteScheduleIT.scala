@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.tests.scheduler.runtime.substitute
 
-import SubstituteScheduleIT._
 import com.sos.scheduler.engine.common.scalautil.xmls.RichScalaXML._
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.runtime.substitute.SubstituteScheduleIT._
 import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
 import org.junit.runner.RunWith

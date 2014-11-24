@@ -9,8 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEnc
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1049.JS1049IT._
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets.{UTF_16BE, UTF_8}

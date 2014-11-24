@@ -1,16 +1,15 @@
-package com.sos.scheduler.engine.test.scala
+package com.sos.scheduler.engine.test.scalatest
 
-import _root_.scala.reflect.ClassTag
 import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest.logger
-import com.sos.scheduler.engine.test.scala.Utils.ignoreException
-import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
-import org.scalatest.Suite
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest._
+import com.sos.scheduler.engine.test.scalatest.Utils._
 import org.joda.time.Duration
+import org.scalatest.Suite
+import scala.reflect.ClassTag
 
 trait ScalaSchedulerTest
     extends Suite

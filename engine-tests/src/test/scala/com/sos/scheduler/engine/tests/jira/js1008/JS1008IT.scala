@@ -1,20 +1,20 @@
 package com.sos.scheduler.engine.tests.jira.js1008
 
-import JS1008IT._
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction}
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1008.JS1008IT._
 import java.io.File
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS1008IT extends FunSuite with ScalaSchedulerTest {
-  test("file_order_source") {
+final class JS1008IT extends FreeSpec with ScalaSchedulerTest {
+
+  "file_order_source" in {
     // Ob Fehler in FindFirstChangeNotification ignoriert werden, testen wir manuell durch vorübergehenden Eingriff in den C++-Code. Dazu Polling-Intervall mit repeat="5" verkürzen
     val eventPipe = controller.newEventPipe()
     val orderSubsystem = instance[OrderSubsystem]

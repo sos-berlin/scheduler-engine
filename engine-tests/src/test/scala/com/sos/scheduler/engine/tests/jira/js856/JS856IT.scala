@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js856
 
-import JS856IT._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js856.JS856IT._
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 

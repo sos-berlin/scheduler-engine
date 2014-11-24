@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.collection.JavaConversions._
-import _root_.scala.reflect.ClassTag
 import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
@@ -20,11 +19,12 @@ import com.sos.scheduler.engine.main.{CppBinaries, CppBinary, SchedulerState, Sc
 import com.sos.scheduler.engine.test.TestSchedulerController._
 import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinaries}
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.sql.{Connection, DriverManager}
 import org.joda.time.Duration
 import org.scalactic.Requirements._
+import scala.collection.JavaConversions.iterableAsScalaIterable
+import scala.reflect.ClassTag
 
 abstract class TestSchedulerController
 extends DelegatingSchedulerController
@@ -124,7 +124,7 @@ with EventHandlerAnnotated {
   }
 
   private def checkForErrorLogLine(): Unit = {
-    val lastErrorLine = _scheduler.instance[PrefixLog].lastByLevel(SchedulerLogLevel.error)
+    val lastErrorLine = _scheduler.injector.apply[PrefixLog].lastByLevel(SchedulerLogLevel.error)
     if (!lastErrorLine.isEmpty) sys.error("Test terminated after error log line: " + lastErrorLine)
   }
 

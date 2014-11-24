@@ -8,8 +8,7 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1159.JS1159IT._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

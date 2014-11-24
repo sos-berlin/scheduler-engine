@@ -11,8 +11,7 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.taskIdOffset
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT.{MyFinishedEvent, _}
@@ -33,8 +32,8 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
     testClass = getClass,
     terminateOnError = false)
 
-  private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
-  private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]
+  private lazy val jobSubsystem = instance[JobSubsystem]
+  private lazy val orderSubsystem = instance[OrderSubsystem]
 
   Settings.list.zipWithIndex foreach { case ((setting, expected), i) =>
     val index = i + 1

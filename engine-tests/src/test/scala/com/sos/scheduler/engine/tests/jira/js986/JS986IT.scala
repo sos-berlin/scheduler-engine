@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js986
 
-import JS986IT._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.data.xmlcommands.{What, ShowOrderCommand, OrderCommand}
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ShowOrderCommand, What}
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js986.JS986IT._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._

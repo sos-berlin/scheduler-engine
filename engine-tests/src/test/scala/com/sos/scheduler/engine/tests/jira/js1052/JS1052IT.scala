@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.command.RemoteSchedulers
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1052.JS1052IT._
 import java.io.{ByteArrayInputStream, OutputStreamWriter}
 import java.net.Socket

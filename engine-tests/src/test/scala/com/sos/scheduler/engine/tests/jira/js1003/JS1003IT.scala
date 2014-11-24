@@ -7,9 +7,8 @@ import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.Action
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.EventPipe
-import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.SchedulerTestUtils.order
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1003.JS1003IT._
 import org.joda.time.{DateTime, Instant}
 import org.junit.runner.RunWith

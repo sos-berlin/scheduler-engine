@@ -1,8 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.annotation.tailrec
-import _root_.scala.collection.{immutable, mutable}
-import _root_.scala.reflect.ClassTag
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
@@ -12,6 +9,9 @@ import com.sos.scheduler.engine.test.EventPipe._
 import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import org.joda.time.Instant.now
 import org.joda.time.{Duration, ReadableDuration}
+import scala.annotation.tailrec
+import scala.collection.{immutable, mutable}
+import scala.reflect.ClassTag
 
 final class EventPipe(eventBus: EventBus, defaultTimeout: Duration)
 extends EventHandlerAnnotated with AutoCloseable {

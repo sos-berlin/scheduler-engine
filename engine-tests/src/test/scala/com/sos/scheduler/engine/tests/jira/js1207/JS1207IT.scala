@@ -9,8 +9,7 @@ import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.test.SchedulerTestUtils.awaitSuccess
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1207.JS1207IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

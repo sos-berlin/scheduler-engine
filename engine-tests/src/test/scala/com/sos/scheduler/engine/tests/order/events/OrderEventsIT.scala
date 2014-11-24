@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.tests.order.events
 
-import OrderEventsIT._
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
+import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
 import com.sos.scheduler.engine.kernel.order._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.order.events.OrderEventsIT._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._

@@ -5,8 +5,7 @@ import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.order
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1081.JS1081IT._
 import org.joda.time.Instant.now
 import org.joda.time.format.DateTimeFormat

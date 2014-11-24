@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester.norma
 import com.sos.scheduler.engine.plugins.webservice.services.CommandServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sun.jersey.api.client.{ClientResponse, UniformInterfaceException}
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith

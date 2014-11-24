@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1031
 
-import JS1031IT._
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.time.ScalaJoda._
@@ -8,7 +7,8 @@ import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1031.JS1031IT._
 import java.io.File
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant.now

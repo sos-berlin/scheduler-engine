@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.unsafewebservice
 
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester.normalizeUri
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

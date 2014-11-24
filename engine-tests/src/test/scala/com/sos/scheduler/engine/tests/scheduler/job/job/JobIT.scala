@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.scheduler.job.job
 
-import JobIT._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.job.job.JobIT._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._

@@ -19,9 +19,7 @@ import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
+import com.sos.scheduler.engine.test.scalatest.{HasCloserBeforeAndAfterAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT._
 import java.io.File
 import java.nio.file.Files

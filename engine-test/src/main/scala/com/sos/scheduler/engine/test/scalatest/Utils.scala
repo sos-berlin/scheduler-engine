@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.test.scala
+package com.sos.scheduler.engine.test.scalatest
 
 import org.slf4j.LoggerFactory
 

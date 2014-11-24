@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestSchedulerController}
 import com.sos.scheduler.engine.tests.jira.js957.JS957IT._
 import org.junit.runner.RunWith

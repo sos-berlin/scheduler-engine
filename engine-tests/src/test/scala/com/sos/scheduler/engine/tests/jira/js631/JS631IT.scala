@@ -4,8 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderState, OrderStateChangedEvent, OrderTouchedEvent}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.order
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js631.JS631IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

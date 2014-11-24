@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.concurrent.{Await, Future, Promise}
-import _root_.scala.reflect.ClassTag
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
 import java.util.concurrent.TimeoutException
 import org.joda.time.Duration
+import scala.concurrent.{Await, Future, Promise}
+import scala.reflect.ClassTag
 
 object EventBusTestFutures {
 

@@ -1,10 +1,7 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.collection.generic.CanBuildFrom
-import _root_.scala.concurrent.{Await, ExecutionContext, Future}
-import _root_.scala.language.higherKinds
-import _root_.scala.util.Try
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -19,28 +16,32 @@ import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassS
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.joda.time.Duration
+import scala.collection.generic.CanBuildFrom
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.language.{higherKinds, implicitConversions}
+import scala.reflect.ClassTag
+import scala.util.Try
 
 object SchedulerTestUtils {
 
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
-    hasInjector.injector.apply[JobSubsystem].job(jobPath)
+    instance[JobSubsystem].job(jobPath)
 
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
-    hasInjector.injector.apply[OrderSubsystem].jobChain(jobChainPath)
+    instance[OrderSubsystem].jobChain(jobChainPath)
 
   def order(key: OrderKey)(implicit hasInjector: HasInjector): Order =
-    hasInjector.injector.apply[OrderSubsystem].order(key)
+    instance[OrderSubsystem].order(key)
 
   def orderOption(key: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
-    hasInjector.injector.apply[OrderSubsystem].orderOption(key)
+    instance[OrderSubsystem].orderOption(key)
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
-    hasInjector.injector.apply[TaskSubsystem].task(taskId)
+    instance[TaskSubsystem].task(taskId)
 
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
-    hasInjector.injector.apply[ProcessClassSubsystem].processClass(path)
+    instance[ProcessClassSubsystem].processClass(path)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskId = {
     runJobAndWaitForEnd(jobPath, timeout.duration)
@@ -67,7 +68,7 @@ object SchedulerTestUtils {
     TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
   }
 
-  implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = hasInjector.injector.apply[ExecutionContext]
+  implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = instance[ExecutionContext]
 
   def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = awaitCompletion(f).get
 
@@ -79,7 +80,9 @@ object SchedulerTestUtils {
       (implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext, timeout: ImplicitTimeout) =
     Await.result(Future.sequence(o)(cbf, ec), TestTimeout)
 
-//  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
+  def instance[A : ClassTag](implicit hasInjector: HasInjector): A = hasInjector.injector.getInstance(implicitClass[A])
+
+  //  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
 //    * Eine Fehlermeldung im Hauptprotokoll führt gewöhnlich zum Abbruch des Tests.
 //    * @param errorCode Code der im Hauptprokoll zu tolerierenden Fehlermeldung.
 //    * @param testException: Test-Code, der bei einer falschen CppException eine Exception wirft, zum Bespiel mit ScalaTest. */
