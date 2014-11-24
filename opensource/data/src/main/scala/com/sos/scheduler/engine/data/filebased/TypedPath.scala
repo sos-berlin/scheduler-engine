@@ -22,7 +22,7 @@ extends AbsolutePath {
 
 
 object TypedPath {
-  implicit def ordering[A <: TypedPath] = new Ordering[A] {
+  implicit def ordering[A <: TypedPath]: Ordering[A] with Object {def compare(a: A, b: A): Int} = new Ordering[A] {
     def compare(a: A, b: A) = a.string compare b.string
   }
 

@@ -41,7 +41,7 @@ with UnmodifiableJobChain {
 
   def onCppProxyInvalidated(): Unit = {}
 
-  private implicit def entityManagerFactory =
+  private implicit def entityManagerFactory: EntityManagerFactory =
     injector.getInstance(classOf[EntityManagerFactory])
 
   @ForCpp

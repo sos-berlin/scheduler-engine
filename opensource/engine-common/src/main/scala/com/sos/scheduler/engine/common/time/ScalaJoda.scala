@@ -85,7 +85,7 @@ object ScalaJoda {
     override def compare(a: Instant, b: Instant) = a.getMillis compare b.getMillis
   }
 
-  implicit def jodaToConcurrentDuration(o: Duration) =
+  implicit def jodaToConcurrentDuration(o: Duration): FiniteDuration =
     new FiniteDuration(o.getMillis, TimeUnit.MILLISECONDS)
 
   def sleep(d: Duration): Unit = {

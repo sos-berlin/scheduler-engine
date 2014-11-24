@@ -9,7 +9,7 @@ final class MyRichString(string: String) {
 }
 
 object MyRichString {
-  implicit def myRichStringOfString(s: String) = new MyRichString(s)
+  implicit def myRichStringOfString(s: String): MyRichString = new MyRichString(s)
 
   def noneIfEmpty(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 }

@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.eventbus.EventSource
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.File_basedC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
@@ -22,7 +23,7 @@ with EventSource {
 
   protected def subsystem: FileBasedSubsystem
 
-  protected implicit def schedulerThreadCallQueue = subsystem.schedulerThreadCallQueue
+  protected implicit def schedulerThreadCallQueue: SchedulerThreadCallQueue = subsystem.schedulerThreadCallQueue
 
   /** Jedes Exemplar hat seine eigene UUID. */
   final val uuid = java.util.UUID.randomUUID
