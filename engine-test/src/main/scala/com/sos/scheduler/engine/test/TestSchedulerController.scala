@@ -38,7 +38,6 @@ with EventHandlerAnnotated {
 
   private val testName = testConfiguration.testClass.getName
   protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
-  val eventBus: SchedulerEventBus = getEventBus
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
   private var isPrepared: Boolean = false
@@ -139,7 +138,7 @@ with EventHandlerAnnotated {
     errorLogEventIsTolerated = predicate
     try {
       val result = f
-      getEventBus.dispatchEvents()   // Damit handleEvent(ErrorLogEvent) wirklich jetzt gerufen wird, solange noch errorLogEventIsTolerated gesetzt ist
+      eventBus.dispatchEvents()   // Damit handleEvent(ErrorLogEvent) wirklich jetzt gerufen wird, solange noch errorLogEventIsTolerated gesetzt ist
       result
     }
     finally errorLogEventIsTolerated = Set()

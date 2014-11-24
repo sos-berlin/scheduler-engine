@@ -58,7 +58,7 @@ object SchedulerTestUtils {
     inSchedulerThread {
       val taskId = startJob(jobPath)
       // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst ginge es verloren.
-      val future = controller.getEventBus.keyedEventFuture[TaskClosedEvent](taskId)
+      val future = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
       (taskId, future)
     }
   }

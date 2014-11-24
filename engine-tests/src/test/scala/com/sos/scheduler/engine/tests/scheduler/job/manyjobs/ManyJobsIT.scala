@@ -47,7 +47,7 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
                 <modify_job job={o.path.string} cmd="unstop"/>
               })
         sleep(duration)
-        controller.getEventBus.dispatchEvents()
+        controller.eventBus.dispatchEvents()
         System.err.println(s"$taskCount tasks in ${duration.getStandardSeconds}s, ${1000f * taskCount / duration.getMillis} tasks/s")
       }
     }

@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1195IT extends FreeSpec with ScalaSchedulerTest  {
 
-  private lazy val eventBus = controller.getEventBus
+  import controller.eventBus
 
   "JS1195IT" in {
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](ClonedOrderKey) {

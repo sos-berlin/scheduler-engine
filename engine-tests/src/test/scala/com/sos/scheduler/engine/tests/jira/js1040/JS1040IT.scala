@@ -58,7 +58,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
     def removeJobChain(): Unit = {
       autoClosing(controller.newEventPipe()) { eventPipe =>
         orderSubsystem.removeJobChain(testJobChainPath)
-        controller.getEventBus.dispatchEvents()
+        controller.eventBus.dispatchEvents()
         eventPipe.nextKeyed[FileBasedRemovedEvent](testJobChainPath)
       }
     }

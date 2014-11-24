@@ -120,7 +120,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
       }
       val (_, jobFuture) = runJobFuture(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
-      controller.getEventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
+      controller.eventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
         testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", List(agentRefs(1)))
         instance[FolderSubsystem].updateFolders()
       }
@@ -146,7 +146,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         e.codeOption == Some(MessageCode("SCHEDULER-280")) ||
         e.codeOption == Some(MessageCode("Z-JAVA-105")) && (e.message contains classOf[FailableSelector.CancelledException].getName)
       controller.toleratingErrorLogEvent(expectedErrorLogEvent) {
-        controller.getEventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
+        controller.eventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
           testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", Nil)
           instance[FolderSubsystem].updateFolders()
         }

@@ -23,7 +23,7 @@ final class JS993IT extends FunSuite with ScalaSchedulerTest {
   List("spidermonkey", "javascript") foreach { language =>
     test(s"language=$language should work on 32bit and rejected on 64bit") {
       val jobPath = JobPath(s"/test-$language")
-      controller.getEventBus.dispatchEvents()   // Ruft ggf. handle(ErrorLogEvent)
+      controller.eventBus.dispatchEvents()   // Ruft ggf. handle(ErrorLogEvent)
       bitness match {
         case Bits64 =>
           assert(errorLogged, "Error SCHEDULER-482 expected")

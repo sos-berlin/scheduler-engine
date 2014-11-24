@@ -66,7 +66,7 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def checkCollectedOrderEvents(orderKey: OrderKey): Unit = {
-    controller.getEventBus.dispatchEvents()  // Das letzte OrderFinishedEvent kann sonst verloren gehen.
+    controller.eventBus.dispatchEvents()  // Das letzte OrderFinishedEvent kann sonst verloren gehen.
     coldEvents should equal (Map(
       "OrderTouched"   -> OrderTouchedEvent(orderKey),
       "OrderFinished"  -> OrderFinishedEvent(orderKey),

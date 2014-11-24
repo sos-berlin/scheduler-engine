@@ -35,7 +35,7 @@ final class EventsServiceIT extends FunSuite with ScalaSchedulerTest with JettyP
       }
       controller.terminateScheduler()
       controller.waitForTermination()
-      controller.getEventBus.dispatchEvents()
+      controller.eventBus.dispatchEvents()
       Thread.sleep(100)
     } finally {
       thread.interrupt()

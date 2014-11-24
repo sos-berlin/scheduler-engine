@@ -21,7 +21,7 @@ trait DelegatingSchedulerController extends SchedulerController {
   final def exitCode =
     delegate.exitCode
 
-  final def getEventBus =
-    delegate.getEventBus
+  final def eventBus =
+    delegate.eventBus
 }
 

@@ -24,5 +24,5 @@ trait SchedulerController extends AutoCloseable {
 
   def exitCode: Int
 
-  def getEventBus: SchedulerEventBus
+  def eventBus: SchedulerEventBus
 }

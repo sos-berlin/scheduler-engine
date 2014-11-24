@@ -30,11 +30,11 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     }
 
     @Before public final void schedulerTestBefore() {
-        controller.getEventBus().registerAnnotated(this);
+        controller.eventBus().registerAnnotated(this);
     }
 
     @After public final void schedulerTestClose() {
-        controller.getEventBus().unregisterAnnotated(this);
+        controller.eventBus().unregisterAnnotated(this);
         controller.close();
     }
 

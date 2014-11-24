@@ -36,8 +36,8 @@ trait ScalaSchedulerTest
     }
     else
       try {
-        controller.getEventBus.registerAnnotated(this)
-        onClose { controller.getEventBus.unregisterAnnotated(this) }
+        controller.eventBus.registerAnnotated(this)
+        onClose { controller.eventBus.unregisterAnnotated(this) }
         checkedBeforeAll()
         if (!controller.isStarted) {
           controller.prepare()

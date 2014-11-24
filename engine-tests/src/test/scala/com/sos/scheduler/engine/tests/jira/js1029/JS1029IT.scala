@@ -41,7 +41,7 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
   }
 
   @HotEventHandler def handleEvent(e: TaskStartedEvent, task: Task): Unit = {
-    controller.getEventBus publishCold MyTaskStartedEvent(e.taskId, task.stdoutFile)
+    controller.eventBus publishCold MyTaskStartedEvent(e.taskId, task.stdoutFile)
   }
 }
 
