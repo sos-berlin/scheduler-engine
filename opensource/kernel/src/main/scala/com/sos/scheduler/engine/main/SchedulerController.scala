@@ -8,7 +8,7 @@ import org.joda.time.Duration
  * @author Joacim Zschimmer
  */
 trait SchedulerController extends AutoCloseable {
-  def startScheduler(arguments: String*)
+  def startScheduler(arguments: String*): Unit
 
   /** Veranlasst die Beendigung des Schedulers, wartet aufs Ende und schließt alles. */
   def close(): Unit

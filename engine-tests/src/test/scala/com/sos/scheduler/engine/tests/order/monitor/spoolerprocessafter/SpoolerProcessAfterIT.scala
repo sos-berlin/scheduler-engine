@@ -100,7 +100,7 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
   }
 
   @EventHandler def handleEvent(e: LogEvent): Unit = {
-    if (Expected.logLevels contains e.level) {
+    if (Expected.LogLevels contains e.level) {
       for (code <- Option(e.getCodeOrNull))
         messageCodes.addBinding(e.level, code)
     }

@@ -173,7 +173,7 @@ extends Sister {
   }
 
   @ForCpp def tryToEndATask(): Boolean =
-    jobOption map { _.tryToEndATask() } getOrElse false
+    jobOption exists { _.tryToEndATask() }
 
   @ForCpp def killTask(id: Int, immediately: Boolean) = {
     val task = job.task(TaskId(id))
@@ -183,8 +183,7 @@ extends Sister {
       task.end()
   }
 
-  @ForCpp def hasTask: Boolean =
-    jobOption map { _.hasTask } getOrElse false
+  @ForCpp def hasTask: Boolean = jobOption exists { _.hasTask }
 
 
   // ORDER

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
     <job_chain_node state="state-a" job="a"/>
     <job_chain_node state="state-b" job="b"/>
     <job_chain_node state="state-c" job="c"/>

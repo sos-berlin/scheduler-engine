@@ -15,7 +15,7 @@ abstract class MessageCode(val level: SchedulerLogLevel) extends ExpectedDetail 
 }
 
 object MessageCode {
-  def unapply(o: MessageCode) = Some(o.level, o.code)
+  def unapply(o: MessageCode) = Some((o.level, o.code))
 }
 
 case class ErrorCode(code: String) extends MessageCode(SchedulerLogLevel.error)

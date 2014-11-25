@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 
 trait EventSubscription {
   def eventClass: Class[_ <: Event]
-  def handleEvent(e: Event)
+  def handleEvent(e: Event): Unit
 
   override def toString = s"EventSubscription(${eventClass.getSimpleName})"
 }

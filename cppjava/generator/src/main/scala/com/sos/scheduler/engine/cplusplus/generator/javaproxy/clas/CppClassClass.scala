@@ -42,7 +42,7 @@ class CppClassClass(cppClass: CppClass)  extends CppCode {
 
   private val methodVariables = new CppCode {
     def headerCode = (cppClass.cppProcedures map { "    "+ _.classClassCode.headerCode +"\n" }).mkString
-    def sourceCode = (cppClass.cppProcedures map { "    ,"+ _.classClassCode.sourceCode } mkString "\n")
+    def sourceCode = cppClass.cppProcedures map { "    ," + _.classClassCode.sourceCode } mkString "\n"
   }
 
   private val staticVariables = new CppCode {

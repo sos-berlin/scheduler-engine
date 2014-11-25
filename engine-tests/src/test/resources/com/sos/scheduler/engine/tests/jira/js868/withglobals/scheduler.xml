@@ -5,7 +5,7 @@
   ~ </div>
   -->
 
-<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd">
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
 	<config>
         <params>
             <param name="ORDER_JOB_GLOBAL" value="global" />

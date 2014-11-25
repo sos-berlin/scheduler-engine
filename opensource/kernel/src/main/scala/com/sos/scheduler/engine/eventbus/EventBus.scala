@@ -7,14 +7,14 @@ import com.sos.scheduler.engine.data.event.Event
  */
 trait EventBus {
 
-  def registerAnnotated(o: EventHandlerAnnotated)
+  def registerAnnotated(o: EventHandlerAnnotated): Unit
 
-  def unregisterAnnotated(o: EventHandlerAnnotated)
+  def unregisterAnnotated(o: EventHandlerAnnotated): Unit
 
-  def register(o: EventSubscription)
+  def register(o: EventSubscription): Unit
 
-  def unregister(o: EventSubscription)
+  def unregister(o: EventSubscription): Unit
 
-  def publish(e: Event)
+  def publish(e: Event): Unit
 }
 

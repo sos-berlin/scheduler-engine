@@ -8,7 +8,7 @@ import scala.language.reflectiveCalls
 object Util {
     private val logger = LoggerFactory.getLogger(getClass)
 
-    private type HasClose = { def close() }
+    private type HasClose = { def close(): Unit }
     
     /** Implementiert das Load Pattern mit close().
      * Aufruf: closingFinally( new InputStream ) { inputStream => code }.

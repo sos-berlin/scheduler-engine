@@ -10,9 +10,9 @@ trait JPAStore[OBJ <: HasKey[KEY], KEY] {
 
   def tryFetch(key: KEY)(implicit em: EntityManager): Option[OBJ]
 
-  def insert(o: OBJ)(implicit em: EntityManager)
+  def insert(o: OBJ)(implicit em: EntityManager): Unit
 
-  def store(o: OBJ)(implicit em: EntityManager)
+  def store(o: OBJ)(implicit em: EntityManager): Unit
 
-  def delete(key: KEY)(implicit em: EntityManager)
+  def delete(key: KEY)(implicit em: EntityManager): Unit
 }

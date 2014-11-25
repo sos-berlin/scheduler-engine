@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppField, CppClass
  */
 @CppClass(clas = "sos::scheduler::Settings", directory = "scheduler", include = "spooler.h")
 trait SettingsC extends CppProxy {
-  def set(number: Int, value: String)
+  def set(number: Int, value: String): Unit
   def is_freezed: Boolean
 
   @CppField

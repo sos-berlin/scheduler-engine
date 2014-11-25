@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.joda.time.Duration;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.slf4j.Logger;

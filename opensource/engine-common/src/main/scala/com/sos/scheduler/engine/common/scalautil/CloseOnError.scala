@@ -12,5 +12,5 @@ trait CloseOnError {
         throw t
     }
 
-  def close()
+  def close(): Unit
 }

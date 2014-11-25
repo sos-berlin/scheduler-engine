@@ -19,7 +19,7 @@ object XMLs {
         val saxHandler = new NoBindingFactoryAdapter()
         saxHandler.scopeStack.push(TopScope)
         TransformerFactory.newInstance.newTransformer.transform(new DOMSource(node), new SAXResult(saxHandler))
-        saxHandler.scopeStack.pop
+        saxHandler.scopeStack.pop()
         saxHandler.rootElem
     }
 }

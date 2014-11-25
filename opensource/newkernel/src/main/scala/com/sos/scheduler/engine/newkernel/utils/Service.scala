@@ -9,13 +9,13 @@ trait Service extends AutoCloseable {
     _started = true
   }
 
-  protected def onStart()
+  protected def onStart(): Unit
 
   final def stop(): Unit = {
     onStop()
   }
 
-  protected def onStop()
+  protected def onStop(): Unit
 }
 
 object Service {

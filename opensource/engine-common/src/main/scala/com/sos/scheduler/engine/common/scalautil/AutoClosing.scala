@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
   * @author Joacim Zschimmer */
 object AutoClosing {
 
-  private type HasClose = ({def close()}) with AnyRef
+  private type HasClose = ({ def close(): Unit }) with AnyRef
 
   private val logger = Logger(getClass)
 

@@ -8,7 +8,7 @@ import scala.xml._
 object XmlUtil {
   def replaceNodes(node: Node)(f: PartialFunction[Node, NodeSeq]): NodeSeq = {
     def t(node: Node): NodeSeq = node match {
-      case n if (f isDefinedAt n) => f(n)
+      case n if f isDefinedAt n => f(n)
       case e: Elem if e.descendant exists f.isDefinedAt => e.copy(e.prefix, e.label, e.attributes, e.scope, true, e.child flatMap t)
       case n => n
     }
@@ -19,7 +19,7 @@ object XmlUtil {
 
   def xmlOf(e: Elem, encoding: Charset = utf8) =
     "<?xml version=\"1.0\" encoding=\"" + encoding.name + "\"?>\n" +
-    correctNewlinesInAttributesForScala(e.toString)
+    correctNewlinesInAttributesForScala(e.toString())
 
   def saveAndCorrectScalaBug(file: File, document: Elem, encoding: Charset): Unit = {
     Files.write(xmlOf(document, encoding), file, encoding)

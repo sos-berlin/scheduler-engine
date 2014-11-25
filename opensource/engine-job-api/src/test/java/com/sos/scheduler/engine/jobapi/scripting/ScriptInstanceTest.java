@@ -4,12 +4,10 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
-import com.sos.scheduler.engine.common.Lazy;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.io.Resources.getResource;

@@ -10,7 +10,7 @@ trait File_basedC[S <: Sister] {
   def file_modification_time_t: Long
   def source_xml_bytes: Array[Byte]
   def log: Prefix_logC
-  def set_force_file_reread()
+  def set_force_file_reread(): Unit
   def is_file_based_reread: Boolean
   def is_visible: Boolean
   def has_base_file: Boolean

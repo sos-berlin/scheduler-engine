@@ -7,11 +7,9 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.joda.time.Duration;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
+import org.junit.Test;
 
 import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFileEncoding;
 
