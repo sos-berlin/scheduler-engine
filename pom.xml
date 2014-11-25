@@ -50,7 +50,6 @@
         </plugins>
     </build>
 
-    <!-- Merge von v1.7 - Soll das auch in die v1.8?
     <profiles>
         <profile>
         <!- - This profile is for collecting the sources of all artifacts in one jar (in the install phase). In case of deployment the sources will also deployed - ->
@@ -75,7 +74,6 @@
             </build>
         </profile>
     </profile>
-    -->
 
     <scm>
         <!-- Falls release:prepare <scm> geändert hat (die Versionsbezeichnungen angehängt hat), so soll es für Snapshot aussehen:
