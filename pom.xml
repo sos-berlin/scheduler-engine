@@ -52,11 +52,11 @@
 
     <profiles>
         <profile>
-        <!- - This profile is for collecting the sources of all artifacts in one jar (in the install phase). In case of deployment the sources will also deployed - ->
+        <!-- This profile is for collecting the sources of all artifacts in one jar (in the install phase). In case of deployment the sources will also deployed -->
             <id>collect-sources</id>
             <build>
                 <plugins>
-                    <!- - Aggregate the source of all artifacts - ->
+                    <!-- Aggregate the source of all artifacts -->
                     <plugin>
                         <artifactId>maven-source-plugin</artifactId>
                         <version>2.4</version>
