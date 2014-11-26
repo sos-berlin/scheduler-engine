@@ -73,7 +73,7 @@
                 </plugins>
             </build>
         </profile>
-    </profile>
+    </profiles>
 
     <scm>
         <!-- Falls release:prepare <scm> geändert hat (die Versionsbezeichnungen angehängt hat), so soll es für Snapshot aussehen:
