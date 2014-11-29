@@ -47,7 +47,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.0</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -61,7 +60,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.5</version>
                 <executions>
                     <execution>
                         <!-- Liefert Versionsbestandteile in ${parsedVersion.xxx}, siehe http://mojo.codehaus.org/build-helper-maven-plugin/parse-version-mojo.html -->
@@ -76,7 +74,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1</version>
                 <executions>
                     <execution>
                         <id>Generate Java proxies</id>
