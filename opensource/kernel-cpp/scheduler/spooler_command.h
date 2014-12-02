@@ -338,7 +338,7 @@ struct Command_processor
     xml::Document_ptr          _answer;
     Xc_copy                    _error;
     bool                       _validate;
-    Security::Level            _security_level;
+    Security::Level const      _security_level;
     string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
     Has_log*                   _log;
     Variable_set_map           _variable_set_map;

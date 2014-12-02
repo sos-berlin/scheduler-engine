@@ -23,7 +23,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-117", "Cannot use different scripting languages in the same scripting engine" },
     { "SCHEDULER-119", "There is no security level \"$1\"" },
     { "SCHEDULER-120", "Script has reported an error: $1" },
-    { "SCHEDULER-121", "The security settings do not allow this operation" },
+    { "SCHEDULER-121", "The security settings do not allow this operation (or JobScheduler is waiting for database)" },
     { "SCHEDULER-122", "Task terminated" },
     { "SCHEDULER-125", "task.wait_until_terminated() cannot be called in its own thread. Deadlock." },
     { "SCHEDULER-130", "Job $1 has already been defined" },

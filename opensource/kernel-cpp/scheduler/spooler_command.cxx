@@ -436,7 +436,7 @@ Command_processor::Command_processor( Spooler* spooler, Security::Level security
     _communication_operation( cp ),
     _client_host(client_host),
     _validate(true),
-    _security_level( security_level )
+    _security_level(spooler->db() && spooler->db()->is_waiting()? min(security_level, Security::seclev_info) : security_level)   // is_waiting => in some recursion. Do not modify anything!
 {
     _variable_set_map[ variable_set_name_for_substitution ] = _spooler->_environment;
     _spooler->_executing_command = true;
