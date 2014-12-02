@@ -463,6 +463,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
   private:
     void                        add_to_typed_folder_map     ( Typed_folder* );
+    vector<Typed_folder*> ordered_typed_folders() const;
 
     Fill_zero                  _zero_;
 

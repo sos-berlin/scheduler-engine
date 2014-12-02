@@ -242,12 +242,11 @@ bool Folder::adjust_with_directory( Directory* directory )
             }
         }
 
-        Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-        {
-            Typed_folder* typed_folder = it->second;
 
+        vector<Typed_folder*> typed_folders = ordered_typed_folders();
+        Z_FOR_EACH_CONST(vector<Typed_folder*>, typed_folders, i) {
+            Typed_folder* typed_folder = *i;
             typed_folder->remove_duplicates_from_list( &file_list_map[ typed_folder ] );
-
             something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
         }
     }
@@ -261,6 +260,20 @@ bool Folder::adjust_with_directory( Directory* directory )
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  it->second->handle_replace_or_remove_candidates();
 
     return something_changed;
+}
+
+
+vector<Typed_folder*> Folder::ordered_typed_folders() const {
+    // Reihenfolge der Abhängigkeit, so dass gleich nach einer geänderten .job_chain.xml die abhängigen .order.xml neu geladen werden können (JS-1281). 
+    vector<Typed_folder*> typed_folders;
+    typed_folders.push_back(_subfolder_folder);
+    typed_folders.push_back(_lock_folder);
+    typed_folders.push_back(_schedule_folder);
+    typed_folders.push_back(_process_class_folder);
+    typed_folders.push_back(_job_folder);
+    typed_folders.push_back(_job_chain_folder);
+    typed_folders.push_back(_standing_order_folder);
+    return typed_folders;
 }
 
 //------------------------------------------------------------------------------Folder::dom_element
