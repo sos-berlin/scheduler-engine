@@ -15,13 +15,6 @@
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
 
-    <properties>
-        <sos.jars.version>2136</sos.jars.version>            <!-- verwendete Version der jar Files der SOS, vorher mit setup/deploy-sos-jars deployen: ant -f deploy-sos-jars.xml -Djar.version=x.x.xx.xxxx -->
-
-        <!-- To deploy the aggregated sources into the release repository set -Dsource-repo=sos-release -->
-        <source.repo>snapshots</source.repo>
-    </properties>
-
     <modules>
         <module>cppjava</module>
         <module>common</module>
@@ -68,6 +61,7 @@
                 <plugins>
                     <!-- Aggregate the source of all artifacts -->
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
                         <version>2.4</version>
                         <executions>
@@ -86,15 +80,9 @@
     </profiles>
 
     <scm>
-        <!-- Falls release:prepare <scm> geändert hat (die Versionsbezeichnungen angehängt hat), so soll es für Snapshot aussehen:
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
-        -->
         <connection>scm:git:git@github.com:sos-berlin/scheduler-engine.git</connection>
         <developerConnection>scm:git:git@github.com:sos-berlin/scheduler-engine.git</developerConnection>
         <url>https://github.com/sos-berlin/scheduler-engine</url>
-      <tag>HEAD</tag>
-  </scm>
-
+        <tag>HEAD</tag>
+    </scm>
 </project>
