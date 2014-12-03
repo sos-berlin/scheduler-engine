@@ -24,14 +24,24 @@
 
     <modules>
         <module>cppjava</module>
-        <module>engine-test</module>
-        <module>engine-tests</module>
-        <module>engine-testwar</module>
-        <module>opensource</module>
+        <module>common</module>
+        <module>data</module>
+        <module>job-api</module>
+        <module>kernel</module>
+        <module>kernel-cppproxies</module>
+        <module>kernel-cpp</module>
+        <module>newkernel</module>
+        <module>web</module>
+        <module>jar</module>
         <module>parent</module>
-        <module>plugins</module>
+        <module>persistence</module>
         <module>playground</module>
+        <module>plugin-jetty</module>
+        <module>plugins</module>
         <module>setup</module>
+        <module>test</module>
+        <module>tests</module>
+        <module>testwar</module>
     </modules>
 
     <build>
