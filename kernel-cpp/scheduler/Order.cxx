@@ -654,6 +654,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
     string payload_string          = string_payload();
     bool   record_exists_error     = false;
     string record_exists_insertion;
+    bool   tolerated_distributed_filebased_collision = false;
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
@@ -732,7 +733,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
                 Any_file result_set = ta.open_result_set
                     ( 
-                        S() << "select " << db_text_distributed_next_time() << " as distributed_next_time" 
+                        S() << "select " << db_text_distributed_next_time() << " as distributed_next_time, order_xml"
                                " from " << db()->_orders_tablename << 
                                db_where_clause().where_string(), 
                         Z_FUNCTION 
@@ -743,8 +744,16 @@ bool Order::db_try_insert( bool throw_exists_exception )
                     if( throw_exists_exception )  
                     {
                         Record record = result_set.get_record();
-                        record_exists_error     = true;
-                        record_exists_insertion = record.null( "distributed_next_time" )? "in database, not distributed" : "distributed";
+                        record_exists_error = true;
+                        bool record_order_is_distributed = !record.null("distributed_next_time");
+                        record_exists_insertion = record_order_is_distributed ? "distributed" : "in database, not distributed";
+
+                        if (_is_distributed && is_file_based() && record_order_is_distributed) {
+                            if (!record.null("order_xml")) {
+                                string order_xml = record.as_string("order_xml");
+                                tolerated_distributed_filebased_collision = xml::Document_ptr::from_xml_string(order_xml).documentElement().select_node("file_based");
+                            }
+                        }
                     }
 
                     break;
@@ -777,7 +786,14 @@ bool Order::db_try_insert( bool throw_exists_exception )
     }
     catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", db()->_orders_tablename, x ), Z_FUNCTION ); }
 
-    if( record_exists_error  &&  throw_exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path, record_exists_insertion );
+    if (record_exists_error  &&  throw_exists_exception && !tolerated_distributed_filebased_collision) {
+        z::throw_xc("SCHEDULER-186", obj_name(), _job_chain_path, record_exists_insertion);
+    }
+
+    if (tolerated_distributed_filebased_collision) {
+        _log->debug9(S() << "Abort double insert into database of distributed file_based order [ " << obj_name() << " ]");
+        insert_ok = true;
+    }
 
     //if( insert_ok )  tip_next_node_for_new_distributed_order_state();
 
