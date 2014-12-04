@@ -17,10 +17,11 @@ final class HttpVerbRestrictionTester(webResource: WebResource) {
     httpOptionShouldReturnVerbs(path, verbSet)
   }
 
-  def httpTraceShouldBeNotAllowed(path: String): Unit = {
-    webResource.path(path).method("TRACE", classOf[ClientResponse]).getStatus should
-      (equal (METHOD_NOT_ALLOWED.getStatusCode) or equal (FORBIDDEN.getStatusCode))
-  }
+  def httpTraceShouldBeNotAllowed(path: String): Unit =
+    withClue("HTTP verb TRACE: ") {
+      webResource.path(path).method("TRACE", classOf[ClientResponse]).getStatus should
+        (equal (METHOD_NOT_ALLOWED.getStatusCode) or equal (FORBIDDEN.getStatusCode))
+    }
 
   def httpOptionShouldReturnVerbs(path: String, verbSet: Set[String]): Unit = {
     val response = webResource.path(path).options(classOf[ClientResponse])

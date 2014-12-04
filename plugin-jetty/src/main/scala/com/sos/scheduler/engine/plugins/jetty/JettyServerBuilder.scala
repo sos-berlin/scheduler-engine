@@ -89,6 +89,7 @@ object JettyServerBuilder {
       Some(newJobSchedulerContextHandler()) ++
       Some(newRootContextHandler()) ++
       (config.wars map { case WarEntry(contextPath, warFile) ⇒ newWarWebAppContext(contextPath, warFile) }) ++
+      Some(new RootForwardingHandler) ++
       Some(new DefaultHandler)))
     for (o <- config.jettyXMLURLOption) new XmlConfiguration(o).configure(result)
     result
