@@ -170,7 +170,7 @@
       <AdditionalIncludeDirectories>..\libxml2\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -232,7 +232,7 @@
       <CompileAs>Default</CompileAs>
       <AssemblerOutput>NoListing</AssemblerOutput>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <UseUnicodeForAssemblerListing>
       </UseUnicodeForAssemblerListing>
       <OmitFramePointers>false</OmitFramePointers>
