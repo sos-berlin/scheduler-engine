@@ -43,7 +43,7 @@ final class JettyPluginWarIT extends FreeSpec with ScalaSchedulerTest with Jetty
 private object JettyPluginWarIT {
   private val ContextPath = "/TESTWAR"
   private val WarFilename = "engine-testwar.war"
-  private val WarRelativePath = s"engine/engine-testwar/target/$WarFilename"
+  private val WarRelativePath = s"engine/testwar/target/$WarFilename"
   private val logger = Logger(getClass)
 
   private def generateSchedulerConfig(warFile: File) =
