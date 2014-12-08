@@ -589,7 +589,6 @@ struct Object_entry
     Object_id                  _id;
     IUnknown*                  _iunknown;               // AddRef() und Release() nur bei _is_owner
     bool                       _table_is_owner;         // Die Objekttabelle ist der (stellvertretende) Eigentümer des Objektes. Der richtige Eigentümer ist auf der anderen Seite
-    bool                       _is_proxy;
     Z_DEBUG_ONLY( string       _debug_string; )
 
   private:
@@ -606,7 +605,7 @@ struct Object_table
     void                        remove                  ( Object_id );
     ptr<IUnknown>               get_object              ( Session*, Object_id );
     void                        add_proxy               ( Session*, Object_id, Proxy* proxy );
-    Object_id                   get_object_id           ( IUnknown*, bool* is_new = NULL, bool become_owner = false );
+    Object_id                   get_object_id           ( IUnknown*, bool* is_new = NULL);
     bool                        empty                   () const                                    { return _objects.empty(); }
     void                        obj_print               ( ostream* s ) const;
     friend ostream&             operator <<             ( ostream& s, const Object_table& o )       { o.obj_print( &s );  return s; }
@@ -1002,7 +1001,6 @@ struct Server : Object
   //void                        execute                 ( Input_message*, Output_message* );
 
     Object*                     get_class_object_or_null( const CLSID& );
-    void                        set_class_object        ( const CLSID&, Object* );
     
     void                    set_stdin_data              ( const string& data )                      { _stdin_data = data; _has_stdin_data = true; }
     string                      stdin_data              ();

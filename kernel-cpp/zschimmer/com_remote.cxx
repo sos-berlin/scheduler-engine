@@ -110,8 +110,6 @@ const string socket_environment_name = "__scheduler_socket";
 
 namespace zschimmer {
 
-extern Message_code_text com_remote_messages[];
-
 //-------------------------------------------------------------------------------------------static
 
 #ifndef Z_WINDOWS
@@ -122,8 +120,6 @@ extern Message_code_text com_remote_messages[];
 
 Z_INIT( z_com_remote )
 {
-    add_message_code_texts( com_remote_messages ); 
-
     srand( (uint)( double_from_localtime() * 1000 ) );
 }
 
@@ -1701,7 +1697,6 @@ Object_entry::Object_entry( const Object_entry& e )
     _id             = e._id;
     _iunknown       = e._iunknown;
     _table_is_owner = e._table_is_owner;
-    _is_proxy       = e._is_proxy;
 
 #   ifdef _DEBUG
         _debug_string = e._debug_string;
@@ -1832,7 +1827,6 @@ void Object_table::add_proxy( Session*, Object_id id, Proxy* proxy )
 
     e._id             = id;
     e._iunknown       = (IDispatch*)+proxy;
-    e._is_proxy       = true;
     e._table_is_owner = false;
 
 #   ifdef Z_DEBUG
@@ -1844,7 +1838,7 @@ void Object_table::add_proxy( Session*, Object_id id, Proxy* proxy )
 
 //----------------------------------------------------------------------Object_table::get_object_id
 
-Object_id Object_table::get_object_id( IUnknown* iunknown, bool* is_new, bool become_owner )
+Object_id Object_table::get_object_id(IUnknown* iunknown, bool* is_new)
 {
     if( is_new )  *is_new = false;
 
@@ -1867,16 +1861,14 @@ Object_id Object_table::get_object_id( IUnknown* iunknown, bool* is_new, bool be
 
     e._id             = id;
     e._iunknown       = iunknown;
-    e._table_is_owner = become_owner;
+    e._table_is_owner = true;
 
 #   ifdef Z_DEBUG
         e.set_debug_string();
 #   endif
 
     //Z_DEBUG_ONLY( Z_LOG( "com_remote: Object_table::get_object_id(" << (void*)iunknown << ") => " << e << "  " << ( e._table_is_owner? "AddRef()\n" : "\n" ) ); )
-    if( e._table_is_owner )  e._iunknown->AddRef();
-
-    e._is_proxy       = false;
+    e._iunknown->AddRef();
 
     return e._id;
 }
