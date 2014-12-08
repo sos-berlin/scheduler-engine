@@ -65,7 +65,6 @@ enum Message_class
 
 enum Message_cmd
 {
-  //cmd_login           = 'L',      // Wird als erste Nachricht vom Server an den Controller geschickt und nicht beantwortet 
     cmd_createinstance  = 'C',
     cmd_release         = 'R',
     cmd_queryinterface  = 'Q',
@@ -81,23 +80,9 @@ struct Dispname
     bool                        equals                  ( OLECHAR**, int names_count, LCID );
 
     LCID                       _lcid;
-  //vector<string>             _names;
     string                     _name;
 };
 
-//---------------------------------------------------------------------------------------Dispid_map
-/*
-struct Dispid_map
-{
-    void                        add                     ( OLECHAR**, LCID, DISPID );
-    bool                        get                     ( OLECHAR**, LCID, DISPID* );
-
-
-    typedef std::map< Dispname, DISPID >  Map;
-
-    Map                        _map;
-};
-*/
 //---------------------------------------------------------------------------------------Parameters
 
 typedef std::pair< string, string >  Parameter;             // Name, Wert
@@ -301,7 +286,6 @@ struct Connection : Object,
     bool                        has_error               () const                                    { return _last_errno != 0  ||  _killed  ||  _broken; }
 
     // Statistik
-  //time_t                      running_since           () const                                    { return _running_since; }
     int                         operation_count         () const                                    { return _operation_count; }
     int                         callback_count          () const                                    { return _callback_count; }
 
@@ -349,8 +333,6 @@ struct Connection : Object,
     pid_t                      _pid;
     Mutex                      _exclusive_io_mutex;
     Thread_id                  _in_use_by_thread_id;
-  //ptr<Socket_operation>      _listen_socket;
-  //ptr<Socket_operation>      _socket;
     Host                       _remote_host;
     Host_and_port              _peer;
     bool                       _wsastartup_called;
@@ -361,10 +343,8 @@ struct Connection : Object,
     Host_and_port              _controller_address;
     string                     _stdin_data;
     bool                       _has_stdin_data;
-  //SOCKET                     _stdin_of_process;
     Event*                     _event;
     Input_message::Builder     _input_message_builder;
-  //Thread::Id                 _thread_id;
     std::stack< ptr<Simple_operation> >   _operation_stack;        // n > 1 bei Callback
     int                        _callback_nesting;
     ptr<Async_operation>       _my_operation;
@@ -376,7 +356,6 @@ struct Connection : Object,
     bool                       _process_lost;
     bool                       _close_abnormally;
 
-  //time_t                     _running_since;
     int                        _operation_count;
     int                        _callback_count;
 
@@ -449,19 +428,14 @@ struct Connection_to_own_server_process : Connection
     int                        _termination_signal;     // Nur Unix
 
 #   ifdef Z_WINDOWS
-
         Process_handle          process_handle          ()                                          { return _process_handle; }
         windows::Event*         process_event           ()                                          { return &_process_handle; }
         
         windows::Event         _process_handle;
         DWORD                  _exit_code;
-
 #    else
-
         Process_handle          process_handle          ()                                          { return _pid; }
-        
         int                    _exit_code;
-
 #   endif
 
 #   ifdef Z_HPUX
@@ -544,8 +518,6 @@ struct Object_id
     friend ostream&             operator <<             ( ostream& s, const Object_id& o )          { s << string_from_object_id( o );  return s; }
     friend inline size_t        hash_value              ( Object_id o )                             { return (size_t)( o._value ^ ( o._value >> 32 ) ); }
 };
-
-//typedef int64                   Object_id;
 
 //-------------------------------------------------------------------------------------Object_entry
 /*
@@ -632,7 +604,6 @@ struct Object_table
 
     void                        clear                   ();
     void                        remove                  ( Object_id );
-  //ptr<IUnknown>               get_object              ( Session*, Object_id, bool is_new, bool become_owner, const string& title = "" );
     ptr<IUnknown>               get_object              ( Session*, Object_id );
     void                        add_proxy               ( Session*, Object_id, Proxy* proxy );
     Object_id                   get_object_id           ( IUnknown*, bool* is_new = NULL, bool become_owner = false );
@@ -671,7 +642,6 @@ struct Session : Object
     Async_operation*            connect_server__start   ()                                          { return  _connection->connect_server__start(); }
     void                        connect_server__end     ()                                          { _connection->connect_server__end(); }
 
-  //HRESULT                     create_instance         ( const CLSID& clsid, IUnknown* outer, DWORD, COSERVERINFO*, uint count, MULTI_QI* query_interfaces );
     Simple_operation*           create_instance__start  ( const CLSID& clsid, IUnknown* outer, DWORD, COSERVERINFO*, uint count, MULTI_QI* query_interfaces );
     HRESULT                     create_instance__end    ( uint count, MULTI_QI* query_interfaces );
 
@@ -680,10 +650,6 @@ struct Session : Object
 
     Server*                     server                  () const                                    { return _server; }
     int                         pid                     () const                                    { return _connection? _connection->pid() : 0; }
-
-  //Object*                     get_class_storage       ( const CLSID& clsid )                      { return get_container_element( _class_storage, clsid, NULL ); }
-  //void                        set_class_storage       ( const CLSID& clsid, Object* o )           { _class_storage[ clsid ] = o; }
-
 
   private:
     friend struct Server;
@@ -695,7 +661,6 @@ struct Session : Object
     Z_GNU_ONLY(                 Session                 (); )
 
     void                        send_response           ( Output_message*, bool* connection_lost = NULL );
-  //void                        execute_and_reply       ( Input_message* );
     HRESULT                     execute_create_instance ( const CLSID& clsid, IUnknown* outer, DWORD context, 
                                                           COSERVERINFO* coserverinfo, unsigned long count, MULTI_QI* query_interfaces );
 
@@ -716,9 +681,6 @@ struct Session : Object
     Object_table               _object_table;
     bool                       _connection_has_only_this_session;
     ptr<Async_operation>       _sync_operation;
-
-  //typedef stdext::hash_map<CLSID,ptr<Object>> Class_storage;
-  //Class_storage              _class_storage;
 };
 
 //--------------------------------------------------------------------------------------------Proxy
@@ -733,7 +695,6 @@ struct Proxy : idispatch_base_implementation< IDispatch >  //Object
     void                    set_session                 ( Session* s )                              { _session = s;  _connection = s->connection(); }
     Session*                    session                 () const                                    { return _session; }
     void                    set_object_id               ( Object_id id )                            { _object_id = id; }
-  //void                    set_table_is_owner          ( bool b )                                  { _table_is_owner = b; }
     void                    set_title                   ( const string& title )                     { _title = title; }
 
     virtual void                set_property            ( const string& name, const Variant& value );
@@ -790,7 +751,6 @@ struct Proxy : idispatch_base_implementation< IDispatch >  //Object
     Fill_zero                  _zero_;
     ptr<Session>               _session;
     ptr<Connection>            _connection;
-  //bool                       _table_is_owner;
     bool                       _no_operation;
     Object_id                  _object_id;
     string                     _title;
@@ -888,7 +848,6 @@ struct __declspec_uuid( "feee4703-6c1b-11d8-8103-000476ee8afb" ) Ihas_reference_
 {
     friend inline const GUID& __uuidof_                 ( Ihas_reference_with_properties* )         { return IID_Ihas_reference_with_properties; }
 
-    //virtual STDMETHODIMP        get_reference_with_properties   ( const IID& iid, ptr<z::com::object_server::Reference_with_properties>* ) = 0;
     virtual ptr<object_server::Reference_with_properties> get_reference_with_properties() = 0;
 };
 
@@ -918,7 +877,6 @@ struct Output_message
     void                        write_string            ( const OLECHAR*, int length );
     void                        write_double            ( double );
     void                        write_bstr              ( const BSTR bstr )                         { write_string( bstr, SysStringLen( bstr ) ); }
-  //void                        write_safearray         ( const VARIANT& );
     void                        write_safearray         ( const SAFEARRAY* );
     void                        write_guid              ( const GUID& );
     void                        write_iunknown          ( IUnknown* );
@@ -974,7 +932,6 @@ struct Simple_operation : Async_operation
     string                      state_name              () const;
     bool                        is_callback_message     ()                                          { return _input_message.peek_char() == msg_object; }
 
-  //bool                        receive_async           ();
     void                        send                    ();
     bool                        send_async              ();
 
@@ -1035,7 +992,6 @@ struct Server : Object
                                 Server                  ();
 
 
-  //int                         main                    ( int, char** );
     int                         main                    ( int, char** );
     void                        simple_server           ( const Host_and_port& controller );
     void                        server                  ( int server_port );
@@ -1060,11 +1016,6 @@ struct Server : Object
     string                     _stdin_data;
     bool                       _has_stdin_data;
 };
-
-//----------------------------------------------------------com_create_instance_in_separate_process
-
-//HRESULT                         com_create_instance_in_separate_process( const CLSID& clsid, IUnknown* outer, DWORD context, const IID& iid, void** result, 
-//                                                                         int* pid, const Parameters& = Parameters() );
 
 //-------------------------------------------------------------------------------------------------
 

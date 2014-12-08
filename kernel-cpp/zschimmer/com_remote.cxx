@@ -110,43 +110,6 @@ const string socket_environment_name = "__scheduler_socket";
 
 namespace zschimmer {
 
-//-------------------------------------------------------------------------------------------------
-/*
-static Message_code_text error_codes[] =
-{
-    { "Z-REMOTE-100", "Objectserver: Fehler: " },
-    { "Z-REMOTE-101", "Objectserver pid=$1: TCP-Verbindung ist abgebrochen" },
-    { "Z-REMOTE-102", "Objectserver: Unbekannte Proxy-Id $1" },
-    { "Z-REMOTE-103", "Objectserver: Nicht registriertes Objekt $1" },
-    { "Z-REMOTE-104", "Objectserver: Session-Id ist nicht korrekt" },
-    { "Z-REMOTE-105", "Objectserver: Session-Kommando unbekannt (Fehler in der Kommunikation)" },
-    { "Z-REMOTE-106", "Objectserver: Session-Klasse unbekannt (Fehler in der Kommunikation)" },
-    { "Z-REMOTE-107", "Objectserver pid=$1: Ungültige Antwort" },
-    { "Z-REMOTE-108", "Objectserver: Variant-Typ $1 ist nicht übertragbar" },
-    { "Z-REMOTE-109", "Objectserver: Fehler in der Kommunikation (Nachricht ist zu kurz)" },
-  //{ "Z-REMOTE-110", "Objectserver: Objekt-Id ist doppelt" },
-    { "Z-REMOTE-111", "Objectserver: Zwei Operationen gleichzeitig" },
-    { "Z-REMOTE-112", "Objectserver: Programm hat Ergebnis der Operation nicht übernommen" },
-    { "Z-REMOTE-113", "Objectserver: Programm will Ergebnis einer anderen Operation übernehmen" },
-    { "Z-REMOTE-114", "Objectserver: Programm will Ergebnis einer nicht abgeschlossenen Operation übernehmen" },
-    { "Z-REMOTE-115", "Objectserver pid=$1: Nachricht mit zu großer oder ungültiger Länge $2" },
-  //{ "Z-REMOTE-116", "Objectserver: GetOverlappedResult() liefert $1, dass ist nicht die Anzahl $2 mit WriteFile() versendeter Bytes" },
-  //{ "Z-REMOTE-117", "Objectserver: Der Objektserver kann nicht als einzelnes Programm gestartet werden" },
-    { "Z-REMOTE-118", "Objectserver pid=$1: Der Objektserver war nicht innerhalb der Wartezeit von $2s bereit" },
-    { "Z-REMOTE-119", "Objectserver: Gleichzeitige Operationen auf derselben Verbindung. Erste Operation: $1; Zweite Operation: $2" },
-    { "Z-REMOTE-120", "Objectserver: Objekt-Id ist unbekannt" },
-    { "Z-REMOTE-121", "Objectserver: pop_operation, aber Stack ist leer, Methode=$1" },
-    { "Z-REMOTE-122", "Objectserver pid=$1: Der Prozess ist (vom Aufrufer) abgebrochen worden" },
-    { "Z-REMOTE-123", "Objectserver pid=$1: Der Prozess hat sich unerwartet beendet" },
-    { "Z-REMOTE-124", "Objectserver: Benannte Parameter sind nicht möglich" },
-    { "Z-REMOTE-125", "Objectserver: DISPID $1 nicht bekannt" },
-    { "Z-REMOTE-126", "Objectserver: Default-Proxy für $1 kennt keine Eigenschaften" },
-    { "Z-REMOTE-127", "Objectserver: Mehr Daten empfangen als angekündigt. Fehlerhafte Daten empfangen." },
-    { "Z-REMOTE-128", "Objectserver: v.vt stimmt nicht mit SafeArrayGetVartype() überein" },
-  //{ "Z-REMOTE-127", "Objectserver: Asynchroner Aufruf einer lokalen Proxy-Methode ist nicht implementiert" },
-    { NULL }
-};
-*/
 extern Message_code_text com_remote_messages[];
 
 //-------------------------------------------------------------------------------------------static
@@ -171,7 +134,6 @@ namespace object_server {
 
 //--------------------------------------------------------------------------------------------const
 
-//const char* port_env_name   = "__OBJECT_SERVER_PORT";
 const int   connect_timeout             = 60;  //1000*24*60*60;     // Nach sovielen Sekunden warten wir nicht mehr (das brauchen wir nicht mehr)
 const int   connection_buffer_size      = 50000;
 const string& Connection_reset_exception::exception_name = "zschimmer::com::object_server::Connection_reset_exception";
@@ -192,8 +154,6 @@ static void set_linger( SOCKET socket )
 
 static void set_non_blocking( SOCKET socket )
 {
-    //Z_LOG( "ioctl(" << socket << ",FIONBIO,&1)\n" );
-
     unsigned long on = 1;
     int ret = ioctlsocket( socket, FIONBIO, &on );
     if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
@@ -223,7 +183,6 @@ Connection::Connection( Connection_manager* m, Server* server )
 : 
     _zero_(this+1),
     _manager(m),
-  //_stdin_of_process(-1),
     _remote_host( Ip_address::localhost ),
     _server(server)
 {
@@ -241,8 +200,6 @@ Connection::Connection( Connection_manager* m, Server* server )
 #   endif
 
     _manager->add_connection( this );
-
-    //if( _server )  enter_exclusive_mode();
 }
 
 //--------------------------------------------------------------------------Connection::~Connection
@@ -256,21 +213,6 @@ Connection::~Connection()
     try
     {
         close();
-        //close_socket( &_stdin_of_process );
-        //close_socket( &_socket );
-        //close_socket( &_listen_socket );
-
-        //while( !_operation_stack.empty() )
-        //{
-        //    Z_LOG( "pid=" << pid() << " Connection::close: Operation liegt auf dem Stack: " << _operation_stack.top()->async_state_text() << "\n" );
-        //    _operation_stack.pop();
-        //}
-
-        //if( _manager )
-        //{
-        //    if( _tcp_port )  _manager->_used_tcp_ports.unregister_port( _tcp_port );
-        //    _manager->remove_connection( this ), _manager = NULL;
-        //}
     }
     catch( const exception& x ) 
     {
@@ -531,40 +473,8 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
 
         case s_writing_to_stdin:
         {
-#           if  1//def Z_WINDOWS     // Windows kann nicht asynchron (mit select()) zu stdin des Prozesses schreiben. Also nehmen wir eine temporäre Datei
-        
-                _state = s_ok;
-
-#            else
-
-                if( _stdin_written < _connection->_stdin_data.length() )
-                {
-                    const char* p = _connection->_stdin_data.data() + _stdin_written;
-                    int remaining = _connection->_stdin_data.length() - _stdin_written;
-
-                    int written = ::write( _connection->_stdin_of_process, p, remaining );
-                    if( written < 0 )  
-                    {
-                        int errn = errno;
-                        //if( errn != EPIPE )  
-                            z::throw_errno( errn, "write", Z_FUNCTION );
-
-                        //Z_LOG( Z_FUNCTION << "  ERROR ERRNO-" << errn << "  "  << strerror( errn ) << "\n" );
-                        //_state = s_waiting_for_connection;
-                    }
-                    else
-                        _stdin_written += written;
-                }
-
-                if( _stdin_written == _connection->_stdin_data.length() )  
-                {
-                    int errn = _connection->close_socket( &_connection->_stdin_of_process );
-                    if( errn )  throw_errno( errno, "close", Z_FUNCTION );
-
-                    _state = s_ok;
-                }
-
-#           endif
+            // Windows kann nicht asynchron (mit select()) zu stdin des Prozesses schreiben. Also nehmen wir eine temporäre Datei
+            _state = s_ok;
         }
         if( _state != s_ok )  break;
 
@@ -1054,13 +964,11 @@ void Connection::check_connection_error()
             int read = recv( _socket, buffer, 1, MSG_NOSIGNAL | MSG_PEEK );    //?? Meldet keinen Fehler, wenn Verbindung abgebrochen ist.
             int err = read == -1? socket_errno() : 0;
             bool broken = read == -1  &&  err != Z_EWOULDBLOCK  ||  read == 0;
-            //int read = send( _socket, buffer, 0, MSG_NOSIGNAL );
 #       endif
 
         Z_LOG2( "socket.recv", "pid=" << pid() << " recv(" << _socket << ",0) => " << read << "   errno=" << err << " " << z_strerror(err) << "\n" );
 
 
-        //if( read == -1  &&  err != Z_EWOULDBLOCK )
         if( broken )
         {
             _new_error = true;
@@ -1080,7 +988,6 @@ void Connection::check_connection_error()
 
 void Connection::async_check_error( const string& text )
 { 
-    //if( _new_error )
     {
         _new_error = false;
 
@@ -1123,7 +1030,6 @@ Connection_to_own_server_process::Wait_for_process_termination::Wait_for_process
     
 void Connection_to_own_server_process::Wait_for_process_termination::async_check_error_()
 { 
-    //if( _connection->_last_errno )  throw_socket( _connection->_last_errno, "sockets" );
 }
 
 //------------------Connection_to_own_server_process::Wait_for_process_termination::async_continue_
@@ -1140,10 +1046,7 @@ bool Connection_to_own_server_process::Wait_for_process_termination::async_conti
     }
     else
     {
-        // In Windows könnten wir auf ein Signal von _process_handle warten. Das müsste spooler.cxx tun.
-//#       ifdef Z_UNIX           // Unter Windows für remote task periodisch prüfen (wir haben hier kein Event)
-            set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
-//#       endif
+        set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
     }
 
 
@@ -1154,7 +1057,6 @@ bool Connection_to_own_server_process::Wait_for_process_termination::async_conti
             Z_LOG( "pid=" << _connection->pid() << " WaitForSingleObject()  ...\n" );
             DWORD ret = WaitForSingleObject( _connection->_process_handle, INFINITE );
             Z_LOG( "pid=" << _connection->pid() << " WaitForSingleObject()  ret=" <<  ret << "\n" );
-            //if( ret == WAIT_FAILED )  throw_mswin( "WaitForSingleObject" );
         }
 
         _connection->_exit_code = 0;
@@ -1235,17 +1137,9 @@ Connection_to_own_server_process::~Connection_to_own_server_process()
 }
 
 //--------------------------------------------------Connection_to_own_server_process::start_process
-
 /**
- * \brief Start einer Task in einem eigenen Prozess
- * \detail
  * Aus dem Haupt-Scheduler (server) heraus werden über diese Methode die anstehenden Tasks in einem eigenen
  * Prozess gestartet.
- *
- * \version 2.0.224 - 2010-03-02 09:40
- *
- * \param name - description
- * \return type of returnvalue
  */
 void Connection_to_own_server_process::start_process( const Parameters& params )
 {
@@ -1273,8 +1167,6 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
             int len = GetModuleFileName( NULL, filename, sizeof filename );
             if( len <= 0 )  throw_mswin( "GetModuleFileName" );
             object_server_filename = filename;
-#        else
-            //object_server_filename = _argv[0];
 #       endif
     }
 
@@ -1509,8 +1401,6 @@ Async_operation* Connection_to_own_server_process::close__start()
     ptr<Wait_for_process_termination> operation = Z_NEW( Wait_for_process_termination( this ) );
     _my_operation = +operation;
 
-    //_operation->set_async_child( Connection::close__start() );
-
     return _my_operation;
 }
 
@@ -1660,7 +1550,6 @@ Connection_to_own_server_thread::Server_thread::Server_thread( Connection_to_own
     _zero_(this+1),
     _connection(connection) 
 {
-    ///set_thread_name( S() << "Connection_to_own_server_thread.Server_thread" );
     set_thread_name( S() << "Connection_to_own_server_thread::Server_thread(" << _connection->_controller_address << ")" );
 }
 
@@ -1669,18 +1558,6 @@ Connection_to_own_server_thread::Server_thread::Server_thread( Connection_to_own
 Connection_to_own_server_thread::Server_thread::~Server_thread()
 {
 }
-
-//--------------------------------------Connection_to_own_server_thread::Server_thread::thread_main
-
-//int Connection_to_own_server_thread::Server_thread::thread_main()
-//{
-//    Com_initialize com_initialize;
-//
-//    Server server;
-//    server.simple_server( _connection->_controller_address );
-//
-//    return 0;
-//}
 
 //---------------------------------------Connection_to_own_server_thread::Server_thread::run_server
 
@@ -1715,10 +1592,7 @@ bool Connection_to_own_server_thread::Wait_for_thread_termination::async_continu
     }
     else
     {
-        // In Windows könnten wir auf ein Signal von _process_handle warten. Das müsste spooler.cxx tun.
-//#       ifdef Z_UNIX           // Unter Windows für remote task periodisch prüfen (wir haben hier kein Event)
-            set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
-//#       endif
+        set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
     }
 
     if( _connection->_thread )
@@ -1780,8 +1654,6 @@ Async_operation* Connection_to_own_server_thread::close__start()
     ptr<Wait_for_thread_termination> operation = Z_NEW( Wait_for_thread_termination( this ) );
     _my_operation = +operation;
 
-    //_operation->set_async_child( Connection::close__start() );
-
     return _my_operation;
 }
 
@@ -1793,13 +1665,6 @@ void Connection_to_own_server_thread::close__end()
     _my_operation = NULL;
     operation->async_check_error( Z_FUNCTION );
 }
-
-//---------------------------------------------Connection_to_own_server_thread::process_terminated
-
-//bool Connection_to_own_server_thread::process_terminated()
-//{
-//    return _thread == NULL;
-//}
 
 //---------------------------------------------------Connection_to_own_server_thread::::short_name
 
@@ -1867,25 +1732,6 @@ void Object_entry::close()
     if( _table_is_owner && iunknown )  iunknown->Release();
 }
 
-//--
-/*
-void Object_entry::add_ref()
-{
-    Z_LOG( *this << ".AddRef()\n" );
-    _iunknown->AddRef();
-}
-
-int Object_entry::release()
-{
-    Z_LOG( *this << ".Release()\n" );
-
-    IUnknown* iunknown = _iunknown;
-    _iunknown = NULL;
-    if( _table_is_owner && _iunknown )  iunknown->Release(); 
-
-    _iunknown->Release();
-}
-*/
 //-------------------------------------------------------------------Object_entry::set_debug_string
 
 void Object_entry::set_debug_string()
@@ -1910,11 +1756,6 @@ void Object_entry::obj_print( ostream* s ) const
     *s << _id << " - " << (void*)_iunknown;
 
 #   ifdef _DEBUG
-        //char buffer [ 20 ];
-        //time_t t = (time_t)_created;
-        //strftime( buffer, sizeof buffer, " %H:%M:%S", localtime(&t) );
-        //*s << buffer;
-        //*s << ( buffer + z_snprintf( buffer, sizeof buffer, "%0.3lf", _created ) - 4 );
         *s << ' ';
         *s << _debug_string;
 #   endif
@@ -1980,25 +1821,6 @@ ptr<IUnknown> Object_table::get_object( Session*, Object_id id ) //, bool is_new
         return it->second._iunknown;
     }
     else
-/*
-    if( is_new )
-    {
-        ptr<Proxy> proxy = Z_NEW( Proxy( session, id, become_owner, title ) );
-
-        Object_entry& e = _objects[ id ];
-
-        e._id             = id;
-        e._iunknown       = (IDispatch*)+proxy;
-        e._is_proxy       = true;
-        e._table_is_owner = become_owner;
-
-        //Z_DEBUG_ONLY( Z_LOG( "com_remote: Object_table::get_object(" << id << ") => new " << e << "  " << ( e._table_is_owner? "AddRef()\n" : "\n" ) ); )
-        if( e._table_is_owner ) e._iunknown->AddRef();
-
-        return +proxy;
-    }
-    else
-*/
         throw_xc( "Z-REMOTE-102", string_from_object_id( id ) );
 }
 
@@ -2006,8 +1828,6 @@ ptr<IUnknown> Object_table::get_object( Session*, Object_id id ) //, bool is_new
 
 void Object_table::add_proxy( Session*, Object_id id, Proxy* proxy )
 {
-    //Map::iterator it = _objects.find( id );
-
     Object_entry& e = _objects[ id ];
 
     e._id             = id;
@@ -2020,7 +1840,6 @@ void Object_table::add_proxy( Session*, Object_id id, Proxy* proxy )
 #   endif
 
     //Z_DEBUG_ONLY( Z_LOG( "com_remote: Object_table::get_object(" << id << ") => new " << e << "  " << ( e._table_is_owner? "AddRef()\n" : "\n" ) ); )
-    //if( e._table_is_owner ) e._iunknown->AddRef();
 }
 
 //----------------------------------------------------------------------Object_table::get_object_id
@@ -2181,7 +2000,6 @@ void Session::execute_object_queryinterface( IUnknown* iunknown, Input_message* 
 
 
     hr = result.Assign_qi( iunknown, iid );
-    //hr = iunknown->QueryInterface( iid, (void**)&result );
 
     out->write_int32( hr );
 
@@ -2524,28 +2342,6 @@ ptr<IUnknown> Session::object_from_id( Object_id id )
     return _object_table.get_object( this, id );
 }
 
-/*
-ptr<IUnknown> Session::object_from_id( Object_id id, bool is_new, bool become_owner, const string& title )
-{
-    return _object_table.get_object( this, id, is_new, become_owner, title );
-}
-*/
-//------------------------------------------------------------------------------com_create_instance
-/*
-HRESULT com_create_instance( const CLSID& clsid, IUnknown* outer, DWORD context, const IID& iid, void** result, Session* session )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        hr = session->create_instance( clsid, outer, flags, server_info, count, query_interfaces );
-    }
-    catch( const exception& x )  { hr = com_set_error( x, "com_create_instance" ); }
-
-    return hr;
-}
-*/
-
 //-----------------------------------------------------------Connection_manager::Connection_manager
 
 Connection_manager::Connection_manager()
@@ -2597,92 +2393,6 @@ void Connection_manager::remove_connection( Connection* connection )
     }
 }
 
-//----------------------------------------------------------com_create_instance_in_separate_process
-/*
-   Auf asynchrone Verarbeitun umstellen!
-
-HRESULT com_create_instance_in_seperate_process( const CLSID& clsid, IUnknown* outer, DWORD flags, 
-                                                 COSERVERINFO* server_info, ulong count, MULTI_QI* query_interfaces, 
-                                                 int* pid_ptr, const Parameters& params )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        ptr<Connection> connection = start_process( params );
-        ptr<Session>    session    = Z_NEW( Session( connection ) );
-
-        if( pid_ptr )  *pid_ptr = connection->pid();
-
-        //session->login();
-        hr = session->create_instance( clsid, outer, flags, server_info, count, query_interfaces );
-    }
-    catch( const exception& x )  { hr = com_set_error( x, "com_create_instance_in_separate_process" ); }
-
-    return hr;
-}
-  
-//----------------------------------------------------------com_create_instance_in_separate_process
-
-    Auf asynchrone Verarbeitun umstellen!
-
-HRESULT com_create_instance_in_separate_process( const CLSID& clsid, IUnknown* outer, DWORD context, const IID& iid, void** result, 
-                                                 int* pid, const Parameters& params )
-{
-    MULTI_QI query_interfaces;
-    
-    query_interfaces.pIID = &iid;
-    query_interfaces.pItf = NULL;
-
-    HRESULT hr = com_create_instance_in_seperate_process( clsid, outer, context, NULL, 1, &query_interfaces, pid, params );
-
-    if( !FAILED(hr) )  *result = query_interfaces.pItf;
-
-    return hr;
-}
-*/
-//------------------------------------------------------------------------------com_create_instance
-/*
-HRESULT com_create_instance( const CLSID& clsid, IUnknown* outer, DWORD context, COSERVERINFO* server_info, ulong count, MULTI_QI* query_interfaces, const string& params )
-
-// Die Schnittstelle ist eine Erweiterung von CoCreateInstanceEx().
-
-{
-    //string server_name; // = server_info? string_from_ole( server_info->pwszName ) : "";
-    //
-    //for( Sos_option_iterator opt = params; opt.next(); !opt.end() )
-    //{
-    //    if( opt.flag( "async_continue" )  separate_process = true;
-    //    else
-    //    if( opt.with_value( "server" ) )  server_name = opt.value();
-    //    else
-    //        throw_sos_option_error( "COM_CREATE_INSTANCE" );
-    //}
-
-    if( context & Z_CLSCTX_SEPARATE_PROCESS )   // Erweiterung von CLSCTX
-    {
-        return com_create_instance_in_seperate_process( clsid, outer, context, server_info, count, query_interfaces );
-    }
-    else
-    {
-        return CoCreateInstanceEx( clsid, outer, context, server_info, count, query_interfaces );
-    }
-}
-*/
-//------------------------------------------------------------------------------com_create_instance
-/*
-HRESULT com_create_instance( const CLSID& clsid, IUnknown* outer, DWORD context, const IID& iid, void** result, const string& params )
-{
-    if( context & Z_CLSCTX_SEPARATE_PROCESS )   // Erweiterung von CLSCTX
-    {
-        return com_create_instance_in_separate_process( clsid, outer, context, iid, result, params );
-    }
-    else
-    {
-        return CoCreateInstance( clsid, outer, context, iid, result );
-    }
-}
-*/
 //-----------------------------------------------------------------------------Output_message::send
 
 void Output_message::send()
@@ -2749,7 +2459,6 @@ void Output_message::write_int64( int64 i )
 
 void Output_message::write_string( const string& str )
 {
-    //int bytes = utf8_byte_count_from_iso_8859_1( str );
     int bytes = int_cast(str.length());
     write_int32( bytes );
     _data += str;
@@ -2766,22 +2475,6 @@ void Output_message::write_string( const OLECHAR* unicode, int length )
     _data += string_from_ole( unicode, length );
 }
 
-//------------------------------------------------------------------Output_message::write_safearray
-/*
-void Output_message::write_safearray( const VARIANT& v )
-{
-    if( !( v.vt & VT_ARRAY ) )  throw_xc( Z_FUNCTION );
-
-    VARTYPE vartype = 0;
-
-    HRESULT hr = SafeArrayGetVartype( const_cast<SAFEARRAY*>( V_ARRAY( &v ) ), &vartype );
-    if( FAILED( hr ) )  throw_com( hr, "SafeArrayGetVartype" );
-
-    if( v.vt != ( VT_ARRAY | vartype ) )  throw_xc( "Z-REMOTE-128" );
-
-    write_safearray( V_ARRAY( &v ) );
-}
-*/
 //------------------------------------------------------------------Output_message::write_safearray
 
 void Output_message::write_safearray( const SAFEARRAY* const_safearray )
@@ -2848,24 +2541,6 @@ void Output_message::write_variant( const VARIANT& v )
 
     write_int32( v.vt & ~VT_BYREF );
 
-    /*
-    if( v.vt & VT_ARRAY )
-    {
-        write_safearray( v );
-        / *
-        Locked_safearray<Variant> array = V_ARRAY( &v );
-
-        int count = array.count();
-        write_int32( count );
-
-        for( int i = 0; i < count; i++ )
-        {
-            write_variant( array[i] );
-        }
-        * /
-    }
-    else
-    */
     {
         //Z_LOG2( "DEBUG", Z_FUNCTION << " " << debug_string_from_variant( v ) << "\n" );
 
@@ -2960,7 +2635,7 @@ void Output_message::write_iunknown( IUnknown* iunknown )
 
     if( iunknown )
     {
-        object_id = _session->_object_table.get_object_id( iunknown, &is_new, true );  //??? _is_answer );
+        object_id = _session->_object_table.get_object_id(iunknown, &is_new);
     }
 
     write_int64( object_id._value );
@@ -3018,7 +2693,6 @@ void Output_message::write_excepinfo( const EXCEPINFO& xi )
     write_bstr ( xi.bstrDescription );
     write_bstr ( xi.bstrHelpFile );
     write_int32( xi.dwHelpContext);
-  //write_int32( xi.pvReserved );
     write_int32( xi.scode );
 }
 
@@ -3062,13 +2736,6 @@ void Input_message::Builder::add_data( const Byte* data, int length )
     }
 }
 
-//---------------------------------------------------------------------Input_message::receive_async
-/*
-bool Input_message::receive_async()
-{
-    return _session->connection()->receive_async( this );
-}
-*/
 //------------------------------------------------------------------------Input_message::need_bytes
 
 void Input_message::need_bytes( int byte_count )
@@ -3242,7 +2909,6 @@ ptr<IUnknown> Input_message::read_iunknown()
         title = read_string();
 
         CLSID   proxy_clsid          = read_guid();
-      //IID     proxy_iid            = read_iid();
         int     local_property_count = read_int32();
 
         ptr<Proxy> proxy;
@@ -3283,7 +2949,6 @@ ptr<IUnknown> Input_message::read_iunknown()
 
         proxy->set_session       ( _session );
         proxy->set_object_id     ( id );
-      //proxy->set_table_is_owner( false );
         proxy->set_title         ( title );
 
         _session->_object_table.add_proxy( _session, id, proxy );
@@ -3292,7 +2957,6 @@ ptr<IUnknown> Input_message::read_iunknown()
     }
     else
     {
-        //return _session->object_from_id( id, is_new, false, title );      //??? !_is_answer );
         return _session->object_from_id( id );
     }
 }
@@ -3372,26 +3036,6 @@ void Input_message::read_variant( VARIANT* v )
         if( FAILED( hr ) )  throw_com( hr, "SafeArrayGetVartype" );
 
         if( vartype != ( v->vt & ~VT_ARRAY ) )  throw_xc( Z_FUNCTION );
-
-        /*
-        int n = read_int32();
-        V_ARRAY( v ) = SafeArrayCreateVector( VT_VARIANT, 0, n );
-
-        try
-        {
-            Locked_safearray<Variant> array = V_ARRAY( v );
-        
-            for( int i = 0; i < array.count(); i++ )
-            {
-                read_variant( &array[i] );
-            }
-        }
-        catch( const exception& )
-        {
-            VariantClear( v );
-            throw;
-        }
-        */
     }
     else
     {
@@ -3510,27 +3154,6 @@ int Input_message::pid() const
     return _session? _session->pid() : 0; 
 }
 
-//----------------------------------------------------------------------Serverobject::GetIDsOfNames
-/*
-HRESULT Serverobject::GetIDsOfNames( IID& iid, OLECHAR** names, uint names_count, LCID lcid, DISPID* dispid )
-{
-    send(), recv();
-
-    if( FAILED(hr) )  return hr;
-
-    _dispid_set.insert( *dispid );
-
-    return hr;
-}
-*/
-//-----------------------------------------------------------------------Serverobject::check_dispid
-/*
-void Serverobject::check_dispid( DISPID dispid )
-{
-    if( _dispid_set.find( dispid ) == _dispid_set.end() )  throw_xc( "CHECK_DISPID", _name );
-}
-*/
-
 //---------------------------------------------------------------Simple_operation::Simple_operation
 
 Simple_operation::Simple_operation( Session* s, IDispatch* o, const string& method, const string& debug_text )
@@ -3628,7 +3251,6 @@ bool Simple_operation::async_continue_( Continue_flags flags )
                 assert( &_input_message == _session->connection()->_input_message_builder._input_message );
 
                 something_done = _session->connection()->receive_async();
-              //something_done = receive_async();
 
                 if( something_done               )  _state = s_receiving;
                 if( _input_message.is_complete() )  _state = s_received;
@@ -3681,20 +3303,6 @@ bool Simple_operation::async_continue_( Continue_flags flags )
     return result;
 }
 
-//-------------------------------------------------------Simple_operation::execute_callback_message
-
-//void Simple_operation::execute_callback_message()
-//{
-//    _session->connection()->_callback_count++;
-//    _session->connection()->_callback_nesting++;
-//
-//    _output_message.clear();
-//
-//    _session->connection()->execute( _session, &_input_message, &_output_message );
-//
-//    _session->connection()->_callback_nesting--;
-//}
-
 //------------------------------------------------------------------Simple_operation::async_finish_
 
 void Simple_operation::async_finish_()
@@ -3744,13 +3352,6 @@ void Simple_operation::async_check_error_()
     if( _input_message.peek_char() != msg_answer )  throw_xc( "Z-REMOTE-107", pid() );
 }
 
-//------------------------------------------------------------------Simple_operation::receive_async
-/*
-bool Simple_operation::receive_async()
-{ 
-    return _input_message.receive_async(); 
-}
-*/
 //---------------------------------------------------------------------------Simple_operation::send
 
 void Simple_operation::send()
@@ -3836,7 +3437,6 @@ void Proxy::release()
 
 void Proxy::release_finish()
 {
-    //if( !_table_is_owner )  
     _session->_object_table.remove( _object_id );
     _object_id = 0;
 }
@@ -3880,13 +3480,6 @@ void Proxy::release__end()
     release_finish();
 }
 
-//----------------------------------------------------------------------------Proxy::async_finished
-/*
-bool Proxy::async_finished()
-{ 
-    return _session->current_operation()->async_finished(); 
-}
-*/
 //----------------------------------------------------------------------------Proxy::QueryInterface
 
 STDMETHODIMP Proxy::QueryInterface( const IID& iid, void** result )
@@ -4271,29 +3864,6 @@ Object* Server::get_class_object_or_null( const CLSID& clsid )
     return result;
 }
 
-//-------------------------------------------------------------------------Server::set_class_object
-
-void Server::set_class_object( const CLSID& clsid, Object* o )
-{ 
-    Class_register::iterator it = _class_register.find( clsid );
-    if( it == _class_register.end() )  throw_xc( Z_FUNCTION, string_from_clsid( clsid ) );
-
-    it->second._class_object = o;
-}
-
-//-------------------------------------------------------------------------------get_and_delete_env
-/*
-static int get_and_delete_env( const char* name )
-{
-    const char* v = getenv( name );
-    if( !v )  throw_xc( "Z-REMOTE-117" );
-
-    int result = as_int( v );
-    unsetenv( name );
-    return result;
-}
-*/
-
 //-----------------------------------------------------------------------------------Session::close
 
 void Session::close()
@@ -4367,12 +3937,7 @@ void Server::server( int server_port )
 
     while(1)
     {
-//#       ifdef Z_HPUX
-//            int len;    
-//#        else
-            sockaddrlen_t len;
-//#       endif
-
+        sockaddrlen_t len;
         sockaddr_in peer_addr;
         memset( &peer_addr, 0, sizeof peer_addr );
 
@@ -4450,9 +4015,7 @@ string Server::stdin_data()
 
 int Server::main( int argc, char** argv )
 {
-
-        // für Testzwecke auskommentieren
-        // Prozess stoppt hier -> IDE: Extras|An den Prozess anhängen
+    // für Testzwecke auskommentieren. Prozess stoppt hier -> IDE: Extras|An den Prozess anhängen
     //MessageBox(NULL,( "object_server pid=" + as_string(getpid()) ).c_str(),"",0);
     //Z_DEBUG_ONLY( Sleep((connect_timeout*10)*1000); )
     //Z_DEBUG_ONLY( Sleep(10*1000); )
@@ -4479,8 +4042,6 @@ int Server::main( int argc, char** argv )
         }
         else
         if( string( argv[i] ) == "-server" )  server = true;
-        //else
-        //if( string_begins_with( argv[i], "-port="   ) )  server_port = as_int( argv[i] + 6 );
     }
 
     if( server )
@@ -4491,8 +4052,6 @@ int Server::main( int argc, char** argv )
     {
         simple_server( Host_and_port( controller_ip, controller_port ) );
     }
-
-    //Z_LOG( "Object_server normal beendet\n" );
 
     return 0;
 }
