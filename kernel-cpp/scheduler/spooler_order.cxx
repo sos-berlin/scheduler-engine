@@ -2600,16 +2600,13 @@ void Job_chain::db_try_delete_non_distributed_order(Transaction* outer_transacti
 {
     bool deleted = false;
 
-    for (Retry_nested_transaction ta(db(), outer_transaction); ta.enter_loop(); ta++) try {
-        deleted = ta.try_execute_single(S() << 
-            "DELETE from " << db()->_orders_tablename << 
-            " where " << db_where_condition() << 
-            " and `id`=" << sql::quoted(order_id) <<
-            " and `distributed_next_time` is null" <<
-            " and `occupying_cluster_member_id` is null", 
-            Z_FUNCTION);
-    }
-    catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
+    deleted = outer_transaction->try_execute_single(S() <<
+        "DELETE from " << db()->_orders_tablename << 
+        " where " << db_where_condition() << 
+        " and `id`=" << sql::quoted(order_id) <<
+        " and `distributed_next_time` is null" <<
+        " and `occupying_cluster_member_id` is null", 
+        Z_FUNCTION);
 
     if (deleted)
         log()->info(message_string("SCHEDULER-725", order_id));
