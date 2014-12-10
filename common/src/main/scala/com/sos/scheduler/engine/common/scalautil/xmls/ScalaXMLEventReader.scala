@@ -66,29 +66,31 @@ final class ScalaXMLEventReader(delegate: XMLEventReader) extends AutoCloseable 
     forEachStartElement[A] { case `name` ⇒ parseElement() { f } }.values
 
   def forEachStartElement[A](f: PartialFunction[String, A]): ConvertedElementMap[A] = {
-    def callF(element: StartElement) = {
-      def errorSuffix = s"at ${locationToString(element.getLocation)}"
-      val name = element.getName.toString
-      try f.applyOrElse(name, { name: String ⇒ sys.error(s"Unexpected XML element <$name>, $errorSuffix") })
-      catch {
-        case x: Exception ⇒ throw new WrappedException(s"Error in XML element <$name>: $x - $errorSuffix", x)
-      }
-    }
-
     val results = mutable.Buffer[(String, A)]()
 
     @tailrec
     def g(): Unit = {
       peek match {
         case e: StartElement ⇒
-          val o = callF(e)
+          val o = parseStartElementAlternative(f)
           results += e.getName.toString -> o
           g()
         case e: EndElement ⇒ mutable.Buffer[(String, A)]()
       }
     }
+
     g()
     new ConvertedElementMap(results.toVector)
+  }
+
+  def parseStartElementAlternative[A](f: PartialFunction[String, A]): A = {
+    val element = peek.asStartElement()
+    def errorSuffix = s"at ${locationToString(element.getLocation)}"
+    val name = element.getName.toString
+    try f.applyOrElse(name, { name: String ⇒ sys.error(s"Unexpected XML element <$name>, $errorSuffix") })
+    catch {
+      case x: Exception ⇒ throw new WrappedException(s"Error in XML element <$name>: $x - $errorSuffix", x)
+    }
   }
 
   def eatStartElement(name: String) = {

@@ -145,6 +145,20 @@ final class ScalaXMLEventReaderTest extends FreeSpec {
     intercept[Exception] { parseString(testXmlString)(parseA) }
       .rootCause.asInstanceOf[NoSuchElementException]
   }
+
+  "parseStartElementAlternative" in {
+    val testXmlString = <A><Y/></A>.toString()
+    parseString(testXmlString) { eventReader ⇒
+      import eventReader._
+      parseElement("A") {
+        parseStartElementAlternative {
+          case "X" ⇒ parseElement() { "XX" }
+          case "Y" ⇒ parseElement() { "YY" }
+          case "Z" ⇒ parseElement() { "ZZ" }
+        }
+      }
+    } shouldEqual "YY"
+  }
 }
 
 private object ScalaXMLEventReaderTest {
