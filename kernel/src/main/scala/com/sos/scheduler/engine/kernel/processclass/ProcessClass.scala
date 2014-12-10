@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.processclass
 
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp

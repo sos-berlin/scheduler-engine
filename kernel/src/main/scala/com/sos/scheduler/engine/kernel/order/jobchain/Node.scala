@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.common.io.Closer
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.xml.XmlUtils.nodeListToSeq
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp

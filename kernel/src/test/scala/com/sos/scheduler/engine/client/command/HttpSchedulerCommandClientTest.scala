@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.command
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Guice}
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClientTest._
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort

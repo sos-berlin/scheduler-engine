@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.filebased
 
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaCollections.emptyToNone
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString

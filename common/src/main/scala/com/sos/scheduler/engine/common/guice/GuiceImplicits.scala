@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.common.inject
+package com.sos.scheduler.engine.common.guice
 
 import com.google.inject.Injector
 import scala.reflect.ClassTag

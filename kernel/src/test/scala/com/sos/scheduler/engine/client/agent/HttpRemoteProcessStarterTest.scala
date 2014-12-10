@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Guice}
 import com.sos.scheduler.engine.client.agent.HttpRemoteProcessStarterTest._
 import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
