@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
+import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
