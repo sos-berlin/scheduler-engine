@@ -655,6 +655,15 @@ bool Order::db_try_insert( bool throw_exists_exception )
     bool   record_exists_error     = false;
     string record_exists_insertion;
     bool   tolerated_distributed_filebased_collision = false;
+    int    ordering;
+
+    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try
+    {
+        ordering = db_get_ordering(&ta);
+        ta.commit(Z_FUNCTION);
+    }
+    catch (exception& x) { ta.reopen_database_after_error(z::Xc("SCHEDULER-305", db()->_orders_tablename, x), Z_FUNCTION); }
+
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
@@ -697,9 +706,6 @@ bool Order::db_try_insert( bool throw_exists_exception )
             // Satz darf nicht vorhanden sein.
         }
 
-
-        int ordering = db_get_ordering( &ta );
-        
 
         sql::Insert_stmt insert ( ta.database_descriptor(), db()->_orders_tablename );
         
@@ -1305,11 +1311,6 @@ bool Order::on_activate()
 
     if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( _file_based_job_chain_name ) )
     {
-        if (!_spooler->standing_order_subsystem()->is_activating())  // Nicht, wenn der Auftrag vom Standing_order_subsystem aktiviert wird. TODO: Der Zeitstempelvergleich aus add_order_from_database_record() sollte mit Typed_folder::on_base_file_changed() zusammenfallen.
-        {
-            job_chain->db_try_delete_non_distributed_order(NULL, _id.as_string());   // Den Datenbanksatz verwerfen wir. Die geänderte File_based .order.xml gilt.
-        }
-        
         place_or_replace_in_job_chain( job_chain );
 
         result = true;
