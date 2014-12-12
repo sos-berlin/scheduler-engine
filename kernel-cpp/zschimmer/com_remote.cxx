@@ -3136,7 +3136,7 @@ void Input_message::read_excepinfo( EXCEPINFO* xi )
 
 void Input_message::finish()
 {
-    if( _index != _data.length() )  throw_xc( "Input_message::finish" );
+    if (_index != _data.length()) throw_xc("Input_message::finish", as_string(_index), as_string(_data.length()));
 }
 
 //-------------------------------------------------------------------------------Input_message::pid
