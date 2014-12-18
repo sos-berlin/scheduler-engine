@@ -2,10 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>agent</artifactId>
     <groupId>com.sos-berlin.jobscheduler.agent</groupId>
-    <name>${project.artifactId}</name>
-    <inceptionYear>2014</inceptionYear>
+    <artifactId>agent</artifactId>
 
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
@@ -13,6 +11,10 @@
         <version>1.8-SNAPSHOT</version>
         <relativePath>../engine/parent</relativePath>
     </parent>
+
+    <name>${project.artifactId}</name>
+    <inceptionYear>2014</inceptionYear>
+    <description>C++ free Agent for JVM</description>
 
     <build>
         <plugins>
