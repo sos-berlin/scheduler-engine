@@ -78,7 +78,7 @@
                 <executions>
                     <execution>
                         <id>Generate Java proxies</id>
-                        <phase>process-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>

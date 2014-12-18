@@ -27,7 +27,7 @@
                 <executions>
                     <execution>
                         <id>generate-sources</id>
-                        <phase>process-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
