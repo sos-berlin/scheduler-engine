@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.8-SNAPSHOT</version>
+        <version>1.8-RC1</version>
     </parent>
 
     <artifactId>kernel-cpp</artifactId>
@@ -257,8 +256,8 @@
                         <configuration>
                             <target>
                                 <ant antfile="prepare_build.xml" target="all">
-                                    <property name="settings.localRepository" value="${settings.localRepository}"/>
-                                    <property name="operatingSystem" value="${operatingSystem}"/>
+                                    <property name="settings.localRepository" value="${settings.localRepository}" />
+                                    <property name="operatingSystem" value="${operatingSystem}" />
                                 </ant>
                             </target>
                         </configuration>
