@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.taskserver.job
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.minicom.IUnknownFactory
-import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, Variant, VariantArray}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, IUnknown, Variant, VariantArray}
 import com.sos.scheduler.engine.taskserver.task.{ShellScriptTask, Task}
 import java.util.UUID
 import org.scalactic.Requirements._
@@ -19,23 +19,22 @@ final class RemoteModuleInstanceServer extends IDispatch {
   private var task: Task = null
 
   def construct(arguments: VariantArray): Unit = {
-    for (KeyValueRegex(key, value) ← arguments.indexedSeq filter { _ != Variant.BoxedEmpty } map cast[String]
-         if value.nonEmpty) {
-      key match {
-        case k if KeySet contains k ⇒ argMap += k → value
-        case k ⇒ logger.debug(s"RemoteModuleInstanceServer.construct: Unsupported key: $k=$value")
+    for (keyValueString ← arguments.indexedSeq filter { _ != Variant.BoxedEmpty } map cast[String]) {
+      val KeyValueRegex(key, value) = keyValueString
+      if (value.nonEmpty) {
+        key match {
+          case k if KeySet contains k ⇒ argMap += k → value
+          case k ⇒ logger.debug(s"Ignoring unsupported key: $k=$value")
+        }
       }
     }
   }
 
   def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
-    val objectNames = objectNamesAnys.as[String]
-    val objects = objectAnys.asIUnknowns
-    require(objectNames.size == objects.size)
-    val namedObjects = objectNames zip objects
-    val script = Script.parseXmlString(argMap(keys.Script))
     task = argMap(keys.Language) match {
-      case "shell" ⇒ new ShellScriptTask(namedObjects.toMap, script = script.string)
+      case "shell" ⇒ new ShellScriptTask(
+        objectMap = toNamedObjectMap(names = objectNamesAnys, anys = objectAnys),
+        script = Script.parseXmlString(argMap(keys.Script)).string)
       case o ⇒ throw new IllegalArgumentException(s"Unknown language '$o'")
     }
     task.start()
@@ -97,4 +96,11 @@ object RemoteModuleInstanceServer extends IUnknownFactory {
     keys.Script,
     keys.Job,
     keys.TaskId)
+
+  private def toNamedObjectMap(names: VariantArray, anys: VariantArray): Map[String, IUnknown] = {
+    val nameStrings = names.as[String]
+    val iunknowns = anys.asIUnknowns
+    require(nameStrings.size == iunknowns.size)
+    (nameStrings zip iunknowns).toMap
+  }
 }
