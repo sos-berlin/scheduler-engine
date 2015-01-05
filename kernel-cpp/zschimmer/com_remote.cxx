@@ -2796,7 +2796,7 @@ int32 Input_message::read_int32()
 int64 Input_message::read_int64()
 {
     int32 first = read_int32();
-    return ( int64(first) << 32 ) | read_int32();
+    return (int64(first) << 32) | (uint32)read_int32();
 }
 
 //-----------------------------------------------------------------------Input_message::read_double
