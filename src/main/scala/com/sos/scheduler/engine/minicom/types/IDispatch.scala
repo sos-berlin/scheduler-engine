@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.minicom.types
 
+import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_UNKNOWNNAME
+import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_BADPARAMCOUNT
+import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_MEMBERNOTFOUND
 import java.lang.reflect.{InvocationTargetException, Method}
 import scala.collection.immutable
 
@@ -9,9 +12,9 @@ import scala.collection.immutable
 trait IDispatch extends IUnknown
 
 object IDispatch {
-  def apply(obj: IDispatch) = new Delegator(obj)
+  def apply(obj: IDispatch) = new Dispatcher(obj)
 
-  final class Delegator(val delegate: AnyRef) {
+  final class Dispatcher(val delegate: AnyRef) {
     private val methods = delegate.getClass.getMethods
 
     def call(methodName: String, arguments: Seq[Any]): Any =
@@ -25,20 +28,20 @@ object IDispatch {
 
     private def methodIndex(name: String): Int = {
       val methodIndices = methods.indices filter { i ⇒ methods(i).getName.compareToIgnoreCase(name) == 0 }
-      if (methodIndices.size < 1) throw new IDispatchException(s"Unknown method '$name'")
-      if (methodIndices.size > 1) throw new IDispatchException(s"Ambiguous method name '$name'")
+      if (methodIndices.size < 1) throw new COMException(DISP_E_UNKNOWNNAME, s"Unknown name '$name'")
+      if (methodIndices.size > 1) throw new COMException(DISP_E_UNKNOWNNAME, s"Ambiguous name '$name'")
       methodIndices.head
     }
 
     def invoke(dispIds: Seq[DISPID], dispatchType: DispatchType, arguments: Seq[Any]): Any = {
-      if (dispatchType != DISPATCH_METHOD) throw new RuntimeException("DISPATCH_METHOD expected")
+      if (dispatchType != DISPATCH_METHOD) throw new COMException(DISP_E_MEMBERNOTFOUND, "Only DISPATCH_METHOD is supported")
       require(dispIds.size == 1)
       val method = methods(dispIds.head.value)
       invokeMethod(method, arguments)
     }
 
     private def invokeMethod(method: Method, arguments: Seq[Any]): Any = {
-      require(arguments.size == method.getParameterCount, s"Number of arguments (${arguments.size }) does not match method $method")
+      if(arguments.size != method.getParameterCount) throw new COMException(DISP_E_BADPARAMCOUNT, s"Number of arguments (${arguments.size }) does not match method $method")
       val javaParameters = for ((t, v) ← method.getParameterTypes zip arguments) yield convert(t.asInstanceOf[Class[_ <: AnyRef]], v)
       val result =
         try method.invoke(delegate, javaParameters: _*)
@@ -77,6 +80,4 @@ object IDispatch {
       case VariantArraySerializableClass ⇒ v.asInstanceOf[VariantArray]
     }).asInstanceOf[A]
   }
-
-  final class IDispatchException(override val getMessage: String) extends RuntimeException
 }

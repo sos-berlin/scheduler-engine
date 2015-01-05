@@ -21,5 +21,5 @@ private[comrpc] abstract class VariantSerializer extends BaseSerializer {
       case Unit | UNIT ⇒ writeInt32(VT_EMPTY)
     }
 
-  def writeIUnknown(iUnknown: Option[IUnknown]): Unit = throw new UnsupportedOperationException("IUnknown is not supported")
+  def writeIUnknown(iUnknown: Option[IUnknown]): Unit = throw new UnsupportedOperationException("IUnknown is not supported")  // Method is overridden
 }

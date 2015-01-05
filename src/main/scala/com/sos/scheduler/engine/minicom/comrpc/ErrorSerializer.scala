@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
-import com.sos.scheduler.engine.minicom.types.hresult.DISP_E_EXCEPTION
+import com.sos.scheduler.engine.minicom.types.COMException
+import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_EXCEPTION
 
 /**
  * @author Joacim Zschimmer
@@ -10,9 +11,13 @@ object ErrorSerializer {
     val b = new BaseSerializer
     b.writeByte(MessageClass.Error)
     b.writeString("name=COM")
-    val hResult = DISP_E_EXCEPTION
-    b.writeString(f"code=COM-$hResult%08X")
+    b.writeString(f"code=${throwableToHResult(t).comString}")
     b.writeString(s"what=$t")
     b.byteArrayAndLength
+  }
+
+  private def throwableToHResult(t: Throwable) = t match {
+    case t: COMException ⇒ t.hResult
+    case _ ⇒ DISP_E_EXCEPTION
   }
 }

@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
+import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_BADVARTYPE
 import com.sos.scheduler.engine.minicom.types.Variant._
-import com.sos.scheduler.engine.minicom.types.VariantArray.{FADF_HAVEVARTYPE, FADF_VARIANT, FADF_BSTR, FADF_FIXEDSIZE}
-import com.sos.scheduler.engine.minicom.types.{IUnknown, VariantArray}
+import com.sos.scheduler.engine.minicom.types.VariantArray.{FADF_BSTR, FADF_FIXEDSIZE, FADF_HAVEVARTYPE, FADF_VARIANT}
+import com.sos.scheduler.engine.minicom.types.{COMException, IUnknown, VariantArray}
 import org.scalactic.Requirements._
 
 /**
@@ -29,16 +30,14 @@ private[comrpc] trait VariantDeserializer extends BaseDeserializer {
     val lowerBound = readInt32()
     require(lowerBound == 0)
     readInt32() match {
-      case VT_UI1 ⇒
-        require((features & FADF_HAVEVARTYPE) != 0, f"VT_UI1 requires FADF_HAVEVARTYPE, not fFeature=$features%04x")
-        ???
-      case VT_BSTR ⇒
-        require((features & FADF_BSTR) != 0, f"VT_BSTR requires FADF_HAVEVARTYPE | FADF_VARIANT, not fFeature=$features%04x")
-        ???
+//      case VT_UI1 ⇒
+//        require((features & FADF_HAVEVARTYPE) != 0, f"VT_UI1 requires FADF_HAVEVARTYPE, not fFeature=$features%04x")
+//      case VT_BSTR ⇒
+//        require((features & FADF_BSTR) != 0, f"VT_BSTR requires FADF_HAVEVARTYPE | FADF_VARIANT, not fFeature=$features%04x")
       case VT_VARIANT ⇒
         require((features & FADF_VARIANT) != 0, f"VT_VARIANT requires FADF_HAVEVARTYPE | FADF_VARIANT, not fFeature=$features%04x")
         VariantArray(Vector.fill(count) { readVariant() })
-      case o ⇒ throw new IllegalArgumentException(f"Unsupported Array Variant VT=$o%x")
+      case o ⇒ throw new COMException(DISP_E_BADVARTYPE, f"Unsupported Array Variant VT=$o%x")
     }
   }
 
@@ -64,8 +63,8 @@ private[comrpc] trait VariantDeserializer extends BaseDeserializer {
       //case VT_UI8 ⇒
       //case VT_INT ⇒
       //case VT_UINT ⇒
-      case o ⇒ throw new IllegalArgumentException(f"Unsupported Variant VT=$o%x")
+      case o ⇒ throw new COMException(DISP_E_BADVARTYPE, f"Unsupported Variant VT=$o%x")
     }
 
-  protected def readIUnknown(): Option[IUnknown] = throw new UnsupportedOperationException("IUnknown is not supported")
+  protected def readIUnknown(): Option[IUnknown] = throw new UnsupportedOperationException("IUnknown is not supported")  // Method is overridden
 }

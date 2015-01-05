@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
 import com.sos.scheduler.engine.minicom.comrpc.calls.{CreateInstanceResult, EmptyResult, InvokeResult, Result}
-import com.sos.scheduler.engine.minicom.types.hresult
+import com.sos.scheduler.engine.minicom.types.HRESULT.S_OK
 
 /**
  * @author Joacim Zschimmer
@@ -13,12 +13,12 @@ private final class ResultSerializer(protected val iunknownProxyRegister: ProxyR
     result match {
 
       case CreateInstanceResult(iUnknown) ⇒
-        writeInt32(hresult.S_OK)
-        writeInt32(hresult.S_OK)  // For IID
+        writeInt32(S_OK.value)
+        writeInt32(S_OK.value)  // For IID
         writeIUnknown(Some(iUnknown))
 
       case InvokeResult(value) ⇒
-        writeInt32(hresult.S_OK)
+        writeInt32(S_OK.value)
         writeVariant(value)
 
       case EmptyResult ⇒
