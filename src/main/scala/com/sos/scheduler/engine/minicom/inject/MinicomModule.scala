@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.minicom.IUnknownFactory
 import com.sos.scheduler.engine.minicom.comrpc.CallExecutor
 import com.sos.scheduler.engine.minicom.comrpc.CallExecutor._
 import com.sos.scheduler.engine.minicom.comrpc.calls.{Call, Result}
+import com.sos.scheduler.engine.minicom.types.{IUnknown, IID, CLSID}
 import javax.inject.Singleton
 import scala.collection.immutable
 
@@ -20,5 +21,13 @@ final class MinicomModule(iUnknownFactories: immutable.Iterable[IUnknownFactory]
   private def executeCall(o: CallExecutor): Call ⇒ Result = o.execute
 
   @Provides @Singleton
-  private def clsidToFactory: ClsidToFactory = (iUnknownFactories map { o ⇒ (o.clsid, o.iid) → o.apply _ }).toMap
+  private def createInstanceByCLSID: CreateIUnknownByCLSID = {
+    val clsidToFactoryMap = (iUnknownFactories map { o ⇒ o.clsid → o }).toMap
+    def createIUnknown(clsId: CLSID, iid: IID): IUnknown = {
+      val factory = clsidToFactoryMap(clsId)
+      require(factory.iid == iid, s"IID $iid is not supported by $factory")
+      factory()
+    }
+    createIUnknown
+  }
 }

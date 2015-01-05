@@ -23,7 +23,7 @@ final class ShellScriptTask(objectMap: Map[String, IUnknown], script: String) ex
   override def step() = {
     val b = new ProcessBuilder
     b.command(s"cmd", "/c", scriptFile.toString)
-    val process = b.start()  // Used native function is synchronized (one after another)
+    val process = b.start()
     val exitValue = process.waitFor()
     Files.delete(scriptFile)
     <process.result spooler_process_result="true" exit_code={exitValue.toString} state_text="STATE_TEXT"/>.toString()

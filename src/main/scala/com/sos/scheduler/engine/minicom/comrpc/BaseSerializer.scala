@@ -34,7 +34,7 @@ private[comrpc] class BaseSerializer {
   final def writeString(o: String): Unit = {
     need(4 + o.length)
     byteBuffer.putInt(o.length)
-    for (c ← o.iterator) byteBuffer.put(charToByte(c))
+    for (c ← o.iterator) byteBuffer.put(charToIso88591Byte(c))
   }
 
   final def writeUUID(o: UUID): Unit = byteBuffer.putLong(o.getMostSignificantBits).putLong(o.getLeastSignificantBits)
@@ -51,8 +51,8 @@ private[comrpc] class BaseSerializer {
 
 private object BaseSerializer {
   private[comrpc] val InitialSize = 1000
-  private def charToByte(o: Char) = o.toByte    // TODO Codierung?
-  
+  private def charToIso88591Byte(o: Char) = o.toByte    // ISO-8859-1
+
   private[comrpc] def increased(currentSize: Int, neededSize: Int) =
     max(2 * currentSize, neededSize + InitialSize)
 }
