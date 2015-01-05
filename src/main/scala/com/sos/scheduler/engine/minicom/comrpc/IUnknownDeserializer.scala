@@ -7,24 +7,24 @@ import scala.collection.immutable
 /**
  * @author Joacim Zschimmer
  */
-private[comrpc] trait ProxyDeserializer extends COMDeserializer {
+private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
 
   protected val proxyRegister: ProxyRegister
 
-  def readIUnknown() = {
+  override final def readIUnknown() = {
     val proxyId = ProxyId(readInt64())
     val isNew = readBoolean()
     if (isNew) {
       // ???
       val name = readString()
-      val proxyClasid = CLSID(readUUID())
-      val n = readInt32()
-      val proxyProperties = immutable.Seq.fill(n) {
+      val proxyClsid = CLSID(readUUID())
+      val proxyProperties = immutable.Seq.fill(readInt32()) {
         val name = readString()
         val value = readVariant()
         name → value
       }
-    }
-    proxyRegister.registerProxyId(proxyId)
+      proxyRegister.registerProxyId(proxyId, name)
+    } else
+      proxyRegister(proxyId)
   }
 }

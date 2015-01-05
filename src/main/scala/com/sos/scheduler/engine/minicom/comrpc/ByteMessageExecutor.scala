@@ -1,25 +1,33 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.minicom.comrpc.CallDeserializer.deserializeCall
+import com.sos.scheduler.engine.minicom.comrpc.ErrorSerializer.serializeError
+import com.sos.scheduler.engine.minicom.comrpc.ResultSerializer.serializeResult
 import com.sos.scheduler.engine.minicom.comrpc.calls._
 import java.nio.ByteBuffer
 import javax.inject.{Inject, Singleton}
+import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
  */
 @Singleton
-final class ByteMessageExecutor @Inject private(callExecutor: CallExecutor, proxyRegister: ProxyRegister) {
+final class ByteMessageExecutor @Inject private(executeCall: Call ⇒ Result, proxyRegister: ProxyRegister) {
 
-  def executeMessage(commandBuffer: ByteBuffer): (Array[Byte], Int) = {
-    val deserializer = new CallDeserializer(proxyRegister, commandBuffer)
-    val call = deserializer.readCall()
-    val result = callExecutor.execute(call)
-    serializeResult(result)
-  }
+  private def logger = Logger(getClass)
 
-  def serializeResult(result: Result): (Array[Byte], Int) = {
-    val serializer = new CallSerializer(proxyRegister)
-    serializer.writeResult(result)
-    (serializer.byteBuffer.array, serializer.byteBuffer.position)
-  }
+  /**
+   * @return (Array, length)
+   */
+  def executeMessage(callBuffer: ByteBuffer): (Array[Byte], Int) =
+    try {
+      val call = deserializeCall(proxyRegister, callBuffer)
+      val result = executeCall(call)
+      serializeResult(proxyRegister, result)
+    }
+    catch { case NonFatal(t) ⇒
+      logger.debug(t.toString, t)
+      serializeError(t)
+    }
 }

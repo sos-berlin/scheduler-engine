@@ -15,9 +15,7 @@ final class Main(conf: AgentConfiguration) extends AutoCloseable {
 
   def start() = injector.apply[AgentStarter].start()
 
-  def close(): Unit = {
-    injector.apply[Closer].close()
-  }
+  def close() = injector.apply[Closer].close()
 }
 
 object Main {

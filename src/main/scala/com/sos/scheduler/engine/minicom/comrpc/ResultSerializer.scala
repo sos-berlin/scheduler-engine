@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.minicom.types.hresult
 /**
  * @author Joacim Zschimmer
  */
-private[comrpc] final class CallSerializer(protected val iunknownProxyRegister: ProxyRegister) extends ProxySerializer {
+private final class ResultSerializer(protected val iunknownProxyRegister: ProxyRegister) extends IUnknownSerializer {
 
   def writeResult(result: Result): Unit = {
     writeByte(MessageClass.Answer)
@@ -15,7 +15,7 @@ private[comrpc] final class CallSerializer(protected val iunknownProxyRegister: 
       case CreateInstanceResult(iUnknown) ⇒
         writeInt32(hresult.S_OK)
         writeInt32(hresult.S_OK)  // For IID
-        writeIUnknown(iUnknown)
+        writeIUnknown(Some(iUnknown))
 
       case InvokeResult(value) ⇒
         writeInt32(hresult.S_OK)
@@ -23,5 +23,16 @@ private[comrpc] final class CallSerializer(protected val iunknownProxyRegister: 
 
       case EmptyResult ⇒
     }
+  }
+}
+
+object ResultSerializer {
+  /**
+   * @return (Array, length)
+   */
+  def serializeResult(proxyRegister: ProxyRegister, result: Result): (Array[Byte], Int) = {
+    val serializer = new ResultSerializer(proxyRegister)
+    serializer.writeResult(result)
+    serializer.byteArrayAndLength
   }
 }

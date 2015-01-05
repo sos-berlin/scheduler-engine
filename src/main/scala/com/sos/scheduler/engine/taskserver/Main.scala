@@ -12,6 +12,6 @@ private object Main {
   def main(arg: Array[String]): Unit = {
     // <task_process> von stdin lesen
     val startConfiguration: StartConfiguration = ???
-    TaskServer.run(startConfiguration)
+    SimpleTaskServer.run(startConfiguration)
   }
 }

@@ -10,14 +10,14 @@ import scala.collection.immutable
 /**
  * @author Joacim Zschimmer
  */
-private[comrpc] final class CallDeserializer(protected val proxyRegister: ProxyRegister, val buffer: ByteBuffer) extends ProxyDeserializer {
+private[comrpc] final class CallDeserializer(protected val proxyRegister: ProxyRegister, protected val buffer: ByteBuffer)
+extends IUnknownDeserializer {
 
-  def readCall(): Call = {
+  def readCall(): Call =
     readByte() match {
       case MessageClass.Session ⇒ readSessionCall()
       case MessageClass.Object ⇒ readObjectCall()
     }
-  }
 
   private def readSessionCall(): Call = {
     val sessionId = readInt64()  // ???
@@ -58,7 +58,7 @@ private[comrpc] final class CallDeserializer(protected val proxyRegister: ProxyR
         val argumentCount = readInt32()
         val namedArgumentCount = readInt32()
         require(namedArgumentCount == 0)
-        val arguments = immutable.Seq.fill(argumentCount) { readVariant() }
+        val arguments = readArguments(argumentCount)
         InvokeCall(proxyId, dispatchId, iid, flags, arguments, namedArguments = Nil)
 
       case MessageCommand.Call ⇒
@@ -67,13 +67,15 @@ private[comrpc] final class CallDeserializer(protected val proxyRegister: ProxyR
         val namedArgumentCount = readInt32()
         require(namedArgumentCount == 0)
         logger.trace(s"Call '$methodName' with $argumentCount arguments")
-        val arguments = immutable.Seq.fill(argumentCount) { readVariant() }
+        val arguments = readArguments(argumentCount)
         CallCall(proxyId, methodName, arguments)
     }
   }
+
+  private def readArguments(n: Int): immutable.Seq[Any] = immutable.Seq.fill(n) { readVariant() } .reverse
 }
 
-private object CallDeserializer {
+object CallDeserializer {
   private val logger = Logger(getClass)
 
   object MessageCommand {
@@ -84,4 +86,6 @@ private object CallDeserializer {
     val Invoke          = 'I'.toByte
     val Call            = 'A'.toByte
   }
+
+  def deserializeCall(proxyRegister: ProxyRegister, buffer: ByteBuffer) = new CallDeserializer(proxyRegister, buffer).readCall()
 }

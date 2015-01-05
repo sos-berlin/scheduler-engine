@@ -12,7 +12,7 @@ trait SessionCall extends Call
 
 final case class CreateInstanceCall(
   clsid: CLSID,
-  outer: IUnknown,
+  outer: Option[IUnknown],
   context: Int,
   iids: immutable.Seq[IID])
   extends SessionCall

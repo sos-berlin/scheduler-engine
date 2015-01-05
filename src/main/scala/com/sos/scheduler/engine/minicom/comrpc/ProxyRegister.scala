@@ -1,66 +1,67 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.google.common.collect.HashBiMap
 import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister._
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.IUnknown
+import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
-import scala.collection.mutable
-import scala.util.Random
+import scala.collection.JavaConversions._
 
 /**
  * @author Joacim Zschimmer
  */
 @Singleton
 private[comrpc] final class ProxyRegister @Inject private {
-  private val proxyIdToProxy = mutable.Map[ProxyId, Entry]()
-  private val iunknownToProxyId = mutable.Map[IUnknown, ProxyId]()
-  private val proxyIdIterator = Iterator from 1 map { i: Int ⇒ ProxyId((Random.nextInt().toLong << 32) + i) }  // FIXME Eindeutig zu Proxy-IDs der Gegenstelle
+  private val proxyIdToIUnknown = HashBiMap.create[ProxyId, IUnknown]()
+  private val iunknownToProxyId = proxyIdToIUnknown.inverse
+  private val proxyIdGenerator = ProxyId.newGenerator()
 
-  def registerIUnknown(iunknown: IUnknown): (ProxyId, Boolean) = {
-    iunknownToProxyId.get(iunknown) match {
-      case Some(o) ⇒ (o, false)
-      case None ⇒
-        val proxy = Entry(proxyIdIterator.next(), iunknown, registerIsOwner = true)
-        proxyIdToProxy += proxy.proxyId → proxy
-        iunknownToProxyId += proxy.iunknown → proxy.proxyId
-        (proxy.proxyId, true)
-    }
-  }
-
-  def registerProxyId(proxyId: ProxyId): IUnknown =
+  def registerProxyId(proxyId: ProxyId, name: String): Option[IUnknown] =
     if (proxyId == ProxyId.Null)
-      null
-    else
-      proxyIdToProxy.get(proxyId) match {
-        case Some(o) ⇒ o.iunknown
-        case None ⇒
-          val proxyIUnknown = ProxyIUnknown()
-          val e = Entry(proxyId, proxyIUnknown, registerIsOwner = false)
-          proxyIdToProxy += proxyId → e
-          iunknownToProxyId += proxyIUnknown → proxyId
-          e.iunknown
-      }
-
-  def removeProxy(proxyId: ProxyId) = {
-    proxyIdToProxy.get(proxyId) match {
-      case None ⇒
-      case Some(proxy) ⇒
-        iunknownToProxyId -= proxy.iunknown
-        proxyIdToProxy -= proxyId
+      None
+    else {
+      val iUnknown = ProxyIUnknown(proxyId, name)
+      add(proxyId, iUnknown)
+      Some(iUnknown)
     }
-  }
 
-  def apply(proxyId: ProxyId): IUnknown = proxyIdToProxy(proxyId).iunknown
+  def iUnknownToProxyId(iunknown: IUnknown): (ProxyId, Boolean) =
+    synchronized {
+      iunknownToProxyId.get(iunknown) match {
+        case null ⇒
+          val proxyId = proxyIdGenerator.next()
+          add(proxyId, iunknown)
+          (proxyId, true)
+        case o ⇒ (o, false)
+      }
+    }
+
+  private def add(proxyId: ProxyId, iUnknown: IUnknown): Unit =
+    synchronized {
+      if (proxyIdToIUnknown containsKey proxyId) throw new DuplicateKeyException(s"$proxyId already registered")
+      if (iunknownToProxyId containsKey iUnknown) throw new DuplicateKeyException(s"IUnknown '$iUnknown' already registered")
+      proxyIdToIUnknown.put(proxyId, iUnknown)
+    }
+
+  def removeProxy(proxyId: ProxyId): Unit =
+    synchronized {
+      proxyIdToIUnknown.remove(proxyId)
+    }
+
+  @Nullable
+  def apply(proxyId: ProxyId): Option[IUnknown] =
+    if (proxyId == ProxyId.Null)
+      None
+    else
+      Some(synchronized { proxyIdToIUnknown(proxyId) })
+
+  override def toString = s"${getClass.getSimpleName}($size proxies)"
+
+  def size = proxyIdToIUnknown.size
 }
 
 object ProxyRegister {
-  private val logger = Logger(getClass)
-
-  final case class Entry(
-    proxyId: ProxyId,
-    iunknown: IUnknown,
-    registerIsOwner: Boolean)
-
-  final case class ProxyIUnknown() extends IUnknown
+  final case class ProxyIUnknown(id: ProxyId, name: String) extends IUnknown
+  class DuplicateKeyException(override val getMessage: String) extends RuntimeException
 }

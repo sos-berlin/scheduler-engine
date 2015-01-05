@@ -1,6 +1,9 @@
 package com.sos.scheduler.engine.minicom.types
 
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{cast, implicitClass}
 import scala.collection.immutable
+import scala.reflect.ClassTag
+import scala.runtime.BoxedUnit
 
 /**
  * @author Joacim Zschimmer
@@ -31,8 +34,23 @@ object Variant {
   val VT_UINT             = 23
   val VT_SAFEARRAY        = 27
   val VT_ARRAY            = 0x2000
+
+  val BoxedEmpty = BoxedUnit.UNIT
 }
 
-object EmptyVariant
+final case class VariantArray(indexedSeq: immutable.IndexedSeq[Any]) {
+  def asIUnknowns: immutable.IndexedSeq[IUnknown] =
+    indexedSeq.asInstanceOf[immutable.IndexedSeq[Some[_]]] map { case Some(o) ⇒ cast[IUnknown](o) }
 
-final case class VariantArray(indexedSeq: immutable.IndexedSeq[Any])
+  def as[A : ClassTag] = {
+    require(indexedSeq forall { _.getClass isAssignableFrom implicitClass[A] })
+    indexedSeq.asInstanceOf[immutable.IndexedSeq[A]]
+  }
+}
+
+object VariantArray {
+  final val FADF_FIXEDSIZE   =  0x10
+  final val FADF_HAVEVARTYPE =  0x80
+  final val FADF_BSTR        = 0x100
+  final val FADF_VARIANT     = 0x800
+}

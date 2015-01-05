@@ -12,7 +12,6 @@ import scala.concurrent.Future
 final class AgentCommandExecutor @Inject private(remoteTaskHandler: RemoteTaskHandler)
 extends CommandExecutor {
 
-  //TODO Threadsicher? Als Actor implementieren?
   def executeCommand(command: Command): Future[Response] =
     command match {
       case command: RemoteTaskCommand ⇒ remoteTaskHandler.executeCommand(command)

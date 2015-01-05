@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.agent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import spray.http.HttpEntity
 import spray.http.MediaTypes._
-import spray.http.{ContentType, HttpEntity}
 import spray.routing.{HttpServiceActor, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
 
 /**
@@ -20,11 +20,9 @@ final class AgentWebServiceActor(executeCommand: String ⇒ Future[xml.Elem]) ex
           entity(as[HttpEntity]) {
             case HttpEntity.Empty ⇒ reject(RequestEntityExpectedRejection)
             case httpEntity: HttpEntity.NonEmpty ⇒
-              httpEntity.contentType match {
-                case ContentType(`application/xml` | `text/xml`, _) ⇒
-                  val future = executeCommand(httpEntity.asString)
-                  onSuccess(future) { response ⇒ complete(response) }
-                case _ ⇒ reject(UnsupportedRequestContentTypeRejection("application/xml expected"))
+              if (!(Set(`application/xml`, `text/xml`) contains httpEntity.contentType.mediaType)) reject(UnsupportedRequestContentTypeRejection("application/xml expected"))
+              onSuccess(executeCommand(httpEntity.asString)) {
+                response ⇒ complete(response)
               }
           }
         }

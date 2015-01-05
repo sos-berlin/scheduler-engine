@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.taskserver.job
 
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.minicom.IUnknownFactory
-import com.sos.scheduler.engine.minicom.types.{CLSID, EmptyVariant, IDispatch, IID, IUnknown, VariantArray}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, Variant, VariantArray}
 import com.sos.scheduler.engine.taskserver.task.{ShellScriptTask, Task}
 import java.util.UUID
 import org.scalactic.Requirements._
@@ -18,72 +19,82 @@ final class RemoteModuleInstanceServer extends IDispatch {
   private var task: Task = null
 
   def construct(arguments: VariantArray): Unit = {
-    for (KeyValueRegex(key, value) ← arguments.indexedSeq filter { _ != EmptyVariant } map { _.asInstanceOf[String] }
+    for (KeyValueRegex(key, value) ← arguments.indexedSeq filter { _ != Variant.BoxedEmpty } map cast[String]
          if value.nonEmpty) {
       key match {
-        case k if KeyNames contains k ⇒ argMap += k → value
+        case k if KeySet contains k ⇒ argMap += k → value
         case k ⇒ logger.debug(s"RemoteModuleInstanceServer.construct: Unsupported key: $k=$value")
       }
     }
   }
 
   def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
-    val objectNames = objectNamesAnys.indexedSeq map { _.asInstanceOf[String] }
-    val objects = objectAnys.indexedSeq map { _.asInstanceOf[IUnknown] }
+    val objectNames = objectNamesAnys.as[String]
+    val objects = objectAnys.asIUnknowns
     require(objectNames.size == objects.size)
     val namedObjects = objectNames zip objects
-
-    val script = Script.parseXmlString(argMap("script"))
-
-    task = argMap("language") match {
+    val script = Script.parseXmlString(argMap(keys.Script))
+    task = argMap(keys.Language) match {
       case "shell" ⇒ new ShellScriptTask(namedObjects.toMap, script = script.string)
+      case o ⇒ throw new IllegalArgumentException(s"Unknown language '$o'")
     }
     task.start()
   }
 
   def end(succeeded: Boolean): Any = {
-    task.end()
+    if (task != null)
+      task.end()
   }
 
-  def step(): Any = {
+  def step(): Any =
     task.step()
-  }
 
-  def waitForSubprocesses(): Unit = {
-  }
+  def waitForSubprocesses(): Unit = {}
+
+  override def toString =
+    s"${getClass.getSimpleName}" + List(
+      argMap get keys.Job map { o ⇒ s"job $o" },
+      argMap get keys.TaskId map { o ⇒ s":$o" })
+      .flatten.mkString("(", "", ")")
 }
 
 object RemoteModuleInstanceServer extends IUnknownFactory {
   private val logger = Logger(getClass)
+  val clsid = CLSID(UUID.fromString("feee47a3-6c1b-11d8-8103-000476ee8afb"))
+  val iid = IID(UUID.fromString("feee47a2-6c1b-11d8-8103-000476ee8afb"))
 
-  def clsid = CLSID(UUID.fromString("feee47a3-6c1b-11d8-8103-000476ee8afb"))
-  def iid = IID(UUID.fromString("feee47a2-6c1b-11d8-8103-000476ee8afb"))
   def apply() = new RemoteModuleInstanceServer
 
-  private val KeyValueRegex = "([^=]+)=(.*)".r
-  private val KeyNames = Set(
-    "language",
+  private val KeyValueRegex = "([^=]+)=(.*)".r  // "key=value"
+  object keys {
+    val Language = "language"
     //"com_class",
-    "filename",
-    "java_class",
-    "recompile",
-    "script",
-    "job",
-    "task_id",
-    "environment",
-    "has_order",
-    "process.filename",
-    "process.param_raw",
-    "process.log_filename",
-    "process.ignore_error",
-    "process.ignore_signal",
-    "process.shell_variable_prefix",
-    "monitor.language",
-    "monitor.name",
-    "monitor.ordering",
-    //"monitor.com_class",
-    "monitor.filename",
-    "monitor.java_class",
-    "monitor.recompile",
-    "monitor.script")
+    //val Filename = "filename"
+    //val Java_class = "java_class"
+    //val Recompile = "recompile"
+    val Script = "script"
+    val Job = "job"
+    val TaskId = "task_id"
+    //val Environment = "environment"
+    //val HasOrder = "has_order"
+    //val ProcessFilename = "process.filename"
+    //val ProcessParam_raw = "process.param_raw"
+    //val ProcessLog_filename = "process.log_filename"
+    //val ProcessIgnore_error = "process.ignore_error"
+    //val ProcessIgnore_signal = "process.ignore_signal"
+    //val ProcessShellVariablePrefix = "process.shell_variable_prefix"
+    //val MonitorLanguage = "monitor.language"
+    //val MonitorName = "monitor.name"
+    //val MonitorOrdering = "monitor.ordering"
+    //val MonitorComClass = "monitor.com_class"
+    //val MonitorFilename = "monitor.filename"
+    //val MonitorJavaClass = "monitor.java_class"
+    //val MonitorRecompile = "monitor.recompile"
+    //val MonitorScript = "monitor.script"
+  }
+  private val KeySet = Set(
+    keys.Language,
+    keys.Script,
+    keys.Job,
+    keys.TaskId)
 }

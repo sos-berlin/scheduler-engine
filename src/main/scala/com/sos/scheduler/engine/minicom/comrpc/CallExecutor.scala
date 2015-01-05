@@ -10,13 +10,13 @@ import org.scalactic.Requirements._
  * @author Joacim Zschimmer
  */
 @Singleton
-private[comrpc] final class CallExecutor @Inject private(clsidToFactory: ClsidToFactory, proxyRegister: ProxyRegister) {
+final class CallExecutor @Inject private(clsidToFactory: ClsidToFactory, proxyRegister: ProxyRegister) {
 
   def execute(command: Call): Result = command match {
     case CreateInstanceCall(clsid, outer, context, iids) ⇒
-      require(outer == null && context == 0 && iids.size == 1)
+      require(outer == None && context == 0 && iids.size == 1)
       val iunknown = clsidToFactory(clsid, iids.head)()
-      InvokeResult(iunknown)
+      CreateInstanceResult(iunknown)
 
     case ReleaseCall(proxyId) ⇒
       proxyRegister.removeProxy(proxyId)
@@ -24,7 +24,7 @@ private[comrpc] final class CallExecutor @Inject private(clsidToFactory: ClsidTo
 
     case CallCall(proxyId, methodName, arguments) ⇒
       proxyRegister(proxyId) match {
-        case o: IDispatch ⇒ InvokeResult(o.call(methodName, arguments))
+        case Some(o: IDispatch) ⇒ InvokeResult(IDispatch(o).call(methodName, arguments))
         case o ⇒ throw new IllegalArgumentException("No IDispatch")
       }
   }

@@ -1,48 +1,58 @@
 package com.sos.scheduler.engine.agent.task
 
 import com.sos.scheduler.engine.agent.commands.{CloseRemoteTask, CloseRemoteTaskResponse, RemoteTaskCommand, Response, StartRemoteTask, StartRemoteTaskResponse}
-import com.sos.scheduler.engine.agent.task.RemoteTaskId
+import com.sos.scheduler.engine.agent.common.ScalaConcurrentHashMap
+import com.sos.scheduler.engine.agent.task.RemoteTaskHandler._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
 import java.net.InetSocketAddress
 import javax.inject.{Inject, Singleton}
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
  */
 @Singleton
-final class RemoteTaskHandler @Inject private {
+final class RemoteTaskHandler @Inject private(newRemoteTaskId: () ⇒ RemoteTaskId, newRemoteTask: StartConfiguration ⇒ RemoteTask) {
 
-  private val remoteTasks = mutable.Map[RemoteTaskId, RemoteTask]()
-  private val remoteTaskIdIterator = RemoteTaskId.newGenerator()
+  private val taskRegister = new ScalaConcurrentHashMap[RemoteTaskId, RemoteTask] {
+    override def default(id: RemoteTaskId) = throwUnknownTask(id)
+  }
 
-  //TODO Threadsicher? Actor vorschalten?
-  def executeCommand(command: RemoteTaskCommand): Future[Response] = {
+  def executeCommand(command: RemoteTaskCommand) = Future[Response] {
     command match {
-      case StartRemoteTask(controllerTcpPort, usesApi, javaOptions, javaClassPath) ⇒
-        require(!usesApi, "Remote API tasks are not yet implemented")
-        val task = new InProcessRemoteTask(remoteTaskIdIterator.next(), StartConfiguration(controllerAddress = new InetSocketAddress("127.0.0.1", controllerTcpPort)))
-        remoteTasks += task.id → task
-        Future {
-          task.connectWithScheduler()
-          task.start()
-          StartRemoteTaskResponse(task.id)
-        }
+      case StartRemoteTask(controllerTcpPort, usesApi, javaOptions, javaClasspath) ⇒
+        val remoteTaskId = newRemoteTaskId()
+        val startConfiguration = StartConfiguration(
+          remoteTaskId,
+          controllerAddress = new InetSocketAddress(LocalHostIpAddress, controllerTcpPort),
+          usesApi = usesApi,
+          javaOptions = javaOptions,
+          javaClasspath = javaClasspath)
+        val task = newRemoteTask(startConfiguration)
+        assert(task.id == remoteTaskId)
+        taskRegister += task.id → task
+        task.start()
+        StartRemoteTaskResponse(task.id)
 
       case CloseRemoteTask(remoteTaskId, kill) ⇒
-        val task = remoteTasks(remoteTaskId)
-        try if (kill) task.kill()
-        finally task.close()
-        remoteTasks(remoteTaskId).close()
-        remoteTasks -= remoteTaskId
-        Future.successful { CloseRemoteTaskResponse }
-    }
+        val task = taskRegister.remove(remoteTaskId) getOrElse throwUnknownTask(remoteTaskId)
+        if (kill) tryKillTask(task)
+        task.close()
+        CloseRemoteTaskResponse
+      }
   }
 }
 
 private object RemoteTaskHandler {
+  private val LocalHostIpAddress = "127.0.0.1"
   private val logger = Logger(getClass)
+
+  private def tryKillTask(task: RemoteTask) =
+    try task.kill()
+    catch { case NonFatal(t) ⇒ logger.warn(s"Kill $task failed: $t") }
+
+  private def throwUnknownTask(taskId: RemoteTaskId) = throw new NoSuchElementException(s"Unknown Task '$taskId'")
 }
