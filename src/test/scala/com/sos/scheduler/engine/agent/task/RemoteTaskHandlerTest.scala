@@ -9,6 +9,7 @@ import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.FreeSpec
+import org.scalatest.Inside.inside
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.AsyncAssertions.Waiter
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -16,7 +17,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.time.SpanSugar._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -28,16 +29,11 @@ final class RemoteTaskHandlerTest extends FreeSpec {
   private lazy val remoteTaskHandler = Guice.createInjector(new TestModule(remoteTasks)).apply[RemoteTaskHandler]
 
   "StartRemoteTask" in {
-    val w = new Waiter
-    val command = StartRemoteTask(9000, usesApi = false, javaOptions = JavaOptions, javaClassPath = JavaClasspath)
-    for (remoteTaskId ← RemoteTaskIds) {
-      waiterOnComplete(w, remoteTaskHandler.executeCommand(command)) {
-        case Success(StartRemoteTaskResponse(id)) ⇒
-          w { id shouldEqual remoteTaskId }
-          w.dismiss()
-      }
+    val command = StartRemoteTask(controllerTcpPort = 9999, usesApi = false, javaOptions = JavaOptions, javaClassPath = JavaClasspath)
+    for (nextRemoteTaskId ← RemoteTaskIds) {
+      val response = Await.result(remoteTaskHandler.executeCommand(command), 1.seconds)
+      inside(response) { case StartRemoteTaskResponse(id) ⇒ id shouldEqual nextRemoteTaskId }
     }
-    w.await(Timeout(3000.millis))
     for (remoteTask ← remoteTasks) {
       verify(remoteTask, times(1)).start()
       verify(remoteTask, never).kill()
