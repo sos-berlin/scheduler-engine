@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.ScalaCollections._
+import com.sos.scheduler.engine.common.scalautil.ScalaCollections.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.eventbus.{EventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers}
