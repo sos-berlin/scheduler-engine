@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.eventbus
 
 import com.google.common.io.Closer
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.data.event.Event
@@ -59,7 +59,7 @@ final class SchedulerEventBus extends EventBus with Runnable {
 
   private def subscribeClosable[E <: Event](whichEventBus: EventBus, subscription: EventSubscription)(implicit closer: Closer, e: ClassTag[E]): Unit = {
     whichEventBus.register(subscription)
-    closer {
+    closer.onClose {
       whichEventBus.unregister(subscription)
     }
   }

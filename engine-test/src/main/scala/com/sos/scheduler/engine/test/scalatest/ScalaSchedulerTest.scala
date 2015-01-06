@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test.scalatest
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test._
@@ -24,9 +24,9 @@ trait ScalaSchedulerTest
     TestConfiguration(testClass = getClass)
 
   protected final lazy val testEnvironment =
-    TestEnvironment(testConfiguration, testDirectory).registerCloseable
+    TestEnvironment(testConfiguration, testDirectory).closeWithCloser
 
-  protected implicit lazy final val controller = TestSchedulerController(testConfiguration, testEnvironment).registerCloseable
+  protected implicit lazy final val controller = TestSchedulerController(testConfiguration, testEnvironment).closeWithCloser
 
   override protected final def beforeAll(): Unit = {
     if (testNames.isEmpty) {

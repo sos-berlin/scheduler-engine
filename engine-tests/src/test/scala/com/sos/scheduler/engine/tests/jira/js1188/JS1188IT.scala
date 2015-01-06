@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tests.jira.js1188
 
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
@@ -164,7 +164,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
   private def startAndWaitForAgents(agentRefs: AgentRef*)(implicit closer: Closer): Unit = {
     awaitResults(
       for (a ← agentRefs) yield {
-        runningAgents(a) = newAgent(a).registerCloseable
+        runningAgents(a) = newAgent(a).closeWithCloser
         runningAgents(a).start()
       })
   }

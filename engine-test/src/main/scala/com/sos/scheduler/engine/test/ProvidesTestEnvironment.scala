@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.persistenceUnitName
 import com.sos.scheduler.engine.test.configuration.{JdbcDatabaseConfiguration, TestConfiguration}
 import javax.persistence.Persistence.createEntityManagerFactory
@@ -16,7 +16,7 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
   protected def testConfiguration: TestConfiguration
 
   lazy val testEnvironment =
-    TestEnvironment(testConfiguration, testDirectory).registerCloseable
+    TestEnvironment(testConfiguration, testDirectory).closeWithCloser
 
   private lazy val entityManagerFactory = {
     val properties: Map[String, String] =

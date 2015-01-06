@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1227
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -29,7 +29,7 @@ trait ClusterTest extends ScalaSchedulerTest with SharedDatabaseTest {
     val newClusterScheduler = instance[ClusterScheduler.Factory]
     (for (Seq(tcpPort, httpPort) ← otherTcpPorts.toVector grouped 2) yield
       newClusterScheduler(testEnvironment, controller, databaseConfiguration, tcpPort = tcpPort, httpPort = httpPort)
-        .registerCloseable
+        .closeWithCloser
     ).toVector
   }
 

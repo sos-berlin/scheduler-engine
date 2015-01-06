@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.kernel.plugin._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
@@ -23,7 +23,7 @@ with HasCloser {
   private var webServer: WebServer = null
 
   override def onActivate(): Unit = {
-    webServer = new WebServer(myJettyConfiguration).registerCloseable
+    webServer = new WebServer(myJettyConfiguration).closeWithCloser
     val portNumbersString = webServer.portNumbers mkString " "
     if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")
     else logger.warn(s"No HTTP port seems to be configured")

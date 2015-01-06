@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.configuration
 
 import akka.actor.ActorSystem
 import com.google.common.io.Closer
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.typesafe.config.ConfigFactory
 import scala.concurrent.duration._
 
@@ -14,7 +14,7 @@ private[configuration] object AkkaProvider {
 
   private[configuration] def newActorSystem(closer: Closer): ActorSystem = {
     val actorSystem = ActorSystem("JobScheduler", ConfigFactory.load(ConfigurationResourcePath))
-    closer {
+    closer.onClose {
       //implicit val timeout = Timeout(15.seconds)
       //IO(Http) ? Http.CloseAll
       actorSystem.shutdown()

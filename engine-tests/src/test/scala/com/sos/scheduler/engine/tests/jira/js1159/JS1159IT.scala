@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1159
 
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
@@ -43,7 +44,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
 
   "Start" in {
     extraScheduler.start()
-    registerAutoCloseable(extraScheduler)
+    closer.registerAutoCloseable(extraScheduler)
     scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
     scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri}/>
     Await.result(extraScheduler.activatedFuture, TestTimeout)

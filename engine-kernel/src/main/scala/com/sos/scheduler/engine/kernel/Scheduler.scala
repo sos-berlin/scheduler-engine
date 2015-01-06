@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.xml.NamedChildElements
@@ -85,7 +84,7 @@ with HasCloser {
 
   if (controllerBridge eq EmptySchedulerControllerBridge.singleton) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
     threadLock()
-    closer { threadUnlock() } //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
+    onClose { threadUnlock() } //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
   }
 
   @ForCpp
@@ -96,7 +95,7 @@ with HasCloser {
       EventSubscription[FileBasedEvent] { e ⇒ for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) }
     }
     eventBus.registerHot(eventSubscription)
-    closer { eventBus.unregisterHot(eventSubscription) }
+    onClose { eventBus.unregisterHot(eventSubscription) }
   }
 
   def onCppProxyInvalidated(): Unit = {}
