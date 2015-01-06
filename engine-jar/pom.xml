@@ -5,7 +5,7 @@
     <artifactId>engine-jar</artifactId>
 
     <parent>
-        <groupId>com.sos.scheduler.engine</groupId>
+        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
@@ -63,19 +63,19 @@
         </dependency>
         
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-cppjava-runtime</artifactId>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-data</artifactId>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-web</artifactId>
             <scope>runtime</scope>
         </dependency>

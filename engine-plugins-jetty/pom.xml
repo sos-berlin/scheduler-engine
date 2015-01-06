@@ -5,7 +5,7 @@
     <artifactId>engine-plugins-jetty</artifactId>
 
     <parent>
-        <groupId>com.sos.scheduler.engine</groupId>
+        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
@@ -33,7 +33,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.sos.scheduler.engine</groupId>
+                                    <groupId>com.sos-berlin.jobscheduler.engine</groupId>
                                     <artifactId>engine-testwar</artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>
@@ -56,13 +56,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-testwar</artifactId>
             <version>${project.version}</version>
             <type>war</type>

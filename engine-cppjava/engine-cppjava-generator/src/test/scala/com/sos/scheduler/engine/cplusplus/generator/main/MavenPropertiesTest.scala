@@ -8,7 +8,7 @@ final class MavenPropertiesTest {
     val mavenProperties = new MavenProperties(getClass)
 
     @Test def testGroupId(): Unit = {
-        assertThat(mavenProperties.groupId, equalTo("com.sos.scheduler.engine"))
+        assertThat(mavenProperties.groupId, equalTo("com.sos-berlin.jobscheduler.engine"))
     }
 
     @Test def testArtifactId(): Unit = {

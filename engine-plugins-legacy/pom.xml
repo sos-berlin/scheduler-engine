@@ -5,7 +5,7 @@
     <artifactId>engine-plugins-legacy</artifactId>
 
     <parent>
-        <groupId>com.sos.scheduler.engine</groupId>
+        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
@@ -33,7 +33,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-test</artifactId>
             <version>${project.version}</version>
         </dependency>

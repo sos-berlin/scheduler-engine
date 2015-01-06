@@ -5,7 +5,7 @@
     <artifactId>engine-kernelcpp</artifactId>
 
     <parent>
-        <groupId>com.sos.scheduler.engine</groupId>
+        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
@@ -148,7 +148,7 @@
                     <dependency>
                         <!-- Das wird auch bei clean verlangt, obwohl es nur für generate-sources gebraucht wird.
                         Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. Lösung: mvn clean install. -->
-                        <groupId>com.sos.scheduler.engine</groupId>
+                        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
                         <artifactId>engine-cppjava-generator</artifactId>
                         <version>${project.cplusplusVersion}</version>
                         <scope>compile</scope>

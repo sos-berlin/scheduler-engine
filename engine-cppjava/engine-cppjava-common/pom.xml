@@ -5,7 +5,7 @@
     <artifactId>engine-cppjava-common</artifactId>
 
     <parent>
-        <groupId>com.sos.scheduler.engine</groupId>
+        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine-cppjava</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
