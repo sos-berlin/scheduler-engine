@@ -33,7 +33,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.sos.scheduler.enginedoc</groupId>
+                                    <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-common</artifactId>
                                     <version>${enginedoc.version}</version>
                                     <type>jar</type>
@@ -284,7 +284,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sos.scheduler.enginedoc</groupId>
+            <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
             <artifactId>enginedoc-common</artifactId>
             <version>${enginedoc.version}</version>
         </dependency>

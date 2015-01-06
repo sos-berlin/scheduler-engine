@@ -80,7 +80,7 @@
             <artifactId>engine-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sos.scheduler.enginedoc</groupId>
+            <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
             <artifactId>enginedoc-common</artifactId>
             <version>${enginedoc.version}</version>
         </dependency>

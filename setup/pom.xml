@@ -142,12 +142,12 @@ call prepare-setup.sh <version> to use this pom
                             <outputDirectory>${project.build.directory}/workspace/scheduler</outputDirectory>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.sos.scheduler.enginedoc</groupId>
+                                    <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-setup</artifactId>
                                     <version>${enginedoc.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.sos.scheduler.enginedoc</groupId>
+                                    <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
                                     <artifactId>enginedoc-common</artifactId>
                                     <version>${enginedoc.version}</version>
                                 </artifactItem>
