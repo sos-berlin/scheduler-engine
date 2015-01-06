@@ -7,9 +7,9 @@
 
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
-        <relativePath>../engine/parent/pom.xml</relativePath>
+        <relativePath>../engine/pom.xml</relativePath>
     </parent>
 
     <name>${project.artifactId}</name>
