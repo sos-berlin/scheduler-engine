@@ -6,7 +6,7 @@
     <artifactId>agent</artifactId>
 
     <parent>
-        <groupId>com.sos.scheduler.engine</groupId>
+        <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
         <relativePath>../engine/pom.xml</relativePath>
@@ -31,11 +31,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
