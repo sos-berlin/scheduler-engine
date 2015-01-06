@@ -67,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>jetty</artifactId>
+            <artifactId>engine-plugins-jetty</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

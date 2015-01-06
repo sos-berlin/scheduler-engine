@@ -108,7 +108,7 @@ call prepare-setup.sh <version> to use this pom
                                 <!-- fat jar mit allen benötigten jars der JobScheduler engine (derzeit nicht ausgeliefert) -->
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>jar</artifactId>
+                                    <artifactId>engine-jar</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
                                     <destFileName>${project.groupId}-${project.version}.jar</destFileName>
@@ -167,7 +167,7 @@ call prepare-setup.sh <version> to use this pom
                                 <artifactItem>
                                     <!-- Plattformspezifischer C++ Kern -->
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>kernel-cpp</artifactId>
+                                    <artifactId>engine-kernelcpp</artifactId>
                                     <version>${project.version}</version>
                                     <classifier>${setup.platform}</classifier>
                                 </artifactItem>
@@ -335,22 +335,21 @@ call prepare-setup.sh <version> to use this pom
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>jar</artifactId>
+            <artifactId>engine-jar</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>kernel-cpp</artifactId>
+                    <artifactId>engine-kernelcpp</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kernel-cpp</artifactId>
+            <artifactId>engine-kernelcpp</artifactId>
             <version>${project.version}</version>
             <classifier>${setup.platform}</classifier>
             <scope>runtime</scope>
@@ -358,13 +357,13 @@ call prepare-setup.sh <version> to use this pom
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>jetty</artifactId>
+            <artifactId>engine-plugins-jetty</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>kernel-cpp</artifactId>
+                    <artifactId>engine-kernelcpp</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

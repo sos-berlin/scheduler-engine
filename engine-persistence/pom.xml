@@ -46,7 +46,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>data</artifactId>
+            <artifactId>engine-data</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

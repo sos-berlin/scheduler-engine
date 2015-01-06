@@ -15,7 +15,7 @@ import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.debug;
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
     private static final Logger logger = LoggerFactory.getLogger(KernelCppArtifactBinaries.class);
-    private static final String kernelCppDirName = "engine/kernel-cpp";
+    private static final String kernelCppDirName = "engine/engine-kernelcpp";
 
     private final File directory;
 

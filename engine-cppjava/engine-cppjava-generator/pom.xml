@@ -2,19 +2,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>engine-cppjava-generator</artifactId>
+
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
-        <artifactId>engine</artifactId>
+        <artifactId>engine-cppjava</artifactId>
         <version>1.9-SNAPSHOT</version>
+        <!-- Versionsnummer wie com.sos.scheduler.engine. Der Generator hängt von C++-Klassen ab -->
     </parent>
-    
-    <artifactId>engine-newkernel</artifactId>
 
     <name>${project.artifactId}</name>
-    <inceptionYear>2013</inceptionYear>
-    <description>New Scala JobScheduler kernel</description>
+    <inceptionYear>2010</inceptionYear>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/maven.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
@@ -26,53 +38,59 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>engine-common</artifactId>
+            <artifactId>engine-cppjava-runtime</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>engine-cppjava-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!--dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>engine-kernel</artifactId>
             <version>${project.version}</version>
-        </dependency>
+            <scope>test</scope>
+        </dependency-->
+
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>engine-data</artifactId>
+            <!--Für JDOM-->
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>engine-persistence</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.binaryVersion}</artifactId>
-            <scope>test</scope>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -80,16 +98,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.joda</groupId>
-            <artifactId>joda-convert</artifactId>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binaryVersion}</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
