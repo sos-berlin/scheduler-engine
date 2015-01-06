@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-call prepare-setup.sh <version> to use this pom
--->
+<!-- Call prepare-setup.sh <version> to use this pom -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>engine-setup</artifactId>
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
@@ -19,7 +18,6 @@ call prepare-setup.sh <version> to use this pom
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
 
-    <artifactId>setup</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
