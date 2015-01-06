@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.taskserver
 import com.google.inject.Guice
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.minicom.comrpc.ByteMessageExecutor
 import com.sos.scheduler.engine.taskserver.SimpleTaskServer._
@@ -20,7 +20,7 @@ final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with H
 
   private val injector = Guice.createInjector(new TaskServerModule)
   private val executor = injector.apply[ByteMessageExecutor]
-  private val connection = new TcpConnection(conf.controllerAddress).registerCloseable
+  private val connection = new TcpConnection(conf.controllerAddress).closeWithCloser
 
   private val terminatedPromise = Promise[Unit]()
   def terminated = terminatedPromise.future

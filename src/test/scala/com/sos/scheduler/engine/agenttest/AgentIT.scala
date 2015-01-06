@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.agenttest
 import com.sos.scheduler.engine.agent.Main
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agenttest.AgentIT._
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -21,7 +21,7 @@ import scala.concurrent.duration._
 final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val agentTcpPort = findRandomFreeTcpPort()
-  private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).registerCloseable
+  private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
 
   protected override def onSchedulerActivated(): Unit = {
     val started = agentApp.start()

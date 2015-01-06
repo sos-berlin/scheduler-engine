@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketException}
@@ -25,7 +25,7 @@ final class TcpConnectionTest extends FreeSpec with HasCloserBeforeAndAfterAll {
   private lazy val port = findRandomFreeTcpPort()
   private lazy val tcpConnection = new TcpConnection(new InetSocketAddress(ipAddress, port))
   private var testSocket: Socket = null
-  private lazy val listenSocket = new ServerSocket(port, 1, ipAddress).registerCloseable
+  private lazy val listenSocket = new ServerSocket(port, 1, ipAddress).closeWithCloser
   private def out = testSocket.getOutputStream
   private def in = testSocket.getInputStream
 
@@ -69,7 +69,7 @@ final class TcpConnectionTest extends FreeSpec with HasCloserBeforeAndAfterAll {
 
   private def connect(tcpConnection: TcpConnection): Unit = {
     val connected = Future { tcpConnection.connect() }
-    testSocket = listenSocket.accept().registerCloseable
+    testSocket = listenSocket.accept().closeWithCloser
     Await.result(connected, 1.seconds)
   }
 
