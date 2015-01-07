@@ -1,12 +1,14 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
 import com.google.common.collect.HashBiMap
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister._
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.IUnknown
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConversions._
+import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
@@ -46,15 +48,18 @@ private[comrpc] final class ProxyRegister @Inject private {
 
   def removeProxy(proxyId: ProxyId): Unit =
     synchronized {
-      proxyIdToIUnknown.remove(proxyId)
+      proxyIdToIUnknown.remove(proxyId) match {
+        case o: AutoCloseable ⇒
+          try o.close()
+          catch { case NonFatal(t) ⇒ logger.error(s"Suppressed: $t", t) }
+        case _ ⇒
+      }
     }
 
   @Nullable
   def apply(proxyId: ProxyId): Option[IUnknown] =
-    if (proxyId == ProxyId.Null)
-      None
-    else
-      Some(synchronized { proxyIdToIUnknown(proxyId) })
+    if (proxyId == ProxyId.Null) None
+    else Some(synchronized { proxyIdToIUnknown(proxyId) })
 
   override def toString = s"${getClass.getSimpleName}($size proxies)"
 
@@ -62,6 +67,8 @@ private[comrpc] final class ProxyRegister @Inject private {
 }
 
 object ProxyRegister {
+  private val logger = Logger(getClass)
+
   final case class ProxyIUnknown(id: ProxyId, name: String) extends IUnknown
   class DuplicateKeyException(override val getMessage: String) extends RuntimeException
 }

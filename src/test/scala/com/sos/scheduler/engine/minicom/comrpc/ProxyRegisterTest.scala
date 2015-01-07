@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.minicom.comrpc
 
 import com.google.inject.Guice
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister.ProxyIUnknown
-import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister.DuplicateKeyException
+import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister.{DuplicateKeyException, ProxyIUnknown}
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.IUnknown
 import org.junit.runner.RunWith
@@ -51,5 +50,20 @@ final class ProxyRegisterTest extends FreeSpec {
     proxyRegister.size shouldEqual 2
     proxyRegister.removeProxy(externalProxyId)
     proxyRegister.size shouldEqual 2
+  }
+
+  "remoteProxy closes AutoCloseable" in {
+    class A extends IUnknown with AutoCloseable {
+      var isClosed = false
+      def close() = {
+        isClosed = true
+        throw new Exception("Should be ignored, only logged")
+      }
+    }
+    val a = new A
+    val (proxyId, true) = proxyRegister.iUnknownToProxyId(a)
+    assert(!a.isClosed)
+    proxyRegister.removeProxy(proxyId)
+    assert(a.isClosed)
   }
 }
