@@ -39,7 +39,7 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
 	private final Connector connector;
     private final ObjectMapper mapper;
     
-    private final List<Package> publicEventPackages = new ArrayList<Package>();
+    private final List<Package> publicEventPackages = new ArrayList<>();
     private final ImmutableSet<String> defautlBaseEventPackages =  ImmutableSet.of(
         "com.sos.scheduler.engine.data"
         // here you can define additional packages for events to provide
@@ -56,7 +56,8 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
 		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", ActiveMQConfiguration.vmProviderUrl);
 		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", ActiveMQConfiguration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
-		logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
+        closer().register(connector);
+        logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
 		prefixLog.info("Providing messages to " + providerUrl);
         mapper = EngineJacksonConfiguration.newObjectMapper();
         registerDefaultEventPackages();
@@ -78,15 +79,6 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
 	@Override
 	public void onActivate() {
 		connector.start();
-	}
-
-	@Override
-	public void close() {
-		try {
-			connector.close();
-		} finally {
-			super.close();
-		}
 	}
 
 	/*

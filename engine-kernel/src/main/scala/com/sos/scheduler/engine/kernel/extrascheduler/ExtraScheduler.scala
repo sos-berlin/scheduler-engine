@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.extrascheduler
 import com.google.common.base.Strings._
 import com.sos.scheduler.engine.common.io.ReaderIterator
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.{CloseOnError, HasCloser, Logger}
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler.{logger, _}
@@ -19,7 +19,7 @@ final class ExtraScheduler(
   env: immutable.Iterable[(String, String)] = Nil,
   httpPort: Option[Int] = None,
   tcpPort: Option[Int] = None)
-extends AutoCloseable with HasCloser with CloseOnError {
+extends AutoCloseable with HasCloser {
 
   private val tcpAddressOption = tcpPort map { o ⇒ SchedulerAddress("127.0.0.1", o) }
   private val uriOption = httpPort map { o ⇒ s"http://127.0.0.1:$o" }
@@ -36,19 +36,17 @@ extends AutoCloseable with HasCloser with CloseOnError {
    */
   def start(): Future[Unit] = {
     if (started) throw new IllegalStateException
-    closeOnError {
-      val process = startProcess()
-      closer.whenNotClosedAtShutdown {
-        process.destroy()
-        logger.error(s"ExtraScheduler.close() has not been called. Process is being destroyed")
-      }
-      startStdoutCollectorThread(process.getInputStream)
-      onClose {
-        process.destroy()  // StdoutCollectorThread endet erst, wenn Prozess geendet hat
-        process.waitFor()
-      }
-      started = true
+    val process = startProcess()
+    closer.whenNotClosedAtShutdown {
+      process.destroy()
+      logger.error(s"ExtraScheduler.close() has not been called. Process is being destroyed")
     }
+    startStdoutCollectorThread(process.getInputStream)
+    onClose {
+      process.destroy()  // StdoutCollectorThread endet erst, wenn Prozess geendet hat
+      process.waitFor()
+    }
+    started = true
     activatedFuture
   }
 

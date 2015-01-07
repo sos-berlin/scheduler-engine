@@ -30,6 +30,7 @@ public class JMSPlugin extends AbstractPlugin implements EventHandlerAnnotated {
 
     @Override public final void close() {
         connector.close();
+        super.close();
     }
 
     @EventHandler public final void handleEvent(Event e) throws JMSException {

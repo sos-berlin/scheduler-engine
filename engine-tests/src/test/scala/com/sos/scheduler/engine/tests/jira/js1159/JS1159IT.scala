@@ -39,12 +39,11 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
       s"-java-classpath=${System.getProperty("java.class.path")}",
       s"-job-java-classpath=${System.getProperty("java.class.path")}",
       (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
-    new ExtraScheduler(args = args, httpPort = Some(agentHttpPort), tcpPort = Some(agentTcpPort))
+    new ExtraScheduler(args = args, httpPort = Some(agentHttpPort), tcpPort = Some(agentTcpPort)).closeWithCloser
   }
 
   "Start" in {
     extraScheduler.start()
-    closer.registerAutoCloseable(extraScheduler)
     scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
     scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri}/>
     Await.result(extraScheduler.activatedFuture, TestTimeout)

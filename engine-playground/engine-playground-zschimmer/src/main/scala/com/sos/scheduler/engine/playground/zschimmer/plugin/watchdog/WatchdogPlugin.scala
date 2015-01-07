@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
-import WatchdogPlugin._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins}
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
-import com.sos.scheduler.engine.playground.zschimmer.{XMLs, Timer}
+import com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugin._
+import com.sos.scheduler.engine.playground.zschimmer.{Timer, XMLs}
 import java.util.concurrent.TimeUnit
-import javax.inject.{Named, Inject}
+import javax.inject.{Inject, Named}
 import org.w3c.dom.Element
 import scala.concurrent._
 import scala.concurrent.duration.Duration
@@ -26,14 +26,14 @@ extends Plugin {
 
   private val elem = XMLs.fromJavaDom(confElement).asInstanceOf[xml.Elem]
   private val configuration = Configuration(elem)
-  private val thread1 = new Thread1
+  private val thread1 = new Thread1()
+
+  onClose {
+    interruptAndJoinThread(thread1)
+  }
 
   override def onActivate(): Unit = {
     thread1.start()
-  }
-
-  override def close(): Unit = {
-    interruptAndJoinThread(thread1)
   }
 
   override def xmlState =

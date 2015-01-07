@@ -52,7 +52,7 @@ with EventHandlerAnnotated {
     }
 
   override def close(): Unit = {
-    try delegate.close()
+    try delegate.close()   // Possibly called twice, then checking for SchedulerCLoseEvent handling error
     finally super.close()
   }
 

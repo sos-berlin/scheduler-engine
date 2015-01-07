@@ -44,10 +44,6 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     scheduler executeXml <process_class name="test-c" remote_scheduler={processClassAgent.extraScheduler.tcpAddress.string}/>
   }
 
-  onClose {
-    agents foreach { _.close() }
-  }
-
   s"Without parameter $remoteSchedulerParameterName runs job in our scheduler" in {
     testOrderWithRemoteScheduler(ShellJobChainPath, None, "**")
   }
