@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.taskserver.job
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.minicom.IUnknownFactory
-import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, IUnknown, Variant, VariantArray}
-import com.sos.scheduler.engine.taskserver.task.{ShellScriptTask, Task}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, Variant, VariantArray}
+import com.sos.scheduler.engine.taskserver.task.{NamedObjects, ScriptLanguage, ShellProcessTask, ShellScriptLanguage, Task, TaskConfiguration}
 import java.util.UUID
 import org.scalactic.Requirements._
 import scala.collection.mutable
@@ -12,13 +14,14 @@ import scala.collection.mutable
 /**
  * @author Joacim Zschimmer
  */
-final class RemoteModuleInstanceServer extends IDispatch {
+final class RemoteModuleInstanceServer extends IDispatch with HasCloser {
   import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer._
 
-  private val argMap = mutable.Map[String, String]()
+  private var conf: TaskConfiguration = null
   private var task: Task = null
 
   def construct(arguments: VariantArray): Unit = {
+    val argMap = mutable.Map[String, String]()
     for (keyValueString ← arguments.indexedSeq filter { _ != Variant.BoxedEmpty } map cast[String]) {
       val KeyValueRegex(key, value) = keyValueString
       if (value.nonEmpty) {
@@ -28,17 +31,19 @@ final class RemoteModuleInstanceServer extends IDispatch {
         }
       }
     }
+    conf = toTaskConfiguration(argMap.toMap)
   }
 
   def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
-    task = argMap(keys.Language) match {
-      case "shell" ⇒ new ShellScriptTask(
-        objectMap = toNamedObjectMap(names = objectNamesAnys, anys = objectAnys),
-        script = Script.parseXmlString(argMap(keys.Script)).string)
-      case o ⇒ throw new IllegalArgumentException(s"Unknown language '$o'")
-    }
+    task = languageToTask(conf.language).closeWithCloser
     task.start()
   }
+
+  private def languageToTask(language: ScriptLanguage): Task =
+    conf.language match {
+      case ShellScriptLanguage ⇒ new ShellProcessTask(conf)
+      case o ⇒ throw new IllegalArgumentException(s"Unknown language '$o'")
+    }
 
   def end(succeeded: Boolean): Any = {
     if (task != null)
@@ -51,56 +56,62 @@ final class RemoteModuleInstanceServer extends IDispatch {
   def waitForSubprocesses(): Unit = {}
 
   override def toString =
-    s"${getClass.getSimpleName}" + List(
-      argMap get keys.Job map { o ⇒ s"job $o" },
-      argMap get keys.TaskId map { o ⇒ s":$o" })
-      .flatten.mkString("(", "", ")")
+    List(
+      s"${getClass.getSimpleName}",
+      Option(conf) map { t ⇒ s"(${t.jobName}:${t.taskId}})" })
+      .mkString("")
 }
 
 object RemoteModuleInstanceServer extends IUnknownFactory {
-  private val logger = Logger(getClass)
   val clsid = CLSID(UUID.fromString("feee47a3-6c1b-11d8-8103-000476ee8afb"))
   val iid = IID(UUID.fromString("feee47a2-6c1b-11d8-8103-000476ee8afb"))
+  private val logger = Logger(getClass)
 
   def apply() = new RemoteModuleInstanceServer
 
   private val KeyValueRegex = "([^=]+)=(.*)".r  // "key=value"
-  object keys {
-    val Language = "language"
+    val LanguageKey = "language"
     //"com_class",
-    //val Filename = "filename"
-    //val Java_class = "java_class"
-    //val Recompile = "recompile"
-    val Script = "script"
-    val Job = "job"
-    val TaskId = "task_id"
-    //val Environment = "environment"
-    //val HasOrder = "has_order"
-    //val ProcessFilename = "process.filename"
-    //val ProcessParam_raw = "process.param_raw"
-    //val ProcessLog_filename = "process.log_filename"
-    //val ProcessIgnore_error = "process.ignore_error"
-    //val ProcessIgnore_signal = "process.ignore_signal"
-    //val ProcessShellVariablePrefix = "process.shell_variable_prefix"
-    //val MonitorLanguage = "monitor.language"
-    //val MonitorName = "monitor.name"
-    //val MonitorOrdering = "monitor.ordering"
-    //val MonitorComClass = "monitor.com_class"
-    //val MonitorFilename = "monitor.filename"
-    //val MonitorJavaClass = "monitor.java_class"
-    //val MonitorRecompile = "monitor.recompile"
-    //val MonitorScript = "monitor.script"
-  }
+    //val FilenameKey = "filename"
+    //val Java_classKey = "java_class"
+    //val RecompileKey = "recompile"
+    val ScriptKey = "script"
+    val JobKey = "job"
+    val TaskIdKey = "task_id"
+    //val EnvironmentKey = "environment"
+    //val HasOrderKey = "has_order"
+    //val ProcessFilenameKey = "process.filename"
+    //val ProcessParam_rawKey = "process.param_raw"
+    //val ProcessLog_filenameKey = "process.log_filename"
+    //val ProcessIgnore_errorKey = "process.ignore_error"
+    //val ProcessIgnore_signalKey = "process.ignore_signal"
+    //val ProcessShellVariablePrefixKey = "process.shell_variable_prefix"
+    //val MonitorLanguageKey = "monitor.language"
+    //val MonitorNameKey = "monitor.name"
+    //val MonitorOrderingKey = "monitor.ordering"
+    //val MonitorComClassKey = "monitor.com_class"
+    //val MonitorFilenameKey = "monitor.filename"
+    //val MonitorJavaClassKey = "monitor.java_class"
+    //val MonitorRecompileKey = "monitor.recompile"
+    //val MonitorScriptKey = "monitor.script"
   private val KeySet = Set(
-    keys.Language,
-    keys.Script,
-    keys.Job,
-    keys.TaskId)
+    LanguageKey,
+    ScriptKey,
+    JobKey,
+    TaskIdKey)
 
-  private def toNamedObjectMap(names: VariantArray, anys: VariantArray): Map[String, IUnknown] = {
+  private def toNamedObjectMap(names: VariantArray, anys: VariantArray): NamedObjects = {
     val nameStrings = names.as[String]
-    val iunknowns = anys.asIUnknowns
-    require(nameStrings.size == iunknowns.size)
-    (nameStrings zip iunknowns).toMap
+    val iDispatches = anys.asIUnknowns map { _.asInstanceOf[IDispatch] }
+    require(nameStrings.size == iDispatches.size)
+    NamedObjects(nameStrings zip iDispatches)
   }
+
+  private def toTaskConfiguration(args: Map[String, String]) =
+    TaskConfiguration(
+      jobName = args(JobKey),
+      taskId = TaskId(args(TaskIdKey).toInt),
+      language = ScriptLanguage(args(LanguageKey)),
+      scriptString = Script.parseXmlString(args(ScriptKey)).string
+    )
 }

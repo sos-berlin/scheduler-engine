@@ -36,6 +36,10 @@
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
+            <artifactId>engine-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

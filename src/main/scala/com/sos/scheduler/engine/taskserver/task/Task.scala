@@ -5,9 +5,9 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 /**
  * @author Joacim Zschimmer
  */
-trait Task {
-  def start(): Boolean
-  def end()
+trait Task extends AutoCloseable {
+  def start(): Unit
+  def end(): Unit
   def step(): Any
 }
 
