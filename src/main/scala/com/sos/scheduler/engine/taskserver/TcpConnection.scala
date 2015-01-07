@@ -18,11 +18,6 @@ final class TcpConnection(peerAddress: InetSocketAddress) extends AutoCloseable 
 
   def close(): Unit = socket.close()
 
-//???  def shutdown(): Unit = {
-//    socket.shutdownInput()
-//    socket.shutdownOutput()
-//  }
-
   /**
    * @return None: Connection has been closed before next message
    */

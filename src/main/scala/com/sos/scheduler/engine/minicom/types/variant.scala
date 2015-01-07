@@ -39,6 +39,9 @@ object Variant {
 }
 
 final case class VariantArray(indexedSeq: immutable.IndexedSeq[Any]) {
+  /**
+   * @throws NullPointerException when an IUnknown is null.
+   */
   def asIUnknowns: immutable.IndexedSeq[IUnknown] =
     indexedSeq.asInstanceOf[immutable.IndexedSeq[Some[_]]] map { case Some(o) ⇒ cast[IUnknown](o) }
 

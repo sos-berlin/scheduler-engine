@@ -15,7 +15,7 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
     val proxyId = ProxyId(readInt64())
     val isNew = readBoolean()
     if (isNew) {
-      // ???
+      // TODO Proxy properties
       val name = readString()
       val proxyClsid = CLSID(readUUID())
       val proxyProperties = immutable.Seq.fill(readInt32()) {

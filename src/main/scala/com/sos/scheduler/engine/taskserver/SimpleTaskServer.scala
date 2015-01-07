@@ -20,7 +20,7 @@ final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with H
 
   private val injector = Guice.createInjector(new TaskServerModule)
   private val executor = injector.apply[ByteMessageExecutor]
-  private val connection = new TcpConnection(conf.controllerAddress).closeWithCloser
+  private val controllingScheduler = new TcpConnection(conf.controllerAddress).closeWithCloser
 
   private val terminatedPromise = Promise[Unit]()
   def terminated = terminatedPromise.future
@@ -28,7 +28,7 @@ final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with H
   def start(): Unit =
     Future {
       blocking {
-        connection.connect()
+        controllingScheduler.connect()
         try while (processNextMessage()) {}
         catch {
           case t: Throwable ⇒
@@ -41,16 +41,16 @@ final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with H
     }
 
   private def processNextMessage(): Boolean =
-    connection.receiveMessage() match {
+    controllingScheduler.receiveMessage() match {
       case Some(callBytes) ⇒
         val (resultBytes, n) = executor.executeMessage(callBytes)
-        connection.sendMessage(resultBytes, n)
+        controllingScheduler.sendMessage(resultBytes, n)
         true
       case None ⇒
         false
     }
 
-  def kill(): Unit = connection.close()
+  def kill(): Unit = controllingScheduler.close()
 
   override def toString = s"TaskServer(controller=${conf.controllerAddress})"
 }
