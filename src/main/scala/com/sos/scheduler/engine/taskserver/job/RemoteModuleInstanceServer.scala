@@ -5,7 +5,8 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.minicom.IUnknownFactory
-import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, Variant, VariantArray}
+import com.sos.scheduler.engine.minicom.annotations.invocable
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID, Variant, VariantArray}
 import com.sos.scheduler.engine.taskserver.task.{NamedObjects, ScriptLanguage, ShellProcessTask, ShellScriptLanguage, Task, TaskConfiguration}
 import java.util.UUID
 import org.scalactic.Requirements._
@@ -13,13 +14,15 @@ import scala.collection.mutable
 
 /**
  * @author Joacim Zschimmer
+ * @see Com_remote_module_instance_server, spooler_module_remote_server.cxx
  */
-final class RemoteModuleInstanceServer extends IDispatch with HasCloser {
+final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
   import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer._
 
   private var conf: TaskConfiguration = null
   private var task: Task = null
 
+  @invocable
   def construct(arguments: VariantArray): Unit = {
     val argMap = mutable.Map[String, String]()
     for (keyValueString ← arguments.indexedSeq filter { _ != Variant.BoxedEmpty } map cast[String]) {
@@ -34,6 +37,7 @@ final class RemoteModuleInstanceServer extends IDispatch with HasCloser {
     conf = toTaskConfiguration(argMap.toMap)
   }
 
+  @invocable
   def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
     task = languageToTask(conf.language).closeWithCloser
     task.start()
@@ -45,14 +49,17 @@ final class RemoteModuleInstanceServer extends IDispatch with HasCloser {
       case o ⇒ throw new IllegalArgumentException(s"Unknown language '$o'")
     }
 
+  @invocable
   def end(succeeded: Boolean): Any = {
     if (task != null)
       task.end()
   }
 
+  @invocable
   def step(): Any =
     task.step()
 
+  @invocable
   def waitForSubprocesses(): Unit = {}
 
   override def toString =
@@ -69,7 +76,7 @@ object RemoteModuleInstanceServer extends IUnknownFactory {
 
   def apply() = new RemoteModuleInstanceServer
 
-  private val KeyValueRegex = "([^=]+)=(.*)".r  // "key=value"
+  private val KeyValueRegex = "(?s)([[a-z_.]]+)=(.*)".r  //  "(?s)" dot matches \n too, "key=value"
     val LanguageKey = "language"
     //"com_class",
     //val FilenameKey = "filename"
@@ -102,7 +109,7 @@ object RemoteModuleInstanceServer extends IUnknownFactory {
 
   private def toNamedObjectMap(names: VariantArray, anys: VariantArray): NamedObjects = {
     val nameStrings = names.as[String]
-    val iDispatches = anys.asIUnknowns map { _.asInstanceOf[IDispatch] }
+    val iDispatches = anys.asIUnknowns map { _.asInstanceOf[IDispatchable] }
     require(nameStrings.size == iDispatches.size)
     NamedObjects(nameStrings zip iDispatches)
   }

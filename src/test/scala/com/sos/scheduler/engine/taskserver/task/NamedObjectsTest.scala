@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver.task
 
-import com.sos.scheduler.engine.minicom.types.IDispatch
+import com.sos.scheduler.engine.minicom.types.IDispatchable
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 
@@ -10,10 +10,10 @@ import org.scalatest.Matchers._
 final class NamedObjectsTest extends FreeSpec {
 
   "spoolerLog" in {
-    val spoolerLog = new IDispatch {}
-    val spoolerTask = new IDispatch {}
-    val spoolerJob = new IDispatch {}
-    val spooler = new IDispatch {}
+    val spoolerLog = new IDispatchable {}
+    val spoolerTask = new IDispatchable {}
+    val spoolerJob = new IDispatchable {}
+    val spooler = new IDispatchable {}
     val namedObjects = NamedObjects(List(
       "spooler_log" → spoolerLog,
       "spooler_task" → spoolerTask,
@@ -24,6 +24,6 @@ final class NamedObjectsTest extends FreeSpec {
   }
 
   "invalid name" in {
-    intercept[IllegalArgumentException] { NamedObjects(List("invalid" → new IDispatch {})) }
+    intercept[IllegalArgumentException] { NamedObjects(List("invalid" → new IDispatchable {})) }
   }
 }

@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
+import com.sos.scheduler.engine.minicom.Dispatcher.implicits._
 import com.sos.scheduler.engine.minicom.comrpc.CallExecutor.CreateIUnknownByCLSID
 import com.sos.scheduler.engine.minicom.comrpc.calls._
-import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatch, IID, IUnknown}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID, IUnknown}
 import javax.inject.{Inject, Singleton}
 import org.scalactic.Requirements._
 
@@ -24,8 +25,8 @@ final class CallExecutor @Inject private(createIUnknown: CreateIUnknownByCLSID, 
 
     case CallCall(proxyId, methodName, arguments) ⇒
       proxyRegister(proxyId) match {
-        case Some(o: IDispatch) ⇒ InvokeResult(IDispatch(o).call(methodName, arguments))
-        case o ⇒ throw new IllegalArgumentException(s"No IDispatch: '$o'")
+        case Some(o: IDispatchable) ⇒ InvokeResult(o.call(methodName, arguments))
+        case o ⇒ throw new IllegalArgumentException(s"No IDispatchable: '$o'")
       }
   }
 }
