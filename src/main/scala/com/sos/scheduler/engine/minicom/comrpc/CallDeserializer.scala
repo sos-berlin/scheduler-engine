@@ -24,7 +24,7 @@ extends IUnknownDeserializer {
     readByte() match {
       case MessageCommand.CreateInstance ⇒
         val clsid = CLSID(readUUID())
-        val outer = readIUnknown()
+        val outer = readIUnknownOption()
         val context = readInt32()
         val n = readInt32()
         val iids = immutable.Seq.fill(n) { IID(readUUID()) }

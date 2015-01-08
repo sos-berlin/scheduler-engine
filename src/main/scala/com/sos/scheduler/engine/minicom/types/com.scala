@@ -37,7 +37,7 @@ object HRESULT {
   //
   //final val E_NOTIMPL                     = HRESULT(0x80004001)
   //final val E_NOINTERFACE                 = HRESULT(0x80004002)
-  //final val E_POINTER                     = HRESULT(0x80004003)
+  final val E_POINTER                     = HRESULT(0x80004003)
   //final val E_ABORT                       = HRESULT(0x80004004)
   //final val E_FAIL                        = HRESULT(0x80004005)
   //final val E_UNEXPECTED                  = HRESULT(0x8000FFFF)

@@ -4,8 +4,8 @@ import com.google.common.collect.HashBiMap
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister._
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
-import com.sos.scheduler.engine.minicom.types.IUnknown
-import javax.annotation.Nullable
+import com.sos.scheduler.engine.minicom.types.HRESULT.E_POINTER
+import com.sos.scheduler.engine.minicom.types.{COMException, IUnknown}
 import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
@@ -56,10 +56,12 @@ private[comrpc] final class ProxyRegister @Inject private {
       }
     }
 
-  @Nullable
-  def apply(proxyId: ProxyId): Option[IUnknown] =
-    if (proxyId == ProxyId.Null) None
-    else Some(synchronized { proxyIdToIUnknown(proxyId) })
+  def iUnknownOption(proxyId: ProxyId): Option[IUnknown] =
+    if (proxyId == ProxyId.Null) None else Some(apply(proxyId))
+
+  def apply(proxyId: ProxyId): IUnknown =
+    if (proxyId == ProxyId.Null) throw new COMException(E_POINTER)
+    else synchronized { proxyIdToIUnknown(proxyId) }
 
   override def toString = s"${getClass.getSimpleName}($size proxies)"
 

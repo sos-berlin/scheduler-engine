@@ -15,7 +15,7 @@ private[comrpc] trait VariantDeserializer extends BaseDeserializer {
     val vt = readInt32()
     vt match {
       case _ if (vt & VT_ARRAY) != 0 ⇒ readVariantArray()
-      case VT_UNKNOWN | VT_DISPATCH ⇒ readIUnknown()
+      case VT_UNKNOWN | VT_DISPATCH ⇒ readIUnknownOption()
       case _ ⇒ readSimpleVariant(vt)
     }
   }
@@ -66,5 +66,5 @@ private[comrpc] trait VariantDeserializer extends BaseDeserializer {
       case o ⇒ throw new COMException(DISP_E_BADVARTYPE, f"Unsupported Variant VT=$o%x")
     }
 
-  protected def readIUnknown(): Option[IUnknown] = throw new UnsupportedOperationException("IUnknown is not supported")  // Method is overridden
+  protected def readIUnknownOption(): Option[IUnknown] = throw new UnsupportedOperationException("readIUnknownOption is not implemented")  // Method is overridden
 }

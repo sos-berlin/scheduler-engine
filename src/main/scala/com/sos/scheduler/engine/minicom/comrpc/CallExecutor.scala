@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.minicom.Dispatcher.implicits._
 import com.sos.scheduler.engine.minicom.comrpc.CallExecutor.CreateIUnknownByCLSID
 import com.sos.scheduler.engine.minicom.comrpc.calls._
@@ -24,10 +26,8 @@ final class CallExecutor @Inject private(createIUnknown: CreateIUnknownByCLSID, 
       EmptyResult
 
     case CallCall(proxyId, methodName, arguments) ⇒
-      proxyRegister(proxyId) match {
-        case Some(o: IDispatchable) ⇒ InvokeResult(o.call(methodName, arguments))
-        case o ⇒ throw new IllegalArgumentException(s"No IDispatchable: '$o'")
-      }
+      val iDispatchable = cast[IDispatchable](proxyRegister(proxyId))
+      InvokeResult(result = iDispatchable.call(methodName, arguments))
   }
 }
 

@@ -11,7 +11,7 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
 
   protected val proxyRegister: ProxyRegister
 
-  override final def readIUnknown() = {
+  override final def readIUnknownOption() = {
     val proxyId = ProxyId(readInt64())
     val isNew = readBoolean()
     if (isNew) {
@@ -25,6 +25,6 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
       }
       proxyRegister.registerProxyId(proxyId, name)
     } else
-      proxyRegister(proxyId)
+      proxyRegister.iUnknownOption(proxyId)
   }
 }
