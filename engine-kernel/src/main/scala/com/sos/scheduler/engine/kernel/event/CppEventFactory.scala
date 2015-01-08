@@ -4,9 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.AbstractEvent
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.filebased.{FileBasedReplacedEvent, FileBasedRemovedEvent, FileBasedAddedEvent, FileBasedActivatedEvent}
-import com.sos.scheduler.engine.data.job.TaskClosedEvent
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
-import com.sos.scheduler.engine.data.job.TaskStartedEvent
+import com.sos.scheduler.engine.data.job.{TaskId, JobPath, ResultCode, TaskClosedEvent, TaskEndedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.order._
@@ -35,10 +33,6 @@ import com.sos.scheduler.engine.kernel.order.Order
       case `taskStartedEvent` =>
         val task = eventSource.asInstanceOf[Task]
         new TaskStartedEvent(task.id, task.job.path)
-
-      case `taskEndedEvent` =>
-        val task = eventSource.asInstanceOf[Task]
-        new TaskEndedEvent(task.id, task.job.path)
 
       case `taskClosedEvent` =>
         val task = eventSource.asInstanceOf[Task]
@@ -82,5 +76,8 @@ import com.sos.scheduler.engine.kernel.order.Order
     OrderStateChangedEvent(OrderKey(jobChainPath, orderId), previousState = OrderState(previousState), state = OrderState(state))
 
   @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Int): AbstractEvent =
-    new OrderStepEndedEvent(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppCode(orderStateTransitionCpp))
+    OrderStepEndedEvent(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppCode(orderStateTransitionCpp))
+
+  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, resultCode: Int): AbstractEvent =
+    TaskEndedEvent(TaskId(taskId), JobPath(jobPath), ResultCode(resultCode))
 }

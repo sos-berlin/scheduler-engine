@@ -13,7 +13,7 @@ enum Event_code {
     fileBasedReplacedEvent,
 
     taskStartedEvent,
-    taskEndedEvent,
+    taskEndedEvent_DELETED,
     taskClosedEvent,
 
     orderTouchedEvent,

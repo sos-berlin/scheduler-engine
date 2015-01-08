@@ -8,7 +8,7 @@ public enum CppEventCode {
     fileBasedReplacedEvent,
 
     taskStartedEvent,
-    taskEndedEvent,
+    taskEndedEvent_DELETED,
     taskClosedEvent,
 
     orderTouchedEvent,

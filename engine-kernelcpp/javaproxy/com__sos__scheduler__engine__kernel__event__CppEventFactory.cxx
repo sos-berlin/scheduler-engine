@@ -17,6 +17,7 @@ struct CppEventFactory__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Static_method const _newLogEvent__ILjava_lang_String_2__method;
     ::zschimmer::javabridge::Static_method const _newOrderStateChangedEvent__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Static_method const _newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method;
+    ::zschimmer::javabridge::Static_method const _newTaskEndedEvent__ILjava_lang_String_2I__method;
 
     static const ::zschimmer::javabridge::class_factory< CppEventFactory__class > class_factory;
 };
@@ -27,7 +28,8 @@ CppEventFactory__class::CppEventFactory__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_newLogEvent__ILjava_lang_String_2__method(this, "newLogEvent", "(ILjava/lang/String;)Lcom/sos/scheduler/engine/data/event/AbstractEvent;")
     ,_newOrderStateChangedEvent__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2__method(this, "newOrderStateChangedEvent", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sos/scheduler/engine/data/event/AbstractEvent;")
-    ,_newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method(this, "newOrderStepEndedEvent", "(Ljava/lang/String;Ljava/lang/String;I)Lcom/sos/scheduler/engine/data/event/AbstractEvent;"){}
+    ,_newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method(this, "newOrderStepEndedEvent", "(Ljava/lang/String;Ljava/lang/String;I)Lcom/sos/scheduler/engine/data/event/AbstractEvent;")
+    ,_newTaskEndedEvent__ILjava_lang_String_2I__method(this, "newTaskEndedEvent", "(ILjava/lang/String;I)Lcom/sos/scheduler/engine/data/event/AbstractEvent;"){}
 
 CppEventFactory__class::~CppEventFactory__class() {}
 
@@ -77,6 +79,17 @@ CppEventFactory::~CppEventFactory() { assign_(NULL); }
     CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
     ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent result;
     result.steal_local_ref(cls->_newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method.jobject_call(cls->get_jclass(), parameter_list));
+    return result;
+}
+
+::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent CppEventFactory::newTaskEndedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2) {
+    ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
+    parameter_list._jvalues[0].i = p0;
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    parameter_list._jvalues[2].i = p2;
+    CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
+    ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent result;
+    result.steal_local_ref(cls->_newTaskEndedEvent__ILjava_lang_String_2I__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 

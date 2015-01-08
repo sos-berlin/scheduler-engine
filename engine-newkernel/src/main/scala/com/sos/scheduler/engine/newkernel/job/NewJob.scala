@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.newkernel.job
 import NewJob._
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent, TaskEndedEvent, TaskId}
+import com.sos.scheduler.engine.data.job.{ResultCode, JobPath, TaskStartedEvent, TaskEndedEvent, TaskId}
 import com.sos.scheduler.engine.eventbus.EventBus
 import com.sos.scheduler.engine.newkernel.schedule.IntervalSelector
 import com.sos.scheduler.engine.newkernel.utils.TimedCallHolder
@@ -41,7 +41,7 @@ final class NewJob(
   }
 
   def onTaskTerminated(task: ShellTask): Unit = {
-    eventBus publish new TaskEndedEvent(task.id, path)
+    eventBus publish new TaskEndedEvent(task.id, path, ResultCode(0))
     startTaskAtNextStartTime()
   }
 

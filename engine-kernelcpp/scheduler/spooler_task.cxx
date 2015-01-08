@@ -1729,7 +1729,7 @@ bool Task::do_something()
                                     }
                                 }                                                               
 
-                                report_event_code(taskEndedEvent, java_sister());
+                                report_event(CppEventFactoryJ::newTaskEndedEvent(_id, _job->path(), _exit_code), java_sister());
                                 set_state_direct( s_deleting_files );
                                 loop = true;
                             }
