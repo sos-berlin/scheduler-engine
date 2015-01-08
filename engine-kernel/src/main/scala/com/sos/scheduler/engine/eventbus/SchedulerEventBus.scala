@@ -25,7 +25,7 @@ final class SchedulerEventBus extends EventBus with Runnable {
 
   /**
    * Subscribes events of class E for eventHandler and registers this in [[Closer]] for unsubscription with Closer.closer().
-   * The event handler is called asynchronously by dispatchEvent().
+   * The event handler is called asynchronous by dispatchEvent().
    * @param eventHandler Events not in the function's domain are ignored.
    */
   def on[E <: Event](eventHandler: PartialFunction[E, Unit])(implicit closer: Closer, e: ClassTag[E]): Unit =
@@ -33,21 +33,21 @@ final class SchedulerEventBus extends EventBus with Runnable {
 
   /**
    * Subscribes events of class E for eventHandler and registers this in [[Closer]] for unsubscription with Closer.closer().
-   * The event handler is synchronously.
+   * The event handler is synchronous.
    * @param eventHandler Events not in the function's domain are ignored.
    */
   def onHot[E <: Event](eventHandler: PartialFunction[E, Unit])(implicit closer: Closer, e: ClassTag[E]): Unit =
     subscribeClosable[E](hotEventBus, eventHandler)
 
   /**
-   * Subscribes events of class EventSourceEvent[E] for eventHandler and registers this in [[Closer]] for unsubscription with Closer.closer().
-   * The event handler is synchronously
+   * Subscribes events of class [[EventSourceEvent]][E] for `eventHandler` and registers this in [[Closer]] for automatic unsubscription with Closer.closer().
+   * The event handler is synchronous.
    * @param eventHandler Events not in the function's domain are ignored.
    */
   def onHotEventSourceEvent[E <: Event](eventHandler: PartialFunction[EventSourceEvent[E], Unit])(implicit closer: Closer, e: ClassTag[E]): Unit = {
     val subscription = new EventSubscription {
-      override val eventClass = implicitClass[E]
-      override def handleEvent(e: Event) = eventHandler.applyOrElse(e.asInstanceOf[EventSourceEvent[E]], identity[EventSourceEvent[E]])
+      val eventClass = implicitClass[E]
+      def handleEvent(e: Event) = eventHandler.applyOrElse(e.asInstanceOf[EventSourceEvent[E]], identity[EventSourceEvent[E]])
     }
     subscribeClosable[E](hotEventBus, subscription)
   }
