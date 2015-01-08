@@ -1,5 +1,0 @@
-#! /bin/bash
-
-program="$1"
-shift
-gdb -x <(echo set args $*) $program
