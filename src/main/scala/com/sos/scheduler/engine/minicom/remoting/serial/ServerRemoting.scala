@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.minicom.types.CLSID
  * @author Joacim Zschimmer
  */
 private[remoting] trait ServerRemoting {
-  private[minicom] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]): IDispatch
+  private[remoting] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]): IDispatch
 
-  private[minicom] def iDispatchable(proxyId: ProxyId): IDispatchable
+  private[remoting] def iDispatchable(proxyId: ProxyId): IDispatchable
 }

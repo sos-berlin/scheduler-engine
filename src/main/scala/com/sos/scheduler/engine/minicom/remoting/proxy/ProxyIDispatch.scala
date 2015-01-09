@@ -1,9 +1,7 @@
 package com.sos.scheduler.engine.minicom.remoting.proxy
 
-import com.sos.scheduler.engine.minicom.idispatch.{DISPATCH_METHOD, DISPID, DispatchType, IDispatch}
-import com.sos.scheduler.engine.minicom.remoting.calls.{GetIDsOfNamesCall, GetIDsOfNamesResult, InvokeCall, InvokeResult, ProxyId}
-import com.sos.scheduler.engine.minicom.types.IID
-import org.scalactic.Requirements._
+import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, IDispatch}
+import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import scala.collection.immutable
 
 /**
@@ -14,16 +12,8 @@ trait ProxyIDispatch extends IDispatch {
   val name: String
   protected val remoting: ClientRemoting
 
-  final def getIdOfName(name: String) = {
-    val call = GetIDsOfNamesCall(id, IID.Null, localeId = 0, names = List(name))
-    val GetIDsOfNamesResult(dispIds) = remoting.sendReceive(call)
-    require(dispIds.size == 1)
-    dispIds.head
-  }
+  final def getIdOfName(name: String) = remoting.getIdOfName(id, name)
 
-  final def invoke(dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]) = {
-    val call = InvokeCall(id, dispId, IID.Null, Set(DISPATCH_METHOD), arguments)
-    val InvokeResult(value) = remoting.sendReceive(call)
-    value
-  }
+  final def invoke(dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]) =
+    remoting.invoke(id, dispId, dispatchType, arguments)
 }

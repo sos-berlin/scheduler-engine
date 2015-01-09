@@ -7,9 +7,7 @@ import scala.collection.immutable
 /**
  * @author Joacim Zschimmer
  */
-private[remoting] trait Call {
-  type CallResult <: Result
-}
+private[remoting] trait Call
 
 
 private[remoting] trait SessionCall extends Call
@@ -20,9 +18,7 @@ private[remoting] final case class CreateInstanceCall(
   outer: Option[IUnknown],
   context: Int,
   iids: immutable.Seq[IID])
-extends SessionCall {
-  type CallResult = CreateInstanceResult
-}
+extends SessionCall
 
 
 private[remoting] trait ObjectCall extends Call {
@@ -31,21 +27,15 @@ private[remoting] trait ObjectCall extends Call {
 
 
 private[remoting] final case class ReleaseCall(proxyId: ProxyId)
-extends ObjectCall {
-  type CallResult = ReleaseResult.type
-}
+extends ObjectCall
 
 
 private[remoting] final case class QueryInterfaceCall(proxyId: ProxyId, iid: IID)
-extends ObjectCall {
-  type CallResult = QueryInterfaceResult
-}
+extends ObjectCall
 
 
 private[remoting] final case class GetIDsOfNamesCall(proxyId: ProxyId, iid: IID, localeId: Int, names: immutable.Seq[String])
-extends ObjectCall {
-  type CallResult = GetIDsOfNamesResult
-}
+extends ObjectCall
 
 
 private[remoting] final case class InvokeCall(
@@ -55,9 +45,7 @@ private[remoting] final case class InvokeCall(
   dispatchTypes: immutable.Set[DispatchType],
   arguments: immutable.Seq[Any],
   namedArguments: immutable.Seq[(DISPID, Any)] = Nil)
-extends ObjectCall {
-  type CallResult = InvokeResult
-}
+extends ObjectCall
 
 
 private[remoting] final case class CallCall(proxyId: ProxyId, methodName: String, arguments: immutable.Seq[Any])

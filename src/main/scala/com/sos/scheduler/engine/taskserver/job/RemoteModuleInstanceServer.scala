@@ -24,7 +24,7 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
   @invocable
   def construct(arguments: VariantArray): Unit = {
     val argMap = mutable.Map[String, String]()
-    for (keyValueString ← arguments.indexedSeq filter { _ != variant.BoxedEmpty } map cast[String]) {
+    for (keyValueString ← arguments.indexedSeq filterNot variant.isEmpty map cast[String]) {
       val KeyValueRegex(key, value) = keyValueString
       if (value.nonEmpty) {
         key match {

@@ -1,26 +1,9 @@
 package com.sos.scheduler.engine.minicom.types
 
-import java.util.UUID
-
 /**
- * COM Class ID
+ * COM 32bit error code.
  * @author Joacim Zschimmer
  */
-final case class CLSID(uuid: UUID)
-
-object CLSID {
-  val Null = CLSID(new UUID(0, 0))
-}
-
-/**
- * COM Interface ID
- */
-final case class IID(uuid: UUID)
-
-object IID {
-  val Null = IID(new UUID(0, 0))
-}
-
 final case class HRESULT(value: Int) {
   def isError = value < 0
   def comString = f"COM-$value%08X"
@@ -73,8 +56,4 @@ object HRESULT {
   final val E_INVALIDARG                  = HRESULT(0x80070057)
   //
   //final val CO_S_NOTALLINTERFACES         = HRESULT(0x00080012)
-}
-
-class COMException(val hResult: HRESULT, message: String = "") extends RuntimeException {
-  override def getMessage = List(hResult.comString, message).mkString(" ")
 }

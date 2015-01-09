@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.minicom.remoting
 
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.minicom.idispatch.{IDispatchFactory, IDispatchable}
-import com.sos.scheduler.engine.minicom.remoting.CallExecutor.CreateIDispatchableByCLSID
-import com.sos.scheduler.engine.minicom.remoting.StandardRemoting._
-import com.sos.scheduler.engine.minicom.remoting.calls.{Call, CreateInstanceCall, GetIDsOfNamesCall, InvokeCall, ProxyId}
+import com.sos.scheduler.engine.minicom.idispatch.Dispatcher.implicits._
+import com.sos.scheduler.engine.minicom.idispatch.{DISPATCH_METHOD, DISPID, DispatchType, IDispatchFactory, IDispatchable}
+import com.sos.scheduler.engine.minicom.remoting.Remoting._
+import com.sos.scheduler.engine.minicom.remoting.calls.{Call, CallCall, CreateInstanceCall, CreateInstanceResult, EmptyResult, GetIDsOfNamesCall, GetIDsOfNamesResult, InvokeCall, InvokeResult, ProxyId, ReleaseCall, Result}
 import com.sos.scheduler.engine.minicom.remoting.proxy.{ClientRemoting, ProxyIDispatchFactory, ProxyRegister, SimpleProxyIDispatch}
 import com.sos.scheduler.engine.minicom.remoting.serial.CallDeserializer._
 import com.sos.scheduler.engine.minicom.remoting.serial.CallSerializer._
@@ -13,20 +13,21 @@ import com.sos.scheduler.engine.minicom.remoting.serial.ResultSerializer._
 import com.sos.scheduler.engine.minicom.remoting.serial.{ResultDeserializer, ServerRemoting}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IID}
 import java.nio.ByteBuffer
-import scala.collection.breakOut
+import org.scalactic.Requirements._
+import scala.collection.{breakOut, immutable}
 import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
  */
-final class StandardRemoting(
+final class Remoting(
   connection: MessageConnection,
   iDispatchFactories: Iterable[IDispatchFactory],
   proxyIDispatchFactories: Iterable[ProxyIDispatchFactory])
 extends ServerRemoting with ClientRemoting {
 
   private val proxyRegister = new ProxyRegister
-  private val callExecutor = new CallExecutor(toCreateIDispatchableByCLSID(iDispatchFactories), proxyRegister)
+  private val createIDispatchable = toCreateIDispatchableByCLSID(iDispatchFactories)
   private val proxyClsidMap: Map[CLSID, ProxyIDispatchFactory.Fun] =
     (List(SimpleProxyIDispatch) ++ proxyIDispatchFactories).map { o ⇒ o.clsid → o.apply _ } (breakOut)
 
@@ -45,7 +46,7 @@ extends ServerRemoting with ClientRemoting {
   private def executeMessage(callBuffer: ByteBuffer): (Array[Byte], Int) =
     try {
       val call = deserializeCall(this, callBuffer)
-      val result = callExecutor.execute(call)
+      val result = executeCall(call)
       serializeResult(proxyRegister, result)
     }
     catch { case NonFatal(t) ⇒
@@ -53,29 +54,53 @@ extends ServerRemoting with ClientRemoting {
       serializeError(t)
     }
 
-  private[minicom] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]) = {
-    val newProxy = proxyClsidMap.getOrElse(proxyClsid, proxyClsidMap(CLSID.Null) /* Solange nicht alle Proxys implementiert sind */)
+  private def executeCall(call: Call): Result = call match {
+    case CreateInstanceCall(clsid, outer, context, iids) ⇒
+      require(outer == None && context == 0 && iids.size == 1)
+      CreateInstanceResult(iDispatch = createIDispatchable(clsid, iids.head))
+
+    case ReleaseCall(proxyId) ⇒
+      proxyRegister.removeProxy(proxyId)
+      EmptyResult
+
+    case CallCall(proxyId, methodName, arguments) ⇒
+      val iDispatchable = proxyRegister.iDispatchable(proxyId)
+      val result = iDispatchable.call(methodName, arguments)
+      InvokeResult(result)
+  }
+
+  private[remoting] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]) = {
+    val newProxy = proxyClsidMap.getOrElse(proxyClsid, proxyClsidMap(CLSID.Null))   // TODO getOrElse solange nicht alle Proxys implementiert sind
     val result = newProxy(this, proxyId, name, properties)
     proxyRegister.registerProxy(result)
     result
   }
 
-  private[minicom] def iDispatchable(proxyId: ProxyId) = proxyRegister.iDispatchable(proxyId)
+  private[remoting] def iDispatchable(proxyId: ProxyId) = proxyRegister.iDispatchable(proxyId)
 
-  def sendReceive(call: Call): call.CallResult = {
+  private[remoting] def getIdOfName(proxyId: ProxyId, name: String) = {
+    val call = GetIDsOfNamesCall(proxyId, IID.Null, localeId = 0, names = List(name))
+    val GetIDsOfNamesResult(dispIds) = sendReceive(call).readGetIDsOfNamesResult()
+    require(dispIds.size == 1)
+    dispIds.head
+  }
+
+  private[remoting] def invoke(proxyId: ProxyId, dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]) = {
+    val call = InvokeCall(proxyId, dispId, IID.Null, Set(DISPATCH_METHOD), arguments)
+    val InvokeResult(value) = sendReceive(call).readInvokeResult()
+    value
+  }
+
+  private def sendReceive(call: Call): ResultDeserializer = {
     val (byteArray, length) = serializeCall(proxyRegister, call)
     connection.sendMessage(byteArray, length)
     val byteBuffer = connection.receiveMessage().get
-    val resultDeserializer = new ResultDeserializer(this, byteBuffer)
-    (call match {
-      case _: CreateInstanceCall ⇒ resultDeserializer.readCreateInstanceResult()
-      case _: GetIDsOfNamesCall ⇒ resultDeserializer.readGetIDsOfNamesResult()
-      case _: InvokeCall ⇒ resultDeserializer.readInvokeResult()
-    }).asInstanceOf[call.CallResult]
+    new ResultDeserializer(this, byteBuffer)
   }
 }
 
-object StandardRemoting {
+object Remoting {
+  private type CreateIDispatchableByCLSID = (CLSID, IID) ⇒ IDispatchable
   private val logger = Logger(getClass)
 
   private def toCreateIDispatchableByCLSID(iDispatchFactories: Iterable[IDispatchFactory]): CreateIDispatchableByCLSID = {
