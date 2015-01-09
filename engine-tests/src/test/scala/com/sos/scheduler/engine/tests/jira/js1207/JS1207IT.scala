@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1207
 
-import com.google.common.io.Closer
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderId, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderStepEndedEvent, OrderStepStartedEvent, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -53,7 +52,7 @@ final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
    * @return Map with maxima of simulateneously running orders per jobchain
    */
   private def runOrders(outerJobchainPath: JobChainPath, jobchainLimits: Map[JobChainPath, Int], n: Int): Map[JobChainPath, Int] =
-    autoClosing(Closer.create()) { implicit closer ⇒
+    withCloser { implicit closer ⇒
       val promise = Promise[Unit]()
       var promisedFinishedOrderCount = n
       val counters = mutable.Map[JobChainPath, Statistic]() ++ (jobchainLimits map { case (path, limit) ⇒ path → new Statistic(limit) })

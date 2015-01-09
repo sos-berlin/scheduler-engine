@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.google.common.io.Closer
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.eventbus.SchedulerEventBusTest._
 import org.junit.runner.RunWith
@@ -20,7 +19,7 @@ final class SchedulerEventBusTest extends FreeSpec {
     "on" in {
       val eventBus = new SchedulerEventBus
       var a = 0
-      autoClosing(Closer.create()) { implicit closer ⇒
+      withCloser { implicit closer ⇒
         eventBus.on[A] {
           case e: A1 ⇒ a += 1
         }
@@ -46,7 +45,7 @@ final class SchedulerEventBusTest extends FreeSpec {
     "onHot" in {
       val eventBus = new SchedulerEventBus
       var a = 0
-      autoClosing(Closer.create()) { implicit closer ⇒
+      withCloser { implicit closer ⇒
         eventBus.onHot[A] {
           case e: A1 ⇒ a += 1
         }
@@ -69,7 +68,7 @@ final class SchedulerEventBusTest extends FreeSpec {
       val eventBus = new SchedulerEventBus
       var a = 0
       var source: EventSource = null
-      autoClosing(Closer.create()) { implicit closer ⇒
+      withCloser { implicit closer ⇒
         eventBus.onHotEventSourceEvent[A] {
           case EventSourceEvent(e: A1, s) ⇒
             a += 1
