@@ -1,14 +1,12 @@
 package com.sos.scheduler.engine.taskserver
 
-import com.google.inject.{Guice, Key, TypeLiteral}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.minicom.comrpc.CallExecutor._
 import com.sos.scheduler.engine.minicom.comrpc.StandardSerialContext
 import com.sos.scheduler.engine.taskserver.SimpleTaskServer._
 import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
-import com.sos.scheduler.engine.taskserver.configuration.inject.TaskServerModule
+import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration
@@ -18,11 +16,8 @@ import scala.concurrent.duration.Duration
  */
 final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with HasCloser {
 
-  private val injector = Guice.createInjector(new TaskServerModule)
   private val controllingScheduler = new TcpConnection(conf.controllerAddress).closeWithCloser
-  private val serialContext = new StandardSerialContext(
-    controllingScheduler,
-    injector.getInstance(Key.get(new TypeLiteral[CreateIDispatchableByCLSID] {})))
+  private val serialContext = new StandardSerialContext(controllingScheduler, List(RemoteModuleInstanceServer))
 
   private val terminatedPromise = Promise[Unit]()
   def terminated = terminatedPromise.future
