@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.taskserver
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.minicom.comrpc.StandardRemoting
+import com.sos.scheduler.engine.minicom.remoting.StandardRemoting
 import com.sos.scheduler.engine.taskserver.SimpleTaskServer._
 import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
 import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer

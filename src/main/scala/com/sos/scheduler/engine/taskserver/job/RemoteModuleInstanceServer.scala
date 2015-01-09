@@ -4,13 +4,12 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.minicom.IDispatchFactory
-import com.sos.scheduler.engine.minicom.annotations.invocable
-import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID, Variant, VariantArray}
+import com.sos.scheduler.engine.minicom.idispatch.{IDispatchFactory, IDispatchable, invocable}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IID, VariantArray, variant}
 import com.sos.scheduler.engine.taskserver.task.{NamedObjects, ScriptLanguage, ShellProcessTask, ShellScriptLanguage, Task, TaskConfiguration}
 import java.util.UUID
 import org.scalactic.Requirements._
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 
 /**
  * @author Joacim Zschimmer
@@ -25,7 +24,7 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
   @invocable
   def construct(arguments: VariantArray): Unit = {
     val argMap = mutable.Map[String, String]()
-    for (keyValueString ← arguments.indexedSeq filter { _ != Variant.BoxedEmpty } map cast[String]) {
+    for (keyValueString ← arguments.indexedSeq filter { _ != variant.BoxedEmpty } map cast[String]) {
       val KeyValueRegex(key, value) = keyValueString
       if (value.nonEmpty) {
         key match {
@@ -110,10 +109,18 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
 
   private def toNamedObjectMap(names: VariantArray, anys: VariantArray): NamedObjects = {
     val nameStrings = names.as[String]
-    val iDispatches = anys.asIDispatch map { _.asInstanceOf[IDispatchable] }
+    val iDispatches = variantArrayToIDispatchables(anys)
     require(nameStrings.size == iDispatches.size)
     NamedObjects(nameStrings zip iDispatches)
   }
+
+  /**
+   * Expects an VariantArray with Some[IUnknown]
+   * @return IUnknowns interpreted as IDispatchable
+   * @throws NullPointerException when an IDispatch is null.
+   */
+  private def variantArrayToIDispatchables(a: VariantArray): immutable.IndexedSeq[IDispatchable] =
+    a.indexedSeq.asInstanceOf[immutable.IndexedSeq[Some[_]]] map { case Some(o) ⇒ cast[IDispatchable](o) }
 
   private def toTaskConfiguration(args: Map[String, String]) =
     TaskConfiguration(
@@ -123,3 +130,4 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
       script = Script.parseXmlString(args(ScriptKey)).string
     )
 }
+

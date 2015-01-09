@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver
 
-import com.sos.scheduler.engine.minicom.comrpc.MessageConnection
+import com.sos.scheduler.engine.minicom.remoting.MessageConnection
 import java.net.{InetSocketAddress, Socket}
 import java.nio.ByteBuffer
 import scala.concurrent.blocking

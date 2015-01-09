@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver.task
 
-import com.sos.scheduler.engine.minicom.types.IDispatchable
+import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 

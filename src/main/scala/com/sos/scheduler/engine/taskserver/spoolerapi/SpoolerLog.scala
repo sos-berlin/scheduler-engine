@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver.spoolerapi
 
-import com.sos.scheduler.engine.minicom.types.IDispatchable
+import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
 
 /**
  * @author Joacim Zschimmer

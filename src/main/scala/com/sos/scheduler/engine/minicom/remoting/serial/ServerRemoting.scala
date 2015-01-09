@@ -1,0 +1,14 @@
+package com.sos.scheduler.engine.minicom.remoting.serial
+
+import com.sos.scheduler.engine.minicom.idispatch.{IDispatch, IDispatchable}
+import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
+import com.sos.scheduler.engine.minicom.types.CLSID
+
+/**
+ * @author Joacim Zschimmer
+ */
+private[remoting] trait ServerRemoting {
+  private[minicom] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]): IDispatch
+
+  private[minicom] def iDispatchable(proxyId: ProxyId): IDispatchable
+}

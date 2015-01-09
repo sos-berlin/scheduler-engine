@@ -1,8 +1,6 @@
 package com.sos.scheduler.engine.minicom.types
 
-import com.sos.scheduler.engine.minicom.types.HRESULT._
 import java.util.UUID
-import scala.collection.{immutable, mutable}
 
 /**
  * COM Class ID
@@ -22,12 +20,6 @@ final case class IID(uuid: UUID)
 object IID {
   val Null = IID(new UUID(0, 0))
 }
-
-/**
- * COM Dispatch ID, refers to a name for a method or a property.
- * @see [[DispatchType]]
- */
-final case class DISPID(value: Int)
 
 final case class HRESULT(value: Int) {
   def isError = value < 0
@@ -82,28 +74,6 @@ object HRESULT {
   //
   //final val CO_S_NOTALLINTERFACES         = HRESULT(0x00080012)
 }
-
-/**
- * Type of call using a [[DISPID]].
- */
-sealed abstract class DispatchType(val value: Int)
-
-object DispatchType {
-  private[types] val values = Vector(DISPATCH_METHOD, DISPATCH_PROPERTYGET, DISPATCH_PROPERTYPUT, DISPATCH_PROPERTYPUTREF)
-
-  def set(bits: Int): immutable.Set[DispatchType] = {
-    if ((bits & ~0xF) != 0) throw new COMException(E_INVALIDARG, f"Invalid DispatchType $bits%08x")
-    val result = new mutable.ArrayBuffer[DispatchType](values.size)
-    for (dispatchType ← values) {
-      if ((bits & dispatchType.value) != 0) result += dispatchType
-    }
-    result.toSet
-  }
-}
-object DISPATCH_METHOD extends DispatchType(1)
-object DISPATCH_PROPERTYGET extends DispatchType(2)
-object DISPATCH_PROPERTYPUT extends DispatchType(4)
-object DISPATCH_PROPERTYPUTREF extends DispatchType(8)
 
 class COMException(val hResult: HRESULT, message: String = "") extends RuntimeException {
   override def getMessage = List(hResult.comString, message).mkString(" ")
