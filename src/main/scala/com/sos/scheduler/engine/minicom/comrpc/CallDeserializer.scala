@@ -11,7 +11,7 @@ import scala.collection.immutable
  * @author Joacim Zschimmer
  */
 private[comrpc] final class CallDeserializer(
-  protected val serialContext: SerialContext,
+  protected val remoting: Remoting,
   protected val buffer: ByteBuffer)
 extends IUnknownDeserializer {
 
@@ -89,5 +89,5 @@ object CallDeserializer {
     val Call            = 'A'.toByte
   }
 
-  def deserializeCall(serialContext: SerialContext, buffer: ByteBuffer) = new CallDeserializer(serialContext, buffer).readCall()
+  def deserializeCall(remoting: Remoting, buffer: ByteBuffer) = new CallDeserializer(remoting, buffer).readCall()
 }

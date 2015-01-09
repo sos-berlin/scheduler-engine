@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.minicom.types.IDispatchable
 /**
  * @author Joacim Zschimmer
  */
-trait SerialContext {
+trait Remoting {
   private[comrpc] def registerProxy(proxy: ProxyIDispatch): Unit
 
   private[comrpc] def iDispatchable(proxyId: ProxyId): IDispatchable

@@ -12,7 +12,7 @@ import scala.collection.mutable
  * @author Joacim Zschimmer
  */
 final class ResultDeserializer(
-  protected val serialContext: SerialContext,
+  protected val remoting: Remoting,
   protected val buffer: ByteBuffer)
 extends IUnknownDeserializer {
 

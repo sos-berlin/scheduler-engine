@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.minicom.comrpc.CallExecutor._
 import com.sos.scheduler.engine.minicom.comrpc.CallSerializer._
 import com.sos.scheduler.engine.minicom.comrpc.ErrorSerializer._
 import com.sos.scheduler.engine.minicom.comrpc.ResultSerializer._
-import com.sos.scheduler.engine.minicom.comrpc.StandardSerialContext._
+import com.sos.scheduler.engine.minicom.comrpc.StandardRemoting._
 import com.sos.scheduler.engine.minicom.comrpc.calls.{Call, ProxyId}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID}
 import java.nio.ByteBuffer
@@ -16,8 +16,8 @@ import scala.util.control.NonFatal
 /**
  * @author Joacim Zschimmer
  */
-final class StandardSerialContext(connection: MessageConnection, iDispatchFactories: Iterable[IDispatchFactory])
-extends SerialContext {
+final class StandardRemoting(connection: MessageConnection, iDispatchFactories: Iterable[IDispatchFactory])
+extends Remoting {
 
   private val proxyRegister = new ProxyRegister
   private val callExecutor = new CallExecutor(toCreateIDispatchableByCLSID(iDispatchFactories), proxyRegister)
@@ -57,7 +57,7 @@ extends SerialContext {
   }
 }
 
-object StandardSerialContext {
+object StandardRemoting {
   private val logger = Logger(getClass)
 
   private def toCreateIDispatchableByCLSID(iDispatchFactories: Iterable[IDispatchFactory]): CreateIDispatchableByCLSID = {

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.taskserver.spoolerapi
 
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
-import com.sos.scheduler.engine.minicom.comrpc.{ProxyIDispatch, SerialContext}
+import com.sos.scheduler.engine.minicom.comrpc.{ProxyIDispatch, Remoting}
 import com.sos.scheduler.engine.minicom.types.{CLSID, DISPATCH_METHOD, DISPID}
 import com.sos.scheduler.engine.taskserver.spoolerapi.ProxySpoolerLog._
 import java.util.UUID
@@ -11,7 +11,7 @@ import java.util.UUID
  * @author Joacim Zschimmer
  */
 final class ProxySpoolerLog(
-  protected val serialContext: SerialContext,
+  protected val remoting: Remoting,
   val id: ProxyId,
   val name: String)
 extends SpoolerLog with ProxyIDispatch {

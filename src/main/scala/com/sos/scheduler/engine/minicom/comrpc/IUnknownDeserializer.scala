@@ -10,7 +10,7 @@ import scala.collection.immutable
  */
 private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
 
-  protected val serialContext: SerialContext
+  protected val remoting: Remoting
 
   override final def readIDispatchableOption() = {
     val proxyId = ProxyId(readInt64())
@@ -25,14 +25,14 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
         name → value
       }
       val proxy = proxyClsid match {
-        case ProxySpoolerLog.clsid ⇒ new ProxySpoolerLog(serialContext, proxyId, name)  // TODO Proxy CLSID register, CreateIDispatchableByCLSID?
-        case _/*TODO CLSID.Null*/ ⇒ new ProxyIDispatch.Simple(serialContext, proxyId, name)
+        case ProxySpoolerLog.clsid ⇒ new ProxySpoolerLog(remoting, proxyId, name)  // TODO Proxy CLSID register, CreateIDispatchableByCLSID?
+        case _/*TODO CLSID.Null*/ ⇒ new ProxyIDispatch.Simple(remoting, proxyId, name)
         //case o ⇒ throw new IllegalArgumentException(s"Unknown proxy $o")
       }
-      serialContext.registerProxy(proxy)
+      remoting.registerProxy(proxy)
       Some(proxy)
     } else
       if (proxyId == ProxyId.Null) None
-      else Some(serialContext.iDispatchable(proxyId))
+      else Some(remoting.iDispatchable(proxyId))
   }
 }

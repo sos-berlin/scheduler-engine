@@ -11,25 +11,25 @@ import scala.collection.immutable
 trait ProxyIDispatch extends IDispatch {
   val id: ProxyId
   val name: String
-  protected val serialContext: SerialContext
+  protected val remoting: Remoting
 
   final def getIdOfName(name: String) = {
     val call = GetIDsOfNamesCall(id, IID.Null, localeId = 0, names = List(name))
-    val GetIDsOfNamesResult(dispIds) = serialContext.sendReceive(call).readGetIDsOfNamesResult()
+    val GetIDsOfNamesResult(dispIds) = remoting.sendReceive(call).readGetIDsOfNamesResult()
     require(dispIds.size == 1)
     dispIds.head
   }
 
   final def invoke(dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]) = {
     val call = InvokeCall(id, dispId, IID.Null, Set(DISPATCH_METHOD), arguments)
-    val InvokeResult(value) = serialContext.sendReceive(call).readInvokeResult()
+    val InvokeResult(value) = remoting.sendReceive(call).readInvokeResult()
     value
   }
 }
 
 object ProxyIDispatch {
   final class Simple(
-    protected val serialContext: SerialContext,
+    protected val remoting: Remoting,
     val id: ProxyId,
     val name: String)
   extends ProxyIDispatch
