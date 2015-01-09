@@ -14,14 +14,14 @@ final class HttpRemoteProcess(client: HttpSchedulerCommandClient, uri: String, p
   (implicit executionContext: ExecutionContext) {
 
   def closeRemoteTask(kill: Boolean): Future[Unit] = {
-    val command = <remote_scheduler.remote_task.close process_id={processDescriptor.processId} kill={if (kill) true.toString else null}/>
+    val command = <remote_scheduler.remote_task.close process_id={processDescriptor.remoteTaskId.string} kill={if (kill) true.toString else null}/>
     client.uncheckedExecute(uri, command) map CloseResult.fromXml
   }
 
-  override def toString = s"${getClass.getSimpleName}(processId=${processDescriptor.processId} pid=${processDescriptor.pid})"
+  override def toString = s"${getClass.getSimpleName}(processId=${processDescriptor.remoteTaskId.string} pid=${processDescriptor.pid})"
 
-  def agentProcessId = processDescriptor.processId
-  def pid = processDescriptor.pid
+  //def remoteTaskId = processDescriptor.remoteTaskId
+  //def pid = processDescriptor.pid
 }
 
 object HttpRemoteProcess {
