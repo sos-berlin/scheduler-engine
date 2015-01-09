@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.minicom.IUnknownFactory
+import com.sos.scheduler.engine.minicom.IDispatchFactory
 import com.sos.scheduler.engine.minicom.annotations.invocable
 import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID, Variant, VariantArray}
 import com.sos.scheduler.engine.taskserver.task.{NamedObjects, ScriptLanguage, ShellProcessTask, ShellScriptLanguage, Task, TaskConfiguration}
@@ -39,25 +39,26 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
 
   @invocable
   def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
-    task = languageToTask(conf.language).closeWithCloser
+    val namedObjectMap = toNamedObjectMap(names = objectNamesAnys, anys = objectAnys)
+    val log = namedObjectMap.spoolerLog.info _
+    task = languageToTask(conf.language, log).closeWithCloser
     task.start()
   }
 
-  private def languageToTask(language: ScriptLanguage): Task =
+  private def languageToTask(language: ScriptLanguage, log: String ⇒ Unit): Task =
     conf.language match {
-      case ShellScriptLanguage ⇒ new ShellProcessTask(conf)
+      case ShellScriptLanguage ⇒ new ShellProcessTask(conf, log)
       case o ⇒ throw new IllegalArgumentException(s"Unknown language '$o'")
     }
 
   @invocable
-  def end(succeeded: Boolean): Any = {
+  def end(succeeded: Boolean): Unit = {
     if (task != null)
       task.end()
   }
 
   @invocable
-  def step(): Any =
-    task.step()
+  def step() = task.step()
 
   @invocable
   def waitForSubprocesses(): Unit = {}
@@ -69,7 +70,7 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
       .mkString("")
 }
 
-object RemoteModuleInstanceServer extends IUnknownFactory {
+object RemoteModuleInstanceServer extends IDispatchFactory {
   val clsid = CLSID(UUID.fromString("feee47a3-6c1b-11d8-8103-000476ee8afb"))
   val iid = IID(UUID.fromString("feee47a2-6c1b-11d8-8103-000476ee8afb"))
   private val logger = Logger(getClass)
@@ -109,7 +110,7 @@ object RemoteModuleInstanceServer extends IUnknownFactory {
 
   private def toNamedObjectMap(names: VariantArray, anys: VariantArray): NamedObjects = {
     val nameStrings = names.as[String]
-    val iDispatches = anys.asIUnknowns map { _.asInstanceOf[IDispatchable] }
+    val iDispatches = anys.asIDispatch map { _.asInstanceOf[IDispatchable] }
     require(nameStrings.size == iDispatches.size)
     NamedObjects(nameStrings zip iDispatches)
   }
@@ -119,6 +120,6 @@ object RemoteModuleInstanceServer extends IUnknownFactory {
       jobName = args(JobKey),
       taskId = TaskId(args(TaskIdKey).toInt),
       language = ScriptLanguage(args(LanguageKey)),
-      scriptString = Script.parseXmlString(args(ScriptKey)).string
+      script = Script.parseXmlString(args(ScriptKey)).string
     )
 }

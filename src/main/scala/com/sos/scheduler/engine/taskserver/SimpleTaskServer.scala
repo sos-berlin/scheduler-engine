@@ -43,7 +43,7 @@ final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with H
   private def processNextMessage(): Boolean =
     controllingScheduler.receiveMessage() match {
       case Some(callBytes) ⇒
-        val (resultBytes, n) = executor.executeMessage(callBytes)
+        val (resultBytes, n) = executor.executeMessage(controllingScheduler, callBytes)
         controllingScheduler.sendMessage(resultBytes, n)
         true
       case None ⇒

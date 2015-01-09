@@ -7,21 +7,26 @@ import com.sos.scheduler.engine.taskserver.task.process.{ShellProcess, ShellProc
 /**
  * @author Joacim Zschimmer
  */
-final class ShellProcessTask(conf: TaskConfiguration) extends Task with HasCloser {
+final class ShellProcessTask(conf: TaskConfiguration, log: String ⇒ Unit) extends Task with HasCloser {
 
   private var process: ShellProcess = null
 
   override def start() = {
     process = ShellProcessStarter.start(
       name = conf.jobName,
-      scriptString = conf.scriptString)
+      scriptString = conf.script)
     closer.registerAutoCloseable(process)
   }
 
   override def end() = {}
 
   override def step() = {
-    val exitValue = process.waitFor()
-    <process.result spooler_process_result="true" exit_code={exitValue.toString}/>.toString()
+    val resultCode = process.waitForTermination(logOutput = log)
+    <process.result spooler_process_result="true" exit_code={resultCode.value.toString}/>.toString()
+  }
+
+  def files = {
+    if (process == null) throw new IllegalStateException
+    process.files
   }
 }

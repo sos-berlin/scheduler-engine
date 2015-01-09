@@ -9,5 +9,5 @@ final case class TaskConfiguration(
   jobName: String,
   taskId: TaskId,
   language: ScriptLanguage,
-  scriptString: String) {
+  script: String) {
 }

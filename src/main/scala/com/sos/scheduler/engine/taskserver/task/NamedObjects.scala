@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.minicom.types.IDispatchable
+import com.sos.scheduler.engine.taskserver.spoolerapi.SpoolerLog
 import com.sos.scheduler.engine.taskserver.task.NamedObjects._
 
 /**
  * @author Joacim Zschimmer
  */
 final class NamedObjects private(val toMap: Map[String, IDispatchable]) {
-  def spoolerLog: Option[IDispatchable] = toMap.get(SpoolerLogName)
+  def spoolerLog: SpoolerLog = toMap(SpoolerLogName).asInstanceOf[SpoolerLog]  // instanceOf???
 }
 
 object NamedObjects {

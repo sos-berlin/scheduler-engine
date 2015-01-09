@@ -40,10 +40,10 @@ object Variant {
 
 final case class VariantArray(indexedSeq: immutable.IndexedSeq[Any]) {
   /**
-   * @throws NullPointerException when an IUnknown is null.
+   * @throws NullPointerException when an IDispatch is null.
    */
-  def asIUnknowns: immutable.IndexedSeq[IUnknown] =
-    indexedSeq.asInstanceOf[immutable.IndexedSeq[Some[_]]] map { case Some(o) ⇒ cast[IUnknown](o) }
+  def asIDispatch: immutable.IndexedSeq[IDispatch] =
+    indexedSeq.asInstanceOf[immutable.IndexedSeq[Some[_]]] map { case Some(o) ⇒ cast[IDispatch](o) }
 
   def as[A : ClassTag] = {
     require(indexedSeq forall { _.getClass isAssignableFrom implicitClass[A] })

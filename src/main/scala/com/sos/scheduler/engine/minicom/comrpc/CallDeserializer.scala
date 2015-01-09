@@ -3,14 +3,17 @@ package com.sos.scheduler.engine.minicom.comrpc
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.minicom.comrpc.CallDeserializer._
 import com.sos.scheduler.engine.minicom.comrpc.calls.{Call, CallCall, CreateInstanceCall, GetIDsOfNamesCall, InvokeCall, ObjectCall, ProxyId, QueryInterfaceCall, ReleaseCall}
-import com.sos.scheduler.engine.minicom.types.{CLSID, DISPID, IID}
+import com.sos.scheduler.engine.minicom.types.{CLSID, DISPID, DispatchType, IID}
 import java.nio.ByteBuffer
 import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
  */
-private[comrpc] final class CallDeserializer(protected val proxyRegister: ProxyRegister, protected val buffer: ByteBuffer)
+private[comrpc] final class CallDeserializer(
+  protected val connection: MessageConnection,
+  protected val proxyRegister: ProxyRegister,
+  protected val buffer: ByteBuffer)
 extends IUnknownDeserializer {
 
   def readCall(): Call =
@@ -24,7 +27,7 @@ extends IUnknownDeserializer {
     readByte() match {
       case MessageCommand.CreateInstance ⇒
         val clsid = CLSID(readUUID())
-        val outer = readIUnknownOption()
+        val outer = readIDispatchableOption()
         val context = readInt32()
         val n = readInt32()
         val iids = immutable.Seq.fill(n) { IID(readUUID()) }
@@ -59,7 +62,7 @@ extends IUnknownDeserializer {
         val namedArgumentCount = readInt32()
         require(namedArgumentCount == 0)
         val arguments = readArguments(argumentCount)
-        InvokeCall(proxyId, dispatchId, iid, flags, arguments, namedArguments = Nil)
+        InvokeCall(proxyId, dispatchId, iid, DispatchType.set(flags), arguments, namedArguments = Nil)
 
       case MessageCommand.Call ⇒
         val methodName = readString()
@@ -87,5 +90,6 @@ object CallDeserializer {
     val Call            = 'A'.toByte
   }
 
-  def deserializeCall(proxyRegister: ProxyRegister, buffer: ByteBuffer) = new CallDeserializer(proxyRegister, buffer).readCall()
+  def deserializeCall(messageConnection: MessageConnection, proxyRegister: ProxyRegister, buffer: ByteBuffer) =
+    new CallDeserializer(messageConnection, proxyRegister, buffer).readCall()
 }

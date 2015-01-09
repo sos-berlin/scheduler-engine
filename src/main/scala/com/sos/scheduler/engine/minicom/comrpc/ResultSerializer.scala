@@ -6,16 +6,16 @@ import com.sos.scheduler.engine.minicom.types.HRESULT.S_OK
 /**
  * @author Joacim Zschimmer
  */
-private final class ResultSerializer(protected val iunknownProxyRegister: ProxyRegister) extends IUnknownSerializer {
+private final class ResultSerializer(protected val proxyRegister: ProxyRegister) extends IDispatchSerializer {
 
   def writeResult(result: Result): Unit = {
     writeByte(MessageClass.Answer)
     result match {
 
-      case CreateInstanceResult(iUnknown) ⇒
+      case CreateInstanceResult(iDispatchable) ⇒
         writeInt32(S_OK.value)
         writeInt32(S_OK.value)  // For IID
-        writeIUnknown(Some(iUnknown))
+        writeIDispatchable(Some(iDispatchable))
 
       case InvokeResult(value) ⇒
         writeInt32(S_OK.value)

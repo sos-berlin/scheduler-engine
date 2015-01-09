@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.minicom.comrpc
 
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.CLSID
+import com.sos.scheduler.engine.taskserver.spoolerapi.ProxySpoolerLog
+import java.util.UUID
 import scala.collection.immutable
 
 /**
@@ -9,9 +11,10 @@ import scala.collection.immutable
  */
 private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
 
+  protected val connection: MessageConnection
   protected val proxyRegister: ProxyRegister
 
-  override final def readIUnknownOption() = {
+  override final def readIDispatchableOption() = {
     val proxyId = ProxyId(readInt64())
     val isNew = readBoolean()
     if (isNew) {
@@ -23,8 +26,13 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
         val value = readVariant()
         name → value
       }
-      proxyRegister.registerProxyId(proxyId, name)
+      val proxy = if (proxyClsid == CLSID(UUID.fromString("feee47a6-6c1b-11d8-8103-000476ee8afb"))) {
+        new ProxySpoolerLog(connection, proxyRegister, proxyId, name)
+      } else 
+        new ProxyIDispatch.Simple(connection, proxyRegister, proxyId, name)
+      proxyRegister.registerProxy(proxy)
+      Some(proxy)
     } else
-      proxyRegister.iUnknownOption(proxyId)
+      proxyRegister.iDispatchableOption(proxyId)
   }
 }

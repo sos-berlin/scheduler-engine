@@ -3,25 +3,21 @@ package com.sos.scheduler.engine.minicom
 import com.sos.scheduler.engine.minicom.Dispatcher._
 import com.sos.scheduler.engine.minicom.annotations.invocable
 import com.sos.scheduler.engine.minicom.types.HRESULT._
-import com.sos.scheduler.engine.minicom.types.{COMException, DISPATCH_METHOD, DISPID, DispatchType, IDispatchable, VariantArray}
+import com.sos.scheduler.engine.minicom.types.{COMException, DISPATCH_METHOD, DISPID, DispatchType, IDispatch, IDispatchable, VariantArray}
 import java.lang.reflect.{InvocationTargetException, Method}
 import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
  */
-final class Dispatcher(val delegate: IDispatchable) {
+final class Dispatcher(val delegate: IDispatchable) extends IDispatch {
   private val methods = delegate.getClass.getMethods filter { _.getAnnotation(classOf[invocable]) != null }
   require(methods.nonEmpty, s"Contains no methods declared with @invocable: ${delegate.getClass}")
 
   def call(methodName: String, arguments: Seq[Any] = Nil): Any =
     invokeMethod(methods(methodIndex(methodName)), arguments)
 
-  def getIDsOfNames(names: Seq[String]): immutable.Seq[DISPID] = {
-    require(names.size == 1)
-    val name = names.head
-    List(DISPID(methodIndex(name)))
-  }
+  def getIdOfName(name: String) = DISPID(methodIndex(name))
 
   private def methodIndex(name: String): Int = {
     val methodIndices = methods.indices filter { i ⇒ methods(i).getName.compareToIgnoreCase(name) == 0 }
@@ -30,10 +26,9 @@ final class Dispatcher(val delegate: IDispatchable) {
     methodIndices.head
   }
 
-  def invoke(dispIds: Seq[DISPID], dispatchType: DispatchType, arguments: Seq[Any]): Any = {
+  def invoke(dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]): Any = {
     if (dispatchType != DISPATCH_METHOD) throw new COMException(DISP_E_MEMBERNOTFOUND, "Only DISPATCH_METHOD is supported")
-    require(dispIds.size == 1)
-    val method = methods(dispIds.head.value)
+    val method = methods(dispId.value)
     invokeMethod(method, arguments)
   }
 

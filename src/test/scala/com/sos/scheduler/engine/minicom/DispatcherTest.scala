@@ -43,8 +43,8 @@ final class DispatcherTest extends FreeSpec {
   }
 
   "GetIDsOfNames and Invoke" in {
-    val dispIds = dispatcher.getIDsOfNames(List("DOUBLE"))
-    dispatcher.invoke(dispIds, DISPATCH_METHOD, List(1.2)) shouldEqual 1.3
+    val dispId = dispatcher.getIdOfName("DOUBLE")
+    dispatcher.invoke(dispId, DISPATCH_METHOD, List(1.2)) shouldEqual 1.3
   }
 
   "@invocable is mandatory" in {

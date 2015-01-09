@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.minicom.comrpc
 
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.minicom.Dispatcher.implicits._
-import com.sos.scheduler.engine.minicom.comrpc.CallExecutor.CreateIUnknownByCLSID
+import com.sos.scheduler.engine.minicom.comrpc.CallExecutor.CreateIDispatchableByCLSID
 import com.sos.scheduler.engine.minicom.comrpc.calls._
-import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID, IUnknown}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID}
 import javax.inject.{Inject, Singleton}
 import org.scalactic.Requirements._
 
@@ -13,13 +12,12 @@ import org.scalactic.Requirements._
  * @author Joacim Zschimmer
  */
 @Singleton
-final class CallExecutor @Inject private(createIUnknown: CreateIUnknownByCLSID, proxyRegister: ProxyRegister) {
+final class CallExecutor @Inject private(createIDispatchable: CreateIDispatchableByCLSID, proxyRegister: ProxyRegister) {
 
-  def execute(command: Call): Result = command match {
+  def execute(call: Call): Result = call match {
     case CreateInstanceCall(clsid, outer, context, iids) ⇒
       require(outer == None && context == 0 && iids.size == 1)
-      val iunknown = createIUnknown(clsid, iids.head)
-      CreateInstanceResult(iunknown)
+      CreateInstanceResult(iDispatch = createIDispatchable(clsid, iids.head))
 
     case ReleaseCall(proxyId) ⇒
       proxyRegister.removeProxy(proxyId)
@@ -32,5 +30,5 @@ final class CallExecutor @Inject private(createIUnknown: CreateIUnknownByCLSID, 
 }
 
 object CallExecutor {
-  type CreateIUnknownByCLSID = (CLSID, IID) ⇒ IUnknown
+  type CreateIDispatchableByCLSID = (CLSID, IID) ⇒ IDispatchable
 }

@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.taskserver
 
+import com.sos.scheduler.engine.minicom.comrpc.MessageConnection
 import java.net.{InetSocketAddress, Socket}
 import java.nio.ByteBuffer
 import scala.concurrent.blocking
 
-final class TcpConnection(peerAddress: InetSocketAddress) extends AutoCloseable {
+final class TcpConnection(peerAddress: InetSocketAddress) extends MessageConnection with AutoCloseable {
 
   private val socket = new Socket()
   private lazy val in = socket.getInputStream

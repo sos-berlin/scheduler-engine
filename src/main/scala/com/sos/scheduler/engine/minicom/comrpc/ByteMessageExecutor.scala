@@ -20,9 +20,9 @@ final class ByteMessageExecutor @Inject private(executeCall: Call ⇒ Result, pr
   /**
    * @return (Array, length)
    */
-  def executeMessage(callBuffer: ByteBuffer): (Array[Byte], Int) =
+  def executeMessage(messageConnection: MessageConnection, callBuffer: ByteBuffer): (Array[Byte], Int) =
     try {
-      val call = deserializeCall(proxyRegister, callBuffer)
+      val call = deserializeCall(messageConnection, proxyRegister, callBuffer)
       val result = executeCall(call)
       serializeResult(proxyRegister, result)
     }

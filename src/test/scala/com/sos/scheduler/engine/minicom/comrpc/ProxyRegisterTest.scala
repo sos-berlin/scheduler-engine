@@ -2,14 +2,16 @@ package com.sos.scheduler.engine.minicom.comrpc
 
 import com.google.inject.Guice
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister.{DuplicateKeyException, ProxyIUnknown}
+import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister.DuplicateKeyException
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.HRESULT.E_POINTER
-import com.sos.scheduler.engine.minicom.types.{COMException, IUnknown}
+import com.sos.scheduler.engine.minicom.types.{COMException, IDispatch, IDispatchable}
 import org.junit.runner.RunWith
+import org.mockito.Mockito._
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar.mock
 
 /**
  * @author Joacim Zschimmer
@@ -20,32 +22,29 @@ final class ProxyRegisterTest extends FreeSpec {
   private val proxyRegister = Guice.createInjector().apply[ProxyRegister]
   private val externalProxyId = ProxyId(0x123456789abcdefL)
 
-  "External ProxyId.Null" in {
-    proxyRegister.registerProxyId(ProxyId.Null, "") shouldEqual None
-  }
-
   "External ProxyId" in {
-    val Some(iUnknown) = proxyRegister.registerProxyId(externalProxyId, "")
-    iUnknown.asInstanceOf[ProxyIUnknown].id shouldEqual externalProxyId
-    proxyRegister.iUnknownToProxyId(iUnknown) shouldEqual (externalProxyId, false)
-    proxyRegister.apply(externalProxyId) shouldEqual iUnknown
-    proxyRegister.iUnknownOption(externalProxyId) shouldEqual Some(iUnknown)
+    val proxy = newProxy(externalProxyId)
+    proxyRegister.registerProxy(proxy)
+    proxy.id shouldEqual externalProxyId
+    proxyRegister.iDispatchToProxyId(proxy) shouldEqual (externalProxyId, false)
+    proxyRegister.apply(externalProxyId) shouldEqual proxy
+    proxyRegister.iDispatchableOption(externalProxyId) shouldEqual Some(proxy)
     proxyRegister.size shouldEqual 1
-    intercept[DuplicateKeyException] { proxyRegister.registerProxyId(externalProxyId, "") }
+    intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(externalProxyId)) }
   }
 
-  "Own IUnknown" in {
+  "Own IDispatch" in {
     proxyRegister.size shouldEqual 1
-    val iUnknown = new IUnknown {}
-    val (proxyId, true) = proxyRegister.iUnknownToProxyId(iUnknown)
+    val iDispatch = mock[IDispatchable]
+    val (proxyId, true) = proxyRegister.iDispatchToProxyId(iDispatch)
     proxyId.index shouldEqual 1
-    proxyRegister.iUnknownToProxyId(iUnknown) shouldEqual (proxyId, false)
-    proxyRegister.apply(proxyId) shouldEqual iUnknown
-    proxyRegister.iUnknownOption(proxyId) shouldEqual Some(iUnknown)
-    intercept[DuplicateKeyException] { proxyRegister.registerProxyId(proxyId, "") }
+    proxyRegister.iDispatchToProxyId(iDispatch) shouldEqual (proxyId, false)
+    proxyRegister.apply(proxyId) shouldEqual iDispatch
+    proxyRegister.iDispatchableOption(proxyId) shouldEqual Some(iDispatch)
+    intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(proxyId)) }
 
     proxyRegister.size shouldEqual 2
-    val (otherProxyId, true) = proxyRegister.iUnknownToProxyId(new IUnknown {})
+    val (otherProxyId, true) = proxyRegister.iDispatchToProxyId(mock[IDispatchable])
     otherProxyId.index shouldEqual 2
     proxyRegister.size shouldEqual 3
   }
@@ -60,21 +59,18 @@ final class ProxyRegisterTest extends FreeSpec {
 
   "ProxyId.Null" in {
     intercept[COMException] { proxyRegister.apply(ProxyId.Null) } .hResult shouldEqual E_POINTER
-    proxyRegister.iUnknownOption(ProxyId.Null) shouldEqual None
+    proxyRegister.iDispatchableOption(ProxyId.Null) shouldEqual None
   }
 
   "remoteProxy closes AutoCloseable" in {
-    class A extends IUnknown with AutoCloseable {
-      var isClosed = false
-      def close() = {
-        isClosed = true
-        throw new Exception("SHOULD BE IGNORED, ONLY LOGGED")
-      }
-    }
-    val a = new A
-    val (proxyId, true) = proxyRegister.iUnknownToProxyId(a)
-    assert(!a.isClosed)
+    trait A extends IDispatch with AutoCloseable
+    val a = mock[A]
+    when (a.close()) thenThrow new Exception("SHOULD BE IGNORED, ONLY LOGGED")
+    val (proxyId, true) = proxyRegister.iDispatchToProxyId(a)
     proxyRegister.removeProxy(proxyId)
-    assert(a.isClosed)
+    verify(a).close()
   }
+
+  private def newProxy(proxyId: ProxyId, name: String = "") =
+    new ProxyIDispatch.Simple(mock[MessageConnection], proxyRegister, proxyId, name)
 }

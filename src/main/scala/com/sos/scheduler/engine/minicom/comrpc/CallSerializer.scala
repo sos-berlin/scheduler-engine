@@ -1,0 +1,73 @@
+package com.sos.scheduler.engine.minicom.comrpc
+
+import com.sos.scheduler.engine.minicom.comrpc.CallDeserializer.MessageCommand
+import com.sos.scheduler.engine.minicom.comrpc.calls.{Call, CreateInstanceCall, GetIDsOfNamesCall, InvokeCall, ObjectCall, QueryInterfaceCall, SessionCall}
+
+/**
+ * @author Joacim Zschimmer
+ */
+private final class CallSerializer(protected val proxyRegister: ProxyRegister) extends IDispatchSerializer {
+
+  def writeCall(call: Call): Unit =
+    call match {
+      case call: SessionCall ⇒
+        writeByte(MessageClass.Session)
+        writeSessionCall(call)
+      case call: ObjectCall ⇒
+        writeByte(MessageClass.Object)
+        writeInt64(call.proxyId.value)
+        writeObjectCall(call)
+    }
+
+  private def writeSessionCall(call: SessionCall) =
+    call match {
+      case CreateInstanceCall(clsid, outer, context, iids) ⇒
+        writeUUID(clsid.uuid)
+        writeIDispatchable(None) // outer
+        writeInt32(0) // context
+        writeInt32(iids.size)
+        for (o ← iids) writeUUID(o.uuid)
+    }
+
+  private def writeObjectCall(call: ObjectCall) =
+    call match {
+      //      case ReleaseCall(proxyIDispatch) ⇒   // TODO
+      //        writeByte(MessageClass.Object)
+      //        writeIDispatchable(proxyIDispatch.id)
+      //        writeByte(MessageCommand.Release)
+
+      case QueryInterfaceCall(proxyId, iid) ⇒
+        writeByte(MessageCommand.GetIDsOfNames)
+        writeInt64(proxyId.value)
+        writeUUID(iid.uuid)
+
+      case InvokeCall(proxyId, dispatchId, iid, dispatchTypes, arguments, namedArguments) ⇒
+        writeByte(MessageCommand.Invoke)
+        writeInt32(dispatchId.value)
+        writeUUID(iid.uuid)
+        writeInt32(0)  // localeId
+        writeInt32((dispatchTypes map { _.value }).fold(0) { _ | _ })
+        writeInt32(arguments.size)
+        writeInt32(namedArguments.size)
+        for (a ← arguments.reverse) writeVariant(a)
+        require(namedArguments.size == 0)
+
+      case GetIDsOfNamesCall(proxyId, iid, localeId, names) ⇒
+        writeByte(MessageCommand.GetIDsOfNames)
+        writeUUID(iid.uuid)
+        writeInt32(localeId)
+        writeInt32(names.size)
+        names foreach writeString
+    }
+}
+
+object CallSerializer {
+  /**
+   * @return (Array, length)
+   */
+  def serializeCall(proxyRegister: ProxyRegister, call: Call): (Array[Byte], Int) = {
+    val serializer = new CallSerializer(proxyRegister)
+    serializer.writeCall(call)
+    serializer.byteArrayAndLength
+  }
+}

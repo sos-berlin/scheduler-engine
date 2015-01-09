@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.minicom.comrpc
 import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_BADVARTYPE
 import com.sos.scheduler.engine.minicom.types.Variant._
 import com.sos.scheduler.engine.minicom.types.VariantArray.{FADF_BSTR, FADF_FIXEDSIZE, FADF_HAVEVARTYPE, FADF_VARIANT}
-import com.sos.scheduler.engine.minicom.types.{COMException, IUnknown, VariantArray}
+import com.sos.scheduler.engine.minicom.types.{COMException, IDispatchable, VariantArray}
 import org.scalactic.Requirements._
 
 /**
@@ -15,7 +15,7 @@ private[comrpc] trait VariantDeserializer extends BaseDeserializer {
     val vt = readInt32()
     vt match {
       case _ if (vt & VT_ARRAY) != 0 ⇒ readVariantArray()
-      case VT_UNKNOWN | VT_DISPATCH ⇒ readIUnknownOption()
+      case VT_UNKNOWN | VT_DISPATCH ⇒ readIDispatchableOption()  // To make any sense, VT_UNKNOWN should denote here an  IDispatch
       case _ ⇒ readSimpleVariant(vt)
     }
   }
@@ -66,5 +66,5 @@ private[comrpc] trait VariantDeserializer extends BaseDeserializer {
       case o ⇒ throw new COMException(DISP_E_BADVARTYPE, f"Unsupported Variant VT=$o%x")
     }
 
-  protected def readIUnknownOption(): Option[IUnknown] = throw new UnsupportedOperationException("readIUnknownOption is not implemented")  // Method is overridden
+  protected def readIDispatchableOption(): Option[IDispatchable] = throw new UnsupportedOperationException("readIDispatchableOption is not implemented")  // Method is overridden
 }

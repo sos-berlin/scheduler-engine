@@ -1,0 +1,34 @@
+package com.sos.scheduler.engine.taskserver.task
+
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
+import scala.collection.mutable
+
+/**
+ * @author Joacim Zschimmer
+ */
+final class ShellProcessTaskTest extends FreeSpec {
+  "ShellProcessTask" in {
+    val exitCode = 7
+    val testString = "TEST-SCRIPT"
+    val conf = TaskConfiguration(jobName = "TEST-JOB", taskId = TaskId(1), language = ShellScriptLanguage, script = s"echo $testString\nexit $exitCode")
+    val buffer = mutable.Buffer[String]()
+    val (result, files) = autoClosing(new ShellProcessTask(conf, log = { o ⇒ buffer += o })) { task ⇒
+      task.start()
+      (task.step(), task.files)
+    }
+    SafeXML.loadString(result) shouldEqual <process.result spooler_process_result="true" exit_code={exitCode.toString}/>
+    assert(buffer contains testString)
+    waitForCondition(timeout = 3.s, step = 10.ms) { files forall { !_.exists }}  // Waiting for Future
+    files filter { _.exists } match {
+      case Nil ⇒
+      case undeletedFiles ⇒ fail(s"Files not deleted:\n" + undeletedFiles.mkString("\n"))
+    }
+  }
+}

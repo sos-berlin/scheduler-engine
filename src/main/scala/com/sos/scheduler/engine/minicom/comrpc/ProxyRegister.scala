@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister._
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.HRESULT.E_POINTER
-import com.sos.scheduler.engine.minicom.types.{COMException, IUnknown}
+import com.sos.scheduler.engine.minicom.types.{COMException, IDispatchable}
 import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
@@ -14,41 +14,34 @@ import scala.util.control.NonFatal
  * @author Joacim Zschimmer
  */
 @Singleton
-private[comrpc] final class ProxyRegister @Inject private {
-  private val proxyIdToIUnknown = HashBiMap.create[ProxyId, IUnknown]()
-  private val iunknownToProxyId = proxyIdToIUnknown.inverse
+/*TODO private[comrpc]*/ final class ProxyRegister @Inject private {
+  private val proxyIdToIDispatch = HashBiMap.create[ProxyId, IDispatchable]()
+  private val iunknownToProxyId = proxyIdToIDispatch.inverse
   private val proxyIdGenerator = ProxyId.newGenerator()
 
-  def registerProxyId(proxyId: ProxyId, name: String): Option[IUnknown] =
-    if (proxyId == ProxyId.Null)
-      None
-    else {
-      val iUnknown = ProxyIUnknown(proxyId, name)
-      add(proxyId, iUnknown)
-      Some(iUnknown)
-    }
+  def registerProxy(proxy: ProxyIDispatch): Unit = add(proxy.id, proxy)
 
-  def iUnknownToProxyId(iunknown: IUnknown): (ProxyId, Boolean) =
+  def iDispatchToProxyId(iDispatch: IDispatchable): (ProxyId, Boolean) =
     synchronized {
-      iunknownToProxyId.get(iunknown) match {
+      iunknownToProxyId.get(iDispatch) match {
         case null ⇒
           val proxyId = proxyIdGenerator.next()
-          add(proxyId, iunknown)
+          add(proxyId, iDispatch)
           (proxyId, true)
         case o ⇒ (o, false)
       }
     }
 
-  private def add(proxyId: ProxyId, iUnknown: IUnknown): Unit =
+  private def add(proxyId: ProxyId, iDispatch: IDispatchable): Unit =
     synchronized {
-      if (proxyIdToIUnknown containsKey proxyId) throw new DuplicateKeyException(s"$proxyId already registered")
-      if (iunknownToProxyId containsKey iUnknown) throw new DuplicateKeyException(s"IUnknown '$iUnknown' already registered")
-      proxyIdToIUnknown.put(proxyId, iUnknown)
+      if (proxyIdToIDispatch containsKey proxyId) throw new DuplicateKeyException(s"$proxyId already registered")
+      if (iunknownToProxyId containsKey iDispatch) throw new DuplicateKeyException(s"IDispatch '$iDispatch' already registered")
+      proxyIdToIDispatch.put(proxyId, iDispatch)
     }
 
   def removeProxy(proxyId: ProxyId): Unit =
     synchronized {
-      proxyIdToIUnknown.remove(proxyId) match {
+      proxyIdToIDispatch.remove(proxyId) match {
         case o: AutoCloseable ⇒
           try o.close()
           catch { case NonFatal(t) ⇒ logger.error(s"Suppressed: $t", t) }
@@ -56,21 +49,20 @@ private[comrpc] final class ProxyRegister @Inject private {
       }
     }
 
-  def iUnknownOption(proxyId: ProxyId): Option[IUnknown] =
+  def iDispatchableOption(proxyId: ProxyId): Option[IDispatchable] =
     if (proxyId == ProxyId.Null) None else Some(apply(proxyId))
 
-  def apply(proxyId: ProxyId): IUnknown =
+  def apply(proxyId: ProxyId): IDispatchable =
     if (proxyId == ProxyId.Null) throw new COMException(E_POINTER)
-    else synchronized { proxyIdToIUnknown(proxyId) }
+    else synchronized { proxyIdToIDispatch(proxyId) }
 
   override def toString = s"${getClass.getSimpleName}($size proxies)"
 
-  def size = proxyIdToIUnknown.size
+  def size = proxyIdToIDispatch.size
 }
 
 object ProxyRegister {
   private val logger = Logger(getClass)
 
-  final case class ProxyIUnknown(id: ProxyId, name: String) extends IUnknown
   class DuplicateKeyException(override val getMessage: String) extends RuntimeException
 }

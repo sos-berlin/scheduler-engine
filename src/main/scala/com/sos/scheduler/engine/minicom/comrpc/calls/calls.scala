@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.minicom.comrpc.calls
 
-import com.sos.scheduler.engine.minicom.types.{CLSID, DISPID, IID, IUnknown}
+import com.sos.scheduler.engine.minicom.types.{CLSID, DISPID, DispatchType, IID, IUnknown}
 import scala.collection.immutable
 
 /**
@@ -15,30 +15,30 @@ final case class CreateInstanceCall(
   outer: Option[IUnknown],
   context: Int,
   iids: immutable.Seq[IID])
-  extends SessionCall
+extends SessionCall
 
 trait ObjectCall extends Call {
   def proxyId: ProxyId
 }
 
 final case class ReleaseCall(proxyId: ProxyId)
-  extends ObjectCall
+extends ObjectCall
 
 final case class QueryInterfaceCall(proxyId: ProxyId, iid: IID)
-  extends ObjectCall
+extends ObjectCall
 
 final case class GetIDsOfNamesCall(proxyId: ProxyId, iid: IID, localeId: Int, names: immutable.Seq[String])
-  extends ObjectCall
+extends ObjectCall
 
 final case class InvokeCall(
   proxyId: ProxyId,
   dispatchId: DISPID,
   iid: IID,
-  flags: Int,
-  unnamedArguments: immutable.Seq[Any],
-  namedArguments: immutable.Seq[(DISPID, Any)])
-  extends ObjectCall
+  dispatchTypes: immutable.Set[DispatchType],
+  arguments: immutable.Seq[Any],
+  namedArguments: immutable.Seq[(DISPID, Any)] = Nil)
+extends ObjectCall
 
 final case class CallCall(proxyId: ProxyId, methodName: String, arguments: immutable.Seq[Any])
-  extends ObjectCall
+extends ObjectCall
 

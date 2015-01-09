@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.minicom.types
 
+import com.sos.scheduler.engine.minicom.types.HRESULT._
 import java.util.UUID
+import scala.collection.{immutable, mutable}
 
 /**
  * COM Class ID
@@ -16,6 +18,10 @@ object CLSID {
  * COM Interface ID
  */
 final case class IID(uuid: UUID)
+
+object IID {
+  val Null = IID(new UUID(0, 0))
+}
 
 /**
  * COM Dispatch ID, refers to a name for a method or a property.
@@ -72,7 +78,7 @@ object HRESULT {
   //final val E_ACCESSDENIED                = HRESULT(0x80070005)
   //final val E_HANDLE                      = HRESULT(0x80070006)
   //final val E_OUTOFMEMORY                 = HRESULT(0x8007000E)
-  //final val E_INVALIDARG                  = HRESULT(0x80070057)
+  final val E_INVALIDARG                  = HRESULT(0x80070057)
   //
   //final val CO_S_NOTALLINTERFACES         = HRESULT(0x00080012)
 }
@@ -80,12 +86,25 @@ object HRESULT {
 /**
  * Type of call using a [[DISPID]].
  */
-sealed trait DispatchType
-object DISPATCH_METHOD extends DispatchType
-object DISPATCH_PROPERTYPUT extends DispatchType
-object DISPATCH_PROPERTYPUTREF extends DispatchType
-object DISPATCH_PROPERTYGET extends DispatchType
+sealed abstract class DispatchType(val value: Int)
+
+object DispatchType {
+  private[types] val values = Vector(DISPATCH_METHOD, DISPATCH_PROPERTYGET, DISPATCH_PROPERTYPUT, DISPATCH_PROPERTYPUTREF)
+
+  def set(bits: Int): immutable.Set[DispatchType] = {
+    if ((bits & ~0xF) != 0) throw new COMException(E_INVALIDARG, f"Invalid DispatchType $bits%08x")
+    val result = new mutable.ArrayBuffer[DispatchType](values.size)
+    for (dispatchType ← values) {
+      if ((bits & dispatchType.value) != 0) result += dispatchType
+    }
+    result.toSet
+  }
+}
+object DISPATCH_METHOD extends DispatchType(1)
+object DISPATCH_PROPERTYGET extends DispatchType(2)
+object DISPATCH_PROPERTYPUT extends DispatchType(4)
+object DISPATCH_PROPERTYPUTREF extends DispatchType(8)
 
 class COMException(val hResult: HRESULT, message: String = "") extends RuntimeException {
-  override def getMessage = List(hResult.toString, message).mkString(" ")
+  override def getMessage = List(hResult.comString, message).mkString(" ")
 }

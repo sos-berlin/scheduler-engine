@@ -70,15 +70,12 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Other environment variables are unchanged" in {
-    pending
     val path = (sys.env collectFirst { case ("PATH" | "Path", v) ⇒ v }).head
     assert(shellOutput contains s"PATH=$path")
   }
 
   "stdout in task log" in {
-    pendingUntilFixed {
-      assert(shellOutput contains "STDOUT AGENT ECHO")
-    }
+    assert(shellOutput contains "STDOUT AGENT ECHO")
   }
 
   "stderr in task log" in {
