@@ -14,6 +14,7 @@ final class ShellProcessTask(conf: TaskConfiguration, log: String ⇒ Unit) exte
   override def start() = {
     process = ShellProcessStarter.start(
       name = conf.jobName,
+      extraEnvironment = conf.extraEnvironment,
       scriptString = conf.script)
     closer.registerAutoCloseable(process)
   }

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.taskserver.job
 
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.minicom.idispatch.{IDispatchFactory, IDispatchable, invocable}
@@ -85,7 +86,7 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
     val ScriptKey = "script"
     val JobKey = "job"
     val TaskIdKey = "task_id"
-    //val EnvironmentKey = "environment"
+    val EnvironmentKey = "environment"
     //val HasOrderKey = "has_order"
     //val ProcessFilenameKey = "process.filename"
     //val ProcessParam_rawKey = "process.param_raw"
@@ -105,7 +106,8 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
     LanguageKey,
     ScriptKey,
     JobKey,
-    TaskIdKey)
+    TaskIdKey,
+    EnvironmentKey)
 
   private def toNamedObjectMap(names: VariantArray, anys: VariantArray): NamedObjects = {
     val nameStrings = names.as[String]
@@ -126,8 +128,20 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
     TaskConfiguration(
       jobName = args(JobKey),
       taskId = TaskId(args(TaskIdKey).toInt),
+      extraEnvironment = parseEnvironment(args(EnvironmentKey)),
       language = ScriptLanguage(args(LanguageKey)),
       script = Script.parseXmlString(args(ScriptKey)).string
     )
+
+  private def parseEnvironment(string: String): Map[String, String] =
+    ScalaXMLEventReader.parseString(string) { eventReader ⇒
+      import eventReader._
+      parseElement("environment") {
+        attributeMap("count")
+        parseEachRepeatingElement("variable") {
+          attributeMap("name") → attributeMap.getOrElse("value", "")
+        }
+      }
+    }.toMap
 }
 

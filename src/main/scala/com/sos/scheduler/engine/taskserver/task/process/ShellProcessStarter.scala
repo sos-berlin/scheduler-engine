@@ -10,6 +10,7 @@ import java.nio.file.Files.createTempFile
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.attribute.PosixFilePermissions._
 import java.nio.file.{Files, Path}
+import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
@@ -20,7 +21,7 @@ import scala.util.control.NonFatal
 object ShellProcessStarter {
   private val logger = Logger(getClass)
 
-  def start(name: String, scriptString: String): ShellProcess = {
+  def start(name: String, extraEnvironment: Map[String, String], scriptString: String): ShellProcess = {
     val file = OS.newTemporaryShellFile(name)
     try {
       file.toFile.write(scriptString, OS.fileEncoding)
@@ -29,6 +30,7 @@ object ShellProcessStarter {
       processBuilder.command(OS.toCommandArguments(file): _*)
       processBuilder.redirectOutput(stdFileMap(Stdout))
       processBuilder.redirectError(stdFileMap(Stderr))
+      processBuilder.environment ++= extraEnvironment
       val process = processBuilder.start()
       process.getOutputStream.close() // Empty stdin
       val shellProcess = new ShellProcess(process, file, stdFileMap, OS.fileEncoding)

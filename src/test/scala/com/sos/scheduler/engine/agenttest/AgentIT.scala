@@ -29,7 +29,7 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
   private lazy val agentTcpPort = findRandomFreeTcpPort()
   private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
   private var events: immutable.Seq[Event] = null
-  private lazy val shellOutput = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o }
+  private lazy val shellOutput = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
   private lazy val taskLogLines = events collect { case e: InfoLogEvent ⇒ e.message }
 
   protected override def onSchedulerActivated(): Unit = {
@@ -60,12 +60,13 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
   "Job parameter" in {
     shellOutput
-    pending
-    assert(shellOutput contains s"$ParamName=$ParamValue")
+    pendingUntilFixed {
+      // TODO Parameter via IDispatch vom Scheduler holen, siehe Process_module_instance::fill_process_environment_with_params()
+      assert(shellOutput contains s"$ParamName=$ParamValue")
+    }
   }
 
   "Job environment variable" in {
-    pending
     assert(shellOutput contains s"$EnvName=$EnvValue")
   }
 
@@ -79,9 +80,7 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "stderr in task log" in {
-    pendingUntilFixed {
-      assert(shellOutput contains "STDERR AGENT ECHO")
-    }
+    assert(shellOutput contains "STDERR AGENT ECHO")
   }
 
   "Job.stateText" in {
@@ -112,18 +111,19 @@ private object AgentIT {
         if (isWindows) s"""
           |@echo off
           |echo !$FirstStdoutLine
-          |echo !$ParamName=%$ParamName%
+          |echo !$ParamName=%SCHEDULER_PARAM_$ParamName%
           |echo !$EnvName=%$EnvName%
           |echo !PATH=%PATH%
           |echo !STDOUT AGENT ECHO
-          |echo !STDERR AGENT ECHO >/dev/stderr
+          |echo !STDERR AGENT ECHO 1>&2
           |exit ${TestResultCode.value}""".stripMargin
         else s"""
           |echo !$FirstStdoutLine
-          |echo !TESTPARAM=$$TESTPARAM
-          |echo !TESTVALUE=$$TESTVALUE
+          |echo !$ParamName=$$SCHEDULER_PARAM_$ParamName
+          |echo !$EnvName=$$$EnvName
           |echo !PATH=$$PATH
           |echo !STDOUT AGENT ECHO
+          |echo !STDERR AGENT ECHO 1>&2
           |exit ${TestResultCode.value}""".stripMargin
       }</script>
     </job>

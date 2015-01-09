@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.data.job.TaskId
 final case class TaskConfiguration(
   jobName: String,
   taskId: TaskId,
+  extraEnvironment: Map[String, String],
   language: ScriptLanguage,
   script: String) {
 }
