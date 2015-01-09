@@ -72,5 +72,5 @@ final class ProxyRegisterTest extends FreeSpec {
   }
 
   private def newProxy(proxyId: ProxyId, name: String = "") =
-    new ProxyIDispatch.Simple(mock[MessageConnection], proxyRegister, proxyId, name)
+    new ProxyIDispatch.Simple(mock[SerialContext], proxyId, name)
 }

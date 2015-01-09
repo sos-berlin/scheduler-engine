@@ -12,8 +12,7 @@ import scala.collection.mutable
  * @author Joacim Zschimmer
  */
 final class ResultDeserializer(
-  protected val connection: MessageConnection,
-  protected val proxyRegister: ProxyRegister,
+  protected val serialContext: SerialContext,
   protected val buffer: ByteBuffer)
 extends IUnknownDeserializer {
 

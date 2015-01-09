@@ -5,14 +5,12 @@ import com.sos.scheduler.engine.minicom.Dispatcher.implicits._
 import com.sos.scheduler.engine.minicom.comrpc.CallExecutor.CreateIDispatchableByCLSID
 import com.sos.scheduler.engine.minicom.comrpc.calls._
 import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID}
-import javax.inject.{Inject, Singleton}
 import org.scalactic.Requirements._
 
 /**
  * @author Joacim Zschimmer
  */
-@Singleton
-final class CallExecutor @Inject private(createIDispatchable: CreateIDispatchableByCLSID, proxyRegister: ProxyRegister) {
+final class CallExecutor(createIDispatchable: CreateIDispatchableByCLSID, proxyRegister: ProxyRegister) {
 
   def execute(call: Call): Result = call match {
     case CreateInstanceCall(clsid, outer, context, iids) ⇒

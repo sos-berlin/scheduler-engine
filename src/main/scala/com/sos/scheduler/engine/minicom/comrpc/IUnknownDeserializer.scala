@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.minicom.comrpc
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.CLSID
 import com.sos.scheduler.engine.taskserver.spoolerapi.ProxySpoolerLog
-import java.util.UUID
 import scala.collection.immutable
 
 /**
@@ -11,8 +10,7 @@ import scala.collection.immutable
  */
 private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
 
-  protected val connection: MessageConnection
-  protected val proxyRegister: ProxyRegister
+  protected val serialContext: SerialContext
 
   override final def readIDispatchableOption() = {
     val proxyId = ProxyId(readInt64())
@@ -26,13 +24,14 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
         val value = readVariant()
         name → value
       }
-      val proxy = if (proxyClsid == CLSID(UUID.fromString("feee47a6-6c1b-11d8-8103-000476ee8afb"))) {
-        new ProxySpoolerLog(connection, proxyRegister, proxyId, name)
-      } else 
-        new ProxyIDispatch.Simple(connection, proxyRegister, proxyId, name)
-      proxyRegister.registerProxy(proxy)
+      val proxy = proxyClsid match {
+        case ProxySpoolerLog.clsid ⇒ new ProxySpoolerLog(serialContext, proxyId, name)  // TODO Proxy CLSID register, CreateIDispatchableByCLSID?
+        case _/*TODO CLSID.Null*/ ⇒ new ProxyIDispatch.Simple(serialContext, proxyId, name)
+        //case o ⇒ throw new IllegalArgumentException(s"Unknown proxy $o")
+      }
+      serialContext.registerProxy(proxy)
       Some(proxy)
     } else
-      proxyRegister.iDispatchableOption(proxyId)
+      serialContext.iDispatchableOption(proxyId)
   }
 }

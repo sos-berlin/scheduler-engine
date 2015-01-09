@@ -6,15 +6,13 @@ import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister._
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.HRESULT.E_POINTER
 import com.sos.scheduler.engine.minicom.types.{COMException, IDispatchable}
-import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
  */
-@Singleton
-/*TODO private[comrpc]*/ final class ProxyRegister @Inject private {
+private[comrpc] final class ProxyRegister {
   private val proxyIdToIDispatch = HashBiMap.create[ProxyId, IDispatchable]()
   private val iunknownToProxyId = proxyIdToIDispatch.inverse
   private val proxyIdGenerator = ProxyId.newGenerator()
