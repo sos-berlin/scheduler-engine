@@ -22,7 +22,7 @@ final class CallExecutor(createIDispatchable: CreateIDispatchableByCLSID, proxyR
       EmptyResult
 
     case CallCall(proxyId, methodName, arguments) ⇒
-      val iDispatchable = cast[IDispatchable](proxyRegister(proxyId))
+      val iDispatchable = cast[IDispatchable](proxyRegister.iDispatchable(proxyId))
       InvokeResult(result = iDispatchable.call(methodName, arguments))
   }
 }

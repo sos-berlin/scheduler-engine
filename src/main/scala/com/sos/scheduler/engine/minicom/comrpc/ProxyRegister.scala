@@ -47,10 +47,7 @@ private[comrpc] final class ProxyRegister {
       }
     }
 
-  def iDispatchableOption(proxyId: ProxyId): Option[IDispatchable] =
-    if (proxyId == ProxyId.Null) None else Some(apply(proxyId))
-
-  def apply(proxyId: ProxyId): IDispatchable =
+  def iDispatchable(proxyId: ProxyId): IDispatchable =
     if (proxyId == ProxyId.Null) throw new COMException(E_POINTER)
     else synchronized { proxyIdToIDispatch(proxyId) }
 

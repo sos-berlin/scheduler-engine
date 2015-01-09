@@ -4,8 +4,7 @@ import com.google.inject.Guice
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.minicom.comrpc.ProxyRegister.DuplicateKeyException
 import com.sos.scheduler.engine.minicom.comrpc.calls.ProxyId
-import com.sos.scheduler.engine.minicom.types.HRESULT.E_POINTER
-import com.sos.scheduler.engine.minicom.types.{COMException, IDispatch, IDispatchable}
+import com.sos.scheduler.engine.minicom.types.{IDispatch, IDispatchable}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.FreeSpec
@@ -27,8 +26,7 @@ final class ProxyRegisterTest extends FreeSpec {
     proxyRegister.registerProxy(proxy)
     proxy.id shouldEqual externalProxyId
     proxyRegister.iDispatchToProxyId(proxy) shouldEqual (externalProxyId, false)
-    proxyRegister.apply(externalProxyId) shouldEqual proxy
-    proxyRegister.iDispatchableOption(externalProxyId) shouldEqual Some(proxy)
+    proxyRegister.iDispatchable(externalProxyId) shouldEqual proxy
     proxyRegister.size shouldEqual 1
     intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(externalProxyId)) }
   }
@@ -39,8 +37,7 @@ final class ProxyRegisterTest extends FreeSpec {
     val (proxyId, true) = proxyRegister.iDispatchToProxyId(iDispatch)
     proxyId.index shouldEqual 1
     proxyRegister.iDispatchToProxyId(iDispatch) shouldEqual (proxyId, false)
-    proxyRegister.apply(proxyId) shouldEqual iDispatch
-    proxyRegister.iDispatchableOption(proxyId) shouldEqual Some(iDispatch)
+    proxyRegister.iDispatchable(proxyId) shouldEqual iDispatch
     intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(proxyId)) }
 
     proxyRegister.size shouldEqual 2
@@ -55,11 +52,6 @@ final class ProxyRegisterTest extends FreeSpec {
     proxyRegister.size shouldEqual 2
     proxyRegister.removeProxy(externalProxyId)
     proxyRegister.size shouldEqual 2
-  }
-
-  "ProxyId.Null" in {
-    intercept[COMException] { proxyRegister.apply(ProxyId.Null) } .hResult shouldEqual E_POINTER
-    proxyRegister.iDispatchableOption(ProxyId.Null) shouldEqual None
   }
 
   "remoteProxy closes AutoCloseable" in {

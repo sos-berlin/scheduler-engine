@@ -8,8 +8,8 @@ import com.sos.scheduler.engine.minicom.comrpc.CallSerializer._
 import com.sos.scheduler.engine.minicom.comrpc.ErrorSerializer._
 import com.sos.scheduler.engine.minicom.comrpc.ResultSerializer._
 import com.sos.scheduler.engine.minicom.comrpc.StandardSerialContext._
-import com.sos.scheduler.engine.minicom.comrpc.calls.{ProxyId, Call}
-import com.sos.scheduler.engine.minicom.types.{IID, CLSID, IDispatchable}
+import com.sos.scheduler.engine.minicom.comrpc.calls.{Call, ProxyId}
+import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID}
 import java.nio.ByteBuffer
 import scala.util.control.NonFatal
 
@@ -22,9 +22,9 @@ extends SerialContext {
   private val proxyRegister = new ProxyRegister
   private val callExecutor = new CallExecutor(toCreateIDispatchableByCLSID(iDispatchFactories), proxyRegister)
 
-  private[comrpc] def registerProxy(proxy: ProxyIDispatch): Unit = proxyRegister.registerProxy(proxy)
+  private[comrpc] def registerProxy(proxy: ProxyIDispatch) = proxyRegister.registerProxy(proxy)
 
-  private[comrpc] def iDispatchableOption(proxyId: ProxyId): Option[IDispatchable] = proxyRegister.iDispatchableOption(proxyId)
+  private[comrpc] def iDispatchable(proxyId: ProxyId) = proxyRegister.iDispatchable(proxyId)
 
   def run() = while (processNextMessage()) {}
 
@@ -67,6 +67,6 @@ object StandardSerialContext {
       require(factory.iid == iid, s"IID $iid is not supported by $factory")
       factory()
     }
-    createIDispatchable
+    createIDispatchable  // Return the function
   }
 }

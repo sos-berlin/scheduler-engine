@@ -32,6 +32,7 @@ private[comrpc] trait IUnknownDeserializer extends VariantDeserializer {
       serialContext.registerProxy(proxy)
       Some(proxy)
     } else
-      serialContext.iDispatchableOption(proxyId)
+      if (proxyId == ProxyId.Null) None
+      else Some(serialContext.iDispatchable(proxyId))
   }
 }

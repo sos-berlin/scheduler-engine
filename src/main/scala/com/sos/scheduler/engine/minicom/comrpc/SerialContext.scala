@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.minicom.types.IDispatchable
 trait SerialContext {
   private[comrpc] def registerProxy(proxy: ProxyIDispatch): Unit
 
-  private[comrpc] def iDispatchableOption(proxyId: ProxyId): Option[IDispatchable]
+  private[comrpc] def iDispatchable(proxyId: ProxyId): IDispatchable
 
   private[comrpc] def sendReceive(call: Call): ResultDeserializer
 }
