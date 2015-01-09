@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.commands
 
-import com.sos.scheduler.engine.agent.task.RemoteTaskId
+import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

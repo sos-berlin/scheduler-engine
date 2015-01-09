@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver.configuration
 
-import com.sos.scheduler.engine.agent.task.RemoteTaskId
+import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import java.net.InetSocketAddress
 
 /**

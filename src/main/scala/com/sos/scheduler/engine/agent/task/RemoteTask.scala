@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.agent.task
 
+import com.sos.scheduler.engine.data.agent.RemoteTaskId
+
 /**
  * @author Joacim Zschimmer
  */

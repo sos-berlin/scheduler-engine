@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.agent.commands
 
+import com.sos.scheduler.engine.agent.common.Xmls
 import com.sos.scheduler.engine.agent.common.Xmls._
-import com.sos.scheduler.engine.agent.task.RemoteTaskId
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.scheduler.engine.data.agent.RemoteTaskId
 
 /**
  * @author Joacim Zschimmer

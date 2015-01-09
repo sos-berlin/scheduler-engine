@@ -5,10 +5,11 @@ import com.google.common.io.Closer
 import com.google.inject.Provides
 import com.sos.scheduler.engine.agent.command.{AgentCommandExecutor, CommandExecutor}
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.task.{RemoteTask, RemoteTaskFactory, RemoteTaskId}
+import com.sos.scheduler.engine.agent.task.{RemoteTask, RemoteTaskFactory}
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
 import javax.inject.Singleton
 

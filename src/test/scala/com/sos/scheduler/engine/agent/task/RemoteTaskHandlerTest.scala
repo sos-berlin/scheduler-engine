@@ -4,6 +4,7 @@ import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.agent.commands.{CloseRemoteTask, CloseRemoteTaskResponse, StartRemoteTask, StartRemoteTaskResponse}
 import com.sos.scheduler.engine.agent.task.RemoteTaskHandlerTest._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
 import javax.inject.Singleton
 import org.junit.runner.RunWith
