@@ -11,20 +11,22 @@ import com.sos.scheduler.engine.minicom.comrpc.StandardRemoting._
 import com.sos.scheduler.engine.minicom.comrpc.calls.{Call, ProxyId}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IDispatchable, IID}
 import java.nio.ByteBuffer
+import scala.collection.breakOut
 import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
  */
-final class StandardRemoting(connection: MessageConnection, iDispatchFactories: Iterable[IDispatchFactory])
+final class StandardRemoting(
+  connection: MessageConnection,
+  iDispatchFactories: Iterable[IDispatchFactory],
+  proxyIDispatchFactories: Iterable[ProxyIDispatchFactory])
 extends Remoting {
 
   private val proxyRegister = new ProxyRegister
   private val callExecutor = new CallExecutor(toCreateIDispatchableByCLSID(iDispatchFactories), proxyRegister)
-
-  private[comrpc] def registerProxy(proxy: ProxyIDispatch) = proxyRegister.registerProxy(proxy)
-
-  private[comrpc] def iDispatchable(proxyId: ProxyId) = proxyRegister.iDispatchable(proxyId)
+  private val proxyClsidMap: Map[CLSID, ProxyIDispatchFactory.Fun] =
+    (List(SimpleProxyIDispatch) ++ proxyIDispatchFactories).map { o ⇒ o.clsid → o.apply _ } (breakOut)
 
   def run() = while (processNextMessage()) {}
 
@@ -48,6 +50,15 @@ extends Remoting {
       logger.debug(t.toString, t)
       serializeError(t)
     }
+
+  private[comrpc] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]) = {
+    val f = proxyClsidMap.getOrElse(proxyClsid, proxyClsidMap(CLSID.Null) /* Solange nicht alle Proxys implementiert sind */)
+    val result = f(this, proxyId, name, properties)
+    proxyRegister.registerProxy(result)
+    result
+  }
+
+  private[comrpc] def iDispatchable(proxyId: ProxyId) = proxyRegister.iDispatchable(proxyId)
 
   def sendReceive(call: Call): ResultDeserializer = {
     val (byteArray, length) = serializeCall(proxyRegister, call)

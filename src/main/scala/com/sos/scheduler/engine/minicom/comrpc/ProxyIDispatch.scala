@@ -28,9 +28,4 @@ trait ProxyIDispatch extends IDispatch {
 }
 
 object ProxyIDispatch {
-  final class Simple(
-    protected val remoting: Remoting,
-    val id: ProxyId,
-    val name: String)
-  extends ProxyIDispatch
 }

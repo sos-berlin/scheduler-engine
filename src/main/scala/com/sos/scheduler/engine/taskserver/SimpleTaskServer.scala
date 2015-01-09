@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.minicom.comrpc.StandardRemoting
 import com.sos.scheduler.engine.taskserver.SimpleTaskServer._
 import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
 import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer
+import com.sos.scheduler.engine.taskserver.spoolerapi.ProxySpoolerLog
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration
@@ -17,7 +18,7 @@ import scala.concurrent.duration.Duration
 final class SimpleTaskServer(conf: StartConfiguration) extends TaskServer with HasCloser {
 
   private val controllingScheduler = new TcpConnection(conf.controllerAddress).closeWithCloser
-  private val remoting = new StandardRemoting(controllingScheduler, List(RemoteModuleInstanceServer))
+  private val remoting = new StandardRemoting(controllingScheduler, List(RemoteModuleInstanceServer), List(ProxySpoolerLog))
 
   private val terminatedPromise = Promise[Unit]()
   def terminated = terminatedPromise.future
