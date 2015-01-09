@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.minicom.remoting.proxy
 
-import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, IDispatch}
+import com.sos.scheduler.engine.minicom.idispatch.{DISPATCH_METHOD, DISPATCH_PROPERTYGET, DISPID, DispatchType, IDispatch}
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
-import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
@@ -14,6 +13,10 @@ trait ProxyIDispatch extends IDispatch {
 
   final def getIdOfName(name: String) = remoting.getIdOfName(id, name)
 
-  final def invoke(dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]) =
-    remoting.invoke(id, dispId, dispatchType, arguments)
+  final def invokeGet(dispId: DISPID): Any = invoke(dispId, Set(DISPATCH_PROPERTYGET))
+
+  final def invokeMethod(dispId: DISPID, arguments: Seq[Any]): Any = invoke(dispId, Set(DISPATCH_METHOD), arguments)
+
+  final def invoke(dispId: DISPID, dispatchTypes: Set[DispatchType], arguments: Seq[Any] = Nil) =
+    remoting.invoke(id, dispId, dispatchTypes, arguments)
 }

@@ -4,7 +4,6 @@ import com.sos.scheduler.engine.minicom.idispatch.Dispatcher._
 import com.sos.scheduler.engine.minicom.types.HRESULT._
 import com.sos.scheduler.engine.minicom.types.{COMException, VariantArray}
 import java.lang.reflect.{InvocationTargetException, Method}
-import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
@@ -25,8 +24,8 @@ final class Dispatcher(val delegate: IDispatchable) extends IDispatch {
     methodIndices.head
   }
 
-  def invoke(dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]): Any = {
-    if (dispatchType != DISPATCH_METHOD) throw new COMException(DISP_E_MEMBERNOTFOUND, "Only DISPATCH_METHOD is supported")
+  def invoke(dispId: DISPID, dispatchTypes: Set[DispatchType], arguments: Seq[Any]): Any = {
+    if (dispatchTypes != Set(DISPATCH_METHOD)) throw new COMException(DISP_E_MEMBERNOTFOUND, "Only DISPATCH_METHOD is supported")
     val method = methods(dispId.value)
     invokeMethod(method, arguments)
   }

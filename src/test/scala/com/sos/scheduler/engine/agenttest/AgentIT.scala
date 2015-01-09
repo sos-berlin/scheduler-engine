@@ -60,10 +60,7 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
   "Job parameter" in {
     shellOutput
-    pendingUntilFixed {
-      // TODO Parameter via IDispatch vom Scheduler holen, siehe Process_module_instance::fill_process_environment_with_params()
-      assert(shellOutput contains s"$ParamName=$ParamValue")
-    }
+    assert(shellOutput contains s"$ParamName=$ParamValue")
   }
 
   "Job environment variable" in {

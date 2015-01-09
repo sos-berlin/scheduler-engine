@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
-import com.sos.scheduler.engine.taskserver.spoolerapi.SpoolerLog
+import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
 import com.sos.scheduler.engine.taskserver.task.NamedObjects._
 
 /**
@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.taskserver.task.NamedObjects._
  */
 final class NamedObjects private(val toMap: Map[String, IDispatchable]) {
   def spoolerLog: SpoolerLog = toMap(SpoolerLogName).asInstanceOf[SpoolerLog]  // instanceOf???
+  def spoolerTask: SpoolerTask = toMap(SpoolerTaskName).asInstanceOf[SpoolerTask]  // instanceOf???
 }
 
 object NamedObjects {

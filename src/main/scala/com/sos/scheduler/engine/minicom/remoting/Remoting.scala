@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.minicom.remoting
 
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.RichTraversableOnce
 import com.sos.scheduler.engine.minicom.idispatch.Dispatcher.implicits._
-import com.sos.scheduler.engine.minicom.idispatch.{DISPATCH_METHOD, DISPID, DispatchType, IDispatchFactory, IDispatchable}
+import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, IDispatchFactory, IDispatchable}
 import com.sos.scheduler.engine.minicom.remoting.Remoting._
 import com.sos.scheduler.engine.minicom.remoting.calls.{Call, CallCall, CreateInstanceCall, CreateInstanceResult, EmptyResult, GetIDsOfNamesCall, GetIDsOfNamesResult, InvokeCall, InvokeResult, ProxyId, ReleaseCall, Result}
 import com.sos.scheduler.engine.minicom.remoting.proxy.{ClientRemoting, ProxyIDispatchFactory, ProxyRegister, SimpleProxyIDispatch}
@@ -14,7 +15,7 @@ import com.sos.scheduler.engine.minicom.remoting.serial.{ResultDeserializer, Ser
 import com.sos.scheduler.engine.minicom.types.{CLSID, IID}
 import java.nio.ByteBuffer
 import org.scalactic.Requirements._
-import scala.collection.{breakOut, immutable}
+import scala.collection.breakOut
 import scala.util.control.NonFatal
 
 /**
@@ -85,8 +86,8 @@ extends ServerRemoting with ClientRemoting {
     dispIds.head
   }
 
-  private[remoting] def invoke(proxyId: ProxyId, dispId: DISPID, dispatchType: DispatchType, arguments: immutable.Seq[Any]) = {
-    val call = InvokeCall(proxyId, dispId, IID.Null, Set(DISPATCH_METHOD), arguments)
+  private[remoting] def invoke(proxyId: ProxyId, dispId: DISPID, dispatchTypes: Set[DispatchType], arguments: Seq[Any]) = {
+    val call = InvokeCall(proxyId, dispId, IID.Null, dispatchTypes, arguments.toImmutableSeq)
     val InvokeResult(value) = sendReceive(call).readInvokeResult()
     value
   }

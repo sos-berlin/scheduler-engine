@@ -38,7 +38,7 @@ extends IUnknownDeserializer {
     readByte() match {
       case MessageClass.Answer ⇒
         val hr = HRESULT(readInt32())
-        require(!hr.isError)
+        if (hr.isError) throw new COMException(hr)
       case MessageClass.Error ⇒
         val strings = mutable.Buffer[String]()
         for (_ ← 1 to 3) readString() match {

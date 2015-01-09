@@ -19,12 +19,12 @@ import scala.collection.{immutable, mutable}
 final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
   import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer._
 
+  private var argMap = mutable.Map[String, String]()
   private var conf: TaskConfiguration = null
   private var task: Task = null
 
   @invocable
   def construct(arguments: VariantArray): Unit = {
-    val argMap = mutable.Map[String, String]()
     for (keyValueString ← arguments.indexedSeq filterNot variant.isEmpty map cast[String]) {
       val KeyValueRegex(key, value) = keyValueString
       if (value.nonEmpty) {
@@ -34,14 +34,21 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
         }
       }
     }
-    conf = toTaskConfiguration(argMap.toMap)
   }
 
   @invocable
   def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
     val namedObjectMap = toNamedObjectMap(names = objectNamesAnys, anys = objectAnys)
-    val log = namedObjectMap.spoolerLog.info _
-    task = languageToTask(conf.language, log).closeWithCloser
+    val spoolerLog = namedObjectMap.spoolerLog
+    val spoolerTask = namedObjectMap.spoolerTask
+    conf = toTaskConfiguration(
+        argMap.toMap,
+        params = parseVariableSet(spoolerTask.paramsXml) ++ (spoolerTask.orderParamsXml match {
+          case "" ⇒ Map()
+          case o ⇒ parseVariableSet(o)
+        }))
+    task = languageToTask(conf.language, spoolerLog.info).closeWithCloser
+
     task.start()
   }
 
@@ -73,6 +80,7 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
 object RemoteModuleInstanceServer extends IDispatchFactory {
   val clsid = CLSID(UUID.fromString("feee47a3-6c1b-11d8-8103-000476ee8afb"))
   val iid = IID(UUID.fromString("feee47a2-6c1b-11d8-8103-000476ee8afb"))
+  private val EnvironmentParameterPrefix = "SCHEDULER_PARAM_"
   private val logger = Logger(getClass)
 
   def apply() = new RemoteModuleInstanceServer
@@ -124,19 +132,20 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
   private def variantArrayToIDispatchables(a: VariantArray): immutable.IndexedSeq[IDispatchable] =
     a.indexedSeq.asInstanceOf[immutable.IndexedSeq[Some[_]]] map { case Some(o) ⇒ cast[IDispatchable](o) }
 
-  private def toTaskConfiguration(args: Map[String, String]) =
+  private def toTaskConfiguration(args: Map[String, String], params: Map[String, String]) =
     TaskConfiguration(
       jobName = args(JobKey),
       taskId = TaskId(args(TaskIdKey).toInt),
-      extraEnvironment = parseEnvironment(args(EnvironmentKey)),
+      extraEnvironment = parseVariableSet(args(EnvironmentKey)) ++ (params map { case (k, v) ⇒ s"$EnvironmentParameterPrefix$k" -> v }),
       language = ScriptLanguage(args(LanguageKey)),
-      script = Script.parseXmlString(args(ScriptKey)).string
+      script = Script.parseXmlString(args(ScriptKey)).string.trim
     )
 
-  private def parseEnvironment(string: String): Map[String, String] =
+  private def parseVariableSet(string: String, groupName: String = "", elementName: String = "variable"): Map[String, String] =
     ScalaXMLEventReader.parseString(string) { eventReader ⇒
       import eventReader._
-      parseElement("environment") {
+      val myGroupName = if (groupName.nonEmpty) groupName else peek.asStartElement.getName.getLocalPart
+      parseElement(myGroupName) {
         attributeMap("count")
         parseEachRepeatingElement("variable") {
           attributeMap("name") → attributeMap.getOrElse("value", "")
@@ -144,4 +153,3 @@ object RemoteModuleInstanceServer extends IDispatchFactory {
       }
     }.toMap
 }
-
