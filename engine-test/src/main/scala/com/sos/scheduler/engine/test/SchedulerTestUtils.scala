@@ -57,7 +57,7 @@ object SchedulerTestUtils {
     implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
     inSchedulerThread {
       val taskId = startJob(jobPath)
-      // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst ginge es verloren.
+      // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst könnte es verlorengehen
       val future = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
       (taskId, future)
     }
