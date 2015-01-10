@@ -134,6 +134,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     static State_cmd            as_state_cmd                ( const string& );
 
     virtual void                set_state_text              ( const string& text )                  = 0;
+    virtual string              state_text                  () const                                = 0;
 
     virtual void                notify_a_process_is_idle    ()                                      = 0;
 
@@ -334,6 +335,7 @@ struct Standard_job : Job
     void                        kill_task                   ( int task_id, bool immediately = false );
 
     void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
+    string                      state_text                  () const                                { return _state_text; }
 
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
     void                        remove_waiting_job_from_process_list();

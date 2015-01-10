@@ -84,6 +84,10 @@ struct Java_job : Job {
         _cppNewJobJ.setStateText(text);
     }
 
+    string state_text() const {
+        return "(state_text is not implemented)";
+    }
+
     void set_state_cmd(State_cmd cmd) {
         set_state_cmd(state_cmd_name(cmd));
     }

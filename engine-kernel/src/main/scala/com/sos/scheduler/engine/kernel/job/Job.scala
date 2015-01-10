@@ -33,6 +33,8 @@ with JobPersistence {
 
   def state = JobState.valueOf(cppProxy.state_name)
 
+  def stateText = cppProxy.state_text
+
   def needsProcess: Boolean = cppProxy.waiting_for_process
 
   protected def nextStartInstantOption: Option[Instant] =
