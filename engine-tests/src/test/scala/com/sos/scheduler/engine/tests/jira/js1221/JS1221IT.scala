@@ -22,33 +22,35 @@ import org.scalatest.junit.JUnitRunner
 final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
+  private val fileGenerator: Iterator[File] = Iterator from 1 map { i ⇒ directory / s"test-$i" }
 
-  "Existing file" in {
-    val file = newFile()
-    scheduler executeXml jobChainElem(directory)
-    scheduler executeXml <job_chain_node.modify job_chain="/test" state={AOrderState.string} action="next_state"/>
-    check(file)
-  }
+//  "Existing file" in {  DOES NOT WORK RELIABLE, because job chain cannot be created with next_state at once (atomic).
+//    val file = fileGenerator.next()
+//    check(file) {
+//      createFile(file)
+//      scheduler executeXml jobChainElem(directory)
+//      scheduler executeXml <job_chain_node.modify job_chain="/test" state={AOrderState.string} action="next_state"/>
+//    }
+//  }
 
   "Added file" in {
-    val file = newFile()
-    check(file)
-  }
-
-  private object newFile {
-    private val i = Iterator.from(1)
-
-    def apply() = {
-      val file = directory / s"test-${i.next()}"
-      onClose { file.delete() }
-      touch(file)
-      file
+    scheduler executeXml jobChainElem(directory)
+    scheduler executeXml <job_chain_node.modify job_chain="/test" state={AOrderState.string} action="next_state"/>
+    val file = fileGenerator.next()
+    checkFirstJobChainNodeIsSkipped(file) {
+      createFile(file)
     }
   }
 
-  private def check(file: File): Unit = {
+  def createFile(file: File): Unit = {
+    onClose { file.delete() }
+    touch(file)
+  }
+
+  private def checkFirstJobChainNodeIsSkipped(file: File)(body: ⇒ Unit): Unit = {
     val orderKey = TestJobChainPath.orderKey(file.getPath)
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      body
       eventPipe.nextAny[TaskStartedEvent].jobPath shouldEqual BJobPath
       eventPipe.nextKeyed[OrderStepStartedEvent](orderKey).state shouldEqual BOrderState
       eventPipe.nextKeyed[OrderFinishedEvent](orderKey)
