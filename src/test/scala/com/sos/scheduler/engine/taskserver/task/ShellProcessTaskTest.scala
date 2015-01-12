@@ -23,23 +23,25 @@ final class ShellProcessTaskTest extends FreeSpec {
     val testName = "TESTENV"
     val testValue = "TESTENV-VALUE"
     val testString = "TEST-SCRIPT"
-    val script = (if (isWindows) s"echo $testName=%$testName%" else s"echo $testName=$$$testName") + "\n" +
-      s"echo $testString\n" +
-      s"exit $exitCode"
     val conf = TaskConfiguration(
       jobName = "TEST-JOB",
       taskId = TaskId(1),
       extraEnvironment = Map(testName → testValue),
       language = ShellScriptLanguage,
-      script = script)
-    val buffer = mutable.Buffer[String]()
-    val (result, files) = autoClosing(new ShellProcessTask(conf, log = { o ⇒ buffer += o })) { task ⇒
+      script = (if (isWindows) s"@echo off\necho $testName=%$testName%" else s"echo $testName=$$$testName") + "\n" +
+        s"echo $testString\n" +
+        s"exit $exitCode")
+    val outputLines = mutable.Buffer[String]()
+    val (result, files) = autoClosing(new ShellProcessTask(conf, log = { o ⇒ outputLines += o })) { task ⇒
       task.start()
       (task.step(), task.files)
     }
-    SafeXML.loadString(result) shouldEqual <process.result spooler_process_result="true" exit_code={exitCode.toString}/>
-    assert(buffer contains testString)
-    assert(buffer contains s"$testName=$testValue")
+    SafeXML.loadString(result) shouldEqual <process.result
+      state_text={s"$testName=$testValue"}
+      spooler_process_result="true"
+      exit_code={exitCode.toString}/>
+    assert(outputLines contains testString)
+    assert(outputLines contains s"$testName=$testValue")
     waitForCondition(timeout = 3.s, step = 10.ms) { files forall { !_.exists }}  // Waiting for Future
     files filter { _.exists } match {
       case Nil ⇒

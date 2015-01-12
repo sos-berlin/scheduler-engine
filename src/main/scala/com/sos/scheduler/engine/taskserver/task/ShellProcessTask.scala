@@ -22,8 +22,11 @@ final class ShellProcessTask(conf: TaskConfiguration, log: String ⇒ Unit) exte
   override def end() = {}
 
   override def step() = {
-    val resultCode = process.waitForTermination(logOutput = log)
-    <process.result spooler_process_result="true" exit_code={resultCode.value.toString}/>.toString()
+    val resultCode = process.waitForTermination(logOutputLine = log)
+    <process.result
+      state_text={process.firstStdoutLine}
+      spooler_process_result="true"
+      exit_code={resultCode.value.toString}/>.toString()
   }
 
   def files = {

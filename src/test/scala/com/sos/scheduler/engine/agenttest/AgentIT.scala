@@ -3,14 +3,18 @@ package com.sos.scheduler.engine.agenttest
 import com.sos.scheduler.engine.agent.Main
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agenttest.AgentIT._
-import com.sos.scheduler.engine.common.scalautil.AutoClosing
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{JobPath, ResultCode, TaskEndedEvent}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -26,6 +30,8 @@ import scala.concurrent.duration._
 @RunWith(classOf[JUnitRunner])
 final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
+  import controller.{eventBus, newEventPipe, toleratingErrorCodes}
+
   private lazy val agentTcpPort = findRandomFreeTcpPort()
   private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
   private var events: immutable.Seq[Event] = null
@@ -39,13 +45,15 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
     Await.result(started, 5.seconds)
   }
 
-  // TODO Umgebungsvariablen, Parameter übergeben, Auftragsvariablen ändern, Stdout und Stderr periodisch ins Task-Protokoll übernehmen, result code, viele Tasks parallel und nacheinander
+  // TODO Parameter übergeben, Auftragsvariablen ändern, viele Tasks parallel und nacheinander
 
-  "Run shell job" in {
-    AutoClosing.autoClosing(controller.newEventPipe()) { eventPipe ⇒
-      controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
-        // "Process terminated with exit code 42"
-        runJobAndWaitForEnd(TestJobPath)
+  "Run shell job via order" in {
+    autoClosing(newEventPipe()) { eventPipe ⇒
+      toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
+        val orderKey = TestJobchainPath orderKey "1"
+        eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+          scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
+        }
       }
       events = eventPipe.queued[Event]
     }
@@ -55,16 +63,23 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
     assertResult(List(TestResultCode)) {
       events collect { case TaskEndedEvent(_, TestJobPath, resultCode) ⇒ resultCode }
     }
-    controller.eventBus.dispatchEvents()
+    eventBus.dispatchEvents()
+  }
+
+  "Order variable" in {
+    assert(shellOutput contains OrderVariable.expectedString)
+  }
+
+  "Order variable overrides job variable with same name" in {
+    assert(shellOutput contains OrderParamOverridesJobParam.expectedString)
   }
 
   "Job parameter" in {
-    shellOutput
-    assert(shellOutput contains s"$ParamName=$ParamValue")
+    assert(shellOutput contains JobParam.expectedString)
   }
 
   "Job environment variable" in {
-    assert(shellOutput contains s"$EnvName=$EnvValue")
+    assert(shellOutput contains EnvironmentVariable.expectedString)
   }
 
   "Other environment variables are unchanged" in {
@@ -81,47 +96,63 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job.stateText" in {
-    pending
-    //job(TestJobPath).stateText shouldEqual s"!$FirstStdoutLine"
+    assert(job(TestJobPath).stateText == s"!$FirstStdoutLine")
   }
 }
 
 private object AgentIT {
+  private val TestJobchainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
   private val TestResultCode = ResultCode(42)
   private val FirstStdoutLine = "FIRST STDOUT LINE"
-  private val EnvName = "TESTENV"
-  private val EnvValue = "ENV-VALUE"
-  private val ParamName = "TESTPARAM"
-  private val ParamValue = "PARAM-VALUE"
+  private val OrderVariable = Variable("ORDERPARAM", "ORDERVALUE")
+  private val OrderParamOverridesJobParam = Variable("ORDEROVERRIDESJOBPARAM", "ORDEROVERRIDESJOBVALUE")
+  private val JobParam = Variable("TESTPARAM", "PARAM-VALUE")
+  private val EnvironmentVariable = Variable("TESTENV", "ENV-VALUE")
+  private val SchedulerVariables = List(OrderVariable, OrderParamOverridesJobParam, JobParam)
   private val ScriptOutputRegex = "[^!]*!(.*)".r  // Our test script output start with '!'
+
+  private case class Variable(name: String, value: String) {
+    override def toString = name
+    def expectedString = s"$name=$value"
+    def pair = name → value
+  }
 
   private val TestJobElem =
     <job name={TestJobPath.name} process_class="test-agent" stop_on_error="false">
       <params>
-        <param name={ParamName} value={ParamValue}/>
+        <param name={JobParam.name} value={JobParam.value}/>
+        <param name={OrderParamOverridesJobParam.name} value="OVERRIDDEN-JOB-VALUE"/>
       </params>
       <environment>
-        <variable name={EnvName} value={EnvValue}/>
+        <variable name={EnvironmentVariable.name} value={EnvironmentVariable.value}/>
       </environment>
       <script language="shell">{
-        if (isWindows) s"""
-          |@echo off
-          |echo !$FirstStdoutLine
-          |echo !$ParamName=%SCHEDULER_PARAM_$ParamName%
-          |echo !$EnvName=%$EnvName%
-          |echo !PATH=%PATH%
+        def variableToEcho(v: Variable) = {
+          import v._
+          val envName = paramToEnvName(name)
+          "echo !" + (if (isWindows) s"$name=%$envName%" else s"$name=$$$envName") + "\n"
+        }
+        (
+          if (isWindows) s"""
+            |@echo off
+            |echo !$FirstStdoutLine
+            |echo !$EnvironmentVariable=%$EnvironmentVariable%
+            |echo !PATH=%Path%
+            |""".stripMargin
+          else s"""
+            |echo !$FirstStdoutLine
+            |echo !$EnvironmentVariable=$$$EnvironmentVariable
+            |echo !PATH=$$PATH
+            |""".stripMargin
+        ) +
+        (SchedulerVariables map variableToEcho).mkString + s"""
           |echo !STDOUT AGENT ECHO
           |echo !STDERR AGENT ECHO 1>&2
-          |exit ${TestResultCode.value}""".stripMargin
-        else s"""
-          |echo !$FirstStdoutLine
-          |echo !$ParamName=$$SCHEDULER_PARAM_$ParamName
-          |echo !$EnvName=$$$EnvName
-          |echo !PATH=$$PATH
-          |echo !STDOUT AGENT ECHO
-          |echo !STDERR AGENT ECHO 1>&2
-          |exit ${TestResultCode.value}""".stripMargin
+          |exit ${TestResultCode.value}
+          |""".stripMargin
       }</script>
     </job>
+
+  private def paramToEnvName(name: String) = s"SCHEDULER_PARAM_$name"
 }

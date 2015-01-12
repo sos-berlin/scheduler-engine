@@ -27,7 +27,9 @@ final class FilesLineCollectorTest extends FreeSpec  {
         val testLines = List.fill(10) { Random.nextString(10) }
         for (line ← testLines) writers(Random.nextInt(writers.size)).write(s"$line\n")
         for (w ← writers) w.flush()
-        fileLogger.nextLinesIterator.toSet shouldEqual testLines.toSet
+        val (files, lines) = fileLogger.nextLinesIterator.toList.unzip
+        files.toSet shouldEqual files.toSet
+        lines.toSet shouldEqual testLines.toSet
       }
     }
   }

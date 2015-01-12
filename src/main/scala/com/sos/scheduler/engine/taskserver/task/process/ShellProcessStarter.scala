@@ -64,7 +64,7 @@ object ShellProcessStarter {
 
   private object WindowsSpecific extends ShellProcessStarter.OperatingSystemSpecific {
     val fileEncoding = ISO_8859_1
-    def newTemporaryShellFile(name: String) = createTempFile(filenamePrefix(name), ".cmd")
+    def newTemporaryShellFile(name: String) = createTempFile(filenamePrefix(name) + "-", ".cmd")
     def newTemporaryOutputFile(name: String, outerr: StdoutStderrType) = createTempFile(s"${filenamePrefix(name)}-$outerr-", ".log")
     def toCommandArguments(file: Path) = Vector("""C:\Windows\System32\cmd.exe""", "/C", file.toString)
   }
