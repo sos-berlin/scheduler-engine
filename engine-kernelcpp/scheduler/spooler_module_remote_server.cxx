@@ -171,25 +171,6 @@ void Com_remote_module_instance_server::Class_data::read_xml_bytes( const string
     //STDIN_FILENO neu belegen (mit dup()?), damit nicht irgend ein open() STDIN_FILENO zurückliefert. Windows: "nul:", Unix: "/dev/null".
 }
 
-//------------Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data
-
-//void Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data( const string& text )
-//{
-//    int MUTEX_SPERREN;
-//    int WAS_MACHEN_WIR_MIT_DER_EXCEPTION;
-//
-//    if( _com_server  &&  _com_server->_server  &&  _com_server->_server->_module_instance )
-//    {
-//        if( IDispatch* spooler_log = _com_server->_server->_module_instance->object( "spooler_log", (IDispatch*)NULL ) )
-//        {
-//            vector<Variant> parameters;
-//            parameters.push_back( ( S() << _prefix << ": " << text ).to_string() );
-//
-//            com_invoke( DISPATCH_METHOD, spooler_log, "info", &parameters );
-//        }
-//    }
-//}
-
 //-----------------------------Com_remote_module_instance_server::Com_remote_module_instance_server
 
 Com_remote_module_instance_server::Com_remote_module_instance_server( com::object_server::Session* session, ptr<Object>* class_object_ptr )
@@ -259,7 +240,6 @@ STDMETHODIMP Com_remote_module_instance_server::QueryInterface( const IID& iid, 
 
 STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray, VARIANT_BOOL* result )
 {
-    //assert( !"Com_remote_module_instance_server::Construct" );
     HRESULT hr = NOERROR;
 
     *result = VARIANT_FALSE;
@@ -271,9 +251,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         string include_path    = _class_data->_task_process_element.getAttribute( "include_path"    );
         string java_options    = _class_data->_task_process_element.getAttribute( "java_options"    );
         string java_class_path = _class_data->_task_process_element.getAttribute( "java_class_path" );
-        string javac           = _class_data->_task_process_element.getAttribute( "javac"           );
         string java_work_dir   = _class_data->_task_process_element.getAttribute( "java_work_dir"   );
-      //_log_stdout_stderr     = _class_data->_task_process_element.getAttribute( "stdout_path"     ) == "";
 
         DOM_FOR_EACH_ELEMENT( _class_data->_task_process_element, e )
         {
@@ -386,7 +364,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         //Z_LOG2( "zschimmer", Z_FUNCTION << " java_class_path=" << java_class_path << "\n" );;
         //Z_LOG2( "zschimmer", Z_FUNCTION << " java_work_dir  =" << java_work_dir << "\n" );;
         //Z_LOG2( "zschimmer", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
-        //Z_LOG2( "zschimmer", Z_FUNCTION << " javac          =" << javac << "\n" );;
 
         _server->_module->init();
 
