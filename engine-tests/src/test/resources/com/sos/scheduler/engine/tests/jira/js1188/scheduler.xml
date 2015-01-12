@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.8/scheduler.xsd">
+    <config>
+        <process_classes>
+            <process_class name="defined-in-scheduler-xml">
+                <!-- Only to check the ability to define a process class with multiple agents in the main configuration file -->
+                <remote_schedulers>
+                    <remote_scheduler remote_scheduler="http://127.0.0.0:0"/>
+                    <remote_scheduler remote_scheduler="http://127.0.1.0:0"/>
+                </remote_schedulers>
+            </process_class>
+        </process_classes>
+    </config>
+</spooler>

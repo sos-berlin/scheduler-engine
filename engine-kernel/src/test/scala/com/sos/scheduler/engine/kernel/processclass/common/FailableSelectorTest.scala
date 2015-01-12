@@ -20,7 +20,7 @@ import scala.util.{Failure, Success}
 final class FailableSelectorTest extends FreeSpec {
 
   private var _now = new Instant(10 * 24 * 3600 * 1000)   // Some instant
-  private val failables = new FailableCollection[Failable](Failables, TestDelay) {
+  private val failables = new FailableCollection[Failable](Failables, () ⇒ TestDelay) {
     override def now = _now
   }
   private val callQueue = new StandardCallQueue {

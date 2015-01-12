@@ -59,7 +59,7 @@ extends FileBased {
     _config = c
     _failableAgents = null
     if (_config.agents.nonEmpty) {
-      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy())
+      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy)
       for (c ← clients) {
         c.changeFailableAgents(_failableAgents)
       }
