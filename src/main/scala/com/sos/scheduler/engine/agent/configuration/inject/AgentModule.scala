@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
-import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
+import com.sos.scheduler.engine.taskserver.task.StartConfiguration
 import javax.inject.Singleton
 
 /**

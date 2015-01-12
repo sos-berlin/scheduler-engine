@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.task
 
 import com.sos.scheduler.engine.taskserver.SimpleTaskServer
-import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
+import com.sos.scheduler.engine.taskserver.task.StartConfiguration
 
 /**
  * @author Joacim Zschimmer

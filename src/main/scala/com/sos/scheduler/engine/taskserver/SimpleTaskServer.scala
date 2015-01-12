@@ -5,9 +5,8 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.minicom.remoting.Remoting
 import com.sos.scheduler.engine.taskserver.SimpleTaskServer._
-import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
-import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer
 import com.sos.scheduler.engine.taskserver.spoolerapi.{ProxySpoolerLog, ProxySpoolerTask}
+import com.sos.scheduler.engine.taskserver.task.{RemoteModuleInstanceServer, StartConfiguration}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration

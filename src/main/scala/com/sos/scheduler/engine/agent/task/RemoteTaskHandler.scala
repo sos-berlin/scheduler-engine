@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.agent.common.ScalaConcurrentHashMap
 import com.sos.scheduler.engine.agent.task.RemoteTaskHandler._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
-import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
+import com.sos.scheduler.engine.taskserver.task.StartConfiguration
 import java.net.InetSocketAddress
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global

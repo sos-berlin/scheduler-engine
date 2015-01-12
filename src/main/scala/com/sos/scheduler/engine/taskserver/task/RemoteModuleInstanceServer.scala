@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.taskserver.job
+package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.minicom.idispatch.{IDispatchFactory, IDispatchable, invocable}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IID, VariantArray, variant}
-import com.sos.scheduler.engine.taskserver.task.{NamedObjects, ScriptLanguage, ShellProcessTask, ShellScriptLanguage, Task, TaskConfiguration}
 import java.util.UUID
 import org.scalactic.Requirements._
 import scala.collection.{immutable, mutable}
@@ -17,7 +16,7 @@ import scala.collection.{immutable, mutable}
  * @see Com_remote_module_instance_server, spooler_module_remote_server.cxx
  */
 final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
-  import com.sos.scheduler.engine.taskserver.job.RemoteModuleInstanceServer._
+  import com.sos.scheduler.engine.taskserver.task.RemoteModuleInstanceServer._
 
   private var argMap = mutable.Map[String, String]()
   private var conf: TaskConfiguration = null
@@ -78,8 +77,8 @@ final class RemoteModuleInstanceServer extends IDispatchable with HasCloser {
 }
 
 object RemoteModuleInstanceServer extends IDispatchFactory {
-  val clsid = CLSID(UUID.fromString("feee47a3-6c1b-11d8-8103-000476ee8afb"))
-  val iid = IID(UUID.fromString("feee47a2-6c1b-11d8-8103-000476ee8afb"))
+  val clsid = CLSID(UUID fromString "feee47a3-6c1b-11d8-8103-000476ee8afb")
+  val iid   = IID  (UUID fromString "feee47a2-6c1b-11d8-8103-000476ee8afb")
   private val EnvironmentParameterPrefix = "SCHEDULER_PARAM_"
   private val logger = Logger(getClass)
 

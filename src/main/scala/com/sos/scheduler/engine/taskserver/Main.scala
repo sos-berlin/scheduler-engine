@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.taskserver
 
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.taskserver.configuration.StartConfiguration
+import com.sos.scheduler.engine.taskserver.task.StartConfiguration
 
 /**
  * @author Joacim Zschimmer

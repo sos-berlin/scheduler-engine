@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.taskserver.job
+package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 
