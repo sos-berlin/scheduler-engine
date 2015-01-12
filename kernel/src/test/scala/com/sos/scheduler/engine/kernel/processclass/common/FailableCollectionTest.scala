@@ -16,13 +16,13 @@ final class FailableCollectionTest extends FreeSpec {
   "Requirements" - {
     "Minimum one entity" in {
       intercept[IllegalArgumentException] {
-        new FailableCollection(List[A](), 100.ms)
+        new FailableCollection(List[A](), () ⇒ 100.ms)
       }
     }
 
     "Entities must be distinct" in {
       intercept[IllegalArgumentException] {
-        new FailableCollection(List(A(1), A(1)), 100.ms)
+        new FailableCollection(List(A(1), A(1)), () ⇒ 100.ms)
       }
     }
   }
@@ -32,7 +32,7 @@ final class FailableCollectionTest extends FreeSpec {
     var _now = startInstant
     val as = 0 to 2 map A
     val delay = 30.s
-    val failureCollection = new FailableCollection[A](as, failureTimeout = delay) {
+    val failureCollection = new FailableCollection[A](as, failureTimeout = () ⇒ delay) {
       override def now = _now
     }
 

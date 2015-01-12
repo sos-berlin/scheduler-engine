@@ -10,10 +10,10 @@ import scala.collection.{immutable, mutable}
 /**
  * Verwaltet eine Sequenz von Failables, die reihum geliefert werden.
  * Failables können versagen und werden dann failureTimeout lang nicht geliefert.
- *
+ * @param failureTimeout A function because C++ Settings is not yet freezed (=readable) when &process_class is defined in scheduler.xml.
  * @author Joacim Zschimmer
  */
-class FailableCollection[Failable](failables: immutable.Seq[Failable], failureTimeout: Duration)
+class FailableCollection[Failable](failables: immutable.Seq[Failable], failureTimeout: () ⇒ Duration)
 extends SingleThreaded {
 
   require(failables.nonEmpty)
@@ -21,7 +21,7 @@ extends SingleThreaded {
 
   private case class TimestampedFailure(instant: Instant, throwable: Throwable) {
     def isDelayed = delay > 0.s
-    def delay = instant + failureTimeout - now
+    def delay = instant + failureTimeout() - now
   }
 
   private val failureMap = mutable.LinkedHashMap[Failable, TimestampedFailure]()
