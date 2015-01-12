@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
@@ -12,7 +13,6 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
-import org.slf4j.LoggerFactory
 import scala.collection.mutable
 import scala.xml.Utility.trim
 
@@ -23,18 +23,17 @@ final class JS803IT extends SchedulerTest {
 
   private val expectedOrders = new mutable.HashSet[OrderId]
   private val terminatedOrders = new mutable.HashSet[OrderId]
-  private var startTime: DateTime = null
+  private lazy val startTime = secondNow() plusSeconds orderDelay
 
   @Test def test(): Unit = {
     controller.activateScheduler()
-    startTime = secondNow() plusSeconds orderDelay
     addOrder(jobChainPath orderKey "dailyOrder", addDailyOrderElem)
     addOrder(jobChainPath orderKey "singleOrder", addSingleOrderElem)
     addOrder(jobChainPath orderKey "singleRuntimeOrder", addSingleRuntimeOrderElem)
     try controller.waitForTermination()
     finally (expectedOrders diff terminatedOrders).toList match {
       case List() =>
-      case notTerminatedOrders => logger.error("Orders failed to terminate: "+ (notTerminatedOrders mkString ", "))
+      case notTerminatedOrders => logger.error(s"Orders failed to terminate: ${notTerminatedOrders mkString ", "}")
     }
   }
 
@@ -44,17 +43,16 @@ final class JS803IT extends SchedulerTest {
   }
 
   private def execute(command: xml.Elem): Unit = {
-    logger.debug("{}", trim(command))
+    logger.debug(trim(command).toString())
     controller.scheduler.executeXml(command)
   }
 
   @EventHandler def handleEvent(e: OrderTouchedEvent): Unit = {
-    assertTrue("Order "+e.orderKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
+    assertTrue(s"Order ${e.orderKey} has been started before expected time $startTime", !(new DateTime isBefore startTime))
   }
 
-  @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder): Unit = {
-    assertThat("Wrong end state of order "+event.orderKey, order.state, equalTo(expectedEndState))
-  }
+  @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder): Unit =
+    assertThat(s"Wrong end state of order ${event.orderKey}", order.state, equalTo(expectedEndState))
 
   @EventHandler def handleEvent(event: OrderFinishedEvent): Unit = {
     terminatedOrders.add(event.orderKey.id)
@@ -63,7 +61,7 @@ final class JS803IT extends SchedulerTest {
 }
 
 object JS803IT {
-  private val logger = LoggerFactory.getLogger(classOf[JS803IT])
+  private val logger = Logger(getClass)
   private val orderDelay = 3+1
   private val jobChainPath = JobChainPath("/super")
   private val expectedEndState = OrderState("state.nestedC.end")
