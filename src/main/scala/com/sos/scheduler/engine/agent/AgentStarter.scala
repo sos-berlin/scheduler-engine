@@ -4,7 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.io.{IO, Tcp}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.sos.scheduler.engine.agent.command.CommandXmlExecutor
+import com.sos.scheduler.engine.agent.command.{CommandExecutor, CommandXmlExecutor}
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,9 +18,10 @@ import spray.can.Http
 @Singleton
 final class AgentStarter @Inject private(
   conf: AgentConfiguration,
-  commandExecutor: CommandXmlExecutor,
+  commandExecutor: CommandExecutor,
   private implicit val actorSystem: ActorSystem) {
 
+  private val xmlCommandExecutor = new CommandXmlExecutor(commandExecutor.executeCommand)
   private val httpServer = new AgentHttpServer
   private implicit val timeout: Timeout = 10.seconds
 
@@ -33,7 +34,7 @@ final class AgentStarter @Inject private(
 
   private class AgentHttpServer extends AutoCloseable {
     private val webServiceActorRef = actorSystem actorOf Props {
-      new AgentWebServiceActor(executeCommand = commandExecutor.execute)
+      new AgentWebServiceActor(executeCommand = xmlCommandExecutor.execute)
     }
 
     def start(): Future[Unit] =

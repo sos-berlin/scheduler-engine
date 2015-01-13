@@ -17,6 +17,10 @@ final class CommandTest extends FreeSpec {
       StartRemoteTask(controllerTcpPort = 999, usesApi = true, javaOptions = "", javaClassPath = "")
     parse(<remote_scheduler.start_remote_task tcp_port="999" kind="process" java_options="OPTIONS" java_classpath="CLASSPATH"/>) shouldEqual
       StartRemoteTask(controllerTcpPort = 999, usesApi = false, javaOptions = "OPTIONS", javaClassPath = "CLASSPATH")
+    intercept[Exception] { parse(<remote_scheduler.start_remote_task tcp_port="-1"/>) }
+    intercept[Exception] { parse(<remote_scheduler.start_remote_task tcp_port="0"/>) }
+    intercept[Exception] { parse(<remote_scheduler.start_remote_task tcp_port="65536"/>) }
+    parse(<remote_scheduler.start_remote_task tcp_port="65535"/>)
   }
 
   "CloseRemoteTask" in {

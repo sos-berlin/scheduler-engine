@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.agent.commands
 
-import com.sos.scheduler.engine.agent.common.Xmls
 import com.sos.scheduler.engine.agent.common.Xmls._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
@@ -35,8 +34,8 @@ trait RemoteTaskCommand extends Command
 final case class StartRemoteTask(
   controllerTcpPort: Int,
   usesApi: Boolean,
-  javaOptions: String,
-  javaClassPath: String)
+  javaOptions: String = "",
+  javaClassPath: String = "")
 extends RemoteTaskCommand
 
 object StartRemoteTask {
@@ -49,12 +48,20 @@ object StartRemoteTask {
         case x ⇒ throw new IllegalArgumentException(s"kind=$x")
       }
       StartRemoteTask(
-        controllerTcpPort = attributeMap.asConverted("tcp_port") { _.toInt },
+        controllerTcpPort = attributeMap.asConverted("tcp_port")(stringToTcpPort),
         usesApi = usesApi,
         javaOptions = attributeMap.getOrElse("java_options", ""),
         javaClassPath = attributeMap.getOrElse("java_classpath", ""))
     }
   }
+
+  private def stringToTcpPort(string: String) =
+    try {
+      val result = string.toInt
+      require(result > 1 && result <= 0xffff)
+      result
+    }
+    catch { case e: Exception ⇒ throw new IllegalArgumentException(s"Invalid TCP Port: $string") }
 }
 
 
