@@ -4,6 +4,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 /**
+ * Scala adapter for [[java.util.concurrent.ConcurrentHashMap]].
  * @author Joacim Zschimmer
  */
 class ScalaConcurrentHashMap[K, V] extends mutable.Map[K, V]{

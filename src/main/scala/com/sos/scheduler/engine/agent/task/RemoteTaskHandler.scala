@@ -28,7 +28,7 @@ final class RemoteTaskHandler @Inject private(newRemoteTaskId: () ⇒ RemoteTask
         val remoteTaskId = newRemoteTaskId()
         val startConfiguration = StartConfiguration(
           remoteTaskId,
-          controllerAddress = new InetSocketAddress(LocalHostIpAddress, controllerTcpPort),
+          controllerAddress = new InetSocketAddress(LocalhostIpAddress, controllerTcpPort),
           usesApi = usesApi,
           javaOptions = javaOptions,
           javaClasspath = javaClasspath)
@@ -43,12 +43,12 @@ final class RemoteTaskHandler @Inject private(newRemoteTaskId: () ⇒ RemoteTask
         if (kill) tryKillTask(task)
         task.close()
         CloseRemoteTaskResponse
-      }
+    }
   }
 }
 
 private object RemoteTaskHandler {
-  private val LocalHostIpAddress = "127.0.0.1"
+  private val LocalhostIpAddress = "127.0.0.1"
   private val logger = Logger(getClass)
 
   private def tryKillTask(task: RemoteTask) =

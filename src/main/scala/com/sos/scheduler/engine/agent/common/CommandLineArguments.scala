@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.common
 
-import com.sos.scheduler.engine.agent.common.CommandLineArguments.{NameOnly, Argument}
+import com.sos.scheduler.engine.agent.common.CommandLineArguments.{Argument, NameOnly}
 import java.util.NoSuchElementException
 import scala.collection.{immutable, mutable}
 import scala.util.control.NonFatal
@@ -41,7 +41,7 @@ final class CommandLineArguments private(val argMap: mutable.LinkedHashMap[Strin
       catch { case NonFatal(t) ⇒ throw new IllegalArgumentException(s"Error in -$name=: $t", t) }
     }
 
-  private def arguments(name: String) = {
+  private def arguments(name: String): List[Argument] = {
     unusedArguments -= name
     argMap(name)
   }

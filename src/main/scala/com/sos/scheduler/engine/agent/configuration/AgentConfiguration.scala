@@ -7,6 +7,11 @@ import com.sos.scheduler.engine.agent.common.CommandLineArguments
  */
 final case class AgentConfiguration(
   httpPort: Int,
+
+  /**
+   * The IP address of the only network interface, the Agent should listen to.
+   * If empty, the Agent listens to all network interfaces.
+   */
   httpInterfaceRestriction: Option[String] = None)
 
 object AgentConfiguration {

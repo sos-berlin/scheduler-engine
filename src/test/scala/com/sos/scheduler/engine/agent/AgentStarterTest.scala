@@ -29,7 +29,7 @@ final class AgentStarterTest extends FreeSpec with HasCloserBeforeAndAfterAll {
     val port = findRandomFreeTcpPort()
     autoClosing(new ServerSocket(port)) { _ ⇒
       intercept[RuntimeException] { startAgent(port) }
-        .getMessage should include(s"TCP port $port")
+        .getMessage should include (s"TCP port $port")
     }
   }
 

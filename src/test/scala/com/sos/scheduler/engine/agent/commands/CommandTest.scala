@@ -21,10 +21,10 @@ final class CommandTest extends FreeSpec {
 
   "CloseRemoteTask" in {
     intercept[Exception] { parse(<remote_scheduler.remote_task.close/>) }
-    parse(<remote_scheduler.remote_task.close process_id="1112223334445556667"/>) shouldEqual
-      CloseRemoteTask(RemoteTaskId(1112223334445556667L), kill = false)
-    parse(<remote_scheduler.remote_task.close process_id="1112223334445556667" kill="true"/>) shouldEqual
-      CloseRemoteTask(RemoteTaskId(1112223334445556667L), kill = true)
+    parse(<remote_scheduler.remote_task.close process_id="111222333444555666"/>) shouldEqual
+      CloseRemoteTask(RemoteTaskId(111222333444555666L), kill = false)
+    parse(<remote_scheduler.remote_task.close process_id="111222333444555666" kill="true"/>) shouldEqual
+      CloseRemoteTask(RemoteTaskId(111222333444555666L), kill = true)
   }
 
   private def parse(elem: xml.Elem) = Command.parseString(elem.toString())

@@ -24,13 +24,12 @@ final class AgentStarter @Inject private(
   private val httpServer = new AgentHttpServer
   private implicit val timeout: Timeout = 10.seconds
 
-  def start(): Future[Unit] = {
-    httpServer.start()
-  }
+  /**
+   * @return Future, completed when Agent has been started and is running.
+   */
+  def start(): Future[Unit] = httpServer.start()
 
-  private def close() = {
-    httpServer.close()
-  }
+  private def close() = httpServer.close()
 
   private class AgentHttpServer extends AutoCloseable {
     private val webServiceActorRef = actorSystem actorOf Props {
