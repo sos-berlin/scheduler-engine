@@ -13,13 +13,12 @@ import org.scalatest.FreeSpec
 import org.scalatest.Inside.inside
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.AsyncAssertions.Waiter
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.time.SpanSugar._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 /**
  * @author Joacim Zschimmer
@@ -43,18 +42,13 @@ final class RemoteTaskHandlerTest extends FreeSpec {
   }
 
   "CloseRemoteTask" in {
-    val w = new Waiter
     val commands = List(
       CloseRemoteTask(remoteTasks(0).id, kill = false),
       CloseRemoteTask(remoteTasks(1).id, kill = true))
     for (command ← commands) {
-      waiterOnComplete(w, remoteTaskHandler.executeCommand(command)) {
-        case Success(CloseRemoteTaskResponse) ⇒
-          w.dismiss()
-      }
+      val response = Await.result(remoteTaskHandler.executeCommand(command), 3.seconds)
+      inside(response) { case CloseRemoteTaskResponse ⇒ }
     }
-    w.await(Timeout(3000.millis))
-
     verify(remoteTasks(0), times(1)).start()
     verify(remoteTasks(0), never).kill()
     verify(remoteTasks(0), times(1)).close()

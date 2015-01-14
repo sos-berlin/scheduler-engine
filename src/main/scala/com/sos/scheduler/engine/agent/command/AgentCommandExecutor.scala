@@ -6,6 +6,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 /**
+ * Executes public Agent commands.
  * @author Joacim Zschimmer
  */
 @Singleton

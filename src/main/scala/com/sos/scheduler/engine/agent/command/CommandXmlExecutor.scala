@@ -5,6 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
+ * Executes public Agent command serialized as XML string.
  * @author Joacim Zschimmer
  */
 final class CommandXmlExecutor(executeCommand: Command ⇒ Future[Response]) {
