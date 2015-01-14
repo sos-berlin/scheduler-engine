@@ -107,6 +107,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.spray</groupId>
+            <artifactId>spray-testkit_${scala.binaryVersion}</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <scope>provided</scope>

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent
+package com.sos.scheduler.engine.agent.web
 
 import akka.actor.{ActorSystem, Props}
 import akka.io.{IO, Tcp}
@@ -34,7 +34,9 @@ final class AgentStarter @Inject private(
 
   private class AgentHttpServer extends AutoCloseable {
     private val webServiceActorRef = actorSystem actorOf Props {
-      new AgentWebServiceActor(executeCommand = xmlCommandExecutor.execute)
+      new AgentWebServiceActor {
+        def executeCommand(command: String) = xmlCommandExecutor.execute(command)
+      }
     }
 
     def start(): Future[Unit] =

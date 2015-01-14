@@ -1,19 +1,20 @@
-package com.sos.scheduler.engine.agent
+package com.sos.scheduler.engine.agent.web
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import spray.http.HttpEntity
 import spray.http.MediaTypes._
-import spray.routing.{HttpServiceActor, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
+import spray.routing.{HttpService, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
 
 /**
  * @author Joacim Zschimmer
  */
-final class AgentWebServiceActor(executeCommand: String ⇒ Future[xml.Elem]) extends HttpServiceActor {
+private[agent] trait AgentRoute
+extends HttpService {
 
-  def receive = runRoute(route)
+  protected def executeCommand(command: String): Future[xml.Elem]
 
-  private def route =
+  private[agent] def route =
     (decompressRequest() | compressResponseIfRequested(())) {
       path("jobscheduler" / "engine" / "command") {
         post {
