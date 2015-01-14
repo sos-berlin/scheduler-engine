@@ -5,7 +5,7 @@ import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.command.CommandExecutor
 import com.sos.scheduler.engine.agent.commands.Command
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.web.AgentStarterTest._
+import com.sos.scheduler.engine.agent.web.AgentWebServerTest._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
@@ -23,7 +23,7 @@ import scala.concurrent.duration._
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class AgentStarterTest extends FreeSpec with HasCloserBeforeAndAfterAll {
+final class AgentWebServerTest extends FreeSpec with HasCloserBeforeAndAfterAll {
 
   "AgentStarter fails when HTTP port is not available" in {
     val port = findRandomFreeTcpPort()
@@ -38,7 +38,7 @@ final class AgentStarterTest extends FreeSpec with HasCloserBeforeAndAfterAll {
   }
 }
 
-private object AgentStarterTest {
+private object AgentWebServerTest {
   private object TestCommandExecutor extends CommandExecutor {
     def executeCommand(command: Command) = throw new NotImplementedError
   }
@@ -51,7 +51,7 @@ private object AgentStarterTest {
         bindInstance[ActorSystem](ActorSystem("TEST"))
       }
     })
-    val agentStarter = injector.apply[AgentStarter]
+    val agentStarter = injector.apply[AgentWebServer]
     val started = agentStarter.start()
     Await.result(started, 10.seconds)
     intercept[BindException] { new ServerSocket(httpPort) }

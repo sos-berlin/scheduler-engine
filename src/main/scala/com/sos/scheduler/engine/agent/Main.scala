@@ -4,7 +4,7 @@ import com.google.common.io.Closer
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.configuration.inject.AgentModule
-import com.sos.scheduler.engine.agent.web.AgentStarter
+import com.sos.scheduler.engine.agent.web.AgentWebServer
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 
@@ -15,9 +15,9 @@ final class Main(conf: AgentConfiguration) extends AutoCloseable {
 
   private val injector = Guice.createInjector(new AgentModule(conf))
   private val closer = injector.apply[Closer]
-  private val agentStarter = injector.apply[AgentStarter]
+  private val server = injector.apply[AgentWebServer]
 
-  def start() = agentStarter.start()
+  def start() = server.start()
 
   def close() = closer.close()
 }

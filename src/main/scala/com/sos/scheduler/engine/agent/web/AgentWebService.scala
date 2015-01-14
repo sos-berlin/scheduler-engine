@@ -4,12 +4,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import spray.http.HttpEntity
 import spray.http.MediaTypes._
-import spray.routing.{HttpService, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
+import spray.routing.{HttpService, HttpServiceActor, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
 
 /**
  * @author Joacim Zschimmer
  */
-private[agent] trait AgentRoute
+private[agent] trait AgentWebService
 extends HttpService {
 
   protected def executeCommand(command: String): Future[xml.Elem]
@@ -29,4 +29,10 @@ extends HttpService {
         }
       }
     }
+}
+
+object AgentWebService {
+  trait AsActor extends HttpServiceActor with AgentWebService {
+    def receive = runRoute(route)
+  }
 }

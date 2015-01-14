@@ -10,7 +10,7 @@ import spray.testkit.ScalatestRouteTest
 /**
  * @author Joacim Zschimmer
  */
-final class AgentRouteTest extends FreeSpec with ScalatestRouteTest with AgentRoute {
+final class AgentWebServiceTest extends FreeSpec with ScalatestRouteTest with AgentWebService {
 
   implicit val actorRefFactory = ActorSystem("TEST")
 
