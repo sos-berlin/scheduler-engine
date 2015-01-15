@@ -32,7 +32,7 @@ extends AutoCloseable {
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
   val databaseDirectory = directory
-  val deletableTemporaryDirectories = mutable.Buffer[File]()
+  private val deletableTemporaryDirectories = mutable.Buffer[File]()
   private var isPrepared = false
 
   def close(): Unit = {
