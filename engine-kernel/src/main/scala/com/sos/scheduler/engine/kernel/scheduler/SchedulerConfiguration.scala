@@ -65,7 +65,7 @@ object SchedulerConfiguration {
       def udpPort: Option[Int] = someUnless(spoolerC.udp_port, 0)
 
       lazy val webDirectoryOption: Option[File] =
-        settingsC._html_dir match {
+        settingsC._web_directory match {
           case "" => None
           case o => Some(new File(o))
         }

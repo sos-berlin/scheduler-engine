@@ -232,6 +232,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native boolean _use_old_microscheduling_for_tasks__native(long cppReference);
 
 
+    @Override public java.lang.String _web_directory() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = _web_directory__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String _web_directory__native(long cppReference);
+
+
     @Override public boolean is_freezed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

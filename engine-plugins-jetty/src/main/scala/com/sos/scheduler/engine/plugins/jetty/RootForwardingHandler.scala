@@ -9,12 +9,13 @@ import org.eclipse.jetty.server.handler.AbstractHandler
 
 final class RootForwardingHandler extends AbstractHandler {
 
-  def handle(target: String, baseRequest: Request, request: HttpServletRequest, response: HttpServletResponse) =
-    if (!baseRequest.isHandled && !response.isCommitted && request.getRequestURI == "/") {
+  def handle(target: String, baseRequest: Request, request: HttpServletRequest, response: HttpServletResponse) = {
+    if (!baseRequest.isHandled && !response.isCommitted && (Set("/", "/jobscheduler", "/jobscheduler/") contains request.getRequestURI)) {
       baseRequest.setHandled(true)
       withGetOrHeadOnly(request, response) {
         response.setStatus(SC_TEMPORARY_REDIRECT)
-        response.setHeader("Location", contextPath + request.getRequestURI)
+        response.setHeader("Location", s"$contextPath/operations_gui/")
       }
     }
+  }
 }

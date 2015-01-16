@@ -44,7 +44,9 @@ enum Setting_name {
 
     setting_http_port = 14,
 
-    settings_remote_scheduler_connect_retry_delay = 15
+    settings_remote_scheduler_connect_retry_delay = 15,
+
+    setting_web_directory = 16,   // For JettyPlugin
 };
 
 
@@ -96,6 +98,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     std::set<Role>             _roles;
     int                        _http_port;
     int _remote_scheduler_connect_retry_delay;
+    string                     _web_directory;    // For JettyPlugin
 };
 
 }} //namespace sos::scheduler
