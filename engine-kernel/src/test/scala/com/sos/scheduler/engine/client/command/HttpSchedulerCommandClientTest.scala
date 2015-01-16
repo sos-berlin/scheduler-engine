@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.typesafe.config.ConfigFactory
 import org.junit.runner.RunWith
+import org.scalatest.Inside.inside
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
@@ -51,11 +52,10 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
     expectError(client.executeXml(uri, TestCommandElem.toBytes(schedulerEncoding)))
   }
 
-  private def expectError[A](future: Future[A]): Unit = {
-    Await.ready(future, Duration.Inf).value.get match {
+  private def expectError[A](future: Future[A]): Unit =
+    inside(Await.ready(future, Duration.Inf).value.get) {
       case Failure(e: RemoteSchedulers.XmlResponseException) ⇒ e.getMessage shouldEqual ErrorMessage
     }
-  }
 
   "uncheckedExecute" in {
     val startFuture = client.uncheckedExecute(uri, TestCommandElem)
@@ -93,9 +93,8 @@ private object HttpSchedulerCommandClientTest {
   private val TestResponseString = <spooler><answer><ERROR text={ErrorMessage}/></answer></spooler>.toString()
   private val TestTimeout = 15.seconds
 
-  private def executeCommand(command: String) = {
+  private def executeCommand(command: String) =
     SafeXML.loadString(command) match {
       case TestCommandElem ⇒ TestResponseString
     }
-  }
 }
