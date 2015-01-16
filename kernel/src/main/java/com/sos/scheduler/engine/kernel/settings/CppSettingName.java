@@ -8,7 +8,7 @@ public enum CppSettingName {
     jobJavaClasspath(2),
 
     /** Default für factory.ini [spooler] html_dir */
-    htmlDir(3),
+    htmlDir(3),     // For C++ web server
 
     /** Grundeinstellung der Java-Optionen für alle Jobs. */
     jobJavaOptions(4),
@@ -32,7 +32,10 @@ public enum CppSettingName {
 
     httpPort(14),
 
-    agentConnectRetryDelay(15);
+    agentConnectRetryDelay(15),
+
+    /** For JettyPlugin: Base directory for files beneath URL "/jobscheduler/". */
+    WebDirectory(16);  // For JettyPlugin
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

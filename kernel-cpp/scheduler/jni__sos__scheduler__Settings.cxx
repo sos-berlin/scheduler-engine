@@ -272,6 +272,23 @@ static jboolean JNICALL _1use_1old_1microscheduling_1for_1tasks(JNIEnv* jenv, jo
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL _1web_1directory(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_web_directory()");
+        return env.jstring_from_string(o_->_web_directory);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jboolean JNICALL is_1freezed(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -319,6 +336,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"_use_java_persistence__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1java_1persistence },
     { (char*)"_use_old_microscheduling_for_jobs__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1jobs },
     { (char*)"_use_old_microscheduling_for_tasks__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1tasks },
+    { (char*)"_web_directory__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1web_1directory },
     { (char*)"is_freezed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1freezed },
     { (char*)"set__native", (char*)"(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set__ILjava_lang_String_2 }
 };
