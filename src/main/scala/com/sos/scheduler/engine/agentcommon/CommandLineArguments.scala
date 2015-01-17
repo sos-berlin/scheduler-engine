@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.agent.common
+package com.sos.scheduler.engine.agentcommon
 
-import com.sos.scheduler.engine.agent.common.CommandLineArguments.{Argument, NameOnly}
+import com.sos.scheduler.engine.agentcommon.CommandLineArguments.{Argument, NameOnly}
 import java.util.NoSuchElementException
 import scala.collection.{immutable, mutable}
 import scala.util.control.NonFatal

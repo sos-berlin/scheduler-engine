@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.agent.task
 
 import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.agent.commands.{CloseRemoteTask, CloseRemoteTaskResponse, StartRemoteTask, StartRemoteTaskResponse}
-import com.sos.scheduler.engine.agent.task.RemoteTaskHandlerTest._
+import com.sos.scheduler.engine.agent.task.RemoteTaskProcessorTest._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.task.StartConfiguration
@@ -24,9 +24,9 @@ import scala.util.{Failure, Try}
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class RemoteTaskHandlerTest extends FreeSpec {
+final class RemoteTaskProcessorTest extends FreeSpec {
   private lazy val remoteTasks = List.fill(2) { mock[RemoteTask] }
-  private lazy val remoteTaskHandler = Guice.createInjector(new TestModule(remoteTasks)).apply[RemoteTaskHandler]
+  private lazy val remoteTaskHandler = Guice.createInjector(new TestModule(remoteTasks)).apply[RemoteTaskProcessor]
 
   "StartRemoteTask" in {
     val command = StartRemoteTask(controllerTcpPort = 9999, usesApi = false, javaOptions = JavaOptions, javaClassPath = JavaClasspath)
@@ -59,7 +59,7 @@ final class RemoteTaskHandlerTest extends FreeSpec {
   }
 }
 
-private object RemoteTaskHandlerTest {
+private object RemoteTaskProcessorTest {
   private val RemoteTaskIds = List(111111111111111111L, 222222222222222222L) map RemoteTaskId.apply
   private val JavaOptions = "JAVA-OPTIONS"
   private val JavaClasspath = "JAVA-CLASSPATH"

@@ -24,7 +24,7 @@ final class ShellProcess private[process](process: Process, processFile: Path, s
   private val firstLineCollector = new FirstLineCollector
   def firstStdoutLine = firstLineCollector.firstStdoutLine
 
-  override def close() {
+  override def close(): Unit = {
     try super.close()
     finally promise.success(())
   }

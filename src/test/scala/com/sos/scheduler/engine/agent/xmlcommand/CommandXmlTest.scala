@@ -1,5 +1,6 @@
-package com.sos.scheduler.engine.agent.commands
+package com.sos.scheduler.engine.agent.xmlcommand
 
+import com.sos.scheduler.engine.agent.commands.{CloseRemoteTask, StartRemoteTask}
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -10,7 +11,7 @@ import org.scalatest.junit.JUnitRunner
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class CommandTest extends FreeSpec {
+final class CommandXmlTest extends FreeSpec {
   "StartRemoteTask" in {
     intercept[Exception] { parse(<remote_scheduler.start_remote_task/>) }
     parse(<remote_scheduler.start_remote_task tcp_port="999"/>) shouldEqual
@@ -31,5 +32,5 @@ final class CommandTest extends FreeSpec {
       CloseRemoteTask(RemoteTaskId(111222333444555666L), kill = true)
   }
 
-  private def parse(elem: xml.Elem) = Command.parseString(elem.toString())
+  private def parse(elem: xml.Elem) = CommandXml.parseString(elem.toString())
 }

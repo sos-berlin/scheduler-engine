@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.common
+package com.sos.scheduler.engine.agentcommon
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable

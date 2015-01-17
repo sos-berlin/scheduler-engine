@@ -11,7 +11,7 @@ final class TcpConnection(peerAddress: InetSocketAddress) extends MessageConnect
   private lazy val in = socket.getInputStream
   private lazy val out = socket.getOutputStream
 
-  def connect() {
+  def connect(): Unit = {
     blocking {
       socket.connect(peerAddress)
     }

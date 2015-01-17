@@ -34,7 +34,7 @@ extends IUnknownDeserializer {
     InvokeResult(readVariant())
   }
 
-  private def readAnswerHeader() {
+  private def readAnswerHeader(): Unit = {
     readByte() match {
       case MessageClass.Answer ⇒
         val hr = HRESULT(readInt32())

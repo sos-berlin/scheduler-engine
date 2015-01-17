@@ -1,10 +1,9 @@
-package com.sos.scheduler.engine.agent
+package com.sos.scheduler.engine.agent.web
 
 import com.google.common.io.Closer
 import com.google.inject.Guice
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.AgentConfiguration
 import com.sos.scheduler.engine.agent.configuration.inject.AgentModule
-import com.sos.scheduler.engine.agent.web.AgentWebServer
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 

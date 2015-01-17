@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.command
+package com.sos.scheduler.engine.agent.xmlcommand
 
 import com.sos.scheduler.engine.agent.commands.{Command, StartRemoteTask, StartRemoteTaskResponse}
 import com.sos.scheduler.engine.data.agent.RemoteTaskId

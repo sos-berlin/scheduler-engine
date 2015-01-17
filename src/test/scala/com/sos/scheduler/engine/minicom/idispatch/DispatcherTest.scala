@@ -69,6 +69,6 @@ private object DispatcherTest {
     @invocable def boxedBoolean(o: Boolean): java.lang.Boolean = !o
     @invocable def string(i: Int, l: Long, d: Double, b: Boolean, o: String) = s"$i $l $d $b $o"
     @invocable def array(a: VariantArray) = a.indexedSeq(0).asInstanceOf[Long] + a.indexedSeq(1).asInstanceOf[Double]
-    def noCom() {}
+    def noCom(): Unit = {}
   }
 }

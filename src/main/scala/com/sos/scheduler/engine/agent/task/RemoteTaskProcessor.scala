@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.agent.task
 
 import com.sos.scheduler.engine.agent.commands.{CloseRemoteTask, CloseRemoteTaskResponse, RemoteTaskCommand, Response, StartRemoteTask, StartRemoteTaskResponse}
-import com.sos.scheduler.engine.agent.common.ScalaConcurrentHashMap
-import com.sos.scheduler.engine.agent.task.RemoteTaskHandler._
+import com.sos.scheduler.engine.agent.task.RemoteTaskProcessor._
+import com.sos.scheduler.engine.agentcommon.ScalaConcurrentHashMap
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.task.StartConfiguration
@@ -16,7 +16,7 @@ import scala.util.control.NonFatal
  * @author Joacim Zschimmer
  */
 @Singleton
-final class RemoteTaskHandler @Inject private(newRemoteTaskId: () ⇒ RemoteTaskId, newRemoteTask: StartConfiguration ⇒ RemoteTask) {
+final class RemoteTaskProcessor @Inject private(newRemoteTaskId: () ⇒ RemoteTaskId, newRemoteTask: StartConfiguration ⇒ RemoteTask) {
 
   private val taskRegister = new ScalaConcurrentHashMap[RemoteTaskId, RemoteTask] {
     override def default(id: RemoteTaskId) = throwUnknownTask(id)
@@ -47,7 +47,7 @@ final class RemoteTaskHandler @Inject private(newRemoteTaskId: () ⇒ RemoteTask
   }
 }
 
-private object RemoteTaskHandler {
+private object RemoteTaskProcessor {
   private val LocalhostIpAddress = "127.0.0.1"
   private val logger = Logger(getClass)
 

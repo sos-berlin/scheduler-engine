@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.command
+package com.sos.scheduler.engine.agent
 
 import com.sos.scheduler.engine.agent.commands.{Command, Response}
 import scala.concurrent.Future
