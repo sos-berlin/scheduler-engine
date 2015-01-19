@@ -24,17 +24,20 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
 
+  import controller.eventBus
+
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List("-distributed-orders"))
 
   private implicit lazy val entityManager = instance[EntityManagerFactory]
+  private implicit lazy val orderStore = instance[HibernateOrderStore]
 
   "Permanent order in a distributed job chain" in {
-    controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].fetch(TestOrderKey).title shouldEqual OriginalTitle
+      orderStore.fetch(TestOrderKey).title shouldEqual OriginalTitle
     }
   }
 
@@ -42,30 +45,30 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(OriginalTitle, AChangedTitle)
     instance[FolderSubsystem].updateFolders()
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].fetch(TestOrderKey).title shouldEqual AChangedTitle
+      orderStore.fetch(TestOrderKey).title shouldEqual AChangedTitle
     }
-    controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
   }
 
   "Changing the order configuration file while order is running takes effect when it is finished" in {
     scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="stop"/>
-    controller.eventBus.awaitingKeyedEvent[OrderStepEndedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderStepEndedEvent](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
-    controller.eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestOrderKey) {
       file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
       instance[FolderSubsystem].updateFolders()
       transaction { implicit entityManager ⇒
-        instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
+        orderStore.fetch(TestOrderKey) should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
       }
-      controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+      eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
         scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="process"/>
       }
     }
     transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(FirstState)), 'title(BChangedTitle))
+      orderStore.fetch(TestOrderKey) should have ('stateOption(Some(FirstState)), 'title(BChangedTitle))
     }
   }
 
