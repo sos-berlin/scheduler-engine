@@ -60,15 +60,17 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
 
     }
 
-    /* Wenn C++ ein temporäres Objekt liefert und also den C++-Proxy über JNI sofort wieder freigibt,
-     * dann haben wir nur ein (zerstörtes) Ding der Klasse Object. */
+    /**
+     * Wenn C++ ein temporäres Objekt liefert und also den C++-Proxy über JNI sofort wieder freigibt,
+     * dann haben wir nur ein (zerstörtes) Ding der Klasse Object.
+     */
     protected static void checkIsNotReleased(Class<?> clas, Object o) {
         if (o != null && !clas.isInstance(o))
-            throw new CppProxyInvalidated(clas);
+            throw new InvalidatedCppProxyReturnedException(clas);
     }
 
-    private static class CppProxyInvalidated extends RuntimeException {
-        private CppProxyInvalidated(Class<?> c) {
+    private static class InvalidatedCppProxyReturnedException extends RuntimeException {
+        private InvalidatedCppProxyReturnedException(Class<?> c) {
             super("C++ code has returned a temporary, immediately destructed object (was a " + c.getName()+")");
         }
     }
