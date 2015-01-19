@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1251
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderStepEndedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
@@ -53,13 +54,15 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     controller.eventBus.awaitingKeyedEvent[OrderStepEndedEvent](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
-    file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
-    instance[FolderSubsystem].updateFolders()
-    transaction { implicit entityManager ⇒
-      instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
-    }
-    controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
-      scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="process"/>
+    controller.eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestOrderKey) {
+      file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
+      instance[FolderSubsystem].updateFolders()
+      transaction { implicit entityManager ⇒
+        instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
+      }
+      controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+        scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="process"/>
+      }
     }
     transaction { implicit entityManager ⇒
       instance[HibernateOrderStore].fetch(TestOrderKey)should have ('stateOption(Some(FirstState)), 'title(BChangedTitle))
