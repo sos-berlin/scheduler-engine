@@ -29,7 +29,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>TEST</servlet-name>
-        <url-pattern>/config/*</url-pattern>
+        <url-pattern>/operations_gui/*</url-pattern>
     </servlet-mapping>
 
     <!--servlet>
