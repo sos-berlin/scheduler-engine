@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.minicom.remoting
 
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversableOnce
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.RichTraversableOnce
 import com.sos.scheduler.engine.minicom.idispatch.Dispatcher.implicits._
 import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, IDispatchFactory, IDispatchable}
 import com.sos.scheduler.engine.minicom.remoting.Remoting._
