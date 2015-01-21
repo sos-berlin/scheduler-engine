@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import java.sql.{Connection, PreparedStatement}
 import javax.persistence.EntityManager
 import org.hibernate.jdbc.Work
 import scala.collection.immutable
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 
 
 class RichEntityManager(val delegate: EntityManager) extends AnyVal {

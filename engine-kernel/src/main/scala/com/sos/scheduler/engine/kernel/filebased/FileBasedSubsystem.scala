@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel.filebased
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.cplusplus.runtime.HasSister
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue

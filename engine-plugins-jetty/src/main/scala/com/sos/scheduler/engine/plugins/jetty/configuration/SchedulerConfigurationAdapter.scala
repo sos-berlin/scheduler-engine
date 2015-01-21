@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import com.google.common.base.Splitter
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration

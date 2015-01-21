@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.kernel.order
 
-import OrderPersistence._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaCollections.emptyToNone
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.order.OrderPersistentState
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
+import com.sos.scheduler.engine.kernel.order.OrderPersistence._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import org.joda.time.Instant.now
 import org.joda.time.format.DateTimeFormat

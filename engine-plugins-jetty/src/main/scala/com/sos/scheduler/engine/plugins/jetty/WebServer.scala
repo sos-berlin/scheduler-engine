@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.plugins.jetty.JettyServerBuilder.newJettyServer
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration
 import org.eclipse.jetty.server.{Connector, Server}
