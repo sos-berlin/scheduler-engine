@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import com.sos.scheduler.engine.web.WebIT._
+import com.sos.scheduler.engine.web.GuiIT._
 import java.net.URI
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -15,7 +15,7 @@ import org.scalatest.selenium.Firefox
  * @author Joacim Zschimmer
  */
 //TODO Nicht automatisch unter Maven ausführen: @RunWith(classOf[JUnitRunner])
-final class WebIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester with Firefox {
+final class GuiIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester with Firefox {
 
   onClose {
     webDriver.quit()
@@ -37,9 +37,7 @@ final class WebIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerse
     }
 
     "Jobchain" in {
-      pendingUntilFixed {
-        find(XPathQuery("//tr[@class='job_chain']")).get.text shouldEqual "/test-jobchain"
-      }
+      find(XPathQuery("//tbody[@class='job_chain']//td")).get.text shouldEqual "/test-jobchain"
     }
 
     "Job in jobchain" in {
@@ -53,6 +51,6 @@ final class WebIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerse
   private def uri(u: String) = webResource.uri(new URI(u)).getURI.toString
 }
 
-private object WebIT {
+private object GuiIT {
   private val WebResource = getResource("com/sos/scheduler/engine/web/z").toExternalForm stripSuffix "/z"  // IntelliJ has different directories out/test and out/production
 }
