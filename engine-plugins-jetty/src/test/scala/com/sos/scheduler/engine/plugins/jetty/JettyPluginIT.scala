@@ -22,7 +22,7 @@ final class JettyPluginIT extends FreeSpec with ScalaSchedulerTest with JettyPlu
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     testPackage = Some(Tests.testPackage),
-    cppSettings = Map(CppSettingName.WebDirectory → testDirectory.getPath))
+    cppSettings = Map(CppSettingName.WebDirectoryUrl → testDirectory.toURI.toString))
   private lazy val verbTester = new HttpVerbRestrictionTester(webResource)
 
   "HTTP OPTIONS and TRACE" - {

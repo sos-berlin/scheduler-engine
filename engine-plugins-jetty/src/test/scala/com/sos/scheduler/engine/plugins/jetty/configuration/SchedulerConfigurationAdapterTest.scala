@@ -94,6 +94,6 @@ private object SchedulerConfigurationAdapterTest {
   private def mockSchedulerConfiguration(httpPort: Option[Int] = None): SchedulerConfiguration =
     mock[SchedulerConfiguration] sideEffect { o ⇒
       when(o.httpPortOption) thenReturn httpPort
-      when(o.webDirectoryOption) thenReturn None
+      when(o.webDirectoryUrlOption) thenReturn None
     }
 }

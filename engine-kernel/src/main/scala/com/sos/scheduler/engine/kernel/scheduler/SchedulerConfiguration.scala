@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils.someUnless
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import java.io.File
+import java.net.{URI, URL}
 import javax.inject.{Inject, Provider}
 
 trait SchedulerConfiguration {
@@ -27,7 +28,7 @@ trait SchedulerConfiguration {
 
   def udpPort: Option[Int]
 
-  def webDirectoryOption: Option[File]
+  def webDirectoryUrlOption: Option[URL]
 }
 
 object SchedulerConfiguration {
@@ -64,10 +65,10 @@ object SchedulerConfiguration {
 
       def udpPort: Option[Int] = someUnless(spoolerC.udp_port, 0)
 
-      lazy val webDirectoryOption: Option[File] =
+      lazy val webDirectoryUrlOption: Option[URL] =
         settingsC._web_directory match {
           case "" => None
-          case o => Some(new File(o))
+          case o => Some(new URI(o).toURL)
         }
     }
   }

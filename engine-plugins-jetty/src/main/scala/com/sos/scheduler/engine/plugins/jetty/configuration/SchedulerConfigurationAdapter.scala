@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, TcpPortNumber, WarEntry, WebAppContextConfiguration}
 import com.sos.scheduler.engine.plugins.jetty.configuration.PluginLoginService.Login
 import java.io.File
+import java.net.URL
 import java.util.regex.Pattern
 import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.util.security.Password
@@ -36,7 +37,7 @@ object SchedulerConfigurationAdapter {
           portOption = portOption,
           jettyXMLURLOption = configFileIfExists("jetty.xml") map { _.toURI.toURL },
           webAppContextConfigurationOption = Some(WebAppContextConfiguration(
-            resourceBaseURL = schedulerConfiguration.webDirectoryOption map { _.toURI.toURL } getOrElse Config.resourceBaseURL,
+            resourceBaseURL = schedulerConfiguration.webDirectoryUrlOption getOrElse Config.resourceBaseURL,
             webXMLFileOption = configFileIfExists("web.xml"))),
           loginServiceOption = children.option[LoginService]("loginService"),
           wars = children.byName[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
