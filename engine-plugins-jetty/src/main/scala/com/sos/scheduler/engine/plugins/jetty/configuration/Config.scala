@@ -4,7 +4,7 @@ import com.google.common.io.Resources.getResource
 
 object Config {
   val contextPath = "/jobscheduler"
-  val resourceBaseResourcePath = "com/sos/scheduler/engine/web"
+  val resourceBaseResourcePath = "com/sos/scheduler/engine/plugins/jetty/empty"
   val resourceBaseURL = getResource(resourceBaseResourcePath)
   val enginePrefixPath = "/engine"
   val cppPrefixPath = "/engine-cpp"

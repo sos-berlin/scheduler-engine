@@ -73,13 +73,6 @@
             <artifactId>engine-data</artifactId>
             <scope>runtime</scope>
         </dependency>
-        
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-web</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>engine-job-api</artifactId>

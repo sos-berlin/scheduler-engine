@@ -76,10 +76,6 @@
             <artifactId>engine-cppjava-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>engine-web</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
             <artifactId>enginedoc-common</artifactId>
             <version>${enginedoc.version}</version>
