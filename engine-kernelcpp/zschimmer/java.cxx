@@ -28,12 +28,15 @@
 #endif
 
 #ifdef Z_WINDOWS
-    #define JVM_RELATIVE_PATH "\\bin\\server\\jvm.dll"
+    #define SERVER_JVM_RELATIVE_PATH "\\bin\\server\\jvm.dll"
+    #define CLIENT_JVM_RELATIVE_PATH "\\bin\\client\\jvm.dll"
 #elif defined Z_LINUX
     #if defined Z_64
-        #define JVM_RELATIVE_PATH "/lib/amd64/server/libjvm.so";
+        #define SERVER_JVM_RELATIVE_PATH "/lib/amd64/server/libjvm.so"
+        #define CLIENT_JVM_RELATIVE_PATH "/lib/amd64/client/libjvm.so"
     #else
-        #define JVM_RELATIVE_PATH "/lib/i386/server/libjvm.so";
+        #define SERVER_JVM_RELATIVE_PATH "/lib/i386/server/libjvm.so"
+        #define CLIENT_JVM_RELATIVE_PATH "/lib/i386/client/libjvm.so"
     #endif
 #else
 #   define JVM_RELATIVE_PATH JVM_PATH_IS_UNKNOWN_FOR_THIS_PLATFORM
@@ -402,46 +405,47 @@ vector<string> Vm::filenames()
 {
     vector<string> result;
 
+    if (_filename == "JAVA_HOME") {
+        const char* java_home_c = getenv("JAVA_HOME");
+        if (!java_home_c || !*java_home_c) z::throw_xc("JAVA_HOME not set");
+        Z_LOG2(java_log_category, "JAVA_HOME=" << java_home_c << "\n");
+        File_path home = File_path(java_home_c);
+        File_path jre = File_path(home, "jre");
+        if (jre.exists()) {
+            home = jre;   // JAVA_HOME denotes a JDK, not a JRE
+        }
+        result.push_back(home + SERVER_JVM_RELATIVE_PATH);
+        result.push_back(home + CLIENT_JVM_RELATIVE_PATH);
+    }
+    else
     if (!_filename.empty()) {
         result.push_back(_filename);
-    } else {
+    } 
+    else {
         string jvm_path;
-        #if defined Z_WINDOWS || defined Z_LINUX
-            if (const char* java_home_c = getenv("JAVA_HOME")) {
-                Z_LOG2(java_log_category, "JAVA_HOME=" << java_home_c << "\n");
-                File_path home = File_path(java_home_c);
-                File_path jdk_path = File_path(home, "jre");
-                if (jdk_path.exists()) {
-                    home = jdk_path;   // JAVA_HOME denotes a JDK, not a JRE
+        #ifdef Z_WINDOWS
+            windows::Registry_key hkey;
+            windows::Registry_key version_hkey;
+
+            if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE)) {
+                string current_version = hkey.get_string("CurrentVersion", "");
+                if( current_version != "" 
+                    && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
+                {
+                    string filename = version_hkey.get_string( "RuntimeLib", "" );
+                    result.push_back(filename);
+                    string client_jvm = "\\client\\jvm.dll";
+                    if (string_ends_with(filename, client_jvm))
+                        result.push_back(filename.substr(0, filename.length() - client_jvm.length()) + "\\server\\jvm.dll");    // Java 7.0.7 64bit registriert eine ...\client\jvm.dll, installiert sie aber nicht. 2012-09-17 Zschimmer
                 }
-                jvm_path = home + JVM_RELATIVE_PATH;
             }
+
+            jvm_path = "jvm.dll";
+        #elif defined Z_HPUX_PARISC
+            jvm_path = "libjvm.sl";
+        #else
+            jvm_path = "libjvm.so";
         #endif
-        if (jvm_path.empty()) {
-            #ifdef Z_WINDOWS
-                windows::Registry_key hkey;
-                windows::Registry_key version_hkey;
-
-                if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE)) {
-                    string current_version = hkey.get_string("CurrentVersion", "");
-                    if( current_version != "" 
-                     && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
-                    {
-                        string filename = version_hkey.get_string( "RuntimeLib", "" );
-                        result.push_back(filename);
-                        string client_jvm = "\\client\\jvm.dll";
-                        if (string_ends_with(filename, client_jvm))
-                            result.push_back(filename.substr(0, filename.length() - client_jvm.length()) + "\\server\\jvm.dll");    // Java 7.0.7 64bit registriert eine ...\client\jvm.dll, installiert sie aber nicht. 2012-09-17 Zschimmer
-                    }
-                }
-
-                jvm_path = "jvm.dll";
-            #elif defined Z_HPUX_PARISC
-                jvm_path = "libjvm.sl";
-            #else
-                jvm_path = "libjvm.so";
-            #endif
-        }
         if (!jvm_path.empty()) {
             result.push_back(jvm_path);
         }
@@ -509,14 +513,15 @@ void Vm::start()
         JNI_CreateJavaVM = load_module(module_filename);
     }
     catch (Xc& x) {
-        Z_FOR_EACH(vector<string>, module_filenames, i) {
-            module_filename = *i;
+        for (int i = 0; i < module_filenames.size(); i++) {
+            module_filename = module_filenames[i];
             try {
                 JNI_CreateJavaVM = load_module(module_filename);
+                if (i > 0) Z_LOG2(java_log_category, "Loaded '"<< module_filename << "' instead of inaccessible '" << module_filenames[0] << "'\n");
                 break;
             }
             catch (Xc& xx) {
-                Z_LOG("ERROR loading Java VM from " << module_filename << ": " << xx.what() << "\n");
+                Z_LOG2(java_log_category, "ERROR loading Java VM from " << module_filename << ": " << xx.what() << "\n");
             }
         }
         if (!JNI_CreateJavaVM)  throw x;
