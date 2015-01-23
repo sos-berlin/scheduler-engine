@@ -19,7 +19,7 @@ import org.scalatest.junit.JUnitRunner
 final class WebXmlIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester with DirectoryListingTests {
 
   private lazy val configDir = controller.environment.configDirectory
-  private lazy val baseDir = controller.environment.directory.getCanonicalFile / WebSuperdirectoryName
+  private lazy val baseDir = controller.environment.directory.getCanonicalFile / webSuperdirectoryName
   private lazy val webDirectory = baseDir / WebDirectoryName
 
   override protected def checkedBeforeAll(): Unit = {
@@ -33,7 +33,9 @@ final class WebXmlIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJe
 
   private def prepareWebXml(): Unit = {
     val webXmlFile = configDir / "web.xml"
-    webXmlFile.contentString = webXmlFile.contentString.replace("{{SCHEDULER_WORK_URL}}", baseDir.toURI.toURL.toString)
+    val url = baseDir.toURI.toURL.toString
+    assert(url endsWith expectedUrlSuffix)
+    webXmlFile.contentString = webXmlFile.contentString.replace("{{SCHEDULER_WEB_DIRECTORY_URL}}", url)
   }
 
   "Web server delivers external files described in web.xml" in {
@@ -61,8 +63,8 @@ final class WebXmlIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJe
 }
 
 object WebXmlIT {
-  private val nonAsciiString =
-    if (isWindows) " and Кирилица"
+  private val (webSuperdirectoryName, expectedUrlSuffix) =
+    if (isWindows) ("with blank and Кирилица", "with%20blank%20and%20Кирилица")
     else {
       /* Another workaround might be setting the "-Dfile.encoding=UTF-8" java parameter???
          java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters: [...]/target/failsafe-reports/com.sos.scheduler.engine.plugins.jetty.tests.webxml.WebXmlIT/with blank and Кирилица
@@ -73,8 +75,7 @@ object WebXmlIT {
               at com.sos.scheduler.engine.common.scalautil.FileUtils$implicits$.fileToPath(FileUtils.scala:14)
               at com.sos.scheduler.engine.plugins.jetty.tests.webxml.WebXmlIT.checkedBeforeAll(WebXmlIT.scala:29)
        */
-      ""
+      ("with blank", "with%20blank")
     }
-  private val WebSuperdirectoryName = "with blank" + nonAsciiString
   private val WebDirectoryName = "operations_gui"
 }
