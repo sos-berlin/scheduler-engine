@@ -113,7 +113,7 @@ extends AutoCloseable {
   }
 
   @ForCpp
-  override def toString = if (agentSelector != null) agentSelector.toString else "CppHttpRemoteApiProcessClient (not started)"
+  override def toString = if (agentSelector != null) agentSelector.selectedString else "CppHttpRemoteApiProcessClient (not started)"
 }
 
 object CppHttpRemoteApiProcessClient {

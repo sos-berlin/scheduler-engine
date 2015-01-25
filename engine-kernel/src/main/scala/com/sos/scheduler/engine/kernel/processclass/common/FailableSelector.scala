@@ -74,7 +74,9 @@ class FailableSelector[Failable, Result](
 
   final def isCancelled = cancelled
 
-  final override def toString = s"FailableSelector ${selected getOrElse "(none)"}"
+  final override def toString = s"FailableSelector $selectedString"
+
+  final def selectedString: String = s"${selected getOrElse "(none)"}" + (if (cancelled) " cancelled" else "")
 
   protected def now = Instant.now()
 }
