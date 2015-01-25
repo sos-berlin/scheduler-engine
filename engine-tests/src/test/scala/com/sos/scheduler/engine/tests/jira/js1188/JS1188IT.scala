@@ -30,7 +30,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.Vector.fill
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 import scala.concurrent.Future
 
 /**
@@ -49,13 +49,6 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"),
     cppSettings = Map(CppSettingName.agentConnectRetryDelay → AgentConnectRetryDelay.getStandardSeconds.toString))
-
-  "reduceRepeating" in {
-    val x = -9
-    assertResult(Vector(x, 1, x, 2, x, 3, 4, x)) {
-      reduceRepeating(x)(Vector(x, x, 1, x, 2, x, 3, 4, x, x, x))
-    }
-  }
 
   "ignoreExtraEntries" in {
     val x = -9
@@ -89,6 +82,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         ignoreExtraWaitingForAgentMessageCode(expectedWarnings)(codeOptions)
       }
       waitingStopwatch.duration should be > 2*AgentConnectRetryDelay  // Process class is still waiting the 3rd time
+      waitingStopwatch.duration should be < 3*AgentConnectRetryDelay
     }
   }
 
@@ -96,11 +90,13 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       startAndWaitForAgents(agentRefs(1), agentRefs(3)) // Start 2 out of n agents
       awaitSuccess(waitingTaskClosedFuture) // Waiting task has finally finished
-      waitingStopwatch.duration should be > 3 * AgentConnectRetryDelay
+      waitingStopwatch.duration should be > 3*AgentConnectRetryDelay
+      waitingStopwatch.duration should be < 4*AgentConnectRetryDelay
       // Agent 0 is still unreachable
-      assertResult(List(Some(InaccessibleAgentMessageCode))) {
-        eventPipe.queued[WarningLogEvent] map { _.codeOption } filter { _ != Some(WaitingForAgentMessageCode) }
-      }
+      //(Following check is not reliable. Number of messages "SCHEDULER-489" depends on run-time characteristic. */
+      //assertResult(List(Some(InaccessibleAgentMessageCode))) {
+      //  eventPipe.queued[WarningLogEvent] map { _.codeOption } filter { _ != Some(WaitingForAgentMessageCode) }
+      //}
     }
   }
 
@@ -213,9 +209,6 @@ private object JS1188IT {
         agentRefs map { o ⇒ <remote_scheduler remote_scheduler={o.uri}/> }
       }</remote_schedulers>
     </process_class>
-
-  private def reduceRepeating[A](value: A)(seq: Vector[A]): immutable.IndexedSeq[A] =
-    0 +: ((1 until seq.size) filterNot { i ⇒ seq(i - 1) == value && seq(i) == value }) map seq
 
   private def ignoreExtraWaitingForAgentMessageCode(expected: TraversableOnce[Option[MessageCode]])(seq: TraversableOnce[Option[MessageCode]]) =
     ignoreExtraEntries[Option[MessageCode]](expected, ignore = Some(WaitingForAgentMessageCode))(seq)
