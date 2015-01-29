@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agenttest
 
 import com.sos.scheduler.engine.agent.AgentConfiguration
-import com.sos.scheduler.engine.agent.web.Main
+import com.sos.scheduler.engine.agent.main.Main
 import com.sos.scheduler.engine.agenttest.AgentIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
