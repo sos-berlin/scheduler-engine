@@ -31,7 +31,7 @@ final class Dispatcher(val delegate: IDispatchable) extends IDispatch {
   }
 
   private def invokeMethod(method: Method, arguments: Seq[Any]): Any = {
-    if(arguments.size != method.getParameterCount) throw new COMException(DISP_E_BADPARAMCOUNT, s"Number of arguments (${arguments.size }) does not match method $method")
+    if (arguments.size != method.getParameterCount) throw new COMException(DISP_E_BADPARAMCOUNT, s"Number of arguments (${arguments.size }) does not match method $method")
     val javaParameters = for ((t, v) ← method.getParameterTypes zip arguments) yield convert(t.asInstanceOf[Class[_ <: AnyRef]], v)
     val result =
       try method.invoke(delegate, javaParameters: _*)
@@ -47,18 +47,18 @@ object Dispatcher {
     }
   }
 
-  private val StringClass = classOf[String]
   private val IntClass = classOf[Int]
   private val BoxedIntegerClass = classOf[java.lang.Integer]
   private val LongClass = classOf[Long]
   private val BoxedLongClass = classOf[java.lang.Long]
-  private val BooleanClass = classOf[Boolean]
-  private val BoxedBooleanClass = classOf[java.lang.Boolean]
   private val DoubleClass = classOf[Double]
   private val BoxedDoubleClass = classOf[java.lang.Double]
+  private val BooleanClass = classOf[Boolean]
+  private val BoxedBooleanClass = classOf[java.lang.Boolean]
+  private val StringClass = classOf[String]
   private val VariantArraySerializableClass = classOf[VariantArray]
 
-  private def convert[A <: AnyRef](c: Class[A], v: Any): A = {
+  private def convert[A <: AnyRef](c: Class[A], v: Any): A =
     (c match {
       case IntClass | BoxedIntegerClass ⇒ v match {
         case o: Int ⇒ Int box o
@@ -76,5 +76,4 @@ object Dispatcher {
       case StringClass ⇒ v.toString
       case VariantArraySerializableClass ⇒ v.asInstanceOf[VariantArray]
     }).asInstanceOf[A]
-  }
 }
