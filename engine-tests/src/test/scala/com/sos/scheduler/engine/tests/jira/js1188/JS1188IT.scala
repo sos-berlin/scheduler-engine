@@ -91,7 +91,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
       startAndWaitForAgents(agentRefs(1), agentRefs(3)) // Start 2 out of n agents
       awaitSuccess(waitingTaskClosedFuture) // Waiting task has finally finished
       waitingStopwatch.duration should be > 3*AgentConnectRetryDelay
-      waitingStopwatch.duration should be < 4*AgentConnectRetryDelay
+      //Not on a busy computer: waitingStopwatch.duration should be < 4*AgentConnectRetryDelay
       // Agent 0 is still unreachable
       //(Following check is not reliable. Number of messages "SCHEDULER-489" depends on run-time characteristic. */
       //assertResult(List(Some(InaccessibleAgentMessageCode))) {
