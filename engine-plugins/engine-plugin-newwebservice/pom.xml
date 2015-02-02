@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>engine-plugins-newwebservice</artifactId>
+    <artifactId>engine-plugin-newwebservice</artifactId>
 
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
@@ -25,7 +25,7 @@
     <dependencies>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-plugins-jetty</artifactId>
+            <artifactId>engine-plugin-jetty</artifactId>
             <version>1.9-SNAPSHOT</version>
         </dependency>
         <dependency>

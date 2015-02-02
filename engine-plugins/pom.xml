@@ -15,8 +15,8 @@
     <inceptionYear>2011</inceptionYear>
 
     <modules>
-        <module>engine-plugins-jetty</module>
+        <module>engine-plugin-jetty</module>
+        <module>engine-plugin-newwebservice</module>
         <module>engine-plugins-legacy</module>
-        <module>engine-plugins-newwebservice</module>
     </modules>
 </project>

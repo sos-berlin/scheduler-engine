@@ -67,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-plugins-jetty</artifactId>
+            <artifactId>engine-plugin-jetty</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
