@@ -59,6 +59,10 @@ struct Order_state_transition {
     public: static const Order_state_transition standard_error;
     public: static const Order_state_transition success;
     public: static const Order_state_transition keep;
+
+    public: static Order_state_transition of_bool(bool b) {
+        return b? success : standard_error;
+    }
     
     public: Order_state_transition(int result_code) :
         _internal_value(result_code)
