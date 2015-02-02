@@ -34,16 +34,16 @@ object EventBusTestFutures {
         }
       }
 
-      /** @return Future, der mit dem nächsten KeyedEvent E erfolgreich endet. */
+      /** @return Future, will succeed with next [[KeyedEvent]] `E`. */
       def keyedEventFuture[E <: KeyedEvent](key: E#Key)(implicit e: ClassTag[E]): Future[E] =
         eventFuture[E](predicate = _.key == key)
 
-      /** @return Future, der mit dem nächsten Event E und dem erfüllten Prädikat erfolgreich endet. */
+      /** @return Future, will succeed with next [[Event]] `E`  matching the `predicate`. */
       def eventFuture[E <: Event](predicate: E ⇒ Boolean = EveryEvent)(implicit e: ClassTag[E]): Future[E] = {
         val promise = Promise[E]()
         lazy val eventSubscription: EventSubscription = EventSubscription[E] { e ⇒
           if (predicate(e)) {
-            promise.success(e)
+            promise.trySuccess(e)
             delegate unregister eventSubscription
           }
         }
