@@ -79,12 +79,12 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
       "OrderFinished UnmodifiableOrder"           -> OrderFinishedEvent(orderKey),
       "OrderStepStarted UnmodifiableOrder state1" -> OrderStepStartedEvent(orderKey, OrderState("state1")),
       "OrderStepStarted Order state1"             -> OrderStepStartedEvent(orderKey, OrderState("state1")),
-      "OrderStepEnded UnmodifiableOrder state1"   -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
-      "OrderStepEnded Order state1"               -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepEnded UnmodifiableOrder state1"   -> OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
+      "OrderStepEnded Order state1"               -> OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
       "OrderStepStarted UnmodifiableOrder state2" -> OrderStepStartedEvent(orderKey, OrderState("state2")),
       "OrderStepStarted Order state2"             -> OrderStepStartedEvent(orderKey, OrderState("state2")),
-      "OrderStepEnded UnmodifiableOrder state2"   -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
-      "OrderStepEnded Order state2"               -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepEnded UnmodifiableOrder state2"   -> OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
+      "OrderStepEnded Order state2"               -> OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
       "OrderSuspended UnmodifiableOrder"          -> OrderSuspendedEvent(orderKey),
       "OrderResumed UnmodifiableOrder"            -> OrderResumedEvent(orderKey)))
   }

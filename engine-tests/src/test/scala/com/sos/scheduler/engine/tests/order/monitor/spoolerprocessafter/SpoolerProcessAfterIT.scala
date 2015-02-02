@@ -83,7 +83,7 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
     }
 
   @HotEventHandler def handleEvent(e: OrderStepEndedEvent, order: UnmodifiableOrder): Unit = {
-    if (e.stateTransition == OrderStateTransition.keepState) {
+    if (e.stateTransition == KeepOrderStateTransition) {
       // Es wird kein OrderFinishedEvent geben.
       publishMyFinishedEvent(order)
     }

@@ -177,7 +177,7 @@ Task::Task(Standard_job* job)
     _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Duration::eternal ),
-    _order_state_transition(Order::post_keep_state)
+    _order_state_transition(Order_state_transition::keep)
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -1713,8 +1713,8 @@ bool Task::do_something()
                                             //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
                                             process_module_instance->fetch_parameters_from_process( _order->params() );
                                             if( !has_error() ) {
-                                                postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
-                                                                                                             : Order::post_error   );       
+                                                postprocess_order( _module_instance->spooler_process_result()? Order_state_transition::success
+                                                                                                             : Order_state_transition::standard_error);       
                                             }
                                             else {}     // detach_order_after_error() wird sich drum kümmern.
                                         }
@@ -1722,10 +1722,8 @@ bool Task::do_something()
                                            process_module_instance->fetch_parameters_from_process( _params );
                                     }
                                     else
-                                    if (_order_state_transition != Order::post_keep_state) {
+                                    if (_order_state_transition != Order_state_transition::keep) {
                                         postprocess_order(_order_state_transition);       
-                                        //postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
-                                        //                                                             : Order::post_error   );       
                                     }
                                 }                                                               
 
@@ -1940,9 +1938,9 @@ bool Task::step__end()
         count_step();
 
         if( _order )   {
-            postprocess_order( _delay_until_locks_available? Order::post_keep_state :
-                               result                      ? Order::post_success 
-                                                           : Order::post_error        );
+            postprocess_order( _delay_until_locks_available? (Order_state_transition)Order_state_transition::keep :
+                               result                      ? (Order_state_transition)Order_state_transition::success
+                                                           : (Order_state_transition)Order_state_transition::standard_error);
         }
 
         if( _next_spooler_process.not_zero() )  
@@ -1995,8 +1993,8 @@ string Task::remote_process_step__end()
                 ptr<Com_variable_set> p = new Com_variable_set( order_params_element );
                 _order->params()->merge( p );
             }
-            _order_state_transition = _module_instance->spooler_process_result()? Order::post_success 
-                                                                                : Order::post_error;       
+            _order_state_transition = _module_instance->spooler_process_result()? Order_state_transition::success
+                                                                                : Order_state_transition::standard_error;
             if (_module_instance->_module->_kind != Module::kind_process) {
                 postprocess_order(_order_state_transition);
             }
@@ -2009,7 +2007,7 @@ string Task::remote_process_step__end()
     catch( const exception& x )  { 
         set_error(x); 
         if( _order ) {
-            _order_state_transition = _job->stops_on_task_error()? Order::post_keep_state : Order::post_error;
+            _order_state_transition = _job->stops_on_task_error()? Order_state_transition::keep : Order_state_transition::standard_error;
             if (_module_instance->_module->_kind != Module::kind_process) {
                 detach_order_after_error();
             }
@@ -2107,13 +2105,13 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 //--------------------------------------------------------------------------Task::postprocess_order
 
-void Task::postprocess_order( Order::Order_state_transition state_transition, bool due_to_exception )
+void Task::postprocess_order(Order_state_transition state_transition, bool due_to_exception)
 {
     if( _order ) {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         
         if (!_order->job_chain_path().empty())
-            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition), _order->java_sister());
+            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()), _order->java_sister());
         _order->postprocessing( state_transition );
         
         if( due_to_exception && !_order->setback_called() ) 
@@ -2133,12 +2131,12 @@ void Task::detach_order_after_error()
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
             if (!_order->job_chain_path().empty())
-                report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order::post_keep_state), _order->java_sister());
+                report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order_state_transition::keep.internal_value()), _order->java_sister());
             _order->processing_error();
             detach_order();
         } else {
             // Job stoppt nicht, deshalb wechselt der Auftrag in den Fehlerzustand
-            postprocess_order( Order::post_error, true );
+            postprocess_order(Order_state_transition::standard_error, true);
             // _order ist NULL
         }
     }

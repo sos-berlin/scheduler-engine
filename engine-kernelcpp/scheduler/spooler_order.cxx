@@ -34,6 +34,10 @@ const string no_cluster_member_id = "-";
 const string default_end_state_name                     = "<END_STATE>";
 const string order_select_database_columns              = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
+const Order_state_transition Order_state_transition::success = Order_state_transition(0);
+const Order_state_transition Order_state_transition::standard_error = Order_state_transition(1);
+const Order_state_transition Order_state_transition::keep = Order_state_transition();
+
 //---------------------------------------------------------------------------------Job_chain_folder
 
 struct Job_chain_folder : Job_chain_folder_interface

@@ -2658,7 +2658,7 @@ void Order::postprocessing( Order_state_transition state_transition )
     //if (!job_chain_path().empty()) {
     //    report_event(CppEventFactoryJ::newOrderStepEndedEvent(job_chain_path(), string_id(), state_transition), java_sister());
     //}
-    _is_success_state = state_transition == post_success;
+    _is_success_state = state_transition == Order_state_transition::success;
 
     Job*      last_job          = _task? _task->job() : NULL;
     Job_node* job_node          = Job_node::cast( _job_chain_node );
@@ -2682,7 +2682,7 @@ void Order::postprocessing( Order_state_transition state_transition )
 
     _task = NULL;
 
-    if( state_transition != post_keep_state  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
+    if( state_transition != Order_state_transition::keep  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
         force_error_state )
     {
         if( job_node )

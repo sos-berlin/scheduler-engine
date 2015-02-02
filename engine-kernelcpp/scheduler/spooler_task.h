@@ -231,7 +231,7 @@ struct Task : Object,
     Web_service*                web_service_or_null         () const                                { return _web_service; }
 
     Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause );
-    void                        postprocess_order           ( Order::Order_state_transition, bool due_to_exception = false );
+    void                        postprocess_order           (Order_state_transition, bool due_to_exception = false);
 
     void                        add_pid                     ( int pid, const Duration& timeout = Duration::eternal);
     void                        remove_pid                  ( int pid );
@@ -387,7 +387,7 @@ struct Task : Object,
     bool                       _is_last_job_delay_after_error;
     bool                       _move_order_to_error_state;
     bool                       _delay_until_locks_available;
-    Order::Order_state_transition _order_state_transition;
+    Order_state_transition     _order_state_transition;
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;

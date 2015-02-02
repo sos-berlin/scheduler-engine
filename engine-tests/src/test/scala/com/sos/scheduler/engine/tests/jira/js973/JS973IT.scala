@@ -173,7 +173,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
       instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
       eventPipe.nextAny[ErrorLogEvent].codeOption shouldEqual Some(expectedErrorCode)
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual OrderStateTransition.keepState
+      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual KeepOrderStateTransition
       instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.stopped
     }
   }

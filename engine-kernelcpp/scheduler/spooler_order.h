@@ -46,12 +46,48 @@ extern const string             scheduler_file_path_variable_name;
 
 typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 
-//--------------------------------------------------------------------------------Untouched_is_allowed
+//-----------------------------------------------------------------------------Untouched_is_allowed
 
 enum Untouched_is_allowed {
     untouched_not_allowed = false,
     untouched_allowed = true
 };
+
+//---------------------------------------------------------------------------Order_state_transition
+
+struct Order_state_transition { 
+    public: static const Order_state_transition standard_error;
+    public: static const Order_state_transition success;
+    public: static const Order_state_transition keep;
+    
+    public: Order_state_transition(int result_code) :
+        _internal_value(result_code)
+    {}
+
+    private: Order_state_transition() :
+        _internal_value(INT64_MAX)  // Out of range of Unix and Windows exit codes (max. 32 bits)
+    {}
+
+    public: bool operator ==(const Order_state_transition& o) const { 
+        return internal_value() == o.internal_value();
+    }
+
+    public: bool operator !=(const Order_state_transition& o) const { 
+        return !(*this == o);
+    }
+
+    public: int result_code() const {
+        assert((_internal_value & ~0xFFFFFFFF) == 0);
+        return _internal_value;
+    }
+
+    public: int64 internal_value() const {
+        return _internal_value;
+    }
+
+    private: int64 _internal_value;
+};
+
 
 //--------------------------------------------------------------------------------------------Order
 
@@ -265,7 +301,6 @@ struct Order : Com_order,
     void                        tip_next_node_for_new_distributed_order_state();
     void                        move_to_node            ( job_chain::Node* );
 
-    enum Order_state_transition { post_error = 0, post_success = 1, post_keep_state = 2 };    // Wie Java OrderStateTransistion
     void                        postprocessing          ( Order_state_transition );                    // Verarbeitung nach spooler_process()
     void                        processing_error        ();
     void                        handle_end_state        ();
