@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.agent.xmlcommand
 
 import com.sos.scheduler.engine.agent.commands.{StartRemoteTask, StartRemoteTaskResponse}
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import java.net.{InetAddress, InetSocketAddress}
 
 /**
  * @author Joacim Zschimmer
  */
 object StartRemoteTaskXml {
-  def parseXml(eventReader: ScalaXMLEventReader): StartRemoteTask = {
+  def parseXml(inetAddress: InetAddress, eventReader: ScalaXMLEventReader): StartRemoteTask = {
     import eventReader._
     parseElement() {
       val usesApi = attributeMap.get("kind") match {
@@ -16,7 +17,7 @@ object StartRemoteTaskXml {
         case x ⇒ throw new IllegalArgumentException(s"kind=$x")
       }
       StartRemoteTask(
-        controllerTcpPort = attributeMap.asConverted("tcp_port")(stringToTcpPort),
+        controllerAddress = new InetSocketAddress(inetAddress, attributeMap.asConverted("tcp_port")(stringToTcpPort)),
         usesApi = usesApi,
         javaOptions = attributeMap.getOrElse("java_options", ""),
         javaClassPath = attributeMap.getOrElse("java_classpath", ""))

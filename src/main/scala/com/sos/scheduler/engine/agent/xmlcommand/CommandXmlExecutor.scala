@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.xmlcommand
 
 import com.sos.scheduler.engine.agent.commands.{CloseRemoteTaskResponse, Command, Response, StartRemoteTaskResponse}
+import java.net.InetAddress
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -10,8 +11,8 @@ import scala.concurrent.Future
  */
 final class CommandXmlExecutor(executeCommand: Command ⇒ Future[Response]) {
 
-  def execute(commandString: String): Future[xml.Elem] =
-    (Future { CommandXml.parseString(commandString) }
+  def execute(clientIPAddress: InetAddress, commandString: String): Future[xml.Elem] =
+    (Future { CommandXml.parseString(clientIPAddress, commandString) }
       flatMap executeCommand
       map responseToXml
       recover { case throwable ⇒ <ERROR text={throwable.toString}/> }

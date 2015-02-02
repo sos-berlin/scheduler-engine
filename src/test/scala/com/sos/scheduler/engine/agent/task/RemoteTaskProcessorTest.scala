@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.agent.task.RemoteTaskProcessorTest._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.task.StartConfiguration
+import java.net.InetSocketAddress
 import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
@@ -29,7 +30,7 @@ final class RemoteTaskProcessorTest extends FreeSpec {
   private lazy val remoteTaskHandler = Guice.createInjector(new TestModule(remoteTasks)).apply[RemoteTaskProcessor]
 
   "StartRemoteTask" in {
-    val command = StartRemoteTask(controllerTcpPort = 9999, usesApi = false, javaOptions = JavaOptions, javaClassPath = JavaClasspath)
+    val command = StartRemoteTask(new InetSocketAddress("127.0.0.1", 9999), usesApi = false, javaOptions = JavaOptions, javaClassPath = JavaClasspath)
     for (nextRemoteTaskId ← RemoteTaskIds) {
       val response = Await.result(remoteTaskHandler.executeCommand(command), 1.seconds)
       inside(response) { case StartRemoteTaskResponse(id) ⇒ id shouldEqual nextRemoteTaskId }

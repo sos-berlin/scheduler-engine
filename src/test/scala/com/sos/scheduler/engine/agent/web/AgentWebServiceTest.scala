@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.web
 
 import akka.actor.ActorSystem
+import java.net.InetAddress
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import scala.concurrent.Future
@@ -26,7 +27,7 @@ final class AgentWebServiceTest extends FreeSpec with ScalatestRouteTest with Ag
     }
   }
 
-  protected def executeCommand(command: String) = Future.successful[xml.Elem](
+  protected def executeCommand(clientIP: InetAddress, command: String) = Future.successful[xml.Elem](
     command match {
       case "test" ⇒ <ok/>
       case _ ⇒ throw new Exception

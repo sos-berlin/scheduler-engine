@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.agentcommon.ScalaConcurrentHashMap
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.task.StartConfiguration
-import java.net.InetSocketAddress
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -24,11 +23,11 @@ final class RemoteTaskProcessor @Inject private(newRemoteTaskId: () ⇒ RemoteTa
 
   def executeCommand(command: RemoteTaskCommand) = Future[Response] {
     command match {
-      case StartRemoteTask(controllerTcpPort, usesApi, javaOptions, javaClasspath) ⇒
+      case StartRemoteTask(controllerAddress, usesApi, javaOptions, javaClasspath) ⇒
         val remoteTaskId = newRemoteTaskId()
         val startConfiguration = StartConfiguration(
           remoteTaskId,
-          controllerAddress = new InetSocketAddress(LocalhostIpAddress, controllerTcpPort),
+          controllerAddress = controllerAddress,
           usesApi = usesApi,
           javaOptions = javaOptions,
           javaClasspath = javaClasspath)
@@ -48,7 +47,6 @@ final class RemoteTaskProcessor @Inject private(newRemoteTaskId: () ⇒ RemoteTa
 }
 
 private object RemoteTaskProcessor {
-  private val LocalhostIpAddress = "127.0.0.1"
   private val logger = Logger(getClass)
 
   private def tryKillTask(task: RemoteTask) =

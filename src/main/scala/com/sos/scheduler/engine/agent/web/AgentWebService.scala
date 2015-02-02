@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.agent.web
 
+import java.net.InetAddress
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import spray.http.HttpEntity
 import spray.http.MediaTypes._
-import spray.routing.{HttpService, HttpServiceActor, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
+import spray.http.StatusCodes.BadRequest
+import spray.routing.{HttpService, HttpServiceActor, MissingHeaderRejection, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
 
 /**
  * @author Joacim Zschimmer
@@ -12,7 +14,7 @@ import spray.routing.{HttpService, HttpServiceActor, RequestEntityExpectedReject
 private[agent] trait AgentWebService
 extends HttpService {
 
-  protected def executeCommand(command: String): Future[xml.Elem]
+  protected def executeCommand(clientIPAddress: InetAddress, command: String): Future[xml.Elem]
 
   private[agent] def route =
     (decompressRequest() | compressResponseIfRequested(())) {
@@ -22,8 +24,13 @@ extends HttpService {
             case HttpEntity.Empty ⇒ reject(RequestEntityExpectedRejection)
             case httpEntity: HttpEntity.NonEmpty ⇒
               if (!(Set(`application/xml`, `text/xml`) contains httpEntity.contentType.mediaType)) reject(UnsupportedRequestContentTypeRejection("application/xml expected"))
-              onSuccess(executeCommand(httpEntity.asString)) {
-                response ⇒ complete(response)
+              optionalHeaderValueByName("Remote-Address") {  // Requires Spray configuration spray.can.remote-address-header = on
+                case None ⇒ complete(BadRequest, "Client's IP address is unknown")
+                case Some(clientIPAddress) ⇒ reject(MissingHeaderRejection("Remote-Address"))  // For other possibilities see Spray clientIP
+                  val future = executeCommand(clientIPAddress = InetAddress.getByName(clientIPAddress), command = httpEntity.asString)
+                  onSuccess(future) {
+                    response ⇒ complete(response)
+                  }
               }
           }
         }

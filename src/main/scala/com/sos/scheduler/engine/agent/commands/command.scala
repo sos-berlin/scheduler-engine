@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.commands
 
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
+import java.net.{InetSocketAddress, InetAddress}
 
 /**
  * @author Joacim Zschimmer
@@ -21,7 +22,7 @@ trait RemoteTaskCommand extends Command
 
 
 final case class StartRemoteTask(
-  controllerTcpPort: Int,
+  controllerAddress: InetSocketAddress,
   usesApi: Boolean,
   javaOptions: String = "",
   javaClassPath: String = "")

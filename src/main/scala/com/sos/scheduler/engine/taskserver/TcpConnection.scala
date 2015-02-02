@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.taskserver
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.minicom.remoting.MessageConnection
 import java.net.{InetSocketAddress, Socket}
 import java.nio.ByteBuffer
 import scala.concurrent.blocking
+import TcpConnection._
 
 final class TcpConnection(peerAddress: InetSocketAddress) extends MessageConnection with AutoCloseable {
 
@@ -13,7 +15,9 @@ final class TcpConnection(peerAddress: InetSocketAddress) extends MessageConnect
 
   def connect(): Unit = {
     blocking {
+      logger.debug(s"Connecting with $peerAddress ...")
       socket.connect(peerAddress)
+      logger.debug(s"Connected with $peerAddress")
     }
   }
 
@@ -56,4 +60,8 @@ final class TcpConnection(peerAddress: InetSocketAddress) extends MessageConnect
       out.write(data, 0, length)
     }
   }
+}
+
+object TcpConnection{
+  private val logger = Logger(getClass)
 }
