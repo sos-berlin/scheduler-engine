@@ -4,6 +4,7 @@ import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
@@ -29,8 +30,7 @@ import scala.reflect.ClassTag
 abstract class TestSchedulerController
 extends DelegatingSchedulerController
 with HasCloser
-with HasInjector
-with EventHandlerAnnotated {
+with HasInjector {
 
   def testConfiguration: TestConfiguration
 
@@ -51,9 +51,27 @@ with EventHandlerAnnotated {
         c.testJdbcUrl(testName, environment.databaseDirectory)
     }
 
-  override def close(): Unit = {
-    try delegate.close()   // Possibly called twice, then checking for SchedulerCLoseEvent handling error
-    finally super.close()
+  closeOnError(closer) {
+    eventBus.onHot[ErrorLogEvent] { case e =>
+      // Kann ein anderer Thread sein: C++ Heart_beat_watchdog_thread Abbruchmeldung SCHEDULER-386
+      if (testConfiguration.terminateOnError &&
+        !(e.codeOption exists testConfiguration.ignoreError) &&
+        !errorLogEventIsTolerated(e) &&
+        !testConfiguration.errorLogEventIsTolerated(e)) {
+        terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message }"))
+      }
+    }
+
+    eventBus.onHotAndCold[EventHandlerFailedEvent] { case e ⇒
+      if (testConfiguration.terminateOnError) {
+        logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
+        terminateAfterException(e.getThrowable)
+      }
+    }
+  }
+
+  onClose {
+    delegate.close()   // Possibly called twice, then checking for SchedulerCloseEvent handling error
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
@@ -85,7 +103,6 @@ with EventHandlerAnnotated {
 
   def prepare(): Unit = {
     if (!isPrepared) {
-      registerEventHandler(this)
       environment.prepare()
       delegate.loadModule(cppBinaries.file(CppBinary.moduleFilename))
       isPrepared = true
@@ -144,26 +161,6 @@ with EventHandlerAnnotated {
     finally errorLogEventIsTolerated = Set()
   }
 
-  @HotEventHandler
-  def handleEvent(e: ErrorLogEvent): Unit = {
-    // Kann ein anderer Thread sein: C++ Heart_beat_watchdog_thread Abbruchmeldung SCHEDULER-386
-    if (testConfiguration.terminateOnError &&
-      !(e.codeOption exists testConfiguration.ignoreError) &&
-      !errorLogEventIsTolerated(e) &&
-      !testConfiguration.errorLogEventIsTolerated(e))
-    {
-      terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
-    }
-  }
-
-  @EventHandler @HotEventHandler
-  def handleEvent(e: EventHandlerFailedEvent): Unit = {
-    if (testConfiguration.terminateOnError) {
-      logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
-      terminateAfterException(e.getThrowable)
-    }
-  }
-
   final def instance[A : ClassTag]: A = injector.apply[A]
 
   final def injector = scheduler.injector
@@ -182,16 +179,7 @@ with EventHandlerAnnotated {
       }
 
   /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
-  def newEventPipe(): EventPipe = {
-    val result = new EventPipe(eventBus, TestTimeout)
-    registerEventHandler(result)
-    result
-  }
-
-  private def registerEventHandler(o: EventHandlerAnnotated): Unit = {
-    eventBus registerAnnotated o
-    onClose { eventBus unregisterAnnotated o }
-  }
+  def newEventPipe(): EventPipe = new EventPipe(eventBus, TestTimeout)
 
   def isStarted =
     delegate.isStarted

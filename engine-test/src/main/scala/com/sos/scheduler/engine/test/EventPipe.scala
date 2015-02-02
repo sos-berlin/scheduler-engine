@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
+import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
@@ -13,21 +15,17 @@ import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
 
-final class EventPipe(eventBus: EventBus, defaultTimeout: Duration)
-extends EventHandlerAnnotated with AutoCloseable {
+final class EventPipe(eventBus: SchedulerEventBus, defaultTimeout: Duration)
+extends EventHandlerAnnotated with HasCloser {
 
   private val queue = new LinkedBlockingQueue[Event]
 
-  def close(): Unit = {
-    eventBus unregisterAnnotated this
-  }
-
-  @EventHandler def add(e: Event): Unit = {
-    queue.add(e)
+  closeOnError(closer) {
+    eventBus.on[Event] { case e ⇒ queue.add(e) }
   }
 
   def nextAny[E <: Event : ClassTag]: E =
-    nextEvent[E](defaultTimeout, everyEvent)
+    nextEvent[E](defaultTimeout, EveryEvent)
 
   def nextKeyed[E <: KeyedEvent : ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
     nextEvent[E](timeout, { _.key == key })
@@ -38,10 +36,12 @@ extends EventHandlerAnnotated with AutoCloseable {
   def nextWithTimeoutAndCondition[E <: Event : ClassTag](timeout: Duration)(condition: E ⇒ Boolean): E =
     nextEvent[E](timeout, condition)
 
-  /** @return All so far queued events of type E. */
+  /**
+   * @return All so far queued events of type E.
+   */
   def queued[E <: Event : ClassTag]: immutable.Seq[E] = {
     val result = mutable.ListBuffer[E]()
-    try while (true) result += nextEvent2(0.s, everyEvent, implicitClass[E])
+    try while (true) result += nextEvent2(0.s, EveryEvent, implicitClass[E])
     catch { case _: TimeoutException ⇒ }
     result.toList
   }
@@ -76,7 +76,7 @@ extends EventHandlerAnnotated with AutoCloseable {
 }
 
 object EventPipe {
-  private val everyEvent = (e: Event) ⇒ true
+  private val EveryEvent = (_: Event) ⇒ true
 
   class TimeoutException(override val getMessage: String) extends RuntimeException
 
