@@ -30,6 +30,7 @@ import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.log.{CppLogger, PrefixLog}
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Result
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
@@ -291,9 +292,4 @@ object Scheduler {
       catch { case e: NoSuchElementException ⇒ "" }
     else
       ""
-
-  final case class Result(string: String) {
-    lazy val elem: scala.xml.Elem = SafeXML.loadString(string)
-    lazy val answer = elem \ "answer"
-  }
 }
