@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-        <artifactId>engine</artifactId>
+        <artifactId>engine-plugins</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
 
