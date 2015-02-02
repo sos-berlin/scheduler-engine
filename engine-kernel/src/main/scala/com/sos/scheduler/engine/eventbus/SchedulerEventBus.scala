@@ -24,6 +24,16 @@ final class SchedulerEventBus extends EventBus with Runnable {
   }
 
   /**
+   * Calls methods `onHot` and `on`.
+   * `eventHandler` will be called twice: synchronously at the event and later asynchronously.
+   * @param eventHandler Events not in the function's domain are ignored.
+   */
+  def onHotAndCold[E <: Event](eventHandler: PartialFunction[E, Unit])(implicit closer: Closer, e: ClassTag[E]): Unit = {
+    onHot[E](eventHandler)(closer, e)
+    on[E](eventHandler)(closer, e)
+  }
+
+  /**
    * Subscribes events of class E for eventHandler and registers this in [[Closer]] for unsubscription with Closer.closer().
    * The event handler is called asynchronous by dispatchEvent().
    * @param eventHandler Events not in the function's domain are ignored.
