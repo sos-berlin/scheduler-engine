@@ -50,6 +50,10 @@
             job="/test_SpoolerProcess"
             next_state="SUCCESS" error_state="ERROR"/>
     <job_chain_node
+            state="initial_SpoolerProcess_SpoolerProcessBefore"
+            job="/test_SpoolerProcess_SpoolerProcessBefore"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
             state="initial_SpoolerProcess_SpoolerProcessAfter"
             job="/test_SpoolerProcess_SpoolerProcessAfter"
             next_state="SUCCESS" error_state="ERROR"/>

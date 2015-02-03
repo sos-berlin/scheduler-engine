@@ -40,37 +40,40 @@ object Settings {
     /*14*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR"))) →
         Expected(SuccessState, ErrorCode("TEST-ERROR"), Warning("SCHEDULER-280"), JobIsStopped),
 
-    /*15*/ Setting(SpoolerProcess(Returns(true)), SpoolerProcessAfter(Returns(true))) →
+    /*15*/ Setting(SpoolerProcess(Returns(true)), SpoolerProcessBefore()) →
+      Expected(ErrorState),   // Not InitialState?
+
+    /*16*/ Setting(SpoolerProcess(Returns(true)), SpoolerProcessAfter(Returns(true))) →
         Expected(SuccessState, SpoolerProcessAfterParameter(true)),
-    /*16*/ Setting(SpoolerProcess(Returns(true)), SpoolerProcessAfter(Returns(false))) →
+    /*17*/ Setting(SpoolerProcess(Returns(true)), SpoolerProcessAfter(Returns(false))) →
         Expected(ErrorState, SpoolerProcessAfterParameter(true)),
-    /*17*/ Setting(SpoolerProcess(Returns(false)), SpoolerProcessAfter(Returns(true))) →
+    /*18*/ Setting(SpoolerProcess(Returns(false)), SpoolerProcessAfter(Returns(true))) →
         Expected(SuccessState, SpoolerProcessAfterParameter(false)),
-    /*18*/ Setting(SpoolerProcess(Returns(false)), SpoolerProcessAfter(Returns(false))) →
+    /*19*/ Setting(SpoolerProcess(Returns(false)), SpoolerProcessAfter(Returns(false))) →
         Expected(ErrorState, SpoolerProcessAfterParameter(false)),
 
     // Eine Fehlermeldung führt zu: SCHEDULER-280  Process terminated with exit code 1 (0x1)
-    /*19*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), SpoolerProcessAfter(Returns(true))) →
+    /*20*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), SpoolerProcessAfter(Returns(true))) →
         Expected(SuccessState, SpoolerProcessAfterParameter(true), ErrorCode("TEST-ERROR"), Warning("SCHEDULER-280"), JobIsStopped),
-    /*20*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), DontStopOnError, SpoolerProcessAfter(Returns(true))) →
+    /*21*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), DontStopOnError, SpoolerProcessAfter(Returns(true))) →
         Expected(SuccessState, SpoolerProcessAfterParameter(true), ErrorCode("TEST-ERROR"), Warning("SCHEDULER-280")),
-    /*21*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), SpoolerProcessAfter(Returns(false))) →
+    /*22*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), SpoolerProcessAfter(Returns(false))) →
         Expected(ErrorState, SpoolerProcessAfterParameter(true), ErrorCode("TEST-ERROR"), Warning("SCHEDULER-280"), JobIsStopped),
-    /*22*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), DontStopOnError, SpoolerProcessAfter(Returns(false))) →
+    /*23*/ Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR")), DontStopOnError, SpoolerProcessAfter(Returns(false))) →
         Expected(ErrorState, SpoolerProcessAfterParameter(true), ErrorCode("TEST-ERROR"), Warning("SCHEDULER-280")),
 
     //TODO Warum wird ohne Monitor COM-80020009 Z-JAVA-105, mit Monitor aber Z-JAVA-105 gemeldet?
-    /*23*/ Setting(SpoolerProcess(Throw)) →
+    /*24*/ Setting(SpoolerProcess(Throw)) →
         Expected(InitialState, ErrorCode("COM-80020009"), Warning("SCHEDULER-845"), Warning("SCHEDULER-280"), JobIsStopped),
-    /*24*/ Setting(SpoolerProcess(Throw), DontStopOnError) →
+    /*25*/ Setting(SpoolerProcess(Throw), DontStopOnError) →
         Expected(ErrorState, ErrorCode("COM-80020009"), Warning("SCHEDULER-846"), Warning("SCHEDULER-280")),
-    /*25*/ Setting(SpoolerProcess(Throw), SpoolerProcessAfter(Returns(true))) →
+    /*26*/ Setting(SpoolerProcess(Throw), SpoolerProcessAfter(Returns(true))) →
         Expected(SuccessState, SpoolerProcessAfterParameter(false), ErrorCode("Z-JAVA-105"), Warning("SCHEDULER-280"), JobIsStopped),
-    /*26*/ Setting(SpoolerProcess(Throw), DontStopOnError, SpoolerProcessAfter(Returns(true))) →
+    /*27*/ Setting(SpoolerProcess(Throw), DontStopOnError, SpoolerProcessAfter(Returns(true))) →
         Expected(SuccessState, SpoolerProcessAfterParameter(false), ErrorCode("Z-JAVA-105"), Warning("SCHEDULER-280")),
-    /*27*/ Setting(SpoolerProcess(Throw), SpoolerProcessAfter(Returns(false))) →
+    /*28*/ Setting(SpoolerProcess(Throw), SpoolerProcessAfter(Returns(false))) →
         Expected(ErrorState, SpoolerProcessAfterParameter(false), ErrorCode("Z-JAVA-105"), Warning("SCHEDULER-280"), JobIsStopped),
-    /*28*/ Setting(SpoolerProcess(Throw), DontStopOnError, SpoolerProcessAfter(Returns(false))) →
+    /*29*/ Setting(SpoolerProcess(Throw), DontStopOnError, SpoolerProcessAfter(Returns(false))) →
         Expected(ErrorState, SpoolerProcessAfterParameter(false), ErrorCode("Z-JAVA-105"), Warning("SCHEDULER-280"))
   )
 }
