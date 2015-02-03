@@ -65,11 +65,11 @@ extends AutoCloseable {
       s"-log-dir=${logDirectory.getPath}",
       s"-log=${logCategories.trim}>+${schedulerLog.getPath}",   // "+" (append) in case some ExtraScheduler has been started before
       "-ip-address=127.0.0.1",
+      s"-env=JAVA_HOME=${sys.props("java.home")}",
       if (OperatingSystem.isUnix) "-env=" + libraryPathEnv(cppBinaries.directory) else "",
       configDirectory.getPath
     ) filter { _.nonEmpty }
   }
-
 
   def sosIniFile =
     new File(configDirectory, "sos.ini").getAbsoluteFile

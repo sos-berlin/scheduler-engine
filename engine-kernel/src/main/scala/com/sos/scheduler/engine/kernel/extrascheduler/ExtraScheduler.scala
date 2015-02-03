@@ -14,6 +14,12 @@ import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.concurrent.{Future, Promise}
 
+/**
+ * Runs an extra JobScheduler, for test purposes.
+ * Environment variable JAVA_HOME is set with system property "java.home".
+ *
+ * @author Joacim Zschimmer
+ */
 final class ExtraScheduler(
   args: immutable.Seq[String],
   env: immutable.Iterable[(String, String)] = Nil,
@@ -59,7 +65,8 @@ extends AutoCloseable with HasCloser {
       val previous = nullToEmpty(System.getenv(name))
       processBuilder.environment().put(name, OperatingSystem.concatFileAndPathChain(new File(args.head).getParentFile, previous))
     }
-    for ((k, v) <- env) processBuilder.environment().put(k, v)
+    processBuilder.environment.put("JAVA_HOME", sys.props("java.home"))
+    for ((k, v) ← env) processBuilder.environment.put(k, v)
     processBuilder.redirectErrorStream(true)
     processBuilder.start()
   }
