@@ -27,4 +27,6 @@ abstract class Method(val m: MethodNames, result: MethodResult, details: MethodD
 
 final case class SpoolerProcess(result: MethodResult, details: MethodDetail*) extends Method(SpoolerProcessNames, result, details: _*)
 
+final case class SpoolerProcessBefore(details: MethodDetail*) extends Method(SpoolerProcessBeforeNames, Returns(false), details: _*)
+
 final case class SpoolerProcessAfter(result: MethodResult, details: MethodDetail*) extends Method(SpoolerProcessAfterNames, result, details: _*)

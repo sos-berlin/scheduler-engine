@@ -9,6 +9,8 @@ sealed abstract class MethodNames(val name: String) {
 
 object SpoolerProcessNames extends MethodNames("SpoolerProcess")
 
+object SpoolerProcessBeforeNames extends MethodNames("SpoolerProcessBefore")
+
 object SpoolerProcessAfterNames extends MethodNames("SpoolerProcessAfter") {
   val parameter = s"${prefix}spoolerProcessAfterParameter"
 }

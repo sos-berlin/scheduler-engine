@@ -17,6 +17,14 @@
             job="/test_Shell_Exit7_DontStopOnError"
             next_state="SUCCESS" error_state="ERROR"/>
     <job_chain_node
+            state="initial_Shell_Exit0_SpoolerProcessBefore"
+            job="/test_Shell_Exit0_SpoolerProcessBefore"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit0_DontStopOnError_SpoolerProcessBefore"
+            job="/test_Shell_Exit0_DontStopOnError_SpoolerProcessBefore"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
             state="initial_Shell_Exit0_SpoolerProcessAfter"
             job="/test_Shell_Exit0_SpoolerProcessAfter"
             next_state="SUCCESS" error_state="ERROR"/>
