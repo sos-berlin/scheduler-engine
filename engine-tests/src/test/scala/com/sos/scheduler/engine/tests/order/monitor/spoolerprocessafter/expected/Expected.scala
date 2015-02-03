@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected.Expected._
 
-case class Expected(orderStateExpectation: OrderStateExpectation, details: ExpectedDetail*) {
+final case class Expected(orderStateExpectation: OrderStateExpectation, details: ExpectedDetail*) {
 
   def jobState = if (details contains JobIsStopped) JobState.stopped else JobState.pending
 

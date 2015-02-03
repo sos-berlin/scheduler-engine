@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expecte
 
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 
-abstract sealed class ExpectedDetail
+sealed trait ExpectedDetail
 
 case object JobIsStopped extends ExpectedDetail
 
-case class SpoolerProcessAfterParameter(value: Boolean) extends ExpectedDetail {
-  override def toString = "spooler_process_after("+ value +")"
+final case class SpoolerProcessAfterParameter(value: Boolean) extends ExpectedDetail {
+  override def toString = s"spooler_process_after($value)"
 }
 
 abstract class MessageCode(val level: SchedulerLogLevel) extends ExpectedDetail {
@@ -18,7 +18,6 @@ object MessageCode {
   def unapply(o: MessageCode) = Some((o.level, o.code))
 }
 
-case class ErrorCode(code: String) extends MessageCode(SchedulerLogLevel.error)
+final case class ErrorCode(code: String) extends MessageCode(SchedulerLogLevel.error)
 
-case class Warning(code: String) extends MessageCode(SchedulerLogLevel.warning)
-
+final case class Warning(code: String) extends MessageCode(SchedulerLogLevel.warning)

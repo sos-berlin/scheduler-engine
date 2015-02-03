@@ -3,24 +3,18 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expecte
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting.Setting
 
-abstract sealed class OrderStateExpectation {
+sealed trait OrderStateExpectation {
   def matches(o: OrderState): Boolean
-
-  override def toString =
-    getClass.getSimpleName
 }
 
 case object InitialState extends OrderStateExpectation {
-  def matches(o: OrderState) =
-    o.string startsWith Setting.initialOrderStatePrefix
+  def matches(o: OrderState) = o.string startsWith Setting.InitialOrderStatePrefix
 }
 
 case object SuccessState extends OrderStateExpectation {
-  def matches(o: OrderState) =
-    o == OrderState("SUCCESS")
+  def matches(o: OrderState) = o == OrderState("SUCCESS")
 }
 
 case object ErrorState extends OrderStateExpectation {
-  def matches(o: OrderState) =
-    o == OrderState("ERROR")
+  def matches(o: OrderState) = o == OrderState("ERROR")
 }

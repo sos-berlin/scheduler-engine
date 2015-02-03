@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting
 
-abstract class MethodNames(val name: String) {
-  protected val prefix = name +"."
-  val throwException = prefix +"throwException"
-  val logError = prefix +"logError"
-  val returns = prefix +"returns"
+sealed abstract class MethodNames(val name: String) {
+  protected val prefix = s"$name."
+  val throwException = s"${prefix}throwException"
+  val logError = s"${prefix}logError"
+  val returns = s"${prefix}returns"
 }
 
 object SpoolerProcessNames extends MethodNames("SpoolerProcess")
 
 object SpoolerProcessAfterNames extends MethodNames("SpoolerProcessAfter") {
-  val parameter = prefix +"spoolerProcessAfterParameter"
+  val parameter = s"${prefix}spoolerProcessAfterParameter"
 }
