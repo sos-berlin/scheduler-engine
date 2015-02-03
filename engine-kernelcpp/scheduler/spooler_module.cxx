@@ -1073,6 +1073,18 @@ void Module_instance::release__end()
 {
 }
 
+//----------------------------------------------------------Module_instance::order_state_transition
+
+Order_state_transition Module_instance::order_state_transition() const {
+    if (_module->kind() == Module::kind_process && !_termination_signal) {
+        Order_state_transition t = Order_state_transition::of_exit_code(_exit_code);
+        if (t.is_success() == _spooler_process_result)
+            return t;
+        // spooler_process_after() has changed spooler_process result, so we return a plain Order_state_transistion without exit code
+    } 
+    return Order_state_transition::of_bool(_spooler_process_result);
+}
+
 //-------------------------------------------------------------------------Module_monitors::set_dom
 
 void Module_monitors::set_dom( const xml::Element_ptr& element )

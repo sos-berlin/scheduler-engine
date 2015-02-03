@@ -273,6 +273,7 @@ struct Module_instance : Object
     virtual bool                is_kill_thread_running      ()                                      { return false; }
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }
 
+    public: Order_state_transition order_state_transition() const;
 
     Fill_zero                  _zero_;
 
@@ -303,7 +304,7 @@ struct Module_instance : Object
     bool                       _spooler_close_called;
     In_call*                   _in_call;
     string                     _call_method;                // Für Module_instance::call__start()
-    bool                       _spooler_process_result;     // Bisher nur für Process_module / Process_module_instance
+    bool                       _spooler_process_result;
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log

@@ -60,6 +60,10 @@ struct Order_state_transition {
     public: static const Order_state_transition success;
     public: static const Order_state_transition keep;
 
+    public: static Order_state_transition of_exit_code(int i) {
+        return Order_state_transition(i);
+    }
+    
     public: static Order_state_transition of_bool(bool b) {
         return b? success : standard_error;
     }
@@ -78,6 +82,14 @@ struct Order_state_transition {
 
     public: bool operator !=(const Order_state_transition& o) const { 
         return !(*this == o);
+    }
+
+    public: bool is_success() {
+        return *this == success;
+    }
+
+    public: bool is_error() {
+        return *this != success && *this != keep;
     }
 
     public: int result_code() const {

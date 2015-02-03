@@ -189,6 +189,7 @@ namespace order
     struct Job_chain_folder_interface;
     struct Order_queue;
     struct Order;
+    struct Order_state_transition;
     struct Order_subsystem;
     //struct Standing_order;
     struct Standing_order_folder;

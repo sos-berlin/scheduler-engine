@@ -1713,7 +1713,7 @@ bool Task::do_something()
                                             //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
                                             process_module_instance->fetch_parameters_from_process( _order->params() );
                                             if( !has_error() ) {
-                                                postprocess_order(Order_state_transition::of_bool(_module_instance->spooler_process_result()));
+                                                postprocess_order(process_module_instance->order_state_transition());
                                             }
                                             else {}     // detach_order_after_error() wird sich drum kümmern.
                                         }
@@ -1936,7 +1936,7 @@ bool Task::step__end()
 
         count_step();
 
-        if( _order )   {
+        if (_order) {
             postprocess_order(_delay_until_locks_available ? Order_state_transition::keep : Order_state_transition::of_bool(result));
         }
 
@@ -1990,7 +1990,7 @@ string Task::remote_process_step__end()
                 ptr<Com_variable_set> p = new Com_variable_set( order_params_element );
                 _order->params()->merge( p );
             }
-            _order_state_transition = Order_state_transition::of_bool(_module_instance->spooler_process_result());
+            _order_state_transition = _module_instance->order_state_transition();
             if (_module_instance->_module->_kind != Module::kind_process) {
                 postprocess_order(_order_state_transition);
             }
