@@ -6,6 +6,6 @@
         exit 0
     </script>
     <monitor>
-        <script java_class="com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.TestMonitor"/>
+        <script java_class="com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.TestSpoolerProcessAfterMonitor"/>
     </monitor>
 </job>
