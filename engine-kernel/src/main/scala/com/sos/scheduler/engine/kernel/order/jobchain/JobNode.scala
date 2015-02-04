@@ -15,20 +15,18 @@ final class JobNode(
   protected val injector: Injector)
 extends OrderQueueNode {
 
-  override def overview =
-    JobNodeOverview(
-      orderState = orderState,
-      nextState = nextState,
-      errorState = errorState,
-      orderCount = orderCount,
-      action = action,
-      jobPath = jobPath)
 
-  def jobPath: JobPath =
-    JobPath(cppProxy.job_path)
+  override def overview = JobNodeOverview(
+    orderState = orderState,
+    nextState = nextState,
+    errorState = errorState,
+    orderCount = orderCount,
+    action = action,
+    jobPath = jobPath)
 
-  def getJob: Job =
-    cppProxy.job.getSister
+  def jobPath: JobPath = JobPath(cppProxy.job_path)
+
+  def getJob: Job = cppProxy.job.getSister
 }
 
 
