@@ -2692,19 +2692,13 @@ void Order::postprocessing( Order_state_transition state_transition )
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
                 set_suspended();
             else
-            if( _is_success_state )
-            {
-                if( _outer_job_chain_path == ""  &&  _state == _end_state )
-                {
-                    log()->info( message_string( "SCHEDULER-704", _end_state ) );
-                    set_end_state_reached();
-                    handle_end_state();
-                }
-                else
-                    set_state1( job_node->next_state() );
+            if (_is_success_state && _outer_job_chain_path == ""  &&  _state == _end_state) {
+                log()->info( message_string( "SCHEDULER-704", _end_state ) );
+                set_end_state_reached();
+                handle_end_state();
             }
             else
-                set_state1( job_node->error_state() );
+                set_state1(job_node->order_state(state_transition));
         }
     }
     else

@@ -253,10 +253,11 @@ struct Task : Object,
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;
 
-    void                        detach_order_after_error    ();
+    void                        detach_order_after_error    (const Order_state_transition&);
+    Order_state_transition      error_order_state_transition() const;
     void                        detach_order                ();
 
-    void                        finish                      ();
+    void                        finish                      (const Order_state_transition&);
     void                        fetch_order_parameters_from_process();
     void                        set_state_texts_from_stdout ( const string& );
     void                        process_on_exit_commands    ();

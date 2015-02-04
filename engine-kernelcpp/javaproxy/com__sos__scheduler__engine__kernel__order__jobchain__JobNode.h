@@ -51,6 +51,7 @@ struct JobNode : ::zschimmer::javabridge::proxy_jobject< JobNode >, ::javaproxy:
     }
   public:
 
+    ::javaproxy::java::lang::String orderStateTransitionToState(jlong p0) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

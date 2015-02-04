@@ -1779,9 +1779,10 @@ bool Task::do_something()
                             if (!ok) {
                                 _call_register.call_at<Try_deleting_files_call>(min(now + delete_temporary_files_retry, _trying_deleting_files_until));
                             } else {
+                                Order_state_transition t = error_order_state_transition();   // Falls _order nach Fehler noch da ist
                                 if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
-                                finish();
+                                finish(t);
                                 set_state_direct( s_closed );
                                 something_done = true;
                                 loop = true;
@@ -1815,7 +1816,7 @@ bool Task::do_something()
                 if( error_count == 0 )  set_error( x );
                 else _log->error( x.what() );
                 try  {
-                    detach_order_after_error();
+                    detach_order_after_error(error_order_state_transition());
                 }
                 catch( exception& x ) { _log->error( "detach_order_after_error: " + string(x.what()) ); }
 
@@ -1827,7 +1828,7 @@ bool Task::do_something()
                 if( error_count <= 1 ) {
                     loop = false;
                     try {
-                        finish();
+                        finish(error_order_state_transition());
                     }
                     catch( exception& x ) { _log->error( "finish(): " + string( x.what() ) ); }
                     try  {
@@ -1945,7 +1946,7 @@ bool Task::step__end()
     }
     catch( const exception& x ) { 
         set_error(x); 
-        if( _order )  detach_order_after_error();
+        if( _order )  detach_order_after_error(error_order_state_transition());
         continue_task = false; 
     }
 
@@ -2005,7 +2006,7 @@ string Task::remote_process_step__end()
         if( _order ) {
             _order_state_transition = _job->stops_on_task_error()? Order_state_transition::keep : Order_state_transition::standard_error;
             if (_module_instance->_module->_kind != Module::kind_process) {
-                detach_order_after_error();
+                detach_order_after_error(error_order_state_transition());
             }
         } 
     }
@@ -2119,7 +2120,7 @@ void Task::postprocess_order(const Order_state_transition& state_transition, boo
 
 //-------------------------------------------------------------------Task::detach_order_after_error
 
-void Task::detach_order_after_error()
+void Task::detach_order_after_error(const Order_state_transition& transition)
 {
     if( _order ) {
         if( _job->stops_on_task_error() ) {
@@ -2132,10 +2133,20 @@ void Task::detach_order_after_error()
             detach_order();
         } else {
             // Job stoppt nicht, deshalb wechselt der Auftrag in den Fehlerzustand
-            postprocess_order(Order_state_transition::standard_error, true);
+            postprocess_order(transition, true);
             // _order ist NULL
         }
     }
+}
+
+//---------------------------------------------------------------Task::error_order_state_transition
+
+Order_state_transition Task::error_order_state_transition() const {
+    if (_module_instance) {
+        Order_state_transition t = _module_instance->order_state_transition();
+        return t.is_success()? Order_state_transition::standard_error : t;
+    } else
+        return Order_state_transition::standard_error;
 }
 
 //-------------------------------------------------------------------------------Task::detach_order
@@ -2150,13 +2161,13 @@ void Task::detach_order()
 
 //-------------------------------------------------------------------------------------Task::finish
 
-void Task::finish()
+void Task::finish(const Order_state_transition& error_order_state_transition)
 {
     _job->init_start_when_directory_changed( this );
     process_on_exit_commands();
     if( _order ) {   // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
         if( !has_error()  &&  _spooler->state() != Spooler::s_stopping )  set_error( Xc( "SCHEDULER-226" ) );
-        detach_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
+        detach_order_after_error(error_order_state_transition);  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
     if( has_error()  &&  _job->repeat().is_zero()  &&  _job->_delay_after_error.empty() ) {

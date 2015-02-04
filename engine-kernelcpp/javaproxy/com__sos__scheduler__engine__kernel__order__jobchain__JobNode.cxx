@@ -13,6 +13,7 @@ struct JobNode__class : ::zschimmer::javabridge::Class
     JobNode__class(const string& class_name);
    ~JobNode__class();
 
+    ::zschimmer::javabridge::Method const _orderStateTransitionToState__J__method;
 
     static const ::zschimmer::javabridge::class_factory< JobNode__class > class_factory;
 };
@@ -21,7 +22,7 @@ const ::zschimmer::javabridge::class_factory< JobNode__class > JobNode__class::c
 
 JobNode__class::JobNode__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-{}
+    ,_orderStateTransitionToState__J__method(this, "orderStateTransitionToState", "(J)Ljava/lang/String;"){}
 
 JobNode__class::~JobNode__class() {}
 
@@ -40,6 +41,15 @@ JobNode::~JobNode() { assign_(NULL); }
 
 
 
+
+::javaproxy::java::lang::String JobNode::orderStateTransitionToState(jlong p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].j = p0;
+    JobNode__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_orderStateTransitionToState__J__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
 
 
 ::zschimmer::javabridge::Class* JobNode::java_object_class_() const { return _class.get(); }

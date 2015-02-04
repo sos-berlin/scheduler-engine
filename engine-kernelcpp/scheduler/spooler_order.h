@@ -767,6 +767,7 @@ struct Job_node : Order_queue_node,
     void                        connect_job                 ( Job* );
     void                        disconnect_job              ();
     void wake_orders();
+    Order::State order_state(const Order_state_transition&);
 
   private:
     friend struct               order::Job_chain;           // add_job_node()
