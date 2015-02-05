@@ -260,7 +260,7 @@ struct Module_instance : Object
 
     virtual void                check_connection_error      ()                                      {}
     void                    set_spooler_process_result      ( bool b )                              { _spooler_process_result = b; }
-    int                         spooler_process_result      () const                                { return _spooler_process_result; }
+    bool                        spooler_process_result      () const                                { return _spooler_process_result; }
     int                         exit_code                   ()                                      { return _exit_code; }
     void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
     int                         termination_signal          ()                                      { return _termination_signal; }

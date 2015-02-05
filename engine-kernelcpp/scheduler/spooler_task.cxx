@@ -2101,7 +2101,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 //--------------------------------------------------------------------------Task::postprocess_order
 
-void Task::postprocess_order(Order_state_transition state_transition, bool due_to_exception)
+void Task::postprocess_order(const Order_state_transition& state_transition, bool due_to_exception)
 {
     if( _order ) {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
