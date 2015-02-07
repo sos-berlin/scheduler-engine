@@ -1,28 +1,24 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import PluginAdapter._
 import com.google.common.base.Throwables.getStackTraceAsString
-import com.google.inject.AbstractModule
-import com.google.inject.Injector
+import com.google.inject.{AbstractModule, Injector}
 import com.google.inject.name.Names
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlQuoted
-import com.sos.scheduler.engine.kernel.command.{HasCommandHandlers, CommandDispatcher}
+import com.sos.scheduler.engine.kernel.command.{CommandDispatcher, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.log.PrefixLog
+import com.sos.scheduler.engine.kernel.plugin.PluginAdapter._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import javax.annotation.Nullable
 import org.w3c.dom.Element
-import scala.Option
-import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
 
 /** Die Engine spricht die Plugin über diesen Adapter an. */
-class PluginAdapter(configuration: PluginConfiguration) {
+final class PluginAdapter(configuration: PluginConfiguration) {
 
   private var _log: PrefixLog = null
   @Nullable private var _pluginInstance: Plugin = null
 
-
-  private[plugin] final def tryClose(): Unit = {
+  private[plugin] def tryClose(): Unit = {
     for (o <- Option(_pluginInstance)) {
       try o.close()
       catch {
@@ -31,7 +27,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] final def initialize(injector: Injector, log: PrefixLog): Unit = {
+  private[plugin] def initialize(injector: Injector, log: PrefixLog): Unit = {
     _log = log
     try {
       if(_pluginInstance != null) throw new IllegalStateException(s"$this is already initialized")
@@ -42,7 +38,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] final def prepare(): Unit = {
+  private[plugin] def prepare(): Unit = {
     try {
       if (pluginInstance.isPrepared) throw new IllegalStateException(s"$this is already prepared")
       _pluginInstance.prepare()
@@ -53,14 +49,14 @@ class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] final def tryActivate(): Unit = {
+  private[plugin] def tryActivate(): Unit = {
     try activate()
     catch {
       case NonFatal(t) => logThrowable(t)
     }
   }
 
-  private[plugin] final def activate(): Unit = {
+  private[plugin] def activate(): Unit = {
     _log = log
     try {
       if (pluginInstance.isActive) throw new IllegalStateException(s"$this is already active")
@@ -75,14 +71,14 @@ class PluginAdapter(configuration: PluginConfiguration) {
   private def newPluginInstance(injector: Injector) =
     newPluginInstanceByDI(injector, configuration.pluginClass, configuration.configElement)
 
-  private[plugin] final def xmlState: String = {
+  private[plugin] def xmlState: String = {
     try pluginInstance.xmlState
     catch {
       case x: Exception ⇒ "<ERROR text=" + xmlQuoted(x.toString) + "/>"
     }
   }
 
-  private[plugin] final def commandDispatcher =
+  private[plugin] def commandDispatcher =
     pluginInstance match {
       case o: HasCommandHandlers ⇒ new CommandDispatcher(o.commandHandlers)
       case _ ⇒ throw new SchedulerException("Plugin is not a " + classOf[HasCommandHandlers].getSimpleName)
@@ -110,7 +106,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
 
   override def toString = s"Plugin $pluginClassName"
 
-  private[plugin] final def pluginClassName: String = configuration.className
+  private[plugin] def pluginClassName: String = configuration.className
 }
 
 object PluginAdapter {
