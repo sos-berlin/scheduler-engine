@@ -47,7 +47,6 @@ struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, 
     }
   public:
 
-    ::javaproxy::java::lang::String toString() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

@@ -14,7 +14,6 @@ struct AbstractEvent__class : ::zschimmer::javabridge::Class
    ~AbstractEvent__class();
 
     ::zschimmer::javabridge::Method const __constructor____method;
-    ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< AbstractEvent__class > class_factory;
 };
@@ -23,8 +22,7 @@ const ::zschimmer::javabridge::class_factory< AbstractEvent__class > AbstractEve
 
 AbstractEvent__class::AbstractEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor____method(this, "<init>", "()V")
-    ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
+    ,__constructor____method(this, "<init>", "()V"){}
 
 AbstractEvent__class::~AbstractEvent__class() {}
 
@@ -52,14 +50,6 @@ AbstractEvent::~AbstractEvent() { assign_(NULL); }
 
 
 
-
-::javaproxy::java::lang::String AbstractEvent::toString() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    AbstractEvent__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_toString____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* AbstractEvent::java_object_class_() const { return _class.get(); }
