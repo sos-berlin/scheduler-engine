@@ -13,6 +13,7 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { struct OrderQueueNode; }}}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct Order; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -51,6 +52,7 @@ struct JobNode : ::zschimmer::javabridge::proxy_jobject< JobNode >, ::javaproxy:
     }
   public:
 
+    void onOrderStepEnded(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, jint p1) const;
     ::javaproxy::java::lang::String orderStateTransitionToState(jlong p0) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

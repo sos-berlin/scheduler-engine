@@ -2653,7 +2653,7 @@ Job_chain* Order::job_chain_for_api() const
 
 //----------------------------------------------------------------------------Order::postprocessing
 
-void Order::postprocessing( Order_state_transition state_transition )
+void Order::postprocessing(const Order_state_transition& state_transition)
 {
     //if (!job_chain_path().empty()) {
     //    report_event(CppEventFactoryJ::newOrderStepEndedEvent(job_chain_path(), string_id(), state_transition), java_sister());
@@ -2664,6 +2664,8 @@ void Order::postprocessing( Order_state_transition state_transition )
     Job_node* job_node          = Job_node::cast( _job_chain_node );
     bool      force_error_state = false;
 
+    job_node->typed_java_sister().onOrderStepEnded(java_sister(), state_transition.return_code());
+    
     if( !_is_success_state  &&  job_node  &&  job_node->is_on_error_setback() )  setback();
 
     if( !_setback_called )  _setback_count = 0;

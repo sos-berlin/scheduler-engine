@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -19,10 +20,12 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   import controller.eventBus
 
-  "Order is cloned" in {
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](ClonedOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
-        scheduler executeXml OrderCommand(OriginalOrderKey)
+  "New order is added" in {
+    controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
+      eventBus.awaitingKeyedEvent[OrderFinishedEvent](ClonedOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
+          scheduler executeXml OrderCommand(OriginalOrderKey)
+        }
       }
     }
   }
@@ -36,6 +39,27 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
           eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(CommandFailedCode) }
         }
       }
+    }
+  }
+
+  "<add_order> must not denote the own job-chain" in {
+    controller.toleratingErrorCodes(Set(MessageCode("Z-JAVA-105"))) {
+      intercept[Exception] {
+        scheduler executeXml
+          <job_chain name="test-own"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin NodeOrderPlugin.xsd"
+                     xmlns:NodeOrderPlugin="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin">
+            <job_chain_node state="100" job="/test-exit-0">
+              <on_return_codes>
+                <on_return_code return_code="0">
+                  <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-own"/>
+                </on_return_code>
+              </on_return_codes>
+            </job_chain_node>
+            <job_chain_node.end state="end"/>
+          </job_chain>
+      } .getMessage should include ("must denote the own job_chain")
     }
   }
 }

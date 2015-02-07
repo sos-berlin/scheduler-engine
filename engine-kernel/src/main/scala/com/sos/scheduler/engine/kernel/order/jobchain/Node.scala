@@ -1,41 +1,40 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.google.common.io.Closer
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.xml.XmlUtils.nodeListToSeq
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeKey, NodeOverview}
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
-import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, NamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
+import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
 import org.w3c.dom
-import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
  */
 @ForCpp
-abstract class Node extends Sister with PluginXmlConfigurable {
+abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   protected def injector: Injector
 
   def overview: NodeOverview
 
-  implicit private val closer = Closer.create()
   protected val cppProxy: NodeCI
-  private var plugins: immutable.Seq[NamespaceXmlPlugin] = Nil
 
-  def onCppProxyInvalidated() = closer.close()
+  def onCppProxyInvalidated() = close()
 
   @ForCpp
   def processConfigurationDomElement(nodeElement: dom.Element): Unit = {
-    val pluginSubsystem = injector.apply[PluginSubsystem]
-    nodeListToSeq(nodeElement.getChildNodes) collect {
-      case e: dom.Element ⇒ e → pluginSubsystem.xmlNamespaceToPlugins(e.getNamespaceURI)
-    } collect {
-      case (element, Some(plugin: AttachableNamespaceXmlPlugin)) ⇒ plugin.attachPluginXmlConfigurable(this, element)
+    val elementPluginOption = nodeListToSeq(nodeElement.getChildNodes) collect {
+      case e: dom.Element ⇒ e → injector.apply[PluginSubsystem].xmlNamespaceToPlugins(e.getNamespaceURI)
+    }
+    for ((element, plugins) ← elementPluginOption) {
+      plugins collect {
+        case plugin: AttachableNamespaceXmlPlugin ⇒ plugin.attachPluginXmlConfigurable(this, element)
+      }
     }
   }
 

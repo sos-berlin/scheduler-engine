@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__jobchain__JobNode.h"
+#include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__order__jobchain__OrderQueueNode.h"
 #include "java__lang__String.h"
 
@@ -13,6 +14,7 @@ struct JobNode__class : ::zschimmer::javabridge::Class
     JobNode__class(const string& class_name);
    ~JobNode__class();
 
+    ::zschimmer::javabridge::Method const _onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method;
     ::zschimmer::javabridge::Method const _orderStateTransitionToState__J__method;
 
     static const ::zschimmer::javabridge::class_factory< JobNode__class > class_factory;
@@ -22,6 +24,7 @@ const ::zschimmer::javabridge::class_factory< JobNode__class > JobNode__class::c
 
 JobNode__class::JobNode__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
+    ,_onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method(this, "onOrderStepEnded", "(Lcom/sos/scheduler/engine/kernel/order/Order;I)V")
     ,_orderStateTransitionToState__J__method(this, "orderStateTransitionToState", "(J)Ljava/lang/String;"){}
 
 JobNode__class::~JobNode__class() {}
@@ -41,6 +44,14 @@ JobNode::~JobNode() { assign_(NULL); }
 
 
 
+
+void JobNode::onOrderStepEnded(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, jint p1) const {
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].i = p1;
+    JobNode__class* cls = _class.get();
+    cls->_onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method.call(get_jobject(), parameter_list);
+}
 
 ::javaproxy::java::lang::String JobNode::orderStateTransitionToState(jlong p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;

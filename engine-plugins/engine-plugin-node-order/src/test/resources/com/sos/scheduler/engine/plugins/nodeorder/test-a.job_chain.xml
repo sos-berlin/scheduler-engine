@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <job_chain
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+        xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
         xsi:schemaLocation="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin NodeOrderPlugin.xsd"
         xmlns:NodeOrderPlugin="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin">
-    <job_chain_node state="100" job="/test-a"/>
-    <job_chain_node state="200" job="/test-a">
-        <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
+    <job_chain_node state="100" job="/test-exit-0">
+        <on_return_codes>
+            <on_return_code return_code="7">
+                <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
+                <to_state state="end"/>
+            </on_return_code>
+        </on_return_codes>
     </job_chain_node>
-    <job_chain_node state="300" job="/test-a"/>
+    <job_chain_node state="200" job="/test-exit-7">
+        <on_return_codes>
+            <on_return_code return_code="7">
+                <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
+                <to_state state="end"/>
+            </on_return_code>
+        </on_return_codes>
+    </job_chain_node>
+    <job_chain_node state="300" job="/test-exit-a"/>
     <job_chain_node.end state="end"/>
 </job_chain>
