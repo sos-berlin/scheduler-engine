@@ -34,8 +34,8 @@ extends OrderQueueNode {
   private def orderStateTransitionToState(t: OrderStateTransition): OrderState =
     t match {
       case KeepOrderStateTransition ⇒ orderState
-      case ProceedingOrderStateTransition(resultValue) ⇒
-        nodeConfiguration.valueToState.lift(resultValue) match {
+      case ProceedingOrderStateTransition(returnCode) ⇒
+        nodeConfiguration.valueToState.lift(returnCode) match {
           case Some(state) ⇒ state
           case None ⇒ if (t == SuccessOrderStateTransition) nextState else errorState
         }
@@ -70,14 +70,14 @@ object JobNode {
       parseElement("job_chain_node") {
         attributeMap.ignoreUnread()
         forEachStartElement {
-          case "on_result_values" ⇒
+          case "on_return_codes" ⇒
             parseElement() {
-              val maps = parseEachRepeatingElement("on_result_value") {
-                val resultValues = List(attributeMap("result_value").toInt)
+              val maps = parseEachRepeatingElement("on_return_code") {
+                val returnCode = List(attributeMap("return_code").toInt)
                 val orderState = parseElement("to_state") {
                   OrderState(attributeMap("state"))
                 }
-                resultValues map { _ → orderState }
+                returnCode map { _ → orderState }
               }
               valueToState = Some((maps reduce { _ ++ _ }).toMap)
             }

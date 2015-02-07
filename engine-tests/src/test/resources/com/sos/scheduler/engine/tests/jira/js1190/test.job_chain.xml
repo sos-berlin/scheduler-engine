@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
     <job_chain_node state="INIT" job="test-a" next_state="NEXT" error_state="ERROR">
-        <on_result_values>
-            <on_result_value result_value="0">
+        <on_return_codes>
+            <on_return_code return_code="0">
                 <to_state state="STATE-0"/>
-            </on_result_value>
-            <on_result_value result_value="1">
+            </on_return_code>
+            <on_return_code return_code="1">
                 <to_state state="STATE-1"/>
-            </on_result_value>
-            <on_result_value result_value="99">
+            </on_return_code>
+            <on_return_code return_code="99">
                 <to_state state="STATE-99"/>
-            </on_result_value>
-        </on_result_values>
+            </on_return_code>
+        </on_return_codes>
     </job_chain_node>
     <job_chain_node.end state="UNREACHABLE"/>
     <job_chain_node.end state="NEXT"/>

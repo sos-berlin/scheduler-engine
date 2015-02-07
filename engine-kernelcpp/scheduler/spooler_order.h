@@ -68,8 +68,8 @@ struct Order_state_transition {
         return b? success : standard_error;
     }
     
-    public: Order_state_transition(int result_code) :
-        _internal_value(result_code)
+    public: Order_state_transition(int return_code) :
+        _internal_value(return_code)
     {}
 
     private: Order_state_transition() :
@@ -92,7 +92,7 @@ struct Order_state_transition {
         return *this != success && *this != keep;
     }
 
-    public: int result_code() const {
+    public: int return_code() const {
         assert((_internal_value & ~0xFFFFFFFF) == 0);
         return _internal_value;
     }
