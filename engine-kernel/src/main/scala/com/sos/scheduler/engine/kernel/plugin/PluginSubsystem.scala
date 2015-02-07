@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.scalautil.AssignableFrom.assignableFrom
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.eventbus.{EventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers}
@@ -79,7 +80,8 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   def xmlNamespaceToPlugins(namespace: String): Option[NamespaceXmlPlugin] = namespaceToPlugin.get(namespace)
 
-  def xmlNamespaceToPlugins: immutable.Iterable[NamespaceXmlPlugin] = namespaceToPlugin.values.toImmutableIterable
+  def plugins[A <: NamespaceXmlPlugin]: immutable.Iterable[A] =
+    (namespaceToPlugin.values collect assignableFrom[A]).toImmutableIterable
 
   private def pluginAdapters = pluginAdapterMap.values
 }
