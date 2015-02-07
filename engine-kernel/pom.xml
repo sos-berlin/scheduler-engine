@@ -174,5 +174,9 @@
             <artifactId>spray-routing_${scala.binaryVersion}</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
     </dependencies>
 </project>
