@@ -317,7 +317,7 @@ struct Order : Com_order,
     void                        tip_next_node_for_new_distributed_order_state();
     void                        move_to_node            ( job_chain::Node* );
 
-    void                        postprocessing          ( Order_state_transition );                    // Verarbeitung nach spooler_process()
+    void                        postprocessing          (const Order_state_transition&);                    // Verarbeitung nach spooler_process()
     void                        processing_error        ();
     void                        handle_end_state        ();
     bool                        handle_end_state_of_nested_job_chain();
