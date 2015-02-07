@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import com.google.common.base.Throwables.getStackTraceAsString
-import com.google.inject.{AbstractModule, Injector}
 import com.google.inject.name.Names
+import com.google.inject.{AbstractModule, Injector}
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlQuoted
 import com.sos.scheduler.engine.kernel.command.{CommandDispatcher, HasCommandHandlers}
-import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.plugin.PluginAdapter._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import javax.annotation.Nullable
@@ -15,20 +14,18 @@ import scala.util.control.NonFatal
 /** Die Engine spricht die Plugin über diesen Adapter an. */
 final class PluginAdapter(configuration: PluginConfiguration) {
 
-  private var _log: PrefixLog = null
   @Nullable private var _pluginInstance: Plugin = null
 
   private[plugin] def tryClose(): Unit = {
-    for (o <- Option(_pluginInstance)) {
+    for (o ← Option(_pluginInstance)) {
       try o.close()
       catch {
-        case NonFatal(t) => logThrowable(t)
+        case NonFatal(t) ⇒ logger.warn(s"Close $this: $t", t)
       }
     }
   }
 
-  private[plugin] def initialize(injector: Injector, log: PrefixLog): Unit = {
-    _log = log
+  private[plugin] def initialize(injector: Injector): Unit = {
     try {
       if(_pluginInstance != null) throw new IllegalStateException(s"$this is already initialized")
       _pluginInstance = newPluginInstance(injector)
@@ -38,7 +35,7 @@ final class PluginAdapter(configuration: PluginConfiguration) {
     }
   }
 
-  private[plugin] def prepare(): Unit = {
+  private[plugin] def prepare(): Unit =
     try {
       if (pluginInstance.isPrepared) throw new IllegalStateException(s"$this is already prepared")
       _pluginInstance.prepare()
@@ -47,17 +44,14 @@ final class PluginAdapter(configuration: PluginConfiguration) {
     catch {
       case x: Exception ⇒ throw new RuntimeException(s"$this cannot be prepared: $x", x)
     }
-  }
 
-  private[plugin] def tryActivate(): Unit = {
+  private[plugin] def tryActivate(): Unit =
     try activate()
     catch {
-      case NonFatal(t) => logThrowable(t)
+      case NonFatal(t) ⇒ logger.warn(s"Activate $this: $t", t)
     }
-  }
 
-  private[plugin] def activate(): Unit = {
-    _log = log
+  private[plugin] def activate(): Unit =
     try {
       if (pluginInstance.isActive) throw new IllegalStateException(s"$this is already active")
       pluginInstance.activate()
@@ -66,17 +60,15 @@ final class PluginAdapter(configuration: PluginConfiguration) {
     catch {
       case x: Exception => throw new RuntimeException(s"$this cannot be activated: $x", x)
     }
-  }
 
   private def newPluginInstance(injector: Injector) =
     newPluginInstanceByDI(injector, configuration.pluginClass, configuration.configElement)
 
-  private[plugin] def xmlState: String = {
+  private[plugin] def xmlState: String =
     try pluginInstance.xmlState
     catch {
       case x: Exception ⇒ "<ERROR text=" + xmlQuoted(x.toString) + "/>"
     }
-  }
 
   private[plugin] def commandDispatcher =
     pluginInstance match {
@@ -84,18 +76,8 @@ final class PluginAdapter(configuration: PluginConfiguration) {
       case _ ⇒ throw new SchedulerException("Plugin is not a " + classOf[HasCommandHandlers].getSimpleName)
     }
 
-  private def logThrowable(t: Throwable): Unit = {
-    log.error(toString + ": " + t + "\n" + getStackTraceAsString(t))
-  }
-
   private[plugin] def pluginInstance =
     _pluginInstance match {
-      case null ⇒ throw new IllegalStateException("PluginAdapter not initialized")
-      case o ⇒ o
-    }
-
-  private def log =
-    _log match {
       case null ⇒ throw new IllegalStateException("PluginAdapter not initialized")
       case o ⇒ o
     }
@@ -110,6 +92,8 @@ final class PluginAdapter(configuration: PluginConfiguration) {
 }
 
 object PluginAdapter {
+  private val logger = Logger(getClass)
+
   private def newPluginInstanceByDI(injector: Injector, c: Class[_ <: Plugin], configElement: Element): Plugin = {
     val module = new AbstractModule {
       protected def configure(): Unit = {

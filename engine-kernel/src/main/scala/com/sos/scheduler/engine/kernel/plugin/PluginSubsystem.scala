@@ -6,15 +6,15 @@ import com.sos.scheduler.engine.common.scalautil.AssignableFrom.assignableFrom
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.eventbus.{EventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers}
-import com.sos.scheduler.engine.kernel.log.PrefixLog
-import com.sos.scheduler.engine.kernel.scheduler.{SchedulerException, Subsystem}
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Inject, Singleton}
+import org.jetbrains.annotations.TestOnly
 import scala.collection.{immutable, mutable}
+import scala.reflect.ClassTag
 
 @Singleton
 final class PluginSubsystem @Inject private(
   pluginConfigurations: immutable.Seq[PluginConfiguration],
-  prefixLog: PrefixLog,
   injector: Injector,
   eventBus: EventBus)
 extends Subsystem with HasCommandHandlers with AutoCloseable {
@@ -31,7 +31,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   def initialize(): Unit = {
     pluginAdapterMap ++= newPluginAdapterSeq()
     for (p ← pluginAdapterMap.values) {
-      p.initialize(injector, prefixLog)
+      p.initialize(injector)
       tryRegisterEventHandler(p.pluginInstance)
     }
     for (p ← pluginAdapterMap.values) {
@@ -52,13 +52,13 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   private def tryRegisterEventHandler(o: Plugin): Unit =
     o match {
-      case e: EventHandlerAnnotated => eventBus.registerAnnotated(e)
+      case e: EventHandlerAnnotated ⇒ eventBus.registerAnnotated(e)
       case _ ⇒
     }
 
   private def tryUnregisterEventHandler(o: Plugin): Unit =
     o match {
-      case e: EventHandlerAnnotated => eventBus.unregisterAnnotated(e)
+      case e: EventHandlerAnnotated ⇒ eventBus.unregisterAnnotated(e)
       case _ ⇒
     }
 
@@ -68,6 +68,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
       p.activate()
     }
 
+  @TestOnly
   def activatePlugin(c: PluginClass): Unit = pluginAdapterByClassName(c.getName).activate()
 
   def pluginByClass[A <: Plugin](c: Class[A]): A = pluginAdapterByClassName(c.getName).pluginInstance.asInstanceOf[A]
@@ -75,13 +76,13 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   private[plugin] def pluginAdapterByClassName(className: String): PluginAdapter =
     pluginAdapterMap(pluginConfiguration(className).pluginClass)
 
-  private[plugin] def pluginConfiguration(className: String) =
-    pluginConfigurationMap.getOrElse(className, throw new SchedulerException(s"Unknown plugin '$className'"))
+  private def pluginConfiguration(className: String) =
+    pluginConfigurationMap.getOrElse(className, throw new NoSuchElementException(s"Unknown plugin '$className'"))
 
   def xmlNamespaceToPlugins(namespace: String): Option[NamespaceXmlPlugin] = namespaceToPlugin.get(namespace)
 
-  def plugins[A <: NamespaceXmlPlugin]: immutable.Iterable[A] =
-    (namespaceToPlugin.values collect assignableFrom[A]).toImmutableIterable
+  def plugins[A <: Plugin : ClassTag]: immutable.Iterable[A] =
+    (pluginAdapterMap.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable
 
   private def pluginAdapters = pluginAdapterMap.values
 }

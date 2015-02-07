@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import PluginAdapterTest._
 import com.google.inject.Guice._
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
-import com.sos.scheduler.engine.kernel.scheduler.PrefixLogMock
-import java.lang.RuntimeException
+import com.sos.scheduler.engine.kernel.plugin.PluginAdapterTest._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
@@ -14,13 +12,12 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class PluginAdapterTest extends FunSuite {
-  private val log = PrefixLogMock.newLog(logger.delegate)
   private val pluginAdapter = new PluginAdapter(pluginConfiguration)
   private val errorPluginInstanceAdapter = new PluginAdapter(errorPluginConfiguration)
   private val injector: Injector = createInjector()
 
   test("initialize") {
-    pluginAdapter.initialize(injector, log)
+    pluginAdapter.initialize(injector)
   }
 
   test("prepare") {
@@ -36,7 +33,7 @@ final class PluginAdapterTest extends FunSuite {
   }
 
   test("activate error") {
-    errorPluginInstanceAdapter.initialize(injector, log)
+    errorPluginInstanceAdapter.initialize(injector)
     intercept[RuntimeException] { errorPluginInstanceAdapter.activate() }
   }
 
