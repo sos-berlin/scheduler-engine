@@ -66,7 +66,7 @@ object SchedulerConfigurationAdapter {
               }
           }
         }
-        PluginLoginService(children.one[Iterable[Login]]("logins"))
+        PluginLoginService(children.one[immutable.Seq[Login]]("logins"))
       }
 
     def parseWebContexts(): immutable.IndexedSeq[WarEntry] =
