@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.task
 
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
 import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
 import com.sos.scheduler.engine.taskserver.task.NamedObjects._
@@ -22,6 +23,6 @@ object NamedObjects {
   def apply(kv: Iterable[(String, IDispatchable)]): NamedObjects = {
     val invalidNames = (kv map { _._1 }).toSet -- AllNames
     require(invalidNames.isEmpty, s"Invalid object names: $invalidNames")
-    new NamedObjects(kv.toMap)
+    new NamedObjects(kv.uniqueToMap)
   }
 }

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.minicom.remoting
 
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversableOnce
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits.{RichTraversable, RichTraversableOnce}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.minicom.idispatch.Dispatcher.implicits._
 import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, IDispatchFactory, IDispatchable}
@@ -105,7 +105,7 @@ object Remoting {
   private val logger = Logger(getClass)
 
   private def toCreateIDispatchableByCLSID(iDispatchFactories: Iterable[IDispatchFactory]): CreateIDispatchableByCLSID = {
-    val clsidToFactoryMap = (iDispatchFactories map { o ⇒ o.clsid → o }).toMap
+    val clsidToFactoryMap = iDispatchFactories toKeyedMap { _.clsid }
     def createIDispatchable(clsId: CLSID, iid: IID): IDispatchable = {
       val factory = clsidToFactoryMap(clsId)
       require(factory.iid == iid, s"IID $iid is not supported by $factory")
