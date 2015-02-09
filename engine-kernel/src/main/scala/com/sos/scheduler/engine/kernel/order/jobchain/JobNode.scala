@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
@@ -45,7 +46,7 @@ extends OrderQueueNode with JobChainNodeParserAndHandler {
       namespaceToOnReturnCodeParser =
         (for (plugin ← pluginSubsystem.plugins[JobChainNodeNamespaceXmlPlugin]) yield {
           plugin.xmlNamespace → { r: XMLEventReader ⇒ plugin.parseOnReturnCodeXml(this, r) withToString s"$plugin.onResultCode": OrderFunction }
-        }).toMap)
+        }).uniqueToMap)
     super.processConfigurationDomElement(nodeElement)
   }
 

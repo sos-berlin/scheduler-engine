@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.test
 
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
 import com.sos.scheduler.engine.common.system.OperatingSystem
@@ -117,7 +118,7 @@ object TestEnvironment {
     new TestEnvironment(
       resourcePath = new ResourcePath(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
       directory = directory,
-      nameMap = testConfiguration.resourceNameMap.toMap,
+      nameMap = testConfiguration.resourceNameMap.uniqueToMap,
       fileTransformer = testConfiguration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */

@@ -30,7 +30,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     new PluginCommandResultXmlizer(this))
 
   def initialize(): Unit = {
-    classToPluginAdapter = (pluginConfigurations map { o ⇒ o.pluginClass → new PluginAdapter(o) }).toDistinctMap
+    classToPluginAdapter = (pluginConfigurations map { o ⇒ o.pluginClass → new PluginAdapter(o) }).uniqueToMap
     for (p ← pluginAdapters) p.initialize(injector)
     plugins[EventHandlerAnnotated] foreach eventBus.registerAnnotated
     for (p ← pluginAdapters) p.prepare()
