@@ -66,6 +66,6 @@ final class PluginAdapterTest extends FunSuite {
 
 private object PluginAdapterTest {
   private val logger = Logger(getClass)
-  private val pluginConfiguration = new PluginConfiguration(classOf[MockPlugin].getName, ActivationMode.activateOnStart, None)
-  private val errorPluginConfiguration = new PluginConfiguration(classOf[ErrorMockPlugin].getName, ActivationMode.activateOnStart, None)
+  private val pluginConfiguration = new PluginConfiguration(classOf[MockPlugin].getName, None)
+  private val errorPluginConfiguration = new PluginConfiguration(classOf[ErrorMockPlugin].getName, None)
 }

@@ -1,22 +1,17 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import PluginConfiguration._
 import com.google.inject.Module
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.common.xml.XmlUtils._
-import com.sos.scheduler.engine.kernel.plugin.ActivationMode.activateOnStart
-import com.sos.scheduler.engine.kernel.plugin.ActivationMode.dontActivate
+import com.sos.scheduler.engine.kernel.plugin.PluginConfiguration._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import org.w3c.dom.Element
 import scala.collection.immutable
 
-private[plugin] final case class PluginConfiguration(className: String, activationMode: ActivationMode, configElementOption: Option[Element]) {
+private[plugin] final case class PluginConfiguration(className: String, configElementOption: Option[Element], testInhibitsActivateOnStart: Boolean = false) {
 
-  val pluginClass = {
-    val c = Class.forName(className)
-    require(classOf[Plugin] isAssignableFrom c, s"Plugin $c does not implement ${classOf[Plugin]}")
-    c.asInstanceOf[Class[_ <: Plugin]]
-  }
+  val pluginClass: Class[Plugin] = cast[Class[Plugin]](Class forName className)
 
   val guiceModuleOption: Option[Module] =
     Option(pluginClass.getAnnotation(classOf[UseGuiceModule])) map { _.value.newInstance() }
@@ -30,17 +25,16 @@ private [plugin] object PluginConfiguration {
 
   private [plugin] def readXml(configurationXml: String): immutable.Seq[PluginConfiguration] = {
     val root = loadXml(configurationXml).getDocumentElement
-    for (pluginsElement <- Option(elementXPathOrNull(root, "config/plugins")).to[immutable.Seq];
-         e <- elementsXPath(pluginsElement, "plugin"))
+    for (pluginsElement ← Option(elementXPathOrNull(root, "config/plugins")).to[immutable.Seq];
+         e ← elementsXPath(pluginsElement, "plugin"))
     yield read(e)
   }
 
   private[plugin] def read(e: Element): PluginConfiguration = {
     val className = e.getAttribute("java_class")
     if (className.isEmpty) throw new SchedulerException("Missing attribute java_class in <plugin>")
-    val activationMode = if (booleanXmlAttribute(e, "dont_activate", false)) dontActivate else activateOnStart
     val configElementOption = Option(elementXPathOrNull(e, configElementName))
-    val result = PluginConfiguration(className, activationMode, configElementOption)
+    val result = PluginConfiguration(className, configElementOption, testInhibitsActivateOnStart = booleanXmlAttribute(e, "dont_activate", false))
     logger.debug(s"Configuration for ${result.className} read")
     result
   }

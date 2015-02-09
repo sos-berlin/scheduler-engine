@@ -18,7 +18,7 @@ class PluginCommandCommandXmlParser extends SingleCommandXmlParser {
 
     @Override public final Command parse(Element e) {
         String className = e.getAttribute("plugin_class");
-        PluginAdapter a = subsystem.pluginAdapterByClassName(className);
+        PluginAdapter a = subsystem.classNameToPluginAdapter(className);
         Command subcommand = a.commandDispatcher().parse(singleSubcommandElement(e));
         return new PluginCommandCommand(className, subcommand);
     }

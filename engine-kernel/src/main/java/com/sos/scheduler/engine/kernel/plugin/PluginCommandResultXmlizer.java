@@ -12,7 +12,7 @@ class PluginCommandResultXmlizer extends GenericResultXmlizer<PluginCommandResul
     }
 
     @Override protected final Element doToElement(PluginCommandResult r) {
-        PluginAdapter a = subsystem.pluginAdapterByClassName(r.getPluginClassName());
+        PluginAdapter a = subsystem.classNameToPluginAdapter(r.getPluginClassName());
         return a.commandDispatcher().elementOfResult(r.getPluginResult());
     }
 }

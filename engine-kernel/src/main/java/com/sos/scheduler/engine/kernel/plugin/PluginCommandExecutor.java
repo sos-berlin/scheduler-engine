@@ -12,7 +12,7 @@ class PluginCommandExecutor extends GenericCommandExecutor<PluginCommandCommand,
     }
 
     @Override public final PluginCommandResult doExecute(PluginCommandCommand c) {
-        PluginAdapter a = subsystem.pluginAdapterByClassName(c.getPluginClassName());
+        PluginAdapter a = subsystem.classNameToPluginAdapter(c.getPluginClassName());
         Result pluginResult = a.commandDispatcher().execute(c.getSubcommand());
         return new PluginCommandResult(a.pluginClassName(), pluginResult);
     }

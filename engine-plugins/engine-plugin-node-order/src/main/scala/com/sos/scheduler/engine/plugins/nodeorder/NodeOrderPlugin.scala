@@ -19,6 +19,10 @@ import org.scalactic.Requirements._
 import scala.util.control.NonFatal
 
 /**
+ * Plugin for the job-chain node XML extension `&lt;add_order job_chain='...'>` to start add an order
+ * with equal order ID and a copy of the order's parameters in a different job-chain.
+ * Any error when adding the order is logged to the main log and ignored.
+ *
  * @author Joacim Zschimmer
  */
 final class NodeOrderPlugin @Inject private(
@@ -30,6 +34,11 @@ extends JobChainNodeNamespaceXmlPlugin {
 
   val xmlNamespace = "https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin"
 
+  /**
+   * Parses `&lt;job_chain_node>` XML extension `&lt;add_order job_chain='...'>`.
+   *
+   * @return The curried function `onReturnCode`, a `Order ⇒ Unit`
+   */
   def parseOnReturnCodeXml(jobNode: JobNode, xmlEventReader: XMLEventReader): Order ⇒ Unit = {
     val eventReader = new ScalaXMLEventReader(xmlEventReader)
     import eventReader._

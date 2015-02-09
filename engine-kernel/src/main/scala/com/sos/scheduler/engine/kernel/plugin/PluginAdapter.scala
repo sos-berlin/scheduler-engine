@@ -12,7 +12,7 @@ import org.w3c.dom.Element
 import scala.util.control.NonFatal
 
 /** Die Engine spricht die Plugin über diesen Adapter an. */
-final class PluginAdapter(configuration: PluginConfiguration) {
+final class PluginAdapter(val configuration: PluginConfiguration) {
 
   @Nullable private var _pluginInstance: Plugin = null
 

@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.eventbus.EventBus
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
-import com.sos.scheduler.engine.kernel.plugin.ActivationMode.activateOnStart
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystemTest._
 import java.util.NoSuchElementException
 import javax.xml.stream.XMLEventReader
@@ -26,8 +25,8 @@ final class PluginSubsystemTest extends FreeSpec {
     def configure() = {}
 
     @Provides def pluginConfigurations: immutable.Seq[PluginConfiguration] = List(
-      PluginConfiguration(classOf[APlugin].getName, activateOnStart, None),
-      PluginConfiguration(classOf[BPlugin].getName, activateOnStart, None))
+      PluginConfiguration(classOf[APlugin].getName, None),
+      PluginConfiguration(classOf[BPlugin].getName, None))
 
     @Provides def eventBus = mock[EventBus]
   })
@@ -42,8 +41,8 @@ final class PluginSubsystemTest extends FreeSpec {
   }
 
   "pluginAdapterByClassName" in {
-    pluginSubsystem.pluginAdapterByClassName(classOf[APlugin].getName).pluginInstance shouldEqual aPlugin
-    intercept[NoSuchElementException] { pluginSubsystem.pluginAdapterByClassName("UNKNOWN") }
+    pluginSubsystem.classNameToPluginAdapter(classOf[APlugin].getName).pluginInstance shouldEqual aPlugin
+    intercept[NoSuchElementException] { pluginSubsystem.classNameToPluginAdapter("UNKNOWN") }
   }
 
   "xmlNamespaceToPlugins" in {

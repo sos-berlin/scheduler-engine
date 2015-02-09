@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandle
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
 import scala.reflect.ClassTag
 
 @Singleton
@@ -19,8 +19,9 @@ final class PluginSubsystem @Inject private(
   eventBus: EventBus)
 extends Subsystem with HasCommandHandlers with AutoCloseable {
 
-  private val pluginConfigurationMap: Map[String, PluginConfiguration] = (pluginConfigurations map { o ⇒ o.className → o }).toMap
-  private val pluginAdapterMap = mutable.HashMap[PluginClass, PluginAdapter]()
+  private val classNameToConfiguration: Map[String, PluginConfiguration] =
+    pluginConfigurations toKeyedMap { _.className } withDefault { o ⇒ throw new NoSuchElementException(s"Unknown plugin '$o'") }
+  private var classToPluginAdapter: Map[Class[Plugin], PluginAdapter] = null
   private var namespaceToPlugin: Map[String, NamespaceXmlPlugin] = null
 
   val commandHandlers = ImmutableList.of[CommandHandler](
@@ -29,60 +30,35 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     new PluginCommandResultXmlizer(this))
 
   def initialize(): Unit = {
-    pluginAdapterMap ++= newPluginAdapterSeq()
-    for (p ← pluginAdapterMap.values) {
-      p.initialize(injector)
-      tryRegisterEventHandler(p.pluginInstance)
-    }
-    for (p ← pluginAdapterMap.values) {
-      p.prepare()
-    }
-    namespaceToPlugin = (for (p ← pluginAdapterMap.values) yield
-      Some(p.pluginInstance) collect { case p: NamespaceXmlPlugin ⇒ p.xmlNamespace → p }).flatten.toDistinctMap
+    classToPluginAdapter = (pluginConfigurations map { o ⇒ o.pluginClass → new PluginAdapter(o) }).toDistinctMap
+    for (p ← pluginAdapters) p.initialize(injector)
+    plugins[EventHandlerAnnotated] foreach eventBus.registerAnnotated
+    for (p ← pluginAdapters) p.prepare()
+    namespaceToPlugin = plugins[NamespaceXmlPlugin] toKeyedMap { _.xmlNamespace }
   }
 
-  private def newPluginAdapterSeq() =
-    pluginConfigurations requireDistinct { _.pluginClass } map { o ⇒ o.pluginClass → new PluginAdapter(o) }
-
-  def close(): Unit =
-    for (p ← pluginAdapterMap.values) {
-      tryUnregisterEventHandler(p.pluginInstance)
-      p.tryClose()
-    }
-
-  private def tryRegisterEventHandler(o: Plugin): Unit =
-    o match {
-      case e: EventHandlerAnnotated ⇒ eventBus.registerAnnotated(e)
-      case _ ⇒
-    }
-
-  private def tryUnregisterEventHandler(o: Plugin): Unit =
-    o match {
-      case e: EventHandlerAnnotated ⇒ eventBus.unregisterAnnotated(e)
-      case _ ⇒
-    }
+  def close(): Unit = {
+    plugins[EventHandlerAnnotated] foreach eventBus.unregisterAnnotated
+    for (p ← pluginAdapters) p.tryClose()
+  }
 
   def activate(): Unit =
-    for (p ← pluginAdapters
-         if pluginConfigurationMap(p.pluginClassName).activationMode eq ActivationMode.activateOnStart) {
+    for (p ← pluginAdapters if !p.configuration.testInhibitsActivateOnStart) {
       p.activate()
     }
 
   @TestOnly
-  def activatePlugin(c: PluginClass): Unit = pluginAdapterByClassName(c.getName).activate()
+  def activatePlugin(c: Class[_ <: Plugin]): Unit = classNameToPluginAdapter(c.getName).activate()
 
-  def pluginByClass[A <: Plugin](c: Class[A]): A = pluginAdapterByClassName(c.getName).pluginInstance.asInstanceOf[A]
+  def pluginByClass[A <: Plugin](c: Class[A]): A = classNameToPluginAdapter(c.getName).pluginInstance.asInstanceOf[A]
 
-  private[plugin] def pluginAdapterByClassName(className: String): PluginAdapter =
-    pluginAdapterMap(pluginConfiguration(className).pluginClass)
-
-  private def pluginConfiguration(className: String) =
-    pluginConfigurationMap.getOrElse(className, throw new NoSuchElementException(s"Unknown plugin '$className'"))
+  private[plugin] def classNameToPluginAdapter(className: String): PluginAdapter =
+    classToPluginAdapter(classNameToConfiguration(className).pluginClass)
 
   def xmlNamespaceToPlugins(namespace: String): Option[NamespaceXmlPlugin] = namespaceToPlugin.get(namespace)
 
-  def plugins[A <: Plugin : ClassTag]: immutable.Iterable[A] =
-    (pluginAdapterMap.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable
+  def plugins[A : ClassTag]: immutable.Iterable[A] =
+    (classToPluginAdapter.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable
 
-  private def pluginAdapters = pluginAdapterMap.values
+  private def pluginAdapters = classToPluginAdapter.values
 }
