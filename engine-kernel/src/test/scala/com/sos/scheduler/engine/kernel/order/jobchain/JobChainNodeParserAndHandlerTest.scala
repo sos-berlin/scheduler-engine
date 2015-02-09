@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlElemSource}
 import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, SuccessOrderStateTransition}
 import com.sos.scheduler.engine.kernel.order.Order
@@ -20,7 +20,6 @@ import org.scalatest.junit.JUnitRunner
 final class JobChainNodeParserAndHandlerTest extends FreeSpec {
 
   "JobChainNodeParserAndHandler" in {
-
     val x = new X
     x.initializeWithNodeXml(XmlElemSource(JobchainNodeElem), Map(TestNamespace → testNamespaceParse))
     x.orderStateTransitionToState(SuccessOrderStateTransition) shouldEqual State0

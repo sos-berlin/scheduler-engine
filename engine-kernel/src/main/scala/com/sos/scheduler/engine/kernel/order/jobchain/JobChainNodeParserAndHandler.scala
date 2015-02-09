@@ -65,7 +65,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
 
   private val logger = Logger(getClass)
 
-  private def parseNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: PartialFunction[String, OnReturnCodeParser]) = {
+  private def parseNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: PartialFunction[String, OnReturnCodeParser]): PartialFunction[Int, OnReturnCode] = {
     def parseNodeConfiguration(): NodeConfiguration = {
       parseDocument(xmlSource) { eventReader ⇒
         import eventReader._
@@ -73,7 +73,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
         def parseOnReturnCodes(): immutable.Seq[OnReturnCode] =
           parseElement("on_return_codes") {
             parseEachRepeatingElement[OnReturnCode]("on_return_code") {
-              val returnCodes = Set(attributeMap("return_code").toInt)
+              val returnCodes = RangeSet(attributeMap("return_code"))
               val actions = forEachStartElement[ReturnCodeAction] {
                 case "to_state" ⇒ parseToState()
                 case unknown ⇒
@@ -109,7 +109,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
     }
 
     parseNodeConfiguration() match {
-      case NodeConfiguration(onReturnCodes) ⇒ (onReturnCodes flatMap { o ⇒ o.returnCodes map { _ → o } }).toMap
+      case NodeConfiguration(onReturnCodes) ⇒ Function.unlift(returnCodeToOnReturnCode(onReturnCodes))
     }
   }
 
@@ -117,7 +117,10 @@ private[jobchain] object JobChainNodeParserAndHandler {
 
   private case class NodeConfiguration(onReturnCodes: immutable.Seq[OnReturnCode])
 
-  private case class OnReturnCode(returnCodes: Set[Int], toStateOption: Option[OrderState], callbacks: immutable.Seq[Callback])
+  private case class OnReturnCode(returnCodes: RangeSet, toStateOption: Option[OrderState], callbacks: immutable.Seq[Callback])
+
+  private def returnCodeToOnReturnCode(onReturnCodes: immutable.Seq[OnReturnCode])(returnCode: Int): Option[OnReturnCode] =
+    onReturnCodes collectFirst { case o if o.returnCodes contains returnCode ⇒ o }
 
   private sealed trait ReturnCodeAction
 
