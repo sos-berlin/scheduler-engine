@@ -2664,9 +2664,12 @@ void Order::postprocessing(const Order_state_transition& state_transition)
     Job_node* job_node          = Job_node::cast( _job_chain_node );
     bool      force_error_state = false;
 
-    job_node->typed_java_sister().onOrderStepEnded(java_sister(), state_transition.return_code());
-    
-    if( !_is_success_state  &&  job_node  &&  job_node->is_on_error_setback() )  setback();
+    if (job_node) {
+        job_node->typed_java_sister().onOrderStepEnded(java_sister(), state_transition.return_code());
+        if (!_is_success_state  &&  job_node->is_on_error_setback()) {
+            setback();
+        }
+    }
 
     if( !_setback_called )  _setback_count = 0;
 
