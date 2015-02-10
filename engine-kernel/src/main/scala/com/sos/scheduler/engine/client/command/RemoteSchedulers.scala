@@ -38,7 +38,7 @@ object RemoteSchedulers {
       }
       result.values.toImmutableSeq
     } catch {
-      case ScalaXMLEventReader.WrappedException(x: XmlResponseException) ⇒ throw x
+      case ScalaXMLEventReader.XmlException(x: XmlResponseException) ⇒ throw x
     }
   }
 
