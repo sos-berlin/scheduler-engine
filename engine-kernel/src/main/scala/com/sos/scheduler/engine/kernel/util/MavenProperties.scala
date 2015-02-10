@@ -4,14 +4,15 @@ import com.google.common.io.Resources.getResource
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import scala.collection.JavaConversions._
 
 final class MavenProperties(resourcePath: String) {
 
-  private val properties: java.util.Properties =
+  private val properties: Map[String, String] =
     autoClosing(getResource(resourcePath).openStream()) { in ⇒
       val p = new java.util.Properties
       p.load(in)
-      p
+      p.toMap
     }
 
   override def toString = s"$groupId:$artifactId-$version $branchAndCommitSuffix"
@@ -38,11 +39,14 @@ final class MavenProperties(resourcePath: String) {
 
   def versionCommitHash = asString("sourceVersion.commitHash")
 
-  def versionBranch = asString("sourceVersion.branch")
+  def versionBranch = asString("sourceVersion.branch") match {
+    case o @ "UNKNOWN" ⇒ properties.getOrElse("GIT_BRANCH", o)  // Jenkins Git plugin
+    case o ⇒ o
+  }
 
   def buildDateTime: DateTime =
     ISODateTimeFormat.dateTime.parseDateTime(asString("maven.build.timestamp"))
 
   private def asString(name: String): String =
-    Option(properties.getProperty(name)) getOrElse { throw new NoSuchElementException(s"Unknown property '$name'") }
+    properties.getOrElse(name, throw new NoSuchElementException(s"Unknown property '$name'"))
 }
