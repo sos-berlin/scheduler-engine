@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
-import com.sos.scheduler.engine.kernel.plugin.{NamespaceXmlPlugin, Plugin, PluginXmlConfigurable}
+import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginXmlConfigurable}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor
 import com.sos.scheduler.engine.tests.jira.js1195.TestPlugin._
 import javax.inject.Inject
@@ -21,7 +21,7 @@ import scala.collection.mutable
  * @author Joacim Zschimmer
  */
 final class TestPlugin @Inject private(eventBus: SchedulerEventBus, xmlCommandExecutor: SchedulerXmlCommandExecutor)
-extends Plugin with NamespaceXmlPlugin {
+extends AttachableNamespaceXmlPlugin {
 
   private val nodeConfigurations = mutable.Map[NodeKey, NodeConfiguration]()
 

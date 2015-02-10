@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeKey, NodeOverview}
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
-import com.sos.scheduler.engine.kernel.plugin.{NamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
+import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, NamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
 import org.w3c.dom
 import scala.collection.immutable
 
@@ -31,11 +31,12 @@ abstract class Node extends Sister with PluginXmlConfigurable {
 
   @ForCpp
   def processConfigurationDomElement(nodeElement: dom.Element): Unit = {
-    val elementPlugins = nodeListToSeq(nodeElement.getChildNodes) collect {
-      case e: dom.Element ⇒ e → injector.apply[PluginSubsystem].pluginsByXmlNamespace(e.getNamespaceURI)
+    val pluginSubsystem = injector.apply[PluginSubsystem]
+    nodeListToSeq(nodeElement.getChildNodes) collect {
+      case e: dom.Element ⇒ e → pluginSubsystem.xmlNamespaceToPlugins(e.getNamespaceURI)
+    } collect {
+      case (element, Some(plugin: AttachableNamespaceXmlPlugin)) ⇒ plugin.attachPluginXmlConfigurable(this, element)
     }
-    plugins = (elementPlugins flatMap { _._2 }).distinct
-    for ((element, plugins) ← elementPlugins; plugin ← plugins) plugin.attachPluginXmlConfigurable(this, element)
   }
 
   final def persistentState = new JobChainNodePersistentState(jobChainPath, orderState, action)
@@ -54,4 +55,3 @@ abstract class Node extends Sister with PluginXmlConfigurable {
 
   final def action_=(o: JobChainNodeAction): Unit = cppProxy.set_action_string(o.toCppName)
 }
-

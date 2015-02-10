@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThr
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
-import com.sos.scheduler.engine.kernel.plugin.{NamespaceXmlPlugin, Plugin, PluginXmlConfigurable}
+import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, Plugin, PluginXmlConfigurable}
 import com.sos.scheduler.engine.kernel.scheduler.{SchedulerException, SchedulerXmlCommandExecutor}
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin.{parse, _}
 import javax.inject.Inject
@@ -31,7 +31,7 @@ final class NodeOrderPlugin @Inject private(
   xmlCommandExecutor: SchedulerXmlCommandExecutor,
   schedulerLogger: PrefixLog)
   (implicit callQueue: SchedulerThreadCallQueue)
-  extends Plugin with NamespaceXmlPlugin {
+  extends Plugin with AttachableNamespaceXmlPlugin {
 
   val xmlNamespace = "https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin"
 

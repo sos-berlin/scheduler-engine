@@ -20,6 +20,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   private val pluginConfigurationMap: Map[String, PluginConfiguration] = (pluginConfigurations map { o ⇒ o.className → o }).toMap
   private val pluginAdapterMap = mutable.HashMap[PluginClass, PluginAdapter]()
+  private var namespaceToPlugin: Map[String, NamespaceXmlPlugin] = null
 
   val commandHandlers = ImmutableList.of[CommandHandler](
     new PluginCommandExecutor(this),
@@ -35,9 +36,11 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     for (p ← pluginAdapterMap.values) {
       p.prepare()
     }
+    namespaceToPlugin = (for (p ← pluginAdapterMap.values) yield
+      Some(p.pluginInstance) collect { case p: NamespaceXmlPlugin ⇒ p.xmlNamespace → p }).flatten.toDistinctMap
   }
 
-  def newPluginAdapterSeq() =
+  private def newPluginAdapterSeq() =
     pluginConfigurations requireDistinct { _.pluginClass } map { o ⇒ o.pluginClass → new PluginAdapter(o) }
 
   def close(): Unit =
@@ -74,10 +77,9 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   private[plugin] def pluginConfiguration(className: String) =
     pluginConfigurationMap.getOrElse(className, throw new SchedulerException(s"Unknown plugin '$className'"))
 
-  def pluginsByXmlNamespace(s: String): immutable.Seq[NamespaceXmlPlugin] =
-    (plugins collect { case o: NamespaceXmlPlugin if o.xmlNamespace == s ⇒ o }).toImmutableSeq
+  def xmlNamespaceToPlugins(namespace: String): Option[NamespaceXmlPlugin] = namespaceToPlugin.get(namespace)
+
+  def xmlNamespaceToPlugins: immutable.Iterable[NamespaceXmlPlugin] = namespaceToPlugin.values.toImmutableIterable
 
   private def pluginAdapters = pluginAdapterMap.values
-
-  private def plugins = pluginAdapterMap.values map { _.pluginInstance }
 }
