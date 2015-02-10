@@ -34,7 +34,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     for (p ← pluginAdapters) p.initialize(injector)
     plugins[EventHandlerAnnotated] foreach eventBus.registerAnnotated
     for (p ← pluginAdapters) p.prepare()
-    namespaceToPlugin = plugins[NamespaceXmlPlugin] toKeyedMap { _.xmlNamespace }
+    namespaceToPlugin = plugins[NamespaceXmlPlugin] toKeyedMap { _.xmlNamespace } withDefault { o ⇒ throw new NoSuchElementException(s"Unknown XML namespace: $o")}
   }
 
   def close(): Unit = {
@@ -55,7 +55,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   private[plugin] def classNameToPluginAdapter(className: String): PluginAdapter =
     classToPluginAdapter(classNameToConfiguration(className).pluginClass)
 
-  def xmlNamespaceToPlugins(namespace: String): Option[NamespaceXmlPlugin] = namespaceToPlugin.get(namespace)
+  def xmlNamespaceToPlugins[A : ClassTag](namespace: String): Option[A] = namespaceToPlugin.get(namespace) collect assignableFrom[A]
 
   def plugins[A : ClassTag]: immutable.Iterable[A] =
     (classToPluginAdapter.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable

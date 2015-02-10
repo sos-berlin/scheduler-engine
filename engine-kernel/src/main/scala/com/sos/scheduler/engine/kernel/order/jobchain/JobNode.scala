@@ -2,9 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
@@ -14,12 +12,10 @@ import com.sos.scheduler.engine.data.order.OrderStateTransition
 import com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.Order
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler.OrderFunction
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode._
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.plugin.jobchainnode.JobChainNodeNamespaceXmlPlugin
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import javax.xml.stream.XMLEventReader
 import org.scalactic.Requirements._
 import org.w3c.dom
 
@@ -40,13 +36,10 @@ extends OrderQueueNode with JobChainNodeParserAndHandler {
   }
 
   override def processConfigurationDomElement(nodeElement: dom.Element) = {
-    val pluginSubsystem = injector.apply[PluginSubsystem]
+    val namespaceToJobNodePlugins = injector.apply[PluginSubsystem].xmlNamespaceToPlugins[JobChainNodeNamespaceXmlPlugin] _
     initializeWithNodeXml(
       domElementToStaxSource(nodeElement),
-      namespaceToOnReturnCodeParser =
-        (for (plugin ← pluginSubsystem.plugins[JobChainNodeNamespaceXmlPlugin]) yield {
-          plugin.xmlNamespace → { r: XMLEventReader ⇒ plugin.parseOnReturnCodeXml(this, r) withToString s"$plugin.onResultCode": OrderFunction }
-        }).uniqueToMap)
+      namespaceToJobNodePlugins(_) map { plugin ⇒ plugin.parseOnReturnCodeXml(this, _) })
     super.processConfigurationDomElement(nodeElement)
   }
 

@@ -29,12 +29,10 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
   @ForCpp
   def processConfigurationDomElement(nodeElement: dom.Element): Unit = {
     val elementPluginOption = nodeListToSeq(nodeElement.getChildNodes) collect {
-      case e: dom.Element ⇒ e → injector.apply[PluginSubsystem].xmlNamespaceToPlugins(e.getNamespaceURI)
+      case e: dom.Element ⇒ e → injector.apply[PluginSubsystem].xmlNamespaceToPlugins[AttachableNamespaceXmlPlugin](e.getNamespaceURI)
     }
-    for ((element, plugins) ← elementPluginOption) {
-      plugins collect {
-        case plugin: AttachableNamespaceXmlPlugin ⇒ plugin.attachPluginXmlConfigurable(this, element)
-      }
+    for ((element, plugins) ← elementPluginOption; plugin ← plugins) {
+      plugin.attachPluginXmlConfigurable(this, element)
     }
   }
 

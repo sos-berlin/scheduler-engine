@@ -46,8 +46,11 @@ final class PluginSubsystemTest extends FreeSpec {
   }
 
   "xmlNamespaceToPlugins" in {
-    pluginSubsystem.xmlNamespaceToPlugins(Namespace) shouldEqual Some(bPlugin)
-    pluginSubsystem.xmlNamespaceToPlugins("UNKNOWN") shouldEqual None
+    pluginSubsystem.xmlNamespaceToPlugins[NamespaceXmlPlugin](Namespace) shouldEqual Some(bPlugin)
+    pluginSubsystem.xmlNamespaceToPlugins[Plugin](Namespace) shouldEqual Some(bPlugin)
+    pluginSubsystem.xmlNamespaceToPlugins[BPlugin](Namespace) shouldEqual Some(bPlugin)
+    pluginSubsystem.xmlNamespaceToPlugins[APlugin](Namespace) shouldEqual None
+    pluginSubsystem.xmlNamespaceToPlugins[NamespaceXmlPlugin]("UNKNOWN") shouldEqual None
   }
 
   "plugins" in {

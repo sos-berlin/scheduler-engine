@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -46,7 +47,7 @@ extends JobChainNodeNamespaceXmlPlugin {
       JobChainPath(attributeMap("job_chain"))
     }
     require(jobChainPath != jobNode.jobChainPath, s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> must denote the own job_chain")
-    onReturnCode(jobChainPath)
+    onReturnCode(jobChainPath) _ withToString "NodeOrderPlugin.onResultCode"
   }
 
   private def onReturnCode(jobChainPath: JobChainPath)(order: Order): Unit = {

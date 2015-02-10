@@ -22,15 +22,15 @@ private[jobchain] trait JobChainNodeParserAndHandler {
 
   protected def errorState: OrderState
 
-  private var returnCodeToOnReturnCode: PartialFunction[Int, OnReturnCode] = PartialFunction.empty
+  private var returnCodeToOnReturnCode = PartialFunction.empty[Int, OnReturnCode]
 
   /**
    * May not be called.
    * @param xmlSource The `&lt;job_chain_node>...&lt;/job_chain_node>` to be parsed
-   * @param namespaceToOnReturnCodeParser PartialFunction, mapping an XML namespace to an XML parser,
+   * @param namespaceToOnReturnCodeParser Function, mapping an XML namespace to an XML parser (or None when no XML parser is available),
    *                                      parsing the XML extension and returning a side-effecting function [[Order]] ⇒ [[Unit]]
    */
-  def initializeWithNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: PartialFunction[String, OnReturnCodeParser]) = {
+  def initializeWithNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: String ⇒ Option[OnReturnCodeParser]) = {
     if (returnCodeToOnReturnCode ne PartialFunction.empty) throw new IllegalStateException
     returnCodeToOnReturnCode = parseNodeXml(xmlSource, namespaceToOnReturnCodeParser)
     logger.debug(s"$this: $returnCodeToOnReturnCode")
@@ -65,7 +65,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
 
   private val logger = Logger(getClass)
 
-  private def parseNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: PartialFunction[String, OnReturnCodeParser]): PartialFunction[Int, OnReturnCode] = {
+  private def parseNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: String ⇒ Option[OnReturnCodeParser]): PartialFunction[Int, OnReturnCode] = {
     def parseNodeConfiguration(): NodeConfiguration = {
       parseDocument(xmlSource) { eventReader ⇒
         import eventReader._
@@ -78,7 +78,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
                 case "to_state" ⇒ parseToState()
                 case unknown ⇒
                   val namespace = xmlEventReader.peek.asStartElement.getName.getNamespaceURI
-                  namespaceToOnReturnCodeParser.lift(namespace) match {
+                  namespaceToOnReturnCodeParser(namespace) match {
                     case Some(parse) ⇒
                       Callback(parse(xmlEventReader))
                     case None ⇒
