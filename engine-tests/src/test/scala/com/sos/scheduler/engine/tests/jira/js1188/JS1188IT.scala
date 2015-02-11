@@ -69,13 +69,13 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 
   "With unreachable agents, task waits 2 times agentConnectRetryDelay because no agent is reachable" in {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
-      val (waitingTaskId, taskClosedFuture) = runJobFuture(AgentsJobPath)
-      waitingTaskClosedFuture = taskClosedFuture
+      val taskRun = runJobFuture(AgentsJobPath)
+      waitingTaskClosedFuture = taskRun.closed
       waitingStopwatch = new Stopwatch
       sleep(1.s)
-      requireTaskIsWaitingForAgent(waitingTaskId)
+      requireTaskIsWaitingForAgent(taskRun.taskId)
       sleep((2.5 * AgentConnectRetryDelay.getMillis).toLong)
-      requireTaskIsWaitingForAgent(waitingTaskId)
+      requireTaskIsWaitingForAgent(taskRun.taskId)
       val expectedWarnings = fill(3)(fill(n)(InaccessibleAgentMessageCode) :+ WaitingForAgentMessageCode).flatten map Some.apply
       assertResult(expectedWarnings) {
         val codeOptions = eventPipe.queued[WarningLogEvent].toVector map { _.codeOption }
@@ -114,7 +114,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
       assertResult(List("http://127.0.0.254:1", "http://127.0.0.253:1")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
-      val (_, jobFuture) = runJobFuture(ReplaceTestJobPath)
+      val taskRun = runJobFuture(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
       controller.eventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
         testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", List(agentRefs(1)))
@@ -124,7 +124,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       // Job should run now with new process class configuration denoting an accessible agent
-      awaitSuccess(jobFuture)
+      awaitSuccess(taskRun.result)
     }
   }
 
@@ -136,7 +136,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
       for (a ← runningAgents.values) {
         a.close()
       }
-      val (_, jobFuture) = runJobFuture(ReplaceTestJobPath)
+      val taskRun = runJobFuture(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
       def expectedErrorLogEvent(e: ErrorLogEvent) =
         e.codeOption == Some(MessageCode("SCHEDULER-280")) ||
@@ -149,7 +149,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         assertResult(Nil) {
           processClass(ReplaceProcessClassPath).agents map { _.address }
         }
-        awaitSuccess(jobFuture)
+        awaitSuccess(taskRun.closed)
       }
       // Job should run fail with SCHEDULER-280 because the new process class has no longer remote scheduler
       assert(eventPipe.queued[ErrorLogEvent] exists { _.codeOption == Some(MessageCode("SCHEDULER-280")) })

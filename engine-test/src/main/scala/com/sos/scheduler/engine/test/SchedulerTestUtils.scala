@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.test
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderKey
@@ -17,11 +17,13 @@ import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassS
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
+import java.lang.System.currentTimeMillis
 import org.joda.time.Duration
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.{higherKinds, implicitConversions}
+import scala.math.max
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -50,24 +52,43 @@ object SchedulerTestUtils {
   }
 
   def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskId = {
-    val (taskId, future) = runJobFuture(jobPath)
-    Await.result(future, timeout)
-    taskId
+    val run = runJobFuture(jobPath)
+    Await.result(run.result, timeout)
+    run.taskId
   }
 
-  def runJobFuture(jobPath: JobPath)(implicit controller: TestSchedulerController): (TaskId, Future[TaskClosedEvent]) = {
+  def runJobFuture(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskRun = {
     implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
     inSchedulerThread {
+      // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintriffen. Sonst könnten sie verlorengehen
       val taskId = startJob(jobPath)
-      // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst könnte es verlorengehen
-      val future = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
-      (taskId, future)
+      val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
+      val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
+      val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
+      val startedTime = started map { _ ⇒ currentTimeMillis() }
+      val endedTime = ended map { _ ⇒ currentTimeMillis() }
+      val durationFuture = for (s ← startedTime; e ← endedTime) yield max(0, e - s).ms
+      val result = for (_ ← closed; duration ← durationFuture) yield TaskResult(jobPath, taskId, duration)
+      TaskRun(jobPath, taskId, started, closed, result)
     }
   }
 
   def startJob(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskId = {
     val response = controller.scheduler executeXml <start_job job={jobPath.string}/>
     TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
+  }
+
+  final case class TaskRun(
+    jobPath: JobPath,
+    taskId: TaskId,
+    started: Future[TaskStartedEvent],
+    closed: Future[TaskClosedEvent],
+    result: Future[TaskResult])
+
+  final case class TaskResult(jobPath: JobPath, taskId: TaskId, duration: Duration) {
+    def logString(implicit controller: TestSchedulerController) =
+      ((controller.scheduler executeXml <show_task id={taskId.string} what="log"/>)
+        .answer \ "task" \ "log").text
   }
 
   implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = instance[ExecutionContext]

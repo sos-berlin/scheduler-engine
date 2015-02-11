@@ -35,7 +35,7 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
     scheduler executeXml <process_class name="inaccessible-remote" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
     // Wir starten beide Jobs parallel, damit der Test nicht zweimal eine Minute dauert.
     val time = currentTimeMillis()
-    val futures = List(InvalidRemoteJobPath, InaccessibleRemoteJobPath) map { path ⇒ runJobFuture(path)._2 }
+    val futures = List(InvalidRemoteJobPath, InaccessibleRemoteJobPath) map { path ⇒ runJobFuture(path).result }
     for (f <- futures)
       Await.result(f, 70.s)
     currentTimeMillis - time shouldBe 60000L +- 10000

@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.kernel.job.TaskState
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{job, runJobAndWaitForEnd, runJobFuture, task}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, runJobFuture, task}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1187.JS1187IT._
@@ -40,7 +40,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
     def ignorable(e: ErrorLogEvent) =
       (e.message contains "spray.http.IllegalUriException") || e.codeOption() == Some(MessageCode("SCHEDULER-280"))
     controller.toleratingErrorLogEvent(ignorable) {  // Z-JAVA-105  Java exception spray.http.IllegalUriException: Invalid port 99999, method=CallObjectMethodA []
-      runJobAndWaitForEnd(InvalidRemoteJobPath)
+      awaitSuccess(runJobFuture(InvalidRemoteJobPath).closed)
     }
     job(InvalidRemoteJobPath).isPermanentlyStopped shouldBe true
   }
@@ -51,22 +51,22 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
   "With unreachable remote_scheduler, the waiting task can be killed" in {
     val warningFuture = controller.eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
-    val (taskId, taskClosedFuture) = runJobFuture(UnreachableRemoteJobPath)
+    val taskRun = runJobFuture(UnreachableRemoteJobPath)
     Await.result(warningFuture, TestTimeout)
-    requireIsWaitingForAgent(taskId)
-    scheduler executeXml <kill_task job={UnreachableRemoteJobPath.string} id={taskId.string}/>
-    Await.result(taskClosedFuture, TestTimeout)
+    requireIsWaitingForAgent(taskRun.taskId)
+    scheduler executeXml <kill_task job={UnreachableRemoteJobPath.string} id={taskRun.taskId.string}/>
+    Await.result(taskRun.closed, TestTimeout)
   }
 
   "With unreachable remote_scheduler, task waits until agent is reachable" in {
     autoClosing(newExtraScheduler(agentHttpPort)) { agent ⇒
       val warningFuture = controller.eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
-      val (taskId, taskClosedFuture) = runJobFuture(UnreachableRemoteJobPath)
+      val taskRun = runJobFuture(UnreachableRemoteJobPath)
       Await.result(warningFuture, TestTimeout)
-      requireIsWaitingForAgent(taskId)
+      requireIsWaitingForAgent(taskRun.taskId)
       agent.start()
       Await.result(agent.activatedFuture, TestTimeout)
-      Await.result(taskClosedFuture, TestTimeout)
+      Await.result(taskRun.result, TestTimeout)
     }
   }
 
