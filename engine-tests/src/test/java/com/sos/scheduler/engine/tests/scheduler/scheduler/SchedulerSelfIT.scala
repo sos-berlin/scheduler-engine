@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.scheduler
 
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
+import com.sos.scheduler.engine.test.SchedulerTestUtils.interceptSchedulerError
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -16,10 +16,8 @@ final class SchedulerSelfIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Unknown XML command" in {
-    intercept[SchedulerException] {
-      controller.toleratingErrorCodes(Set(MessageCode("Z-JAVA-105"))) {
-        scheduler.executeXml("<UNKNOWN/>")
-      }
+    interceptSchedulerError(MessageCode("Z-JAVA-105")) {
+      scheduler.executeXml("<UNKNOWN/>")
     }
   }
 }

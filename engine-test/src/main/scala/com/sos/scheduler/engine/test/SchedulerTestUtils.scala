@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -13,10 +14,11 @@ import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsyst
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
-import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import org.joda.time.Duration
+import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.{higherKinds, implicitConversions}
@@ -82,7 +84,7 @@ object SchedulerTestUtils {
 
   def instance[A : ClassTag](implicit hasInjector: HasInjector): A = hasInjector.injector.getInstance(implicitClass[A])
 
-  //  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
+//  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
 //    * Eine Fehlermeldung im Hauptprotokoll führt gewöhnlich zum Abbruch des Tests.
 //    * @param errorCode Code der im Hauptprokoll zu tolerierenden Fehlermeldung.
 //    * @param testException: Test-Code, der bei einer falschen CppException eine Exception wirft, zum Bespiel mit ScalaTest. */
@@ -93,4 +95,14 @@ object SchedulerTestUtils {
 //      testException(e)
 //    }
 //  }
+
+  def interceptSchedulerError(errorCode: MessageCode)(body: ⇒ Unit)(implicit controller: TestSchedulerController): SchedulerException = {
+    val result = intercept[SchedulerException] {
+      controller.toleratingErrorCodes(Set(errorCode)) {
+        body
+      }
+    }
+    result.getMessage should startWith(errorCode.string)
+    result
+  }
 }

@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPluginIT._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
+import com.sos.scheduler.engine.test.SchedulerTestUtils.interceptSchedulerError
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -43,24 +44,22 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "<add_order> must not denote the own job-chain" in {
-    controller.toleratingErrorCodes(Set(MessageCode("Z-JAVA-105"))) {
-      intercept[Exception] {
-        scheduler executeXml
-          <job_chain name="test-own"
-                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                     xsi:schemaLocation="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin NodeOrderPlugin.xsd"
-                     xmlns:NodeOrderPlugin="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin">
-            <job_chain_node state="100" job="/test-exit-0">
-              <on_return_codes>
-                <on_return_code return_code="0">
-                  <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-own"/>
-                </on_return_code>
-              </on_return_codes>
-            </job_chain_node>
-            <job_chain_node.end state="end"/>
-          </job_chain>
-      } .getMessage should include ("must denote the own job_chain")
-    }
+    interceptSchedulerError(MessageCode("Z-JAVA-105")) {
+      scheduler executeXml
+        <job_chain name="test-own"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin NodeOrderPlugin.xsd"
+                   xmlns:NodeOrderPlugin="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin">
+          <job_chain_node state="100" job="/test-exit-0">
+            <on_return_codes>
+              <on_return_code return_code="0">
+                <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-own"/>
+              </on_return_code>
+            </on_return_codes>
+          </job_chain_node>
+          <job_chain_node.end state="end"/>
+        </job_chain>
+    } .getMessage should include ("must denote the own job_chain")
   }
 }
 
