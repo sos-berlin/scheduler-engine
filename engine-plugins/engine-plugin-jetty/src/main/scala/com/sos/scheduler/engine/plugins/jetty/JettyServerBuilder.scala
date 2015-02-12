@@ -13,6 +13,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.servlet._
 import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.util.security.Constraint
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.webapp.{WebAppContext, WebXmlConfiguration}
 import org.eclipse.jetty.xml.XmlConfiguration
 import scala.language.reflectiveCalls
@@ -84,6 +85,7 @@ object JettyServerBuilder {
     val result = new Server
     for (o <- config.portOption) result.addConnector(newConnector(o.value))
     val logHandlerOption = config.accessLogFileOption map { o ⇒ newRequestLogHandler(new NCSARequestLog(o.getPath)) }
+    result.setThreadPool(newThreadPool())
     result.setHandler(newHandlerCollection(
       logHandlerOption ++
       Some(newJobSchedulerContextHandler()) ++
@@ -143,6 +145,12 @@ object JettyServerBuilder {
     result.setRealmName(loginService.getName)
     result.setLoginService(loginService)
     result.setConstraintMappings(Array(constraintMapping))
+    result
+  }
+
+  private def newThreadPool() = {
+    val result = new QueuedThreadPool  // Jetty 8 default
+    result.setName("Jetty")
     result
   }
 }
