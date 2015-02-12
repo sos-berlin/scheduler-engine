@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
-import com.sos.scheduler.engine.common.async.FutureCompletion.futureTimedCall
+import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.withToString
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
 import org.joda.time.{Duration, Instant}
@@ -32,7 +33,7 @@ class FailableSelector[Failable, Result](
       if (delay > 0.s) {
         callbacks.onDelay(delay, failable)
       }
-      val t = futureTimedCall[Unit](now + delay) {
+      val t = functionToFutureTimedCall[Unit](now + delay, withToString(toString) {
         selected = Some(failable)
         catchInFuture { callbacks.apply(failable) } onComplete {
           case Success(Success(result)) ⇒
@@ -41,17 +42,17 @@ class FailableSelector[Failable, Result](
           case x if cancelled ⇒
             logger.debug(s"$x")
             promise.failure(new CancelledException)
-          case Success(Failure(throwable)) ⇒   // Tolerated failure
+          case Success(Failure(throwable)) ⇒ // Tolerated failure
             failables.setFailure(failable, throwable)
             loopUntilConnected()
-          case x @ Failure(_: TimedCall.CancelledException) ⇒
+          case x@Failure(_: TimedCall.CancelledException) ⇒
             logger.debug(s"$x")
             promise.failure(new CancelledException)
-          case x @ Failure(throwable) ⇒   // Failure lets abort FailableSelector
+          case x@Failure(throwable) ⇒ // Failure lets abort FailableSelector
             failables.setFailure(failable, throwable)
             promise.failure(throwable)
         }
-      }
+      })
       callQueue.add(t)
       timedCall = t
       t.future onFailure {
