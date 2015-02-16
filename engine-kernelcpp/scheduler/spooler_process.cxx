@@ -749,7 +749,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         _spooler->cancel_call(_start_remote_task_callback);
         if (unix_signal == Z_SIGKILL) {
             _clientJ.closeRemoteTask(true);
-            return false;
+            return true;
         } else {
             return _clientJ.killRemoteTask(unix_signal);
         }

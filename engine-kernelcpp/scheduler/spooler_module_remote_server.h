@@ -17,14 +17,21 @@ struct Remote_module_instance_server : Com_module_instance_base
 
 
     void                        close__end                  ();
-    void                        load_implicitly             ();
     void                        try_delete_files            ();
-
 
     Fill_zero                  _zero_;
     ptr<Module_instance>       _module_instance;
     ptr<File_logger>           _file_logger;
     Fill_end                   _end_;
+
+    #if defined Z_UNIX
+        static void signal_handler(int, siginfo_t*, void*);
+        void catch_sigterm_for_shell_process();
+        void on_sigterm();
+        bool _own_sigaction_installed;
+        struct sigaction _previous_sigaction;
+        static Remote_module_instance_server* static_this;
+    #endif
 };
 
 //----------------------------------------------------------------Com_remote_module_instance_server

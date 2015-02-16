@@ -500,20 +500,18 @@ bool Process_module_instance::Process_event::wait( double seconds )
     while(1)
     {
         int status = 0;
-
-      //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
-
-        int waitpid_flags = WUNTRACED;                          // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
-        if( seconds != INT_MAX )  waitpid_flags |= WNOHANG;
-                            else  Z_LOG( "pid=" << _pid << " waitpid() ...\n" );
-
-        int ret = waitpid( _pid, &status, waitpid_flags );    
+        int ret, errn;
+        do { 
+            int waitpid_flags = WUNTRACED;                          // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+            if( seconds != INT_MAX )  waitpid_flags |= WNOHANG;
+                                else  Z_LOG( "pid=" << _pid << " waitpid() ...\n" );
+            ret = waitpid( _pid, &status, waitpid_flags );  
+            errn = errno;
+            if (ret == -1) Z_LOG2( "scheduler", "waitpid(" << _pid << ") ==> ERRNO-" << errn << "  " << z_strerror(errno) << "\n" );
+        } while (ret == -1 && errn == EINTR);  // JS-1163, siehe Remote_module_instance_server::catch_sigterm_for_shell_process
         if( ret == -1 )
         {
-            Z_LOG2( "scheduler", "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << z_strerror(errno) << "\n" );
-            //int pid = _pid;
             _pid = 0;
-            //throw_errno( errno, "waitpid", as_string(pid).c_str() );
             set_signaled();
             return true;
         }

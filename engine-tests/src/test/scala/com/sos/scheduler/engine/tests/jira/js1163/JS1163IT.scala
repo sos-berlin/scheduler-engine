@@ -16,6 +16,7 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
+ * Tickets JS-1163, JS-1307.
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
@@ -54,38 +55,42 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
         controller.toleratingErrorCodes(Set(MessageCode("Z-REMOTE-101"), MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-279"), MessageCode("SCHEDULER-280"))) {
           val jobPaths = List(
             StandardJobPath, StandardMonitorJobPath,
-            TerminatingJobPath, TerminatingMonitorJobPath,
+            TrapJobPath, TrapMonitorJobPath,
             IgnoringJobPath, IgnoringMonitorJobPath,
             ApiJobPath)
           val runs = jobPaths map runJobFuture
-          for (run ← runs) {
-            awaitSuccess(run.started)
-            scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getStandardSeconds.toString}/>
-          }
+          for (run ← runs) awaitSuccess(run.started)
+          sleep(ShellStartupTime)  // Wait until shell scripts should have executed their "trap" commands
+          for (run ← runs) scheduler executeXml
+              <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeoutString}/>
           results = awaitResults(runs map { _.result }) toKeyedMap { _.jobPath }
         }
       }
 
-      s"$testVariantName - Without trap, SIGTERM directly aborted process" in {
-        results(StandardJobPath).duration should be < KilledImmediatelyMaxDuration
-        results(StandardJobPath).logString should not (include (FinishedNormallystring) or include (SigtermHandledString))
-      }
-
-      s"$testVariantName - With SIGTERM trapped, SIGTERM aborted process after signal was handled" in {
-        results(TerminatingJobPath).duration should be < KilledImmediatelyMaxDuration
-        results(TerminatingJobPath).logString should include (SigtermHandledString)
-      }
-
-      s"$testVariantName - With SIGTERM ignored, timeout took effect" in {
-        results(IgnoringJobPath).duration should (be >= KillTimeout and be < SleepDuration)
-        results(IgnoringJobPath).logString should not (include (FinishedNormallystring) or include (SigtermHandledString))
-      }
-
-      for (jobPath ← List(ApiJobPath, StandardMonitorJobPath, TerminatingMonitorJobPath, IgnoringMonitorJobPath)) {
-        s"$testVariantName - $jobPath was aborted directly" in {
+      for (jobPath ← List(StandardJobPath, StandardMonitorJobPath)) {
+        s"$testVariantName - $jobPath - Without trap, SIGTERM directly aborted process" in {
+          results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
           results(jobPath).duration should be < KilledImmediatelyMaxDuration
-          results(jobPath).logString should not (include (FinishedNormallystring) or include (SigtermHandledString))
         }
+      }
+
+      for (jobPath ← List(TrapJobPath, TrapMonitorJobPath)) {
+        s"$testVariantName - $jobPath - With SIGTERM trapped, SIGTERM aborted process after signal was handled" in {
+          results(jobPath).logString should (not include FinishedNormally and include (SigtermTrapped))
+          results(jobPath).duration should be < KilledTrappedMaxDuration
+        }
+      }
+
+      for (jobPath ← List(IgnoringJobPath, IgnoringMonitorJobPath)) {
+        s"$testVariantName - $jobPath - With SIGTERM ignored, timeout took effect" in {
+          results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
+          results(jobPath).duration should (be >= KillTimeout and be < SleepDuration)
+        }
+      }
+
+      s"$testVariantName - API job was aborted directly" in {
+        results(ApiJobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
+        results(ApiJobPath).duration should be < KilledImmediatelyMaxDuration
       }
     }
 
@@ -104,19 +109,21 @@ private object JS1163IT {
   private val TestJobPath = JobPath("/test")
   private val StandardJobPath = JobPath("/test-standard")
   private val StandardMonitorJobPath = JobPath("/test-standard-monitor")
-  private val TerminatingJobPath = JobPath("/test-terminate")
-  private val TerminatingMonitorJobPath = JobPath("/test-terminate-monitor")
+  private val TrapJobPath = JobPath("/test-trap")
+  private val TrapMonitorJobPath = JobPath("/test-trap-monitor")
   private val IgnoringJobPath = JobPath("/test-ignore")
   private val IgnoringMonitorJobPath = JobPath("/test-ignore-monitor")
   private val ApiJobPath = JobPath("/test-api")
 
-  private val KillTimeout = 7.s
-  private val NeverTimeout = Int.MaxValue.s
-  private val KilledImmediatelyMaxDuration = 6.s
-  private val SleepDuration = 11.s
+  private val ShellStartupTime = 5.s
+  private val KillTimeout = 9.s
+  private val KillTimeoutString = (KillTimeout - ShellStartupTime).getStandardSeconds.toString
+  private val KilledImmediatelyMaxDuration = 8.s
+  private val KilledTrappedMaxDuration = 11.s
+  private val SleepDuration = 13.s
 
-  private val SigtermHandledString = "SIGTERM HANDLED"
-  private val FinishedNormallystring = "FINISHED NORMALLY"
+  private val SigtermTrapped = "SIGTERM HANDLED"
+  private val FinishedNormally = "FINISHED NORMALLY"
 
   private def testProcessClass(agentAddress: Option[String]) =
       <process_class replace="true" name="test" remote_scheduler={agentAddress.orNull}/>

@@ -44,6 +44,12 @@ Remote_module_instance_server::~Remote_module_instance_server()
         close__end();  // Synchron
     }
     catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+
+    #if defined Z_UNIX
+        if (_own_sigaction_installed) {
+            ::sigaction(SIGTERM, &_previous_sigaction, NULL);
+        }
+    #endif
 }
 
 //--------------------------------------------------------Remote_module_instance_server::close__end
@@ -77,6 +83,52 @@ void Remote_module_instance_server::close__end()   // synchron
     Com_module_instance_base::close__end();  // synchron
 }
 
+//-----------------------------------------------------Remote_module_instance_server::catch_sigterm
+#if defined Z_UNIX
+
+Remote_module_instance_server* Remote_module_instance_server::static_this = NULL;
+
+
+void Remote_module_instance_server::signal_handler(int, siginfo_t*, void*) {
+    Z_LOG2("scheduler", Z_FUNCTION << "\n");
+    if (Remote_module_instance_server* o = static_this) {
+        o->on_sigterm();
+    }
+}
+
+void Remote_module_instance_server::on_sigterm() {
+    bool forwarded = false;
+    if (Process_module_instance* p = dynamic_cast<Process_module_instance*>(+_module_instance)) {
+        if (int pid = p->_pid) {
+            Z_LOG2("scheduler", Z_FUNCTION << " kill(" << pid << ",SIGTERM)\n");
+            int err = ::kill(pid, SIGTERM);
+            if (!err) {
+                forwarded = true;
+            }
+        }
+    }
+    if (!forwarded) {
+        ::sigaction(SIGTERM, &_previous_sigaction, NULL);
+        _own_sigaction_installed = false;
+        Z_LOG2("scheduler", Z_FUNCTION << " kill(getpid(),SIGTERM)\n");
+        ::kill(getpid(), SIGTERM);
+    }
+}
+
+void Remote_module_instance_server::catch_sigterm_for_shell_process() {
+    if (Process_module_instance* p = dynamic_cast<Process_module_instance*>(+_module_instance)) {
+        static_this = this;
+	    struct sigaction act;
+	    memset(&act, 0, sizeof act);
+	    act.sa_sigaction = &signal_handler;
+	    act.sa_flags = SA_SIGINFO;
+	    int ret = sigaction(SIGTERM, &act, &_previous_sigaction);
+        if (ret) throw_errno(errno, "sigaction", "SIGTERM");
+        _own_sigaction_installed = true;
+    }
+}
+
+#endif
 //--------------------------------------------------Remote_module_instance_server::try_delete_files
 
 void Remote_module_instance_server::try_delete_files()
@@ -379,8 +431,9 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             _server->_module_instance->set_job_name( job_name );             // Nur zur Diagnose
             _server->_module_instance->set_task_id( task_id );               // Nur zur Diagnose
             _server->_module_instance->_has_order = has_order;
-          //_server->_module_instance->init();
-          //_server->_module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
+            #if defined Z_UNIX
+                _server->catch_sigterm_for_shell_process();
+            #endif
             *result = VARIANT_TRUE;
         }
     }
@@ -429,7 +482,6 @@ STDMETHODIMP Com_remote_module_instance_server::Name_exists( BSTR name, VARIANT_
     try
     {
         if( !_server->_module_instance )  z::throw_xc( "SCHEDULER-203", "name_exists", string_from_bstr(name) );
-      //_server->load_implicitly();
         *result = _server->_module_instance->name_exists( string_from_bstr(name) );
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::name_exists" ); }
@@ -443,13 +495,8 @@ STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name_bstr, VARIANT* r
 {
     HRESULT hr = NOERROR;
 
-  //In_call in_call ( this, name );
-
     try
     {
-      //_server->load_implicitly();
-      //_server->_module_instance->call( string_from_bstr(name) ).CopyTo( result );
-
         string name = string_from_bstr( name_bstr );
 
         if( !_server  ||  !_server->_module_instance )  
