@@ -49,8 +49,8 @@ struct CppHttpRemoteApiProcessClient : ::zschimmer::javabridge::proxy_jobject< C
     }
   public:
 
-    void closeRemoteTask() const;
-    bool killRemoteTask() const;
+    void closeRemoteTask(jboolean p0) const;
+    bool killRemoteTask(jint p0) const;
     ::javaproxy::java::lang::String toString() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

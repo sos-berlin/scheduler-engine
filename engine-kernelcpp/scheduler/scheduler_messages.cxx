@@ -319,6 +319,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-487", "Role '$1' needed for this operation" },
     { "SCHEDULER-488", "This remote JobScheduler '$1' is not accessible: $2" },
     { "SCHEDULER-489", "No remote JobScheduler is accessible. Waiting before trying again" },
+    { "SCHEDULER-490", "The Windows operating system does not support Unix signals (like SIGTERM). kill_task with timeout > 0 is not supported" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

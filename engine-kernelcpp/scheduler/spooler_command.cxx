@@ -979,9 +979,15 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
     int    id          = element. int_getAttribute( "id" );
     string job_path    = element.     getAttribute( "job" );              // Hilfsweise
     bool   immediately = element.bool_getAttribute( "immediately", false );
-    
+    Duration timeout;
+    if (element.hasAttribute("timeout")) {
+        if (!immediately) throw_xc("SCHEDULER-467", "timeout", "immediately=false");
+        timeout = element.getAttribute("timeout") == "never"? Duration::eternal : Duration(element.int_getAttribute("timeout", 0));
+    } else {
+        timeout = Duration(0);  // Default für immediately="true", wird sonst nicht beachtet
+    }
 
-    _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) )->kill_task( id, immediately );
+    _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) )->kill_task( id, immediately, timeout);
     
     return _answer.createElement( "ok" );
 }
@@ -1069,29 +1075,34 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 //------------------------------------Command_processor::execute_remote_scheduler_remote_task_close
 
-xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& close_element )
+xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_kill_or_close(const xml::Element_ptr& element)
 {
     if (!_spooler->_remote_commands_allowed_for_licence) z::throw_xc("SCHEDULER-717");
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
-    int  process_id = close_element. int_getAttribute( "process_id" );
-    bool kill       = close_element.bool_getAttribute( "kill", false );
-
+    int  process_id = element. int_getAttribute( "process_id" );
     Api_process* process = _communication_operation?  // Old plain TCP
         _communication_operation->_operation_connection->get_task_process( process_id )
         : _spooler->task_process(process_id);
 
-    if( kill )  process->kill();
-
-    ptr<Remote_task_close_command_response> response = Z_NEW(Remote_task_close_command_response(process, _communication_operation ? _communication_operation->_connection : NULL));
-    response->set_async_manager( _spooler->_connection_manager );
-    response->async_continue();
-    if (_communication_operation) {  // Old plain TCP
-        _response = response;
-        return xml::Element_ptr();
-    } else
+    if (element.nodeName_is("remote_scheduler.remote_task.kill")) {
+        if (element.getAttribute("signal") != "SIGTERM") z::throw_xc("SIGTERM expected");
+        process->kill(Z_SIGTERM);
         return _answer.createElement("ok");
+    } else {
+        bool kill = element.bool_getAttribute("kill", false);
+        if (kill) process->kill(Z_SIGKILL);
+
+        ptr<Remote_task_close_command_response> response = Z_NEW(Remote_task_close_command_response(process, _communication_operation ? _communication_operation->_connection : NULL));
+        response->set_async_manager( _spooler->_connection_manager );
+        response->async_continue();
+        if (_communication_operation) {  // Old plain TCP
+            _response = response;
+            return xml::Element_ptr();
+        } else
+            return _answer.createElement("ok");
+    }
 }
 
 //--------------------------------------------------------------Command_processor::execute_add_jobs
@@ -1618,7 +1629,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "remote_scheduler.start_remote_task" ) )  result = execute_remote_scheduler_start_remote_task( element );
     else
-    if( element.nodeName_is( "remote_scheduler.remote_task.close" ) )  result = execute_remote_scheduler_remote_task_close( element );
+    if( element.nodeName_is( "remote_scheduler.remote_task.close" ) )  result = execute_remote_scheduler_remote_task_kill_or_close( element );
+    else
+    if( element.nodeName_is( "remote_scheduler.remote_task.kill" ) )  result = execute_remote_scheduler_remote_task_kill_or_close( element );
     else
     if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );
     else

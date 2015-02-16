@@ -46,6 +46,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Task, Try_deleting_files_call)
     DEFINE_SIMPLE_CALL(Task, Killing_task_call)
     DEFINE_SIMPLE_CALL(Task, Subprocess_timeout_call)
+    DEFINE_SIMPLE_CALL(Task, Kill_timeout_call)
 }
 
 using namespace job;
@@ -483,7 +484,7 @@ Time Task::calculated_start_time( const Time& now )
 
 //------------------------------------------------------------------------------------Task::cmd_end
 
-void Task::cmd_end( End_mode end_mode )
+void Task::cmd_end(End_mode end_mode, const Duration& timeout)
 {
     assert( end_mode != end_none );
 
@@ -493,9 +494,16 @@ void Task::cmd_end( End_mode end_mode )
     if( _end != end_kill_immediately )  _end = end_mode;
     if( !_ending_since )  _ending_since = Time::now();
 
-    if( end_mode == end_kill_immediately  &&  !_kill_tried ) {
-        //_log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-        try_kill();
+    if (end_mode == end_kill_immediately) {
+        if (!timeout.is_zero()) {
+            if (_module_instance) {
+                _module_instance->kill(Z_SIGTERM);
+                _call_register.call_at<Kill_timeout_call>(Time::now() + timeout);
+            }
+        } else
+        if (!_kill_tried) {
+            try_kill();
+        }
     }
 
     if( _state == s_none ) {
@@ -504,6 +512,14 @@ void Task::cmd_end( End_mode end_mode )
     }
     else
         _call_register.call<End_task_call>();
+}
+
+
+void Task::on_call(const job::Kill_timeout_call&) {
+    if (!_kill_tried) {
+        try_kill();
+        do_something();
+    }
 }
 
 //-------------------------------------------------------------------------------Task::cmd_nice_end
@@ -2463,7 +2479,7 @@ void Task::do_close__end()
 
 bool Task::do_kill()
 {
-    return _module_instance? _module_instance->kill() :
+    return _module_instance? _module_instance->kill(Z_SIGKILL) :
            _operation      ? _operation->async_kill()
                            : false;
 }

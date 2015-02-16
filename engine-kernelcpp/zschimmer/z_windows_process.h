@@ -11,6 +11,10 @@ namespace windows {
 
 //-------------------------------------------------------------------------------------------------
     
+inline void kill_with_unix_signal(int /*pid*/, int /*unix_signal*/) { 
+    z::throw_xc("SCHEDULER-490"); 
+}
+
 bool                            try_kill_process_immediately( Process_handle, const string& debug_string = "" );
 void                            kill_process_immediately    ( Process_handle, const string& debug_string = "" );
 void                            kill_process_immediately    ( pid_t         , const string& debug_string = "" );

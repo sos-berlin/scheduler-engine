@@ -58,7 +58,7 @@ struct Api_process : virtual Process {
     virtual int pid() const = 0;
 
     virtual void start() = 0;
-    virtual bool kill() = 0;
+    virtual bool kill(int unix_signal) = 0;
     virtual void close_async() = 0;
     virtual Async_operation* close__start(bool run_independently = false) = 0;
     virtual void close__end() = 0;

@@ -46,7 +46,7 @@ struct Process_module_instance : Module_instance
     bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                                      { return _idispatch != NULL; }
     bool                        callable                    ()                                      { return _idispatch != NULL; }
-    bool                        kill                        ();
+    bool                        kill                        (int unix_signal);
     bool                        process_has_signaled        ();
     string                      get_first_line_as_state_text();
     void                        fill_process_environment_with_params();

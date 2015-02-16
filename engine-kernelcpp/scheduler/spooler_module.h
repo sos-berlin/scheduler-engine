@@ -209,7 +209,7 @@ struct Module_instance : Object
     virtual void                close                       ();
     void                        close_monitor               ();
     virtual void                init                        ();
-    virtual bool                kill                        ()                                      { return false; }
+    virtual bool                kill                        (int unix_signal)                       { return false; }
     virtual bool                is_remote_host              () const                                { return false; }
     Module::Kind                kind                        () const                                { return _kind; }
     void                    set_log                         ( Prefix_log* );

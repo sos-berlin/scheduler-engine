@@ -60,7 +60,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     void                        init                        ();
     bool                        load                        ();
     void                        close                       ();
-    bool                        kill                        ();
+    bool                        kill                        (int unix_signal);
     bool                        is_remote_host              () const                                { return !_remote_scheduler_address.empty(); }
   
     void                        add_obj                     ( IDispatch*, const string& name );

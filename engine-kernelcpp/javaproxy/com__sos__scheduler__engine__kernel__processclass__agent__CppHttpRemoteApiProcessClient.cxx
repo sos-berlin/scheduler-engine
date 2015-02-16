@@ -13,8 +13,8 @@ struct CppHttpRemoteApiProcessClient__class : ::zschimmer::javabridge::Class
     CppHttpRemoteApiProcessClient__class(const string& class_name);
    ~CppHttpRemoteApiProcessClient__class();
 
-    ::zschimmer::javabridge::Method const _closeRemoteTask____method;
-    ::zschimmer::javabridge::Method const _killRemoteTask____method;
+    ::zschimmer::javabridge::Method const _closeRemoteTask__Z__method;
+    ::zschimmer::javabridge::Method const _killRemoteTask__I__method;
     ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< CppHttpRemoteApiProcessClient__class > class_factory;
@@ -24,8 +24,8 @@ const ::zschimmer::javabridge::class_factory< CppHttpRemoteApiProcessClient__cla
 
 CppHttpRemoteApiProcessClient__class::CppHttpRemoteApiProcessClient__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_closeRemoteTask____method(this, "closeRemoteTask", "()V")
-    ,_killRemoteTask____method(this, "killRemoteTask", "()Z")
+    ,_closeRemoteTask__Z__method(this, "closeRemoteTask", "(Z)V")
+    ,_killRemoteTask__I__method(this, "killRemoteTask", "(I)Z")
     ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
 CppHttpRemoteApiProcessClient__class::~CppHttpRemoteApiProcessClient__class() {}
@@ -46,16 +46,18 @@ CppHttpRemoteApiProcessClient::~CppHttpRemoteApiProcessClient() { assign_(NULL);
 
 
 
-void CppHttpRemoteApiProcessClient::closeRemoteTask() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+void CppHttpRemoteApiProcessClient::closeRemoteTask(jboolean p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].z = p0;
     CppHttpRemoteApiProcessClient__class* cls = _class.get();
-    cls->_closeRemoteTask____method.call(get_jobject(), parameter_list);
+    cls->_closeRemoteTask__Z__method.call(get_jobject(), parameter_list);
 }
 
-bool CppHttpRemoteApiProcessClient::killRemoteTask() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+bool CppHttpRemoteApiProcessClient::killRemoteTask(jint p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].i = p0;
     CppHttpRemoteApiProcessClient__class* cls = _class.get();
-    return 0 != cls->_killRemoteTask____method.bool_call(get_jobject(), parameter_list);
+    return 0 != cls->_killRemoteTask__I__method.bool_call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String CppHttpRemoteApiProcessClient::toString() const {

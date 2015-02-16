@@ -62,6 +62,16 @@ void kill_process_group_immediately( int pgid, const string& debug_string )
     if( err )  { int errn = errno; throw_errno( errn, "kill", as_string(-pgid).c_str() ); }
 }
 
+
+void kill_with_unix_signal(int pid, int unix_signal) {
+    Z_LOG("kill(" << pid << "," << unix_signal << ")\n");
+    int err = ::kill(pid, unix_signal);
+    if (err) { 
+        int errn = errno; 
+        throw_errno(errn, "kill", as_string(-pid).c_str());
+    }
+}
+
 //---------------------------------------------------------------try_kill_process_group_immediately
 
 bool try_kill_process_group_immediately( int pid, const string& debug_string )

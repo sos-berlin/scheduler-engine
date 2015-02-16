@@ -124,7 +124,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     virtual void                set_state_cmd               ( State_cmd )                           = 0;
     virtual void                set_state_cmd               (const string&)                         = 0;
-    virtual void                kill_task                   ( int task_id, bool immediately = false ) = 0;
+    virtual void                kill_task                   (int task_id, bool immediately = false, const Duration& timeout = Duration(0)) = 0;
 
     string                      state_name                  ()                                      { return state_name(state()); }
     static string               state_name                  ( State );
@@ -332,7 +332,7 @@ struct Standard_job : Job
 
     void                        set_state_cmd               ( State_cmd );
     void                        set_state_cmd               (const string&);
-    void                        kill_task                   ( int task_id, bool immediately = false );
+    void                        kill_task                   (int task_id, bool immediately = false, const Duration& timeout = Duration(0));
 
     void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
     string                      state_text                  () const                                { return _state_text; }

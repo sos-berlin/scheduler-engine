@@ -38,6 +38,7 @@ namespace job {
     struct Subprocess_timeout_call;
     struct Try_deleting_files_call;
     struct Killing_task_call;
+    struct Kill_timeout_call;
 }
 
 //--------------------------------------------------------------------------------------Start_cause
@@ -153,7 +154,7 @@ struct Task : Object,
     int                         id                          () const                                { return _id; }
 
     enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
-    void                        cmd_end                     ( End_mode = end_normal );
+    void                        cmd_end                     (End_mode = end_normal, const Duration& timeout = Duration(0));
     void                        cmd_nice_end                ( Job* for_job = NULL );
 
     void                        close                       ();
@@ -195,6 +196,7 @@ struct Task : Object,
     void                        on_call                     (const job::Subprocess_timeout_call&);
     void                        on_call                     (const job::Try_deleting_files_call&);
     void                        on_call                     (const job::Killing_task_call&);
+    void                        on_call                     (const job::Kill_timeout_call&);
 
     Task_subsystem*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }

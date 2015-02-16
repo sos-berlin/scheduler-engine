@@ -75,11 +75,11 @@ void Remote_module_instance_proxy::close__end()
 
 //---------------------------------------------------------------Remote_module_instance_proxy::kill
 
-bool Remote_module_instance_proxy::kill()
+bool Remote_module_instance_proxy::kill(int unix_signal)
 {
     // Wenn noch andere Modulinstanzen (Tasks) im Prozess laufen sollten, sind die auch weg.
 
-    return _api_process    ? _api_process->kill() :
+    return _api_process    ? _api_process->kill(unix_signal) :
          //_remote_instance? _remote_instance->kill_process() :
            _operation      ? _operation->async_kill() 
                            : false;

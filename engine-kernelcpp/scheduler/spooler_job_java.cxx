@@ -188,7 +188,7 @@ struct Java_job : Job {
         return _cppNewJobJ.tryToEndATask();
     }
 
-    void kill_task(int task_id, bool immediately = false) {
+    void kill_task(int task_id, bool immediately, const Duration& timeout) {
         return _cppNewJobJ.killTask(task_id, immediately);
     }
 

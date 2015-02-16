@@ -28,6 +28,14 @@
 #   undef INTERFACE     // Für Windows
 #endif
 
+#ifdef Z_UNIX
+#   define Z_SIGKILL SIGKILL
+#   define Z_SIGTERM SIGTERM
+#else
+#   define Z_SIGKILL 9      // Dummy
+#   define Z_SIGTERM 15     // Dummy
+#endif
+
 //----------------------------------------------------------------------------------------warnings
 #if defined _MSC_VER
 #   pragma warning( 3      :4100 )   // Unreferenzierter formaler Parameter

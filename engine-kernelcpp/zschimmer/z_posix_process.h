@@ -19,6 +19,7 @@ string                          shell_command_line_from_argv( const std::vector<
 int                             priority_from_string        ( const string& );
 int                             z_clearenv                  ();
 
+void                            kill_with_unix_signal(int pid, int unix_signal);
 void                            kill_process_group_immediately    ( Process_group_handle, const string& debug_string = "" );
 void                            kill_process_immediately          ( Process_group_handle, const string& debug_string = "" );
 bool                            try_kill_process_group_immediately( Process_group_handle, const string& debug_string = "" );

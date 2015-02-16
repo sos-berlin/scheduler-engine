@@ -13,19 +13,22 @@ import scala.concurrent.{ExecutionContext, Future}
 final class HttpRemoteProcess(client: HttpSchedulerCommandClient, uri: String, processDescriptor: ProcessDescriptor)
   (implicit executionContext: ExecutionContext) {
 
+  def killRemoteTask(unixSignal: Int): Future[Unit] = {
+    require(unixSignal == 15, "SIGTERM (15) required")
+    val command = <remote_scheduler.remote_task.kill process_id={processDescriptor.remoteTaskId.string} signal="SIGTERM"/>
+    client.uncheckedExecute(uri, command) map OkResult.fromXml
+  }
+
   def closeRemoteTask(kill: Boolean): Future[Unit] = {
     val command = <remote_scheduler.remote_task.close process_id={processDescriptor.remoteTaskId.string} kill={if (kill) true.toString else null}/>
-    client.uncheckedExecute(uri, command) map CloseResult.fromXml
+    client.uncheckedExecute(uri, command) map OkResult.fromXml
   }
 
   override def toString = s"${getClass.getSimpleName}(processId=${processDescriptor.remoteTaskId.string} pid=${processDescriptor.pid})"
-
-  //def remoteTaskId = processDescriptor.remoteTaskId
-  //def pid = processDescriptor.pid
 }
 
 object HttpRemoteProcess {
-  case object CloseResult {
+  case object OkResult {
     def fromXml(o: String) =
       readSchedulerResponse(StringSource(o)) { eventReader ⇒
         import eventReader._

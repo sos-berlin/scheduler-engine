@@ -229,7 +229,7 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
     protected: virtual void emergency_kill() {
         log()->warn(message_string("SCHEDULER-850", obj_name()));
         try {
-            kill();
+            kill(Z_SIGKILL);
         } catch (exception& x) { 
             log()->warn(x.what()); 
         }
@@ -412,13 +412,20 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         return _connection != NULL;  // Beim Aufruf stets true
     }
 
-    public: bool kill() {
+    public: bool kill(int unix_signal) {
         if (!_is_killed && _connection) {
-            bool killed = _connection->kill_process();
-            _is_killed = killed;
-            return killed;
-        } else
-            return false;
+            if (int pid = _connection->pid()) {
+                if (unix_signal != Z_SIGKILL) {
+                    system_interface::kill_with_unix_signal(pid, unix_signal);
+                    return false;
+                } else {
+                    bool killed = _connection->kill_process();
+                    _is_killed = killed;
+                    return killed;
+                }
+            }
+        }
+        return false;
     }
 
     public: File_path stdout_path() {
@@ -511,10 +518,15 @@ struct Thread_api_process : Abstract_api_process {
         return result;
     }
 
-    public: bool kill() {
-        if (!_connection) {
-            if (pid_t pid = this->pid())
-                try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
+    public: bool kill(int unix_signal) {
+        if (_connection) {
+            if (pid_t pid = this->pid()) {
+                if (unix_signal != Z_SIGKILL) {
+                    system_interface::kill_with_unix_signal(pid, unix_signal);
+                } else {
+                    try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
+                }
+            }
         }
         return false;
     }
@@ -614,7 +626,8 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         // Nicht möglich, weil kill() asynchron über TCP geht.
     }
 
-    public: bool kill() {
+    public: bool kill(int unix_signal) {
+        if (unix_signal != Z_SIGKILL) z::throw_xc("SCHEDULER-468", "kill timeout", "TCP based agent connection - please connect agent with HTTP");
         if (!_is_killed && connection()) {
             // Async_operation (vorhandene oder neue, besser neue)
             // mit <kill_task> starten. Nur, wenn noch nicht gestartet
@@ -732,9 +745,14 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         // Nicht möglich, weil kill() asynchron über HTTP geht.
     }
 
-    public: bool kill() {
+    public: bool kill(int unix_signal) {
         _spooler->cancel_call(_start_remote_task_callback);
-        return _clientJ.killRemoteTask();
+        if (unix_signal == Z_SIGKILL) {
+            _clientJ.closeRemoteTask(true);
+            return false;
+        } else {
+            return _clientJ.killRemoteTask(unix_signal);
+        }
     }
 
     protected: string async_state_text() const {
@@ -747,7 +765,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
 
     protected: void on_closing_remote_process() {
         if (_clientJ) {
-            _clientJ.closeRemoteTask();
+            _clientJ.closeRemoteTask(false);
         }
     }
 

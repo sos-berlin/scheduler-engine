@@ -36,6 +36,7 @@ extends AutoCloseable {
   }
   private[this] var agentSelector: AgentSelector = null
   private[this] var waitStopped = false
+  private var remoteTaskClosed = false
 
   def close(): Unit = {
     if (agentSelector != null) {
@@ -86,16 +87,17 @@ extends AutoCloseable {
   }
 
   @ForCpp
-  def closeRemoteTask(): Unit =
-    closeRemoteTask(kill = false)
+  def closeRemoteTask(kill: Boolean): Unit =
+    if (!remoteTaskClosed) {
+      killOrCloseRemoteTask(kill = kill, killOnlySignal = None)
+    }
 
   @ForCpp
-  def killRemoteTask(): Boolean =
-    closeRemoteTask(kill = true)
+  def killRemoteTask(killOnlySignal: Int): Boolean = killOrCloseRemoteTask(kill = true, killOnlySignal = Some(killOnlySignal))
 
-  private def closeRemoteTask(kill: Boolean): Boolean = {
+  def killOrCloseRemoteTask(kill: Boolean, killOnlySignal: Option[Int]): Boolean = {
     // TODO Race condition? Wenn das <start>-Kommando gerade rübergeschickt wird, startet der Prozess und verbindet sich
-    // mit einem com_remote-Port. Der aber ist vielleicht schon von der nächsten Task, zu gerade gestartet wird.
+    // mit einem com_remote-Port. Der aber ist vielleicht schon von der nächsten Task, die gerade gestartet wird.
     // Wird die dann gestört? Wenigstens ist es wenig wahrscheinlich.
     agentSelector match {
       case null ⇒ false
@@ -103,10 +105,17 @@ extends AutoCloseable {
         agentSelector.cancel()
         agentSelector.future onSuccess {
           case (agent, httpRemoteProcess) ⇒
-            httpRemoteProcess.closeRemoteTask(kill = kill) onFailure {
-              case t ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be closed: $t")
-              // C++ will keine Bestätigung
+            killOnlySignal match {
+              case Some(signal) ⇒
+                httpRemoteProcess.killRemoteTask(unixSignal = signal) onFailure {
+                  case t ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
+                }
+              case None ⇒ httpRemoteProcess.closeRemoteTask(kill = kill) onComplete {
+                case Success(()) ⇒ remoteTaskClosed = true
+                case Failure(t) ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
+              }
             }
+            // C++ will keine Bestätigung
         }
         true
     }

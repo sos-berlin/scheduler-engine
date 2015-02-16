@@ -228,7 +228,7 @@ void Process_module_instance::close_process()
 #ifdef Z_WINDOWS
     if( _process_handle )
 #endif
-        kill();
+        kill(Z_SIGKILL);
 
     close_handle();
 
@@ -355,20 +355,26 @@ bool Process_module_instance::begin__end()
 
 //--------------------------------------------------------------------Process_module_instance::kill
 
-bool Process_module_instance::kill()
+bool Process_module_instance::kill(int unix_signal)
 {
-    if( !_process_handle )  return false;
-    if( _is_killed )  return false;
-
-    _log.warn( message_string( "SCHEDULER-281" ) );   
-
-    Message_string m ( "SCHEDULER-709" );
-    m.set_log_level( log_warn );
-    windows::try_kill_process_with_descendants_immediately( _pid, _log.base_log(), &m, Z_FUNCTION );
-
-    _is_killed = true;
-
-    return true;
+    if (!_process_handle)
+        return false;
+    else
+    if (unix_signal != Z_SIGKILL) {
+        system_interface::kill_with_unix_signal(_pid, unix_signal);
+        return false;
+    }  
+    else
+    if (_is_killed)
+        return false;
+    else {
+        _log.warn( message_string( "SCHEDULER-281" ) );   
+        Message_string m ( "SCHEDULER-709" );
+        m.set_log_level( log_warn );
+        windows::try_kill_process_with_descendants_immediately( _pid, _log.base_log(), &m, Z_FUNCTION );
+        _is_killed = true;
+        return true;
+    }
 }
 
 #endif
@@ -762,10 +768,13 @@ vector<string> Process_module_instance::get_string_args()
 
 //--------------------------------------------------------------------Process_module_instance::kill
 
-bool Process_module_instance::kill()
+bool Process_module_instance::kill(int unix_signal)
 {
-    bool result = false;
-
+    if (unix_signal != Z_SIGKILL) {
+        system_interface::kill_with_unix_signal(_pid, unix_signal);
+        return false;
+    }
+    else
     if( _process_handle._pid  &&  !_is_killed  &&  !_kill_thread )
     {
         _log.warn( message_string( "SCHEDULER-281" ) );   
@@ -784,13 +793,13 @@ bool Process_module_instance::kill()
         _kill_thread->thread_start();
 
         _is_killed = true;
-        result = true;
-    }
-
-    return result;
+        return true;
+    } else 
+        return false;
 }
 
 #endif
+
 //----------------------------------------------------------------Process_module_instance::end__end
 
 void Process_module_instance::end__end()

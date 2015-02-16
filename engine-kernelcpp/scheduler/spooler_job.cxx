@@ -3583,11 +3583,11 @@ void Standard_job::kill_queued_task( int task_id )
 
 //--------------------------------------------------------------------------Standard_job::kill_task
 
-void Standard_job::kill_task( int id, bool immediately )
+void Standard_job::kill_task(int id, bool immediately, const Duration& timeout)
 {
     Z_FOR_EACH( Task_set, _running_tasks, t ) {
         if( (*t)->_id == id ) { 
-            (*t)->cmd_end( immediately? Task::end_kill_immediately : Task::end_normal );       // Ruft kill_queued_task()
+            (*t)->cmd_end(immediately? Task::end_kill_immediately : Task::end_normal, timeout);       // Ruft kill_queued_task()
             return;
         }
     }
