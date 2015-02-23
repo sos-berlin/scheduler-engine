@@ -498,7 +498,9 @@ void Task::cmd_end(End_mode end_mode, const Duration& timeout)
         if (!timeout.is_zero()) {
             if (_module_instance) {
                 _module_instance->kill(Z_SIGTERM);
-                _call_register.call_at<Kill_timeout_call>(Time::now() + timeout);
+                if (!timeout.is_eternal()) {
+                    _call_register.call_at<Kill_timeout_call>(Time::now() + timeout);
+                }
             }
         } else
         if (!_kill_tried) {
