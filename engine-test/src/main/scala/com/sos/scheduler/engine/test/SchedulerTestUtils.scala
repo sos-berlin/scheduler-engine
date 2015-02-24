@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -60,7 +61,7 @@ object SchedulerTestUtils {
   def runJobFuture(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskRun = {
     implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
     inSchedulerThread {
-      // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintriffen. Sonst könnten sie verlorengehen
+      // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintreffen. Sonst könnten die ersten nach startJob verlorengehen.
       val taskId = startJob(jobPath)
       val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
       val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
@@ -126,4 +127,11 @@ object SchedulerTestUtils {
     result.getMessage should startWith(errorCode.string)
     result
   }
+
+  def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ErrorLogEvent =
+    controller.toleratingErrorCodes(Set(errorCode)) {
+      controller.eventBus.awaitingEvent[ErrorLogEvent](_.codeOption == Some(errorCode)) {
+        body
+      }
+    }
 }
