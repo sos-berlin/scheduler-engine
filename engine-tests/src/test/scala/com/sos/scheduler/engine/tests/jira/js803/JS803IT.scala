@@ -44,7 +44,7 @@ final class JS803IT extends SchedulerTest {
 
   private def execute(command: xml.Elem): Unit = {
     logger.debug(trim(command).toString())
-    controller.scheduler.executeXml(command)
+    scheduler.executeXml(command)
   }
 
   @EventHandler def handleEvent(e: OrderTouchedEvent): Unit = {

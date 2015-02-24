@@ -24,7 +24,7 @@ final class TasksServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPl
 
   "Task log" in {
     val eventPipe = controller.newEventPipe()
-    controller.scheduler executeXml <start_job job={testJobPath.string}/>
+    scheduler executeXml <start_job job={testJobPath.string}/>
     val taskId = eventPipe.nextWithCondition[TaskStartedEvent](_.jobPath == testJobPath).taskId
     val runningLog = getLog(taskId)
     runningLog should include (startMessage)

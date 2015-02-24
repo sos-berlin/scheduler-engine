@@ -65,7 +65,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
   
   "Order.xml_payload" in {
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](XmlPayloadOrderKey) {
-      controller.scheduler executeXml OrderCommand(XmlPayloadOrderKey)
+      scheduler executeXml OrderCommand(XmlPayloadOrderKey)
     }
   }
 }
