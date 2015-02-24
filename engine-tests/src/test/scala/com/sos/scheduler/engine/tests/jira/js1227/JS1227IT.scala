@@ -23,8 +23,6 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1227IT extends FreeSpec with ClusterTest {
 
-  import controller.eventBus
-
   protected def clusterMemberCount = 2
   private implicit lazy val entityManagerFactory = instance[EntityManagerFactory]
 

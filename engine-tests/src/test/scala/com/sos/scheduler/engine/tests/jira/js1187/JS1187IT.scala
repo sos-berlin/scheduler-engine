@@ -50,7 +50,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "With unreachable remote_scheduler, the waiting task can be killed" in {
-    val warningFuture = controller.eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
+    val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
     val taskRun = runJobFuture(UnreachableRemoteJobPath)
     Await.result(warningFuture, TestTimeout)
     requireIsWaitingForAgent(taskRun.taskId)
@@ -60,7 +60,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
   "With unreachable remote_scheduler, task waits until agent is reachable" in {
     autoClosing(newExtraScheduler(agentHttpPort)) { agent ⇒
-      val warningFuture = controller.eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
+      val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
       val taskRun = runJobFuture(UnreachableRemoteJobPath)
       Await.result(warningFuture, TestTimeout)
       requireIsWaitingForAgent(taskRun.taskId)

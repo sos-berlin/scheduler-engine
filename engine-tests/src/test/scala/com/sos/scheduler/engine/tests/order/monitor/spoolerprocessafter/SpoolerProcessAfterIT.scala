@@ -26,8 +26,6 @@ import scala.collection.mutable
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
 
-  import controller.eventBus
-
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
 
   protected override lazy val testConfiguration = TestConfiguration(
@@ -98,7 +96,7 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def publishMyFinishedEvent(order: UnmodifiableOrder): Unit = {
-    controller.eventBus.publishCold(MyFinishedEvent(
+    eventBus.publishCold(MyFinishedEvent(
       order.key, order.state,
       emptyToNone(order.parameters(SpoolerProcessAfterNames.parameter)) map { _.toBoolean }))
   }

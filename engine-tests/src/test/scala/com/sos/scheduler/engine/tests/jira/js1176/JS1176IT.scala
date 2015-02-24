@@ -51,7 +51,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
   "Modifying a job while waiting for database should not crash" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-303"))) {
       val waitingForDatabase = Promise[Unit]()
-      controller.eventBus.onHot[WarningLogEvent] {
+      eventBus.onHot[WarningLogEvent] {
         case e if e.codeOption == Some(MessageCode("SCHEDULER-958")) ⇒ // "Waiting 20 seconds before reopening the database"
           waitingForDatabase.trySuccess(())
       }
@@ -64,7 +64,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
       }
       assert(!databaseStart.isCompleted)
       awaitFailure(checkFolders()).getMessage should startWith ("SCHEDULER-184")  // "Scheduler database cannot be accessed due to a database problem"
-      controller.eventBus.awaitingEvent2[InfoLogEvent](timeout = LostDatabaseRetryTimeout + TestTimeout, predicate = _.codeOption == Some(MessageCode("SCHEDULER-807"))) {
+      eventBus.awaitingEvent2[InfoLogEvent](timeout = LostDatabaseRetryTimeout + TestTimeout, predicate = _.codeOption == Some(MessageCode("SCHEDULER-807"))) {
         awaitSuccess(databaseStart)
       }
       awaitSuccess(checkFolders())

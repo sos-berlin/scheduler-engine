@@ -36,8 +36,8 @@ trait ScalaSchedulerTest
     }
     else
       try {
-        controller.eventBus.registerAnnotated(this)
-        onClose { controller.eventBus.unregisterAnnotated(this) }
+        eventBus.registerAnnotated(this)
+        onClose { eventBus.unregisterAnnotated(this) }
         checkedBeforeAll()
         if (!controller.isStarted) {
           controller.prepare()
@@ -64,6 +64,8 @@ trait ScalaSchedulerTest
    * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */
   protected final def scheduler =
     controller.scheduler
+
+  protected final def eventBus = controller.eventBus
 
   protected implicit def implicitTimeout: ImplicitTimeout = TestSchedulerController.implicits.Timeout
 

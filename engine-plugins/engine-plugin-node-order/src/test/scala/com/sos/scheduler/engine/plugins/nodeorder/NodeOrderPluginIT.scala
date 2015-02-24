@@ -19,8 +19,6 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
-  import controller.eventBus
-
   "New order is added" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
       eventBus.awaitingKeyedEvent[OrderFinishedEvent](ClonedOrderKey) {

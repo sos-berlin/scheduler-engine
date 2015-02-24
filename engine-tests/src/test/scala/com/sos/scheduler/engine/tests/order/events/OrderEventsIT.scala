@@ -73,7 +73,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
 
   private def checkCollectedOrderEvents(orderKey: OrderKey): Unit = {
     sleep(500)  // The last event can be late???
-    controller.eventBus.dispatchEvents()  // Das letzte OrderFinishedEvent kann sonst verloren gehen.
+    eventBus.dispatchEvents()  // Das letzte OrderFinishedEvent kann sonst verloren gehen.
     sleep(500)  // The last event can be late???
     coldEvents.toMap shouldEqual Map(
       "OrderTouched"   → OrderTouchedEvent(orderKey),

@@ -53,7 +53,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job is older than include" in {
-    controller.eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
+    eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
       modifyIncludes(+1)
       Thread.sleep(2500)
       instance[FolderSubsystem].updateFolders()
@@ -62,7 +62,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job is newer than include" in {
-    controller.eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
+    eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
       modifyIncludes(-1)
       Thread.sleep(2500)
       instance[FolderSubsystem].updateFolders()

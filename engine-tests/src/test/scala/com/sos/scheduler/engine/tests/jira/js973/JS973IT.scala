@@ -99,7 +99,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     orderFile.contentString = "test"
     val jobChainPath = JobChainPath("/test-file-order")
     val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
-    controller.eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
       scheduler executeXml
         <job_chain name={jobChainPath.name}>
           <file_order_source directory={fileOrdersDir.toString} regex="^test\.txt$"/>
@@ -180,7 +180,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
 
   @HotEventHandler
   def handle(e: OrderFinishedEvent, o: UnmodifiableOrder): Unit = {
-    controller.eventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.parameters(ResultVariableName)))
+    eventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.parameters(ResultVariableName)))
   }
 
   private val orderIdGenerator = (1 to Int.MaxValue).iterator map { i => new OrderId(i.toString) }

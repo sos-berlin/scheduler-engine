@@ -24,8 +24,6 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
 
-  import controller.eventBus
-
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List("-distributed-orders"))
 
