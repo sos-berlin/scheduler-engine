@@ -36,10 +36,10 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
 
   if (isWindows) {
     "kill_task with timeout on Windows is rejected" in {
-      val run = runJobFuture(StandardJobPath)
+      val run = runJobFuture(WindowsJobPath)
       interceptSchedulerError(MessageCode("SCHEDULER-490")) {
         awaitSuccess(run.started)
-        scheduler executeXml <kill_task job={StandardJobPath.string} id={run.taskId.string} immediately="true" timeout="3"/>
+        scheduler executeXml <kill_task job={WindowsJobPath.string} id={run.taskId.string} immediately="true" timeout="3"/>
       }
     }
   }
@@ -52,7 +52,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
       s"$testVariantName - (Run and kill tasks)" in {
         scheduler executeXml testProcessClass(agentAddressOption())
 
-        controller.toleratingErrorCodes(Set(MessageCode("Z-REMOTE-101"), MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-279"), MessageCode("SCHEDULER-280"))) {
+        controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
           val jobPaths = List(
             StandardJobPath, StandardMonitorJobPath,
             TrapJobPath, TrapMonitorJobPath,
@@ -107,6 +107,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
 
 private object JS1163IT {
   private val TestJobPath = JobPath("/test")
+  private val WindowsJobPath = JobPath("/test-windows")
   private val StandardJobPath = JobPath("/test-standard")
   private val StandardMonitorJobPath = JobPath("/test-standard-monitor")
   private val TrapJobPath = JobPath("/test-trap")
