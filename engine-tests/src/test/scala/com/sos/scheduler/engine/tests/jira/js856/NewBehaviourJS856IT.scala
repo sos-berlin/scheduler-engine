@@ -11,7 +11,7 @@ final class NewBehaviourJS856IT extends JS856IT("New behaviour: restore original
 
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    resourceNameMap = List("new-behaviour-scheduler.xml" -> "scheduler.xml"))
+    renameConfigurationFile = Map("new-behaviour-scheduler.xml" → "scheduler.xml"))
 
   val finallyExpectedParameters = originalParameters
   val whenSuspendedExpectedParameters = Map("a" -> "a-job", "b" -> "b-job")

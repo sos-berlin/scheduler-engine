@@ -11,7 +11,7 @@ final class TestConfigurationBuilder(testClass: Class[_]) {
   private val default: TestConfiguration = TestConfiguration(testClass = testClass)
   private var _testPackage = default.testPackage
   private var _resourceToFileTransformer = default.resourceToFileTransformer
-  private var _resourceNameMap = default.resourceNameMap
+  private var _resourceNameMap = default.renameConfigurationFile
   private var _binariesDebugMode = default.binariesDebugMode
   private var _mainArguments = default.mainArguments
   private var _logCategories = default.logCategories
@@ -61,7 +61,7 @@ final class TestConfigurationBuilder(testClass: Class[_]) {
     testClass = default.testClass,
     testPackage = _testPackage,
     resourceToFileTransformer = _resourceToFileTransformer,
-    resourceNameMap = _resourceNameMap,
+    renameConfigurationFile = _resourceNameMap,
     binariesDebugMode = _binariesDebugMode,
     mainArguments = _mainArguments,
     logCategories = _logCategories,

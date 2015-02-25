@@ -15,7 +15,7 @@ final case class TestConfiguration(
 
   resourceToFileTransformer: Option[ResourceToFileTransformer] = None,
 
-  resourceNameMap: Iterable[(String, String)] = Nil,
+  renameConfigurationFile: PartialFunction[String, String] = PartialFunction.empty,
 
   binariesDebugMode: Option[CppBinariesDebugMode] = None,
 

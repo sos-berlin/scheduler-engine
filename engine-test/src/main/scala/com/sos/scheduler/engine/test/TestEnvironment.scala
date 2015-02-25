@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.test
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
+import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
 import com.sos.scheduler.engine.common.system.OperatingSystem
@@ -18,27 +19,22 @@ import com.sos.scheduler.engine.test.TestEnvironment._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
 import java.nio.file.Files
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(
     resourcePath: JavaResource,
     val directory: File,
-    nameMap: Map[String, String],
+    renameFile: PartialFunction[String, String],
     fileTransformer: ResourceToFileTransformer)
-extends AutoCloseable {
+extends HasCloser {
 
   val configDirectory = new File(directory, ConfigSubdirectoryName)
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
   val databaseDirectory = directory
-  private val deletableTemporaryDirectories = mutable.Buffer[File]()
   private var isPrepared = false
-
-  def close(): Unit = {
-    deletableTemporaryDirectories foreach removeDirectoryRecursivly
-  }
 
   private[test] def prepare(): Unit = {
     if (!isPrepared) {
@@ -52,7 +48,7 @@ extends AutoCloseable {
     removeDirectoryContentRecursivly(directory)
     makeDirectories(configDirectory)
     makeDirectories(logDirectory)
-    TestEnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer)
+    TestEnvironmentFiles.copy(resourcePath, configDirectory, renameFile, fileTransformer)
   }
 
   private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Seq[String] = {
@@ -101,8 +97,7 @@ extends AutoCloseable {
   def newFileOrderSourceDirectory(): File =
     (if (OperatingSystem.isWindows) sys.env.get("TEMP") else None) match {
       case Some(t) ⇒
-        Files.createTempDirectory(new File(t).toPath, "sos-").toFile
-          .sideEffect { o ⇒ deletableTemporaryDirectories += o }
+        Files.createTempDirectory(new File(t).toPath, "sos-").toFile sideEffect { dir ⇒ onClose { removeDirectoryRecursivly(dir) } }
       case None ⇒
         Files.createTempDirectory(null).toFile  // Directory based in java.io.tmpdir, which is modified by Maven pom.xml (target)
     }
@@ -118,7 +113,7 @@ object TestEnvironment {
     new TestEnvironment(
       resourcePath = JavaResource(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
       directory = directory,
-      nameMap = testConfiguration.resourceNameMap.uniqueToMap,
+      renameFile = testConfiguration.renameConfigurationFile,
       fileTransformer = testConfiguration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
