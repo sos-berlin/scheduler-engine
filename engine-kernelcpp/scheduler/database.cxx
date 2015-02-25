@@ -1881,31 +1881,16 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
         for ( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
-            Any_file sel;
+            string prefix = S() << "-in -seq head -" << max( 1, abs(next) ) << " | ";
 
-            S prefix;
             S clause;
-
-            prefix << "-in -seq head -" << max( 1, abs(next) ) << " | ";
-
             clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
             clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
-            if ( !_spooler->_cluster_configuration._demand_exclusiveness )
-                clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
-                        
-            if( id != -1 )
-            {
-                clause << " and `id`";
-                clause << ( next < 0? "<" : 
-                            next > 0? ">" 
-                                    : "=" );
-                clause << id;
-            }
-
+            if (id != -1) clause << " and `id`" << (next < 0? "<" : next > 0? ">" : "=") << id;
             clause << " order by `id` ";  
             if( next < 0 )  clause << " desc";
                         
-            sel = ta.open_file( prefix + _spooler->_db->_db_name, 
+            Any_file sel = ta.open_file(prefix + _spooler->_db->_db_name,
                     S() << "select " <<
                     ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
                     " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
