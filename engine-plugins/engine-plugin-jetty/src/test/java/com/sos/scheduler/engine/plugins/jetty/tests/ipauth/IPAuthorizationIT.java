@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.tests.ipauth;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
+import com.sos.scheduler.engine.common.utils.JavaResource;
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.Sockets;
@@ -12,7 +12,6 @@ import com.sun.jersey.api.client.WebResource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ public class IPAuthorizationIT extends SchedulerTest {
     private static final String xmlCommand = "<show_state />";
     private static final int tcpPort = Sockets.findAvailablePort();
 
-    private static final String jettyXmlTemplateResourcePath = "com/sos/scheduler/engine/plugins/jetty/tests/ipauth/jetty-template.xml";
+    private static final JavaResource jettyXmlTemplateResource = JavaResource.apply("com/sos/scheduler/engine/plugins/jetty/tests/ipauth/jetty-template.xml");
 
     private final String ipToTest;
     private final ClientResponse.Status expectedStatus;
@@ -51,7 +50,6 @@ public class IPAuthorizationIT extends SchedulerTest {
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
         logger.debug("Response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getStatusInfo());
         c.destroy();
-        // logResult(response);
         return response;
     }
 
@@ -61,21 +59,12 @@ public class IPAuthorizationIT extends SchedulerTest {
     }
 
     private void prepareAndWriteJettyXml(File tempDir) throws IOException {
-        URL sourceFile = Resources.getResource(jettyXmlTemplateResourcePath);
-        File targetFile = new File(tempDir, "jetty.xml");
-        String content = Resources.toString(sourceFile, Charsets.UTF_8);
+        String content = jettyXmlTemplateResource.asUTF8String();
         String newContent = content.replace("${tcp.port}", String.valueOf(tcpPort));
         newContent = newContent.replace("${ip.number}", ipToTest);
-        newContent = newContent.replace("${method.name}", (expectedStatus == ClientResponse.Status.OK) ? "white" : "black");
+        newContent = newContent.replace("${method.name}", expectedStatus == ClientResponse.Status.OK? "white" : "black");
+        File targetFile = new File(tempDir, "jetty.xml");
         Files.write(newContent, targetFile, Charsets.UTF_8);
         logger.debug("file " + targetFile.getAbsolutePath() + " created");
     }
-
-    /*
-    private void logResult(ClientResponse r) throws Exception {
-        String s = CharStreams.toString((new InputStreamReader(r.getEntityInputStream(), "UTF-8")));
-        logger.debug(s);
-    }
-    */
-
 }

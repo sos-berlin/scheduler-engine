@@ -4,6 +4,7 @@ import com.google.common.io.Resources
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginWarIT._
 import com.sos.scheduler.engine.plugins.jetty.test.HttpVerbRestrictionTester._
 import com.sos.scheduler.engine.plugins.jetty.test.{HttpVerbRestrictionTester, JettyPluginJerseyTester}
@@ -65,7 +66,7 @@ private object JettyPluginWarIT {
     if (IDE.isRunningUnderIDE)
       forIdeFindWarFile()
     else
-      new File(Resources.getResource(WarFilename).toURI)
+      new File(JavaResource(WarFilename).url.toURI)
   }
 
   /** IntelliJ kopiert nicht die engine-testwar.war, wie in der pom.xml definiert. Deshalb suchen wir sie selbst. */

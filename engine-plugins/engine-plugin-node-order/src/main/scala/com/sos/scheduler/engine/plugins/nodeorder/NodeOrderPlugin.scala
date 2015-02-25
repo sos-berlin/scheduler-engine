@@ -24,6 +24,7 @@ import scala.util.control.NonFatal
  * with equal order ID and a copy of the order's parameters in a different job-chain.
  * Any error when adding the order is logged to the main log and ignored.
  *
+ * @see https://change.sos-berlin.com/browse/JS-1193
  * @author Joacim Zschimmer
  */
 final class NodeOrderPlugin @Inject private(

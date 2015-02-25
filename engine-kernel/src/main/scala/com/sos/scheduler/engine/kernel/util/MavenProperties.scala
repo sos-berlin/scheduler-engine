@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.kernel.util
 
-import com.google.common.io.Resources.getResource
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.utils.JavaResource
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scala.collection.JavaConversions._
 
-final class MavenProperties(resourcePath: String) {
+final class MavenProperties(resourcePath: JavaResource) {
 
   private val properties: Map[String, String] =
-    autoClosing(getResource(resourcePath).openStream()) { in ⇒
+    autoClosing(resourcePath.url.openStream()) { in ⇒
       val p = new java.util.Properties
       p.load(in)
       p.toMap

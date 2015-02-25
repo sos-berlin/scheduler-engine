@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.xml
 
-import com.google.common.io.Resources.getResource
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.kernel.xml.CppXmlSchemaValidatorTest._
 import java.net.URL
 import javax.xml.XMLConstants._
@@ -49,9 +49,9 @@ class CppXmlSchemaValidatorTest extends FreeSpec {
 }
 
 object CppXmlSchemaValidatorTest {
-  private lazy val SchemaResourceUrl = getResource("com/sos/scheduler/engine/kernel/xml/test.xsd")
-  private lazy val ValidXmlUrl = getResource("com/sos/scheduler/engine/kernel/xml/testValid.xml")
-  private lazy val InvalidXmlUrl = getResource("com/sos/scheduler/engine/kernel/xml/testInvalid.xml")
+  private lazy val SchemaResourceUrl = JavaResource("com/sos/scheduler/engine/kernel/xml/test.xsd").url
+  private lazy val ValidXmlUrl = JavaResource("com/sos/scheduler/engine/kernel/xml/testValid.xml").url
+  private lazy val InvalidXmlUrl = JavaResource("com/sos/scheduler/engine/kernel/xml/testInvalid.xml").url
 
   private def dom(u: URL) = {
     val factory = DocumentBuilderFactory.newInstance

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.web
 
 import com.google.common.io.Resources.getResource
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -52,5 +53,5 @@ final class GuiIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerse
 }
 
 private object GuiIT {
-  private val WebResource = getResource("com/sos/scheduler/engine/web/z").toExternalForm stripSuffix "/z"  // IntelliJ has different directories out/test and out/production
+  private val WebResource = JavaResource("com/sos/scheduler/engine/web/z").url.toExternalForm stripSuffix "/z"  // IntelliJ has different directories out/test and out/production
 }

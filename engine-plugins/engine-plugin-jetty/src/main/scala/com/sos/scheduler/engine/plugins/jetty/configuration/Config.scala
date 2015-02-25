@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
-import com.google.common.io.Resources.getResource
+import com.sos.scheduler.engine.common.utils.JavaResource
 
 object Config {
   val contextPath = "/jobscheduler"
-  val resourceBaseResourcePath = "com/sos/scheduler/engine/plugins/jetty/empty"
-  val resourceBaseURL = getResource(resourceBaseResourcePath)
+  val ResourceBaseResource = JavaResource("com/sos/scheduler/engine/plugins/jetty/empty")
   val enginePrefixPath = "/engine"
   val cppPrefixPath = "/engine-cpp"
   val administratorRoleName = "administrator"

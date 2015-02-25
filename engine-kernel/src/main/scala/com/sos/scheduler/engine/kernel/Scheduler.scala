@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -266,7 +267,7 @@ with HasCloser {
 @ForCpp
 object Scheduler {
   private val logger = Logger(getClass)
-  private val mavenProperties = new MavenProperties("com/sos/scheduler/engine/kernel/maven.properties")
+  private val mavenProperties = new MavenProperties(JavaResource("com/sos/scheduler/engine/kernel/maven.properties"))
   private val _defaultTimezoneId = DateTimeZone.getDefault.getID
 
   @ForCpp

@@ -2,15 +2,15 @@ package com.sos.scheduler.engine.test
 
 import TestEnvironmentFiles._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.kernel.util.ResourcePath
+import com.sos.scheduler.engine.common.utils.JavaResource
 import java.io.File
 import java.net.URL
 import org.joda.time.Instant.now
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
-final class TestEnvironmentFiles(
-    configResourcePath: ResourcePath,
+private class TestEnvironmentFiles(
+    configJavaResource: JavaResource,
     directory: File,
     nameMap: Map[String, String],
     fileTransformer: ResourceToFileTransformer) {
@@ -18,21 +18,19 @@ final class TestEnvironmentFiles(
   private val resolver = new PathMatchingResourcePatternResolver
   private val lastModified = now() - 3.s
 
-  private def copy(): Unit = {
-    for ((name, url) <- resourceUrls) copyResource(url, name)
-  }
+  private def copy(): Unit = for ((name, url) ← resourceUrls) copyResource(url, name)
 
   private def resourceUrls: Iterable[(String, URL)] =
-    resourceUrls(defaultConfigResourcePath) ++ resourceUrls(configResourcePath) map { o => nameOfUrl(o) -> o }
+    resourceUrls(DefaultConfigResource) ++ resourceUrls(configJavaResource) map { o ⇒ nameOfUrl(o) → o }
 
-  private def resourceUrls(p: ResourcePath): Iterable[URL] =
-    resources(p) map { _.getURL }
+  private def resourceUrls(resource: JavaResource): Iterable[URL] =
+    resources(resource) map { _.getURL }
 
-  private def resources(p: ResourcePath): Iterable[Resource] =
-    ResourcePatterns flatMap { o ⇒ resources(p, o) }
+  private def resources(resource: JavaResource): Iterable[Resource] =
+    ResourcePatterns flatMap { resources(resource, _) }
 
-  private def resources(p: ResourcePath, namePattern: String): Iterable[Resource] =
-    resolver.getResources(s"classpath*:${p.path}/$namePattern")
+  private def resources(resource: JavaResource, namePattern: String): Iterable[Resource] =
+    resolver.getResources(s"classpath*:${resource.path}/$namePattern")
 
   private def copyResource(url: URL, name: String): Unit = {
     val f = new File(directory, name)
@@ -48,15 +46,13 @@ final class TestEnvironmentFiles(
 
 object TestEnvironmentFiles {
   private val ResourcePatterns = List("*.xml", "*.ini", "*.dtd")
+  private val DefaultConfigResource = JavaResource("com/sos/scheduler/engine/test/config")
 
   def copy(
-      configResourcePath: ResourcePath,
+      configJavaResource: JavaResource,
       directory: File,
       nameMap: Map[String, String] = Map(),
       fileTransformer: ResourceToFileTransformer = StandardResourceToFileTransformer.singleton): Unit = {
-    new TestEnvironmentFiles(configResourcePath, directory, nameMap, fileTransformer).copy()
+    new TestEnvironmentFiles(configJavaResource, directory, nameMap, fileTransformer).copy()
   }
-
-  private val defaultConfigResourcePath: ResourcePath = new ResourcePath(classOf[TestEnvironmentFiles].getPackage, "config")
 }
-

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.tests.securitylevel.authorized;
 
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
+import com.sos.scheduler.engine.common.utils.JavaResource;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -12,11 +12,9 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import org.junit.Test;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.io.Resources.getResource;
 import static com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests.contextUri;
 import static com.sun.jersey.api.client.ClientResponse.Status.FORBIDDEN;
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
@@ -30,8 +28,8 @@ import static org.hamcrest.Matchers.containsString;
 public class SecurityLevelAuthorizedIT extends SchedulerTest {
 
     private static final String generalPassword = "testpassword";
-    private static final String jettyXmlTemplateResourcePath = "com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/jetty-template.xml";
-    private static final String realmPropertiesPath = "com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/realm.properties";
+    private static final JavaResource jettyXmlTemplateResource = JavaResource.apply("com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/jetty-template.xml");
+    private static final JavaResource realmProperties = JavaResource.apply("com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/realm.properties");
     private static final String anonymousUser = "anonymous";
     private static final String xmlCommand = new CommandBuilder().startJobImmediately("a").getCommand();
 
@@ -67,23 +65,19 @@ public class SecurityLevelAuthorizedIT extends SchedulerTest {
     private void prepareEnvironment() throws Exception {
         File tempDir = controller().environment().configDirectory();
         File target = copyRealmFileToConfiguration(tempDir);
-        writeJettyXml(jettyXmlTemplateResourcePath, tempDir, target);
+        writeJettyXml(jettyXmlTemplateResource, tempDir, target);
     }
 
 
     private static File copyRealmFileToConfiguration(File tempDir) throws IOException {
-        URL sourceFile = getResource(realmPropertiesPath);
-        String sourceFileContent = Resources.toString(sourceFile, UTF_8);
-        File targetFile = new File(tempDir, "realm.properties");
-        Files.write(sourceFileContent, targetFile, UTF_8);
-        return targetFile;
+        File file = new File(tempDir, "realm.properties");
+        Files.write(realmProperties.asUTF8String(), file, UTF_8);
+        return file;
     }
 
-    private static void writeJettyXml(String jettyXmlTemplateResourcePath, File outputDirectory, File realmFile) throws IOException {
-        URL sourceFile = getResource(jettyXmlTemplateResourcePath);
-        String content = Resources.toString(sourceFile, UTF_8);
-        String newContent = content.replace("${realm.properties}", realmFile.getAbsolutePath());
-        File targetFile = new File(outputDirectory, "jetty.xml");
-        Files.write(newContent, targetFile, UTF_8);
+    private static void writeJettyXml(JavaResource resource, File outputDirectory, File realmFile) throws IOException {
+        File file = new File(outputDirectory, "jetty.xml");
+        String content = resource.asUTF8String().replace("${realm.properties}", realmFile.getAbsolutePath());
+        Files.write(content, file, UTF_8);
     }
 }

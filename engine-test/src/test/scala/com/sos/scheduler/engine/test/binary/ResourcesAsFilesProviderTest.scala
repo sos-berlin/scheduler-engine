@@ -1,26 +1,22 @@
-package com.sos.scheduler.engine
-package test.binary
+package com.sos.scheduler.engine.test.binary
 
 import com.google.common.io.Files.createTempDir
 import com.sos.scheduler.engine.common.system.Files.removeDirectoryRecursivly
-import com.sos.scheduler.engine.kernel.util.Classes.springPattern
-import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 @RunWith(classOf[JUnitRunner])
-final class ResourcesAsFilesProviderTest extends FunSuite {
+final class ResourcesAsFilesProviderTest extends FreeSpec {
 
-  test("provideResourcesAsFiles") {
+  "provideResourcesAsFiles" in {
     val directory = createTempDir()
     try {
-      val pattern = springPattern(classOf[SchedulerTest].getPackage, "config/*")
-      val resources = (new PathMatchingResourcePatternResolver).getResources(pattern)
-      provideResourcesAsFiles(resources, directory).keySet should equal(Set("scheduler.xml", "factory.ini", "sos.ini"))
+      val resources = (new PathMatchingResourcePatternResolver).getResources("classpath*:com/sos/scheduler/engine/test/config/*")
+      provideResourcesAsFiles(resources, directory).keySet shouldEqual Set("scheduler.xml", "factory.ini", "sos.ini")
     }
     finally removeDirectoryRecursivly(directory)
   }

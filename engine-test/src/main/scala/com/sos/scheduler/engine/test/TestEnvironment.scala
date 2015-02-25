@@ -7,12 +7,12 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
-import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.TestEnvironment._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -22,7 +22,7 @@ import scala.collection.{immutable, mutable}
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(
-    resourcePath: ResourcePath,
+    resourcePath: JavaResource,
     val directory: File,
     nameMap: Map[String, String],
     fileTransformer: ResourceToFileTransformer)
@@ -116,7 +116,7 @@ object TestEnvironment {
 
   def apply(testConfiguration: TestConfiguration, directory: File) =
     new TestEnvironment(
-      resourcePath = new ResourcePath(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
+      resourcePath = JavaResource(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
       directory = directory,
       nameMap = testConfiguration.resourceNameMap.uniqueToMap,
       fileTransformer = testConfiguration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)

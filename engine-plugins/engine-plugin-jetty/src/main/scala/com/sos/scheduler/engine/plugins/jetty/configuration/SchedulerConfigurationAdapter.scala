@@ -37,7 +37,7 @@ object SchedulerConfigurationAdapter {
           portOption = portOption,
           jettyXMLURLOption = configFileIfExists("jetty.xml") map { _.toURI.toURL },
           webAppContextConfigurationOption = Some(WebAppContextConfiguration(
-            resourceBaseURL = schedulerConfiguration.webDirectoryUrlOption getOrElse Config.resourceBaseURL,
+            resourceBaseURL = schedulerConfiguration.webDirectoryUrlOption getOrElse Config.ResourceBaseResource.url,
             webXMLFileOption = configFileIfExists("web.xml"))),
           loginServiceOption = children.option[LoginService]("loginService"),
           wars = children.byName[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
