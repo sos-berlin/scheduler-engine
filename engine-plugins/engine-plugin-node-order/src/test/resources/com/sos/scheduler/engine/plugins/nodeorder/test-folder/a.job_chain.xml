@@ -8,6 +8,7 @@
         <on_return_codes>
             <on_return_code return_code="0">
                 <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="./b"/>
+                <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-folder/d"/>
             </on_return_code>
         </on_return_codes>
     </job_chain_node>

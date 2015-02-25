@@ -19,12 +19,14 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
-  "New order is added" in {
+  "New orders are added" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](CClonedOrderKey) {
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](BClonedOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
-            scheduler executeXml OrderCommand(OriginalOrderKey)
+      eventBus.awaitingKeyedEvent[OrderFinishedEvent](DClonedOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderFinishedEvent](CClonedOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinishedEvent](BClonedOrderKey) {
+            eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
+              scheduler executeXml OrderCommand(OriginalOrderKey)
+            }
           }
         }
       }
@@ -66,6 +68,7 @@ private object NodeOrderPluginIT {
   private val OriginalOrderKey = JobChainPath("/test-folder/a") orderKey "TEST"
   private val BClonedOrderKey = JobChainPath("/test-folder/b") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
   private val CClonedOrderKey = JobChainPath("/test-folder-c/c") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
+  private val DClonedOrderKey = JobChainPath("/test-folder/d") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d"/>
   private val ErrorOrderKey = JobChainPath("/test-folder/error") orderKey "TEST"
   private val MissingJobchainCode = MessageCode("SCHEDULER-161")
 }
