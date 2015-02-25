@@ -4,11 +4,11 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.test.TestEnvironmentFiles._
+import com.sos.scheduler.engine.test.util.JavaResourceResolver._
 import java.io.File
 import java.net.URL
 import org.joda.time.Instant.now
-import org.springframework.core.io.Resource
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+import scala.collection.immutable
 
 private class TestEnvironmentFiles(
     configPackageResource: JavaResource,
@@ -16,7 +16,6 @@ private class TestEnvironmentFiles(
     renameFile: PartialFunction[String, String],
     fileTransformer: ResourceToFileTransformer) {
 
-  private val resolver = new PathMatchingResourcePatternResolver
   private val lastModified = now() - 3.s
 
   private def copy(): Unit = for ((url, name) ← resourceUrls) copyResource(url, name)
@@ -24,14 +23,10 @@ private class TestEnvironmentFiles(
   private def resourceUrls: Iterable[(URL, String)] =
     resourceUrls(DefaultConfigResource) ++ resourceUrls(configPackageResource) map { o ⇒ o → urlToDestinationName(o) }
 
-  private def resourceUrls(resource: JavaResource): Iterable[URL] =
-    resources(resource) map { _.getURL }
-
-  private def resources(resource: JavaResource): Iterable[Resource] =
-    ResourcePatterns flatMap { resources(resource, _) }
-
-  private def resources(resource: JavaResource, namePattern: String): Iterable[Resource] =
-    resolver.getResources(s"classpath*:${resource.path}/$namePattern")
+  private def resourceUrls(packageResource: JavaResource): immutable.Seq[URL] = {
+    val path = packageResource.path stripSuffix "/"
+    resourcePatternToUrls(s"$path/*") filter { u ⇒ NameExtensions exists u.getPath.endsWith }
+  }
 
   private def copyResource(url: URL, name: String): Unit = {
     val f = directory / name
@@ -46,7 +41,7 @@ private class TestEnvironmentFiles(
 }
 
 object TestEnvironmentFiles {
-  private val ResourcePatterns = List("*.xml", "*.ini", "*.dtd")
+  private val NameExtensions = List(".xml", ".ini", ".dtd")
   private val DefaultConfigResource = JavaResource("com/sos/scheduler/engine/test/config")
 
   def copy(
