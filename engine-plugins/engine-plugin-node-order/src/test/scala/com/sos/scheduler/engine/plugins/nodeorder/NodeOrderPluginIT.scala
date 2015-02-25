@@ -21,9 +21,11 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   "New order is added" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](ClonedOrderKey) {
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
-          scheduler executeXml OrderCommand(OriginalOrderKey)
+      eventBus.awaitingKeyedEvent[OrderFinishedEvent](CClonedOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderFinishedEvent](BClonedOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
+            scheduler executeXml OrderCommand(OriginalOrderKey)
+          }
         }
       }
     }
@@ -46,7 +48,6 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml
         <job_chain name="test-own"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin NodeOrderPlugin.xsd"
                    xmlns:NodeOrderPlugin="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin">
           <job_chain_node state="100" job="/test-exit-0">
             <on_return_codes>
@@ -62,8 +63,9 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object NodeOrderPluginIT {
-  private val OriginalOrderKey = JobChainPath("/test-a") orderKey "TEST"
-  private val ClonedOrderKey = JobChainPath("/test-b") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
-  private val ErrorOrderKey = JobChainPath("/test-error") orderKey "TEST"
+  private val OriginalOrderKey = JobChainPath("/test-folder/a") orderKey "TEST"
+  private val BClonedOrderKey = JobChainPath("/test-folder/b") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
+  private val CClonedOrderKey = JobChainPath("/test-folder-c/c") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
+  private val ErrorOrderKey = JobChainPath("/test-folder/error") orderKey "TEST"
   private val MissingJobchainCode = MessageCode("SCHEDULER-161")
 }

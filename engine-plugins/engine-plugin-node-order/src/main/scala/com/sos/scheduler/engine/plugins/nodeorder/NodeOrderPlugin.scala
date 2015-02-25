@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.nodeorder
 
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -45,7 +46,7 @@ extends JobChainNodeNamespaceXmlPlugin {
     val eventReader = new ScalaXMLEventReader(xmlEventReader)
     import eventReader._
     val jobChainPath = parseElement("add_order") {
-      JobChainPath(attributeMap("job_chain"))
+      JobChainPath(AbsolutePath.makeCompatibleAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain")))
     }
     require(jobChainPath != jobNode.jobChainPath, s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> must denote the own job_chain")
     onReturnCode(jobChainPath) _ withToString "NodeOrderPlugin.onResultCode"
