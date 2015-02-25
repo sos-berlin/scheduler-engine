@@ -153,11 +153,6 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
                 _security.set_dom( e );
             }
             else
-            if( e.nodeName_is( "cluster" ) )
-            {
-                _cluster_configuration.set_dom( e );
-            }
-            else
             if( e.nodeName_is( "holidays" ) )
             {
                 _holidays.set_dom( (File_based*)NULL, e );

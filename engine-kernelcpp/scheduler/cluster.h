@@ -27,8 +27,6 @@ struct Configuration
 {
                                 Configuration               ();
 
-    void                        set_dom                     ( const xml::Element_ptr& cluster_element );
-
     bool is_cluster() const { 
         return _orders_are_distributed || _demand_exclusiveness; 
     }

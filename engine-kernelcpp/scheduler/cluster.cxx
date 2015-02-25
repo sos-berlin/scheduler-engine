@@ -1260,32 +1260,6 @@ Configuration::Configuration()
 {
 }
 
-//-------------------------------------------------------------------------------------------------
-
-static int get_time_or_never( const xml::Element_ptr& e, const string& attribute_name, int deflt )
-{
-    int result;
-
-    string v = e.getAttribute( attribute_name );
-
-    if( v == "" )  result = deflt;
-    else
-    if( v == "never" )  result = INT_MAX;
-    else
-        result = e.int_getAttribute( attribute_name );
-
-    return result;
-}
-
-//---------------------------------------------------------------------------Configuration::set_dom
-    
-void Configuration::set_dom( const xml::Element_ptr& cluster_element )
-{
-    _heart_beat_timeout     = cluster_element.int_getAttribute  ( "heart_beat_timeout"     , _heart_beat_timeout      );
-    _heart_beat_own_timeout = get_time_or_never( cluster_element, "heart_beat_own_timeout" , _heart_beat_own_timeout  );
-    _heart_beat_warn_timeout= cluster_element.int_getAttribute  ( "heart_beat_warn_timeout", _heart_beat_warn_timeout );
-}
-
 //----------------------------------------------------------------------------new_cluster_subsystem
 
 ptr<Cluster_subsystem_interface> new_cluster_subsystem( Scheduler* scheduler, const Configuration& c)
