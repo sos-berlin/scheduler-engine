@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent, Ord
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
+import com.sos.scheduler.engine.test.ClusterTest
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitFailure, awaitSuccess}
 import com.sos.scheduler.engine.tests.jira.js1227.JS1227IT._

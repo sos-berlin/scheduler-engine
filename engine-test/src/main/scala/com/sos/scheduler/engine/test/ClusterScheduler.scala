@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js1227
+package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -6,8 +6,7 @@ import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.database.H2DatabaseServer
-import com.sos.scheduler.engine.test.{TestEnvironment, TestSchedulerController}
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 /**

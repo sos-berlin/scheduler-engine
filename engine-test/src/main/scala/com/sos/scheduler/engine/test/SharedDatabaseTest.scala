@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js1227
+package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.test.database.H2DatabaseServer
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js1227
+package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -41,5 +41,5 @@ trait ClusterTest extends ScalaSchedulerTest with SharedDatabaseTest {
   /**
    * @return Future, successful when all cluster members are active and therefore the cluster is ready to use
    */
-  protected def startOtherSchedulers(): Future[Unit] = Future.sequence(otherSchedulers map { _.start() }) map { _ ⇒ () }
+  private def startOtherSchedulers(): Future[Unit] = Future.sequence(otherSchedulers map { _.start() }) map { _ ⇒ () }
 }
