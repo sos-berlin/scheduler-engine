@@ -1315,10 +1315,30 @@ void Order_queue_node::close()
 
 bool Order_queue_node::set_action(Action action)
 {
+    Action previous_action = _action;
     bool ok = Node::set_action(action);
-    if(ok) {
+    if (ok) {
         if( _job_chain->state() >= Job_chain::s_active )
         {
+            if (previous_action == act_next_state) {
+                // JS-864 Aufträge, die wegen übersprungener Knoten in keiner Warteschlange mehr sind, werden hier wieder hinzugefügt.
+                string normalized_job_chain_path = _job_chain->normalized_path();
+                Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
+                    Order* o = i->second;
+                    if (order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
+                        if (o->has_base_file() && !o->is_touched() && !o->_is_in_order_queue) {
+                            Z_LOG2("scheduler", "JS-864 After action=process, we try to re-insert the homeless " << o->obj_name() << " into its order queue\n");
+                            Order_queue_node* n = NULL;
+                            try { n = Order_queue_node::try_cast(_job_chain->referenced_node_from_state(o->initial_state())); } 
+                            catch (exception& x) { Z_LOG2("scheduler", "Ignored: " << x.what() << "\n"); }
+                            if (n) {
+                                o->set_state(n->order_state());
+                            }
+                        }
+                    }
+                }
+            }
+
             switch( _action )
             {
                 case act_process:

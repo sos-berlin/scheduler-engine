@@ -389,7 +389,6 @@ struct Order : Com_order,
     void                        set_attributes_and_remove_duplicates( const xml::Element_ptr& element, xml::Simple_node_ptr node, xml::Element_ptr setback_element );
     bool                        order_is_removable_or_replaceable();
 
-
     friend struct               job_chain::Order_queue_node;
     friend struct               Order_queue;
     friend struct               Job_chain;
