@@ -19,12 +19,12 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   override def onBeforeSchedulerActivation() = eventPipe
 
   override def onSchedulerActivated() = {
-    for (i ← 0 to 5)
-      scheduler executeXml OrderCommand(TestJobChainPath orderKey OrderId(i.toString), suspended = Some(true), parameters = Map("count" → "0"))
+    for (i ← 1 to 5)
+      scheduler executeXml OrderCommand(NonpermanentJobChainPath orderKey OrderId(s"$i"), suspended = Some(true))
+    // Test group 6 will add its order itself, so the order will have a clean initial state
   }
 
-  "0) All job chain node have action='process'" in {
-    val orderKey = TestJobChainPath orderKey OrderId("0")
+  addOrderTests(1, "All job chain node have action='process'", Nil) { orderKey ⇒
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
@@ -33,9 +33,7 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  "1) Job chain node B has action='next_state'" in {
-    modifyNode(BState, NextStateAction)
-    val orderKey = TestJobChainPath orderKey OrderId("1")
+  addOrderTests(2, "Job chain node B has action='next_state'", List(BState → NextStateAction)) { orderKey ⇒
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
@@ -43,10 +41,8 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  "2) Job chain node A has action='next_state'" in {
-    modifyNode(BState, ProcessAction)
-    modifyNode(AState, NextStateAction)   // Alle wartenden Auftrage wechseln zu B
-    val orderKey = TestJobChainPath orderKey OrderId("2")
+  addOrderTests(3, "Job chain node A has action='next_state'", List(BState → ProcessAction, AState → NextStateAction)) { orderKey ⇒
+    // Alle wartenden Auftrage wechseln zu B
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
@@ -54,33 +50,45 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  "3) Again, all job chain nodes have action='process'" in {
-    modifyNode(AState, ProcessAction)
-    val orderKey = TestJobChainPath orderKey OrderId("3")
+  addOrderTests(4, "Again, all job chain nodes have action='process'", List(AState → ProcessAction)) { orderKey ⇒
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
-    // aState nicht, weil next_state im vorangehenden Test den Auftrag schon weitergeschoben hat.
+    // AState nicht, weil next_state im vorangehenden Test den Auftrag schon weitergeschoben hat.
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  "4) All job chain nodes have action='next_state'" in {
-    modifyNode(AState, NextStateAction)
-    modifyNode(BState, NextStateAction)
-    modifyNode(CState, NextStateAction)
-    val orderKey = TestJobChainPath orderKey OrderId("4")
+  addOrderTests(5, "All job chain nodes have action='next_state'", List(AState → NextStateAction, BState → NextStateAction, CState → NextStateAction)) { orderKey ⇒
     resumeOrder(orderKey)
+    orderKey match {
+      case PermanentOrderKey ⇒ // A permanent order does not issue an OrderFinishedEvent ...
+      case _ ⇒ nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
+    }
+  }
+
+  addOrderTests(6, "Again, all job chain nodes have action='process'", List(AState → ProcessAction, BState → ProcessAction, CState → ProcessAction)) { orderKey ⇒
+    if (orderKey.jobChainPath == NonpermanentJobChainPath) {
+      // Add new order 6
+      scheduler executeXml OrderCommand(orderKey)
+    }
+    nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
+    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
+    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
+    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  "5) Again, no job chain node having action='next_state'" in {
-    modifyNode(BState, "process")
-    val orderKey = TestJobChainPath orderKey OrderId("5")
-    resumeOrder(orderKey)
-    //intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition(2.s) { e: OrderTouchedEvent ⇒ e.getKey == jobChainPath.orderKey(orderId) } }
-    nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
-  }
+  private def addOrderTests(index: Int, caption: String, nodeActions: List[(OrderState, String)])(body: OrderKey ⇒ Unit): Unit =
+    s"$index) $caption" - {
+      for (orderKey ← List(NonpermanentJobChainPath orderKey OrderId(s"$index"), PermanentOrderKey)) {
+        s"Order $orderKey" in {
+          for ((state, action) ← nodeActions)
+            scheduler executeXml <job_chain_node.modify job_chain={orderKey.jobChainPath.string} state={state.string} action={action}/>
+          body(orderKey)
+        }
+      }
+    }
 
   private def nextOrderEvent(orderKey: OrderKey) =
     eventPipe.nextWithCondition { e: OrderEvent ⇒ e.orderKey == orderKey && isRelevantOrderEventClass(e.getClass) }
@@ -88,15 +96,14 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   private def isRelevantOrderEventClass(eventClass: Class[_ <: OrderEvent]) =
     List(classOf[OrderTouchedEvent], classOf[OrderFinishedEvent], classOf[OrderStepStartedEvent]) exists { _ isAssignableFrom eventClass }
 
-  private def modifyNode(state: OrderState, action: String): Unit =
-    scheduler executeXml <job_chain_node.modify job_chain={TestJobChainPath.string} state={state.string} action={action}/>
-
   private def resumeOrder(o: OrderKey): Unit =
-    scheduler executeXml <modify_order job_chain={o.jobChainPath.string} order={o.id.string} suspended="false"/>
+    scheduler executeXml <modify_order job_chain={o.jobChainPath.string} order={o.id.string} suspended="false" at="now"/>
 }
 
 private object JS864IT {
-  private val TestJobChainPath = JobChainPath("/test")
+  private val NonpermanentJobChainPath = JobChainPath("/test-nonpermanent")
+  private val PermanentJobChainPath = JobChainPath("/test-permanent")
+  private val PermanentOrderKey = PermanentJobChainPath orderKey "permanent"
   private val AState = OrderState("A")
   private val BState = OrderState("B")
   private val CState = OrderState("C")
