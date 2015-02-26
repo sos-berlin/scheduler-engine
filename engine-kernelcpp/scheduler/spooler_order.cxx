@@ -3182,7 +3182,7 @@ Job_chain* Job_chain::on_replace_now()
         }
     }
 
-    // Wenn die Jobkette geändert wurde, müssen auch die dateibasierten Aufträge neu geladen werden
+    // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
     // Alle dateibasierten Aufträge entfernen:
     string normalized_job_chain_path = order_subsystem()->normalized_path(path());
 
@@ -3195,7 +3195,7 @@ Job_chain* Job_chain::on_replace_now()
 
     close();
 
-    // Wenn die Jobkette geändert wurde, müssen auch die dateibasierten Aufträge neu geladen werden
+    // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
     // Alle dateibasierten Aufträge zum neu laden markieren:
     Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
         Order* o = i->second;
