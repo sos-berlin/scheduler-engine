@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderStepEndedEvent}
-import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ModifyOrderCommand}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate.transaction
@@ -70,6 +70,12 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
+  "JS-1298 Non-distributed job chain in a distributed JobScheduler" in {
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](NonDistributedOrderKey) {
+      scheduler executeXml ModifyOrderCommand(NonDistributedOrderKey, at = Some(ModifyOrderCommand.NowAt))
+    }
+  }
+
   private def file(o: OrderKey) = testEnvironment fileFromPath o
 }
 
@@ -81,4 +87,6 @@ private object JS1251IT {
   private val BChangedTitle = "CHANGED-B"
   private val FirstState = OrderState("100")
   private val SuspendedState = OrderState("200")
+  private val NonDistributedJobChainPath = JobChainPath("/test-non-distributed")
+  private val NonDistributedOrderKey = JobChainPath("/test-non-distributed") orderKey "1"
 }
