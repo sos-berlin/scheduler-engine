@@ -771,7 +771,7 @@ void Task::set_state_direct( State new_state )
         _state = new_state;
 
         if( is_idle()  &&  _job )
-            if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
+            if (Process_class* process_class = process_class_or_null()) process_class->notify_a_process_is_idle();
 
         Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) ) {

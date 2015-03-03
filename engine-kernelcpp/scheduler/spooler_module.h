@@ -275,6 +275,14 @@ struct Module_instance : Object
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }
 
     public: Order_state_transition order_state_transition() const;
+    
+    public: Process_class* process_class() const {
+        return _module->process_class();
+    }
+    
+    public: Process_class* process_class_or_null() const {
+        return _module->process_class_or_null();
+    }
 
     Fill_zero                  _zero_;
 

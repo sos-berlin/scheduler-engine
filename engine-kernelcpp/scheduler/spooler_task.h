@@ -250,6 +250,15 @@ struct Task : Object,
     const string                log_string                  () const                                { return log()->as_string(); }
     const File_path             stdout_path                 () const                                { return _module_instance->stdout_path(); }
     const File_path             stderr_path                 () const                                { return _module_instance->stderr_path(); }    
+    
+    public: Process_class* process_class() const {
+        return _module_instance->process_class();
+    }
+
+    public: Process_class* process_class_or_null() const {
+        return _module_instance->process_class_or_null();
+    }
+
 
   protected:
     friend struct               Stdout_reader;
