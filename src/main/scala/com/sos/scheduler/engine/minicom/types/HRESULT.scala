@@ -25,7 +25,7 @@ object HRESULT {
   //
   //final val DISP_E_UNKNOWNINTERFACE       = HRESULT(0x80020001)
   final val DISP_E_MEMBERNOTFOUND         = HRESULT(0x80020003)
-  //final val DISP_E_PARAMNOTFOUND          = HRESULT(0x80020004)
+  final val DISP_E_PARAMNOTFOUND          = HRESULT(0x80020004)
   //final val DISP_E_TYPEMISMATCH           = HRESULT(0x80020005)
   final val DISP_E_UNKNOWNNAME            = HRESULT(0x80020006)
   //final val DISP_E_NONAMEDARGS            = HRESULT(0x80020007)

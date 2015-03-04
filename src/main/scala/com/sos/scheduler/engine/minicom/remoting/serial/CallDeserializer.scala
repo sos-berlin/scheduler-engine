@@ -58,11 +58,12 @@ extends IUnknownDeserializer {
         val localeId = readInt32()
         require(localeId == 0)
         val flags = readInt32()
-        val argumentCount = readInt32()
+        val n = readInt32()
         val namedArgumentCount = readInt32()
-        require(namedArgumentCount == 0)
-        val arguments = readArguments(argumentCount)
-        InvokeCall(proxyId, dispatchId, iid, DispatchType.set(flags), arguments, namedArguments = Nil)
+        val argDispatchIds = Vector.fill(namedArgumentCount) { DISPID(readInt32()) }
+        val namedArguments = (argDispatchIds map { _ → readVariant() }).reverse
+        val arguments = readArguments(n - namedArgumentCount)
+        InvokeCall(proxyId, dispatchId, iid, DispatchType.set(flags), arguments, namedArguments)
 
       case MessageCommand.Call ⇒
         val methodName = readString()
@@ -75,7 +76,7 @@ extends IUnknownDeserializer {
     }
   }
 
-  private def readArguments(n: Int): immutable.Seq[Any] = immutable.Seq.fill(n) { readVariant() } .reverse
+  private def readArguments(n: Int): immutable.Seq[Any] = Vector.fill(n) { readVariant() } .reverse
 }
 
 private[remoting] object CallDeserializer {

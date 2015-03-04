@@ -24,9 +24,10 @@ final class Dispatcher(val delegate: IDispatchable) extends IDispatch {
     methodIndices.head
   }
 
-  def invoke(dispId: DISPID, dispatchTypes: Set[DispatchType], arguments: Seq[Any]): Any = {
+  def invoke(dispId: DISPID, dispatchTypes: Set[DispatchType], arguments: Seq[Any], namedArguments: Seq[(DISPID, Any)]): Any = {
     if (dispatchTypes != Set(DISPATCH_METHOD)) throw new COMException(DISP_E_MEMBERNOTFOUND, "Only DISPATCH_METHOD is supported")
     val method = methods(dispId.value)
+    if (namedArguments.nonEmpty) throw new COMException(DISP_E_PARAMNOTFOUND, "Named arguments are not supported")
     invokeMethod(method, arguments)
   }
 

@@ -48,10 +48,10 @@ private final class CallSerializer(protected val proxyRegister: ProxyRegister) e
         writeUUID(iid.uuid)
         writeInt32(0)  // localeId
         writeInt32((dispatchTypes map { _.value }).fold(0) { _ | _ })
-        writeInt32(arguments.size)
+        writeInt32(arguments.size + namedArguments.size)
         writeInt32(namedArguments.size)
-        for (a ← arguments.reverse) writeVariant(a)
-        require(namedArguments.size == 0)
+        for (a ← namedArguments.reverseIterator) writeInt32(a._1.value)
+        for (a ← (namedArguments.reverseIterator map { _._2 }) ++ arguments.reverseIterator) writeVariant(a)
 
       case GetIDsOfNamesCall(proxyId, iid, localeId, names) ⇒
         writeByte(MessageCommand.GetIDsOfNames)
