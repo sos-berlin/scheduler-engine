@@ -2016,6 +2016,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
         _visible = element.getAttribute( "visible" ) == "never"? visible_never :
                    element.bool_getAttribute( "visible" )      ? visible_yes 
                                                                : visible_no;
+    _default_process_class_path = Absolute_path(element.getAttribute("process_class"));
 
     _orders_are_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_are_recoverable );
 

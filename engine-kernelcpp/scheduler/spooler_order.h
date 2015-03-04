@@ -993,6 +993,10 @@ struct Job_chain : Com_job_chain,
     xml::Element_ptr            WriterFilter_ptr            () const;
     bool                        is_stopped                  () const                                { return _is_stopped; }
 
+    public: const Absolute_path& default_process_class_path() const {
+        return _default_process_class_path;
+    }
+
   private:
     void                        check_for_removing          ();
     void                        database_record_store       ();
@@ -1017,6 +1021,7 @@ struct Job_chain : Com_job_chain,
     bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
 
     bool                       _db_stopped;
+    Absolute_path _default_process_class_path;
 
   public:
     typedef stdext::hash_map< string, Order* >   Order_map;
