@@ -403,7 +403,7 @@ void Module::init()
 
     switch( _kind )
     {
-        case kind_internal:             if( _process_class_path != ""  )
+        case kind_internal:             if (!Process_class_subsystem::is_empty_default_path(_process_class_path))
                                             if( Process_class* process_class = process_class_or_null() )
                                                 if (process_class->is_remote_host())  z::throw_xc("SCHEDULER-REMOTE-INTERNAL?");
                                         break;

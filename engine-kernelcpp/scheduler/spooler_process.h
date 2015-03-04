@@ -216,6 +216,10 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
                                  file_based_subsystem< Process_class >,
                                  javabridge::has_proxy<Process_class_subsystem>
 {
+    static bool is_empty_default_path(const Absolute_path& o) {
+        return o.empty();
+    }
+
                                 Process_class_subsystem     ( Scheduler* );
 
     // Subsystem
