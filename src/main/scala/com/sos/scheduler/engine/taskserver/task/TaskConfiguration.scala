@@ -10,5 +10,6 @@ final case class TaskConfiguration(
   taskId: TaskId,
   extraEnvironment: Map[String, String],
   language: ScriptLanguage,
-  script: String) {
+  script: String,
+  hasOrder: Boolean) {
 }

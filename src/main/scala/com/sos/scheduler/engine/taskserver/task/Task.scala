@@ -6,5 +6,5 @@ package com.sos.scheduler.engine.taskserver.task
 trait Task extends AutoCloseable {
   def start(): Unit
   def end(): Unit
-  def step(): Any
+  def step(): String
 }

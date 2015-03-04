@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.agent.main.Main
 import com.sos.scheduler.engine.agenttest.AgentIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.event.Event
@@ -12,13 +13,16 @@ import com.sos.scheduler.engine.data.job.{JobPath, ResultCode, TaskEndedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.eventbus.EventSourceEvent
+import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable
 import scala.concurrent.duration._
@@ -34,10 +38,10 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val agentTcpPort = findRandomFreeTcpPort()
   private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
-  private def events: immutable.Seq[Event] = eventsPromise.future.value.get.get
   private val eventsPromise = Promise[immutable.Seq[Event]]()
   private lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
-  private lazy val taskLogLines = events collect { case e: InfoLogEvent ⇒ e.message }
+  private lazy val taskLogLines = eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message }
+  private val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
   protected override def onSchedulerActivated(): Unit = {
     val started = agentApp.start()
@@ -46,12 +50,13 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
     Await.result(started, 5.seconds)
   }
 
-  // TODO Parameter übergeben, Auftragsvariablen ändern, viele Tasks parallel und nacheinander
-
   "Run shell job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
       toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
         val orderKey = TestJobchainPath orderKey "1"
+        eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
+          case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.success(order.parameters.toMap)
+        }
         eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
           scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
         }
@@ -62,7 +67,7 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
   "Shell script exit code" in {
     assertResult(List(TestResultCode)) {
-      events collect { case TaskEndedEvent(_, TestJobPath, resultCode) ⇒ resultCode }
+      eventsPromise.successValue collect { case TaskEndedEvent(_, TestJobPath, resultCode) ⇒ resultCode }
     }
     eventBus.dispatchEvents()
   }
@@ -99,6 +104,14 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
   "Job.stateText" in {
     assert(job(TestJobPath).stateText == s"!$FirstStdoutLine")
   }
+
+  "SCHEDULER_RETURN_VALUES" in {
+    finishedOrderParametersPromise.successValue should contain (ChangedVariable.pair)
+  }
+
+  "Multiple concurrent tasks" in {
+    pending
+  }
 }
 
 private object AgentIT {
@@ -112,6 +125,7 @@ private object AgentIT {
   private val EnvironmentVariable = Variable("TESTENV", "ENV-VALUE")
   private val SchedulerVariables = List(OrderVariable, OrderParamOverridesJobParam, JobParam)
   private val ScriptOutputRegex = "[^!]*!(.*)".r  // Our test script output start with '!'
+  private val ChangedVariable = Variable("CHANGED", "CHANGED-VALUE")
 
   private case class Variable(name: String, value: String) {
     override def toString = name
@@ -140,11 +154,15 @@ private object AgentIT {
             |echo !$FirstStdoutLine
             |echo !$EnvironmentVariable=%$EnvironmentVariable%
             |echo !PATH=%Path%
+            |if "%SCHEDULER_RETURN_VALUES%" == "" goto :noReturnValues
+            |    echo ${ChangedVariable.name}=${ChangedVariable.value} >> %SCHEDULER_RETURN_VALUES%
+            |:noReturnValues
             |""".stripMargin
           else s"""
             |echo !$FirstStdoutLine
             |echo !$EnvironmentVariable=$$$EnvironmentVariable
             |echo !PATH=$$PATH
+            |[ -n "$$SCHEDULER_RETURN_VALUES" ] && echo ${ChangedVariable.name}=${ChangedVariable.value} >> $$SCHEDULER_RETURN_VALUES
             |""".stripMargin
         ) +
         (SchedulerVariables map variableToEcho).mkString + s"""

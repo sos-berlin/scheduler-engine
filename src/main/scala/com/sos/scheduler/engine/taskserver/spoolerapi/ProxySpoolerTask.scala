@@ -15,7 +15,11 @@ extends SpoolerTask with SpecializedProxyIDispatch {
 
   def paramsXml = invokeGet(DISPID(35)).asInstanceOf[String]
 
+  def paramsXml_=(o: String) = invokePut(DISPID(35), o)
+
   def orderParamsXml = invokeGet(DISPID(36)).asInstanceOf[String]
+
+  def orderParamsXml_=(o: String) = invokePut(DISPID(36), o)
 }
 
 object ProxySpoolerTask extends ProxyIDispatchFactory {

@@ -30,7 +30,8 @@ final class ShellProcessTaskTest extends FreeSpec {
       language = ShellScriptLanguage,
       script = (if (isWindows) s"@echo off\necho $testName=%$testName%" else s"echo $testName=$$$testName") + "\n" +
         s"echo $testString\n" +
-        s"exit $exitCode")
+        s"exit $exitCode",
+      hasOrder = false)
     val outputLines = mutable.Buffer[String]()
     val (result, files) = autoClosing(new ShellProcessTask(conf, log = { o ⇒ outputLines += o })) { task ⇒
       task.start()

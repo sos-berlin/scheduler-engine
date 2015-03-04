@@ -21,6 +21,7 @@ object DispatchType {
     result.toSet
   }
 }
+
 object DISPATCH_METHOD extends DispatchType(1)
 object DISPATCH_PROPERTYGET extends DispatchType(2)
 object DISPATCH_PROPERTYPUT extends DispatchType(4)
@@ -31,3 +32,7 @@ object DISPATCH_PROPERTYPUTREF extends DispatchType(8)
  * @see [[DispatchType]]
  */
 final case class DISPID(value: Int)
+
+object DISPID {
+  val PROPERTYPUT = DISPID(-3)
+}
