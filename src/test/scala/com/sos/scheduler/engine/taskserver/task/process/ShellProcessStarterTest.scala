@@ -1,12 +1,15 @@
 package com.sos.scheduler.engine.taskserver.task.process
 
 import com.sos.scheduler.engine.data.job.ResultCode
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class ShellProcessStarterTest extends FreeSpec {
   "ShellProcessStarter and ShellProcess" in {
     val envName = "ENVNAME"
