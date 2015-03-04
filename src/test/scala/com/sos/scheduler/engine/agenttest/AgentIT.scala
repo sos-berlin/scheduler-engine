@@ -21,8 +21,8 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable
-import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Promise}
 
 /**
  * @author Joacim Zschimmer
@@ -30,12 +30,13 @@ import scala.concurrent.duration._
 @RunWith(classOf[JUnitRunner])
 final class AgentIT extends FreeSpec with ScalaSchedulerTest {
 
-  import controller.{eventBus, newEventPipe, toleratingErrorCodes}
+  import controller.{newEventPipe, toleratingErrorCodes}
 
   private lazy val agentTcpPort = findRandomFreeTcpPort()
   private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
-  private var events: immutable.Seq[Event] = null
-  private lazy val shellOutput = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
+  private def events: immutable.Seq[Event] = eventsPromise.future.value.get.get
+  private val eventsPromise = Promise[immutable.Seq[Event]]()
+  private lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
   private lazy val taskLogLines = events collect { case e: InfoLogEvent ⇒ e.message }
 
   protected override def onSchedulerActivated(): Unit = {
@@ -55,7 +56,7 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
           scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
         }
       }
-      events = eventPipe.queued[Event]
+      eventsPromise.success(eventPipe.queued[Event])
     }
   }
 
