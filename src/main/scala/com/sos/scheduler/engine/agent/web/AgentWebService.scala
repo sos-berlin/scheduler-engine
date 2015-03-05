@@ -6,13 +6,12 @@ import scala.concurrent.Future
 import spray.http.HttpEntity
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.BadRequest
-import spray.routing.{HttpService, HttpServiceActor, MissingHeaderRejection, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
+import spray.routing.{HttpService, HttpServiceActor, RequestEntityExpectedRejection, UnsupportedRequestContentTypeRejection}
 
 /**
  * @author Joacim Zschimmer
  */
-private[agent] trait AgentWebService
-extends HttpService {
+private[agent] trait AgentWebService extends HttpService {
 
   protected def executeCommand(clientIPAddress: InetAddress, command: String): Future[xml.Elem]
 
@@ -26,7 +25,7 @@ extends HttpService {
               if (!(Set(`application/xml`, `text/xml`) contains httpEntity.contentType.mediaType)) reject(UnsupportedRequestContentTypeRejection("application/xml expected"))
               optionalHeaderValueByName("Remote-Address") {  // Requires Spray configuration spray.can.remote-address-header = on
                 case None ⇒ complete(BadRequest, "Client's IP address is unknown")
-                case Some(clientIPAddress) ⇒ reject(MissingHeaderRejection("Remote-Address"))  // For other possibilities see Spray clientIP
+                case Some(clientIPAddress) ⇒
                   val future = executeCommand(clientIPAddress = InetAddress.getByName(clientIPAddress), command = httpEntity.asString)
                   onSuccess(future) {
                     response ⇒ complete(response)
