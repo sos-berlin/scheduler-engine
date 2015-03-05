@@ -3,15 +3,12 @@ package com.sos.scheduler.engine.agent.configuration.inject
 import akka.actor.ActorSystem
 import com.google.common.io.Closer
 import com.google.inject.Provides
-import com.sos.scheduler.engine.agent.configuration.inject.AgentModule._
+import com.sos.scheduler.engine.agent.configuration.Akkas.newActorSystem
 import com.sos.scheduler.engine.agent.task.{RemoteTask, RemoteTaskFactory}
 import com.sos.scheduler.engine.agent.{AgentCommandExecutor, AgentConfiguration, CommandExecutor}
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.task.StartConfiguration
-import com.typesafe.config.ConfigFactory
 import javax.inject.Singleton
 
 /**
@@ -24,9 +21,7 @@ final class AgentModule(agentConfiguration: AgentConfiguration) extends ScalaAbs
   protected def configure() = {
     bindInstance[Closer](closer)
     bindInstance[AgentConfiguration](agentConfiguration)
-    provide[ActorSystem] {
-      ActorSystem("JobScheduler-Agent", ConfigFactory.load(ConfigurationResourcePath)) sideEffect { o ⇒ closer.onClose { o.shutdown() } }
-    }
+    provide[ActorSystem] { newActorSystem("JobScheduler-Agent")(closer) }
     bindClass[CommandExecutor] to classOf[AgentCommandExecutor]
   }
 
