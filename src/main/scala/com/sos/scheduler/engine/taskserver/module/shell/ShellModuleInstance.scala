@@ -1,4 +1,6 @@
-package com.sos.scheduler.engine.taskserver.module
+package com.sos.scheduler.engine.taskserver.module.shell
+
+import com.sos.scheduler.engine.taskserver.module.{ModuleInstance, NamedObjects}
 
 /**
  * @author Joacim Zschimmer

@@ -7,7 +7,8 @@ import com.sos.scheduler.engine.common.system.OperatingSystem._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
 import com.sos.scheduler.engine.taskserver.module.NamedObjects.{SpoolerLogName, SpoolerTaskName}
-import com.sos.scheduler.engine.taskserver.module.{NamedObjects, Script, ShellModule, ShellModuleInstance}
+import com.sos.scheduler.engine.taskserver.module.shell.{ShellModule, ShellModuleInstance}
+import com.sos.scheduler.engine.taskserver.module.{NamedObjects, Script}
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
 import com.sos.scheduler.engine.taskserver.task.ShellProcessTaskTest._
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition

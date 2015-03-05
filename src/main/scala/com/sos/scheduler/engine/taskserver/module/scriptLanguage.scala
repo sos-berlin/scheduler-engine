@@ -5,22 +5,27 @@ import com.sos.scheduler.engine.data.base.IsString
 /**
  * @author Joacim Zschimmer
  */
-trait ScriptLanguage extends IsString
+trait ModuleLanguage extends IsString
 
-object ScriptLanguage {
-  def apply(language: String): ScriptLanguage =
+object ModuleLanguage {
+  def apply(language: String): ModuleLanguage =
     language.toLowerCase match {
-      case ShellScriptLanguage.string ⇒ ShellScriptLanguage
-      case _ ⇒ OtherScriptLanguage(language)
+      case ShellModuleLanguage.string ⇒ ShellModuleLanguage
+      case JavaModuleLanguage.string ⇒ JavaModuleLanguage
+      case _ ⇒ OtherModuleLanguage(language)
     }
 }
 
-case object ShellScriptLanguage extends ScriptLanguage {
+case object ShellModuleLanguage extends ModuleLanguage {
   val string = "shell"
 }
 
-//final case class JavaScriptLanguage(javaName: String) extends ScriptLanguage {
+case object JavaModuleLanguage extends ModuleLanguage {
+  val string = "java"
+}
+
+//final case class JavaScriptModuleLanguage(javaName: String) extends ScriptLanguage {
 //  def string = s"java:$javaName"
 //}
 
-final case class OtherScriptLanguage(string: String) extends ScriptLanguage
+final case class OtherModuleLanguage(string: String) extends ModuleLanguage

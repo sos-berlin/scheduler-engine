@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.taskserver.task
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.taskserver.module.ShellModuleInstance
+import com.sos.scheduler.engine.taskserver.module.shell.ShellModuleInstance
 import com.sos.scheduler.engine.taskserver.task.ShellProcessTask._
 import com.sos.scheduler.engine.taskserver.task.common.VariableSets
 import com.sos.scheduler.engine.taskserver.task.process.{ShellProcess, ShellProcessStarter}
