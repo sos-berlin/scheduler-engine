@@ -19,7 +19,6 @@ inline zschimmer::ptr<z::javabridge::Vm> get_java_vm( bool start = true )
     {
         if( read_profile_bool( "", "java", "debug", false ) )  vm->set_debug( true );
 
-        vm->set_javac_filename( z::subst_env( read_profile_string( "", "java"   , "javac"      , vm->javac_filename() ) ) );
         vm->set_filename      ( z::subst_env( read_profile_string( "", "java"   , "vm"         , vm->filename() ) ) );
         vm->prepend_class_path( z::subst_env( read_profile_string( "", "java"   , "class_path" ) ) );
         vm->new_instances     (               read_profile_string( "", "java"   , "instances"  ) );

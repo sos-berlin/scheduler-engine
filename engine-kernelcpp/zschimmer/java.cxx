@@ -459,8 +459,6 @@ vector<string> Vm::filenames()
 
 void Vm::start()
 {
-    if( _javac_filename == "" )  _javac_filename = "javac";
-
     Z_MUTEX( static_vm_mutex )
     {
         if( !_vm )

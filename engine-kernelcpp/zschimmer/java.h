@@ -539,9 +539,6 @@ struct Vm : Object              // Java virtual machine
     void                        prepend_class_path          ( const string& path )                  { _class_path = path + Z_PATH_SEPARATOR + _class_path; }
     void                        expand_class_path           ();
 
-    void                    set_javac_filename              ( const string& filename )              { _javac_filename = filename; }
-    string                      javac_filename              () const                                { return _javac_filename; }
-
     void                    set_work_dir                    ( const string& directory )             { _work_dir = directory; }
     string                      work_dir                    ()                                      { return _work_dir; }
 
@@ -599,7 +596,6 @@ struct Vm : Object              // Java virtual machine
     string                     _class_path;
     string                     _last_expanded_class_path;   // Für expand_class_path()
     string                     _complete_class_path;
-    string                     _javac_filename;
     string                     _work_dir;
     string                     _new_instances;
 

@@ -308,8 +308,6 @@ void Module::set_dom( const xml::Element_ptr& element )
 
     _text_with_includes.append_dom( element );
 
-    _recompile = element.bool_getAttribute( "recompile", true );
-
     set_checked_attribute( &_language          , element, "language"         );
     set_checked_attribute( &_com_class_name    , element, "com_class" , true );
     set_checked_attribute( &_filename          , element, "filename"         );

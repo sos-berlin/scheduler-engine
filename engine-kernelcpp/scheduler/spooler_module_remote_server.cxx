@@ -354,8 +354,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "java_class"       )  _server->_module->_java_class_name = value;
                 else
-                if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
-                else
                 if( key_word == "script"           )  _server->_module->set_xml_string_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelöst worden
                 else
                 if( key_word == "job"              )  job_name                          = value;
@@ -399,8 +397,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( monitor  &&  key_word == "monitor.filename"   )  monitor->_module->_filename        = value;
                 else
                 if( monitor  &&  key_word == "monitor.java_class" )  monitor->_module->_java_class_name = value;
-                else
-                if( monitor  &&  key_word == "monitor.recompile"  )  monitor->_module->_recompile       = value[0] == '1';
                 else
                 if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Paraemter sein!
                 {

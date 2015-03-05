@@ -149,7 +149,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-291", "Error when removing protocol file: $1" },
     { "SCHEDULER-292", "Missing from, to, subject or body. Suppressing email" },
     { "SCHEDULER-293", "Waiting for closing module instance ..." },
-    { "SCHEDULER-294", "Java class $1 could not be loaded. Java source is being recompiled before retrying " },
     { "SCHEDULER-295", "Error when loading order $1 from database: $2" },
     { "SCHEDULER-297", "Order has been carried out without web_service_operation.send(), operation cancelled" },
     { "SCHEDULER-298", "Ignoring job=$1 because order is removed from job chain" },
