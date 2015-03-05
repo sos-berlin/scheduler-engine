@@ -1,10 +1,8 @@
 package com.sos.scheduler.engine.taskserver.spoolerapi
 
-import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
-
 /**
  * @author Joacim Zschimmer
  */
-trait SpoolerLog extends IDispatchable {
+trait SpoolerLog {
   def info(message: String): Unit
 }

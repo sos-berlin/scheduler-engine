@@ -14,11 +14,11 @@ final class NamedObjects private(val toMap: Map[String, IDispatchable]) {
 }
 
 object NamedObjects {
-  private val SpoolerLogName = "spooler_log"
-  private val SpoolerTaskName = "spooler_task"
-  private val SpoolerJobName = "spooler_job"
-  private val SpoolerName = "spooler"
-  private val AllNames = Set(SpoolerLogName, SpoolerTaskName, SpoolerJobName, SpoolerName)
+  val SpoolerLogName = "spooler_log"
+  val SpoolerTaskName = "spooler_task"
+  val SpoolerJobName = "spooler_job"
+  val SpoolerName = "spooler"
+  val AllNames = Set(SpoolerLogName, SpoolerTaskName, SpoolerJobName, SpoolerName)
 
   def apply(kv: Iterable[(String, IDispatchable)]): NamedObjects = {
     val invalidNames = (kv map { _._1 }).toSet -- AllNames

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.taskserver.task
+package com.sos.scheduler.engine.taskserver.module
 
 import com.sos.scheduler.engine.data.base.IsString
 

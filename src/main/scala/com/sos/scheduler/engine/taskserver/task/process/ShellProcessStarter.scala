@@ -21,7 +21,7 @@ import scala.util.control.NonFatal
 object ShellProcessStarter {
   private val logger = Logger(getClass)
 
-  def start(name: String, extraEnvironment: Map[String, String], scriptString: String): ShellProcess = {
+  def start(name: String, additionalEnvironment: Map[String, String], scriptString: String): ShellProcess = {
     val file = OS.newTemporaryShellFile(name)
     try {
       file.toFile.write(scriptString, OS.fileEncoding)
@@ -30,7 +30,7 @@ object ShellProcessStarter {
       processBuilder.command(OS.toCommandArguments(file): _*)
       processBuilder.redirectOutput(stdFileMap(Stdout))
       processBuilder.redirectError(stdFileMap(Stderr))
-      processBuilder.environment ++= extraEnvironment
+      processBuilder.environment ++= additionalEnvironment
       val process = processBuilder.start()
       process.getOutputStream.close() // Empty stdin
       val shellProcess = new ShellProcess(process, file, stdFileMap, OS.fileEncoding)
