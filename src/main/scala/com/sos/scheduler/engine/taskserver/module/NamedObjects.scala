@@ -1,16 +1,16 @@
-package com.sos.scheduler.engine.taskserver.task
+package com.sos.scheduler.engine.taskserver.module
 
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
 import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
+import com.sos.scheduler.engine.taskserver.module.NamedObjects._
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
-import com.sos.scheduler.engine.taskserver.task.NamedObjects._
 
 /**
  * @author Joacim Zschimmer
  */
 final class NamedObjects private(val toMap: Map[String, IDispatchable]) {
-  def spoolerLog: SpoolerLog = toMap(SpoolerLogName).asInstanceOf[SpoolerLog]  // instanceOf???
-  def spoolerTask: SpoolerTask = toMap(SpoolerTaskName).asInstanceOf[SpoolerTask]  // instanceOf???
+  lazy val spoolerLog: SpoolerLog = toMap(SpoolerLogName).asInstanceOf[SpoolerLog]
+  lazy val spoolerTask: SpoolerTask = toMap(SpoolerTaskName).asInstanceOf[SpoolerTask]
 }
 
 object NamedObjects {
