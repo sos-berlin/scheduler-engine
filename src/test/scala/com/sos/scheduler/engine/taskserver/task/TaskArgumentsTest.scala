@@ -29,6 +29,9 @@ final class TaskArgumentsTest extends FreeSpec {
     "monitor.script=",
     "monitor.language=java",
     "monitor.java_class=com.example.B",
+    "monitor.script=",
+    "monitor.language=java",
+    "monitor.java_class=com.example.C",
     "monitor.script="
   )))
 
@@ -58,8 +61,9 @@ final class TaskArgumentsTest extends FreeSpec {
 
   "monitors" in {
     assert(taskArguments.monitors == List(
-      Monitor(JavaModule("com.example.A"), name = "MONITOR-NAME", ordering = 7),
-      Monitor(JavaModule("com.example.B"), name = "", ordering = Monitor.DefaultOrdering)
+      Monitor(JavaModule("com.example.B"), name = "", ordering = 1),
+      Monitor(JavaModule("com.example.C"), name = "", ordering = 1),
+      Monitor(JavaModule("com.example.A"), name = "MONITOR-NAME", ordering = 7)
     ))
   }
 }

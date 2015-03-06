@@ -9,6 +9,8 @@ import com.sos.scheduler.engine.taskserver.module.{Module, ModuleLanguage, Scrip
 import com.sos.scheduler.engine.taskserver.task.TaskArguments._
 import com.sos.scheduler.engine.taskserver.task.common.VariableSets
 import scala.collection.mutable
+import scala.collection.immutable
+import scala.util.Sorting.stableSort
 
 /**
  * @author Joacim Zschimmer
@@ -26,11 +28,14 @@ final class TaskArguments(arguments: List[(String, String)]) {
     case None ⇒ false
   }
 
-  lazy val monitors: List[Monitor] =
-    for (m ← splitMonitorArguments(arguments filter { _._1 startsWith "monitor." })) yield {
-      val module = Module(m.moduleLanguage, m.script, javaClassOption = m.javaClassNameOption)
-      Monitor(module, name = m.name, ordering = m.ordering)
-    }
+  lazy val monitors: immutable.Seq[Monitor] = {
+    val unordered =
+      for (m ← splitMonitorArguments(arguments filter { _._1 startsWith "monitor." })) yield {
+        val module = Module(m.moduleLanguage, m.script, javaClassOption = m.javaClassNameOption)
+        Monitor(module, name = m.name, ordering = m.ordering)
+      }
+    stableSort(unordered, { o: Monitor ⇒ o.ordering }).toImmutableSeq
+  }
 
   private def apply(name: String) = get(name) getOrElse { throw new NoSuchElementException(s"Agent argument '$name' not given") }
 
@@ -38,7 +43,6 @@ final class TaskArguments(arguments: List[(String, String)]) {
 }
 
 object TaskArguments {
-  private val KeyValueRegex = "(?s)([[a-z_.]]+)=(.*)".r  //  "(?s)" dot matches \n too, "key=value"
   private val LanguageKey = "language"
   //"com_class",
   //JS-1295 @deprecated private val FilenameKey = "filename"
@@ -61,18 +65,10 @@ object TaskArguments {
   //JS-1295 @deprecated private val MonitorFilenameKey = "monitor.filename"
   private val MonitorJavaClassKey = "monitor.java_class"
   private val MonitorScriptKey = "monitor.script"
-  private val KeySet = Set(
-    LanguageKey,
-    ScriptKey,
-    JobKey,
-    TaskIdKey,
-    EnvironmentKey,
-    HasOrderKey,
-    MonitorLanguageKey,
-    MonitorNameKey,
-    MonitorOrderingKey,
-    MonitorJavaClassKey,
-    MonitorScriptKey)
+  private val KeySet = Set(LanguageKey, ScriptKey, JobKey, TaskIdKey, EnvironmentKey, HasOrderKey,
+    MonitorLanguageKey, MonitorNameKey, MonitorOrderingKey, MonitorJavaClassKey, MonitorScriptKey)
+
+  private val KeyValueRegex = "(?s)([[a-z_.]]+)=(.*)".r  //  "(?s)" dot matches \n too, "key=value"
   private val logger = Logger(getClass)
 
   def apply(arguments: VariantArray): TaskArguments = {
