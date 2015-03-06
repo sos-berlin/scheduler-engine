@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.client.command.RemoteSchedulers._
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.StringSource
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 
@@ -16,7 +17,7 @@ object ProcessDescriptor {
       parseElement("process") {
         ProcessDescriptor(
           remoteTaskId = RemoteTaskId(attributeMap("process_id").toLong),
-          pid = attributeMap.getAsConverted("pid") { _.toInt } getOrElse 0)
+          pid = attributeMap.getConverted("pid") { _.toInt } getOrElse 0)
       }
     }
 }

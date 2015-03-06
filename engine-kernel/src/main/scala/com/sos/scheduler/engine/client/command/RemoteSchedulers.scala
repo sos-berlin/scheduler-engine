@@ -46,7 +46,7 @@ object RemoteSchedulers {
     import eventReader._
     val (code, text) = parseElement("ERROR") {
       attributeMap.ignoreUnread()
-      (attributeMap.getAsConverted("code")(MessageCode.apply), attributeMap.get("text"))
+      (attributeMap.getConverted("code")(MessageCode.apply), attributeMap.get("text"))
     }
     throw new XmlResponseException(
       code = code getOrElse MessageCode("UNKNOWN"),

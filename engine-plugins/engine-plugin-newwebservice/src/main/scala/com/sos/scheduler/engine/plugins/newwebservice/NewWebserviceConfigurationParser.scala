@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice
 
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import javax.xml.transform.Source
@@ -21,7 +22,7 @@ object NewWebServiceConfigurationParser {
     import eventReader._
 
     parseElement("plugin.config") {
-      builder.testMode = attributeMap.getAsConverted("test") { _.toBoolean } getOrElse false
+      builder.testMode = attributeMap.getConverted("test") { _.toBoolean } getOrElse false
     }
     builder.build()
   }
