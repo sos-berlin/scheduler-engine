@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.taskserver.task
 
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.minicom.types.{VariantArray, variant}
-import com.sos.scheduler.engine.taskserver.module.java.JavaModule
-import com.sos.scheduler.engine.taskserver.module.{JavaModuleLanguage, ModuleLanguage, Script}
+import com.sos.scheduler.engine.taskserver.module.{Module, ModuleLanguage, Script}
 import com.sos.scheduler.engine.taskserver.task.TaskArguments._
 import com.sos.scheduler.engine.taskserver.task.common.VariableSets
 import scala.collection.mutable
@@ -27,14 +27,9 @@ final class TaskArguments(arguments: List[(String, String)]) {
   }
 
   lazy val monitors: List[Monitor] =
-    for (monitorArgs ← splitMonitorArguments(arguments filter { _._1 startsWith "monitor." })) yield {
-      val argMap = monitorArgs.toMap
-      val module = ModuleLanguage(argMap(MonitorLanguageKey)) match {
-        case JavaModuleLanguage ⇒ JavaModule(className = argMap(MonitorJavaClassKey))
-      }
-      Monitor(module,
-        name = argMap.getOrElse(MonitorNameKey, ""),
-        ordering = argMap.get(MonitorOrderingKey) map { _.toInt } getOrElse Monitor.DefaultOrdering)
+    for (m ← splitMonitorArguments(arguments filter { _._1 startsWith "monitor." })) yield {
+      val module = Module(m.moduleLanguage, m.script, javaClassOption = m.javaClassNameOption)
+      Monitor(module, name = m.name, ordering = m.ordering)
     }
 
   private def apply(name: String) = get(name) getOrElse { throw new NoSuchElementException(s"Agent argument '$name' not given") }
@@ -45,7 +40,7 @@ final class TaskArguments(arguments: List[(String, String)]) {
 object TaskArguments {
   private val KeyValueRegex = "(?s)([[a-z_.]]+)=(.*)".r  //  "(?s)" dot matches \n too, "key=value"
   private val LanguageKey = "language"
-  //TODO "com_class",
+  //"com_class",
   //JS-1295 @deprecated private val FilenameKey = "filename"
   //TODO private val Java_classKey = "java_class"
   private val ScriptKey = "script"
@@ -93,12 +88,20 @@ object TaskArguments {
     new TaskArguments(buffer.toList)
   }
 
-  /** @return a list of lists, containing the arguments for each monitor */
-  private def splitMonitorArguments(args: List[(String, String)]): List[List[(String, String)]] =
+  private def splitMonitorArguments(args: List[(String, String)]): List[MonitorArguments] =
+    // For every monitor definition, "monitor.script" is the last argument
     args indexWhere { _._1 == MonitorScriptKey } match {
       case -1 ⇒ Nil
       case scriptIndex ⇒
-        val (head, tail) = args splitAt scriptIndex + 1  // For every monitor definition, "monitor.script" is the last argument
-        head :: splitMonitorArguments(tail)
+        val (head, tail) = args splitAt scriptIndex + 1
+        new MonitorArguments(head.toMap) :: splitMonitorArguments(tail)
     }
+
+  private class MonitorArguments(argMap: Map[String, String]) {
+    def moduleLanguage = ModuleLanguage(argMap(MonitorLanguageKey))
+    def name = argMap.getOrElse(MonitorNameKey, "")
+    def ordering = argMap.getConverted(MonitorOrderingKey) { _.toInt } getOrElse Monitor.DefaultOrdering
+    def javaClassNameOption = argMap.get(MonitorJavaClassKey)
+    def script = Script(argMap(MonitorScriptKey))
+  }
 }

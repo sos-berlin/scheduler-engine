@@ -5,6 +5,6 @@ import com.sos.scheduler.engine.taskserver.module.{Module, Script, ShellModuleLa
 /**
  * @author Joacim Zschimmer
  */
-final class ShellModule(val script: Script) extends Module {
+final case class ShellModule(script: Script) extends Module {
   def moduleLanguage = ShellModuleLanguage
 }
