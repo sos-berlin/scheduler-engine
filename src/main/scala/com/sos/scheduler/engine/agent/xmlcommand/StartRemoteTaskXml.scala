@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.xmlcommand
 
 import com.sos.scheduler.engine.agent.commands.{StartRemoteTask, StartRemoteTaskResponse}
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import java.net.{InetAddress, InetSocketAddress}
 
@@ -17,7 +18,7 @@ object StartRemoteTaskXml {
         case x ⇒ throw new IllegalArgumentException(s"kind=$x")
       }
       StartRemoteTask(
-        controllerAddress = new InetSocketAddress(inetAddress, attributeMap.asConverted("tcp_port")(stringToTcpPort)),
+        controllerAddress = new InetSocketAddress(inetAddress, attributeMap.convert("tcp_port")(stringToTcpPort)),
         usesApi = usesApi,
         javaOptions = attributeMap.getOrElse("java_options", ""),
         javaClassPath = attributeMap.getOrElse("java_classpath", ""))

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.agent.xmlcommand
 
 import com.sos.scheduler.engine.agent.commands.CloseRemoteTask
 import com.sos.scheduler.engine.agentcommon.Xmls._
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 
@@ -13,8 +14,8 @@ object CloseRemoteTaskXml {
     import eventReader._
     parseElement() {
       CloseRemoteTask(
-        remoteTaskId = attributeMap.asConverted("process_id") { o ⇒ RemoteTaskId(o.toLong) },
-        kill = attributeMap.getAsConverted("kill")(xmlStringToBoolean) getOrElse false
+        remoteTaskId = attributeMap.convert("process_id") { o ⇒ RemoteTaskId(o.toLong) },
+        kill = attributeMap.getConverted("kill")(xmlStringToBoolean) getOrElse false
       )
     }
   }
