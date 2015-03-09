@@ -415,11 +415,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
         _server->_module->init();
 
-
-        ptr<javabridge::Vm> java_vm = get_java_vm( false );
-
-        _server->_module->_java_vm = java_vm;
-
         _server->_module_instance = _server->_module->create_instance();
        
         if( _server->_module_instance )
@@ -594,8 +589,8 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
                              _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine_java;
         if(needs_java_vm)
         {
-            _server->_log.debug1("java classpath: " + _server->_module->_java_vm->class_path()); 
-            _server->_log.debug1("java vm arguments: " + _server->_module->_java_vm->options());
+            _server->_log.debug1("java classpath: " + get_java_vm(false)->class_path()); 
+            _server->_log.debug1("java vm arguments: " + get_java_vm(false)->options());
         }                                                                                            // ... JS-540 
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
