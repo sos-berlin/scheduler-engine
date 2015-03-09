@@ -379,20 +379,18 @@ void Module::init()
             if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
         }
         else
-        if( _process_filename != ""  || _language == shell_language_name )  //   Z_POSIX_ONLY( || _language == ""  &&  string_begins_with( _source, "#!" ) ) )
+        if( _process_filename != ""  || _language == shell_language_name )
         {
             _kind = kind_process;
+        }
+        else
+        if (string_begins_with(_language, "javax.script:") || string_begins_with(_language, "java:")) {
+            _kind = kind_scripting_engine_java;
         }
         else
         {
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-            if (string_begins_with(_language, "javax.script:") || string_begins_with(_language, "java:")) {
-                // "javax.script:rhino" für Java-Methoden-Schnittstelle, z.B. spooler_task.set_exit_code( 0 );
-                // "java:rhino" für Beans-Schnittstelle (Property-Schnittstelle), z.B. spooler_task.exit_code = 0;
-                Z_LOG2("scheduler", "Using java interface for scripting language " << _language << "\n");
-                _kind = kind_scripting_engine_java;
-            }
         }
     }
 
@@ -473,30 +471,13 @@ ptr<Module_instance> Module::create_instance_impl(const string& remote_scheduler
     {
         case kind_java:              
         {
-            _java_vm = get_java_vm( false );
-            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
-
-            if( !_java_vm->running() )
-            {
-                init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
-            }
-            
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
             result = +p;
             break;
         }
 
-        // JS-498: neue Instanz für java-script via Java-Interface 
         case kind_scripting_engine_java:
         {
-            _java_vm = get_java_vm( false );
-            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
-
-            if( !_java_vm->running() )
-            {
-                init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
-            }
-            
             ptr<Java_module_script_instance> p = Z_NEW( Java_module_script_instance( this ) );
             result = +p;
             break;
