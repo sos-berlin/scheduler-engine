@@ -14,9 +14,7 @@ import java.util.UUID
 final class ProxySpoolerLog private(protected val remoting: ClientRemoting, val id: ProxyId, val name: String)
 extends SpoolerLog with SpecializedProxyIDispatch {
 
-  def info(message: String): Unit = doLog(SchedulerLogLevel.info, message)
-
-  private def doLog(level: SchedulerLogLevel, message: String) = invokeMethod(DISPID(14), Vector(level.cppNumber, message))
+  def log(level: SchedulerLogLevel, message: String) = invokeMethod(DISPID(14), Vector(level.cppNumber, message))
 }
 
 object ProxySpoolerLog extends ProxyIDispatchFactory {
