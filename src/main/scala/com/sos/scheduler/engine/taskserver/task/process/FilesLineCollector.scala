@@ -15,6 +15,5 @@ final class FilesLineCollector(files: immutable.Iterable[Path], encoding: Charse
 
   private val lineCollectors = closeOnError(closer) { files map { f ⇒ new FileLineCollector(f, encoding).closeWithCloser } }
 
-  def nextLinesIterator: Iterator[(Path, String)] =
-    lineCollectors.iterator flatMap { c ⇒ c.nextLinesIterator map { line ⇒ c.file → line } }
+  def nextLinesIterator: Iterator[(Path, String)] = lineCollectors.iterator flatMap { c ⇒ c.nextLinesIterator map { c.file → _ } }
 }
