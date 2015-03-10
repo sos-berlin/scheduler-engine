@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.module
 
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.minicom.idispatch.Invocable
 import com.sos.scheduler.engine.taskserver.module.NamedInvocables._
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
@@ -9,8 +10,12 @@ import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
  * @author Joacim Zschimmer
  */
 final class NamedInvocables private(val toMap: Map[String, Invocable]) {
-  lazy val spoolerLog: SpoolerLog = toMap(SpoolerLogName).asInstanceOf[SpoolerLog]
-  lazy val spoolerTask: SpoolerTask = toMap(SpoolerTaskName).asInstanceOf[SpoolerTask]
+  lazy val spoolerLog: SpoolerLog = cast[SpoolerLog](toMap(SpoolerLogName))
+  lazy val spoolerTask: SpoolerTask = cast[SpoolerTask](toMap(SpoolerTaskName))
+  lazy val spoolerJob: Invocable = toMap(SpoolerJobName)
+  lazy val spooler: Invocable = toMap(SpoolerName)
+
+  def apply(name: String) = toMap(name)
 }
 
 object NamedInvocables {

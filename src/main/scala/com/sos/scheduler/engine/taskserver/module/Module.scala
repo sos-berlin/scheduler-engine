@@ -11,12 +11,17 @@ trait Module {
 }
 
 object Module {
-  def apply(moduleLanguage: ModuleLanguage, script: Script, javaClassOption: Option[String]) =
+  def apply(moduleLanguage: ModuleLanguage, script: Script, javaClassNameOption: Option[String]) =
     moduleLanguage match {
       case ShellModuleLanguage ⇒
-        javaClassOption map { o ⇒ throw new IllegalArgumentException(s"language '$moduleLanguage' forbids parameter javaClass=$o") }
+        for (name ← javaClassNameOption) throw new IllegalArgumentException(s"language '$moduleLanguage' conflicts with parameter javaClass='$name'")
         new ShellModule(script)
-      case JavaModuleLanguage ⇒ JavaModule(className = javaClassOption getOrElse { throw new NoSuchElementException(s"Language '$moduleLanguage' requires a class name")})
+      case JavaModuleLanguage ⇒
+        JavaModule(
+          newClassInstance = javaClassNameOption match {
+            case Some(o) ⇒ () ⇒ Class.forName(o).newInstance()
+            case None ⇒ throw new NoSuchElementException(s"Language '$moduleLanguage' requires a class name")
+          })
       case _ ⇒ throw new IllegalArgumentException(s"Unsupported language $moduleLanguage")
     }
 }

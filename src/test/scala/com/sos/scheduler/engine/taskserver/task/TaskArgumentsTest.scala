@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.taskserver.task
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.minicom.types.VariantArray
 import com.sos.scheduler.engine.taskserver.module.Script
-import com.sos.scheduler.engine.taskserver.module.java.JavaModule
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -60,10 +59,12 @@ final class TaskArgumentsTest extends FreeSpec {
   }
 
   "monitors" in {
-    assert(taskArguments.monitors == List(
-      Monitor(JavaModule("com.example.B"), name = "", ordering = 1),
-      Monitor(JavaModule("com.example.C"), name = "", ordering = 1),
-      Monitor(JavaModule("com.example.A"), name = "MONITOR-NAME", ordering = 7)
-    ))
+    assert(taskArguments.monitors.size == 3)
+    assert(taskArguments.monitors(0).name == "")
+    assert(taskArguments.monitors(0).ordering == 1)
+    assert(taskArguments.monitors(1).name == "")
+    assert(taskArguments.monitors(1).ordering == 1)
+    assert(taskArguments.monitors(2).name == "MONITOR-NAME")
+    assert(taskArguments.monitors(2).ordering == 7)
   }
 }

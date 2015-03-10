@@ -1,43 +1,72 @@
 package com.sos.scheduler.engine.taskserver.task
 
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.taskserver.module.shell.ShellModuleInstance
+import com.sos.scheduler.engine.taskserver.module.NamedInvocables
+import com.sos.scheduler.engine.taskserver.module.shell.ShellModule
 import com.sos.scheduler.engine.taskserver.task.ShellProcessTask._
 import com.sos.scheduler.engine.taskserver.task.common.VariableSets
 import com.sos.scheduler.engine.taskserver.task.process.{ShellProcess, ShellProcessStarter}
 import java.nio.charset.StandardCharsets._
 import java.nio.file.Files._
+import org.scalactic.Requirements._
+import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
  */
-final class ShellProcessTask(moduleInstance: ShellModuleInstance, environment: Map[String, String], jobName: String, hasOrder: Boolean)
+final class ShellProcessTask(
+  module: ShellModule,
+  namedInvocables: NamedInvocables,
+  monitors: immutable.Seq[Monitor],
+  jobName: String,
+  hasOrder: Boolean,
+  environment: Map[String, String]) 
 extends Task with HasCloser {
+  
+  import namedInvocables.{spoolerLog, spoolerTask}
 
-  private var process: ShellProcess = null
+  private val monitorProcessor = new MonitorProcessor(monitors, namedInvocables, jobName = jobName).closeWithCloser
   private lazy val orderParamsFile = createTempFile("sos-", ".tmp")
+  private var startCalled = false
+  private var shellProcess: ShellProcess = null
 
-  override def start() = {
-    val params = moduleInstance.spoolerTask.parameterMap ++ moduleInstance.spoolerTask.orderParameterMap
-    val paramEnv = params map { case (k, v) ⇒ s"$EnvironmentParameterPrefix$k" → v }
-    process = ShellProcessStarter.start(
-      name = jobName,
-      additionalEnvironment = environment + (ReturnValuesFileEnvironmentVariableName → orderParamsFile.toAbsolutePath.toString) ++ paramEnv,
-      scriptString = moduleInstance.module.script.string.trim)
-    closer.registerAutoCloseable(process)
+  def start() = {
+    startCalled = true
+    monitorProcessor.preTask() && {
+      if (monitorProcessor.preStep()) {
+        shellProcess = startProcess()
+      }
+      true
+    }
   }
 
-  override def end() = {}
+  private def startProcess(): ShellProcess = {
+    val env = {
+      val params = spoolerTask.parameterMap ++ spoolerTask.orderParameterMap
+      val paramEnv = params map { case (k, v) ⇒ s"$EnvironmentParameterPrefix$k" → v }
+      environment + (ReturnValuesFileEnvironmentVariableName → orderParamsFile.toAbsolutePath.toString) ++ paramEnv
+    }
+    ShellProcessStarter.start(name = jobName, additionalEnvironment = env, scriptString = module.script.string.trim).closeWithCloser
+  }
 
-  override def step() = {
-    val resultCode = process.waitForTermination(logOutputLine = moduleInstance.spoolerLog.info)
-    transferReturnValuesToMaster()
-    <process.result
-      state_text={process.firstStdoutLine}
-      spooler_process_result="true"
-      exit_code={resultCode.value.toString}/>.toString()
+  def end() =
+    if (startCalled) {
+      monitorProcessor.postTask()
+    }
+
+  def step() = {
+    requireState(startCalled)
+    if (shellProcess == null)
+      <process.result spooler_process_result="false"/>.toString()
+    else {
+      val rc = shellProcess.waitForTermination(logOutputLine = spoolerLog.info)
+      val success = monitorProcessor.postStep(rc.isSuccess)
+      transferReturnValuesToMaster()
+      <process.result spooler_process_result={success.toString} exit_code={rc.value.toString} state_text={shellProcess.firstStdoutLine}/>.toString()
+    }
   }
 
   private def transferReturnValuesToMaster(): Unit = {
@@ -45,21 +74,23 @@ extends Task with HasCloser {
     if (variables.nonEmpty) {
       val xmlString = VariableSets.toXmlElem(fetchReturnValues()).toString()
       if (hasOrder)
-        moduleInstance.spoolerTask.orderParamsXml = xmlString
+        spoolerTask.orderParamsXml = xmlString
       else
-        moduleInstance.spoolerTask.paramsXml = xmlString
+        spoolerTask.paramsXml = xmlString
     }
   }
 
-  private def fetchReturnValues(): Map[String, String] =
-    (io.Source.fromFile(orderParamsFile)(ReturnValuesFileEncoding).getLines map { _.trim } collect {
-      case ReturnValuesRegex(name, value) ⇒ name.trim → value.trim
-      case line ⇒ throw new IllegalArgumentException(s"Not the expected syntax NAME=VALUE in file denoted by environment variable $ReturnValuesFileEnvironmentVariableName: $line")
-    }).toMap
+  private def fetchReturnValues() =
+    autoClosing(io.Source.fromFile(orderParamsFile)(ReturnValuesFileEncoding)) { source ⇒
+      (source.getLines map lineToKeyValue).toMap
+    }
 
   def files = {
-    if (process == null) throw new IllegalStateException
-    process.files
+    requireState(startCalled)
+    shellProcess match {
+      case null ⇒ Nil
+      case o ⇒ o.files
+    }
   }
 }
 
@@ -68,4 +99,9 @@ object ShellProcessTask {
   private val ReturnValuesFileEnvironmentVariableName = "SCHEDULER_RETURN_VALUES"
   private val ReturnValuesFileEncoding = ISO_8859_1  // For v1.9 (and later ???)
   private val ReturnValuesRegex = "([^=]+)=(.*)".r
+
+  private def lineToKeyValue(line: String): (String, String) = line match {
+    case ReturnValuesRegex(name, value) ⇒ name.trim → value.trim
+    case _ ⇒ throw new IllegalArgumentException(s"Not the expected syntax NAME=VALUE in file denoted by environment variable $ReturnValuesFileEnvironmentVariableName: $line")
+  }
 }

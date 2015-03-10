@@ -13,6 +13,8 @@ import java.util.UUID
 final class ProxySpoolerTask private(protected val remoting: ClientRemoting, val id: ProxyId, val name: String)
 extends SpoolerTask with SpecializedProxyIDispatch {
 
+  def setErrorCodeAndText(code: String, text: String): Unit = invokeMethod(DISPID(26), List(code, text))
+
   def paramsXml = invokeGet(DISPID(35)).asInstanceOf[String]
 
   def paramsXml_=(o: String) = invokePut(DISPID(35), o)

@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.taskserver.task
 
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.minicom.idispatch.annotation.invocable
 import com.sos.scheduler.engine.minicom.idispatch.{Invocable, InvocableFactory}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IID, VariantArray}
-import com.sos.scheduler.engine.taskserver.module.shell.{ShellModule, ShellModuleInstance}
-import com.sos.scheduler.engine.taskserver.module.{ModuleInstance, NamedInvocables, ShellModuleLanguage}
+import com.sos.scheduler.engine.taskserver.module.shell.ShellModule
+import com.sos.scheduler.engine.taskserver.module.{NamedInvocables, ShellModuleLanguage}
 import java.util.UUID
 import org.scalactic.Requirements._
 import scala.collection.immutable
@@ -20,32 +20,26 @@ final class RemoteModuleInstanceServer extends Invocable with HasCloser {
   import com.sos.scheduler.engine.taskserver.task.RemoteModuleInstanceServer._
 
   private var taskArguments: TaskArguments = null
-  private var moduleInstance: ModuleInstance = null
   private var task: Task = null
 
   @invocable
   def construct(arguments: VariantArray): Unit = taskArguments = TaskArguments(arguments)
 
   @invocable
-  def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Unit = {
-    moduleInstance = taskArguments.moduleLanguage match {
+  def begin(objectAnys: VariantArray, objectNamesAnys: VariantArray): Boolean = {
+    task = taskArguments.moduleLanguage match {
       case ShellModuleLanguage ⇒
-        new ShellModuleInstance(new ShellModule(taskArguments.script), toNamedObjectMap(names = objectNamesAnys, anys = objectAnys))
-    }
-    task = newShellTask().closeWithCloser
-    task.start()
-  }
-
-  private def newShellTask(): Task =
-    moduleInstance match {
-      case moduleInstance: ShellModuleInstance ⇒
-        new ShellProcessTask(moduleInstance,
+        new ShellProcessTask(
+          ShellModule(taskArguments.script),
+          toNamedObjectMap(names = objectNamesAnys, anys = objectAnys),
+          taskArguments.monitors,
           jobName = taskArguments.jobName,
           hasOrder = taskArguments.hasOrder,
           environment = taskArguments.environment)
-      case _ ⇒
-        throw new IllegalArgumentException(s"Unknown language '${moduleInstance.module.moduleLanguage }'")
+        .closeWithCloser
     }
+    task.start()
+  }
 
   @invocable
   def end(succeeded: Boolean): Unit = {

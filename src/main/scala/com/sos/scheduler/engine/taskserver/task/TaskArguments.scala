@@ -8,8 +8,7 @@ import com.sos.scheduler.engine.minicom.types.{VariantArray, variant}
 import com.sos.scheduler.engine.taskserver.module.{Module, ModuleLanguage, Script}
 import com.sos.scheduler.engine.taskserver.task.TaskArguments._
 import com.sos.scheduler.engine.taskserver.task.common.VariableSets
-import scala.collection.mutable
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 import scala.util.Sorting.stableSort
 
 /**
@@ -31,7 +30,7 @@ final class TaskArguments(arguments: List[(String, String)]) {
   lazy val monitors: immutable.Seq[Monitor] = {
     val unordered =
       for (m ← splitMonitorArguments(arguments filter { _._1 startsWith "monitor." })) yield {
-        val module = Module(m.moduleLanguage, m.script, javaClassOption = m.javaClassNameOption)
+        val module = Module(m.moduleLanguage, m.script, m.javaClassNameOption)
         Monitor(module, name = m.name, ordering = m.ordering)
       }
     stableSort(unordered, { o: Monitor ⇒ o.ordering }).toImmutableSeq
