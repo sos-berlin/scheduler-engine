@@ -21,5 +21,5 @@ class OrderService @Inject private(
 
   @GET @Path("log")
   @Produces(Array(MediaType.TEXT_PLAIN))
-  def getLogSnapshot = Response.ok(order.log.getFile, schedulerTextPlainVariant).cacheControl(noCache).build()
+  def getLogSnapshot = Response.ok(order.log.file, schedulerTextPlainVariant).cacheControl(noCache).build()
 }

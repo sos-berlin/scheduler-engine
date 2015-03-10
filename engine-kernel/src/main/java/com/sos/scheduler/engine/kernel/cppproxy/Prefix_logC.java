@@ -8,10 +8,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 public interface Prefix_logC extends CppProxyWithSister<PrefixLog> {
     PrefixLog.Type sisterType = new PrefixLog.Type();
 
-    void info(String line);
-    void warn(String line);
-    void error(String line);
-    void debug3(String line);
+    void java_log(int level, String line);
     String java_last(String log_level);
     boolean started();
     String this_filename();

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
+import com.sos.scheduler.engine.kernel.log.{LogSubscription, PrefixLog}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import com.sos.scheduler.engine.kernel.log.{PrefixLog, LogSubscription}
 import org.slf4j.LoggerFactory
 
 //TODO Datei erst nach unsubscribe() löschen.
@@ -17,7 +17,7 @@ object LogServletAsyncOperation {
     val logSubscription = new LogSubscription {
       def onStarted(): Unit = {
         logger.info("onStarted")
-        operation.start(log.getFile)
+        operation.start(log.file)
       }
 
       def onClosed(): Unit = {
@@ -55,7 +55,7 @@ object LogServletAsyncOperation {
     })
 
     if (log.isStarted)
-      operation.start(log.getFile)
+      operation.start(log.file)
     operation
   }
 }

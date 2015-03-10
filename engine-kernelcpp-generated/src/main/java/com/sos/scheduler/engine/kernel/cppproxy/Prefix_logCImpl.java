@@ -14,48 +14,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC {
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public void debug3(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            debug3__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void debug3__native(long cppReference, java.lang.String p0);
-
-
-    @Override public void error(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            error__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void error__native(long cppReference, java.lang.String p0);
-
-
-    @Override public void info(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            info__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void info__native(long cppReference, java.lang.String p0);
-
-
     @Override public java.lang.String java_last(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -70,6 +28,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC {
     }
 
     private static native java.lang.String java_last__native(long cppReference, java.lang.String p0);
+
+
+    @Override public void java_log(int p0, java.lang.String p1) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java_log__native(cppReference(), p0, p1);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void java_log__native(long cppReference, int p0, java.lang.String p1);
 
 
     @Override public boolean started() {
@@ -100,20 +72,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC {
     }
 
     private static native java.lang.String this_filename__native(long cppReference);
-
-
-    @Override public void warn(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            warn__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void warn__native(long cppReference, java.lang.String p0);
 
 
     // </editor-fold>

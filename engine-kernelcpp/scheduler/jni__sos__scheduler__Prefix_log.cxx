@@ -17,54 +17,6 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static void JNICALL debug3__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::debug3()");
-        (o_->debug3(env.string_from_jstring(p0)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static void JNICALL error__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::error()");
-        (o_->error(env.string_from_jstring(p0)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static void JNICALL info__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::info()");
-        (o_->info(env.string_from_jstring(p0)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
 static jstring JNICALL java_1last__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
     Env env = jenv;
@@ -75,6 +27,22 @@ static jstring JNICALL java_1last__Ljava_lang_String_2(JNIEnv* jenv, jobject, jl
     catch(const exception& x) {
         env.set_java_exception(x);
         return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static void JNICALL java_1log__ILjava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jint p0, jstring p1)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::java_log()");
+        (o_->java_log(p0, env.string_from_jstring(p1)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
     }
 }
 
@@ -114,30 +82,11 @@ static jstring JNICALL this_1filename(JNIEnv* jenv, jobject, jlong cppReference)
 
 }}}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static void JNICALL warn__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::warn()");
-        (o_->warn(env.string_from_jstring(p0)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
 const static JNINativeMethod native_methods[] = {
-    { (char*)"debug3__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::debug3__Ljava_lang_String_2 },
-    { (char*)"error__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::error__Ljava_lang_String_2 },
-    { (char*)"info__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::info__Ljava_lang_String_2 },
     { (char*)"java_last__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1last__Ljava_lang_String_2 },
+    { (char*)"java_log__native", (char*)"(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1log__ILjava_lang_String_2 },
     { (char*)"started__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::started },
-    { (char*)"this_filename__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::this_1filename },
-    { (char*)"warn__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::warn__Ljava_lang_String_2 }
+    { (char*)"this_filename__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::this_1filename }
 };
 
 namespace zschimmer { namespace javabridge { 

@@ -17,7 +17,7 @@ import scala.collection.mutable
 final class JS832IT extends FunSuite with ScalaSchedulerTest {
 
   test("When order is finished, Order log should be closed and reopened for next repetition") {
-    def logFile(o: OrderKey) = instance[OrderSubsystem].order(o).log.getFile
+    def logFile(o: OrderKey) = instance[OrderSubsystem].order(o).log.file
     val eventPipe = controller.newEventPipe()
     val firstLines = new mutable.HashSet[String]
     for (i <- 1 to 3) {

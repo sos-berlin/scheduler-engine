@@ -171,6 +171,11 @@ struct Has_log
     void                        warn                        ( const string& line )                  { log( log_warn  , line ); }
     void                        error                       ( const string& line )                  { log( log_error , line ); }
     void                        fatal                       ( const string& line )                  { log( log_fatal , line ); }
+
+    void java_log(int level, const string& line) {
+        return log((Log_level)level, line);
+    }
+
     virtual void                log                         ( Log_level level, const string& line ) { log2( level, "", line ); }
     virtual void                log2                        ( Log_level, const string& prefix, const string& line, Has_log* prefix_log = NULL )  = 0;
     void                        log_file                    ( const string& filename, const string& title = "" );
