@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.minicom.remoting.proxy
 
 import com.google.common.collect.HashBiMap
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
+import com.sos.scheduler.engine.minicom.idispatch.Invocable
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.ProxyRegister._
 import com.sos.scheduler.engine.minicom.types.COMException
@@ -14,33 +14,33 @@ import scala.util.control.NonFatal
  * @author Joacim Zschimmer
  */
 private[remoting] final class ProxyRegister {
-  private val proxyIdToIDispatch = HashBiMap.create[ProxyId, IDispatchable]()
-  private val iunknownToProxyId = proxyIdToIDispatch.inverse
+  private val proxyIdToInvocable = HashBiMap.create[ProxyId, Invocable]()
+  private val invocableToProxyId = proxyIdToInvocable.inverse
   private val proxyIdGenerator = ProxyId.newGenerator()
 
   def registerProxy(proxy: ProxyIDispatch): Unit = add(proxy.id, proxy)
 
-  def iDispatchToProxyId(iDispatch: IDispatchable): (ProxyId, Boolean) =
+  def invocableToProxyId(invocable: Invocable): (ProxyId, Boolean) =
     synchronized {
-      iunknownToProxyId.get(iDispatch) match {
+      invocableToProxyId.get(invocable) match {
         case null ⇒
           val proxyId = proxyIdGenerator.next()
-          add(proxyId, iDispatch)
+          add(proxyId, invocable)
           (proxyId, true)
         case o ⇒ (o, false)
       }
     }
 
-  private def add(proxyId: ProxyId, iDispatch: IDispatchable): Unit =
+  private def add(proxyId: ProxyId, invocable: Invocable): Unit =
     synchronized {
-      if (proxyIdToIDispatch containsKey proxyId) throw new DuplicateKeyException(s"$proxyId already registered")
-      if (iunknownToProxyId containsKey iDispatch) throw new DuplicateKeyException(s"IDispatch '$iDispatch' already registered")
-      proxyIdToIDispatch.put(proxyId, iDispatch)
+      if (proxyIdToInvocable containsKey proxyId) throw new DuplicateKeyException(s"$proxyId already registered")
+      if (invocableToProxyId containsKey invocable) throw new DuplicateKeyException(s"IUnknown '$invocable' already registered")
+      proxyIdToInvocable.put(proxyId, invocable)
     }
 
   def removeProxy(proxyId: ProxyId): Unit =
     synchronized {
-      proxyIdToIDispatch.remove(proxyId) match {
+      proxyIdToInvocable.remove(proxyId) match {
         case o: AutoCloseable ⇒
           try o.close()
           catch { case NonFatal(t) ⇒ logger.error(s"Suppressed: $t", t) }
@@ -48,13 +48,13 @@ private[remoting] final class ProxyRegister {
       }
     }
 
-  def iDispatchable(proxyId: ProxyId): IDispatchable =
+  def invocable(proxyId: ProxyId): Invocable =
     if (proxyId == ProxyId.Null) throw new COMException(E_POINTER)
-    else synchronized { proxyIdToIDispatch(proxyId) }
+    else synchronized { proxyIdToInvocable(proxyId) }
 
   override def toString = s"${getClass.getSimpleName}($size proxies)"
 
-  def size = proxyIdToIDispatch.size
+  def size = proxyIdToInvocable.size
 }
 
 private[remoting] object ProxyRegister {

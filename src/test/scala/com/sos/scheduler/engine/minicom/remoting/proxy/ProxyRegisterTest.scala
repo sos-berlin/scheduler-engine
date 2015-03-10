@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.minicom.remoting.proxy
 
 import com.google.inject.Guice
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.minicom.idispatch.{IDispatch, IDispatchable}
+import com.sos.scheduler.engine.minicom.idispatch.{IDispatch, Invocable}
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.ProxyRegister.DuplicateKeyException
 import org.junit.runner.RunWith
@@ -25,23 +25,23 @@ final class ProxyRegisterTest extends FreeSpec {
     val proxy = newProxy(externalProxyId)
     proxyRegister.registerProxy(proxy)
     proxy.id shouldEqual externalProxyId
-    proxyRegister.iDispatchToProxyId(proxy) shouldEqual (externalProxyId, false)
-    proxyRegister.iDispatchable(externalProxyId) shouldEqual proxy
+    proxyRegister.invocableToProxyId(proxy) shouldEqual (externalProxyId, false)
+    proxyRegister.invocable(externalProxyId) shouldEqual proxy
     proxyRegister.size shouldEqual 1
     intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(externalProxyId)) }
   }
 
   "Own IDispatch" in {
     proxyRegister.size shouldEqual 1
-    val iDispatch = mock[IDispatchable]
-    val (proxyId, true) = proxyRegister.iDispatchToProxyId(iDispatch)
+    val iDispatch = mock[Invocable]
+    val (proxyId, true) = proxyRegister.invocableToProxyId(iDispatch)
     proxyId.index shouldEqual 1
-    proxyRegister.iDispatchToProxyId(iDispatch) shouldEqual (proxyId, false)
-    proxyRegister.iDispatchable(proxyId) shouldEqual iDispatch
+    proxyRegister.invocableToProxyId(iDispatch) shouldEqual (proxyId, false)
+    proxyRegister.invocable(proxyId) shouldEqual iDispatch
     intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(proxyId)) }
 
     proxyRegister.size shouldEqual 2
-    val (otherProxyId, true) = proxyRegister.iDispatchToProxyId(mock[IDispatchable])
+    val (otherProxyId, true) = proxyRegister.invocableToProxyId(mock[Invocable])
     otherProxyId.index shouldEqual 2
     proxyRegister.size shouldEqual 3
   }
@@ -58,7 +58,7 @@ final class ProxyRegisterTest extends FreeSpec {
     trait A extends IDispatch with AutoCloseable
     val a = mock[A]
     when (a.close()) thenThrow new Exception("SHOULD BE IGNORED, ONLY LOGGED")
-    val (proxyId, true) = proxyRegister.iDispatchToProxyId(a)
+    val (proxyId, true) = proxyRegister.invocableToProxyId(a)
     proxyRegister.removeProxy(proxyId)
     verify(a).close()
   }

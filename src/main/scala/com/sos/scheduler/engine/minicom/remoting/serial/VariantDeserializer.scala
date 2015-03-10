@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.minicom.remoting.serial
 
-import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
+import com.sos.scheduler.engine.minicom.idispatch.Invocable
 import com.sos.scheduler.engine.minicom.remoting.serial.variantArrayFlags._
 import com.sos.scheduler.engine.minicom.remoting.serial.variantTypes._
 import com.sos.scheduler.engine.minicom.types.HRESULT.DISP_E_BADVARTYPE
@@ -16,7 +16,7 @@ private[remoting] trait VariantDeserializer extends BaseDeserializer {
     val vt = readInt32()
     vt match {
       case _ if (vt & VT_ARRAY) != 0 ⇒ readVariantArray()
-      case VT_UNKNOWN | VT_DISPATCH ⇒ readIDispatchableOption()  // To make any sense, VT_UNKNOWN should denote here an  IDispatch
+      case VT_UNKNOWN | VT_DISPATCH ⇒ readInvocableOption()  // To make any sense, VT_UNKNOWN should denote here an  IDispatch
       case _ ⇒ readSimpleVariant(vt)
     }
   }
@@ -67,5 +67,5 @@ private[remoting] trait VariantDeserializer extends BaseDeserializer {
       case o ⇒ throw new COMException(DISP_E_BADVARTYPE, f"Unsupported Variant VT=$o%x")
     }
 
-  protected def readIDispatchableOption(): Option[IDispatchable] = throw new UnsupportedOperationException("readIDispatchableOption is not implemented")  // Method is overridden
+  protected def readInvocableOption(): Option[Invocable] = throw new UnsupportedOperationException("readInvocableOption is not implemented")  // Method is overridden
 }

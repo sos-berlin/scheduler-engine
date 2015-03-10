@@ -24,7 +24,7 @@ private final class CallSerializer(protected val proxyRegister: ProxyRegister) e
     call match {
       case CreateInstanceCall(clsid, outer, context, iids) ⇒
         writeUUID(clsid.uuid)
-        writeIDispatchable(None) // outer
+        writeInvocable(None) // outer
         writeInt32(0) // context
         writeInt32(iids.size)
         for (o ← iids) writeUUID(o.uuid)
@@ -32,9 +32,9 @@ private final class CallSerializer(protected val proxyRegister: ProxyRegister) e
 
   private def writeObjectCall(call: ObjectCall) =
     call match {
-      //      case ReleaseCall(proxyIDispatch) ⇒   // TODO
+      //      case ReleaseCall(proxyInvocable) ⇒   // TODO
       //        writeByte(MessageClass.Object)
-      //        writeIDispatchable(proxyIDispatch.id)
+      //        writeInvocable(proxyInvocable.id)
       //        writeByte(MessageCommand.Release)
 
       case QueryInterfaceCall(proxyId, iid) ⇒

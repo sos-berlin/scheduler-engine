@@ -5,10 +5,10 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.minicom.idispatch.IDispatchable
-import com.sos.scheduler.engine.taskserver.module.NamedObjects.{SpoolerLogName, SpoolerTaskName}
+import com.sos.scheduler.engine.minicom.idispatch.Invocable
+import com.sos.scheduler.engine.taskserver.module.NamedInvocables.{SpoolerLogName, SpoolerTaskName}
 import com.sos.scheduler.engine.taskserver.module.shell.{ShellModule, ShellModuleInstance}
-import com.sos.scheduler.engine.taskserver.module.{NamedObjects, Script}
+import com.sos.scheduler.engine.taskserver.module.{NamedInvocables, Script}
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, SpoolerTask}
 import com.sos.scheduler.engine.taskserver.task.ShellProcessTaskTest._
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
@@ -26,18 +26,18 @@ final class ShellProcessTaskTest extends FreeSpec {
   "ShellProcessTask" in {
     val infoMessages = mutable.Buffer[String]()
     def newTask() = {
-      object TestSpoolerLog extends SpoolerLog with IDispatchable {
+      object TestSpoolerLog extends SpoolerLog with Invocable {
         def info(message: String) = infoMessages += message
       }
-      object TestSpoolerTask extends SpoolerTask with IDispatchable {
+      object TestSpoolerTask extends SpoolerTask with Invocable {
         def paramsXml = ""
         def paramsXml_=(o: String) = throw new NotImplementedError
         def orderParamsXml = ""
         def orderParamsXml_=(o: String) = throw new NotImplementedError
       }
-      val namedObjects = NamedObjects(List(SpoolerLogName → TestSpoolerLog, SpoolerTaskName → TestSpoolerTask))
+      val namedInvocables = NamedInvocables(List(SpoolerLogName → TestSpoolerLog, SpoolerTaskName → TestSpoolerTask))
       val module = new ShellModule(TestScript)
-      val moduleInstance = new ShellModuleInstance(module, namedObjects)
+      val moduleInstance = new ShellModuleInstance(module, namedInvocables)
       new ShellProcessTask(moduleInstance, jobName = "TEST-JOB", hasOrder = false, environment = Map(TestName → TestValue))
     }
     val (result, files) = autoClosing(newTask()) { task ⇒

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.minicom.idispatch
 /**
  * @author Joacim Zschimmer
  */
-trait IDispatch extends IDispatchable {
+trait IDispatch extends Invocable {
 
   def getIdOfName(name: String): DISPID
 

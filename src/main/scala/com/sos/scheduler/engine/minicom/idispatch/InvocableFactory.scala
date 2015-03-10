@@ -5,8 +5,8 @@ import com.sos.scheduler.engine.minicom.types.{CLSID, IID}
 /**
  * @author Joacim Zschimmer
  */
-trait IDispatchFactory {
+trait InvocableFactory {
   def clsid: CLSID
   def iid: IID
-  def apply(): IDispatchable
+  def apply(): Invocable
 }

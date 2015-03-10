@@ -11,7 +11,7 @@ private[remoting] trait IUnknownDeserializer extends VariantDeserializer {
 
   protected val remoting: ServerRemoting
 
-  override final def readIDispatchableOption() = {
+  override final def readInvocableOption() = {
     val proxyId = ProxyId(readInt64())
     val isNew = readBoolean()
     if (isNew) {
@@ -27,7 +27,7 @@ private[remoting] trait IUnknownDeserializer extends VariantDeserializer {
     else
       proxyId match {
         case ProxyId.Null ⇒ None
-        case _ ⇒ Some(remoting.iDispatchable(proxyId))
+        case _ ⇒ Some(remoting.invocable(proxyId))
       }
   }
 }

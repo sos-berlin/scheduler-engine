@@ -20,7 +20,7 @@ extends IUnknownDeserializer {
   def readCreateInstanceResult(): CreateInstanceResult = {
     readAnswerHeader()
     require(HRESULT(readInt32()) == S_OK)
-    CreateInstanceResult(readIDispatchableOption().get)
+    CreateInstanceResult(readInvocableOption().get)
   }
 
   def readGetIDsOfNamesResult(): GetIDsOfNamesResult = {

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.minicom.idispatch
 
-import com.sos.scheduler.engine.minicom.idispatch.Dispatcher._
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.minicom.idispatch.InvocableIDispatch._
 import com.sos.scheduler.engine.minicom.types.HRESULT._
 import com.sos.scheduler.engine.minicom.types.{COMException, VariantArray}
 import java.lang.reflect.{InvocationTargetException, Method}
@@ -8,9 +9,9 @@ import java.lang.reflect.{InvocationTargetException, Method}
 /**
  * @author Joacim Zschimmer
  */
-final class Dispatcher(val delegate: IDispatchable) extends IDispatch {
-  private val methods = delegate.getClass.getMethods filter { _.getAnnotation(classOf[invocable]) != null }
-  require(methods.nonEmpty, s"Contains no methods declared with @invocable: ${delegate.getClass}")
+final case class InvocableIDispatch(invocable: Invocable) extends IDispatch {
+
+  private val methods = invocable.invocableMethods
 
   def call(methodName: String, arguments: Seq[Any] = Nil): Any =
     invokeMethod(methods(methodIndex(methodName)), arguments)
@@ -32,19 +33,19 @@ final class Dispatcher(val delegate: IDispatchable) extends IDispatch {
   }
 
   private def invokeMethod(method: Method, arguments: Seq[Any]): Any = {
-    if (arguments.size != method.getParameterCount) throw new COMException(DISP_E_BADPARAMCOUNT, s"Number of arguments (${arguments.size }) does not match method $method")
+    if (arguments.size != method.getParameterCount) throw new COMException(DISP_E_BADPARAMCOUNT, s"Number of arguments (${arguments.size}) does not match method $method")
     val javaParameters = for ((t, v) ← method.getParameterTypes zip arguments) yield convert(t.asInstanceOf[Class[_ <: AnyRef]], v)
     val result =
-      try method.invoke(delegate, javaParameters: _*)
+      try method.invoke(invocable, javaParameters: _*)
       catch { case e: InvocationTargetException ⇒ throw e.getTargetException }
     if (result == null) Unit else result
   }
 }
 
-object Dispatcher {
+object InvocableIDispatch {
   object implicits {
-    implicit class RichIDispatch(val delegate: IDispatchable) extends AnyVal {
-      def call(methodName: String, arguments: Seq[Any]): Any = new Dispatcher(delegate).call(methodName, arguments)
+    implicit class RichInvocable(val delegate: Invocable) extends AnyVal {
+      def call(methodName: String, arguments: Seq[Any]): Any = new InvocableIDispatch(delegate).call(methodName, arguments)
     }
   }
 
@@ -58,6 +59,7 @@ object Dispatcher {
   private val BoxedBooleanClass = classOf[java.lang.Boolean]
   private val StringClass = classOf[String]
   private val VariantArraySerializableClass = classOf[VariantArray]
+  private val logger = Logger(getClass)
 
   private def convert[A <: AnyRef](c: Class[A], v: Any): A =
     (c match {

@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.minicom.remoting
 
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.{RichTraversable, RichTraversableOnce}
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.minicom.idispatch.Dispatcher.implicits._
-import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, IDispatchFactory, IDispatchable}
+import com.sos.scheduler.engine.minicom.idispatch.InvocableIDispatch.implicits._
+import com.sos.scheduler.engine.minicom.idispatch.{DISPID, DispatchType, Invocable, InvocableFactory}
 import com.sos.scheduler.engine.minicom.remoting.Remoting._
 import com.sos.scheduler.engine.minicom.remoting.calls.{Call, CallCall, CreateInstanceCall, CreateInstanceResult, EmptyResult, GetIDsOfNamesCall, GetIDsOfNamesResult, InvokeCall, InvokeResult, ProxyId, ReleaseCall, Result}
 import com.sos.scheduler.engine.minicom.remoting.proxy.{ClientRemoting, ProxyIDispatchFactory, ProxyRegister, SimpleProxyIDispatch}
@@ -23,12 +23,12 @@ import scala.util.control.NonFatal
  */
 final class Remoting(
   connection: MessageConnection,
-  iDispatchFactories: Iterable[IDispatchFactory],
+  invocableFactories: Iterable[InvocableFactory],
   proxyIDispatchFactories: Iterable[ProxyIDispatchFactory])
 extends ServerRemoting with ClientRemoting {
 
   private val proxyRegister = new ProxyRegister
-  private val createIDispatchable = toCreateIDispatchableByCLSID(iDispatchFactories)
+  private val createInvocable = toCreateInvocableByCLSID(invocableFactories)
   private val proxyClsidMap: Map[CLSID, ProxyIDispatchFactory.Fun] =
     (List(SimpleProxyIDispatch) ++ proxyIDispatchFactories).map { o ⇒ o.clsid → o.apply _ } (breakOut)
 
@@ -58,15 +58,15 @@ extends ServerRemoting with ClientRemoting {
   private def executeCall(call: Call): Result = call match {
     case CreateInstanceCall(clsid, outer, context, iids) ⇒
       require(outer == None && context == 0 && iids.size == 1)
-      CreateInstanceResult(iDispatch = createIDispatchable(clsid, iids.head))
+      CreateInstanceResult(invocable = createInvocable(clsid, iids.head))
 
     case ReleaseCall(proxyId) ⇒
       proxyRegister.removeProxy(proxyId)
       EmptyResult
 
     case CallCall(proxyId, methodName, arguments) ⇒
-      val iDispatchable = proxyRegister.iDispatchable(proxyId)
-      val result = iDispatchable.call(methodName, arguments)
+      val invocable = proxyRegister.invocable(proxyId)
+      val result = invocable.call(methodName, arguments)
       InvokeResult(result)
   }
 
@@ -77,7 +77,7 @@ extends ServerRemoting with ClientRemoting {
     result
   }
 
-  private[remoting] def iDispatchable(proxyId: ProxyId) = proxyRegister.iDispatchable(proxyId)
+  private[remoting] def invocable(proxyId: ProxyId) = proxyRegister.invocable(proxyId)
 
   private[remoting] def getIdOfName(proxyId: ProxyId, name: String) = {
     val call = GetIDsOfNamesCall(proxyId, IID.Null, localeId = 0, names = List(name))
@@ -101,16 +101,16 @@ extends ServerRemoting with ClientRemoting {
 }
 
 object Remoting {
-  private type CreateIDispatchableByCLSID = (CLSID, IID) ⇒ IDispatchable
+  private type CreateInvocableByCLSID = (CLSID, IID) ⇒ Invocable
   private val logger = Logger(getClass)
 
-  private def toCreateIDispatchableByCLSID(iDispatchFactories: Iterable[IDispatchFactory]): CreateIDispatchableByCLSID = {
-    val clsidToFactoryMap = iDispatchFactories toKeyedMap { _.clsid }
-    def createIDispatchable(clsId: CLSID, iid: IID): IDispatchable = {
+  private def toCreateInvocableByCLSID(invocableFactories: Iterable[InvocableFactory]): CreateInvocableByCLSID = {
+    val clsidToFactoryMap = invocableFactories toKeyedMap { _.clsid }
+    def createInvocable(clsId: CLSID, iid: IID): Invocable = {
       val factory = clsidToFactoryMap(clsId)
       require(factory.iid == iid, s"IID $iid is not supported by $factory")
       factory()
     }
-    createIDispatchable  // Return the function
+    createInvocable  // Return the function itself
   }
 }
