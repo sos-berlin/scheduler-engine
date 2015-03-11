@@ -622,8 +622,17 @@ struct Session : Object
     typedef int64               Id;
 
 
-                                Session                 ( Connection* con, Id id = 0 )                  : _zero_(this+1), _id(id), _connection(con) {}
-                                Session                 ( Server* server, Connection* con, Id id = 0 )  : _zero_(this+1), _server(server), _id(id), _connection(con) {}
+    Session(Connection* con) : 
+        _zero_(this + 1), 
+        _connection(con) 
+    {}
+
+    Session(Server* server, Connection* con, Id id = 0) : 
+        _zero_(this + 1), 
+        _server(server), 
+        _connection(con) 
+    {}
+
                                ~Session                 ();
 
     void                        close                   ();
@@ -675,7 +684,6 @@ struct Session : Object
 
     Fill_zero                  _zero_;
     Server*                    _server;
-    Id                         _id;
     ptr<Connection>            _connection;
     Object_table               _object_table;
     bool                       _connection_has_only_this_session;

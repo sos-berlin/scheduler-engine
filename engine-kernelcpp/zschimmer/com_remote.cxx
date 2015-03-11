@@ -2157,7 +2157,7 @@ void Session::execute( Input_message* in, Output_message* out )
         {
             case msg_session:
             {
-                if( in->read_int64() != _id )  throw_xc( "Z-REMOTE-104", string_from_object_id( _id ) );
+                if (in->read_int64() != 0)  throw_xc("Z-REMOTE-104", string_from_object_id(0));   // Session ID is always 0
             
                 switch( in->read_char() )
                 {
@@ -2276,7 +2276,7 @@ Simple_operation* Session::create_instance__start( const CLSID& clsid, IUnknown*
     ptr<Simple_operation> operation = Z_NEW( Simple_operation( this, NULL, "create_instance" ) );
 
     operation->_output_message.write_char    ( msg_session );
-    operation->_output_message.write_int64   ( _id );
+    operation->_output_message.write_int64   ( 0 );  // Session ID, is always 0
     operation->_output_message.write_char    ( cmd_createinstance );
     operation->_output_message.write_guid    ( clsid );
     operation->_output_message.write_iunknown( outer );
