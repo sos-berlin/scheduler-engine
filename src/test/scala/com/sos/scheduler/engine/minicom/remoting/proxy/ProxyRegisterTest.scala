@@ -5,6 +5,8 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.minicom.idispatch.{IDispatch, Invocable}
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.ProxyRegister.DuplicateKeyException
+import com.sos.scheduler.engine.minicom.types.COMException
+import com.sos.scheduler.engine.minicom.types.HRESULT._
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.FreeSpec
@@ -44,6 +46,11 @@ final class ProxyRegisterTest extends FreeSpec {
     val (otherProxyId, true) = proxyRegister.invocableToProxyId(mock[Invocable])
     otherProxyId.index shouldEqual 2
     proxyRegister.size shouldEqual 3
+  }
+
+  "null is rejected" in {
+    intercept[COMException] { proxyRegister.invocable(ProxyId.Null) } .hResult shouldEqual E_POINTER
+    intercept[NullPointerException] { proxyRegister.invocableToProxyId(null) }
   }
 
   "removeProxy" in {

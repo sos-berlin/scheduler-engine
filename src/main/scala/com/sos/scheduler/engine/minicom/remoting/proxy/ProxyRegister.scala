@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.ProxyRegister._
 import com.sos.scheduler.engine.minicom.types.COMException
 import com.sos.scheduler.engine.minicom.types.HRESULT.E_POINTER
+import org.scalactic.Requirements._
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
 
@@ -20,7 +21,8 @@ private[remoting] final class ProxyRegister {
 
   def registerProxy(proxy: ProxyIDispatch): Unit = add(proxy.id, proxy)
 
-  def invocableToProxyId(invocable: Invocable): (ProxyId, Boolean) =
+  def invocableToProxyId(invocable: Invocable): (ProxyId, Boolean) = {
+    requireNonNull(invocable)
     synchronized {
       invocableToProxyId.get(invocable) match {
         case null ⇒
@@ -30,6 +32,7 @@ private[remoting] final class ProxyRegister {
         case o ⇒ (o, false)
       }
     }
+  }
 
   private def add(proxyId: ProxyId, invocable: Invocable): Unit =
     synchronized {
@@ -48,9 +51,10 @@ private[remoting] final class ProxyRegister {
       }
     }
 
-  def invocable(proxyId: ProxyId): Invocable =
+  def invocable(proxyId: ProxyId): Invocable = {
     if (proxyId == ProxyId.Null) throw new COMException(E_POINTER)
-    else synchronized { proxyIdToInvocable(proxyId) }
+    synchronized { proxyIdToInvocable(proxyId) }
+  }
 
   override def toString = s"${getClass.getSimpleName}($size proxies)"
 
