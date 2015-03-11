@@ -7,7 +7,9 @@ import com.sos.scheduler.engine.minicom.types.IUnknown
 import java.lang.reflect.Method
 
 /**
- * Public methods annotated with @[[invocable]] are callable via [[InvocableIDispatch]]
+ * Public methods annotated with @[[invocable]] are callable via [[InvocableIDispatch]].
+ * Nearly a [[IDispatch]], but without need to implement the `IDispatch`s methods.
+ *
  * @author Joacim Zschimmer
  */
 trait Invocable extends IUnknown {
