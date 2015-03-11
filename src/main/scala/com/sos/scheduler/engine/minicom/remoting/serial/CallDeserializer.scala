@@ -23,7 +23,7 @@ extends IUnknownDeserializer {
     }
 
   private def readSessionCall(): Call = {
-    val sessionId = readInt64()  // ???
+    require(readInt64() == 0, "Session ID is not 0")
     readByte() match {
       case MessageCommand.CreateInstance ⇒
         val clsid = CLSID(readUUID())
