@@ -61,7 +61,7 @@ extends ServerRemoting with ClientRemoting {
       CreateInstanceResult(invocable = createInvocable(clsid, iids.head))
 
     case ReleaseCall(proxyId) ⇒
-      proxyRegister.removeProxy(proxyId)
+      proxyRegister.release(proxyId)
       EmptyResult
 
     case CallCall(proxyId, methodName, arguments) ⇒

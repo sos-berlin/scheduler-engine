@@ -55,9 +55,9 @@ final class ProxyRegisterTest extends FreeSpec {
 
   "removeProxy" in {
     proxyRegister.size shouldEqual 3
-    proxyRegister.removeProxy(externalProxyId)
+    proxyRegister.release(externalProxyId)
     proxyRegister.size shouldEqual 2
-    proxyRegister.removeProxy(externalProxyId)
+    proxyRegister.release(externalProxyId)
     proxyRegister.size shouldEqual 2
   }
 
@@ -66,10 +66,9 @@ final class ProxyRegisterTest extends FreeSpec {
     val a = mock[A]
     when (a.close()) thenThrow new Exception("SHOULD BE IGNORED, ONLY LOGGED")
     val (proxyId, true) = proxyRegister.invocableToProxyId(a)
-    proxyRegister.removeProxy(proxyId)
+    proxyRegister.release(proxyId)
     verify(a).close()
   }
 
-  private def newProxy(proxyId: ProxyId, name: String = "") =
-    new SimpleProxyIDispatch(mock[ClientRemoting], proxyId, name)
+  private def newProxy(proxyId: ProxyId, name: String = "") = new SimpleProxyIDispatch(mock[ClientRemoting], proxyId, name)
 }

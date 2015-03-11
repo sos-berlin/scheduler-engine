@@ -41,7 +41,7 @@ private[remoting] final class ProxyRegister {
       proxyIdToInvocable.put(proxyId, invocable)
     }
 
-  def removeProxy(proxyId: ProxyId): Unit =
+  def release(proxyId: ProxyId): Unit =
     synchronized {
       proxyIdToInvocable.remove(proxyId) match {
         case o: AutoCloseable ⇒
