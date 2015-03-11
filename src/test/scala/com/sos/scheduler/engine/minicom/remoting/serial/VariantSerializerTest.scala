@@ -63,7 +63,7 @@ private object VariantSerializerTest {
   }
 
   private def testSerialize(value: Any, variantType: Int, bytes: Seq[Int]): Unit = {
-    val serializer = new VariantSerializer {}
+    val serializer = new VariantSerializer.WithoutIUnknown
     serializer.writeVariant(value)
     val (a, length) = serializer.byteArrayAndLength
     a.take(length) shouldEqual variantTypeToArray(variantType, bytes)

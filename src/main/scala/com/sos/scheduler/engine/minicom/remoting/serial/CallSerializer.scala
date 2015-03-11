@@ -24,7 +24,7 @@ private final class CallSerializer(protected val proxyRegister: ProxyRegister) e
     call match {
       case CreateInstanceCall(clsid, outer, context, iids) ⇒
         writeUUID(clsid.uuid)
-        writeInvocable(None) // outer
+        writeNull() // outer
         writeInt32(0) // context
         writeInt32(iids.size)
         for (o ← iids) writeUUID(o.uuid)
