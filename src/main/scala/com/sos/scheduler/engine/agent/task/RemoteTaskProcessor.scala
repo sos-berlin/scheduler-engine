@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.agent.task
 
 import com.sos.scheduler.engine.agent.commands.{CloseRemoteTask, CloseRemoteTaskResponse, RemoteTaskCommand, Response, StartRemoteTask, StartRemoteTaskResponse}
 import com.sos.scheduler.engine.agent.task.RemoteTaskProcessor._
-import com.sos.scheduler.engine.agentcommon.ScalaConcurrentHashMap
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashMap}
 import com.sos.scheduler.engine.data.agent.RemoteTaskId
 import com.sos.scheduler.engine.taskserver.task.StartConfiguration
 import javax.inject.{Inject, Singleton}
