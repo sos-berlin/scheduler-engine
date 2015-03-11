@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent
 
-import com.sos.scheduler.engine.agentcommon.CommandLineArguments
+import com.sos.scheduler.engine.common.commandline.CommandLineArguments
 
 /**
  * @author Joacim Zschimmer
