@@ -13,6 +13,7 @@ import java.nio.charset.Charset
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.concurrent.{Future, Promise}
+import scala.util.control.NonFatal
 
 /**
  * Runs an extra JobScheduler, for test purposes.
@@ -68,7 +69,8 @@ extends AutoCloseable with HasCloser {
     processBuilder.environment.put("JAVA_HOME", sys.props("java.home"))
     for ((k, v) ← env) processBuilder.environment.put(k, v)
     processBuilder.redirectErrorStream(true)
-    processBuilder.start()
+    try processBuilder.start()
+    catch { case NonFatal(t) ⇒ throw new RuntimeException(s"$t - arguments=${processBuilder.command.mkString("(", ",", ")")}", t) }
   }
 
   private def startStdoutCollectorThread(in: InputStream): Unit = {
