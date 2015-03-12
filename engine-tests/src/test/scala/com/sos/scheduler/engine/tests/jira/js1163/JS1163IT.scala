@@ -58,7 +58,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
             TrapJobPath, TrapMonitorJobPath,
             IgnoringJobPath, IgnoringMonitorJobPath,
             ApiJobPath)
-          val runs = jobPaths map runJobFuture
+          val runs = jobPaths map { runJobFuture(_) }
           for (run ← runs) awaitSuccess(run.started)
           sleep(ShellStartupTime)  // Wait until shell scripts should have executed their "trap" commands
           for (run ← runs) scheduler executeXml

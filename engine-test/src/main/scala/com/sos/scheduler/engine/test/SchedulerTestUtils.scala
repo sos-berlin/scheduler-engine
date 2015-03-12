@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
@@ -58,11 +59,11 @@ object SchedulerTestUtils {
     run.taskId
   }
 
-  def runJobFuture(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskRun = {
+  def runJobFuture(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun = {
     implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
     inSchedulerThread {
       // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintreffen. Sonst könnten die ersten nach startJob verlorengehen.
-      val taskId = startJob(jobPath)
+      val taskId = startJob(jobPath, variables = variables)
       val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
       val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
       val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
@@ -74,8 +75,8 @@ object SchedulerTestUtils {
     }
   }
 
-  def startJob(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskId = {
-    val response = controller.scheduler executeXml <start_job job={jobPath.string}/>
+  def startJob(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskId = {
+    val response = controller.scheduler executeXml StartJobCommand(jobPath, variables = variables)
     TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
   }
 
