@@ -21,6 +21,7 @@ import java.io.IOException;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class JS428Test extends SchedulerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JS428Test.class);
