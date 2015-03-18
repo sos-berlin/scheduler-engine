@@ -12,12 +12,17 @@ final case class SpoolerProcessAfterParameter(value: Boolean) extends ExpectedDe
 
 abstract class MessageCode(val level: SchedulerLogLevel) extends ExpectedDetail {
   val code: String
+  val disposition: Disposition
 }
 
 object MessageCode {
-  def unapply(o: MessageCode) = Some((o.level, o.code))
+  def unapply(o: MessageCode) = Some((o.level, o.code, o.disposition))
 }
 
-final case class ErrorCode(code: String) extends MessageCode(SchedulerLogLevel.error)
+final case class ErrorCode(code: String, disposition: Disposition = Mandatory) extends MessageCode(SchedulerLogLevel.error)
 
-final case class Warning(code: String) extends MessageCode(SchedulerLogLevel.warning)
+final case class Warning(code: String, disposition: Disposition = Mandatory) extends MessageCode(SchedulerLogLevel.warning)
+
+sealed trait Disposition
+case object Mandatory extends Disposition
+case object Ignorable extends Disposition
