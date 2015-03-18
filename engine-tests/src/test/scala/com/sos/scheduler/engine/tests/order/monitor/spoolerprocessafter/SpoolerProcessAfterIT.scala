@@ -42,9 +42,10 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentHttpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
   private lazy val agentModes = List(
-    "no Agent"                → None,
-    "C++ Agent via TCP"       → Some(s"127.0.0.1:$tcpPort"),
-    // FIXME C++ crashes: "C++ Agent via C++ HTTP"  → Some(s"http://127.0.0.1:$tcpPort"),
+    //"no Agent"                → None,
+    //"C++ Agent via TCP"       → Some(s"127.0.0.1:$tcpPort"),
+    // FIXME C++ crashes:
+    "C++ Agent via C++ HTTP"  → Some(s"http://127.0.0.1:$tcpPort"),
     "C++ Agent via Java HTTP" → Some(s"http://127.0.0.1:$javaPort"))
     //TODO JS-1291 While agent has not been finished:  "Java Agent"              → Some(s"http://127.0.0.1:$agentHttpPort"))
 
