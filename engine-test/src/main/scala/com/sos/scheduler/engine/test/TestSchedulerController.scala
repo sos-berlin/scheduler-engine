@@ -151,7 +151,7 @@ with HasInjector {
     toleratingErrorLogEvent(_.codeOption exists tolerateErrorCodes)(f)
 
   def toleratingErrorLogEvent[A](predicate: ErrorLogEvent ⇒ Boolean)(f: ⇒ A): A = {
-    require(errorLogEventIsTolerated == Set())
+    require(errorLogEventIsTolerated == Set(), "Not nestable")
     errorLogEventIsTolerated = predicate
     try {
       val result = f
