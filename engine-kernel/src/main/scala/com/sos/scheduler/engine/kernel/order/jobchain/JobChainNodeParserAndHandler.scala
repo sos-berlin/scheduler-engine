@@ -33,7 +33,6 @@ private[jobchain] trait JobChainNodeParserAndHandler {
   def initializeWithNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: String ⇒ Option[OnReturnCodeParser]) = {
     if (returnCodeToOnReturnCode ne PartialFunction.empty) throw new IllegalStateException
     returnCodeToOnReturnCode = parseNodeXml(xmlSource, namespaceToOnReturnCodeParser)
-    logger.debug(s"$this: $returnCodeToOnReturnCode")
   }
 
   def orderStateTransitionToState(t: OrderStateTransition): OrderState =
