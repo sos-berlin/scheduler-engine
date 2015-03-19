@@ -26,12 +26,12 @@
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-kernel</artifactId>
-            <version>1.9-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-test</artifactId>
-            <version>1.9-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

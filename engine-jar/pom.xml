@@ -65,12 +65,14 @@
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-cppjava-runtime</artifactId>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-data</artifactId>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

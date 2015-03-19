@@ -11,8 +11,6 @@
         <artifactId>engine</artifactId>
         <version>1.9-SNAPSHOT</version>
     </parent>
-    
-    <version>1.9-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
