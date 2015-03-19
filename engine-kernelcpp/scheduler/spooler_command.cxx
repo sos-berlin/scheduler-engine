@@ -1041,6 +1041,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
+    bool via_old_plain_tcp = dynamic_cast<Xml_operation*>(_communication_operation) != NULL;
     int  tcp_port = start_task_element.int_getAttribute( "tcp_port" );
     string kind   = start_task_element.    getAttribute( "kind" );
 
@@ -1057,7 +1058,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
 
-    if (_communication_operation) {  // Old plain TCP
+    if (via_old_plain_tcp) {
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " register_task_process()\n");
         _communication_operation->_operation_connection->register_task_process( process );
     } else {
@@ -1077,12 +1078,13 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_kill_or_close(const xml::Element_ptr& element)
 {
+    bool via_old_plain_tcp = dynamic_cast<Xml_operation*>(_communication_operation) != NULL;
     if (!_spooler->_remote_commands_allowed_for_licence) z::throw_xc("SCHEDULER-717");
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
     int  process_id = element. int_getAttribute( "process_id" );
-    Api_process* process = _communication_operation?  // Old plain TCP
+    Api_process* process = via_old_plain_tcp?  // Old plain TCP
         _communication_operation->_operation_connection->get_task_process( process_id )
         : _spooler->task_process(process_id);
 
@@ -1094,10 +1096,10 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_kill_or
         bool kill = element.bool_getAttribute("kill", false);
         if (kill) process->kill(Z_SIGKILL);
 
-        ptr<Remote_task_close_command_response> response = Z_NEW(Remote_task_close_command_response(process, _communication_operation ? _communication_operation->_connection : NULL));
+        ptr<Remote_task_close_command_response> response = Z_NEW(Remote_task_close_command_response(process, via_old_plain_tcp ? _communication_operation->_connection : NULL));
         response->set_async_manager( _spooler->_connection_manager );
         response->async_continue();
-        if (_communication_operation) {  // Old plain TCP
+        if (via_old_plain_tcp) {  // Old plain TCP
             _response = response;
             return xml::Element_ptr();
         } else
@@ -1454,7 +1456,8 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
 xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element )
 {
-    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
+    bool via_old_plain_tcp = dynamic_cast<Xml_operation*>(_communication_operation) != NULL;
+    if (!via_old_plain_tcp) z::throw_xc("SCHEDULER-222", register_remote_scheduler_element.nodeName());
 
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
