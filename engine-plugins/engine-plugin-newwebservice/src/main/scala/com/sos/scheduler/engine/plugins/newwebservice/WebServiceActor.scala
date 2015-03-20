@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice
 import akka.actor.ActorLogging
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
@@ -85,7 +86,7 @@ extends HttpServiceActor with ActorLogging {
           }
         } ~
         pathPrefix(Segment) { subsystemName ⇒
-          val subsystem = fileBasedSubsystemRegister.subsystem(subsystemName)
+          val subsystem = fileBasedSubsystemRegister.subsystem(FileBasedType.fromCppName(subsystemName))
           path("overview") {
             detach(()) {
               complete {

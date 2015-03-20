@@ -101,7 +101,6 @@ object FileBasedSubsystem {
 
   final class Register private(injector: Injector, typeToDescription: Map[FileBasedType, Description]) {
     val descriptions = typeToDescription.values.toImmutableSeq
-    def subsystem(cppName: String): FileBasedSubsystem = subsystem(FileBasedType fromCppName cppName)
     def subsystem(t: FileBasedType): FileBasedSubsystem = injector.getInstance(description(t).subsystemClass)
     def description(t: FileBasedType): Description = typeToDescription(t)
   }
