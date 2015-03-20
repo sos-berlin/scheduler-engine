@@ -27,6 +27,8 @@ with JobPersistence {
 
   def stringToPath(o: String) = JobPath(o)
 
+  def title: String = cppProxy.title
+
   def description: String = cppProxy.description
 
   def scriptText: String = cppProxy.script_text()

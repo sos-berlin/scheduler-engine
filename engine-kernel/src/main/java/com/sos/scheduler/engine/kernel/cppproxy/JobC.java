@@ -10,6 +10,7 @@ public interface JobC extends CppProxyWithSister<Job>, File_basedC<Job> {
     Job.Type sisterType = new Job.Type();
 
     String script_text();
+    String title();
     String description();
     String state_name();
     String state_text();
