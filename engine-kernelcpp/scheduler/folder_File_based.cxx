@@ -586,9 +586,9 @@ xml::Element_ptr File_based::execute_xml( Command_processor* command_processor, 
 
 //------------------------------------------------------------------------File_based::set_xml_bytes
 
-void File_based::set_xml_bytes(const string& x) 
+void File_based::set_xml_bytes(const string& xml_bytes) 
 {
-    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_bytes(x);
+    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_bytes(xml_bytes);
     xml::Element_ptr  element      = dom_document.documentElement();
     subsystem()->assert_xml_element_name( element );
     if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
@@ -597,6 +597,7 @@ void File_based::set_xml_bytes(const string& x)
     if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
     
     set_dom(element);
+    _source_xml_bytes = xml_bytes;
 }
 
 //-----------------------------------------------------------------------------File_based::set_dom

@@ -29,6 +29,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__plugin__PluginSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
 #include "../javaproxy/java__util__ArrayList.h"
 #include "../javaproxy/java__lang__Object.h"
@@ -56,6 +57,8 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobCh
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobNode JobNodeJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::NestedJobChainNode NestedJobChainNodeJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Node NodeJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::plugin::PluginSubsystem PluginSubsystemJ;
+
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 typedef ::javaproxy::scala::util::Try TryJ;

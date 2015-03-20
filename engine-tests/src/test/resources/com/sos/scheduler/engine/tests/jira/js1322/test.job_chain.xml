@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+     title="DO NOT TOUCH!"
+>
+    <job_chain_node state="DUMMY" job="/dummy"/>
+</job_chain>

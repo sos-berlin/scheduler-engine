@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.AssignableFrom.assignableFrom
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.eventbus.{EventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
+@ForCpp
 @Singleton
 final class PluginSubsystem @Inject private(
   pluginConfigurations: immutable.Seq[PluginConfiguration],
@@ -23,6 +26,8 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     pluginConfigurations toKeyedMap { _.className } withDefault { o ⇒ throw new NoSuchElementException(s"Unknown plugin '$o'") }
   private var classToPluginAdapter: Map[Class[Plugin], PluginAdapter] = null
   private var namespaceToPlugin: Map[String, NamespaceXmlPlugin] = null
+  private lazy val typeToSourceChangingPlugins: Map[FileBasedType, immutable.Seq[XmlConfigurationChangingPlugin]] =
+    (for (p ← plugins[XmlConfigurationChangingPlugin]; t ← p.fileBasedTypes) yield t → p).toSeqMultiMap withDefaultValue Nil
 
   val commandHandlers = ImmutableList.of[CommandHandler](
     new PluginCommandExecutor(this),
@@ -46,6 +51,17 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     for (p ← pluginAdapters if !p.configuration.testInhibitsActivateOnStart) {
       p.activate()
     }
+
+  @ForCpp
+  def changeObjectXmlBytes(typeName: String, pathString: String, xmlBytes: Array[Byte]): Array[Byte] = {
+    val typ = FileBasedType.fromInternalCppName(typeName)
+    val path = typ.toPath(pathString)
+    var result = xmlBytes
+    for (p ← typeToSourceChangingPlugins(typ)) {
+      result = p.changeXmlConfiguration(typ, path, xmlBytes)
+    }
+    result
+  }
 
   @TestOnly
   def activatePlugin(c: Class[_ <: Plugin]): Unit = classNameToPluginAdapter(c.getName).activate()

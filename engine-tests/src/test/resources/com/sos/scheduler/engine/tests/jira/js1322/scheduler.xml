@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
+    <config>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.tests.jira.js1322.TestPlugin">
+                <plugin.config append-to-title="TEST-SUFFIX"/>
+            </plugin>
+        </plugins>
+        <jobs>
+            <job name="scheduler.xml" title="scheduler.xml">
+                <script language="shell">exit 0</script>
+            </job>
+        </jobs>
+    </config>
+</spooler>
