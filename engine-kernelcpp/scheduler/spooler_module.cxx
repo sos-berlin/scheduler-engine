@@ -19,7 +19,6 @@ extern const string spooler_process_name        = "spooler_process()Z";
 extern const string spooler_on_error_name       = "spooler_on_error()V";
 extern const string spooler_on_success_name     = "spooler_on_success()V";
 extern const string spooler_api_version_name    = "spooler_api_version()Ljava.lang.String;";
-const string        default_monitor_name        = "scheduler";
 
 const string shell_language_name           = "shell";
 const string shell_variable_prefix_default = "SCHEDULER_PARAM_";
@@ -1056,82 +1055,6 @@ Order_state_transition Module_instance::order_state_transition() const {
         // spooler_process_after() has changed spooler_process result, so we return a plain Order_state_transistion without exit code
     } 
     return Order_state_transition::of_bool(_spooler_process_result);
-}
-
-//-------------------------------------------------------------------------Module_monitors::set_dom
-
-void Module_monitors::set_dom( const xml::Element_ptr& element )
-{
-    if( !element.nodeName_is( "monitor" ) )  assert(0), z::throw_xc( "SCHEDULER-409", "monitor", element.nodeName() );
-    
-    string name = element.getAttribute( "name", default_monitor_name );
-
-    ptr<Module_monitor> monitor = monitor_or_null( name );
-
-    if( !monitor )
-    {
-        monitor = Z_NEW( Module_monitor() );
-        monitor->_name   = name;
-        monitor->_module = Z_NEW( Module( _main_module->_spooler, _main_module->_file_based, _main_module->_spooler->include_path(), &_main_module->_log ) );
-        add_monitor( monitor );
-    }
-
-    monitor->_ordering = element.int_getAttribute( "ordering", monitor->_ordering );
-
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "script" ) )  
-        {
-            monitor->_module->set_dom( e );
-        }
-    }
-}
-
-//-----------------------------------------------------------------Module_monitors::monitor_or_null
-
-Module_monitor* Module_monitors::monitor_or_null( const string& name )
-{
-    Module_monitor* result = NULL;
-
-    Monitor_map::iterator m = _monitor_map.find( name );
-    if( m != _monitor_map.end() )  result = m->second;
-
-    return result;
-}
-
-//----------------------------------------------------------------------Module_monitors::initialize
-
-void Module_monitors::initialize()
-{
-    vector<Module_monitor*> ordered_monitors = this->ordered_monitors();
-
-    Z_FOR_EACH( vector<Module_monitor*>, ordered_monitors, m )
-    {
-        Module_monitor* monitor = *m;
-        monitor->_module->init();
-    }
-}
-
-//-------------------------------------------------------------Module_monitors::ordered_module_list
-
-vector<Module_monitor*> Module_monitors::ordered_monitors()
-{
-    vector<Module_monitor*> result;
-
-    result.reserve( _monitor_map.size() );
-    Z_FOR_EACH( Monitor_map, _monitor_map, m )  result.push_back( m->second );
-    sort( result.begin(), result.end(), Module_monitor::less_ordering );
-
-    return result;
-}
-
-//-------------------------------------------------Module_monitor_instance::Module_monitor_instance
-
-Module_monitor_instance::Module_monitor_instance( Module_monitor* monitor, Module_instance* module_instance )
-:
-    _module_instance(module_instance),
-    _obj_name( "Script_monitor " + monitor->name() )
-{
 }
 
 //-------------------------------------------------------------------------------------------------

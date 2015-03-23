@@ -14,6 +14,9 @@ include ../jni_cppproxy.makefile.include
 objects = \
  $(jni_cppproxy_objects)\
  Event_subsystem.o\
+ Module_monitor.o\
+ Module_monitors.o\
+ Module_monitor_instance.o\
  Module_monitor_instances.o\
  Order.o\
  Settings.o\

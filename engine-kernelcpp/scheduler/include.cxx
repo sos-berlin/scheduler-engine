@@ -61,11 +61,6 @@ void Include_command::initialize()
                                                                               : root_path, 
                                        _attribute_live_file ); 
 
-                //Path path = _attribute_live_file.is_relative_path()? _source_file_based->path().folder_path() + "/" + _attribute_live_file 
-                //                                                   : _attribute_live_file;
-
-                //_path.set_simplified_dot_dot_path( path );
-
                 string configuration_root_directory = _source_file_based->has_base_file()? _source_file_based->configuration_root_directory() 
                                                                                          : _source_file_based->spooler()->_configuration_directories[ confdir_local ];
                 _file_path = File_path( configuration_root_directory, _path );

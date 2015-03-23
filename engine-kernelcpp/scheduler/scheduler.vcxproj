@@ -371,6 +371,9 @@
     <ClCompile Include="folder_Typed_folder.cxx" />
     <ClCompile Include="log_cache_Request.cxx" />
     <ClCompile Include="log_cache_Request_cache.cxx" />
+    <ClCompile Include="Module_monitor.cxx" />
+    <ClCompile Include="Module_monitors.cxx" />
+    <ClCompile Include="Module_monitor_instance.cxx" />
     <ClCompile Include="spooler_job_java.cxx" />
     <ClCompile Include="Timed_call.cxx" />
     <ClCompile Include="Settings.cxx" />
@@ -492,6 +495,9 @@
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />
     <ClInclude Include="log_cache_Request_cache.h" />
+    <ClInclude Include="Module_monitor.h" />
+    <ClInclude Include="Module_monitors.h" />
+    <ClInclude Include="Module_monitor_instance.h" />
     <ClInclude Include="spooler_job_java.h" />
     <ClInclude Include="Timed_call.h" />
     <ClInclude Include="settings.h" />

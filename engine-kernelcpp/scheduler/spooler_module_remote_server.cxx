@@ -398,7 +398,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( monitor  &&  key_word == "monitor.java_class" )  monitor->_module->_java_class_name = value;
                 else
-                if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Paraemter sein!
+                if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Parameter sein!
                 {
                     monitor->_module->set_xml_string_text_with_includes(value);
                     _server->_module->_monitors->add_monitor( monitor );

@@ -1,7 +1,7 @@
 // $Id: Module_monitor_instances.h 13753 2009-03-05 12:40:59Z jz $
 
-#ifndef __MODULE_MONITTOR_INSTANCES_H
-#define __MODULE_MONITTOR_INSTANCES_H
+#ifndef __MODULE_MONITOR_INSTANCES_H
+#define __MODULE_MONITOR_INSTANCES_H
 
 namespace sos {
 namespace scheduler {

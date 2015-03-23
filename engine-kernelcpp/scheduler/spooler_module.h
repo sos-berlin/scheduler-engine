@@ -4,6 +4,10 @@
 #define __SPOOLER_MODULE_H
 
 #include <jni.h>
+
+#include "Module_monitor.h"
+#include "Module_monitors.h"
+#include "Module_monitor_instance.h"
 #include "Module_monitor_instances.h"
 
 namespace sos {
@@ -113,7 +117,7 @@ struct Module : Object
 
 
     Fill_zero                  _zero_;
-    Spooler*                   _spooler;
+    Spooler* const             _spooler;
     File_based*                _file_based;
     Delegated_log              _log;
     bool                       _set;
@@ -309,59 +313,6 @@ struct Module_instance : Object
     Module_monitor_instances   _monitor_instances;
 
     Fill_end                   _end_;
-};
-
-//-----------------------------------------------------------------------------------Module_monitor
-
-struct Module_monitor : Object
-{
-    static bool                 less_ordering               ( const Module_monitor* a, const Module_monitor* b )  { return a->_ordering < b->_ordering; }
-
-
-                                Module_monitor              ()                                      : _zero_(this+1), _ordering(1) {}
-
-    string                      name                        () const                                { return _name; }
-    string                      obj_name                    () const                                { return S() << "Script_monitor " << name(); }
-
-    Fill_zero                  _zero_;
-    string                     _name;
-    int                        _ordering;
-    ptr<Module>                _module;
-};
-
-//----------------------------------------------------------------------------------Module_monitors
-
-struct Module_monitors : Object
-{
-                                Module_monitors             ( Module* module )                      : _zero_(this+1), _main_module(module) {}
-
-    void                        close                       ();
-    void                    set_dom                         ( const xml::Element_ptr& );
-    void                        initialize                  ();
-    void                        add_monitor                 ( Module_monitor* monitor )             { _monitor_map[ monitor->name() ] = monitor; }
-    Module_monitor*             monitor_or_null             ( const string& );
-    bool                        is_empty                    () const                                { return _monitor_map.empty(); }
-    vector<Module_monitor*>     ordered_monitors            ();
-
-
-    Fill_zero                  _zero_;
-    typedef stdext::hash_map< string, ptr<Module_monitor> > Monitor_map;
-    Monitor_map                _monitor_map;
-
-  private:
-    Module*                    _main_module;
-};
-
-//--------------------------------------------------------------------------Module_monitor_instance
-
-struct Module_monitor_instance : Object
-{
-                                Module_monitor_instance     ( Module_monitor*, Module_instance* );
-
-    string                      obj_name                    () const                                { return _obj_name; }
-
-    ptr<Module_instance>       _module_instance;
-    string                     _obj_name;
 };
 
 //-------------------------------------------------------------------------------------------------

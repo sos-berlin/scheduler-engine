@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <Filter Include="Quellcodedateien">
@@ -204,15 +204,12 @@
     <ClCompile Include="jni__sos__scheduler__Job_subsystem.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
     <ClCompile Include="jni__sos__scheduler__order__Order.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__order__Order_queue.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="jni__sos__scheduler__Prefix_log.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -297,31 +294,24 @@
     <ClCompile Include="spooler_job_java.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx">
+    <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__Folder.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="jni__sos__scheduler__Process_class.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="jni__sos__scheduler__lock__Lock.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__lock__Lock_subsystem.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
     <ClCompile Include="jni__sos__scheduler__schedule__Schedule.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
     <ClCompile Include="jni__sos__scheduler__Process_class_subsystem.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -331,14 +321,9 @@
     <ClCompile Include="jni__sos__scheduler__schedule__Schedule_subsystem_interface.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="jni__sos__scheduler__order__Order_subsystem.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="jni__sos__scheduler__order__job_chain__End_node.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -348,11 +333,19 @@
     <ClCompile Include="jni__sos__scheduler__order__job_chain__Sink_node.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
     <ClCompile Include="jni__sos__scheduler__Api_process_configuration.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    </ItemGroup>
+    <ClCompile Include="Module_monitor_instance.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Module_monitors.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Module_monitor.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
       <Filter>Quellcodedateien</Filter>
@@ -529,6 +522,15 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="spooler_job_java.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Module_monitor.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Module_monitor_instance.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Module_monitors.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
   </ItemGroup>
