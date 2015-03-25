@@ -44,6 +44,9 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_lock_requestor:               return "Lock.Use";
         case type_lock_subsystem:               return "Lock_subsystem";
         case type_lock_use:                     return "Use";
+        case type_monitor:                      return "Monitor";
+        case type_monitor_folder:               return "Monitor_folder";
+        case type_monitor_subsystem:            return "Monitor_subsystem";
         case type_order:                        return "Order";
         case type_order_queue:                  return "Order_queue";
         case type_order_subsystem:              return "Job_chain_subsystem";
