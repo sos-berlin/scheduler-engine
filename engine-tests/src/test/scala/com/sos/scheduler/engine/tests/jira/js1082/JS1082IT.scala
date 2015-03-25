@@ -21,13 +21,13 @@ import org.scalatest.junit.JUnitRunner
 final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
 
   "While waiting for reconnect with database, JobScheduler should reject command start-job" in {
-    runJobAndWaitForEnd(testJobPath) shouldEqual TaskId(taskIdOffset)
+    runJobAndWaitForEnd(testJobPath).taskId shouldEqual TaskId(taskIdOffset)
     withDatabaseError {
       interceptDatabaseError {
         runJobAndWaitForEnd(testJobPath)
       }
     }
-    runJobAndWaitForEnd(testJobPath) shouldEqual TaskId(taskIdOffset + 1)
+    runJobAndWaitForEnd(testJobPath).taskId shouldEqual TaskId(taskIdOffset + 1)
     autoClosing(instance[EntityManagerFactory].createEntityManager()) { entityManager ⇒
       val taskHistoryEntities = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
       taskHistoryEntities map { o ⇒ o.id -> o.jobPath } shouldEqual List(

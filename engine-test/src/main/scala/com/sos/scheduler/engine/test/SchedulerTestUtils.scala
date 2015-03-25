@@ -49,14 +49,12 @@ object SchedulerTestUtils {
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
     instance[ProcessClassSubsystem].processClass(path)
 
-  def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskId = {
+  def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult =
     runJobAndWaitForEnd(jobPath, timeout.duration)
-  }
 
-  def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskId = {
+  def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskResult = {
     val run = runJobFuture(jobPath)
     Await.result(run.result, timeout)
-    run.taskId
   }
 
   def runJobFuture(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun = {
