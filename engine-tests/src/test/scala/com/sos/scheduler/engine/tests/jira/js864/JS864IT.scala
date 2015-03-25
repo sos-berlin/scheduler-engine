@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js864
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js864.JS864IT._
 import org.junit.runner.RunWith
@@ -67,7 +67,7 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  addOrderTests(6, "Again, all job chain nodes have action='process'", List(AState → ProcessAction, BState → ProcessAction, CState → ProcessAction)) { orderKey ⇒
+  addOrderTests(6, "Again, all job chain nodes have action='process'", List(AState → ProcessAction, BState → ProcessAction, CState → ProcessAction), suspend = false) { orderKey ⇒
     if (orderKey.jobChainPath == NonpermanentJobChainPath) {
       // Add new order 6
       scheduler executeXml OrderCommand(orderKey)
@@ -79,12 +79,14 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  private def addOrderTests(index: Int, caption: String, nodeActions: List[(OrderState, String)])(body: OrderKey ⇒ Unit): Unit =
+  private def addOrderTests(index: Int, caption: String, nodeActions: List[(OrderState, String)], suspend: Boolean = true)(body: OrderKey ⇒ Unit): Unit =
     s"$index) $caption" - {
       for (orderKey ← List(NonpermanentJobChainPath orderKey OrderId(s"$index"), PermanentOrderKey)) {
         s"Order $orderKey" in {
-          for ((state, action) ← nodeActions)
+          if (suspend) suspendOrder(orderKey)
+          for ((state, action) ← nodeActions) {
             scheduler executeXml <job_chain_node.modify job_chain={orderKey.jobChainPath.string} state={state.string} action={action}/>
+          }
           body(orderKey)
         }
       }
@@ -96,8 +98,11 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   private def isRelevantOrderEventClass(eventClass: Class[_ <: OrderEvent]) =
     List(classOf[OrderTouchedEvent], classOf[OrderFinishedEvent], classOf[OrderStepStartedEvent]) exists { _ isAssignableFrom eventClass }
 
-  private def resumeOrder(o: OrderKey): Unit =
-    scheduler executeXml <modify_order job_chain={o.jobChainPath.string} order={o.id.string} suspended="false" at="now"/>
+  private def suspendOrder(orderKey: OrderKey): Unit =
+    scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
+
+  private def resumeOrder(orderKey: OrderKey): Unit =
+    scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false), at = Some(ModifyOrderCommand.NowAt))
 }
 
 private object JS864IT {
