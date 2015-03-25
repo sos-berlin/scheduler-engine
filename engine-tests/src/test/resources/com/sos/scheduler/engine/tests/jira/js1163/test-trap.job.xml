@@ -18,6 +18,8 @@
         sleep 1
         sleep 1
         sleep 1
+        sleep 1
+        sleep 1
         trap - TERM
         echo "FINISHED NORMALLY"
     ]]></script>

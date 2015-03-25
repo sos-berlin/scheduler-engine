@@ -117,11 +117,11 @@ private object JS1163IT {
   private val ApiJobPath = JobPath("/test-api")
 
   private val ShellStartupTime = 5.s
-  private val KillTimeout = 9.s
+  private val KillTimeout = 11.s
   private val KillTimeoutString = (KillTimeout - ShellStartupTime).getStandardSeconds.toString
-  private val KilledImmediatelyMaxDuration = 8.s
-  private val KilledTrappedMaxDuration = 11.s
-  private val SleepDuration = 13.s
+  private val KilledImmediatelyMaxDuration = 10.s
+  private val KilledTrappedMaxDuration = 13.s
+  private val SleepDuration = 15.s
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
