@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.test.scalatest
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
+import com.sos.scheduler.engine.eventbus.{SchedulerEventBus, EventHandlerAnnotated}
+import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.test._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest._
@@ -17,16 +19,15 @@ trait ScalaSchedulerTest
     with EventHandlerAnnotated
     with ProvidesTestDirectory {
 
-  protected def testClass =
-    getClass
+  protected def testClass = getClass
 
-  protected lazy val testConfiguration =
-    TestConfiguration(testClass = getClass)
+  protected lazy val testConfiguration = TestConfiguration(testClass = getClass)
 
-  protected final lazy val testEnvironment =
+  protected final lazy val testEnvironment: TestEnvironment =
     TestEnvironment(testConfiguration, testDirectory).closeWithCloser
 
-  protected implicit lazy final val controller = TestSchedulerController(testConfiguration, testEnvironment).closeWithCloser
+  protected implicit lazy final val controller: TestSchedulerController =
+    TestSchedulerController(testConfiguration, testEnvironment).closeWithCloser
 
   override protected final def beforeAll(): Unit = {
     if (testNames.isEmpty) {
@@ -60,22 +61,21 @@ trait ScalaSchedulerTest
 
   protected def onSchedulerActivated(): Unit = {}
 
-  /** Zur Bequemlichkeit.
-   * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */
-  protected final def scheduler =
-    controller.scheduler
-
-  protected final def eventBus = controller.eventBus
+  protected final def eventBus: SchedulerEventBus = controller.eventBus
 
   protected implicit def implicitTimeout: ImplicitTimeout = TestSchedulerController.implicits.Timeout
 
   protected final val TestTimeout: Duration = TestSchedulerController.TestTimeout
 
-  final def injector =
-    scheduler.injector
+  final def injector: Injector = controller.injector
 
-  protected final def instance[A](implicit c: ClassTag[A]): A =
-    controller.instance(c)
+  protected final def instance[A](implicit c: ClassTag[A]): A = controller.instance(c)
+
+  /**
+   * For convenience.
+   * @see [[com.sos.scheduler.engine.test.TestSchedulerController]]#scheduler().
+   */
+  protected final def scheduler: Scheduler = controller.scheduler
 }
 
 private object ScalaSchedulerTest {
