@@ -271,11 +271,11 @@ int Zlib_file::read_header()
     {
         if( !_auto )  throw_xc( "ZLIB-100" );
         _do_nothing = true;
-        LOG( "gzip -auto: Datenstrom hat keinen gzip-Kopf\n" );
+        LOG("gzip -auto: Byte stream does not have a GZIP header\n");
         return 0;
     }
 
-    if( _auto )  LOG( "gzip -auto: Datenstrom hat einen gzip-Kopf\n" );
+    if (_auto)  LOG("gzip -auto: Byte stream has a GZIP header\n");
 
     p += 2;
     _method = *p++;
