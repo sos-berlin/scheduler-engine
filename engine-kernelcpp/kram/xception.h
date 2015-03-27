@@ -7,17 +7,12 @@
 namespace sos
 {
 
-//#define USE_OLD_EXCEPTIONS
-
 struct SOS_CLASS Area;
 struct SOS_CLASS Sos_object_base;
 
 const int sos_max_error_code_length = 24;     // ohne 0-Byte
 const int max_msg_insertions        = 4;      // Anzahl Einfügungen in Xc
-
-//#if defined SYSTEM_SOLARIS
 const int max_msg_insertion_length  = 1000;   // jz 10.9.97: Erhöht von 100 auf 100, sossv2.cxx show_msg fügt ggfs. Blanks ein.
-//#endif
 
 struct Const_area;
 
@@ -45,9 +40,6 @@ struct Source_pos
 {
                                 Source_pos              ( const char* f, int l=-1, int c=-1 )  : _line(l),_col(c) { filename(f); }
                                 Source_pos              ( int col = -1 )  : _line(-1),_col(col) { _file[0] = '\0'; }
-                              //Source_pos              ( const Source_pos& o )           { _assign( o ); }
-
-  //Source_pos&                 operator =              ( const Source_pos& o )           { _assign( o ); }
 
     int                        _line;                   // 0..n-1, -1: Keine Zeilenangabe
     int                        _col;                    // 0..m-1, -1: Keine Spaltenangabe
@@ -97,7 +89,6 @@ struct Msg_insertions //: Sos_self_deleting  für bei Solaris C++ 4.0.1 zum Fehl
     void                        append                  ( const Sos_string&     , Xc_base* = NULL ) THROW_NONE;
     void                        append                  ( const Sos_object_base*, Xc_base* = NULL ) THROW_NONE;
     void                        append                  ( int4                  , Xc_base* = NULL ) THROW_NONE;
-  //ostrstream                  ostrstream              ();
     const char*                 operator []             ( int i ) const     { return _insertion_array[ i ].c_str(); }
     void                       _obj_print               ( ::std::ostream* ) const THROW_NONE;
 
@@ -110,20 +101,9 @@ struct Msg_insertions //: Sos_self_deleting  für bei Solaris C++ 4.0.1 zum Fehl
 
     string                     _insertion_array [ max_msg_insertions ];
 
-/*
-#   if defined SYSTEM_SOLARIS  // Wegen Problem bei throw und ~Msg_insertions (wird mit falschem this aufgerufen) 
-        char                   _insertion_array [ max_msg_insertions ][ max_msg_insertion_length ];
-#    else
-        char*                  _insertion_array [ max_msg_insertions ];
-#   endif
-*/
 };
 
 inline ::std::ostream& operator<< ( ::std::ostream&, const Msg_insertions& );
-//inline Msg_insertions& operator& ( Msg_insertions& i, const char* s            )  { i.append( s ); return i; }
-//inline Msg_insertions& operator& ( Msg_insertions& i, const Sos_string& s      )  { i.append( s ); return i; }
-//inline Msg_insertions& operator& ( Msg_insertions& i, const Sos_object_base* s )  { i.append( s ); return i; }
-//inline Msg_insertions& operator& ( Msg_insertions& i, int4 s )                    { i.append( s ); return i; }
 
 //--------------------------------------------------------------------------------------Xc_base
 
@@ -157,7 +137,6 @@ struct Xc_base : exception
     Bool                        get_text                ( Area* ) const THROW_NONE;
     virtual const char*         what                    () const throw();
 
-  //DEFINE_OBJ_COPY( Xc_base )
     const char*                 name                    () const     { return _name; }
     void                        set_name                ( const char* );
 
@@ -187,30 +166,11 @@ struct Xc : Xc_base
                                 Xc                      ( const Msg_code& ) THROW_NONE;
                                 Xc                      ( const Msg_code&, const Msg_insertions& ) THROW_NONE;
                                 Xc                      ( const Msg_code&, const Msg_insertions&, const Source_pos& ) THROW_NONE;
-                              //Xc                      ( const Msg_code&, const Source_pos& );
                                 Xc                      ( const exception& ) THROW_NONE;
-                              //Xc                      ( const zschimmer::Xc& x ) throw();
                                 Xc                      ( const Xc& ) THROW_NONE;
                                ~Xc                      () THROW_NONE;
-/*
-    Xc&                         insert                  ( const char* a )                 { Xc_base::insert( a ); return *this; }
-    Xc&                         insert                  ( const char* a, int len )        { Xc_base::insert( a, len ); return *this; }
-    Xc&                         insert                  ( const Sos_string& a )           { Xc_base::insert( a ); return *this; }
-    Xc&                         insert                  ( const Sos_object_base* a )      { Xc_base::insert( a ); return *this; }
-    Xc&                         insert                  ( int4 a )                        { Xc_base::insert( a ); return *this; }
-*/
     void                        throw_right_typed       () const;
-
-    //DEFINE_OBJ_COPY( Xc )
 };
-
-// Solaris nennt folgendes obsolet, weil temporäres Objekt bei throw erzeugt wird (warum?)
-/*
-Xc& operator^ ( Xc& x, const char* s            )  { return x.insert( s ); }
-inline Xc& operator^ ( Xc& x, const Sos_string& s      )  { return x.insert( s ); }
-inline Xc& operator^ ( Xc& x, const Sos_object_base* s )  { return x.insert( s ); }
-inline Xc& operator^ ( Xc& x, int4 s )                    { return x.insert( s ); }
-*/
 
 //--------------------------------------------------------------------------------------Xc_copy
 // Xc_ptr ohne Referenzzählung, also nur ein Xc_ptr für eine Xc.
@@ -268,7 +228,6 @@ struct Duplicate_error  : Xc { Duplicate_error( const char* e              ) THR
 struct Too_long_error   : Xc { Too_long_error ( const char* e = "SOS-1113" ) THROW_NONE; /*DEFINE_OBJ_COPY( Too_long_error )*/};
 struct No_space_error   : Xc { No_space_error ( const char* e = "D180"     ) THROW_NONE; /*DEFINE_OBJ_COPY( No_space_error )*/};
 struct Wrong_type_error : Xc { Wrong_type_error(const char* e              ) THROW_NONE; /*DEFINE_OBJ_COPY( Wrong_type_error )*/};
-//struct Errno_error      : Xc { Errno_error    ( int         e = 0          ); };
 struct Connection_lost_error : Xc { Connection_lost_error( const char* e              ) THROW_NONE; /*DEFINE_OBJ_COPY( Wrong_type_error )*/};
 struct Data_error            : Xc { Data_error           ( const char* e              ) THROW_NONE; /*DEFINE_OBJ_COPY( Wrong_type_error )*/};
 struct Locked_error          : Xc { Locked_error         ( const Msg_code& e          ) THROW_NONE; /*DEFINE_OBJ_COPY( Wrong_type_error )*/};
@@ -290,49 +249,12 @@ struct Abort_error           : Xc_base { Abort_error() THROW_NONE; };
 
 struct Syntax_error : Xc
 {
-                              //Syntax_error            ( const char* code, const Source_pos& = Source_pos() );
                                 Syntax_error            ( const char* code, const Msg_insertions& = Msg_insertions(),
                                                           const Source_pos& = Source_pos() ) THROW_NONE;
 };
 
 //------------------------------------------------------------------------------------throw_xxx
-/*
-enum Exception_code
-{
-    xc_none                     = 0,
-    xc_abort_error,
-    xc_xc,
-    xc_no_memory_error,
-    xc_connection_lost_error,
-    xc_data_error,
-    xc_duplicate_error,
-    xc_eof_error,
-    xc_exist_error,
-    xc_no_space_error,
-    xc_not_exist_error,
-    xc_not_found_error,
-    xc_overflow_error,
-    xc_syntax_error,
-    xc_too_long_error,
-    xc_wrong_type_error,
-};
 
-void throw_xc( Exception_code, const char* error_code );
-void throw_xc( Exception_code, const char* error_code );
-void throw_xc( Exception_code, const char* error_code, const char* insertion );
-void throw_xc( Exception_code, const char* error_code, const Const_area& insertion );
-void throw_xc( Exception_code, const char* error_code, const Sos_object_base* );
-void throw_xc( Exception_code, const char* error_code, const Msg_insertions& );
-void throw_xc( Exception_code, const char* error_code, const Msg_insertions&, const Source_pos& );
-
-void throw_xc( const char* error_code )                                             { throw_xc( xc_xc, error_code ); }
-void throw_xc( const char* error_code, const char* insertion )                      { throw_xc( xc_xc, error_code, insertion ); }
-void throw_xc( const char* error_code, const Const_area& insertion )                { throw_xc( xc_xc, error_code, insertion ); }
-void throw_xc( const char* error_code, const Sos_object_base* o )                   { throw_xc( xc_xc, error_code, o ); }
-void throw_xc( const char* error_code, const Msg_insertions& a )                    { throw_xc( xc_xc, error_code, a ); }
-void throw_xc( const char* error_code, const Msg_insertions& a, const Source_pos& b ) { throw_xc( xc_xc, error_code, a, b ); }
-void throw_xc( const Xc& );
-*/
 Z_NORETURN void throw_abort_error           ();
 Z_NORETURN void throw_connection_lost_error ( const char* error_code );
 Z_NORETURN void throw_data_error            ( const char* error_code );
@@ -350,7 +272,6 @@ Z_NORETURN void throw_not_exist_error       ( const char* error_code, const char
 Z_NORETURN void throw_not_found_error       ( const char* error_code = "D311", const Sos_object_base* = 0 );
 Z_NORETURN void throw_overflow_error        ( const char* error_code = "SOS-1107" );
 Z_NORETURN void throw_overflow_error        ( const char* error_code, const char*, const char* = 0 );
-//Z_NORETURN void throw_syntax_error          ( const char* error_code );
 Z_NORETURN void throw_syntax_error          ( const char* e, const Source_pos& pos );
 Z_NORETURN void throw_syntax_error          ( const char* error_code, int column = -1 );
 Z_NORETURN void throw_syntax_error          ( const char* error_code, const char* insertion, const Source_pos& );
@@ -404,121 +325,8 @@ Z_NORETURN inline void throw_mswin_error    ( int4 win_error, const char* functi
     catch( const exception& x ) { throw Xc( x ); }                                          \
     catch( ... )                { throw Xc( "UNKNOWN" ); }
 
-/*
-#if defined SYSTEM_EXCEPTIONS
-    #define THROW( XC )  throw XC
- #else
-    #define THROW( XC )  { SHOW_ERR( "**EXCEPTION** in " SOURCE ", " __FILE__ " Zeile " << __LINE__ << ": " << XC ); exit(999); }
-#endif
-*/
-
-#if !defined USE_OLD_EXCEPTIONS
-
-/*jz 26.6.00 
-#    define BEGIN {
-#    define END   }
-#    define xc
-#    define exceptions  return;
-*/
-
-# else
-
-struct Exception
-{
-                                Exception               ();
-
-    int                         raised                  () const  { return _level > _base_level;  }
-    const char*                 error_code              () const  { return _error_code; }
-    const char*                 name                    () const  { return _name      ; }
-
-    void                        raise_exception         ( const char* n, const char* e, const char* source = SOURCE );
-    void                        raise_exception         ( int _errno, const char* source = SOURCE );
-    void                       _raise_again             ();
-
-    int                         is_it                   ( const char* exception_name ) const;
-
-    int                         handle_exception        ( const char* n );
-    int                         handle_exception        ();
-    void                        discard_exception       ();
-
-    void                        save                    ( Exception* x_ptr );
-    void                        restore                 ( const Exception& x );
-
-  private:
-    short       _base_level;
-    short       _level;
-    char        _name      [ 20+1 ];
-    char        _error_code[ sos_max_error_code_length + 1 ];
-};
-
-
-struct Save_exception
-{
-    Save_exception();
-   ~Save_exception();
-
-  private:
-    Exception _saved_xc;
-};
-
-
-
-#define BEGIN { Save_exception __saved_xc;
-#define END   }
-
-//extern Exception _XC;
-
-inline Exception* xc_ptr();            // inline in sosstat.h
-
-#define _XC  (*xc_ptr())
-
-//-------------------------------------------------------------------------------raise_to_throw
-
-inline void raise_to_THROW_NONE
-{
-    if( _XC.raised() )
-    {
-        extern void _raise_to_THROW_NONE;
-        _raise_to_THROW_NONE;
-    }
-}
-
-
-// raise löst eine Exception aus (auáerhalb eines Exception-Handlers)
-#define raise(name,error_code) {                                              \
-        _XC.raise_exception (name, error_code);                               \
-        goto exception_handler;                                               \
-}
-
-// raise löst eine Exception aus (auáerhalb eines Exception-Handlers)
-#define raise_errno(_errno) {                                                 \
-        _XC.raise_exception (_errno);                                         \
-        goto exception_handler;                                               \
-}
-
-// x_raise löst eine Exception in einem Exception-Handler aus
-#define x_raise(name,error_code) {                                            \
-        _XC.raise_exception (name, error_code);                               \
-        return;                                                               \
-}
-
-// Löst dieselbe Exception in einem Exception Handler nochmal aus
-#define raise_again {                                                         \
-        _XC._raise_again();                                                   \
-        /*goto exception_handler; */                                          \
-        return;                                                               \
-}
-
-#define xc  if (_XC.raised ())  goto exception_handler;
-
-#define exceptions  return; exception_handler: ;
-
-#define SHOW_EXCEPTION(text)  SHOW_MSG( text << " Exception " << _XC.name() << ": " << Xc( _XC.error_code()) )
-
-#endif
 
 extern void check_new( void* pointer, const char* source = SOURCE );
-
 
 void                            get_mswin_msg_text      ( Area* buffer, long msg_code );
 string                          get_mswin_msg_text      ( long msg_code );
@@ -537,97 +345,6 @@ inline ::std::ostream& operator<< ( ::std::ostream& s, const Xc& x )
     return s;
 }
 
-#if defined USE_OLD_EXCEPTIONS
-inline Exception::Exception()
- :  _level      ( 0 ),
-    _base_level ( 0 )
-{
-    _name      [ 0 ] = 0;
-    _error_code[ 0 ] = 0;
-}
-
-
-inline void Exception::_raise_again()
-{
-    _level = _base_level + 1;
-    // name und error_code bleiben stehen
-}
-
-
-inline int Exception::handle_exception( const char* n )
-{
-    if (is_it (n)) {
-        _level = _base_level;
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-inline int Exception::handle_exception ()
-{
-    if (raised ()) {
-        _level = _base_level;
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-inline void Exception::discard_exception ()
-{
-    //assert( ("discard_exception()",_level > _base_level ) );
-    _level = _base_level;
-}
-
-inline void Exception::save( Exception* x_ptr )
-{
-    *x_ptr = *this;
-    _base_level = _level;
-}
-
-
-inline void Exception::restore( const Exception& x )
-{
-    if( raised() ) {
-        _base_level = x._base_level;
-    } else {
-        *this = x;
-    }
-}
-
-inline Save_exception::Save_exception()  { _XC.save( &_saved_xc ); }
-inline Save_exception::~Save_exception() { _XC.restore( _saved_xc  ); }
-
-inline int exception (const char* n) {
-    return _XC.handle_exception (n);
-}
-
-
-/* jz 12.1.2001
-inline int exception () {
-    return _XC.handle_exception ();
-}
-*/
-
-
-inline void discard_exception()
-{
-    _XC.discard_exception();
-}
-
-
-inline void ignore_exception()
-{
-    (void) exception();
-}
-
-inline void ignore_exception( const char* exception_name )
-{
-    (void) exception( exception_name );
-}
-
-#endif
 
 } //namespace sos
 
