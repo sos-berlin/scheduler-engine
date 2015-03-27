@@ -63,13 +63,12 @@ object SchedulerTestUtils {
       // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintreffen. Sonst könnten die ersten nach startJob verlorengehen.
       val taskId = startJob(jobPath, variables = variables)
       val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
-      val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
-      val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
+      val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
-      val durationFuture = for (s ← startedTime; e ← endedTime) yield max(0, e - s).ms
-      val result = for (_ ← closed; duration ← durationFuture) yield TaskResult(jobPath, taskId, duration)
-      TaskRun(jobPath, taskId, started, closed, result)
+      val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
+      val result = for (_ ← closed; s ← startedTime; e ← endedTime) yield TaskResult(jobPath, taskId, duration = max(0, e - s).ms)
+      TaskRun(jobPath, taskId, started, ended, closed, result)
     }
   }
 
@@ -79,11 +78,13 @@ object SchedulerTestUtils {
   }
 
   final case class TaskRun(
-    jobPath: JobPath,
-    taskId: TaskId,
-    started: Future[TaskStartedEvent],
-    closed: Future[TaskClosedEvent],
-    result: Future[TaskResult])
+      jobPath: JobPath,
+      taskId: TaskId,
+      started: Future[TaskStartedEvent],
+      ended: Future[TaskEndedEvent],
+      closed: Future[TaskClosedEvent],
+      result: Future[TaskResult]) {
+  }
 
   final case class TaskResult(jobPath: JobPath, taskId: TaskId, duration: Duration) {
     def logString(implicit controller: TestSchedulerController) =
