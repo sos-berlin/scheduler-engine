@@ -43,14 +43,14 @@ private class TestEnvironmentFiles(
     def packagePath = s"/${configPackageResource.path stripSuffix "/"}/"
     val relativePath = u.getPath lastIndexOf packagePath match {
       case -1 ⇒ throw new RuntimeException(s"'$u' does not contain $packagePath")
-      case i ⇒ u.getPath.substring(i + packagePath.size)
+      case i ⇒ u.getPath.substring(i + packagePath.length)
     }
     renameFile.applyOrElse(relativePath, identity[String])
   }
 }
 
 object TestEnvironmentFiles {
-  private val NameExtensions = Set(".xml", ".ini", ".dtd")
+  private val NameExtensions = Set(".xml", ".ini", ".dtd", ".js")
   private val DefaultConfigResource = JavaResource("com/sos/scheduler/engine/test/config")
 
   def copy(
