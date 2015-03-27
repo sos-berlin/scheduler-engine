@@ -47,7 +47,7 @@ const int immediately_reopened_max = 10;    // Maximale Anzahl Fehler in der Ret
 
 //-------------------------------------------------------------------------------------------------
 
-const int Database::seconds_before_reopen   = Z_NDEBUG_DEBUG( 60, 20 );     // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird. 
+const int Database::seconds_before_reopen = Z_NDEBUG_DEBUG(40, 15);     // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird. Deutlich kürzer als heart_beat_period (JS-1283)
 
 //---------------------------------------------------------------------------------------sql_quoted
 
