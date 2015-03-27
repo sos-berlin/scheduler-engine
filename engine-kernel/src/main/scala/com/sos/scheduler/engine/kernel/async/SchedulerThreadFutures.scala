@@ -5,12 +5,17 @@ import java.lang.Thread.currentThread
 import org.joda.time.Instant
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object SchedulerThreadFutures {
 
   def inSchedulerThread[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): A =
-    Await.result(directOrSchedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf)
+    Await.ready(directOrSchedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf).value.get match {
+      case Success(o) ⇒ o
+      case Failure(t) ⇒
+        t.setStackTrace(t.getStackTrace ++ (new Exception).getStackTrace)
+        throw t
+    }
 
   /** Executes f, directly if in JobScheduler thread, else by CallQueue. */
   def directOrSchedulerThreadFuture[A](f: ⇒ A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =
