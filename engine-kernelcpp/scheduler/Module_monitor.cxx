@@ -12,6 +12,12 @@ Module_monitor::Module_monitor() :
     _name(default_monitor_name)
 {}
 
+
+void Module_monitor::initialize() {
+    _module->init();
+}
+
+
 void Module_monitor::set_dom(const xml::Element_ptr& monitor_element) {
     if (!monitor_element.nodeName_is("monitor"))  assert(0), z::throw_xc("SCHEDULER-409", "monitor", monitor_element.nodeName());
     

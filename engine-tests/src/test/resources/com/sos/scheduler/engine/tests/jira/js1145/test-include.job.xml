@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
+    <script language="java:javascript">
+        <include live_file="test-include.js"/>
+    </script>
+</job>

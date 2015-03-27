@@ -135,6 +135,7 @@ bool Scheduler_script::on_load()
 {
     //Z_LOGI2( "scheduler", "Scheduler-Skript wird geladen\n" );
 
+    _module->_monitors->try_load();
     _module_instance = _module->create_instance();
     _module_instance->init();
 

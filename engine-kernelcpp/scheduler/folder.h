@@ -56,7 +56,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     virtual bool                on_requisite_loaded         ( File_based* )                         = 0;
     virtual bool                on_requisite_to_be_removed  ( File_based* );
     virtual void                on_requisite_removed        ( File_based* );
-    virtual Prefix_log*         log                         ()                                      = 0;
+    virtual Has_log*            log                         ()                                      = 0;
     virtual string              obj_name                    () const                                = 0;
     virtual bool                is_visible_requisite        ()                                      { return true; }
 
@@ -453,6 +453,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     Typed_folder*               typed_folder                (const string& type_name) const;
     Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
+    Monitor_folder*             monitor_folder              ()                                      { return _monitor_folder; }
     Job_folder*                 job_folder                  ()                                      { return _job_folder; }
     Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
     Standing_order_folder*      standing_order_folder       ()                                      { return _standing_order_folder; }
@@ -477,6 +478,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     ptr<Scheduler_script_folder>    _scheduler_script_folder;
     ptr<Process_class_folder>       _process_class_folder;
     ptr<lock::Lock_folder>          _lock_folder;
+    ptr<Monitor_folder>             _monitor_folder;
     ptr<Job_folder>                 _job_folder;
     ptr<Job_chain_folder_interface> _job_chain_folder;
     ptr<Standing_order_folder>      _standing_order_folder;

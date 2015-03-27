@@ -342,7 +342,16 @@
     <ClCompile Include="Module_monitors.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="Monitor_subsystem.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
     <ClCompile Include="Module_monitor.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Monitor_folder.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Monitor.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<monitor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+         ordering="3">
+    <script java_class="com.sos.scheduler.engine.tests.jira.js1145.TestCMonitor"/>
+</monitor>

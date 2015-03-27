@@ -933,7 +933,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( !show_what.is_set( show_folders ) )
     {
         if (_lock_subsystem && !_lock_subsystem->is_empty() )  state_element.appendChild(_lock_subsystem->file_baseds_dom_element( dom, show_what ) );
-
+        if (_monitor_subsystem && !_monitor_subsystem->is_empty())  state_element.appendChild(_monitor_subsystem->file_baseds_dom_element(dom, show_what));
         if (_job_subsystem && show_what.is_set( show_jobs ) )  state_element.appendChild(_job_subsystem->file_baseds_dom_element( dom, show_what ) );
         else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
@@ -1238,6 +1238,14 @@ Task_subsystem* Spooler::task_subsystem() const
     if( !_task_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Task_subsystem is not initialized" );
 
     return _task_subsystem; 
+}
+
+//-----------------------------------------------------------------------Spooler::monitor_subsystem
+
+Monitor_subsystem* Spooler::monitor_subsystem() const
+{ 
+    if (!_monitor_subsystem)  assert(0), z::throw_xc(Z_FUNCTION, "Monitor_subsystem is not initialized");
+    return _monitor_subsystem; 
 }
 
 //-------------------------------------------------------------------------Spooler::order_subsystem
@@ -1823,6 +1831,7 @@ void Spooler::new_subsystems()
     _schedule_subsystem         = schedule::new_schedule_subsystem( this );
     _process_class_subsystem    = Z_NEW( Process_class_subsystem( this ) );
     _lock_subsystem             = Z_NEW( lock::Lock_subsystem( this ) );
+    _monitor_subsystem          = new_monitor_subsystem(this);
     _job_subsystem              = new_job_subsystem( this );
     _task_subsystem             = Z_NEW( Task_subsystem( this ) );
     _order_subsystem            = new_order_subsystem( this );
@@ -1842,6 +1851,7 @@ void Spooler::destroy_subsystems()
     _order_subsystem            = NULL;
     _task_subsystem             = NULL;
     _job_subsystem              = NULL;
+    _monitor_subsystem          = NULL;
     _lock_subsystem             = NULL;
     _process_class_subsystem    = NULL;
     _schedule_subsystem         = NULL;
@@ -1860,6 +1870,7 @@ void Spooler::initialize_subsystems()
     _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem   ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem            ->switch_subsystem_state( subsys_initialized );
+    _monitor_subsystem         ->switch_subsystem_state( subsys_initialized );
     //_job_subsystem             ->switch_subsystem_state( subsys_initialized );
     //_scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );
     _order_subsystem           ->switch_subsystem_state( subsys_initialized );
@@ -1895,6 +1906,7 @@ void Spooler::load_subsystems()
 
     _schedule_subsystem        ->switch_subsystem_state( subsys_loaded );
     _lock_subsystem            ->switch_subsystem_state( subsys_loaded );
+    _monitor_subsystem         ->switch_subsystem_state( subsys_loaded );
     _job_subsystem             ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
     _order_subsystem           ->switch_subsystem_state( subsys_loaded );
     _standing_order_subsystem  ->switch_subsystem_state( subsys_loaded );
@@ -1920,6 +1932,7 @@ void Spooler::activate_subsystems()
 
     _schedule_subsystem      ->switch_subsystem_state( subsys_active );
     _lock_subsystem          ->switch_subsystem_state( subsys_active );
+    _monitor_subsystem       ->switch_subsystem_state( subsys_active );
     _job_subsystem           ->switch_subsystem_state( subsys_active );
     _order_subsystem         ->switch_subsystem_state( subsys_active );
     _standing_order_subsystem->switch_subsystem_state( subsys_active );
@@ -1936,6 +1949,7 @@ void Spooler::stop_subsystems()
     _order_subsystem           ->switch_subsystem_state( subsys_stopped );
     _job_subsystem             ->switch_subsystem_state( subsys_stopped );
     _task_subsystem            ->switch_subsystem_state( subsys_stopped );
+    _monitor_subsystem         ->switch_subsystem_state( subsys_stopped );
     _lock_subsystem            ->switch_subsystem_state( subsys_stopped );
     _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
     _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );

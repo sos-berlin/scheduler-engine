@@ -18,6 +18,9 @@ objects = \
  Module_monitors.o\
  Module_monitor_instance.o\
  Module_monitor_instances.o\
+ Monitor.o\
+ Monitor_folder.o\
+ Monitor_subsystem.o\
  Order.o\
  Settings.o\
  Timed_call.o\

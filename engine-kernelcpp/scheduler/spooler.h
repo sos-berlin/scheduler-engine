@@ -182,6 +182,7 @@ namespace lock
     struct Requestor;
 }
 
+struct Monitor_folder;
 
 namespace order
 {
@@ -258,6 +259,12 @@ typedef stdext::hash_set<string> String_set;
 #include "folder.h"
 #include "register.h"
 #include "lock.h"
+#include "Module_monitor.h"
+#include "Module_monitors.h"
+#include "Module_monitor_instances.h"
+#include "Monitor.h"
+#include "Monitor_folder.h"
+#include "Monitor_subsystem.h"
 #include "schedule.h"
 #include "Timed_call.h"
 #include "scheduler_script.h"
@@ -549,6 +556,7 @@ struct Spooler : Object,
     Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
     Job_subsystem*              job_subsystem               () const;
     Job_subsystem*              job_subsystem_or_null       () const                            { return _job_subsystem; }
+    Monitor_subsystem*          monitor_subsystem           () const;
     Order_subsystem*            order_subsystem             () const;
     Standing_order_subsystem*   standing_order_subsystem    () const;
     Schedule_subsystem_interface* schedule_subsystem        () const;
@@ -671,6 +679,7 @@ struct Spooler : Object,
     ptr<Process_class_subsystem>     _process_class_subsystem;
     ptr<Job_subsystem>               _job_subsystem;
     ptr<Task_subsystem>              _task_subsystem;
+    ptr<Monitor_subsystem>           _monitor_subsystem;
     ptr<Order_subsystem>             _order_subsystem;
     ptr<Standing_order_subsystem>    _standing_order_subsystem;
     ptr<Schedule_subsystem_interface>_schedule_subsystem;

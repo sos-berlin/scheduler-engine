@@ -436,7 +436,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, int_cast((16+2) + 8 * _module->_monitors->_monitor_map.size()) );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, int_cast((16+2) + 8 * _module->_monitors->module_monitors().size()) );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -468,13 +468,12 @@ AGAIN:
                 if (_module->_process_shell_variable_prefix_is_configured)
                   params_array[ nr++ ] = "process.shell_variable_prefix=" + _module->_process_shell_variable_prefix;
 
-                Z_FOR_EACH( Module_monitors::Monitor_map, _module->_monitors->_monitor_map, m )
-                {
-                    Module_monitor* monitor = m->second;
-
+                vector<Module_monitor*> module_monitors = _module->_monitors->module_monitors();
+                for (int i = 0; i < module_monitors.size(); i++) {
+                    Module_monitor* monitor = module_monitors[i];
                     params_array[ nr++ ] = "monitor.language="        + monitor->_module->_language;       // Muss der erste Parameter sein, legt den Module_monitor an
-                    params_array[ nr++ ] = "monitor.name="            + monitor->_name;           
-                    params_array[ nr++ ] = "monitor.ordering="        + as_string( monitor->_ordering );
+                    params_array[ nr++ ] = "monitor.name="            + monitor->monitor_name();           
+                    params_array[ nr++ ] = "monitor.ordering="        + as_string(i);  // module_monitors() are ordered increasingly
                     params_array[ nr++ ] = "monitor.com_class="       + monitor->_module->_com_class_name;
                     params_array[ nr++ ] = "monitor.filename="        + monitor->_module->_filename;
                     params_array[ nr++ ] = "monitor.java_class="      + monitor->_module->_java_class_name;

@@ -777,8 +777,11 @@ bool Standard_job::on_activate()
     {
         try
         {
-            bool ok = _schedule_use->try_load();
-            if( !ok )    // Nach _schedule_use->set_default_schedule() immer true
+            bool ok = _schedule_use->try_load();  
+            if (ok) {  // Nach _schedule_use->set_default_schedule() immer true
+                ok = _module->_monitors->try_load();
+            }
+            if( !ok )    
             {
                 set_file_based_state( s_incomplete );
             }
@@ -985,7 +988,7 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
                 _module->set_process();
             }
             else
-            if( e.nodeName_is( "monitor" ) )
+            if (e.nodeName_is("monitor.use") || e.nodeName_is("monitor"))
             {
                 _module->_monitors->set_dom( e );
             }
@@ -1291,6 +1294,28 @@ bool Standard_job::on_schedule_to_be_removed()
 
     reset_scheduling();
 
+    return true;
+}
+
+//-----------------------------------------------------------------Standard_job::on_monitors_loaded
+
+bool Standard_job::on_monitors_loaded() {
+    if (file_based_state() == s_incomplete) {
+        bool ok = activate();
+        if (ok) set_state(_is_permanently_stopped ? s_stopped : s_pending);
+    } 
+    return file_based_state() == s_active;
+}
+
+//-----------------------------------------------------------Standard_job::on_monitor_to_be_removed
+
+bool Standard_job::on_monitor_to_be_removed(Monitor* monitor) {
+    if (!_module->_monitors->is_loaded()) {
+        set_file_based_state(File_based::s_incomplete);
+        end_tasks(message_string("SCHEDULER-885", monitor->obj_name()));
+        bool end_all_tasks = true;
+        stop_simply(end_all_tasks);
+    }
     return true;
 }
 

@@ -401,7 +401,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Parameter sein!
                 {
                     monitor->_module->set_xml_string_text_with_includes(value);
-                    _server->_module->_monitors->add_monitor( monitor );
+                    _server->_module->_monitors->add_module_monitor(monitor);
                 }
                 else
                    Z_LOG2( "scheduler", Z_FUNCTION << " unknown parameter " << key_word << "=" << value << "\n" );;
@@ -414,7 +414,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         //Z_LOG2( "zschimmer", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
 
         _server->_module->init();
-
+        _server->_module->_monitors->try_load();
         _server->_module_instance = _server->_module->create_instance();
        
         if( _server->_module_instance )

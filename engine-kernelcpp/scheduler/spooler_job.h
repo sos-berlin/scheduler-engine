@@ -151,6 +151,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->job_chain_priority() > b->job_chain_priority(); }
     virtual void                on_order_possibly_available ()                                      = 0;
 
+    virtual bool on_monitors_loaded() = 0;
+    virtual bool on_monitor_to_be_removed(Monitor*) = 0;;
+
     virtual string script_text() const = 0;
 
   private:
@@ -264,6 +267,8 @@ struct Standard_job : Job
     bool                        on_schedule_to_be_removed   ();
   //void                        on_schedule_removed         ();
 
+    bool on_monitors_loaded();
+    bool on_monitor_to_be_removed(Monitor*);
 
     State                       state                       () const                                { return _state; }
     bool                        is_permanently_stopped      () const                                { return _is_permanently_stopped; }

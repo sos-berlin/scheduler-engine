@@ -374,6 +374,9 @@
     <ClCompile Include="Module_monitor.cxx" />
     <ClCompile Include="Module_monitors.cxx" />
     <ClCompile Include="Module_monitor_instance.cxx" />
+    <ClCompile Include="Monitor.cxx" />
+    <ClCompile Include="Monitor_folder.cxx" />
+    <ClCompile Include="Monitor_subsystem.cxx" />
     <ClCompile Include="spooler_job_java.cxx" />
     <ClCompile Include="Timed_call.cxx" />
     <ClCompile Include="Settings.cxx" />

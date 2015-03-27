@@ -167,6 +167,13 @@ struct Java_job : Job {
         z::throw_xc(Z_FUNCTION);
     }
 
+    bool on_monitors_loaded() { 
+        return false; 
+    }
+    
+    bool on_monitor_to_be_removed(Monitor*) {
+        return false;
+    }
 
 
     // *** TASK ***

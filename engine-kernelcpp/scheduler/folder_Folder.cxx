@@ -20,6 +20,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
 
     _process_class_folder    = spooler()->process_class_subsystem   ()->new_process_class_folder ( this );
     _lock_folder             = spooler()->lock_subsystem            ()->new_lock_folder          ( this );
+    _monitor_folder          = spooler()->monitor_subsystem         ()->new_monitor_folder       ( this );
     _job_folder              = spooler()->job_subsystem             ()->new_job_folder           ( this );
     _job_chain_folder        = spooler()->order_subsystem           ()->new_job_chain_folder     ( this );
     _standing_order_folder   = spooler()->standing_order_subsystem  ()->new_standing_order_folder( this );
@@ -29,6 +30,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
   //add_to_typed_folder_map( _scheduler_script_folder );
     add_to_typed_folder_map( _process_class_folder    );
     add_to_typed_folder_map( _lock_folder             );
+    add_to_typed_folder_map( _monitor_folder          );
     add_to_typed_folder_map( _job_folder              );
     add_to_typed_folder_map( _job_chain_folder        );
     add_to_typed_folder_map( _schedule_folder         );
@@ -268,6 +270,7 @@ vector<Typed_folder*> Folder::ordered_typed_folders() const {
     vector<Typed_folder*> typed_folders;
     typed_folders.push_back(_subfolder_folder);
     typed_folders.push_back(_lock_folder);
+    typed_folders.push_back(_monitor_folder);
     typed_folders.push_back(_schedule_folder);
     typed_folders.push_back(_process_class_folder);
     typed_folders.push_back(_job_folder);
