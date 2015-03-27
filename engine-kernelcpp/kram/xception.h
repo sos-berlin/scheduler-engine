@@ -109,7 +109,10 @@ inline ::std::ostream& operator<< ( ::std::ostream&, const Msg_insertions& );
 
 struct Xc_base : exception
 {
+    enum Dont_log { dont_log };
+
                                 Xc_base                 ( const char* ) THROW_NONE;
+                                Xc_base                 (const char*, Dont_log) THROW_NONE;
                                 Xc_base                 ( const char*, const Msg_insertions& ) THROW_NONE;
                                 Xc_base                 ( const Xc_base& ) THROW_NONE;
 #ifdef SYSTEM_GNU
@@ -163,6 +166,7 @@ struct Xc_base : exception
 struct Xc : Xc_base
 {
                                 Xc                      ( const char* ) THROW_NONE;
+                                Xc                      (const char*, Dont_log) THROW_NONE;
                                 Xc                      ( const Msg_code& ) THROW_NONE;
                                 Xc                      ( const Msg_code&, const Msg_insertions& ) THROW_NONE;
                                 Xc                      ( const Msg_code&, const Msg_insertions&, const Source_pos& ) THROW_NONE;

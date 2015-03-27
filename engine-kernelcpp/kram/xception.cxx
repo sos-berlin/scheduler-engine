@@ -365,7 +365,17 @@ THROW_NONE
     _what = "";
     _name[ 0 ] = '\0';
 
-    log_error();
+    if (error_code[0]) {
+        log_error();
+    }
+}
+
+
+Xc_base::Xc_base(const char* error_code, Dont_log) THROW_NONE :
+    _error_code(error_code)
+{
+    _what = "";
+    _name[0] = '\0';
 }
 
 //-----------------------------------------------------------------------------Xc_base::Xc_base
@@ -677,6 +687,11 @@ Xc::Xc( const char* error_code )
 THROW_NONE
 :
     Xc_base ( error_code )
+{
+}
+
+Xc::Xc(const char* error_code, Xc::Dont_log) THROW_NONE :
+    Xc_base(error_code, dont_log)
 {
 }
 

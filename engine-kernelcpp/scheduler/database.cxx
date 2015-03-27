@@ -1948,7 +1948,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                 if( use_task_schema  &&  error_text != "" )
                 {
-                    Xc x ( error_code.c_str() );
+                    Xc x(error_code.c_str(), Xc::dont_log);
                     x.set_what( error_text );
                     history_entry.appendChild( create_error_element( doc, x ) );
                 }
