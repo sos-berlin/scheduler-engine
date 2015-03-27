@@ -9,6 +9,7 @@
     <xsd:element name="add_order">
         <xsd:complexType>
             <xsd:attribute name="job_chain" type="xsd:string" use="required"/>
+            <xsd:attribute name="id" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 </xsd:schema>

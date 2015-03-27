@@ -21,9 +21,9 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   "New orders are added" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](DClonedOrderKey) {
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](CClonedOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](BClonedOrderKey) {
+      eventBus.awaitingKeyedEvent[OrderFinishedEvent](DOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderFinishedEvent](COrderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinishedEvent](BOrderKey) {
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
               scheduler executeXml OrderCommand(OriginalOrderKey)
             }
@@ -66,9 +66,9 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
 private object NodeOrderPluginIT {
   private val OriginalOrderKey = JobChainPath("/test-folder/a") orderKey "TEST"
-  private val BClonedOrderKey = JobChainPath("/test-folder/b") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
-  private val CClonedOrderKey = JobChainPath("/test-folder-c/c") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
-  private val DClonedOrderKey = JobChainPath("/test-folder/d") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d"/>
+  private val BOrderKey = JobChainPath("/test-folder/b") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
+  private val COrderKey = JobChainPath("/test-folder-c/c") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
+  private val DOrderKey = JobChainPath("/test-folder/d") orderKey "aaaTESTzzz"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d" NodeOrderPlugin:id="aaa${ORDER_ID}zzz"/>
   private val ErrorOrderKey = JobChainPath("/test-folder/error") orderKey "TEST"
   private val MissingJobchainCode = MessageCode("SCHEDULER-161")
 }

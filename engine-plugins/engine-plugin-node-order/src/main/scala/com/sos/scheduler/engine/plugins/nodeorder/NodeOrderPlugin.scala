@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -45,15 +46,20 @@ extends JobChainNodeNamespaceXmlPlugin {
   def parseOnReturnCodeXml(jobNode: JobNode, xmlEventReader: XMLEventReader): Order ⇒ Unit = {
     val eventReader = new ScalaXMLEventReader(xmlEventReader)
     import eventReader._
-    val jobChainPath = parseElement("add_order") {
-      JobChainPath(AbsolutePath.makeCompatibleAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain")))
+    val orderKeyPattern = parseElement("add_order") {
+      val jobChainPath = JobChainPath(AbsolutePath.makeCompatibleAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain")))
+      val idPattern = attributeMap.getOrElse("id", "")
+      OrderKeyPattern(jobChainPath, idPattern)
     }
-    require(jobChainPath != jobNode.jobChainPath, s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> must denote the own job_chain")
-    onReturnCode(jobChainPath) _ withToString "NodeOrderPlugin.onResultCode"
+    require(orderKeyPattern.idPattern.nonEmpty || orderKeyPattern.jobChainPath != jobNode.jobChainPath,
+      s"${this.getClass.getName} <add_order job_chain='${orderKeyPattern.jobChainPath}'> must denote the own job_chain")
+    onReturnCode(orderKeyPattern) _ withToString "NodeOrderPlugin.onResultCode"
   }
 
-  private def onReturnCode(jobChainPath: JobChainPath)(order: Order): Unit = {
-    val addOrderCommand = OrderCommand(jobChainPath orderKey order.id, parameters = order.parameters.toMap)
+  private def onReturnCode(orderKeyPattern: OrderKeyPattern)(order: Order): Unit = {
+    val addOrderCommand = OrderCommand(
+      orderKey = orderKeyPattern.resolveWith(order.id),
+      parameters = order.parameters.toMap)
     schedulerThreadFuture {
       try xmlCommandExecutor executeXml addOrderCommand
       catch {
@@ -70,4 +76,13 @@ extends JobChainNodeNamespaceXmlPlugin {
 
 object NodeOrderPlugin {
   private[nodeorder] val CommandFailedCode = MessageCode("NODE-ORDER-PLUGIN-100")
+
+  private case class OrderKeyPattern(jobChainPath: JobChainPath, idPattern: String) {
+    def resolveWith(id: OrderId) = OrderKey(jobChainPath, resolveIdWith(id))
+
+    private def resolveIdWith(id: OrderId) = idPattern match {
+      case "" ⇒ id
+      case _ ⇒ OrderId(idPattern.replace("${ORDER_ID}", id.string))
+    }
+  }
 }
