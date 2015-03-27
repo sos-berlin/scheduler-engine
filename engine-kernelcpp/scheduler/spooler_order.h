@@ -94,7 +94,7 @@ struct Order_state_transition {
 
     public: int return_code() const {
         assert((_internal_value & ~0xFFFFFFFF) == 0);
-        return _internal_value;
+        return (int)_internal_value;
     }
 
     public: int64 internal_value() const {
