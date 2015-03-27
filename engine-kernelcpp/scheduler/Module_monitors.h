@@ -31,12 +31,12 @@ struct Module_monitors : Dependant, Object
 
         public: void set_module_monitor(Module_monitor* m) {
             _module_monitor = m;
-            if (!_ordering_is_defined) _ordering = m->_ordering;
+            if (!_ordering_is_defined) _ordering = m->ordering();
         }
 
         public: int ordering() const {
             if (!_module_monitor) z::throw_xc(Z_FUNCTION);
-            return _ordering_is_defined? _ordering : _module_monitor->_ordering;
+            return _ordering_is_defined? _ordering : _module_monitor->ordering();
         }
 
         public: string monitor_name() const {
@@ -61,7 +61,7 @@ struct Module_monitors : Dependant, Object
         {}
 
         public: int ordering() const {
-            return _module_monitor->_ordering;
+            return _module_monitor->ordering();
         }
 
         public: string monitor_name() const {

@@ -76,7 +76,7 @@ void Module_monitor_instances::create_instances()
     vector<Module_monitor*> module_monitors = _monitors->module_monitors();
     Z_FOR_EACH(vector<Module_monitor*>, module_monitors, i) {
         Module_monitor* monitor = *i;
-        _instance_list.push_back( Z_NEW( Module_monitor_instance( monitor, monitor->_module->create_instance() ) ) );
+        _instance_list.push_back(Z_NEW(Module_monitor_instance(monitor, monitor->create_module_instance())));
     }
 }
 

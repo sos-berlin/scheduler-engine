@@ -4,14 +4,28 @@ namespace sos {
 namespace scheduler {
 
 const string default_monitor_name = "scheduler";
+const int default_ordering = 1;
 
 
 Module_monitor::Module_monitor() : 
     _zero_(this + 1), 
-    _ordering(1),
-    _name(default_monitor_name)
+    _ordering(default_ordering),
+    _monitor_name(default_monitor_name)
 {}
 
+Module_monitor::Module_monitor(Module* module) :
+    _zero_(this + 1), 
+    _ordering(default_ordering),
+    _monitor_name(default_monitor_name),
+    _module(module)
+{}
+
+Module_monitor::Module_monitor(const string& name, Module* module) :
+    _zero_(this + 1), 
+    _ordering(default_ordering),
+    _monitor_name(name),
+    _module(module)
+{}
 
 void Module_monitor::initialize() {
     _module->init();
@@ -30,5 +44,10 @@ void Module_monitor::set_dom(const xml::Element_ptr& monitor_element) {
         }
     }
 }
+
+ptr<Module_instance> Module_monitor::create_module_instance() const {
+    return _module->create_instance();
+}
+
 
 }} // namespace

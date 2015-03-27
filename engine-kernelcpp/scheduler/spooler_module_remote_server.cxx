@@ -383,24 +383,24 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!
                 {
-                    monitor = Z_NEW( Module_monitor );
-                    monitor->_module = Z_NEW( Module( (Scheduler*)NULL, (File_based*)NULL, include_path, NULL ) );  
-                    monitor->_module->_language = value;
+                    ptr<Module> m = Z_NEW(Module((Scheduler*)NULL, (File_based*)NULL, include_path, NULL));
+                    m->_language = value;
+                    monitor = Z_NEW(Module_monitor(m));
                 }
                 else                                                                         
-                if( monitor  &&  key_word == "monitor.name"       )  monitor->_name                     = value;
+                if( monitor  &&  key_word == "monitor.name"       )  monitor->_monitor_name = value;
                 else                                                                         
                 if( monitor  &&  key_word == "monitor.ordering"   )  monitor->_ordering                 = as_int( value );
                 else                                                                         
-                if( monitor  &&  key_word == "monitor.com_class"  )  monitor->_module->_com_class_name  = value;
+                if( monitor  &&  key_word == "monitor.com_class"  )  monitor->module()->_com_class_name  = value;
                 else                                                                         
-                if( monitor  &&  key_word == "monitor.filename"   )  monitor->_module->_filename        = value;
+                if( monitor  &&  key_word == "monitor.filename"   )  monitor->module()->_filename        = value;
                 else
-                if( monitor  &&  key_word == "monitor.java_class" )  monitor->_module->_java_class_name = value;
+                if( monitor  &&  key_word == "monitor.java_class" )  monitor->module()->_java_class_name = value;
                 else
                 if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Parameter sein!
                 {
-                    monitor->_module->set_xml_string_text_with_includes(value);
+                    monitor->module()->set_xml_string_text_with_includes(value);
                     _server->_module->_monitors->add_module_monitor(monitor);
                 }
                 else

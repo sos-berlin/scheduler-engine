@@ -7,9 +7,9 @@ namespace scheduler {
 const string default_monitor_name = "scheduler";
 
 
-Module_monitors::Module_monitors(Module* module) : 
+Module_monitors::Module_monitors(Module* main_module) : 
     _zero_(this +1), 
-    _main_module(module),
+    _main_module(main_module),
     _job(dynamic_cast<Job*>(_main_module->_file_based))
 {}
 
@@ -29,9 +29,8 @@ void Module_monitors::set_dom(const xml::Element_ptr& element) {
         if (Anonymous_monitor_reference* anon = dynamic_cast<Anonymous_monitor_reference*>(monitor_reference_or_null(name))) {
             module_monitor = anon->module_monitor();
         } else {
-            module_monitor = Z_NEW(Module_monitor());
-            module_monitor->_name = name;
-            module_monitor->_module = Z_NEW(Module(spooler(), _main_module->_file_based, spooler()->include_path(), &_main_module->_log));
+            ptr<Module> module = Z_NEW(Module(spooler(), _main_module->_file_based, spooler()->include_path(), &_main_module->_log));
+            module_monitor = Z_NEW(Module_monitor(name, module));
             add_module_monitor(module_monitor);  // Possibly overriding existing, equally named Named_monitor_reference
         }
         module_monitor->set_dom(element);

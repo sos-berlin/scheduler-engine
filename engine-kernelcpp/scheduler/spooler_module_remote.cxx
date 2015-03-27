@@ -471,13 +471,13 @@ AGAIN:
                 vector<Module_monitor*> module_monitors = _module->_monitors->module_monitors();
                 for (int i = 0; i < module_monitors.size(); i++) {
                     Module_monitor* monitor = module_monitors[i];
-                    params_array[ nr++ ] = "monitor.language="        + monitor->_module->_language;       // Muss der erste Parameter sein, legt den Module_monitor an
+                    params_array[ nr++ ] = "monitor.language="        + monitor->module()->_language;       // Muss der erste Parameter sein, legt den Module_monitor an
                     params_array[ nr++ ] = "monitor.name="            + monitor->monitor_name();           
                     params_array[ nr++ ] = "monitor.ordering="        + as_string(i);  // module_monitors() are ordered increasingly
-                    params_array[ nr++ ] = "monitor.com_class="       + monitor->_module->_com_class_name;
-                    params_array[ nr++ ] = "monitor.filename="        + monitor->_module->_filename;
-                    params_array[ nr++ ] = "monitor.java_class="      + monitor->_module->_java_class_name;
-                    params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.includes_resolved().xml_string();    // JS-444  // Muss der letzte Parameter sein!
+                    params_array[ nr++ ] = "monitor.com_class="       + monitor->module()->_com_class_name;
+                    params_array[ nr++ ] = "monitor.filename="        + monitor->module()->_filename;
+                    params_array[ nr++ ] = "monitor.java_class="      + monitor->module()->_java_class_name;
+                    params_array[ nr++ ] = "monitor.script="          + monitor->module()->_text_with_includes.includes_resolved().xml_string();    // JS-444  // Muss der letzte Parameter sein!
                 }
             }
 
