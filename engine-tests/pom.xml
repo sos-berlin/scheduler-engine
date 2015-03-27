@@ -24,18 +24,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!--
-                    <systemProperties>
-                        <property>
-                            <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
-                            <name>java.io.tmpdir</name>
-                            <value>${basedir}/target/temp</value>
-                        </property>
-                    </systemProperties>
-                    -->
-                    <!-- excluded contains test cases not executed in the test phase (e.g. for unresolved jira issues) -->
 	                <excludes>
-                        <exclude>com/sos/scheduler/engine/kernelcpptest/excluded/**/*.java</exclude>
                         <exclude>com/sos/scheduler/engine/tests/excluded/**/*.java</exclude>
 	                </excludes>
                 </configuration>
