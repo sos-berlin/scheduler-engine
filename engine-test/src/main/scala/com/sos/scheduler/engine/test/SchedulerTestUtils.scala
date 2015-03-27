@@ -20,7 +20,7 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
-import org.joda.time.Duration
+import org.joda.time.{Instant, Duration}
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -67,7 +67,8 @@ object SchedulerTestUtils {
       val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
       val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
-      val result = for (_ ← closed; s ← startedTime; e ← endedTime) yield TaskResult(jobPath, taskId, duration = max(0, e - s).ms)
+      val result = for (_ ← closed; s ← startedTime; e ← endedTime)
+                   yield TaskResult(jobPath, taskId, endedInstant = new Instant(e), duration = max(0, e - s).ms)
       TaskRun(jobPath, taskId, started, ended, closed, result)
     }
   }
@@ -86,7 +87,7 @@ object SchedulerTestUtils {
       result: Future[TaskResult]) {
   }
 
-  final case class TaskResult(jobPath: JobPath, taskId: TaskId, duration: Duration) {
+  final case class TaskResult(jobPath: JobPath, taskId: TaskId, endedInstant: Instant, duration: Duration) {
     def logString(implicit controller: TestSchedulerController) =
       ((controller.scheduler executeXml <show_task id={taskId.string} what="log"/>)
         .answer \ "task" \ "log").text

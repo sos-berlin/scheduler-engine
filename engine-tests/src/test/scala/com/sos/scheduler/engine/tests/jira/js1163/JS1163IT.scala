@@ -10,6 +10,8 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._
+import org.joda.time.Instant
+import org.joda.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -25,6 +27,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val List(httpPort, tcpPort) = findRandomFreeTcpPorts(2)
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-http-port=$httpPort", s"-tcp-port=$tcpPort"))
   private var results: Map[JobPath, TaskResult] = null
+  private var killTime: Instant = null
 
   "kill_task with timeout but without immediately=true is rejected" in {
     val run = runJobFuture(TestJobPath)
@@ -42,8 +45,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
         scheduler executeXml <kill_task job={WindowsJobPath.string} id={run.taskId.string} immediately="true" timeout="3"/>
       }
     }
-  }
-  else {
+  } else {
     val settings = List(
       "Without agent" → { () ⇒ None },
       "With agent" → { () ⇒ Some(s"http://127.0.0.1:$httpPort") })
@@ -58,11 +60,14 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
             TrapJobPath, TrapMonitorJobPath,
             IgnoringJobPath, IgnoringMonitorJobPath,
             ApiJobPath)
+          val t = now()
           val runs = jobPaths map { runJobFuture(_) }
           for (run ← runs) awaitSuccess(run.started)
-          sleep(ShellStartupTime)  // Wait until shell scripts should have executed their "trap" commands
+          // Now, during slow Java start, shell scripts should have executed their "trap" commands
+          sleep(1.s)
+          killTime = now()
           for (run ← runs) scheduler executeXml
-              <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeoutString}/>
+              <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getStandardSeconds.toString}/>
           results = awaitResults(runs map { _.result }) toKeyedMap { _.jobPath }
         }
       }
@@ -70,27 +75,31 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
       for (jobPath ← List(StandardJobPath, StandardMonitorJobPath)) {
         s"$testVariantName - $jobPath - Without trap, SIGTERM directly aborted process" in {
           results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
-          results(jobPath).duration should be < KilledImmediatelyMaxDuration
+          results(jobPath).duration should be < UndisturbedDuration
+          results(jobPath).endedInstant should be < killTime + MaxKillDuration
         }
       }
 
       for (jobPath ← List(TrapJobPath, TrapMonitorJobPath)) {
         s"$testVariantName - $jobPath - With SIGTERM trapped, SIGTERM aborted process after signal was handled" in {
           results(jobPath).logString should (not include FinishedNormally and include (SigtermTrapped))
-          results(jobPath).duration should be < KilledTrappedMaxDuration
+          results(jobPath).duration should be < UndisturbedDuration
+          results(jobPath).endedInstant should be < killTime + MaxKillDuration + TrapDuration
         }
       }
 
       for (jobPath ← List(IgnoringJobPath, IgnoringMonitorJobPath)) {
         s"$testVariantName - $jobPath - With SIGTERM ignored, timeout took effect" in {
           results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
-          results(jobPath).duration should (be >= KillTimeout and be < SleepDuration)
+          results(jobPath).endedInstant should be > killTime + KillTimeout - 1.s
+          results(jobPath).endedInstant should be < killTime + MaxKillDuration + KillTimeout
+          results(jobPath).duration should be < UndisturbedDuration
         }
       }
 
       s"$testVariantName - API job was aborted directly" in {
         results(ApiJobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
-        results(ApiJobPath).duration should be < KilledImmediatelyMaxDuration
+        results(ApiJobPath).endedInstant should be < killTime + 2.s
       }
     }
 
@@ -116,12 +125,10 @@ private object JS1163IT {
   private val IgnoringMonitorJobPath = JobPath("/test-ignore-monitor")
   private val ApiJobPath = JobPath("/test-api")
 
-  private val ShellStartupTime = 5.s
-  private val KillTimeout = 11.s
-  private val KillTimeoutString = (KillTimeout - ShellStartupTime).getStandardSeconds.toString
-  private val KilledImmediatelyMaxDuration = 10.s
-  private val KilledTrappedMaxDuration = 13.s
-  private val SleepDuration = 15.s
+  private val KillTimeout = 4.s
+  private val MaxKillDuration = 2.s
+  private val TrapDuration = 2.s  // Trap sleeps 2s
+  private val UndisturbedDuration = 15.s
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
