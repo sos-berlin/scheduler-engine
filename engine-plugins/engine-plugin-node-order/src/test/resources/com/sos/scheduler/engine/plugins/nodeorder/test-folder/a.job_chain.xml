@@ -8,7 +8,12 @@
         <on_return_codes>
             <on_return_code return_code="0">
                 <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="./b"/>
-                <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-folder/d" NodeOrderPlugin:id="aaa${ORDER_ID}zzz"/>
+                <add_order xmlns="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin" job_chain="/test-folder/d" id="aaa${ORDER_ID}zzz">
+                    <params>
+                        <param name="a" value="AAA"/>
+                        <param name="b" value="BBB"/>
+                    </params>
+                </add_order>
             </on_return_code>
         </on_return_codes>
     </job_chain_node>

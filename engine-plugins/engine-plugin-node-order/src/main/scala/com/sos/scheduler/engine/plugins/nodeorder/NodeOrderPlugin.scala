@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.nodeorder
 
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.xml.VariableSets
 import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -18,7 +19,6 @@ import com.sos.scheduler.engine.kernel.scheduler.{SchedulerException, SchedulerX
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._
 import javax.inject.Inject
 import javax.xml.stream.XMLEventReader
-import org.scalactic.Requirements._
 import scala.util.control.NonFatal
 
 /**
@@ -36,7 +36,7 @@ final class NodeOrderPlugin @Inject private(
   (implicit callQueue: SchedulerThreadCallQueue)
 extends JobChainNodeNamespaceXmlPlugin {
 
-  val xmlNamespace = "https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin"
+  val xmlNamespace = XmlNamespace
 
   /**
    * Parses `&lt;job_chain_node>` XML extension `&lt;add_order job_chain='...'>`.
@@ -46,20 +46,22 @@ extends JobChainNodeNamespaceXmlPlugin {
   def parseOnReturnCodeXml(jobNode: JobNode, xmlEventReader: XMLEventReader): Order ⇒ Unit = {
     val eventReader = new ScalaXMLEventReader(xmlEventReader)
     import eventReader._
-    val orderKeyPattern = parseElement("add_order") {
+    val addOrder = parseElement("add_order") {
       val jobChainPath = JobChainPath(AbsolutePath.makeCompatibleAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain")))
       val idPattern = attributeMap.getOrElse("id", "")
-      OrderKeyPattern(jobChainPath, idPattern)
+      if (jobChainPath == jobNode.jobChainPath && idPattern.isEmpty) throw new IllegalArgumentException(s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> must denote the own job_chain")
+      val elementMap = forEachStartElement {
+        case ParamsElementName ⇒ VariableSets.parseXml(eventReader, "params", s"{$XmlNamespace}param")
+      }
+      AddOrder(OrderKeyPattern(jobChainPath, idPattern), variables = elementMap.option[Map[String,String]](ParamsElementName) getOrElse Map())
     }
-    require(orderKeyPattern.idPattern.nonEmpty || orderKeyPattern.jobChainPath != jobNode.jobChainPath,
-      s"${this.getClass.getName} <add_order job_chain='${orderKeyPattern.jobChainPath}'> must denote the own job_chain")
-    onReturnCode(orderKeyPattern) _ withToString "NodeOrderPlugin.onResultCode"
+    onReturnCode(addOrder) _ withToString "NodeOrderPlugin.onResultCode"
   }
 
-  private def onReturnCode(orderKeyPattern: OrderKeyPattern)(order: Order): Unit = {
+  private def onReturnCode(addOrder: AddOrder)(order: Order): Unit = {
     val addOrderCommand = OrderCommand(
-      orderKey = orderKeyPattern.resolveWith(order.id),
-      parameters = order.parameters.toMap)
+      orderKey = addOrder.orderKeyPattern.resolveWith(order.id),
+      parameters = order.parameters.toMap ++ addOrder.variables)
     schedulerThreadFuture {
       try xmlCommandExecutor executeXml addOrderCommand
       catch {
@@ -76,6 +78,11 @@ extends JobChainNodeNamespaceXmlPlugin {
 
 object NodeOrderPlugin {
   private[nodeorder] val CommandFailedCode = MessageCode("NODE-ORDER-PLUGIN-100")
+
+  private val XmlNamespace = "https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin"
+  private val ParamsElementName = s"{$XmlNamespace}params"
+
+  private case class AddOrder(orderKeyPattern: OrderKeyPattern, variables: Map[String, String])
 
   private case class OrderKeyPattern(jobChainPath: JobChainPath, idPattern: String) {
     def resolveWith(id: OrderId) = OrderKey(jobChainPath, resolveIdWith(id))

@@ -1,34 +1,39 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
+import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.eventbus.EventSourceEvent
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPluginIT._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.interceptSchedulerError
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
 
 @RunWith(classOf[JUnitRunner])
 final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   "New orders are added" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](DOrderKey) {
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](COrderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](BOrderKey) {
-            eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
-              scheduler executeXml OrderCommand(OriginalOrderKey)
-            }
-          }
+      val promiseMap = (OrderKeys map { _ → Promise[Map[String, String]]() }).toMap
+      withCloser { implicit closer ⇒
+        eventBus.onHotEventSourceEvent[OrderFinishedEvent] {
+          case EventSourceEvent(_, order: UnmodifiableOrder) ⇒ promiseMap(order.key).success(order.parameters.toMap)
         }
+        scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
+        val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))
+        assert((OrderKeys zip results).toMap == ExpectedVariables)
       }
     }
   }
@@ -66,9 +71,15 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
 private object NodeOrderPluginIT {
   private val OriginalOrderKey = JobChainPath("/test-folder/a") orderKey "TEST"
-  private val BOrderKey = JobChainPath("/test-folder/b") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
-  private val COrderKey = JobChainPath("/test-folder-c/c") orderKey "TEST"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
-  private val DOrderKey = JobChainPath("/test-folder/d") orderKey "aaaTESTzzz"  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d" NodeOrderPlugin:id="aaa${ORDER_ID}zzz"/>
+  private val OriginalVariables = Map("a" → "A", "test" → "TEST")
+  private val ExpectedVariables = Map(
+    OriginalOrderKey → OriginalVariables,
+    (JobChainPath("/test-folder/b") orderKey "TEST") → OriginalVariables,   // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
+    (JobChainPath("/test-folder-c/c") orderKey "TEST") → OriginalVariables, // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
+    (JobChainPath("/test-folder/d") orderKey "aaaTESTzzz") → Map("test" → "TEST", "a" → "AAA", "b" → "BBB")  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d" NodeOrderPlugin:id="aaa${ORDER_ID}zzz"/>
+  )
+  private val OrderKeys = ExpectedVariables map { _._1 }
+
   private val ErrorOrderKey = JobChainPath("/test-folder/error") orderKey "TEST"
   private val MissingJobchainCode = MessageCode("SCHEDULER-161")
 }

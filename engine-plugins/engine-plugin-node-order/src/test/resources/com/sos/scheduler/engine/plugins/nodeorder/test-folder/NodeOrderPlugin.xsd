@@ -8,6 +8,20 @@
 
     <xsd:element name="add_order">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="params" maxOccurs="0">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="param">
+                                <xsd:complexType>
+                                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                                    <xsd:attribute name="value" type="xsd:string" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
             <xsd:attribute name="job_chain" type="xsd:string" use="required"/>
             <xsd:attribute name="id" type="xsd:string"/>
         </xsd:complexType>
