@@ -31,8 +31,8 @@
                         <goals>
                             <goal>java</goal>
                         </goals>
-
                         <configuration>
+                            <killAfter>-1</killAfter>
                             <includeProjectDependencies>false</includeProjectDependencies>
                             <includePluginDependencies>true</includePluginDependencies>                            
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
