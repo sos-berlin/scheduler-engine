@@ -25,7 +25,6 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   addOrderTests(1, "All job chain node have action='process'", Nil) { orderKey ⇒
-    resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
@@ -34,7 +33,6 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   addOrderTests(2, "Job chain node B has action='next_state'", List(BState → NextStateAction)) { orderKey ⇒
-    resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
@@ -43,7 +41,6 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
 
   addOrderTests(3, "Job chain node A has action='next_state'", List(BState → ProcessAction, AState → NextStateAction)) { orderKey ⇒
     // Alle wartenden Auftrage wechseln zu B
-    resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
@@ -51,7 +48,6 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   addOrderTests(4, "Again, all job chain nodes have action='process'", List(AState → ProcessAction)) { orderKey ⇒
-    resumeOrder(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     // AState nicht, weil next_state im vorangehenden Test den Auftrag schon weitergeschoben hat.
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
@@ -59,19 +55,13 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  addOrderTests(5, "All job chain nodes have action='next_state'", List(AState → NextStateAction, BState → NextStateAction, CState → NextStateAction)) { orderKey ⇒
-    resumeOrder(orderKey)
-    orderKey match {
-      case PermanentOrderKey ⇒ // A permanent order does not issue an OrderFinishedEvent ...
-      case _ ⇒ nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
-    }
+  addOrderTests(5, "All job chain nodes have action='next_state'", List(AState → NextStateAction, BState → NextStateAction, CState → NextStateAction)) {
+    case PermanentOrderKey ⇒ // A permanent order does not issue an OrderFinishedEvent ...
+    case orderKey ⇒ nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  addOrderTests(6, "Again, all job chain nodes have action='process'", List(AState → ProcessAction, BState → ProcessAction, CState → ProcessAction), suspend = false) { orderKey ⇒
-    if (orderKey.jobChainPath == NonpermanentJobChainPath) {
-      // Add new order 6
-      scheduler executeXml OrderCommand(orderKey)
-    }
+  addOrderTests(6, "Again, all job chain nodes have action='process'", List(AState → ProcessAction, BState → ProcessAction, CState → ProcessAction),
+      addOrderFor = Set(NonpermanentJobChainPath)) { orderKey ⇒
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
     nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
@@ -79,13 +69,20 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey)
   }
 
-  private def addOrderTests(index: Int, caption: String, nodeActions: List[(OrderState, String)], suspend: Boolean = true)(body: OrderKey ⇒ Unit): Unit =
+  private def addOrderTests(index: Int, caption: String, nodeActions: List[(OrderState, String)], addOrderFor: Set[JobChainPath] = Set())(body: OrderKey ⇒ Unit): Unit =
     s"$index) $caption" - {
       for (orderKey ← List(NonpermanentJobChainPath orderKey OrderId(s"$index"), PermanentOrderKey)) {
         s"Order $orderKey" in {
-          if (suspend) suspendOrder(orderKey)
+          if (!addOrderFor(orderKey.jobChainPath)) {
+            suspendOrder(orderKey)
+          }
           for ((state, action) ← nodeActions) {
             scheduler executeXml <job_chain_node.modify job_chain={orderKey.jobChainPath.string} state={state.string} action={action}/>
+          }
+          if (addOrderFor(orderKey.jobChainPath)) {
+            scheduler executeXml OrderCommand(orderKey)
+          } else {
+            resumeOrder(orderKey)
           }
           body(orderKey)
         }
