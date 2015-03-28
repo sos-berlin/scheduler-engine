@@ -41,27 +41,27 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
     terminateOnError = false)
 
   private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentHttpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
-  private lazy val agentModes = List(
-    "no Agent"                → None,
-    "C++ Agent via TCP"       → Some(s"127.0.0.1:$tcpPort"),
-    "C++ Agent via C++ HTTP"  → Some(s"http://127.0.0.1:$tcpPort"),
-    "C++ Agent via Java HTTP" → Some(s"http://127.0.0.1:$javaPort"))
-    //TODO JS-1291 While agent has not been finished: "Java Agent"              → Some(s"http://127.0.0.1:$agentHttpPort"))
-
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
   private lazy val jobSubsystem = instance[JobSubsystem]
   private lazy val orderSubsystem = instance[OrderSubsystem]
+
+  private sealed abstract class AgentMode(override val toString: String, val addressOption: () ⇒ Option[String])
+  private object NoAgent          extends AgentMode("No Agent"               , () ⇒ None)
+  private object JavaAgent        extends AgentMode("Java Agent"             , () ⇒ Some(s"http://127.0.0.1:$agentHttpPort"))
+  private object JavaHttpCppAgent extends AgentMode("C++ Agent via Java HTTP", () ⇒ Some(s"http://127.0.0.1:$javaPort"))
+  private object CppHttpCppAgent  extends AgentMode("C++ Agent via C++ HTTP" , () ⇒ Some(s"http://127.0.0.1:$tcpPort"))
+  private object TcpCppAgent      extends AgentMode("C++ Agent via TCP"      , () ⇒ Some(s"127.0.0.1:$tcpPort"))
+  private val allAgentModes = List(NoAgent, JavaAgent, JavaHttpCppAgent, CppHttpCppAgent, TcpCppAgent)
 
   private val expectedTaskId = Iterator from 3 map TaskId.apply
   Settings.list.zipWithIndex foreach { case ((setting, expected), i) ⇒
     val index = i + 1
     val testName = s"$index. $setting should result in $expected"
     testName - {
-      for ((modeName, agentOption) ← agentModes) {
-        modeName in {
-          def t() = myTest(index, agentOption, setting, expected, expectedTaskId.next())
-          if (modeName != "no Agent" && index == 2 ||   // FIXME JS-1330 exit 7 via agent results in order state ERROR instead of InitialState and JobIsStopped
-            modeName == "Java Agent" && (setting.details collectFirst { case _: SpoolerProcess ⇒ }).nonEmpty)  // FIXME JS-1291 API jobs are not yet completed
+      for (mode ← allAgentModes) {
+        s"$mode" in {
+          def t() = myTest(index, mode, setting, expected, expectedTaskId.next())
+          if (`***testIsPending***`(index, mode, setting))
             pendingUntilFixed(t())
           else
             t()
@@ -69,24 +69,12 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       }
     }
   }
-//  for ((modeName, agentOption) ← agentModes) {
-//    modeName - {
-//      Settings.list.zipWithIndex foreach { case ((setting, nonAgentExpected, agentExpected), i) ⇒
-//        val index = i + 1
-//        val expected: Expected = agentOption map { _ ⇒ agentExpected } getOrElse nonAgentExpected
-//        val testName = s"$index. $setting should result in $expected"
-//        testName in {
-//          myTest(index, agentOption, setting, expected, expectedTaskId.next())
-//        }
-//      }
-//    }
-//  }
 
   protected override def onSchedulerActivated() = awaitResult(agentApp.start(), 10.seconds)
 
-  private def myTest(index: Int, agentAddressOption: Option[String], setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
+  private def myTest(index: Int, agentMode: AgentMode, setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
-      scheduler executeXml <process_class name="test" remote_scheduler={agentAddressOption.orNull} replace="true"/>
+      scheduler executeXml <process_class name="test" remote_scheduler={agentMode.addressOption().orNull} replace="true"/>
 
       val job = jobSubsystem.job(setting.jobPath)
 
@@ -146,6 +134,10 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       emptyToNone(order.parameters(SpoolerProcessAfterNames.parameter)) map { _.toBoolean }))
   }
 
+  private def `***testIsPending***`(index: Int, mode: AgentMode, setting: Setting): Boolean =
+    mode != NoAgent && index == 2 ||  // FIXME JS-1330 exit 7 via agent results in order state ERROR instead of InitialState and JobIsStopped
+    mode == JavaAgent && (!Set(24,25)(index) && (setting.details collectFirst { case _: SpoolerProcess ⇒ }).nonEmpty) // FIXME JS-1291 API jobs are not yet completed
+
   eventBus.on[LogEvent] { case e: LogEvent ⇒
     if (Expected.LogLevels contains e.level) {
       for (code ← Option(e.getCodeOrNull))
@@ -159,9 +151,4 @@ private object SpoolerProcessAfterIT {
   private class MyMutableMultiMap[A, B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
   private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
-
-//  /** Wegen JUnitRunner? Klammern bringen Surefire Klassen- und Testnamen durcheinander */
-//  private def renameTestForSurefire(name: String) =
-//    name.replace('(', '[').replace(')', ']')
-//      .replace(',', ' ')  // Surefire zeigt Komma als \u002C
 }
