@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1176
 
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.JobPath
@@ -19,7 +20,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.{Future, Promise}
 
 /**
  * JS-1176 BUG: If you change a job configuration while the database connection get lost then the JobScheduler can crash.
@@ -57,7 +58,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
       }
       databaseServer.stop()
       testEnvironment.fileFromPath(TestJobPath).append(" ")
-      Await.result(waitingForDatabase.future, ConfigurationDirectoryWatchPeriod + TestTimeout)
+      awaitResult(waitingForDatabase.future, ConfigurationDirectoryWatchPeriod + TestTimeout)
       val databaseStart = Future {
         Thread.sleep(5000)
         databaseServer.start()

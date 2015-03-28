@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js973
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -27,7 +28,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
 final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBeforeAndAfterAll {
@@ -217,7 +217,7 @@ private object JS973IT {
     }
 
     def expectedResult = {
-      Await.result(extraScheduler.activatedFuture, ExtraSchedulerTimeout.toScalaDuration)
+      awaitResult(extraScheduler.activatedFuture, ExtraSchedulerTimeout.toScalaDuration)
       _expectedResult
     }
   }

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1187
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
@@ -20,7 +21,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.concurrent.Await
 
 /**
  * JS-1187 Job waits until agent is available.
@@ -52,21 +52,21 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   "With unreachable remote_scheduler, the waiting task can be killed" in {
     val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
     val taskRun = runJobFuture(UnreachableRemoteJobPath)
-    Await.result(warningFuture, TestTimeout)
+    awaitResult(warningFuture, TestTimeout)
     requireIsWaitingForAgent(taskRun.taskId)
     scheduler executeXml <kill_task job={UnreachableRemoteJobPath.string} id={taskRun.taskId.string}/>
-    Await.result(taskRun.closed, TestTimeout)
+    awaitResult(taskRun.closed, TestTimeout)
   }
 
   "With unreachable remote_scheduler, task waits until agent is reachable" in {
     autoClosing(newExtraScheduler(agentHttpPort)) { agent ⇒
       val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
       val taskRun = runJobFuture(UnreachableRemoteJobPath)
-      Await.result(warningFuture, TestTimeout)
+      awaitResult(warningFuture, TestTimeout)
       requireIsWaitingForAgent(taskRun.taskId)
       agent.start()
-      Await.result(agent.activatedFuture, TestTimeout)
-      Await.result(taskRun.result, TestTimeout)
+      awaitResult(agent.activatedFuture, TestTimeout)
+      awaitResult(taskRun.result, TestTimeout)
     }
   }
 

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1159
 
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
@@ -14,7 +15,6 @@ import com.sos.scheduler.engine.tests.jira.js1159.JS1159IT._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FreeSpec}
-import scala.concurrent.Await
 
 /**
  * JS-1159: Agent communication via HTTP.
@@ -46,7 +46,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
     extraScheduler.start()
     scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
     scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri}/>
-    Await.result(extraScheduler.activatedFuture, TestTimeout)
+    awaitResult(extraScheduler.activatedFuture, TestTimeout)
   }
 
   TestJobPaths foreach { jobPath ⇒

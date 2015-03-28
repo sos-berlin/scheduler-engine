@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
 import java.util.concurrent.TimeoutException
 import org.joda.time.Duration
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.{Future, Promise}
 import scala.reflect.ClassTag
 
 object EventBusTestFutures {
@@ -28,7 +29,7 @@ object EventBusTestFutures {
       def awaitingEvent2[E <: Event](timeout: Duration, predicate: E ⇒ Boolean = EveryEvent)(f: ⇒ Unit)(implicit e: ClassTag[E]): E = {
         val future = eventFuture[E](predicate = predicate)(e)
         f
-        try Await.result(future, timeout)
+        try awaitResult(future, timeout)
         catch {
           case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for event ${implicitClass[E].getName}")
         }

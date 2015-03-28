@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
@@ -20,7 +22,7 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
-import org.joda.time.{Instant, Duration}
+import org.joda.time.{Duration, Instant}
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -54,7 +56,7 @@ object SchedulerTestUtils {
 
   def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskResult = {
     val run = runJobFuture(jobPath)
-    Await.result(run.result, timeout)
+    awaitResult(run.result, timeout)
   }
 
   def runJobFuture(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun = {
@@ -95,7 +97,7 @@ object SchedulerTestUtils {
 
   implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = instance[ExecutionContext]
 
-  def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = awaitCompletion(f).get
+  def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = Await.ready(f, t.concurrentDuration).successValue
 
   def awaitFailure[A](f: Future[A])(implicit t: ImplicitTimeout): Throwable = awaitCompletion(f).failed.get
 
@@ -103,7 +105,7 @@ object SchedulerTestUtils {
 
   def awaitResults[A, M[X] <: TraversableOnce[X]](o: M[Future[A]])
       (implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext, timeout: ImplicitTimeout) =
-    Await.result(Future.sequence(o)(cbf, ec), TestTimeout)
+    awaitResult(Future.sequence(o)(cbf, ec), TestTimeout)
 
   def instance[A : ClassTag](implicit hasInjector: HasInjector): A = hasInjector.injector.getInstance(implicitClass[A])
 

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1200
 
 import akka.actor.ActorSystem
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -8,8 +9,8 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
 import spray.client.pipelining._
 import spray.http.HttpHeaders.{Accept, `Content-Type`}
 import spray.http.MediaTypes._
@@ -43,7 +44,7 @@ final class JS1200IT extends FreeSpec with ScalaSchedulerTest {
   private def getJobDescription(mediaType: MediaType): String = {
     val pipeline: HttpRequest ⇒ Future[HttpResponse] = addHeader(Accept(mediaType)) ~> (sendReceive ~> unmarshal[HttpResponse])
     val future = pipeline(Get(s"http://127.0.0.1:$tcpPort/job_description?job=/test-a"))
-    val response = Await.result(future, 5.seconds)
+    val response = awaitResult(future, 5.seconds)
     assertResult(Some(`Content-Type`(mediaType))) { response.header[`Content-Type`] }
     response.entity.asString
   }

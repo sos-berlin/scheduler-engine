@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.agent.main.Main
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskId}
@@ -25,7 +26,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import scala.concurrent.Await
 import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
@@ -82,7 +82,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 //    }
 //  }
 
-  protected override def onSchedulerActivated() = Await.result(agentApp.start(), 10.seconds)
+  protected override def onSchedulerActivated() = awaitResult(agentApp.start(), 10.seconds)
 
   private def myTest(index: Int, agentAddressOption: Option[String], setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒

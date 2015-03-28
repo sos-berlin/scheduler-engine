@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js946.a
 
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.job.JobPath
@@ -17,7 +18,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
 final class JS946IT extends FreeSpec with ScalaSchedulerTest {
@@ -37,7 +37,7 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
     val time = currentTimeMillis()
     val futures = List(InvalidRemoteJobPath, InaccessibleRemoteJobPath) map { path ⇒ runJobFuture(path).result }
     for (f <- futures)
-      Await.result(f, 70.s)
+      awaitResult(f, 70.s)
     currentTimeMillis - time shouldBe 60000L +- 10000
   }
 
@@ -50,7 +50,7 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
         sleep(500.ms)
         f
       }
-    for (f <- futures) Await.result(f, 15.s)
+    for (f <- futures) awaitResult(f, 15.s)
   }
 }
 

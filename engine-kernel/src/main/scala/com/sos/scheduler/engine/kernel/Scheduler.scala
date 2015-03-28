@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
+import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.utils.JavaResource
@@ -46,7 +47,6 @@ import org.joda.time.DateTimeZone.UTC
 import org.joda.time.Instant.now
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
-import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 
@@ -160,7 +160,7 @@ with HasCloser {
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
     val future = injector.apply[HttpSchedulerCommandClient].uncheckedExecute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
-    val response: String = Await.result(future, Duration.Inf)
+    val response: String = awaitResult(future, Duration.Inf)
     System.out.println(response)
   }
 

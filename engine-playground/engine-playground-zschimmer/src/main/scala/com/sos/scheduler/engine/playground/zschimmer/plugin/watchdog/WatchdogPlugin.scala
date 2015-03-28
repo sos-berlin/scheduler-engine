@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -45,7 +46,7 @@ extends Plugin {
         val future = schedulerThreadFuture { scheduler.callCppAndDoNothing() }
         val t = new Timer(configuration.timeout)
         try {
-          Await.result(future, Duration(configuration.timeout.getMillis, TimeUnit.MILLISECONDS))
+          awaitResult(future, Duration(configuration.timeout.getMillis, TimeUnit.MILLISECONDS))
           logger.info(s"Scheduler response time was $t")
         }
         catch {

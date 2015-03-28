@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Guice}
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClientTest._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
@@ -37,7 +38,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
 
   override def beforeAll(): Unit = {
     val future = server.start()
-    Await.result(future, TestTimeout)
+    awaitResult(future, TestTimeout)
   }
 
   override def afterAll(): Unit = {
@@ -59,12 +60,12 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
 
   "uncheckedExecute" in {
     val startFuture = client.uncheckedExecute(uri, TestCommandElem)
-    Await.result(startFuture, Duration.Inf) shouldEqual TestResponseString
+    awaitResult(startFuture, Duration.Inf) shouldEqual TestResponseString
   }
 
   "uncheckedExecuteXml" in {
     val startFuture = client.uncheckedExecuteXml(uri, TestCommandElem.toBytes(schedulerEncoding))
-    Await.result(startFuture, Duration.Inf) shouldEqual TestResponseString
+    awaitResult(startFuture, Duration.Inf) shouldEqual TestResponseString
   }
 
   "Server error" in {
