@@ -1,4 +1,4 @@
-﻿#ifndef __MODULE_MONITOR_H
+#ifndef __MODULE_MONITOR_H
 #define __MODULE_MONITOR_H
 
 namespace sos {

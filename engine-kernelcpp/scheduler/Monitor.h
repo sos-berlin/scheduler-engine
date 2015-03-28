@@ -1,4 +1,4 @@
-﻿#ifndef __SCHEDULER_MONITOR_H
+#ifndef __SCHEDULER_MONITOR_H
 #define __SCHEDULER_MONITOR_H
 
 namespace sos {

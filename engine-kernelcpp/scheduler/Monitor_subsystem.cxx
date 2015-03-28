@@ -1,4 +1,4 @@
-﻿#include "spooler.h"
+#include "spooler.h"
 
 namespace sos {
 namespace scheduler {
