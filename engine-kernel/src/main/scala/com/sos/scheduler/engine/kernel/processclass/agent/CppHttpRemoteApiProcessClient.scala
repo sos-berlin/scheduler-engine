@@ -110,10 +110,10 @@ extends AutoCloseable {
                 httpRemoteProcess.killRemoteTask(unixSignal = signal) onFailure {
                   case t ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
                 }
-              case None ⇒ httpRemoteProcess.closeRemoteTask(kill = kill) onComplete {
-                case Success(()) ⇒ remoteTaskClosed = true
-                case Failure(t) ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
+              case None ⇒ httpRemoteProcess.closeRemoteTask(kill = kill) onFailure {
+                case t ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
               }
+              remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
             }
             // C++ will keine Bestätigung
         }
