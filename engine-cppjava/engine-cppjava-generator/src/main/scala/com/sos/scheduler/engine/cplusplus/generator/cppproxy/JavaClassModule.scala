@@ -44,7 +44,7 @@ extends JavaModule {
     s"""package ${interface.getPackage.getName};
    |
    |@javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
-   |@SuppressWarnings("unchecked")
+   |@SuppressWarnings({"unchecked", "rawtypes"})
    |final class $simpleName
    |extends ${classOf[CppProxyImpl[_]].getName}<${sisterClass.getName}>
    |implements ${interface.getName} {
