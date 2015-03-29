@@ -76,7 +76,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
-    virtual Absolute_path       process_class_path          () const                                = 0;
     virtual bool                waiting_for_process         () const                                = 0;
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
@@ -111,7 +110,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     ptr<Task>                   start_task                  (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) { return start_task_(params, environment, at, force, task_name, web_service_name); }
     virtual ptr<Task>           start_task_                 (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) = 0;
     virtual void                enqueue_taskPersistentState (const TaskPersistentStateJ&)           = 0;
-    virtual bool                try_to_end_task             (Job* for_job)                          = 0;
+    virtual bool                try_to_end_task             (Job* for_job, Process_class*)          = 0;
     
     virtual void                remove_running_task         ( Task* )                               = 0;
     virtual void                stop                        ( bool end_all_tasks )                  = 0;
@@ -247,9 +246,6 @@ struct Standard_job : Job
     bool                        on_requisite_to_be_removed  ( File_based* );
   //void                        on_requisite_removed        ( File_based* );
 
-
-
-    Absolute_path               process_class_path          () const                                { return _module->_process_class_path; }
     bool                        waiting_for_process         () const                                { return _waiting_for_process; }
 
  //   Job*                        on_replace_now              ();
@@ -366,7 +362,7 @@ struct Standard_job : Job
     Time                        next_order_time             () const;
     Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
-    bool                        try_to_end_task             (Job* for_job);
+    bool                        try_to_end_task             (Job* for_job, Process_class*);
     void                        kill_queued_task            ( int task_id );
     void                        end_tasks                   ( const string& task_warning );
     ptr<Module_instance>        create_module_instance      (const string& remote_scheduler);

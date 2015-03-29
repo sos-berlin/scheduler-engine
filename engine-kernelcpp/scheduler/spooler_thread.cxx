@@ -157,10 +157,8 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
     build_prioritized_order_job_array();
     Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it ) {
         Job* job = *it;
-        if( spooler()->process_class_subsystem()->normalized_path(job->process_class_path()) == process_class->normalized_path() ) {
-            bool ok = job->try_to_end_task(for_job);
-            if (ok) break;
-        }
+        bool ok = job->try_to_end_task(for_job, process_class);
+        if (ok) break;
     }
 
     return false;

@@ -140,10 +140,6 @@ struct Java_job : Job {
         return _cppNewJobJ.isWaitingForProcess();
     }
 
-    Absolute_path process_class_path() const {
-        return Absolute_path((string)_cppNewJobJ.processClassPath());
-    }
-
 
     // *** SCHEDULE ***
 
@@ -191,8 +187,8 @@ struct Java_job : Job {
         return _cppNewJobJ.removeRunningTask(task->id());
     }
 
-    bool try_to_end_task(Job* for_job) {
-        return _cppNewJobJ.tryToEndATask();
+    bool try_to_end_task(Job* for_job, Process_class* process_class) {
+        return _cppNewJobJ.tryToEndATask();  // TODO process_class should be respected
     }
 
     void kill_task(int task_id, bool immediately, const Duration& timeout) {

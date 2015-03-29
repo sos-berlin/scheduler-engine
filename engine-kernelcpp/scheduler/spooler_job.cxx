@@ -3585,11 +3585,11 @@ string Standard_job::time_zone_name() const
 
 //--------------------------------------------------------------------Standard_job::try_to_end_task
 
-bool Standard_job::try_to_end_task(Job* for_job) 
+bool Standard_job::try_to_end_task(Job* for_job, Process_class* process_class) 
 {
     Z_FOR_EACH(Task_set, _running_tasks, i) {
         Task* task = *i;
-        if( task->is_idle() ) {
+        if (task->is_idle() && task->process_class() == process_class) {
             task->cmd_nice_end( for_job );
             return true;
         }
