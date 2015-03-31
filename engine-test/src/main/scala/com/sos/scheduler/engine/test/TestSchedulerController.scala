@@ -20,6 +20,7 @@ import com.sos.scheduler.engine.main.{CppBinaries, CppBinary, SchedulerState, Sc
 import com.sos.scheduler.engine.test.TestSchedulerController._
 import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinaries}
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.util.IDE.isRunningUnderIDE
 import java.io.File
 import java.sql.{Connection, DriverManager}
 import org.joda.time.Duration
@@ -68,6 +69,11 @@ with HasInjector {
         terminateAfterException(e.getThrowable)
       }
     }
+  }
+
+  if (isRunningUnderIDE) {
+    val possiblePid = java.lang.management.ManagementFactory.getRuntimeMXBean.getName takeWhile { _ != '@' }  // http://stackoverflow.com/questions/35842
+    logger.debug(s"PID is possibly $possiblePid")
   }
 
   onClose {
