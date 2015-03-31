@@ -1085,6 +1085,7 @@ struct Order_queue : Com_order_queue,
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, Untouched_is_allowed, const Time& now, const string& cause );
+    void unoccupy_order(Order*);
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }
     time_t                      next_distributed_order_check_time() const                           { return _next_distributed_order_check_time; }
