@@ -680,10 +680,17 @@ bool Standard_job::on_initialize()
         _spooler->settings()->require_role(Settings::role_scheduler, obj_name());
         if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
-        add_requisite( Requisite_path( spooler()->process_class_subsystem(), _module->_process_class_path ) );
+        add_requisite( Requisite_path( spooler()->process_class_subsystem(), _default_process_class_path ) );
 
         //_module->set_folder_path( folder_path() );
         _module->init();
+        if (_module->kind() == Module::kind_internal) {
+            if (!Process_class_subsystem::is_empty_default_path(_default_process_class_path))
+                if( Process_class* process_class = default_process_class_or_null() )
+                    if (process_class->is_remote_host())  
+                        z::throw_xc("SCHEDULER-REMOTE-INTERNAL?");
+        } 
+
         if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
         if( _module->kind() == Module::kind_none )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
@@ -861,8 +868,7 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
         _title      = element.     getAttribute( "title"        , _title      );
         _log_append = element.bool_getAttribute( "log_append"   , _log_append );
         order       = element.bool_getAttribute( "order"        );
-        _module->_process_class_path = Absolute_path( folder_path(),
-                      element.     getAttribute( "process_class", _module->_process_class_path ) );
+        _default_process_class_path = Absolute_path(folder_path(), element.getAttribute("process_class", _default_process_class_path));
         _module->_java_options += " " + subst_env( 
                       element.     getAttribute( "java_options" ) );
         _min_tasks  = element.uint_getAttribute( "min_tasks"    , _min_tasks );
@@ -2717,9 +2723,7 @@ void Standard_job::remove_waiting_job_from_process_list()
     if( _waiting_for_process )
     {
         _waiting_for_process = false;
-
-        if( Process_class* process_class = _module->process_class_or_null() )
-        {
+        if (Process_class* process_class = default_process_class_or_null()) {
             process_class->remove_waiting_job( this );
         }
     }
@@ -2733,8 +2737,8 @@ bool Standard_job::on_requisite_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
 
-    if (_module->_use_process_class) {
-        assert( file_based == _module->process_class() );
+    if (!_spooler->_ignore_process_classes) {
+        assert(file_based == default_process_class());
         assert( dynamic_cast<Process_class*>( file_based ) );
         if (_waiting_for_process) {
             notify_a_process_is_idle();
@@ -2845,12 +2849,9 @@ ptr<Task> Standard_job::task_to_start()
 
     if( cause || has_order )
     {
-        if( _module->_use_process_class )
-        {
+        if (!_spooler->_ignore_process_classes) {
             // Ist ein Prozess verfügbar?
-
-            Process_class* process_class = _module->process_class_or_null();
-
+            Process_class* process_class = default_process_class_or_null();
             if( !process_class  ||  !process_class->process_available( this ) )
             {
                 if( process_class )
@@ -2860,7 +2861,7 @@ ptr<Task> Standard_job::task_to_start()
                     {
                         if( !_waiting_for_process  )
                         {
-                            Message_string m ( "SCHEDULER-949", _module->_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                            Message_string m ( "SCHEDULER-949", _default_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
                             if( task )  m.insert( 2, task->obj_name() );
                             log()->info( m );
                             process_class->enqueue_waiting_job( this );
@@ -2937,7 +2938,7 @@ ptr<Task> Standard_job::task_to_start()
 
     if( _waiting_for_process )
     {
-        if( Process_class* process_class = _module->process_class_or_null() )
+        if( Process_class* process_class = default_process_class_or_null() )
             if( process_class->process_available( this ) )
                 remove_waiting_job_from_process_list();
     }
@@ -3273,7 +3274,7 @@ xml::Element_ptr Standard_job::dom_element( const xml::Document_ptr& document, c
 
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
 
-    result.setAttribute_optional( "process_class", _module->_process_class_path );
+    result.setAttribute_optional("process_class", _default_process_class_path);
 
     if( _state != s_not_initialized )
     {
@@ -3539,8 +3540,8 @@ xml::Element_ptr Standard_job::why_dom_element(const xml::Document_ptr& doc) {
     if (_lock_requestor && !_lock_requestor->locks_are_available())
         append_obstacle_element(result, "locks_available", as_bool_string(false));
 
-    if( _module->_use_process_class ) {
-        Process_class* process_class = _module->process_class_or_null();
+    if (!_spooler->_ignore_process_classes) {
+        Process_class* process_class = default_process_class_or_null();
         if (!process_class) append_obstacle_element(result, "process_class_is_unknown", as_bool_string(true));
         if (!process_class->process_available(this)) {
             xml::Element_ptr obstacle = result.append_new_element(obstacle_element_name);
@@ -3629,7 +3630,7 @@ ptr<Module_instance> Standard_job::create_module_instance(const string& remote_s
     {
         if( _state == s_error      )  z::throw_xc( "SCHEDULER-204", name(), _error.what() );
 
-        result = _module->create_instance(remote_scheduler);
+        result = _module->create_instance(default_process_class(), remote_scheduler);
 
         if( result )
         {
@@ -3639,6 +3640,17 @@ ptr<Module_instance> Standard_job::create_module_instance(const string& remote_s
     }
 
     return result;
+}
+
+
+Process_class* Standard_job::default_process_class_or_null() const { 
+    return _spooler->_ignore_process_classes ? NULL
+        :_spooler->process_class_subsystem()->process_class_or_null(_default_process_class_path);
+}
+
+
+Process_class* Standard_job::default_process_class() const { 
+    return _spooler->process_class_subsystem()->process_class(_default_process_class_path);
 }
 
 //------------------------------------------------------------------------nternal_job::Internal_job

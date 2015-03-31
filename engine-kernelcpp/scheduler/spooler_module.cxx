@@ -393,21 +393,9 @@ void Module::init()
         }
     }
 
-
-    if( _kind != kind_internal )
-    {
-        if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;
-        if( _dont_remote )  _use_process_class = false, _process_class_path.clear();
-    }
-
-
     switch( _kind )
     {
-        case kind_internal:             if (!Process_class_subsystem::is_empty_default_path(_process_class_path))
-                                            if( Process_class* process_class = process_class_or_null() )
-                                                if (process_class->is_remote_host())  z::throw_xc("SCHEDULER-REMOTE-INTERNAL?");
-                                        break;
-
+        case kind_internal: break;
         case kind_remote:               break;
 
         case kind_java:                 break;
@@ -434,16 +422,15 @@ void Module::init()
 
 //--------------------------------------------------------------------------Module::create_instance
 
-ptr<Module_instance> Module::create_instance(const string& remote_scheduler)
+ptr<Module_instance> Module::create_instance(Process_class* process_class_or_null, const string& remote_scheduler)
 {
-    ptr<Module_instance> result = create_instance_impl(remote_scheduler);
+    ptr<Module_instance> result = create_instance_impl(process_class_or_null, remote_scheduler);
+    result->set_process_class(process_class_or_null);
 
     if( !_monitors->is_empty() )
     {
         if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
-        
-        if( !_use_process_class )  
-        {
+        if (!process_class_or_null && remote_scheduler.empty()) {
             result->_monitor_instances.create_instances();
         }
     }
@@ -453,19 +440,13 @@ ptr<Module_instance> Module::create_instance(const string& remote_scheduler)
 
 //---------------------------------------------------------------------Module::create_instance_impl
 
-ptr<Module_instance> Module::create_instance_impl(const string& remote_scheduler)
+ptr<Module_instance> Module::create_instance_impl(Process_class* process_class_or_null, const string& remote_scheduler)
 {
     ptr<Module_instance> result;
-
-
-    Kind kind = _kind;
-    
-    if( _use_process_class  &&
-        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
-    {
-        kind = kind_remote;                 
-    }
-
+    bool use_remote_scheduler = (process_class_or_null && process_class_or_null->is_remote_host()) || !remote_scheduler.empty();
+    bool remote_allowed = _spooler && !_spooler->_ignore_process_classes && (process_class_or_null || use_remote_scheduler) && _kind != kind_internal;
+    bool remote = remote_allowed && (has_api() || use_remote_scheduler);     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+    Kind kind = remote? kind_remote : _kind;
     switch( kind )
     {
         case kind_java:              
@@ -526,32 +507,6 @@ ptr<Module_instance> Module::create_instance_impl(const string& remote_scheduler
 bool Module::has_api() const
 { 
     return _kind != kind_process || !_monitors->is_empty(); 
-}
-
-//--------------------------------------------------------------------Module::process_class_or_null
-
-Process_class* Module::process_class_or_null() const
-{ 
-    Process_class* result = NULL;
-
-    if( _use_process_class )
-    {
-        result = _spooler->process_class_subsystem()->process_class_or_null( _process_class_path );
-    }
-
-    return result;
-}
-
-//----------------------------------------------------------------------------Module::process_class
-
-Process_class* Module::process_class() const
-{ 
-    //kind_process darf das (für remote_scheduler)  if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
-
-    // Für kind_process (ohne kind_remote) wird die Prozessklasse nicht wirklich benutzt, d.h. das Prozesslimit wirkt nicht.
-    // Besser wäre das Limit zu berücksichtigen (über Dummy-Process?).
-
-    return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
 
 //----------------------------------------------------------------Module_instance::In_call::In_call

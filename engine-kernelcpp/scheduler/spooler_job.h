@@ -377,6 +377,8 @@ struct Standard_job : Job
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
     void                        try_start_tasks             ();
     bool                        try_start_one_task          ();
+    public: Process_class* default_process_class() const;
+    public: Process_class* default_process_class_or_null() const;
 
   private:
     void                        set_log                     ();
@@ -478,7 +480,7 @@ struct Standard_job : Job
 
     ptr<Com_variable_set>      _default_params;
 
-
+    Absolute_path              _default_process_class_path;
     ptr<Module>                _module;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
 

@@ -11,7 +11,7 @@ namespace scheduler {
 struct Internal_module : Module
 {
                                 Internal_module             ( Spooler*, Prefix_log* = NULL );
-    virtual ptr<Module_instance> create_instance_impl       (const string& remote_scheduler) = 0;
+    virtual ptr<Module_instance> create_instance_impl       (Process_class*, const string& remote_scheduler) = 0;
 };
 
 //-------------------------------------------------------------------------Internal_module_instance

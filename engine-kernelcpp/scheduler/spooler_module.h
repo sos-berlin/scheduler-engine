@@ -101,8 +101,8 @@ struct Module : Object
     void                        init0                       ();
     void                        init                        ();
 
-    ptr<Module_instance>        create_instance             (const string& remote_scheduler = "");
-    virtual ptr<Module_instance> create_instance_impl       (const string& remote_scheduler);
+    ptr<Module_instance>        create_instance             (Process_class* = NULL, const string& remote_scheduler = "");
+    virtual ptr<Module_instance> create_instance_impl       (Process_class*, const string& remote_scheduler);
     bool                        set                         ()                                      { return _set; }
     bool                        has_api                     () const;
     Kind                        kind                        () const                                { return _kind; }
@@ -111,10 +111,6 @@ struct Module : Object
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
     string                      read_source_script          ()                                      { return _text_with_includes.read_plain_or_xml_string(); }
-
-    Process_class*              process_class               () const;
-    Process_class*              process_class_or_null       () const;
-
 
     Fill_zero                  _zero_;
     Spooler* const             _spooler;
@@ -125,9 +121,6 @@ struct Module : Object
     Text_with_includes         _text_with_includes;
     string                     _include_path;
     Absolute_path              _folder_path;
-    string                     _process_class_string;
-    Absolute_path              _process_class_path;
-    bool                       _use_process_class;
     Kind                       _kind;
     bool                       _initialized;
 
@@ -159,7 +152,6 @@ struct Module : Object
     int                        _encoding_code_page;
 #endif
 
-    bool                       _dont_remote;
     ptr<Module_monitors>       _monitors;
     ptr<Login>                 _login;
 
@@ -277,11 +269,17 @@ struct Module_instance : Object
     public: Order_state_transition order_state_transition() const;
     
     public: Process_class* process_class() const {
-        return _module->process_class();
+        if (!_process_class_or_null) z::throw_xc(Z_FUNCTION);
+        return _process_class_or_null;
     }
     
     public: Process_class* process_class_or_null() const {
-        return _module->process_class_or_null();
+        return _process_class_or_null;
+    }
+
+    public: void set_process_class(Process_class* o) {
+        assert(!_process_class_or_null || _process_class_or_null == o);
+        _process_class_or_null = o;
     }
 
     Fill_zero                  _zero_;
@@ -319,8 +317,8 @@ struct Module_instance : Object
     ptr<Com_log>               _com_log;                    // spooler_log
 
     Module_monitor_instances   _monitor_instances;
-
-    Fill_end                   _end_;
+    private: Process_class* _process_class_or_null;
+    private: Fill_end _end_;
 };
 
 //-------------------------------------------------------------------------------------------------

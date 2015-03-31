@@ -2206,7 +2206,7 @@ STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        *result = _job->module()->process_class();
+        *result = _job->default_process_class_or_null();
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
