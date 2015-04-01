@@ -645,6 +645,12 @@ void Module_instance::set_in_call( In_call* in_call, const string& extra )
     }
 }
 
+
+void Module_instance::set_process_class(Process_class* o) {
+    if (_process) z::throw_xc(Z_FUNCTION);
+    _process_class_or_null = o;
+}
+
 //---------------------------------------------------------------------Module_instance::attach_task
 
 void Module_instance::attach_task( Task* task, Prefix_log* log )

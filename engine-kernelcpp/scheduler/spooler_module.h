@@ -277,10 +277,7 @@ struct Module_instance : Object
         return _process_class_or_null;
     }
 
-    public: void set_process_class(Process_class* o) {
-        assert(!_process_class_or_null || _process_class_or_null == o);
-        _process_class_or_null = o;
-    }
+    public: void set_process_class(Process_class*);
 
     Fill_zero                  _zero_;
 
