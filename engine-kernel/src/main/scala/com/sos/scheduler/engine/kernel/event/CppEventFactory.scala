@@ -42,7 +42,8 @@ import com.sos.scheduler.engine.kernel.order.Order
         new OrderTouchedEvent(eventSource.asInstanceOf[Order].key)
 
       case `orderFinishedEvent` =>
-        new OrderFinishedEvent(eventSource.asInstanceOf[Order].key)
+        val order: Order = eventSource.asInstanceOf[Order]
+        new OrderFinishedEvent(eventSource.asInstanceOf[Order].key, order.state)
 
       case `orderNestedTouchedEvent` =>
         new OrderNestedTouchedEvent(eventSource.asInstanceOf[Order].key)

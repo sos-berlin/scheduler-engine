@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.implicits.Insertabl
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
+import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -25,10 +26,10 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   private val coldEvents = mutable.Map[String, Event]()
 
   "Persistent order" in {
-    checkOrderStates(persistentOrderKey)
+    checkOrderStates(PersistentOrderKey)
     eventPipe.nextAny[OrderEvent] match {
       case e: OrderStateChangedEvent ⇒
-        e.orderKey shouldEqual persistentOrderKey
+        e.orderKey shouldEqual PersistentOrderKey
         assert(e.previousState == OrderState("end"))
     }
   }
@@ -36,19 +37,19 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   "Temporary order" in {
     hotEvents.clear()
     coldEvents.clear()
-    scheduler.executeXml(<add_order job_chain={jobChainPath.string} id={temporaryOrderKey.id.toString}/>)
-    checkOrderStates(temporaryOrderKey)
+    scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={TemporaryOrderKey.id.toString}/>)
+    checkOrderStates(TemporaryOrderKey)
   }
 
   "Removed temporary order" in {
     hotEvents.clear()
     coldEvents.clear()
-    val orderKey = temporaryOrderKey
-    scheduler.executeXml(<add_order job_chain={jobChainPath.string} id={orderKey.id.toString}/>)
+    val orderKey = TemporaryOrderKey
+    scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={orderKey.id.toString}/>)
     eventPipe.nextAny[OrderTouchedEvent].orderKey shouldEqual orderKey
     eventPipe.nextAny[OrderSuspendedEvent].orderKey shouldEqual orderKey
     eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent ⇒ e.orderKey shouldEqual orderKey; e.previousState shouldEqual OrderState("state1") }
-    scheduler.executeXml(<remove_order job_chain={jobChainPath.string} order={orderKey.id.toString}/>)
+    scheduler.executeXml(<remove_order job_chain={TestJobChainPath.string} order={orderKey.id.toString}/>)
     //eventPipe.next[OrderEvent] match { case e: OrderFinishedEvent ⇒ e.getKey shouldEqual orderKey }
   }
 
@@ -63,7 +64,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent ⇒ e.orderKey shouldEqual orderKey }
     eventPipe.nextAny[OrderEvent] match { case e: OrderSuspendedEvent ⇒ e.orderKey shouldEqual orderKey }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent ⇒ e.orderKey shouldEqual orderKey; e.previousState shouldEqual OrderState("state1") }
-    scheduler.executeXml(<modify_order job_chain={jobChainPath.string} order={orderKey.id.toString} suspended="no"/>)
+    scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
     eventPipe.nextAny[OrderEvent] match { case e: OrderResumedEvent ⇒ e.orderKey shouldEqual orderKey }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent ⇒ e.orderKey shouldEqual orderKey; e.state shouldEqual OrderState("state2") }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent ⇒ e.orderKey shouldEqual orderKey }
@@ -77,14 +78,14 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     sleep(500)  // The last event can be late???
     coldEvents.toMap shouldEqual Map(
       "OrderTouched"   → OrderTouchedEvent(orderKey),
-      "OrderFinished"  → OrderFinishedEvent(orderKey),
+      "OrderFinished"  → OrderFinishedEvent(orderKey, OrderState("end")),
       "OrderSuspended" → OrderSuspendedEvent(orderKey),
       "OrderResumed"   → OrderResumedEvent(orderKey)
     )
     hotEvents shouldEqual Map(
       "OrderTouched UnmodifiableOrder"            → OrderTouchedEvent(orderKey),
       "OrderTouched Order"                        → OrderTouchedEvent(orderKey),
-      "OrderFinished UnmodifiableOrder"           → OrderFinishedEvent(orderKey),
+      "OrderFinished UnmodifiableOrder"           → OrderFinishedEvent(orderKey, OrderState("end")),
       "OrderStepStarted UnmodifiableOrder state1" → OrderStepStartedEvent(orderKey, OrderState("state1")),
       "OrderStepStarted Order state1"             → OrderStepStartedEvent(orderKey, OrderState("state1")),
       "OrderStepEnded UnmodifiableOrder state1"   → OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
@@ -153,7 +154,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
 
 
 private object OrderEventsIT {
-  private val jobChainPath = JobChainPath("/a")
-  private val persistentOrderKey = jobChainPath orderKey "persistentOrder"
-  private val temporaryOrderKey = jobChainPath orderKey "1"
+  private val TestJobChainPath = JobChainPath("/a")
+  private val PersistentOrderKey = TestJobChainPath orderKey "persistentOrder"
+  private val TemporaryOrderKey = TestJobChainPath orderKey "1"
 }
