@@ -90,10 +90,16 @@ object SchedulerTestUtils {
   }
 
   final case class TaskResult(jobPath: JobPath, taskId: TaskId, endedInstant: Instant, duration: Duration) {
-    def logString(implicit controller: TestSchedulerController) =
-      ((controller.scheduler executeXml <show_task id={taskId.string} what="log"/>)
-        .answer \ "task" \ "log").text
+    def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
   }
+
+  def taskLog(taskId: TaskId)(implicit controller: TestSchedulerController): String =
+    ((controller.scheduler executeXml <show_task id={taskId.string} what="log"/>)
+      .answer \ "task" \ "log").text
+
+  def orderLog(orderKey: OrderKey)(implicit controller: TestSchedulerController): String =
+    ((controller.scheduler executeXml <show_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} what="log"/>)
+      .answer \ "order" \ "log").text
 
   implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = instance[ExecutionContext]
 
