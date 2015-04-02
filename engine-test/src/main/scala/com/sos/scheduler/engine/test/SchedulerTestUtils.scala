@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
+import java.util.concurrent.TimeoutException
 import org.joda.time.{Duration, Instant}
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
@@ -141,6 +142,16 @@ object SchedulerTestUtils {
     controller.toleratingErrorCodes(Set(errorCode)) {
       controller.eventBus.awaitingEvent[ErrorLogEvent](_.codeOption == Some(errorCode)) {
         body
+      }
+    }
+
+  def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
+    controller.toleratingErrorCodes(errorCodes.toSet) {
+      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.codeOption == Some(o)) }
+      body
+      try awaitResults(futures)
+      catch {
+        case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error messages $errorCodes")
       }
     }
 }
