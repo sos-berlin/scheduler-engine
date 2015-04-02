@@ -65,6 +65,7 @@ string                          start_cause_name            ( Start_cause );
 
 struct Task : Object, 
               Abstract_scheduler_object,
+              Dependant,
               javabridge::has_proxy<Task>
 {
     enum State
@@ -247,18 +248,34 @@ struct Task : Object,
     Xc_copy                     error                       ()                                      { return _error; }
     bool                        force                       () const                                { return _force_start; }
     const Time&                 at                          () const                                { return _start_at; }
-    const string                log_string                  () const                                { return log()->as_string(); }
+    const string                log_string                  ()                                      { return log()->as_string(); }
     const File_path             stdout_path                 () const                                { return _module_instance->stdout_path(); }
     const File_path             stderr_path                 () const                                { return _module_instance->stderr_path(); }    
     
     public: Process_class* process_class() const {
-        return _module_instance->process_class();
+        if (!_process_class) z::throw_xc(Z_FUNCTION);
+        return _process_class;
     }
 
     public: Process_class* process_class_or_null() const {
-        return _module_instance->process_class_or_null();
+        return _process_class;
     }
 
+    public: bool on_requisite_loaded(File_based* file_based) { 
+        if (dynamic_cast<Process_class*>(file_based) && _state == s_waiting_for_process) {
+            do_something();
+        }
+        return true;
+    }
+
+    public: bool on_requisite_to_be_removed(File_based*) { 
+        cmd_end(); 
+        return true;
+    }
+
+    public: Prefix_log* log() {
+        return _log;
+    }
 
   protected:
     friend struct               Stdout_reader;
@@ -424,6 +441,7 @@ struct Task : Object,
     ptr<lock::Holder>          _lock_holder;
 
     ptr<File_logger>           _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
+    private: ptr<Process_class> _process_class;
 };
 
 //----------------------------------------------------------------------------------------Task_list

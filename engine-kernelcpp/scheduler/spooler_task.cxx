@@ -178,7 +178,8 @@ Task::Task(Standard_job* job)
     _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Duration::eternal ),
-    _order_state_transition(Order_state_transition::keep)
+    _order_state_transition(Order_state_transition::keep),
+    _process_class(job->default_process_class())
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -771,7 +772,7 @@ void Task::set_state_direct( State new_state )
         _state = new_state;
 
         if( is_idle()  &&  _job )
-            if (Process_class* process_class = process_class_or_null()) process_class->notify_a_process_is_idle();
+            if (_process_class) _process_class->notify_a_process_is_idle();
 
         Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) ) {
@@ -1800,6 +1801,10 @@ bool Task::do_something()
                                 Order_state_transition t = error_order_state_transition();   // Falls _order nach Fehler noch da ist
                                 if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
+                                if (_process_class) {
+                                    remove_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
+                                    _process_class = NULL;
+                                }
                                 finish(t);
                                 set_state_direct( s_closed );
                                 something_done = true;
@@ -2106,6 +2111,32 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
             _order = order;
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
             _log->set_order_log( _order->_log );
+
+            Absolute_path process_class_path = order->job_chain()->default_process_class_path();
+            if (process_class_path.empty()) {
+                if (Process_class* p = _job->default_process_class_or_null()) 
+                    process_class_path = p->path();
+            }
+            Process_class* process_class;
+            try { 
+                process_class = _spooler->process_class_subsystem()->process_class(process_class_path);
+            } catch (exception& x) {
+                order->log()->error(x.what());
+                postprocess_order(Order_state_transition::standard_error);
+                assert(!_order);
+                return NULL;
+            }
+            if (process_class != _process_class) {
+                if (_state > s_loading && process_class != _process_class) {
+                    _log->error(Message_string("SCHEDULER-491", _process_class? _process_class->path() : string("none"), process_class_path));
+                    postprocess_order(Order_state_transition::standard_error);
+                    assert(!_order);
+                    return NULL;
+                }
+                assert(!_module_instance);
+                _process_class = process_class;
+                add_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
+            }
             _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         } else {
             _job->request_order( now, cause );
@@ -2492,7 +2523,7 @@ bool Task::do_load()
 {
     string remote_scheduler = read_remote_scheduler_parameter();
     
-    if (ptr<Module_instance> module_instance = _job->create_module_instance(remote_scheduler)) {
+    if (ptr<Module_instance> module_instance = _job->create_module_instance(_process_class, remote_scheduler)) {
         module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
 
         _module_instance = module_instance;
@@ -2561,8 +2592,9 @@ void Task::do_end__end()
 Async_operation* Task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
+    Async_operation* result = _module_instance->step__start();
     if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
-    return _module_instance->step__start();
+    return result;
 }
 
 //-------------------------------------------------------------------------------Task::do_step__end

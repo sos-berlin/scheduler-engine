@@ -1,0 +1,113 @@
+package com.sos.scheduler.engine.tests.jira.js1301
+
+import com.sos.scheduler.engine.agent.AgentConfiguration
+import com.sos.scheduler.engine.agent.main.Main
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
+import com.sos.scheduler.engine.data.filebased.{FileBasedAddedEvent, FileBasedRemovedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order._
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1301.JS1301IT._
+import java.nio.file.Files
+import org.junit.runner.RunWith
+import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
+import scala.concurrent.duration._
+
+/**
+ * JS-1301 &lt;job_chain process_class=""/>.
+ *
+ * @author Joacim Zschimmer
+ */
+@RunWith(classOf[JUnitRunner])
+final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
+
+  private lazy val agentHttpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
+  private lazy val agentApp = {
+    val conf = AgentConfiguration(
+      httpPort = agentHttpPort,
+      httpInterfaceRestriction = Some("127.0.0.1"),
+      environment = Map("TEST_AGENT" → "*AGENT*"))
+    new Main(conf).closeWithCloser
+  }
+
+  protected override def onSchedulerActivated(): Unit =
+    awaitResult(agentApp.start(), 10.seconds)
+
+  "Order changes to error state when job chain process class is missing" in {
+    controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {
+      runOrder(AJobChainPath orderKey "1").state shouldEqual OrderState("ERROR")
+    }
+  }
+
+  "Job chain process class" in {
+    testEnvironment.fileFromPath(AProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
+    instance[FolderSubsystem].updateFolders()
+    val orderKey = AJobChainPath orderKey "2"
+    runOrder(orderKey).state shouldEqual OrderState("END")
+    orderLog(orderKey) should include ("SHELL TEST_AGENT=*AGENT*")
+    orderLog(orderKey) should include ("API TEST_AGENT=*AGENT*")
+  }
+
+  "Same API task cannot be used by two job chains with different process classes" in {
+    scheduler executeXml <process_class name="test-b" remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
+    runOrder(AJobChainPath orderKey "API").state shouldEqual OrderState("END")
+    interceptErrorLogEvents(Set(MessageCode("SCHEDULER-491"))) {
+      runOrder(BJobChainPath orderKey "API").state shouldEqual OrderState("ERROR")
+    }
+  }
+
+  "Deletion of a process class is delayed until all using tasks terminated" in {
+    val orderKey = AJobChainPath orderKey "DELETE"
+    val file = testEnvironment.fileFromPath(AProcessClassPath)
+    val content = file.contentBytes
+    eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](AProcessClassPath) {
+      eventBus.awaitingEvent2[TaskEndedEvent](predicate = _.jobPath == JavaJobPath, timeout = 10.s) {
+        eventBus.awaitingKeyedEvent[OrderStepStartedEvent](orderKey) {
+          scheduler executeXml OrderCommand(orderKey, parameters = Map("sleep" → "5"))
+        }
+        scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
+        sleep(2.s)
+        eventBus.awaitingEvent[InfoLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-989"))) { // "Process_class cannot be removed now, it will be done later"
+          Files.delete(file)
+          instance[FolderSubsystem].updateFolders()
+        }
+      }
+    }
+    assert(order(orderKey).state == OrderState("200"))
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+      eventBus.awaitingKeyedEvent[FileBasedAddedEvent](AProcessClassPath) {
+        file.contentBytes = content
+        instance[FolderSubsystem].updateFolders()
+      }
+      scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
+    }
+    .state shouldEqual OrderState("END")
+  }
+
+  private def runOrder(orderKey: OrderKey): OrderFinishedEvent =
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+      scheduler executeXml OrderCommand(orderKey)
+    }
+}
+
+private object JS1301IT {
+  private val AJobChainPath = JobChainPath("/test-a")
+  private val BJobChainPath = JobChainPath("/test-b")
+  private val AProcessClassPath = ProcessClassPath("/test-a")
+  private val JavaJobPath = JobPath("/test-java")
+}
