@@ -2129,8 +2129,10 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
             if (process_class != _process_class) {
                 if (_state > s_loading && process_class != _process_class) {
                     _log->error(Message_string("SCHEDULER-491", _process_class? _process_class->path() : string("none"), process_class_path));
-                    postprocess_order(Order_state_transition::standard_error);
+                    postprocess_order(Order_state_transition::keep);
+                    // Alternative to _job->stop(): postprocess_order(Order_state_transition::standard_error);
                     assert(!_order);
+                    _job->stop(true);
                     return NULL;
                 }
                 assert(!_module_instance);

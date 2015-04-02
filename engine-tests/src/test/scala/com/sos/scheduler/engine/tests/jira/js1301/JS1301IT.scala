@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -63,14 +64,6 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
     orderLog(orderKey) should include ("API TEST_AGENT=*AGENT*")
   }
 
-  "Same API task cannot be used by two job chains with different process classes" in {
-    scheduler executeXml <process_class name="test-b" remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
-    runOrder(AJobChainPath orderKey "API").state shouldEqual OrderState("END")
-    interceptErrorLogEvents(Set(MessageCode("SCHEDULER-491"))) {
-      runOrder(BJobChainPath orderKey "API").state shouldEqual OrderState("ERROR")
-    }
-  }
-
   "Deletion of a process class is delayed until all using tasks terminated" in {
     val orderKey = AJobChainPath orderKey "DELETE"
     val file = testEnvironment.fileFromPath(AProcessClassPath)
@@ -97,6 +90,22 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
     }
     .state shouldEqual OrderState("END")
+  }
+
+  "Same API task cannot be used by two job chains with different process classes" in {
+    scheduler executeXml <process_class name="test-b" remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
+    val aOrderKey = AJobChainPath orderKey "A-API"
+    val bOrderKey = BJobChainPath orderKey "B-API"
+    runOrder(aOrderKey).state shouldEqual OrderState("END")
+    eventBus.awaitingEvent[TaskEndedEvent](_.jobPath == JavaJobPath) {
+      interceptErrorLogEvents(Set(MessageCode("SCHEDULER-491"))) {
+        eventBus.awaitingKeyedEvent[OrderStepEndedEvent](bOrderKey) {
+          scheduler executeXml OrderCommand(bOrderKey)
+        }
+      }
+    }
+    assert(job(JavaJobPath).state == JobState.stopped)
+    assert(order(bOrderKey).state == OrderState("100"))
   }
 
   private def runOrder(orderKey: OrderKey): OrderFinishedEvent =
