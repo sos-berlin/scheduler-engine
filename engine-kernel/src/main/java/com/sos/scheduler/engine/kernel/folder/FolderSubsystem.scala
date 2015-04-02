@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.folder
 
-import com.sos.scheduler.engine.data.filebased.{FileBasedType, AbsolutePath}
+import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -21,10 +21,8 @@ extends FileBasedSubsystem {
 
   val description = FolderSubsystem
 
-  def names(path: AbsolutePath, typeName: String): immutable.Seq[String] = {
-    val cppTypeName = typeName.replaceAll("([A-Z])", "_$1").toLowerCase
-    immutable.Seq() ++ cppProxy.java_names(path.string, cppTypeName)
-  }
+  def names(path: AbsolutePath, typ: FileBasedType): immutable.Seq[String] =
+    immutable.Seq() ++ cppProxy.java_names(path.string, typ.cppName)
 
   /** @return true, wenn ein [[com.sos.scheduler.engine.kernel.filebased.FileBased]] geladen worden ist. */
   def updateFolders(): Boolean =
