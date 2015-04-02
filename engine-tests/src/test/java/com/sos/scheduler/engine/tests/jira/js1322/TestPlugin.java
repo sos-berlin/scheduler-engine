@@ -37,7 +37,7 @@ public final class TestPlugin extends AbstractPlugin implements XmlConfiguration
     private final String appendToTitle;
 
     @Inject
-    public TestPlugin(@Named(Plugins.configurationXMLName) Element pluginElement) {
+    private TestPlugin(@Named(Plugins.configurationXMLName) Element pluginElement) {
         // Missing: check for valid configuration
         appendToTitle = pluginElement.getAttribute("append-to-title");
     }
