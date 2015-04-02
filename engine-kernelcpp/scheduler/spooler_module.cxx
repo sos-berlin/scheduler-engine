@@ -769,7 +769,7 @@ bool Module_instance::try_to_get_process(const Api_process_configuration* c)
         // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
     }
 
-    return true;
+    return _process != NULL;
 }
 
 //---------------------------------------------------------------------------Module_instance::start
