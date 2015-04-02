@@ -136,7 +136,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
   private def `***testIsPending***`(index: Int, mode: AgentMode, setting: Setting): Boolean =
     mode != NoAgent && index == 2 ||  // FIXME JS-1330 exit 7 via agent results in order state ERROR instead of InitialState and JobIsStopped
-    mode == JavaAgent && (!Set(24,25)(index) && (setting.details collectFirst { case _: SpoolerProcess ⇒ }).nonEmpty) // FIXME JS-1291 API jobs are not yet completed
+    mode == JavaAgent && (!Set(12, 13, 14, 24,25)(index) && (setting.details collectFirst { case _: SpoolerProcess ⇒ }).nonEmpty) // FIXME JS-1291 API jobs are not yet completed
 
   eventBus.on[LogEvent] { case e: LogEvent ⇒
     if (Expected.LogLevels contains e.level) {
