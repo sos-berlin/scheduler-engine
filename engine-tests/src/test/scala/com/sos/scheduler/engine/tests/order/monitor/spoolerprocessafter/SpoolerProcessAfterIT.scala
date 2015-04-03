@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 
-import com.sos.scheduler.engine.agent.AgentConfiguration
-import com.sos.scheduler.engine.agent.main.Main
+import com.sos.scheduler.engine.agent.Agent
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
@@ -40,7 +40,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       s"-http-port=$javaPort"),
     terminateOnError = false)
 
-  private lazy val agentApp = new Main(AgentConfiguration(httpPort = agentHttpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
+  private lazy val agent = new Agent(AgentConfiguration(httpPort = agentHttpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
   private lazy val jobSubsystem = instance[JobSubsystem]
   private lazy val orderSubsystem = instance[OrderSubsystem]
@@ -70,7 +70,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  protected override def onSchedulerActivated() = awaitResult(agentApp.start(), 10.seconds)
+  protected override def onSchedulerActivated() = awaitResult(agent.start(), 10.seconds)
 
   private def myTest(index: Int, agentMode: AgentMode, setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒

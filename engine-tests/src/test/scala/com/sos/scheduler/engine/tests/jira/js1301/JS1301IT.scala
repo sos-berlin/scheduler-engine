@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1301
 
-import com.sos.scheduler.engine.agent.AgentConfiguration
-import com.sos.scheduler.engine.agent.main.Main
+import com.sos.scheduler.engine.agent.Agent
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -38,16 +38,16 @@ import scala.concurrent.duration._
 final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val agentHttpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
-  private lazy val agentApp = {
+  private lazy val agent = {
     val conf = AgentConfiguration(
       httpPort = agentHttpPort,
       httpInterfaceRestriction = Some("127.0.0.1"),
       environment = Map("TEST_AGENT" → "*AGENT*"))
-    new Main(conf).closeWithCloser
+    new Agent(conf).closeWithCloser
   }
 
   protected override def onSchedulerActivated(): Unit =
-    awaitResult(agentApp.start(), 10.seconds)
+    awaitResult(agent.start(), 10.seconds)
 
   "Order changes to error state when job chain process class is missing" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {
