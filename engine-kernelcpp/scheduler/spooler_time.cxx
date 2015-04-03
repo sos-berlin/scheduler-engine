@@ -275,7 +275,7 @@ void Time::set( double t )
     if( _time > never_double )  assert( !"time > never" ),  _time = never_double;
 
 
-#   if defined Z_DEBUG && defined Z_WINDOWS
+#   if defined SCHEDULER_TIME_WITH_DEBUG_STRING
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
                     else  _time_as_string = _time == never_double? time::never_name
                                                                  : utc_string();

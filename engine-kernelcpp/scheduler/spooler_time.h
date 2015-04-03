@@ -5,6 +5,11 @@
 
 #include <math.h>
 
+#if defined Z_DEBUG && defined Z_WINDOWS
+//#   define SCHEDULER_TIME_WITH_DEBUG_STRING
+#endif
+
+
 namespace sos {
 namespace scheduler {
 namespace time {
@@ -151,7 +156,7 @@ struct Time
     static Time                 now                         ();
     static Time                 local_now                   ();
 
-#   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
+#   if defined SCHEDULER_TIME_WITH_DEBUG_STRING
         string                 _time_as_string;
 #   endif    
 
