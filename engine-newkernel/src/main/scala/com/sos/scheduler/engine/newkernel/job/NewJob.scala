@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import NewJob._
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.job.{ResultCode, JobPath, TaskStartedEvent, TaskEndedEvent, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.EventBus
+import com.sos.scheduler.engine.newkernel.job.NewJob._
+import com.sos.scheduler.engine.newkernel.job.commands.{SomeJobCommand, StopJobCommand}
 import com.sos.scheduler.engine.newkernel.schedule.IntervalSelector
 import com.sos.scheduler.engine.newkernel.utils.TimedCallHolder
 import org.joda.time.Instant.now
 import scala.collection.mutable
-import com.sos.scheduler.engine.kernel.job.JobState
-import com.sos.scheduler.engine.newkernel.job.commands.{StopJobCommand, SomeJobCommand}
 
 final class NewJob(
     val path: JobPath,
@@ -41,7 +40,7 @@ final class NewJob(
   }
 
   def onTaskTerminated(task: ShellTask): Unit = {
-    eventBus publish new TaskEndedEvent(task.id, path, ResultCode(0))
+    eventBus publish new TaskEndedEvent(task.id, path, ReturnCode(0))
     startTaskAtNextStartTime()
   }
 

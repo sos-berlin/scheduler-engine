@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1190
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, OrderStateChangedEvent, OrderStateTransition, OrderStepEndedEvent, ProceedingOrderStateTransition, SuccessOrderStateTransition}
@@ -26,7 +26,7 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
     }
     for ((exitCode, expectedState) ← ExitCodeToState) {
       s"Exit code $exitCode" in {
-        runAndCheckOrder("SIMPLE", Map(), exitCode, ProceedingOrderStateTransition(exitCode), expectedState)
+        runAndCheckOrder("SIMPLE", Map(), exitCode, ProceedingOrderStateTransition(ReturnCode(exitCode)), expectedState)
       }
     }
   }
@@ -69,9 +69,9 @@ private object JS1190IT {
 
   private val MonitorExitCodeToState = List[((Boolean, Int, Boolean), (OrderStateTransition, OrderState))](
     (true, 0, true) → (SuccessOrderStateTransition, OrderState("STATE-0")),
-    (true, 1, false) → (ErrorOrderStateTransition(1), OrderState("STATE-1")),
-    (true, 99, false) → (ErrorOrderStateTransition(99), OrderState("STATE-99")),
-    (true, 100, false) → (ErrorOrderStateTransition(100), OrderState("ERROR")),
+    (true, 1, false) → (ErrorOrderStateTransition(ReturnCode(1)), OrderState("STATE-1")),
+    (true, 99, false) → (ErrorOrderStateTransition(ReturnCode(99)), OrderState("STATE-99")),
+    (true, 100, false) → (ErrorOrderStateTransition(ReturnCode(100)), OrderState("ERROR")),
 
     (true, 0, false) → (ErrorOrderStateTransition.Standard, OrderState("STATE-1")),
     (true, 1, true) → (SuccessOrderStateTransition, OrderState("STATE-0")),

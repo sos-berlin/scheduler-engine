@@ -2,7 +2,8 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
-import com.sos.scheduler.engine.common.scalautil.xmls.{XmlElemSource, ScalaXMLEventReader}
+import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlElemSource}
+import com.sos.scheduler.engine.data.job.ReturnCode
 import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, SuccessOrderStateTransition}
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler.OrderFunction
@@ -24,14 +25,14 @@ final class JobChainNodeParserAndHandlerTest extends FreeSpec {
     val x = new X
     x.initializeWithNodeXml(XmlElemSource(JobchainNodeElem), Map(TestNamespace → testNamespaceParse _).lift)
     x.orderStateTransitionToState(SuccessOrderStateTransition) shouldEqual State0
-    x.orderStateTransitionToState(ErrorOrderStateTransition(1)) shouldEqual State1
-    x.orderStateTransitionToState(ErrorOrderStateTransition(7)) shouldEqual State7
-    x.orderStateTransitionToState(ErrorOrderStateTransition(99)) shouldEqual ErrorState
-    x.returnCodeToOrderFunctions(0) shouldEqual Nil
-    x.returnCodeToOrderFunctions(1) shouldEqual Nil
-    x.returnCodeToOrderFunctions(2) shouldEqual Nil
-    x.returnCodeToOrderFunctions(7) should have size 1
-    x.returnCodeToOrderFunctions(7).head.toString shouldEqual TestCallbackName
+    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(1))) shouldEqual State1
+    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(7))) shouldEqual State7
+    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(99))) shouldEqual ErrorState
+    x.returnCodeToOrderFunctions(ReturnCode(0)) shouldEqual Nil
+    x.returnCodeToOrderFunctions(ReturnCode(1)) shouldEqual Nil
+    x.returnCodeToOrderFunctions(ReturnCode(2)) shouldEqual Nil
+    x.returnCodeToOrderFunctions(ReturnCode(7)) should have size 1
+    x.returnCodeToOrderFunctions(ReturnCode(7)).head.toString shouldEqual TestCallbackName
   }
 }
 

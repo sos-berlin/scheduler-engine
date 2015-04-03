@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.AbstractEvent
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.filebased.{FileBasedReplacedEvent, FileBasedRemovedEvent, FileBasedAddedEvent, FileBasedActivatedEvent}
-import com.sos.scheduler.engine.data.job.{TaskId, JobPath, ResultCode, TaskClosedEvent, TaskEndedEvent, TaskStartedEvent}
-import com.sos.scheduler.engine.data.log.LogEvent
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.scheduler.engine.data.event.{AbstractEvent, Event}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedAddedEvent, FileBasedRemovedEvent, FileBasedReplacedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.event.CppEventCode._
@@ -79,6 +77,6 @@ import com.sos.scheduler.engine.kernel.order.Order
   @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Long): AbstractEvent =
     OrderStepEndedEvent(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppInternalValue(orderStateTransitionCpp))
 
-  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, resultCode: Int): AbstractEvent =
-    TaskEndedEvent(TaskId(taskId), JobPath(jobPath), ResultCode(resultCode))
+  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AbstractEvent =
+    TaskEndedEvent(TaskId(taskId), JobPath(jobPath), ReturnCode(returnCode))
 }

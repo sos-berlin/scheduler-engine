@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
 import com.sos.scheduler.engine.data.order.OrderStateTransition
 import com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC
@@ -29,7 +29,7 @@ extends OrderQueueNode with JobChainNodeParserAndHandler {
   def onOrderStepEnded(order: Order, returnCode: Int): Unit = {
     logger.trace(s"$this onOrderStepEnded ${order.id} returnCode=$returnCode")
     require(order.jobChainPath == jobChainPath)
-    for (orderFunction ← returnCodeToOrderFunctions(returnCode)) {
+    for (orderFunction ← returnCodeToOrderFunctions(ReturnCode(returnCode))) {
       logger.trace(s"returnCode=$returnCode => calling plugin callback $orderFunction")
       orderFunction(order)
     }

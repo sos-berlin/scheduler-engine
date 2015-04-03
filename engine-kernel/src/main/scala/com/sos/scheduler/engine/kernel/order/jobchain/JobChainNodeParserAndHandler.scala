@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
+import com.sos.scheduler.engine.data.job.ReturnCode
 import com.sos.scheduler.engine.data.order.{KeepOrderStateTransition, OrderState, OrderStateTransition, ProceedingOrderStateTransition, SuccessOrderStateTransition}
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler._
@@ -22,7 +23,7 @@ private[jobchain] trait JobChainNodeParserAndHandler {
 
   protected def errorState: OrderState
 
-  private var returnCodeToOnReturnCode = PartialFunction.empty[Int, OnReturnCode]
+  private var returnCodeToOnReturnCode = PartialFunction.empty[ReturnCode, OnReturnCode]
 
   /**
    * May not be called.
@@ -48,7 +49,7 @@ private[jobchain] trait JobChainNodeParserAndHandler {
   /**
    * @return All functions [[Order]] ⇒ [[Unit]] to be executed when an order step ended with given `return_code`
    */
-  def returnCodeToOrderFunctions(returnCode: Int): immutable.Seq[OrderFunction] = {
+  def returnCodeToOrderFunctions(returnCode: ReturnCode): immutable.Seq[OrderFunction] = {
     returnCodeToOnReturnCode.lift(returnCode) match {
       case Some(OnReturnCode(_, _, callbacks)) ⇒ callbacks map { _.orderFunction }
       case _ ⇒ Nil
@@ -64,7 +65,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
 
   private val logger = Logger(getClass)
 
-  private def parseNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: String ⇒ Option[OnReturnCodeParser]): PartialFunction[Int, OnReturnCode] = {
+  private def parseNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: String ⇒ Option[OnReturnCodeParser]): PartialFunction[ReturnCode, OnReturnCode] = {
     def parseNodeConfiguration(): NodeConfiguration = {
       parseDocument(xmlSource) { eventReader ⇒
         import eventReader._
@@ -118,8 +119,8 @@ private[jobchain] object JobChainNodeParserAndHandler {
 
   private case class OnReturnCode(returnCodes: RangeSet, toStateOption: Option[OrderState], callbacks: immutable.Seq[Callback])
 
-  private def returnCodeToOnReturnCode(onReturnCodes: immutable.Seq[OnReturnCode])(returnCode: Int): Option[OnReturnCode] =
-    onReturnCodes collectFirst { case o if o.returnCodes contains returnCode ⇒ o }
+  private def returnCodeToOnReturnCode(onReturnCodes: immutable.Seq[OnReturnCode])(returnCode: ReturnCode): Option[OnReturnCode] =
+    onReturnCodes collectFirst { case o if o.returnCodes contains returnCode.toInt ⇒ o }
 
   private sealed trait ReturnCodeAction
 
