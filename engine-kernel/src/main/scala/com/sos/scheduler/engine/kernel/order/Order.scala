@@ -112,7 +112,7 @@ object Order {
   final class Type extends SisterType[Order, OrderC] {
     def sister(proxy: OrderC, context: Sister): Order = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Order(proxy, injector.apply[StandingOrderSubsystem])
+      new Order(proxy, injector.instance[StandingOrderSubsystem])
     }
   }
 }

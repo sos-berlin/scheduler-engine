@@ -63,7 +63,7 @@ object Job {
   final class Type extends SisterType[Job, JobC] {
     def sister(proxy: JobC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Job(proxy, injector.apply[JobSubsystem])
+      new Job(proxy, injector.instance[JobSubsystem])
     }
   }
 }

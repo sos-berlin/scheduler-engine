@@ -27,7 +27,7 @@ final class WebXmlIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJe
     prepareWebXml()
     createDirectory(webDirectory.getParentFile)
     createDirectory(webDirectory)
-    injector.apply[PluginSubsystem].activatePlugin(classOf[JettyPlugin])
+    injector.instance[PluginSubsystem].activatePlugin(classOf[JettyPlugin])
     super.checkedBeforeAll()
   }
 

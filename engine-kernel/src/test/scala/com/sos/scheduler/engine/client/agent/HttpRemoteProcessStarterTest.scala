@@ -27,12 +27,12 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
     }
   })
   private lazy val commandExecutor = new CommandExecutor
-  private lazy val server = injector.apply[TestCommandExecutorHttpServer.Factory].apply(httpPort, commandExecutor)
+  private lazy val server = injector.instance[TestCommandExecutorHttpServer.Factory].apply(httpPort, commandExecutor)
   private lazy val conf = ApiProcessConfiguration(
     hasApi = false,
     javaOptions = DummyJavaOptions,
     javaClasspath = DummyJavaClasspath)
-  private lazy val client = injector.apply[HttpRemoteProcessStarter]
+  private lazy val client = injector.instance[HttpRemoteProcessStarter]
 
   override def beforeAll(): Unit = {
     val future = server.start()
@@ -40,7 +40,7 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
   }
 
   override def afterAll(): Unit = {
-    injector.apply[ActorSystem].shutdown()
+    injector.instance[ActorSystem].shutdown()
   }
 
   "startRemoteTask and closeRemoteTask" in {

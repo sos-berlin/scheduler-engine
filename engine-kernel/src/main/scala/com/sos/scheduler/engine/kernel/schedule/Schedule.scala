@@ -27,7 +27,7 @@ private object Schedule {
   final class Type extends SisterType[Schedule, ScheduleC] {
     def sister(proxy: ScheduleC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Schedule(proxy, injector.apply[ScheduleSubsystem])
+      new Schedule(proxy, injector.instance[ScheduleSubsystem])
     }
   }
 }

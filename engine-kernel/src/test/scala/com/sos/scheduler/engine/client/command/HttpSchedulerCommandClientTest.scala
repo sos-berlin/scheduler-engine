@@ -32,8 +32,8 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
       bind(classOf[ExecutionContext]) toInstance ExecutionContext.global
     }
   })
-  private lazy val server = injector.apply[TestCommandExecutorHttpServer.Factory].apply(httpPort, executeCommand)
-  private lazy val client = injector.apply[HttpSchedulerCommandClient]
+  private lazy val server = injector.instance[TestCommandExecutorHttpServer.Factory].apply(httpPort, executeCommand)
+  private lazy val client = injector.instance[HttpSchedulerCommandClient]
   private lazy val uri = s"http://$HttpInterface:$httpPort/"
 
   override def beforeAll(): Unit = {
@@ -42,7 +42,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
   }
 
   override def afterAll(): Unit = {
-    injector.apply[ActorSystem].shutdown()
+    injector.instance[ActorSystem].shutdown()
   }
 
   "execute" in {

@@ -24,7 +24,7 @@ object Lock {
   final class Type extends SisterType[Lock, LockC] {
     def sister(proxy: LockC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Lock(proxy, injector.apply[LockSubsystem])
+      new Lock(proxy, injector.instance[LockSubsystem])
     }
   }
 }

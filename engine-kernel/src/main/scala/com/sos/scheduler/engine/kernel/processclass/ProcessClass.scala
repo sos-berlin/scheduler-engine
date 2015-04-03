@@ -114,10 +114,10 @@ object ProcessClass {
       val injector = context.asInstanceOf[HasInjector].injector
       new ProcessClass(
         proxy,
-        injector.apply[ProcessClassSubsystem],
-        injector.apply[SchedulerThreadCallQueue],
-        injector.apply[CppHttpRemoteApiProcessClient.Factory],
-        agentConnectRetryDelayLazy = () ⇒ max(1, injector.apply[SpoolerC].settings()._remote_scheduler_connect_retry_delay).s)
+        injector.instance[ProcessClassSubsystem],
+        injector.instance[SchedulerThreadCallQueue],
+        injector.instance[CppHttpRemoteApiProcessClient.Factory],
+        agentConnectRetryDelayLazy = () ⇒ max(1, injector.instance[SpoolerC].settings()._remote_scheduler_connect_retry_delay).s)
     }
   }
 

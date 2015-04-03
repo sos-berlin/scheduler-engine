@@ -31,7 +31,7 @@ extends FileBasedSubsystem {
 
   val description = OrderSubsystem
 
-  private implicit lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
+  private implicit lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
   private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
 
 //  def jobChainMap = new Map[JobChainPath, JobChain] {

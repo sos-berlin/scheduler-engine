@@ -15,7 +15,7 @@ import spray.servlet.Initializer.{ServiceActorAttrName, SettingsAttrName, System
 /** Like spray.servlet.Initializer. */
 class SprayServletContextInitializer(injector: Injector) extends ServletContextListener {
   private val started = new Switch
-  private[this] val actorSystem = injector.apply[ActorSystem]
+  private[this] val actorSystem = injector.instance[ActorSystem]
 
   // TODO Bei ActorInitializationException Plugin abbrechen. Bisher wird die Exception nur protokolliert und der Scheduler setzt fort.
 

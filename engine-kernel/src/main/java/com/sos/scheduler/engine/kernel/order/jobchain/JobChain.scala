@@ -153,7 +153,7 @@ object JobChain {
   final class Type extends SisterType[JobChain, Job_chainC] {
     def sister(proxy: Job_chainC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new JobChain(proxy, injector.apply[OrderSubsystem], injector)
+      new JobChain(proxy, injector.instance[OrderSubsystem], injector)
     }
   }
 

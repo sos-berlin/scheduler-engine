@@ -19,9 +19,9 @@ final class CppJobSubsystem @Inject private(
   injector: Injector)
 extends JobSubsystem {
 
-  private[job] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
-  private[job] lazy val jobStore = injector.apply[HibernateJobStore]
-  private[job] lazy val taskStore = injector.apply[HibernateTaskStore]
+  private[job] lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
+  private[job] lazy val jobStore = injector.instance[HibernateJobStore]
+  private[job] lazy val taskStore = injector.instance[HibernateTaskStore]
 
   override def overview: JobSubsystemOverview = {
     case class JobInfo(fileBasedState: FileBasedState, jobState: JobState, needsProcess: Boolean)

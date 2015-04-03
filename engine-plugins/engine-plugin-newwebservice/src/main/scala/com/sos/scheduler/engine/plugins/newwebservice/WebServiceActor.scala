@@ -29,9 +29,9 @@ extends HttpServiceActor with ActorLogging {
   private val tickDuration = new Duration(Try { context.system.settings.config.getDuration("akka.scheduler.tick-duration", TimeUnit.MILLISECONDS) } getOrElse Int.MaxValue)
 
   // Die Scheduler-Objekte stehen beim Start noch nicht bereit (es käme zu einem Deadlock, weil wir in einem anderem Thread sind).
-  private lazy val schedulerConfiguration = injector.apply[SchedulerConfiguration]
-  private lazy val scheduler = injector.apply[Scheduler]
-  private lazy val fileBasedSubsystemRegister = injector.apply[FileBasedSubsystem.Register]
+  private lazy val schedulerConfiguration = injector.instance[SchedulerConfiguration]
+  private lazy val scheduler = injector.instance[Scheduler]
+  private lazy val fileBasedSubsystemRegister = injector.instance[FileBasedSubsystem.Register]
 
   override def receive = runRoute(route)
 

@@ -146,7 +146,7 @@ with HasInjector {
   }
 
   private def checkForErrorLogLine(): Unit = {
-    val lastErrorLine = _scheduler.injector.apply[PrefixLog].lastByLevel(SchedulerLogLevel.error)
+    val lastErrorLine = _scheduler.injector.instance[PrefixLog].lastByLevel(SchedulerLogLevel.error)
     if (!lastErrorLine.isEmpty) sys.error("Test terminated after error log line: " + lastErrorLine)
   }
 
@@ -167,7 +167,7 @@ with HasInjector {
     finally errorLogEventIsTolerated = Set()
   }
 
-  final def instance[A : ClassTag]: A = injector.apply[A]
+  final def instance[A : ClassTag]: A = injector.instance[A]
 
   final def injector = scheduler.injector
 

@@ -69,13 +69,13 @@ with HasCloser {
 
   private var closed = false
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
-  private lazy val pluginSubsystem = injector.apply[PluginSubsystem]
-  private lazy val commandSubsystem = injector.apply[CommandSubsystem]
-  private lazy val databaseSubsystem = injector.apply[DatabaseSubsystem]
+  private lazy val pluginSubsystem = injector.instance[PluginSubsystem]
+  private lazy val commandSubsystem = injector.instance[CommandSubsystem]
+  private lazy val databaseSubsystem = injector.instance[DatabaseSubsystem]
 
   val startInstant = now()
 
-  onClose { injector.apply[DependencyInjectionCloser].closer.close() }
+  onClose { injector.instance[DependencyInjectionCloser].closer.close() }
   enableJavaUtilLoggingOverSLF4J()
   TimeZones.initialize()
   //DateTimeZone.setDefault(UTC);
@@ -92,7 +92,7 @@ with HasCloser {
   @ForCpp
   private def initialize(): Unit = {
     val eventSubscription = {
-      val subsystemDescriptions = injector.apply[FileBasedSubsystem.Register].descriptions
+      val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
       val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
       EventSubscription[FileBasedEvent] { e ⇒ for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) }
     }
@@ -131,7 +131,7 @@ with HasCloser {
 
   private def initializeCppDependencySingletons(): Unit = {
     // Eagerly call all C++ providers now to avoid later deadlock (Scheduler lock and DI lock)
-    for (o ← injector.apply[LazyBoundCppSingletons].interfaces) injector.getInstance(o)
+    for (o ← injector.instance[LazyBoundCppSingletons].interfaces) injector.getInstance(o)
   }
 
   @ForCpp private def onActivated(): Unit = {
@@ -159,7 +159,7 @@ with HasCloser {
   }
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
-    val future = injector.apply[HttpSchedulerCommandClient].uncheckedExecute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
+    val future = injector.instance[HttpSchedulerCommandClient].uncheckedExecute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
     val response: String = awaitResult(future, Duration.Inf)
     System.out.println(response)
   }

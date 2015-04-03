@@ -61,7 +61,7 @@ object SchedulerTestUtils {
   }
 
   def runJobFuture(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun = {
-    implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
+    implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
     inSchedulerThread {
       // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintreffen. Sonst könnten die ersten nach startJob verlorengehen.
       val taskId = startJob(jobPath, variables = variables)

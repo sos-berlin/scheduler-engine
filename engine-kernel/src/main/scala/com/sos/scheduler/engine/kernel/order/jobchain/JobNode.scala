@@ -36,7 +36,7 @@ extends OrderQueueNode with JobChainNodeParserAndHandler {
   }
 
   override def processConfigurationDomElement(nodeElement: dom.Element) = {
-    val namespaceToJobNodePlugins = injector.apply[PluginSubsystem].xmlNamespaceToPlugins[JobChainNodeNamespaceXmlPlugin] _
+    val namespaceToJobNodePlugins = injector.instance[PluginSubsystem].xmlNamespaceToPlugins[JobChainNodeNamespaceXmlPlugin] _
     initializeWithNodeXml(
       domElementToStaxSource(nodeElement),
       namespaceToJobNodePlugins(_) map { plugin ⇒ plugin.parseOnReturnCodeXml(this, _) })

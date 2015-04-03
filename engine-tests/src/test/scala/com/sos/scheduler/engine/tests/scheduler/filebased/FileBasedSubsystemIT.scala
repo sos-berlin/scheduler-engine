@@ -34,8 +34,8 @@ import scala.util.Try
 @RunWith(classOf[JUnitRunner])
 final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val jobSubsystem = injector.apply[JobSubsystem]
-  private lazy val fileBasedSubsystemRegister = injector.apply[FileBasedSubsystem.Register]
+  private lazy val jobSubsystem = injector.instance[JobSubsystem]
+  private lazy val fileBasedSubsystemRegister = injector.instance[FileBasedSubsystem.Register]
 
   "FileBasedSubsystem.Register" in {
     fileBasedSubsystemRegister.descriptions.toSet shouldEqual (testSettings map { _.subsystemDescription }).toSet

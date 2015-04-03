@@ -30,7 +30,7 @@ final class PluginSubsystemTest extends FreeSpec {
 
     @Provides def eventBus = mock[EventBus]
   })
-  private lazy val pluginSubsystem = injector.apply[PluginSubsystem] sideEffect { _.initialize() }
+  private lazy val pluginSubsystem = injector.instance[PluginSubsystem] sideEffect { _.initialize() }
   private lazy val aPlugin: APlugin = pluginSubsystem.pluginByClass(classOf[APlugin])
   private lazy val bPlugin: BPlugin = pluginSubsystem.pluginByClass(classOf[BPlugin])
 

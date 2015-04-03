@@ -27,7 +27,7 @@ object Folder {
   final class Type extends SisterType[Folder, FolderC] {
     def sister(proxy: FolderC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Folder(proxy, injector.apply[FolderSubsystem])
+      new Folder(proxy, injector.instance[FolderSubsystem])
     }
   }
 }
