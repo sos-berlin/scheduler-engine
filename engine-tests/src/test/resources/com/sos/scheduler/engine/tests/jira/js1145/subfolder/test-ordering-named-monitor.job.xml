@@ -2,7 +2,7 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
     <script language="shell">exit 0</script>
-    <monitor.use monitor="/test-a" ordering="3"/>
-    <monitor.use monitor="/test-b" ordering="2"/>
-    <monitor.use monitor="/test-c" ordering="1"/>
+    <monitor.use monitor="test-a" ordering="3"/>
+    <monitor.use monitor="./test-b" ordering="2"/>
+    <monitor.use monitor="/subfolder/test-c" ordering="1"/>
 </job>

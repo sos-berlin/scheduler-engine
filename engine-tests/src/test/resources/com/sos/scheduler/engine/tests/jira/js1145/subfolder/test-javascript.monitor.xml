@@ -2,7 +2,7 @@
 <monitor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
     <script language="java:javascript">
-        <include live_file="/test-s.js"/>
-        <include live_file="/test-t.js"/>
+        <include live_file="test-s.js"/>
+        <include live_file="test-t.js"/>
     </script>
 </monitor>

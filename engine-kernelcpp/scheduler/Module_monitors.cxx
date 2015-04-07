@@ -17,7 +17,7 @@ Module_monitors::Module_monitors(Module* main_module) :
 void Module_monitors::set_dom(const xml::Element_ptr& element) {
     if (_is_loaded) z::throw_xc(Z_FUNCTION);
     if (element.nodeName_is("monitor.use")) {
-        Absolute_path path = Absolute_path(element.getAttribute_mandatory("monitor"));
+        Absolute_path path = Absolute_path(_job->folder_path(), element.getAttribute_mandatory("monitor"));
         ptr<Named_monitor_reference> ref = Z_NEW(Named_monitor_reference(path, element.hasAttribute("ordering"), element.int_getAttribute("ordering", 0)));
         _monitor_reference_map[ref->monitor_name()] = +ref; 
         add_requisite(Requisite_path(spooler()->monitor_subsystem(), path));

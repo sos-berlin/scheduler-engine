@@ -28,21 +28,21 @@ import scala.util.matching.Regex
 @RunWith(classOf[JUnitRunner])
 final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val aMonitorFile = testEnvironment.fileFromPath(MonitorPath("/test-a"))
-  private lazy val sIncludeFile = testEnvironment.configDirectory / "test-s.js"
+  private lazy val aMonitorFile = testEnvironment.fileFromPath(MonitorPath("/subfolder/test-a"))
+  private lazy val sIncludeFile = testEnvironment.configDirectory / "subfolder/test-s.js"
 
   "Named monitor" in {
     runNamedMonitorJob()
   }
 
   "Named monitor with overridden ordering" in {
-    runJob(JobPath("/test-ordering-named-monitor")) shouldEqual List(
+    runJob(JobPath("/subfolder/test-ordering-named-monitor")) shouldEqual List(
       TestCMonitor.PreStepString, TestBMonitor.PreStepString, TestAMonitor.PreStepString,
       TestAMonitor.PostStepString, TestBMonitor.PostStepString, TestCMonitor.PostStepString)
   }
 
   "Anonymous monitor" in {
-    runJob(JobPath("/test-anonymous-monitor")) shouldEqual List(
+    runJob(JobPath("/subfolder/test-anonymous-monitor")) shouldEqual List(
       TestAMonitor.PreStepString, TestBMonitor.PreStepString, TestCMonitor.PreStepString,
       TestCMonitor.PostStepString, TestBMonitor.PostStepString, TestAMonitor.PostStepString)
   }
@@ -97,16 +97,8 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "When all missing include files used by monitors reappears, the dependant job runs successfully again" in {
-//    Files.move(tIncludeFile, renamedTIncludeFile)
-//    updateFolders()
-//    assert(job(JavascriptMonitorJobPath).fileBasedState == FileBasedState.incomplete)
-//    assert(job(JavascriptMonitorJobPath).state == JobState.stopped)
     Files.move(renamed(sIncludeFile), sIncludeFile)
     updateFolders()
-//    assert(job(JavascriptMonitorJobPath).fileBasedState == FileBasedState.incomplete)
-//    assert(job(JavascriptMonitorJobPath).state == JobState.stopped)
-//    Files.move(renamedTIncludeFile, tIncludeFile)
-//    updateFolders()
     assert(job(JavascriptMonitorJobPath).fileBasedState == FileBasedState.active)
     assert(job(JavascriptMonitorJobPath).state == JobState.pending)
     runNamedJavascriptMonitorJob()
@@ -115,9 +107,9 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   "Simple job with include starts event if included file is missing" in {
     // Just to prove that <script live_file="..."> does not inhibit a job start, if the requisite is missing.
     // So, we do not implement this for <script> in <monitor>, too.
-    val jobPath = JobPath("/test-include")
+    val jobPath = JobPath("/subfolder/test-include")
     runJob(jobPath) shouldEqual List("TEST-INCLUDE.JS")
-    val file = testEnvironment.configDirectory / "test-include.js"
+    val file = testEnvironment.configDirectory / "subfolder/test-include.js"
     val renamedFile = new File(s"$file~")
     Files.move(file, renamedFile)
     updateFolders()
@@ -147,8 +139,8 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
 private[js1145] object JS1145IT {
   private val LateMonitorJobPath = JobPath("/test-late-monitor")
   private val LateMonitorPath = MonitorPath("/test-late")
-  private val NamedMonitorJobPath = JobPath("/test-named-monitor")
-  private val JavascriptMonitorJobPath = JobPath("/test-javascript-monitor")
+  private val NamedMonitorJobPath = JobPath("/subfolder/test-named-monitor")
+  private val JavascriptMonitorJobPath = JobPath("/subfolder/test-javascript-monitor")
   private val Start = ">>>"
   private val End = "<<<"
   private val LogMarkerRegex = new Regex(".*" + Pattern.quote(Start) + "(.*)" + Pattern.quote(End) + ".*")

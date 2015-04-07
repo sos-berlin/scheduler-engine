@@ -4,5 +4,5 @@
      stop_on_error="false"
 >
     <script language="shell">exit 0</script>
-    <monitor.use monitor="/test-javascript"/>
+    <monitor.use monitor="test-javascript"/>
 </job>
