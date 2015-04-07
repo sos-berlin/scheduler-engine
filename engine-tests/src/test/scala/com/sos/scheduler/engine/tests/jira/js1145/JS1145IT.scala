@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1145
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -19,7 +21,6 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable
 import scala.util.matching.Regex
-import com.sos.scheduler.engine.common.time.ScalaJoda._
 
 /**
  * @author Joacim Zschimmer
@@ -29,7 +30,6 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val aMonitorFile = testEnvironment.fileFromPath(MonitorPath("/test-a"))
   private lazy val sIncludeFile = testEnvironment.configDirectory / "test-s.js"
-  private lazy val tIncludeFile = testEnvironment.configDirectory / "test-t.js"
 
   "Named monitor" in {
     runNamedMonitorJob()
@@ -49,6 +49,21 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
 
   "Javascript monitor" in {
     runNamedJavascriptMonitorJob()
+  }
+
+  "Job with referencing an unknown monitor is not active" in {
+    assert(job(LateMonitorJobPath).fileBasedState == FileBasedState.incomplete)
+    assert(job(LateMonitorJobPath).state == JobState.loaded)
+  }
+
+  "When the monitor is defined, the job is activated" in {
+    testEnvironment.fileFromPath(LateMonitorPath).xml =
+      <monitor>
+        <script java_class="com.sos.scheduler.engine.tests.jira.js1145.TestAMonitor"/>
+      </monitor>
+    updateFolders()
+    assert(job(LateMonitorJobPath).fileBasedState == FileBasedState.active)
+    assert(job(LateMonitorJobPath).state == JobState.pending)
   }
 
   "Deleting a monitor stopps dependant job and ends its tasks" in {
@@ -130,6 +145,8 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private[js1145] object JS1145IT {
+  private val LateMonitorJobPath = JobPath("/test-late-monitor")
+  private val LateMonitorPath = MonitorPath("/test-late")
   private val NamedMonitorJobPath = JobPath("/test-named-monitor")
   private val JavascriptMonitorJobPath = JobPath("/test-javascript-monitor")
   private val Start = ">>>"
