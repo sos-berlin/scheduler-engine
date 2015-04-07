@@ -5,13 +5,16 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.filewatcher.FileWatcher._
 import java.nio.file.Files
 import java.nio.file.Files.createFile
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConversions._
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class FileWatcherTest extends FreeSpec with HasCloser {
 
   private lazy val directory = Files.createTempDirectory("test-")
