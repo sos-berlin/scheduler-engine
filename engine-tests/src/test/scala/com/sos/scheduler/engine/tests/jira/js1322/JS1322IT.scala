@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXm
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.SchedulerTestUtils.job
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
