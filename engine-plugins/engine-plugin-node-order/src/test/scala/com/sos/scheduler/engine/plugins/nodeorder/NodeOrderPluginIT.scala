@@ -21,6 +21,10 @@ import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
+/**
+ * @see https://change.sos-berlin.com/browse/JS-1193
+ * @author Joacim Zschimmer
+ */
 @RunWith(classOf[JUnitRunner])
 final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
