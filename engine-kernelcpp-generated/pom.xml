@@ -36,6 +36,10 @@
                             <includeProjectDependencies>false</includeProjectDependencies>
                             <includePluginDependencies>true</includePluginDependencies>                            
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
+							<executableDependency>
+								<groupId>com.sos-berlin.jobscheduler.engine</groupId>
+								<artifactId>engine-cppjava-generator</artifactId>
+							</executableDependency>
                             <arguments>
                                 <argument>-java-output-directory=${project.build.sourceDirectory}</argument>
                                 <argument>-exclude=com.sos.scheduler.engine.kernel.persistence.hibernate</argument>
