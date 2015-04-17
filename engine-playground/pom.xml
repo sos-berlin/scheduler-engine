@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>engine-playground</artifactId>
+  <version>1.9.0-RC1</version>
 
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
@@ -18,4 +19,8 @@
         <module>engine-playground-mq</module>
         <module>engine-playground-zschimmer</module>
     </modules>
+
+  <scm>
+    <tag>v1.9.0-RC1</tag>
+  </scm>
 </project>

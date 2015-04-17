@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>engine-kernel</artifactId>
+  <version>1.9.0-RC1</version>
 
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
@@ -182,4 +183,8 @@
             <artifactId>annotations</artifactId>
         </dependency>
     </dependencies>
+
+  <scm>
+    <tag>v1.9.0-RC1</tag>
+  </scm>
 </project>
