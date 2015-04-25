@@ -28,7 +28,6 @@ const string                    scheduler_file_path_variable_name         = "sch
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
-const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
 const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
 
@@ -96,7 +95,6 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     bool                       _send_recovered_mail;
     Event                      _notification_event;             // Nur Windows
     Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
-    int                        _max_orders;
     bool                       _alert_when_directory_missing;
 
     vector< ptr<zschimmer::file::File_info> > _new_files;
@@ -256,7 +254,6 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _zero_(this+1),
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
-    _max_orders(directory_file_order_source_max_default),
     _alert_when_directory_missing(alert_when_directory_missing_default)
 {
     _path = subst_env( element.getAttribute( "directory" ) );
@@ -272,7 +269,6 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     if( element.getAttribute( "repeat" ) == "no" )  _repeat = Duration::eternal;
                                               else  _repeat = Duration(element.int_getAttribute( "repeat", int_cast(_repeat.seconds())));
 
-    _max_orders = element.int_getAttribute( "max", _max_orders );
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
     _alert_when_directory_missing = element.bool_getAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
 }
@@ -310,7 +306,6 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
                                              element.setAttribute         ( "directory" , _path );
                                              element.setAttribute_optional( "regex"     , _regex_string );
         if( _notification_event._signaled )  element.setAttribute         ( "signaled"  , "yes" );
-        if( _max_orders < INT_MAX )          element.setAttribute         ( "max"       , _max_orders );
         if( !_next_state.is_missing() )      element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
 
         if (!delay_after_error().is_eternal())  element.setAttribute( "delay_after_error", delay_after_error().seconds() );

@@ -395,8 +395,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-982", "File has been removed, so the file order is being removed too" },
     { "SCHEDULER-983", "New file, $2: Added $1" },
     { "SCHEDULER-984", "Recovered from previous error in directory $1" },
-    { "SCHEDULER-985", "$1 more file orders will be added later, after previous orders have been processed" },
-    { "SCHEDULER-986", "Continuing reading buffered directory (as of $1)" },
     { "SCHEDULER-987", "Starting process: $1" },
     { "SCHEDULER-989", "$1 cannot be removed now, it will be done later" },
     { "SCHEDULER-990", "Adding $1" },
