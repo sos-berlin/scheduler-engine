@@ -57,6 +57,7 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
 
   "Job chain process class" in {
     testEnvironment.fileFromPath(AProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
+    testEnvironment.fileFromPath(BProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
     instance[FolderSubsystem].updateFolders()
     val orderKey = AJobChainPath orderKey "2"
     runOrder(orderKey).state shouldEqual OrderState("END")
@@ -93,7 +94,6 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Same API task cannot be used by two job chains with different process classes" in {
-    scheduler executeXml <process_class name="test-b" remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
     val aOrderKey = AJobChainPath orderKey "A-API"
     val bOrderKey = BJobChainPath orderKey "B-API"
     runOrder(aOrderKey).state shouldEqual OrderState("END")
@@ -115,8 +115,9 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS1301IT {
-  private val AJobChainPath = JobChainPath("/test-a")
-  private val BJobChainPath = JobChainPath("/test-b")
-  private val AProcessClassPath = ProcessClassPath("/test-a")
-  private val JavaJobPath = JobPath("/test-java")
+  private val AJobChainPath = JobChainPath("/test-folder/test-a")
+  private val BJobChainPath = JobChainPath("/test-folder/test-b")
+  private val AProcessClassPath = ProcessClassPath("/test-folder/test-a")
+  private val BProcessClassPath = ProcessClassPath("/test-folder/test-b")
+  private val JavaJobPath = JobPath("/test-folder/test-java")
 }
