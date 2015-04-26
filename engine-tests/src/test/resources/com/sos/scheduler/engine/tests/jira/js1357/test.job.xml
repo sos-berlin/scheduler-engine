@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
+    <script language="shell">
+        :;if false; then :
+        goto WINDOWS
+        fi
+
+        sleep 15
+        exit
+
+        :WINDOWS
+        ping -n 15 127.0.0.1
+    </script>
+</job>
