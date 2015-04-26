@@ -2893,24 +2893,21 @@ ptr<Task> Standard_job::task_to_start()
             }
             else
             {
-                task = create_task( NULL, "", 0 ); 
-                task->_let_run |= ( cause == cause_period_single );
-                task->_trigger_files = trigger_files( task );   // Vor occupy_order()!
-
-                if( has_order ) 
-                {
-                    Order* order = task->fetch_and_occupy_order( now, Z_FUNCTION );   // Versuchen, den Auftrag für die neue Task zu belegen
-                    
-                    if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
-                    {
-                        Z_LOG2("scheduler", obj_name() << ": fetch_and_occupy_order() failed, Task will be rejected\n");
-                        task->close(); 
-                        task = NULL;
-                    }
-                    else 
-                    {
-                        log_lines += "Task starts for " + order->obj_name() + "\n";
-                        if( !cause )  cause = cause_order;
+                Order* order = has_order? fetch_and_occupy_order(now, Z_FUNCTION) : NULL;   // Versuchen, den Auftrag zu belegen
+                if (!has_order || order) {
+                    task = create_task(NULL, "", 0);
+                    task->_let_run |= cause == cause_period_single;
+                    task->_trigger_files = trigger_files(task);   // Vor try_assign_order()!
+                    if (order) {
+                        if (task->try_assign_order(order)) {
+                            log_lines += "Task starts for " + order->obj_name() + "\n";
+                            if (!cause)  cause = cause_order;
+                        } else {
+                            Z_LOG2("scheduler", obj_name() << ": try_assign_order() failed, Task will be discarded\n");
+                            order->unoccupy();
+                            task->close(); 
+                            task = NULL;
+                        }
                     }
                 }
             }
