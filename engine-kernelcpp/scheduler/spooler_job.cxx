@@ -168,7 +168,7 @@ struct Combined_job_nodes : Object
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_requests     ();
     Time                        next_time                   ();
-    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
+    Order*                      fetch_and_occupy_order      (const Time& now, const string& cause);
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&);
     void                        connect_with_order_queues   ();
     void                        connect_job_node            ( job_chain::Job_node* );
@@ -470,14 +470,14 @@ void Combined_job_nodes::withdraw_order_requests()
 
 //----------------------------------------------------Combined_job_nodes::fetch_and_occupy_order
 
-Order* Combined_job_nodes::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
+Order* Combined_job_nodes::fetch_and_occupy_order(const Time& now, const string& cause)
 {
     Order* result = NULL;
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
         Job_node* job_node = *it;
-        result = job_node->fetch_and_occupy_order(occupying_task, now, cause);
+        result = job_node->fetch_and_occupy_order(now, cause);
         if( result )  break;
     }
 
@@ -1124,8 +1124,8 @@ Time Standard_job::next_order_time() const
 
 //-------------------------------------------------------------Standard_job::fetch_and_occupy_order
 
-Order* Standard_job::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause) {
-    return _combined_job_nodes->fetch_and_occupy_order(occupying_task, now, cause);
+Order* Standard_job::fetch_and_occupy_order(const Time& now, const string& cause) {
+    return _combined_job_nodes->fetch_and_occupy_order(now, cause);
 }
 
 //---------------------------------------------------------------Standard_job::set_order_controlled
@@ -2903,7 +2903,7 @@ ptr<Task> Standard_job::task_to_start()
                     
                     if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
                     {
-                        // Z_LOG2( "scheduler", obj_name() << ": fetch_and_occupy_order() failed, Task will be rejected\n" );  // müllt das Log zu
+                        Z_LOG2("scheduler", obj_name() << ": fetch_and_occupy_order() failed, Task will be rejected\n");
                         task->close(); 
                         task = NULL;
                     }

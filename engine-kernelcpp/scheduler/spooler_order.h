@@ -165,7 +165,7 @@ struct Order : Com_order,
     void                        load_run_time_blob          ( Read_transaction* );
     void                        load_payload_blob           ( Read_transaction* );
 
-    void                        occupy_for_task             ( Task*, const Time& now );
+    void                        assign_to_task              (Task*, const Time& now);
     void                        assert_no_task              ( const string& debug_text );
     void                        assert_task                 ( const string& debug_text );
 
@@ -496,7 +496,7 @@ struct Order_source : Abstract_scheduler_object, Event_operation
     virtual void                initialize              ();
     virtual void                activate                ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
-    virtual Order*              fetch_and_occupy_order  (const Order::State&, Task* occupying_task, const Time& now, const string& cause) = 0;
+    virtual Order*              fetch_and_occupy_order  (const Order::State&, const Time& now, const string& cause) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -716,7 +716,7 @@ struct Order_queue_node : Node
     virtual void                wake_orders                 ();
     bool                        request_order               (const Time& now, const string& cause);
     void                        withdraw_order_request      ();
-    Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
+    Order*                      fetch_and_occupy_order      (const Time& now, const string& cause);
     bool                        is_ready_for_order_processing ();
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
 
@@ -1078,13 +1078,13 @@ struct Order_queue : Com_order_queue,
     Order*                      first_processable_order     () const;
     Order*                      first_immediately_processable_order(Untouched_is_allowed, const Time& now ) const;
     bool                        is_below_outer_chain_max_orders(const Absolute_path& outer_job_chain_path) const;
-    Order*                      fetch_order                 ( const Time& now );
-    Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed, const Time& now);
+    Order*                      fetch_and_occupy_order      (const Time& now);
+    Order*                      load_and_occupy_next_distributed_order_from_database(Untouched_is_allowed, const Time& now);
     bool                        has_immediately_processable_order( const Time& now = Time(0) );
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
-    Order*                      fetch_and_occupy_order      ( Task* occupying_task, Untouched_is_allowed, const Time& now, const string& cause );
+    Order*                      fetch_and_occupy_order      (Untouched_is_allowed, const Time& now, const string& cause);
     void unoccupy_order(Order*);
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }

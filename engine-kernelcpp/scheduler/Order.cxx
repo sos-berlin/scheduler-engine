@@ -314,9 +314,9 @@ void Order::assert_task( const string& debug_text )
     if( !_task )  assert(0), z::throw_xc( "ORDER-HAS-NO-TASK", obj_name(), debug_text );
 }
 
-//---------------------------------------------------------------------------Order::occupy_for_task
+//----------------------------------------------------------------------------Order::assign_to_task
 
-void Order::occupy_for_task( Task* task, const Time& now )
+void Order::assign_to_task(Task* task, const Time& now)
 {
     assert( task );
     assert_no_task( Z_FUNCTION );   // Vorsichtshalber
@@ -500,8 +500,7 @@ void Order::db_insert_order_step_history_record( Transaction* ta )
     if( _spooler->_order_history_yes)
     {
         assert( _history_id );
-        assert( _task );
-
+        assert_task(Z_FUNCTION);
 
         try
         {

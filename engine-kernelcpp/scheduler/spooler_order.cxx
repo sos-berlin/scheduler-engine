@@ -1425,16 +1425,16 @@ void Order_queue_node::withdraw_order_request()
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
-Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
+Order* Order_queue_node::fetch_and_occupy_order(const Time& now, const string& cause)
 {
     Order* order = NULL;
     if (is_ready_for_order_processing()) {
         Untouched_is_allowed u = _job_chain->untouched_is_allowed();
-        order = order_queue()->fetch_and_occupy_order(occupying_task, u, now, cause);
+        order = order_queue()->fetch_and_occupy_order(u, now, cause);
         if (!order && u && _action != act_next_state) {   // act_next_step erst hier prüfen, wegen JS-1122
             Z_FOR_EACH(Order_source_list, _order_source_list, it) {
                 Order_source* order_source = *it;
-                order = order_source->fetch_and_occupy_order(_order_state, occupying_task, now, cause);
+                order = order_source->fetch_and_occupy_order(_order_state, now, cause);
                 if (order) break;
             }
             if (!order) {
@@ -1443,7 +1443,7 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
                     Order_queue_node* skipped_node = *i;
                     Z_FOR_EACH(Order_source_list, skipped_node->_order_source_list, it) {
                         Order_source* order_source = *it;
-                        order = order_source->fetch_and_occupy_order(_order_state, occupying_task, now, cause);
+                        order = order_source->fetch_and_occupy_order(_order_state, now, cause);
                         if (order) break;
                     }
                     if (order) {
@@ -1454,8 +1454,6 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
             }
         }
         if (order) {
-            order->db_start_order_history();
-            order->assert_task(Z_FUNCTION);
             order->on_occupied();
         }
     } 
@@ -4485,10 +4483,8 @@ xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, cons
 
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
-Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_allowed untouched_is_allowed,
-    const Time& now, const string& cause)
+Order* Order_queue::fetch_and_occupy_order(Untouched_is_allowed untouched_is_allowed, const Time& now, const string& cause)
 {
-    assert( occupying_task );
     _has_tip_for_new_order = false;
 
     check_orders_for_replacing_or_removing(File_based::act_now);
@@ -4496,13 +4492,11 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
     ptr<Order> order = first_immediately_processable_order(untouched_is_allowed, now);
-    if( order )  order->occupy_for_task( occupying_task, now );
-
 
     // Dann (alte) Aufträge aus der Datenbank
     if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angekündigt
     {
-        if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, untouched_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
+        if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(untouched_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
             assert(o->_is_distributed);
             if (o->_state != o->_occupied_state) {
                 // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), 
@@ -4520,7 +4514,6 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_al
 
 
 void Order_queue::unoccupy_order(Order* order) {
-    order->_task = NULL;
     if (order->is_distributed()) {
         order->db_update(Order::update_and_release_occupation);
         order->close();
@@ -4548,7 +4541,7 @@ void Order_queue::check_orders_for_replacing_or_removing(File_based::When_to_act
 
 //--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database
 
-Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed untouched_is_allowed, const Time& now)
+Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Untouched_is_allowed untouched_is_allowed, const Time& now)
 {
     if (!untouched_is_allowed)  _job_chain->assert_is_not_distributed(Z_FUNCTION);
 
@@ -4613,7 +4606,6 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* o
         
                 if( ok )
                 {
-                    order->occupy_for_task( occupying_task, now );
                     job_chain->add_order( order );
 
                     result = order,  order = NULL;
