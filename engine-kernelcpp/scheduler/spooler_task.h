@@ -234,6 +234,7 @@ struct Task : Object,
     Web_service*                web_service_or_null         () const                                { return _web_service; }
 
     Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause );
+    bool try_assign_order(Order*);
     void                        postprocess_order           (const Order_state_transition&, bool due_to_exception = false);
 
     void                        add_pid                     ( int pid, const Duration& timeout = Duration::eternal);

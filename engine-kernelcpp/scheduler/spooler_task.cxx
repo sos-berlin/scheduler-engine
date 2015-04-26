@@ -2106,42 +2106,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
      && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
     {
         if (Order* order = _job->fetch_and_occupy_order(now, cause)) {
-            order->assign_to_task(this, now);
-            order->db_start_order_history();
-            if( order->is_file_order() )  
-                _trigger_files = order->file_path();
-            _order = order;
-            _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
-            _log->set_order_log( _order->_log );
-
-            Absolute_path process_class_path = order->job_chain()->default_process_class_path();
-            if (process_class_path.empty()) {
-                if (Process_class* p = _job->default_process_class_or_null()) 
-                    process_class_path = p->path();
-            }
-            Process_class* process_class;
-            try { 
-                process_class = _spooler->process_class_subsystem()->process_class(process_class_path);
-            } catch (exception& x) {
-                order->log()->error(x.what());
-                postprocess_order(Order_state_transition::standard_error);
-                assert(!_order);
-                return NULL;
-            }
-            if (process_class != _process_class) {
-                if (_state > s_loading && process_class != _process_class) {
-                    _log->error(Message_string("SCHEDULER-491", _process_class? _process_class->path() : string("none"), process_class_path));
-                    postprocess_order(Order_state_transition::keep);
-                    // Alternative to _job->stop(): postprocess_order(Order_state_transition::standard_error);
-                    assert(!_order);
-                    _job->stop(true);
-                    return NULL;
-                }
-                assert(!_module_instance);
-                _process_class = process_class;
-                add_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
-            }
-            _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url() ) );
+            try_assign_order(order);
         } else {
             _job->request_order( now, cause );
         }
@@ -2151,6 +2116,49 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
         _order->assert_task( Z_FUNCTION );
 
     return _order;
+}
+
+
+bool Task::try_assign_order(Order* order) 
+{
+    order->assign_to_task(this, Time::now());
+    order->db_start_order_history();
+    if (order->is_file_order()) {
+        _trigger_files = order->file_path();
+    }
+    _order = order;
+    _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
+    _log->set_order_log(_order->_log);
+
+    Absolute_path process_class_path = order->job_chain()->default_process_class_path();
+    if (process_class_path.empty()) {
+        if (Process_class* p = _job->default_process_class_or_null())
+            process_class_path = p->path();
+    }
+    Process_class* process_class;
+    try {
+        process_class = _spooler->process_class_subsystem()->process_class(process_class_path);
+    } catch (exception& x) {
+        order->log()->error(x.what());
+        postprocess_order(Order_state_transition::standard_error);
+        assert(!_order);
+        return false;
+    }
+    if (process_class != _process_class) {
+        if (_state > s_loading && process_class != _process_class) {
+            _log->error(Message_string("SCHEDULER-491", _process_class ? _process_class->path() : string("none"), process_class_path));
+            postprocess_order(Order_state_transition::keep);
+            // Alternative to _job->stop(): postprocess_order(Order_state_transition::standard_error);
+            assert(!_order);
+            _job->stop(true);
+            return false;
+        }
+        assert(!_module_instance);
+        _process_class = process_class;
+        add_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
+    }
+    _log->info(message_string("SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url()));
+    return true;
 }
 
 //--------------------------------------------------------------------------Task::postprocess_order
