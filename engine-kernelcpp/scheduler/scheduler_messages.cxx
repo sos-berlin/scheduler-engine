@@ -399,7 +399,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-989", "$1 cannot be removed now, it will be done later" },
     { "SCHEDULER-990", "Adding $1" },
     { "SCHEDULER-991", "Order has been suspended" },
-    { "SCHEDULER-992", "Order ist not longer suspended, next start $1" },
+    { "SCHEDULER-992", "Order is no longer suspended, next start $1" },
     { "SCHEDULER-994", "No heart beat for $2 seconds ($1), expecting heart beat within $3 seconds" },
     { "SCHEDULER-995", "No heart beat for $2 seconds ($1), ignored for $3 seconds because of recent database reconnect" },
     { "SCHEDULER-996", "No heart beat for $2 seconds ($1) - JobScheduler seems to be dead" },
