@@ -4501,7 +4501,7 @@ Order* Order_queue::fetch_and_occupy_order(Untouched_is_allowed untouched_is_all
             if (o->_state != o->_occupied_state) {
                 // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), 
                 // SCHEDULER-859. Order::set_dom() ändert _state, was wir hier speichern.
-                unoccupy_order(o);
+                o->unoccupy();
             } else {
                 order = o;
                 withdraw_distributed_order_request();
@@ -4512,13 +4512,6 @@ Order* Order_queue::fetch_and_occupy_order(Untouched_is_allowed untouched_is_all
     return order;
 }
 
-
-void Order_queue::unoccupy_order(Order* order) {
-    if (order->is_distributed()) {
-        order->db_update(Order::update_and_release_occupation);
-        order->close();
-    }
-}
 
 
 void Order_queue::check_orders_for_replacing_or_removing(File_based::When_to_act when_to_act) {

@@ -359,6 +359,7 @@ struct Order : Com_order,
     string                      calculate_db_distributed_next_time();
     string                      database_runtime_xml    ();
     string                      database_xml            ();
+    void unoccupy();
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     bool                        db_update               ( Update_option u, Transaction* outer_transaction = NULL )              { return db_update2( u, false, outer_transaction ); }
@@ -1085,7 +1086,6 @@ struct Order_queue : Com_order_queue,
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
     Order*                      fetch_and_occupy_order      (Untouched_is_allowed, const Time& now, const string& cause);
-    void unoccupy_order(Order*);
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }
     time_t                      next_distributed_order_check_time() const                           { return _next_distributed_order_check_time; }

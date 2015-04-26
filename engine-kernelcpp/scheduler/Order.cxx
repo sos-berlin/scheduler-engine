@@ -1159,6 +1159,14 @@ string Order::database_xml()
     return order_element.hasAttributes() || order_element.firstChild()? order_document.xml_string() : "";
 }
 
+
+void Order::unoccupy() {
+    if (is_distributed()) {
+        db_update(Order::update_and_release_occupation);
+        close();
+    }
+}
+
 //---------------------------------------------------------------------------Order::db_get_ordering
 
 int Order::db_get_ordering( Transaction* ta )
