@@ -105,7 +105,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
       val stopwatch = new Stopwatch
       for (_ ← 1 to 2*n + 1) runJobAndWaitForEnd(AgentsJobPath)
       stopwatch.duration should be < TestTimeout
-      eventPipe.queued[WarningLogEvent] map { _.codeOption } shouldEqual List(Some(InaccessibleAgentMessageCode))  // Agent 2 is still unreachable
+      //Not reliable (all tasks can start on first Agent): eventPipe.queued[WarningLogEvent] map { _.codeOption } shouldEqual List(Some(InaccessibleAgentMessageCode))  // Agent 2 is still unreachable
     }
   }
 
