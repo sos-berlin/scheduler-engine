@@ -28,7 +28,7 @@ const string                    scheduler_file_path_variable_name         = "sch
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
-const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
+const int                       max_tries                                 = 2;        // Nach Fehler machen wir sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
 
 #ifdef Z_WINDOWS
@@ -406,7 +406,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
                     if( _notification_event.signaled() )      
                     {
                         _notification_event.set_signaled();     
-                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Old directory watchers signal has been transferd to new watcher.\n" );
+                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Old directory watchers signal has been transfered to new watcher.\n" );
                     }
 
                     close_notification();
@@ -628,9 +628,6 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     order->set_file_path( path );
                     order->set_state(fetching_state);
 
-                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
-
-
                     bool ok = true;
 
                     if( ok )  ok = known_orders.find( order->string_id() ) == known_orders.end();     // Auftrag ist noch nicht bekannt?
@@ -661,6 +658,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     if( ok )
                     {
                         result = order;
+                        string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
                     }
 
@@ -964,7 +962,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
                                                  : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
-    set_async_delay( max( 1, delay ) );     // Falls ein Spaßvogel es geschafft hat, repeat="0" anzugeben
+    set_async_delay(max(1, delay));
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 
