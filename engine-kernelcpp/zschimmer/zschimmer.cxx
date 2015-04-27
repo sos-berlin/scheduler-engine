@@ -910,23 +910,10 @@ int int_cast(size_t n)
 {
     if (n > (size_t)INT_MAX) {  // size_t ist unsigned, < 0 brauchen wir nicht zu prüfen.
         string s = (S() << "size_t(" << (long)n << ")").to_string();    // long, damit unmögliche negative Zahl -1 nicht als 18446744073709551613 ausgegeben wird. 
-        //assert(!"int_cast(): size_t out of int range");   // DebugBreak()
         throw_overflow("Z-4002", "int", s.c_str());
     }
     return (int)n;
 }
-
-//-------------------------------------------------------------------------------------------as_int
-
-//int int_cast(int64 n)
-//{
-//    if (n > INT_MAX || n < INT_MIN) {
-//        string s = (S() << "int64(" << n << ")").to_string();
-//        //assert(!"int_cast(): size_t out of int range");   // DebugBreak()
-//        throw_overflow("Z-4002", "int", s.c_str());
-//    }
-//    return (int)n;
-//}
 
 //----------------------------------------------------------------------------------Use_locale::set
 
@@ -1064,7 +1051,6 @@ struct tm* localtime_r( const time_t* timep, struct tm* result )
         int my_errno = localtime_s( result, timep );
         if( my_errno ) 
         {
-            Z_DEBUG_ONLY( DebugBreak(); )
             throw_errno( my_errno, "localtime_s" );
         }
 #   endif
@@ -1084,7 +1070,6 @@ struct tm* gmtime_r( const time_t* timep, struct tm* result )
         int my_errno = gmtime_s( result, timep );
         if( my_errno )  
         {
-            Z_DEBUG_ONLY( DebugBreak(); )
             throw_errno( my_errno, "gmtime_s" );
         }
 #   endif
@@ -1203,7 +1188,6 @@ time_t localtime_from_gmtime( time_t gmtime )
         errno_t errn = localtime_s( &local_tm, &gmtime );
         if( errn )  
         {
-            Z_DEBUG_ONLY( DebugBreak(); )
             throw_errno( errn, "localtime_s" );     // Das sollte aber nicht passieren!
         }
 
@@ -1211,7 +1195,6 @@ time_t localtime_from_gmtime( time_t gmtime )
         errn = _get_timezone( &my_timezone );
         if( errn )  
         {
-            Z_DEBUG_ONLY( DebugBreak(); )
             throw_errno( errn, "_get_timezone" );     // Das sollte aber nicht passieren!
         }
 
@@ -1260,7 +1243,6 @@ time_t gmtime_from_localtime( time_t localtime )
         errno_t errn = gmtime_s( &gm_tm, &localtime );
         if( errn ) 
         {
-            Z_DEBUG_ONLY( DebugBreak(); )
             throw_errno( errn, "gmtime_s" );     // Das sollte aber nicht passieren!
         }
 
@@ -1268,7 +1250,6 @@ time_t gmtime_from_localtime( time_t localtime )
         errn = _get_timezone( &my_timezone );
         if( errn )  
         {
-            Z_DEBUG_ONLY( DebugBreak(); )
             throw_errno( errn, "_get_timezone" );     // Das sollte aber nicht passieren!
         }
 

@@ -152,12 +152,6 @@ void Sos_self_deleting::obj_del()
 void throw_sos_1126()
 {
     Xc x ( "SOS-1126" );       // Zeiger auf bereits zerstörtes Objekt verwendet
-    SHOW_ERR( x );
-
-#   if defined _DEBUG  &&  defined SYSTEM_WIN32
-        DebugBreak();
-#   endif
-
     throw x;
 }
 

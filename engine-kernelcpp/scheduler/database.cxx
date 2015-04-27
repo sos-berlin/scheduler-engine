@@ -333,7 +333,6 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
     {
         if( _outer_transaction )  
         {
-            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
             Z_LOG( "Rollback in inner transaction." << debug_text );        // Keine Exception, weil wir schon in einer Exception sein können.
         }
 

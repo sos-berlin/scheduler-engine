@@ -939,7 +939,7 @@ void Connection::check_async( Async_operation* operation )
         Z_DEBUG_ONLY( fputs( msg.c_str(), stderr ) );
 
 #       if defined Z_WINDOWS
-            if( IsDebuggerPresent() )  assert( !"Connection::check_async  BLOCKING WHEN IN ASYNCHRONOUS OPERATION" ); //DebugBreak();
+            if( IsDebuggerPresent() )  assert( !"Connection::check_async  BLOCKING WHEN IN ASYNCHRONOUS OPERATION" );
 #       endif
     }
 }
