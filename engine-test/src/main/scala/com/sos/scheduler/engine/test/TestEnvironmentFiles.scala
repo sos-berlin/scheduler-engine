@@ -50,7 +50,7 @@ private class TestEnvironmentFiles(
 }
 
 object TestEnvironmentFiles {
-  private val NameExtensions = Set(".xml", ".ini", ".dtd", ".js")
+  private val NameExtensions = Set(".xml", ".ini", ".dtd", ".js", ".txt")
   private val DefaultConfigResource = JavaResource("com/sos/scheduler/engine/test/config")
 
   def copy(
