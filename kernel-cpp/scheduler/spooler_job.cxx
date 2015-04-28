@@ -1415,7 +1415,7 @@ ptr<Task> Standard_job::create_task(Com_variable_set* params, const string& task
 
 ptr<Task> Standard_job::create_task(Com_variable_set* params, const string& name, bool force, const Time& start_at )
 {
-    return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
+    return create_task( params, name, force, start_at, _spooler->db()->get_task_id(obj_name()) );
 }
 
 //-------------------------------------------------------------------------Standard_job::load_tasks
