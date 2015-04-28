@@ -895,6 +895,8 @@ struct Job_chain : Com_job_chain,
     void                        disconnect_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
     void                    set_order_id_space              ( Order_id_space* );
+    bool                        order_id_space_contains_order_id(const string& order_id);
+
     String_set                  connected_job_chains        ();
     void                    get_connected_job_chains        ( String_set* );
 
