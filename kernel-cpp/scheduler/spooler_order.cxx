@@ -1880,6 +1880,14 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
 }    
 
 
+bool Job_chain::order_id_space_contains_order_id(const string& id) {
+    if (_order_id_space)
+        return _order_id_space->job_chain_by_order_id_or_null(id) != NULL;
+    else
+        return has_order_id((Read_transaction*)NULL, id);
+}
+
+
 vector<Order_queue_node*> Job_chain::skipped_order_queue_nodes(const Order::State& state) const {
     vector<Order_queue_node*> result;
     vector<Order::State> states = skipped_states(state);

@@ -84,6 +84,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Duration                    delay_after_error       ();
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
+    bool has_new_file();
 
     Fill_zero                  _zero_;
     File_path                  _path;
@@ -493,10 +494,9 @@ void Directory_file_order_source::activate()
 
 bool Directory_file_order_source::request_order( const string& cause )
 {
-    bool result = _new_files_index < _new_files.size();
-
-    if( !result )
-    {
+    if (has_new_file())
+        return true;
+    else {
         if( _expecting_request_order 
          || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
         {
@@ -510,9 +510,8 @@ bool Directory_file_order_source::request_order( const string& cause )
         {
             //Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
         }
+        return false;
     }
-
-    return result;
 }
 
 //----------------------------------------------Directory_file_order_source::withdraw_order_request
@@ -962,7 +961,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     read_directory( was_notified, cause );
 
-    if (_new_files_index < _new_files.size()) {
+    if (has_new_file()) {
         _job_chain->tip_for_new_order(_next_state);
     }
 
@@ -974,6 +973,31 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 
     return true;
+}
+
+
+bool Directory_file_order_source::has_new_file() {
+    // read_known_orders, also Lesen der Datenbank, ist nicht aktiv, weil request_order und dmait has_new_file sehr oft aufgerufen wird. Jedenfalls mit dem alten (<2013) Mikroscheduling
+    // Bei verteilter Jobkette wir das Problem JS-1354 (hochzählen der nächsten Task-ID in der Datenbank) weiterhin bestehen.
+    //String_set known_orders;
+    //bool known_orders_has_been_read = false;
+    for (int i = _new_files_index; i < _new_files.size(); i++) {
+        if (file::File_info* f = _new_files[i]) {
+            File_path path = f->path();
+            if (path.exists() && !_job_chain->order_id_space_contains_order_id(path)) {
+                //if (!_job_chain->is_distributed()) {
+                    return true;
+                //} else {
+                //    if (!known_orders_has_been_read) {
+                //        read_known_orders(&known_orders);
+                //        known_orders_has_been_read = true;
+                //    }
+                //    return known_orders.find(path) == known_orders.end();
+                //}
+            }
+        }
+    }
+    return false;
 }
 
 //---------------------------------------------------Directory_file_order_source::delay_after_error
