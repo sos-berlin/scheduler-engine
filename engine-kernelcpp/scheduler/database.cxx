@@ -42,6 +42,7 @@ const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob i
 const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
 const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
 const int order_title_column_size = 200;
+const int order_state_text_column_size = 100;
 const int immediately_reopened_max = 10;    // Maximale Anzahl Fehler in der Retry_transaction, ohne dass die Datenbank nicht erreichbar war. Verhindert Endlosschleife.
 
 
@@ -744,7 +745,7 @@ void Database::create_tables_when_needed()
                                 "`priority`"                    " integer"      " not null,"
                                 // "`suspended`"                   " boolean"         << null << ","     // JS-333
                                 "`state`"                       " varchar(100)"    << null << ","
-                                "`state_text`"                  " varchar(100)"    << null << ","
+                                "`state_text`"                  " varchar(" << order_state_text_column_size << ")"    << null << ","
                                 "`title`"                       " varchar(200)"    << null << ","
                                 "`created_time`"                " datetime"     " not null,"
                                 "`mod_time`"                    " datetime"        << null << ","
@@ -794,7 +795,7 @@ void Database::create_tables_when_needed()
             "`spooler_id`"  " varchar(100)" " not null,"
             "`title`"       " varchar(200)"    << null << ","
             "`state`"       " varchar(100)"    << null << ","
-            "`state_text`"  " varchar(100)"    << null << ","
+            "`state_text`"  " varchar(" << order_state_text_column_size << ")"    << null << ","
             "`start_time`"  " datetime"     " not null,"
             "`end_time`"    " datetime"        << null << ","
             "`log`"         " blob"            << null;
