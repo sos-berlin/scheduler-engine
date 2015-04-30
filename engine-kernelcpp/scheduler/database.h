@@ -19,6 +19,7 @@ namespace database {
 
 extern const int                max_column_length;
 extern const int                order_title_column_size;
+extern const int order_state_text_column_size;
 
 //-----------------------------------------------------------------------------------Archive_switch
 
@@ -64,10 +65,10 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
     void                        spooler_start           ();
     void                        spooler_stop            ();
 
-    int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
+    int                         get_task_id             (const string& debug)                       { return get_id("spooler_job_id", (Transaction*)NULL, debug); }
     int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
-    int                         get_id                  ( const string& variable_name, Transaction* = NULL );
+    int                         get_id                  (const string& variable_name, Transaction* = NULL, const string& debug = "");
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
     string                      read_task_log           (int task_id);
@@ -121,7 +122,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
     void                        handle_order_id_columns ( Transaction* );
     int                         expand_varchar_column   ( Transaction*, const string& table_name, const string& column_name, int minimum_width, int new_width );
     int                         column_width            ( Transaction*, const string& table_name, const string& column_name );
-    int                         get_id_                 ( const string& variable_name, Transaction* );
+    int                         get_id_                 (const string& variable_name, Transaction*, const string& debug);
     void                        delete_order            ( Order*, Transaction* );
 
     string                     _db_name;

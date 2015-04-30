@@ -375,5 +375,4 @@
             <url>${repositoryBase}/sos-os-${osArch}</url>
         </snapshotRepository>
     </distributionManagement>
-
 </project>

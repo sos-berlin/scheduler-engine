@@ -136,8 +136,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             {
                 if( !( flags & cont_next_gmtime_reached ) )  
                 { 
-                    Z_DEBUG_ONLY( Z_LOG( "*** " << Z_FUNCTION << " !cont_next_gmtime_reached\n" ); 
-                    Z_WINDOWS_ONLY( DebugBreak(); ) ) 
+                    Z_DEBUG_ONLY(Z_LOG("*** " << Z_FUNCTION << " !cont_next_gmtime_reached\n"));
                     break;
                 }
 

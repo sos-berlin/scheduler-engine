@@ -28,8 +28,7 @@ const string                    scheduler_file_path_variable_name         = "sch
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
-const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
-const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
+const int                       max_tries                                 = 2;        // Nach Fehler machen wir sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
 
 #ifdef Z_WINDOWS
@@ -84,6 +83,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Duration                    delay_after_error       ();
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
+    bool has_new_file();
 
     Fill_zero                  _zero_;
     File_path                  _path;
@@ -96,7 +96,6 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     bool                       _send_recovered_mail;
     Event                      _notification_event;             // Nur Windows
     Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
-    int                        _max_orders;
     bool                       _alert_when_directory_missing;
 
     vector< ptr<zschimmer::file::File_info> > _new_files;
@@ -256,7 +255,6 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _zero_(this+1),
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
-    _max_orders(directory_file_order_source_max_default),
     _alert_when_directory_missing(alert_when_directory_missing_default)
 {
     _path = subst_env( element.getAttribute( "directory" ) );
@@ -272,7 +270,6 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     if( element.getAttribute( "repeat" ) == "no" )  _repeat = Duration::eternal;
                                               else  _repeat = Duration(element.int_getAttribute( "repeat", int_cast(_repeat.seconds())));
 
-    _max_orders = element.int_getAttribute( "max", _max_orders );
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
     _alert_when_directory_missing = element.bool_getAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
 }
@@ -310,7 +307,6 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
                                              element.setAttribute         ( "directory" , _path );
                                              element.setAttribute_optional( "regex"     , _regex_string );
         if( _notification_event._signaled )  element.setAttribute         ( "signaled"  , "yes" );
-        if( _max_orders < INT_MAX )          element.setAttribute         ( "max"       , _max_orders );
         if( !_next_state.is_missing() )      element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
 
         if (!delay_after_error().is_eternal())  element.setAttribute( "delay_after_error", delay_after_error().seconds() );
@@ -411,7 +407,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
                     if( _notification_event.signaled() )      
                     {
                         _notification_event.set_signaled();     
-                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Old directory watchers signal has been transferd to new watcher.\n" );
+                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Old directory watchers signal has been transfered to new watcher.\n" );
                     }
 
                     close_notification();
@@ -493,10 +489,9 @@ void Directory_file_order_source::activate()
 
 bool Directory_file_order_source::request_order( const string& cause )
 {
-    bool result = _new_files_index < _new_files.size();
-
-    if( !result )
-    {
+    if (has_new_file()) 
+        return true;
+    else {
         if( _expecting_request_order 
          || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
         {
@@ -510,9 +505,8 @@ bool Directory_file_order_source::request_order( const string& cause )
         {
             //Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
         }
+        return false;
     }
-
-    return result;
 }
 
 //----------------------------------------------Directory_file_order_source::withdraw_order_request
@@ -633,9 +627,6 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     order->set_file_path( path );
                     order->set_state(fetching_state);
 
-                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
-
-
                     bool ok = true;
 
                     if( ok )  ok = known_orders.find( order->string_id() ) == known_orders.end();     // Auftrag ist noch nicht bekannt?
@@ -666,6 +657,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     if( ok )
                     {
                         result = order;
+                        string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
                     }
 
@@ -962,18 +954,43 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     read_directory( was_notified, cause );
 
-    if (_new_files_index < _new_files.size()) {
+    if (has_new_file()) {
         _job_chain->tip_for_new_order(_next_state);
     }
 
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
                                                  : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
-    set_async_delay( max( 1, delay ) );     // Falls ein Spaßvogel es geschafft hat, repeat="0" anzugeben
+    set_async_delay(max(1, delay));
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 
     return true;
+}
+
+
+bool Directory_file_order_source::has_new_file() {
+    // read_known_orders, also Lesen der Datenbank, ist nicht aktiv, weil request_order und dmait has_new_file sehr oft aufgerufen wird. Jedenfalls mit dem alten (<2013) Mikroscheduling
+    // Bei verteilter Jobkette wir das Problem JS-1354 (hochzählen der nächsten Task-ID in der Datenbank) weiterhin bestehen.
+    //String_set known_orders;
+    //bool known_orders_has_been_read = false;
+    for (int i = _new_files_index; i < _new_files.size(); i++) {
+        if (file::File_info* f = _new_files[i]) {
+            File_path path = f->path();
+            if (path.exists() && !_job_chain->order_id_space_contains_order_id(path)) {
+                //if (!_job_chain->is_distributed()) {
+                    return true;
+                //} else {
+                //    if (!known_orders_has_been_read) {
+                //        read_known_orders(&known_orders); 
+                //        known_orders_has_been_read = true;
+                //    }
+                //    return known_orders.find(path) == known_orders.end();
+                //}
+            }
+        }
+    }
+    return false;
 }
 
 //---------------------------------------------------Directory_file_order_source::delay_after_error

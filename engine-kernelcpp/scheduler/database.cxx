@@ -42,6 +42,7 @@ const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob i
 const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
 const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
 const int order_title_column_size = 200;
+const int order_state_text_column_size = 100;
 const int immediately_reopened_max = 10;    // Maximale Anzahl Fehler in der Retry_transaction, ohne dass die Datenbank nicht erreichbar war. Verhindert Endlosschleife.
 
 
@@ -333,7 +334,6 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
     {
         if( _outer_transaction )  
         {
-            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
             Z_LOG( "Rollback in inner transaction." << debug_text );        // Keine Exception, weil wir schon in einer Exception sein können.
         }
 
@@ -745,7 +745,7 @@ void Database::create_tables_when_needed()
                                 "`priority`"                    " integer"      " not null,"
                                 // "`suspended`"                   " boolean"         << null << ","     // JS-333
                                 "`state`"                       " varchar(100)"    << null << ","
-                                "`state_text`"                  " varchar(100)"    << null << ","
+                                "`state_text`"                  " varchar(" << order_state_text_column_size << ")"    << null << ","
                                 "`title`"                       " varchar(200)"    << null << ","
                                 "`created_time`"                " datetime"     " not null,"
                                 "`mod_time`"                    " datetime"        << null << ","
@@ -795,7 +795,7 @@ void Database::create_tables_when_needed()
             "`spooler_id`"  " varchar(100)" " not null,"
             "`title`"       " varchar(200)"    << null << ","
             "`state`"       " varchar(100)"    << null << ","
-            "`state_text`"  " varchar(100)"    << null << ","
+            "`state_text`"  " varchar(" << order_state_text_column_size << ")"    << null << ","
             "`start_time`"  " datetime"     " not null,"
             "`end_time`"    " datetime"        << null << ","
             "`log`"         " blob"            << null;
@@ -1383,10 +1383,10 @@ Database_lock_syntax Database::lock_syntax()
 
 //---------------------------------------------------------------------------------Database::get_id
 
-int Database::get_id( const string& variable_name, Transaction* outer_transaction )
+int Database::get_id(const string& variable_name, Transaction* outer_transaction, const string& debug)
 {
     try {
-        return get_id_( variable_name, outer_transaction );
+        return get_id_(variable_name, outer_transaction, debug);
     }
     catch (exception& x) { 
         _spooler->log()->error( message_string( "SCHEDULER-304", x, variable_name ) );   // "FEHLER BEIM LESEN DER NÄCHSTEN ID: "
@@ -1396,39 +1396,40 @@ int Database::get_id( const string& variable_name, Transaction* outer_transactio
 
 //--------------------------------------------------------------------------------Database::get_id_
 
-int Database::get_id_( const string& variable_name, Transaction* outer_transaction )
+int Database::get_id_(const string& variable_name, Transaction* outer_transaction, const string& debug)
 {
+    string my_debug = Z_FUNCTION + " " + debug;
     int id = -1;
     for (Retry_nested_transaction ta (db(), outer_transaction); ta.enter_loop(); ta++) 
     try {
         if( dbms_kind() == dbms_access ||
             dbms_kind() == dbms_sybase)
         {
-            ta.execute( S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), Z_FUNCTION );
+            ta.execute( S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), my_debug);
             Any_file sel = ta.open_result_set( S() << "select `wert`  from " << _variables_tablename << "  where `name`=" << sql::quoted( variable_name ),
-                                               Z_FUNCTION );
+                                               my_debug);
             if (sel.eof()) {
                 id = 1;
                 ta.execute( S() << "INSERT into " << _variables_tablename << " (`name`,`wert`) " 
                             "values (" << sql::quoted( variable_name ) << "," << id << ")",
-                            Z_FUNCTION);
+                            my_debug);
             } else {
                 id = sel.get_record().as_int(0);
             }
         } else {
             for (int tries = 2; tries > 0; tries--) {
                 Any_file sel = ta.open_commitable_result_set(S() << "select `wert`  from " << _variables_tablename << " %update_lock  where `name`=" << sql::quoted(variable_name), 
-                                                              Z_FUNCTION );
+                                                             my_debug);
                 if (!sel.eof()) {
                     id = sel.get_record().as_int(0) + 1;
-                    ta.execute(S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), Z_FUNCTION);
+                    ta.execute(S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), my_debug);
                     tries = 0;
                 } else {
                     try {
                         id = 1;
                         ta.execute( S() << "INSERT into " << _variables_tablename << " (`name`,`wert`) " 
                                     "values (" << sql::quoted(variable_name) << "," << id << ")",
-                                    Z_FUNCTION);
+                                    my_debug);
                     }
                     catch (exception& x) {
                         if (tries <= 1) throw;
@@ -1437,11 +1438,11 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
                 }
             }
         }
-        Z_LOG2( "scheduler", "Database::get_id(\"" + variable_name + "\") = " << id << '\n' );
-        ta.commit( Z_FUNCTION );
+        Z_LOG2( "scheduler", "Database::get_id(\"" + variable_name + "\") = " << id << " " << debug << '\n' );
+        ta.commit(my_debug);
     }
-    catch (exception& x) { ta.reopen_database_after_error(z::Xc("SCHEDULER-306", _variables_tablename, x  ), Z_FUNCTION); }
-    if (id == -1)  z::throw_xc(Z_FUNCTION);
+    catch (exception& x) { ta.reopen_database_after_error(z::Xc("SCHEDULER-306", _variables_tablename, x  ), my_debug); }
+    if (id == -1)  z::throw_xc(Z_FUNCTION, debug);
     return id;
 }
 
@@ -1604,7 +1605,7 @@ void Database::spooler_start()
 {
     if( _db.opened() )
     {
-        _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
+        _id = get_task_id("Scheduler");     // Der Spooler-Satz hat auch eine Id
 
         Transaction ta ( this );
         {
