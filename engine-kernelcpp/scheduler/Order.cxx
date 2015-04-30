@@ -397,7 +397,7 @@ void Order::db_insert_order_history_record( Transaction* ta )
         insert[ "order_id"   ] = id().as_string();
         insert[ "title"      ] = title().substr(0, database::order_title_column_size);;
         insert[ "state"      ] = state().as_string();
-        insert[ "state_text" ] = state_text();
+        insert[ "state_text" ] = state_text().substr(0, order_state_text_column_size);
         insert[ "spooler_id" ] = _spooler->id_for_db();
         insert.set_datetime( "start_time", start_time().db_string(time::without_ms) );
         //insert.set_datetime( "end_time"  , "0000-00-00 00:00:00" );
@@ -431,7 +431,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
             update.and_where_condition( "history_id", _history_id );
             
             update[ "state"      ] = state().as_string();
-            update[ "state_text" ] = state_text();
+            update[ "state_text" ] = state_text().substr(0, order_state_text_column_size);
             update[ "title"      ] = title().substr(0, database::order_title_column_size);
             update.set_datetime( "end_time"  , ( end_time().not_zero()? end_time() : Time::now() ).db_string(time::without_ms) );
 
@@ -484,7 +484,7 @@ void Order::db_update_order_history_state( Transaction* outer_transaction )
             update.and_where_condition( "history_id", _history_id );
             
             update[ "state"      ] = state().as_string();
-            update[ "state_text" ] = state_text();
+            update[ "state_text" ] = state_text().substr(0, order_state_text_column_size);
 
             ta.execute( update, Z_FUNCTION );
             ta.commit( Z_FUNCTION );
@@ -543,7 +543,6 @@ void Order::db_update_order_step_history_record( Transaction* ta )
         update.and_where_condition( "step"      , _step_number );
         
         update[ "end_time"   ].set_datetime( Time::now().db_string( time::without_ms ) );
-      //update[ "state_text" ] = state_text();
         update[ "error"      ] = _task_error != NULL;
 
         if( _task_error )
@@ -715,7 +714,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
         insert[ "spooler_id"    ] = _spooler->id_for_db();
         insert[ "title"         ] = title().substr(0, database::order_title_column_size), _title_modified = false;
         insert[ "state"         ] = state().as_string();
-        insert[ "state_text"    ] = state_text()                , _state_text_modified = false;
+        insert[ "state_text"    ] = state_text().substr(0, order_state_text_column_size), _state_text_modified = false;
         insert[ "priority"      ] = priority()                  , _priority_modified   = false;
         insert[ "initial_state" ] = initial_state().as_string();
 //        insert[ "suspended"     ] = _suspended;   // JS-333
@@ -917,7 +916,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
             if( _priority_modified   )  update[ "priority"   ] = priority();
             if( _title_modified      )  update[ "title"      ] = title().substr(0, database::order_title_column_size);
-            if( _state_text_modified )  update[ "state_text" ] = state_text();
+            if( _state_text_modified )  update[ "state_text" ] = state_text().substr(0, order_state_text_column_size);
 
             for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
             {

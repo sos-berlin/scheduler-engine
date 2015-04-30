@@ -452,9 +452,6 @@ STDMETHODIMP_(ULONG) Sos_ole_object::Release()
 {
     if( _ref_count == 0 )  {
         LOG( "***ERROR*** Sos_ole_object._ref_count is already 0!\n" ); 
-#       if defined _DEBUG && defined SYSTEM_WIN
-            DebugBreak();
-#       endif
         return 0; 
     }
 

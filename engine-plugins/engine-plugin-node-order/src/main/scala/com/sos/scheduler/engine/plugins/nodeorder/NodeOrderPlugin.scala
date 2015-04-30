@@ -47,7 +47,7 @@ extends JobChainNodeNamespaceXmlPlugin {
     val eventReader = new ScalaXMLEventReader(xmlEventReader)
     import eventReader._
     val addOrder = parseElement("add_order") {
-      val jobChainPath = JobChainPath(AbsolutePath.makeCompatibleAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain")))
+      val jobChainPath = JobChainPath.makeAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain"))
       val idPattern = attributeMap.getOrElse("id", "")
       if (jobChainPath == jobNode.jobChainPath && idPattern.isEmpty) throw new IllegalArgumentException(s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> must denote the own job_chain")
       val elementMap = forEachStartElement {

@@ -38,6 +38,12 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   if (isWindows) {
+    addWindowsTests()
+  } else {
+    addUnixTests()
+  }
+
+  private def addWindowsTests(): Unit = {
     "kill_task with timeout on Windows is rejected" in {
       val run = runJobFuture(WindowsJobPath)
       interceptSchedulerError(MessageCode("SCHEDULER-490")) {
@@ -45,7 +51,9 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
         scheduler executeXml <kill_task job={WindowsJobPath.string} id={run.taskId.string} immediately="true" timeout="3"/>
       }
     }
-  } else {
+  }
+
+  private def addUnixTests(): Unit = {
     val settings = List(
       "Without agent" → { () ⇒ None },
       "With agent" → { () ⇒ Some(s"http://127.0.0.1:$httpPort") })

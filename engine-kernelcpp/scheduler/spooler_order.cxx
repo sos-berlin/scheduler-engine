@@ -1907,7 +1907,15 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
     {
         order_subsystem()->order_id_spaces()->disconnect_order_id_spaces( this, disconnected_job_chains );
     }
-}    
+}   
+
+
+bool Job_chain::order_id_space_contains_order_id(const string& id) {
+    if (_order_id_space)
+        return _order_id_space->job_chain_by_order_id_or_null(id) != NULL;
+    else
+        return has_order_id((Read_transaction*)NULL, id);
+}
 
 
 vector<Order_queue_node*> Job_chain::skipped_order_queue_nodes(const Order::State& state) const {
@@ -2016,7 +2024,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
         _visible = element.getAttribute( "visible" ) == "never"? visible_never :
                    element.bool_getAttribute( "visible" )      ? visible_yes 
                                                                : visible_no;
-    _default_process_class_path = Absolute_path(element.getAttribute("process_class"));
+    _default_process_class_path = Absolute_path(folder_path(), element.getAttribute("process_class"));
 
     _orders_are_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_are_recoverable );
 
