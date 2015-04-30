@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
@@ -52,8 +51,10 @@ object SchedulerTestUtils {
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
     instance[ProcessClassSubsystem].processClass(path)
 
-  def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult =
-    runJobAndWaitForEnd(jobPath, timeout.duration)
+  def runJobAndWaitForEnd(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult = {
+    val run = runJobFuture(jobPath, variables)
+    awaitResult(run.result, timeout.concurrentDuration)
+  }
 
   def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskResult = {
     val run = runJobFuture(jobPath)
