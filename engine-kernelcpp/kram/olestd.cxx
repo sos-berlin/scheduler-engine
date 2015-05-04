@@ -39,7 +39,7 @@ using namespace std;
 namespace sos {
 
 
-const LCID   std_lcid = (LCID)0;   //LOCALE_SYSTEM_DEFAULT;
+const LCID   std_lcid = (LCID)0;
 const Variant      empty_variant;
 
 
