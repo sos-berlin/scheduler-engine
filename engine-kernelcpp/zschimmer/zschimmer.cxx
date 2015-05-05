@@ -850,7 +850,7 @@ double as_double( const char* str )
     }
 
     while( *t == ' ' )  t++;
-    if( *t != '\0' )  throw_xc( "Z-4003", str );
+    if( *t != '\0' )  throw_xc( "Z-4003", "double", str );
 
     return a;
 }
