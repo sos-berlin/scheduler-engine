@@ -1199,18 +1199,18 @@ bool get_string_from_variant( const VARIANT& variant, LCID lcid, string* result 
 RESPECT_LOCALE:
         char decimal_char = '.';
 
-        switch( lcid )
-        {
-            case LOCALE_SYSTEM_DEFAULT: decimal_char = ','; break;  //decimal_char = *localeconv()->decimal_point;  break;
-          //case LANG_GERMAN: decimal_char =   Einstellung des Betriebssystems lesen
-            default :;
-        }
+        //switch( lcid )
+        //{
+        //    case LOCALE_SYSTEM_DEFAULT: decimal_char = ','; break;  //decimal_char = *localeconv()->decimal_point;  break;
+        //  //case LANG_GERMAN: decimal_char =   Einstellung des Betriebssystems lesen
+        //    default :;
+        //}
 
-        if( decimal_char != '.' )
-        {
-            char* p = strchr( buffer, '.' );
-            if( p )  *p = decimal_char;
-        }
+        //if( decimal_char != '.' )
+        //{
+        //    char* p = strchr( buffer, '.' );
+        //    if( p )  *p = decimal_char;
+        //}
 
         *result = buffer; 
         ok = true;

@@ -50,7 +50,7 @@ const DWORD             DLL_THREAD_DETACH  = 4;
 const DWORD             Z_DLL_COM_ATTACH = 101;         // Eigene Erweiterung, um Com_context zu übergeben (für SetError() etc.)
 const DWORD             Z_DLL_COM_DETACH = 102;         // Eigene Erweiterung 
 
-#define LOCALE_SYSTEM_DEFAULT  0u
+#define LOCALE_SYSTEM_DEFAULT  0x800u
 #define LANG_ENGLISH           0u
 #define SORT_DEFAULT           0u
 #define MAKELANGID(x,y)        0u
