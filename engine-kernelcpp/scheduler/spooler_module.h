@@ -89,8 +89,8 @@ struct Module : Object
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler*, File_based*, const string& include_path, Has_log* = NULL );
-    explicit                    Module                      ( Spooler*, File_based*, const xml::Element_ptr&, const string& include_path );
+                                Module                      ( Spooler*, File_based*, const string& include_path, Has_log*, bool is_monitor);
+    explicit                    Module                      ( Spooler*, File_based*, const xml::Element_ptr&, const string& include_path, bool is_monitor);
                                ~Module                      ()                                      {}
 
     void                        set_log                     ( Has_log* log )                        { _log.set_log( log ); }
@@ -123,6 +123,7 @@ struct Module : Object
     Absolute_path              _folder_path;
     Kind                       _kind;
     bool                       _initialized;
+    bool _is_monitor;
 
 
     // Scripting Engine

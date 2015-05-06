@@ -83,6 +83,7 @@ struct Java_module_script_instance : Java_module_instance
                                 Java_module_script_instance ( Module* );
     void                        init                        ();
     string                      java_adapter_job            () const                            { return "sos/spooler/jobs/ScriptAdapterJob"; }
+    string                      java_adapter_monitor        () const                            { return "sos/spooler/jobs/ScriptAdapterMonitor"; }
 };
 
 //-------------------------------------------------------------------------------------------------

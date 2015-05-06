@@ -206,7 +206,7 @@ bool Text_with_includes::is_empty() const
 
 //-----------------------------------------------------------------------------------Module::Module
 
-Module::Module( Spooler* sp, File_based* file_based, const string& include_path, Has_log* log )
+Module::Module( Spooler* sp, File_based* file_based, const string& include_path, Has_log* log, bool is_monitor)
 : 
     _zero_(_end_), 
     _spooler(sp), 
@@ -214,20 +214,22 @@ Module::Module( Spooler* sp, File_based* file_based, const string& include_path,
     _log(log),
     _process_environment( new Com_variable_set() ),
     _include_path(include_path),
-    _text_with_includes(sp,file_based,include_path)
+    _text_with_includes(sp,file_based,include_path),
+    _is_monitor(is_monitor)
 {
     init0();
 }
 
 //-----------------------------------------------------------------------------------Module::Module
     
-Module::Module( Spooler* sp, File_based* file_based, const xml::Element_ptr& e, const string& include_path )  
+Module::Module( Spooler* sp, File_based* file_based, const xml::Element_ptr& e, const string& include_path, bool is_monitor)  
 : 
     _zero_(_end_),
     _spooler(sp),
     _process_environment( new Com_variable_set() ),
     _include_path(include_path),
-    _text_with_includes(sp,file_based,include_path)
+    _text_with_includes(sp,file_based,include_path),
+    _is_monitor(is_monitor)
 { 
     init0();
     set_dom( e ); 

@@ -578,7 +578,7 @@ Standard_job::Standard_job( Scheduler* scheduler, const string& name, const ptr<
     _log = Z_NEW( Prefix_log( this ) );
     set_log();
 
-    _module = module? module : Z_NEW( Module( _spooler, this, _spooler->include_path() ) );
+    _module = module ? module : Z_NEW(Module(_spooler, this, _spooler->include_path(), (Has_log*)NULL, false));
     _module->set_log( _log );
 
     _com_job  = new Com_job( this );

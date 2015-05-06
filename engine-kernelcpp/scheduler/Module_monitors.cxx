@@ -29,7 +29,7 @@ void Module_monitors::set_dom(const xml::Element_ptr& element) {
         if (Anonymous_monitor_reference* anon = dynamic_cast<Anonymous_monitor_reference*>(monitor_reference_or_null(name))) {
             module_monitor = anon->module_monitor();
         } else {
-            ptr<Module> module = Z_NEW(Module(spooler(), _main_module->_file_based, spooler()->include_path(), &_main_module->_log));
+            ptr<Module> module = Z_NEW(Module(spooler(), _main_module->_file_based, spooler()->include_path(), &_main_module->_log, true));
             module_monitor = Z_NEW(Module_monitor(name, module));
             add_module_monitor(module_monitor);  // Possibly overriding existing, equally named Named_monitor_reference
         }

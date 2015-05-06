@@ -198,7 +198,7 @@ struct File_order_sink_module : Internal_module
 {
     File_order_sink_module( Spooler* spooler )
     :
-        Internal_module( spooler )
+        Internal_module(spooler, (Prefix_log*)NULL, false)
     {
     }
 

@@ -7,9 +7,9 @@ namespace scheduler {
 
 //-----------------------------------------------------------------Internal_module::Internal_module
     
-Internal_module::Internal_module( Spooler* spooler, Prefix_log* log )
+Internal_module::Internal_module( Spooler* spooler, Prefix_log* log, bool is_monitor)
 :
-    Module( spooler, (File_based*)NULL, "::NO-INCLUDE-PATH::", log )
+    Module( spooler, (File_based*)NULL, "::NO-INCLUDE-PATH::", log, is_monitor)
 {
     _kind = kind_internal;
     _set = true;
