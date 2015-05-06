@@ -1,12 +1,12 @@
-package com.sos.scheduler.engine.tests.scheduler.job.javajob
+package com.sos.scheduler.engine.tests.scheduler.job.jobmethods
 
 import com.sos.scheduler.engine.agent.test.AgentTest
-import com.sos.scheduler.engine.agent.tests.javajob.TestJob._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import com.sos.scheduler.engine.tests.scheduler.job.javajob.JavaJobIT._
+import com.sos.scheduler.engine.tests.scheduler.job.jobmethods.JobMethodsIT._
+import com.sos.scheduler.engine.tests.scheduler.job.jobmethods.TestJob._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -15,7 +15,7 @@ import org.scalatest.junit.JUnitRunner
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JavaJobIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
+final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
 
   "Self test" in {
     val lines = """xx
@@ -53,7 +53,7 @@ final class JavaJobIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
   }
 
   private def check(variables: Iterable[(String, String)], expectedCalls: Iterable[String], toleratedErrorCodes: Set[MessageCode] = Set()): Unit = {
-    for ((name, jobPath) ← List("Without Agent" → NonAgentJobPath, "With Agent" -> AgentJobPath)) {
+    for ((name, jobPath) ← Settings) {
       name in {
         val taskResult = controller.toleratingErrorCodes(toleratedErrorCodes) {
           runJobAndWaitForEnd(jobPath, variables = (AllNamesTrue ++ variables).toMap)
@@ -72,9 +72,12 @@ final class JavaJobIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
   }
 }
 
-object JavaJobIT {
-  private val NonAgentJobPath = JobPath("/test-non-agent")
-  private val AgentJobPath = JobPath("/test-agent")
+object JobMethodsIT {
+  private val Settings = List(
+    "Java without Agent" → JobPath("/test-java-non-agent"),
+    "Java with Agent" -> JobPath("/test-java-agent"),
+    "JavaScript without Agent" → JobPath("/test-javascript-non-agent"),
+    "JavaScript with Agent" -> JobPath("/test-javascript-agent"))
   private val CalledPattern = ">([a-z_]+)< CALLED".r
   private val Error = "ERROR"  // lets .toBoolean fail
   private val AllNames = List(SpoolerInitName, SpoolerOpenName, SpoolerProcessName, SpoolerProcessName, SpoolerCloseName, SpoolerOnSuccessName, SpoolerExitName)

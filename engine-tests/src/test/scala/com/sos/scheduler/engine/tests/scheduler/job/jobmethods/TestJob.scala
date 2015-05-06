@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.agent.tests.javajob
+package com.sos.scheduler.engine.tests.scheduler.job.jobmethods
 
-import com.sos.scheduler.engine.agent.tests.javajob.TestJob._
+import com.sos.scheduler.engine.tests.scheduler.job.jobmethods.TestJob._
 
 /**
  * @author Joacim Zschimmer
