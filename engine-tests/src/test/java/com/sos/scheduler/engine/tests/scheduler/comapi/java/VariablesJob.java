@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.tests.api;
+package com.sos.scheduler.engine.tests.scheduler.comapi.java;
 
 import sos.spooler.Job_impl;
 import sos.spooler.Order;

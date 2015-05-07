@@ -1,8 +1,7 @@
-package com.sos.scheduler.engine.agent.tests.api
+package com.sos.scheduler.engine.tests.scheduler.comapi.java
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.tests.api.SchedulerAPIIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -21,10 +20,12 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.scheduler.comapi.java.SchedulerAPIIT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.concurrent.Promise
@@ -34,7 +35,7 @@ import scala.concurrent.duration._
  * @author Andreas Liebert
  */
 @RunWith(classOf[JUnitRunner])
-final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest{
+final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
@@ -60,14 +61,14 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest{
   }
 
   "sos.spooler.Log methods" in {
-      val taskResult: TaskResult = runJobAndWaitForEnd(JobPath("/log"))
-      for (level <- LogJob.LogMessages.keySet) {
-        taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
-      }
-      taskResult.logString should include (LogJob.SpoolerInitMessage)
-      taskResult.logString should include (LogJob.SpoolerExitMessage)
-      taskResult.logString should include (LogJob.SpoolerOpenMessage)
-      taskResult.logString should include (LogJob.SpoolerCloseMessage)
+    val taskResult: TaskResult = runJobAndWaitForEnd(JobPath("/log"))
+    for (level <- LogJob.LogMessages.keySet()) {
+      taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
+    }
+    taskResult.logString should include(LogJob.SpoolerInitMessage)
+    taskResult.logString should include(LogJob.SpoolerExitMessage)
+    taskResult.logString should include(LogJob.SpoolerOpenMessage)
+    taskResult.logString should include(LogJob.SpoolerCloseMessage)
   }
 
   "sos.spooler.Job methods" in {
@@ -75,10 +76,10 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest{
     for (mes <- JobObjectJob.UnwantedMessage.values) {
       taskLog should not include mes.toString
     }
-    taskLog should include (s"include_path=$IncludePath")
-    taskLog should include (s"process_class name=$ProcessClassName")
-    taskLog should include (s"process_class remote_scheduler=$remoteSchedulerAddress")
-    taskLog should include (s"process_class max_processes=$MaxProcesses")
+    taskLog should include(s"include_path=$IncludePath")
+    taskLog should include(s"process_class name=$ProcessClassName")
+    taskLog should include(s"process_class remote_scheduler=$remoteSchedulerAddress")
+    taskLog should include(s"process_class max_processes=$MaxProcesses")
   }
 
   "Run variables job via order" in {
@@ -104,16 +105,16 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest{
   }
 
   "variables count" in {
-    assert(taskLogLines contains TaskParamsCountPrefix+"2")
+    assert(taskLogLines contains TaskParamsCountPrefix + "2")
   }
 
   "variable substitution" in {
-    val substitutedString = VariableSubstitutionString.replace("$"+JobParam.name,JobParam.value)
+    val substitutedString = VariableSubstitutionString.replace("$" + JobParam.name, JobParam.value)
     assert(taskLogLines contains substitutedString)
   }
 
   "Order variable created in job" in {
-    finishedOrderParametersPromise.successValue should contain (OrderVariableSetInJob.pair)
+    finishedOrderParametersPromise.successValue should contain(OrderVariableSetInJob.pair)
   }
 }
 
@@ -136,7 +137,9 @@ object SchedulerAPIIT {
 
   final case class Variable(name: String, value: String) {
     override def toString = name
+
     def expectedString = s"$name=$value"
+
     def pair = name → value
   }
 
@@ -146,6 +149,6 @@ object SchedulerAPIIT {
         <param name={JobParam.name} value={JobParam.value}/>
         <param name={OrderParamOverridesJobParam.name} value="OVERRIDDEN-JOB-VALUE"/>
       </params>
-      <script language="java" java_class="com.sos.scheduler.engine.agent.tests.api.VariablesJob"/>
+      <script language="java" java_class="com.sos.scheduler.engine.tests.scheduler.comapi.java.VariablesJob"/>
     </job>
 }

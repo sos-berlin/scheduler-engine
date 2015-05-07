@@ -2,6 +2,9 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
      process_class="test-agent">
 
-    <script language="java" java_class="com.sos.scheduler.engine.agent.tests.api.JobObjectJob"/>
+    <settings>
+        <log_level>debug9</log_level>
+    </settings>
+    <script language="java" java_class="com.sos.scheduler.engine.tests.scheduler.comapi.java.LogJob"/>
 
 </job>

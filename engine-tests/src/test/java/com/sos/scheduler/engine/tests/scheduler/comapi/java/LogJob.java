@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.tests.api;
+package com.sos.scheduler.engine.tests.scheduler.comapi.java;
 
 import com.google.common.base.Strings;
 import java.util.HashMap;
