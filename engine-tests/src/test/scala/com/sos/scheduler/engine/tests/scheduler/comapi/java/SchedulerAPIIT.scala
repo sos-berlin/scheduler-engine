@@ -82,6 +82,11 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
     taskLog should include(s"process_class max_processes=$MaxProcesses")
   }
 
+  "Measure api call duration" in {
+    val taskLog = runJobAndWaitForEnd(MeasureTimeJobPath).logString
+    //TODO: check times
+  }
+
   "Run variables job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
       eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
@@ -122,6 +127,7 @@ object SchedulerAPIIT {
   private val VariablesJobchainPath = JobChainPath("/variables")
   private val VariablesJobPath = JobPath("/variables")
   private val VariablesOrderKey = VariablesJobchainPath orderKey "1"
+  private val MeasureTimeJobPath = JobPath("/measure_time")
   val OrderVariable = Variable("orderparam", "ORDERVALUE")
   val OrderVariableSetInJob = Variable("orderparaminjob", "qwertzui")
   val OrderParamOverridesJobParam = Variable("ORDEROVERRIDESJOBPARAM", "ORDEROVERRIDESJOBVALUE")
