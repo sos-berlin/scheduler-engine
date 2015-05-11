@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.test.util.time
+package com.sos.scheduler.engine.common.time
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import org.joda.time.Instant.now
-import org.joda.time.{Duration, DateTimeUtils}
+import org.joda.time.{DateTimeUtils, Duration}
 
 object WaitForCondition {
 

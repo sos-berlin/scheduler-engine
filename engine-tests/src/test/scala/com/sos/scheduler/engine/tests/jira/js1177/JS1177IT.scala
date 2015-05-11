@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1177
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.WaitForCondition
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.test.ClusterTest
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.tests.jira.js1177.JS1177IT._
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith

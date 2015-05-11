@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.test.util.time
+package com.sos.scheduler.engine.common.time
 
-import org.joda.time.{ReadableInstant, Duration}
+import org.joda.time.{Duration, ReadableInstant}
 
 /** Eine in Schritte unterteilte Frist.
   */

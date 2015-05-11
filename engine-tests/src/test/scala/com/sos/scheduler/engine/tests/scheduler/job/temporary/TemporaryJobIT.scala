@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.tests.scheduler.job.temporary
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.WaitForCondition
 import com.sos.scheduler.engine.data.filebased.FileBasedRemovedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import WaitForCondition.waitForCondition
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.time.{WaitForCondition, TimeoutWithSteps}
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskId}
@@ -16,8 +17,7 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
-import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
