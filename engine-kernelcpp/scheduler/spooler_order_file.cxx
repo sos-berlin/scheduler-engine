@@ -12,6 +12,10 @@
 
 
 #include "spooler.h"
+#include "../javaproxy/com__sos__scheduler__engine__client__agent__CppFileOrderSourceClient.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
+
+typedef ::javaproxy::com::sos::scheduler::engine::client::agent::CppFileOrderSourceClient CppFileOrderSourceClientJ;
 
 using stdext::hash_set;
 using stdext::hash_map;
@@ -37,9 +41,7 @@ const bool                      alert_when_directory_missing_default      = true
     const int   directory_file_order_source_repeat_default  = 10;
 #endif
 
-//-------------------------------------------------------------------------------------------static
-
-//Directory_file_order_source::Class_descriptor    Directory_file_order_source::class_descriptor ( &typelib, "Spooler.Directory_file_order_source", Directory_file_order_source::_methods );
+DEFINE_SIMPLE_CALL(Directory_file_order_source, Directory_read_result_call)
 
 //----------------------------------------------------------------------Directory_file_order_source
 
@@ -70,13 +72,16 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Order*                      fetch_and_occupy_order  (const Order::State&, Task* occupying_task, const Time& now, const string& cause);
     void                        withdraw_order_request  ();
     string                      obj_name                () const;
-
+    void on_call(const Directory_read_result_call&);
 
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );
+    void on_directory_read();
+    void repeat();
     void                        close_notification      ();
     void                        read_directory          ( bool was_notified, const string& cause );
+    void start_read_new_files_from_agent();
     void                        read_new_files_and_handle_deleted_files( const string& cause );
     bool                        read_new_files          ();
     bool                        clean_up_blacklisted_files();
@@ -86,6 +91,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     bool has_new_file();
 
     Fill_zero                  _zero_;
+    string _remote_scheduler;
     File_path                  _path;
     string                     _regex_string;
     Regex                      _regex;
@@ -116,6 +122,9 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Bad_map                    _bad_map;
 
     bool                       _are_blacklisted_orders_cleaned_up;
+    CppFileOrderSourceClientJ     _fileOrderSourceClientJ;
+    ptr<Directory_read_result_call> const _directory_read_result_call;
+    bool _in_directory_read_result_call;
 };
 
 //------------------------------------------------------------------File_order_sink_module_instance
@@ -255,8 +264,10 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _zero_(this+1),
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
-    _alert_when_directory_missing(alert_when_directory_missing_default)
+    _alert_when_directory_missing(alert_when_directory_missing_default),
+    _directory_read_result_call(Z_NEW(Directory_read_result_call(this)))
 {
+    _remote_scheduler = element.getAttribute("remote_scheduler");
     _path = subst_env( element.getAttribute( "directory" ) );
 
     _regex_string = element.getAttribute( "regex" );
@@ -272,6 +283,9 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
 
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
     _alert_when_directory_missing = element.bool_getAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
+    if (_remote_scheduler != "") {
+        _fileOrderSourceClientJ = CppFileOrderSourceClientJ::apply(_remote_scheduler, (string)_path, _spooler->injectorJ());
+    }
 }
 
 //----------------------------------------Directory_file_order_source::~Directory_file_order_source
@@ -312,6 +326,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         if (!delay_after_error().is_eternal())  element.setAttribute( "delay_after_error", delay_after_error().seconds() );
         if (!_repeat.is_eternal())              element.setAttribute( "repeat"           , _repeat.seconds());
         element.setAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
+        element.setAttribute_optional("remote_scheduler", _remote_scheduler);
         
         if( _directory_error )  append_error_element( element, _directory_error );
 
@@ -518,6 +533,52 @@ void Directory_file_order_source::withdraw_order_request()
     _expecting_request_order = true;
     set_async_next_gmtime( double_time_max );
 }
+
+
+void Directory_file_order_source::start_read_new_files_from_agent() {
+    if (_in_directory_read_result_call) {
+        Z_LOG2("scheduler", Z_FUNCTION << " Still waiting for agent's response\n");
+        repeat();
+    } else {
+        // Auftragskennungen in ArrayList übergeben, an Webservice, mitsamt Regex, der antwortet mit der einen nächsten neuen Datei.
+        _fileOrderSourceClientJ.readFiles(_directory_read_result_call->java_sister());
+    }
+}
+
+
+void Directory_file_order_source::on_call(const Directory_read_result_call& call) {
+    assert(&call == _directory_read_result_call);
+    _in_directory_read_result_call = false;
+    clear_new_files();
+    _new_files_time  = Time::now();
+    try {
+        javaproxy::java::util::List javaList = (javaproxy::java::util::List)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
+        int n = javaList.size();
+        _new_files.reserve(n);
+        for (int i = 0; i < n; i++) {
+            string path = (javaproxy::java::lang::String)javaList.get(i);
+            ptr<file::File_info> file_info = Z_NEW(file::File_info(path));
+            //file_info->set_last_access_time(???);
+            _new_files.push_back(file_info);
+            _new_files_count++;
+        }
+        on_directory_read();
+    } catch (exception& x) {
+        log()->error(x.what());
+    }
+    repeat();
+}
+
+
+//void Directory_file_order_source::handle_blacklist() {
+//    // In Scala?
+//    if (blacklist.non_empty()) {
+//        _agentJ.send(blacklisted files);
+//    oncall:
+//        Zu jeder gelöschten Datei den Auftrag aus der schwarzen Liste nehmen.
+//        send erneuern;
+//    }
+//}
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
@@ -952,20 +1013,33 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     _notification_event.reset();
 
-    read_directory( was_notified, cause );
+    if (_remote_scheduler != "") {
+        start_read_new_files_from_agent();
+    } else {
+        read_directory( was_notified, cause );
+        on_directory_read();
+        repeat();
+    }
 
+    return true;
+}
+
+
+void Directory_file_order_source::on_directory_read() {
     if (has_new_file()) {
         _job_chain->tip_for_new_order(_next_state);
     }
+    repeat();
+}
 
+
+void Directory_file_order_source::repeat() {
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
                                                  : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
     set_async_delay(max(1, delay));
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
-
-    return true;
 }
 
 

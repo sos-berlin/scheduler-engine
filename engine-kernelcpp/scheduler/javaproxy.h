@@ -32,6 +32,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__plugin__PluginSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
 #include "../javaproxy/java__util__ArrayList.h"
+#include "../javaproxy/java__util__List.h"
 #include "../javaproxy/java__lang__Object.h"
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/org__joda__time__Duration.h"

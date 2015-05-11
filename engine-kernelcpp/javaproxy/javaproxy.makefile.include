@@ -2,6 +2,7 @@
 
 javaproxy_objects=\
  com__google__inject__Injector.o\
+ com__sos__scheduler__engine__client__agent__CppFileOrderSourceClient.o\
  com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.o\
  com__sos__scheduler__engine__common__scalautil__Resources.o\
  com__sos__scheduler__engine__common__xml__XmlUtils.o\
