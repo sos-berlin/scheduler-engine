@@ -15,6 +15,7 @@
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace java { namespace util { struct AbstractList; }}}
+namespace javaproxy { namespace java { namespace util { struct List; }}}
 
 
 namespace javaproxy { namespace java { namespace util { 
@@ -65,6 +66,7 @@ struct ArrayList : ::zschimmer::javabridge::proxy_jobject< ArrayList >, ::javapr
     bool remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
     ::javaproxy::java::lang::Object set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
     jint size() const;
+    ::javaproxy::java::util::List subList(jint p0, jint p1) const;
     void trimToSize() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

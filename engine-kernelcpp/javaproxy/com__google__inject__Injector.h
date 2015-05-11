@@ -13,6 +13,7 @@
 namespace javaproxy { namespace java { namespace lang { struct Class; }}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
+namespace javaproxy { namespace java { namespace util { struct List; }}}
 
 
 namespace javaproxy { namespace com { namespace google { namespace inject { 

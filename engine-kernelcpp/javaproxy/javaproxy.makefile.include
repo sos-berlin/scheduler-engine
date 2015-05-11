@@ -81,6 +81,7 @@ javaproxy_objects=\
  java__util__AbstractMap.o\
  java__util__ArrayList.o\
  java__util__HashMap.o\
+ java__util__List.o\
  org__joda__time__Duration.o\
  org__joda__time__ReadableInstant.o\
  org__joda__time__base__AbstractDuration.o\

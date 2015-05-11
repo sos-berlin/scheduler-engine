@@ -6,6 +6,7 @@
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 #include "java__util__AbstractList.h"
+#include "java__util__List.h"
 
 namespace javaproxy { namespace java { namespace util { 
 
@@ -30,6 +31,7 @@ struct ArrayList__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _remove__Ljava_lang_Object_2__method;
     ::zschimmer::javabridge::Method const _set__ILjava_lang_Object_2__method;
     ::zschimmer::javabridge::Method const _size____method;
+    ::zschimmer::javabridge::Method const _subList__II__method;
     ::zschimmer::javabridge::Method const _trimToSize____method;
 
     static const ::zschimmer::javabridge::class_factory< ArrayList__class > class_factory;
@@ -55,6 +57,7 @@ ArrayList__class::ArrayList__class(const string& class_name) :
     ,_remove__Ljava_lang_Object_2__method(this, "remove", "(Ljava/lang/Object;)Z")
     ,_set__ILjava_lang_Object_2__method(this, "set", "(ILjava/lang/Object;)Ljava/lang/Object;")
     ,_size____method(this, "size", "()I")
+    ,_subList__II__method(this, "subList", "(II)Ljava/util/List;")
     ,_trimToSize____method(this, "trimToSize", "()V"){}
 
 ArrayList__class::~ArrayList__class() {}
@@ -196,6 +199,16 @@ jint ArrayList::size() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     ArrayList__class* cls = _class.get();
     return cls->_size____method.int_call(get_jobject(), parameter_list);
+}
+
+::javaproxy::java::util::List ArrayList::subList(jint p0, jint p1) const {
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].i = p0;
+    parameter_list._jvalues[1].i = p1;
+    ArrayList__class* cls = _class.get();
+    ::javaproxy::java::util::List result;
+    result.steal_local_ref(cls->_subList__II__method.jobject_call(get_jobject(), parameter_list));
+    return result;
 }
 
 void ArrayList::trimToSize() const {

@@ -97,6 +97,7 @@
                                 <argument>java.io.File</argument>
                                 <argument>java.net.URI</argument>
                                 <argument>java.net.URL</argument>
+                                <argument>java.util.List</argument>
                                 <argument>java.util.ArrayList</argument>
                                 <argument>java.util.HashMap</argument>
                                 <argument>org.joda.time.Duration</argument>
