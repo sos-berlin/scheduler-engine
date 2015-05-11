@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.agent.tests.overall
+package com.sos.scheduler.engine.tests.jira.js1291
 
-import com.sos.scheduler.engine.agent.tests.overall.AgentIT._
+import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT._
 import java.io.File
 import java.lang.Thread.sleep
 

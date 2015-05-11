@@ -1,8 +1,7 @@
-package com.sos.scheduler.engine.agent.tests.overall
+package com.sos.scheduler.engine.tests.jira.js1291
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.tests.overall.AgentIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -21,6 +20,7 @@ import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT._
 import java.nio.file.Files
 import java.nio.file.Files.createTempFile
 import org.junit.runner.RunWith
@@ -32,10 +32,12 @@ import scala.concurrent.Promise
 import scala.concurrent.duration._
 
 /**
+ * JS-1291 First Agent tests.
+ *
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class AgentIT extends FreeSpec with ScalaSchedulerTest {
+final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest {
 
   import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogEvent}
 
@@ -133,7 +135,7 @@ final class AgentIT extends FreeSpec with ScalaSchedulerTest {
   }
 }
 
-object AgentIT {
+object JS1291AgentIT {
   private val TestJobchainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
   private val TestReturnCode = ReturnCode(42)

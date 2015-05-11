@@ -1,6 +1,7 @@
-package com.sos.scheduler.engine.agent.tests.overall
-import com.sos.scheduler.engine.agent.tests.overall.AgentIT.SignalName
+package com.sos.scheduler.engine.tests.jira.js1291
+
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT.SignalName
 import java.io.File
 
 final class TestMonitor extends sos.spooler.Monitor_impl {

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.tests.overall
+package com.sos.scheduler.engine.tests.jira.js1291
 
 final class ThrowingMonitor extends sos.spooler.Monitor_impl {
 
