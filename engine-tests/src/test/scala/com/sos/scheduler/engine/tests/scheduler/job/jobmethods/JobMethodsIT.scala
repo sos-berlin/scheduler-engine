@@ -75,9 +75,9 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentTest
 object JobMethodsIT {
   private val Settings = List(
     "Java without Agent" → JobPath("/test-java-non-agent"),
-    "Java with Agent" -> JobPath("/test-java-agent"),
+    "Java with Agent" → JobPath("/test-java-agent"),
     "JavaScript without Agent" → JobPath("/test-javascript-non-agent"),
-    "JavaScript with Agent" -> JobPath("/test-javascript-agent"))
+    "JavaScript with Agent" → JobPath("/test-javascript-agent"))
   private val CalledPattern = ">([a-z_]+)< CALLED".r
   private val Error = "ERROR"  // lets .toBoolean fail
   private val AllNames = List(SpoolerInitName, SpoolerOpenName, SpoolerProcessName, SpoolerProcessName, SpoolerCloseName, SpoolerOnSuccessName, SpoolerExitName)
