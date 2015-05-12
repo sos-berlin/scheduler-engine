@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
+import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester.normalizeUri
+import com.sos.scheduler.engine.plugins.jetty.test.{JettyPluginJerseyTester, ProvideUmlautJob}
 import com.sos.scheduler.engine.plugins.webservice.services.CommandServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -16,7 +17,7 @@ import org.scalatest.junit.JUnitRunner
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @RunWith(classOf[JUnitRunner])
-final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester {
+final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJerseyTester with ProvideUmlautJob {
 
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
@@ -57,10 +58,18 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
     }
   }
 
-  def postCommand(command: String) =
+  "Umlauts in job name, Windows only" in {
+    if (isUnix) pending  // Unix encodes filenames with UTF-8 but JobScheduler decodes then with ISO-8859-1 (see JS-1374)
+    provideUmlautJob()
+    val responseString = postCommand("<show_state/>")
+    val jobAttributeValues = xml.XML.loadString(responseString) \ "answer" \ "state" \ "jobs" \ "job" map { o ⇒ (o \ "@job").text }
+    assert(jobAttributeValues.toSet == Set("a", "test-umlauts-äöüßÄÖÜ"))
+  }
+
+  def postCommand(command: String): String =
     webResource.path("/jobscheduler/engine/command").accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], command)
 
-  def getCommand(command: String) = {
+  def getCommand(command: String): String = {
     val c = command.replaceAll(" ", "%20")
     get[String](normalizeUri(s"/jobscheduler/engine/command?command=$c"), Accept = List(TEXT_XML_TYPE))
   }

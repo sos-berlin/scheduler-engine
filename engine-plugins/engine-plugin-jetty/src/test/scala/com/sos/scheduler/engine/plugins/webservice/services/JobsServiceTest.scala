@@ -12,14 +12,14 @@ import org.mockito.Mockito._
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{FreeSpec, BeforeAndAfterAll}
+import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import spray.json._
 
 @RunWith(classOf[JUnitRunner])
 final class JobsServiceTest extends FreeSpec with BeforeAndAfterAll with MockitoSugar {
 
   private val mockedJobSubsystem = mock[JobSubsystem] sideEffect { o ⇒
-    when(o.visiblePaths) thenReturn List(JobPath("/a"), JobPath("/b/c"))
+    when(o.visiblePaths) thenReturn List(JobPath("/a"), JobPath("/b/c"), JobPath("/äöüßÄÖÜ"))
   }
 
   private lazy val injector = Guice.createInjector(
@@ -42,6 +42,6 @@ final class JobsServiceTest extends FreeSpec with BeforeAndAfterAll with Mockito
 
   "Read job list" in {
     tester.webResource.path("/jobscheduler/engine/jobs").accept(APPLICATION_JSON_TYPE).get(classOf[String]).parseJson shouldEqual
-      """[ "/a", "/b/c" ]""".parseJson
+      """[ "/a", "/b/c", "/äöüßÄÖÜ" ]""".parseJson
   }
 }

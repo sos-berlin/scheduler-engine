@@ -62,7 +62,7 @@ final class CppServletIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
   "show_log?task=..." in {
     val eventPipe = controller.newEventPipe()
     scheduler.executeXml(<order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}/>)
-    val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == orderJobPath } .taskId
+    val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == OrderJobPath } .taskId
     val result = stringFromResponse(get[ClientResponse](s"/jobscheduler/engine-cpp/show_log?task=${taskId.string}", Accept = List(TEXT_HTML_TYPE)))
     result should include ("SCHEDULER-918  state=closed")
     result should include ("SCHEDULER-962") // "Protocol ends in ..."
@@ -82,5 +82,5 @@ final class CppServletIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
 }
 
 private object CppServletIT {
-  private val orderKey = aJobChainPath.orderKey("1")
+  private val orderKey = AJobChainPath.orderKey("1")
 }

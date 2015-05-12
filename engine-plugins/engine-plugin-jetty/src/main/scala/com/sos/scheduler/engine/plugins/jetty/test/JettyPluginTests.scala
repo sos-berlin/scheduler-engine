@@ -19,9 +19,10 @@ import scala.util.control.NonFatal
 object JettyPluginTests {
 
   private val defaultTimeout = 60.s
-  val aJobChainPath = JobChainPath("/a")
-  val aJobPath = JobPath("/a")
-  val orderJobPath = JobPath("/order")
+  val AJobChainPath = JobChainPath("/a")
+  val AJobPath = JobPath("/a")
+  val UmlautJobPath = JobPath("/test-umlauts-äöüßÄÖÜ")
+  val OrderJobPath = JobPath("/order")
 
   def contextUri(injector: Injector) =
     new URI("http://127.0.0.1:"+ jettyPortNumber(injector))
