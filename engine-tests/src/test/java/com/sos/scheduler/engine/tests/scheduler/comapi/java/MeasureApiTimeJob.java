@@ -15,10 +15,10 @@ public class MeasureApiTimeJob extends Job_impl{
         DurationMeasurement debugDuration = measureTotal(20,
                 x -> spooler_log.debug9("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"));
 
-        spooler_log.info("spooler_log.info total_duration: "+infoDuration.totalDuration/100000+"ms");
-        spooler_log.info("spooler_log.info average_duration: "+infoDuration.averageDuration/100000+"ms");
-        spooler_log.info("spooler_log.debug9 total_duration: "+debugDuration.totalDuration/100000+"ms");
-        spooler_log.info("spooler_log.debug9 average_duration: "+debugDuration.averageDuration/100000+"ms");
+        spooler_log.info("spooler_log.info total_duration: "+infoDuration.totalAsMilliseconds()+"ms");
+        spooler_log.info("spooler_log.info average_duration: "+infoDuration.averageAsMilliseconds()+"ms");
+        spooler_log.info("spooler_log.debug9 total_duration: "+debugDuration.totalAsMilliseconds()+"ms");
+        spooler_log.info("spooler_log.debug9 average_duration: "+debugDuration.averageAsMilliseconds()+"ms");
         return super.spooler_process();
     }
 
@@ -44,9 +44,19 @@ public class MeasureApiTimeJob extends Job_impl{
         long totalDuration;
         long averageDuration;
 
+        final static int nano2msDivisor = 1000000;
+
         public DurationMeasurement(long total, long average){
             totalDuration = total;
             averageDuration = average;
+        }
+
+        public long totalAsMilliseconds(){
+            return totalDuration/nano2msDivisor;
+        }
+
+        public long averageAsMilliseconds(){
+            return averageDuration/nano2msDivisor;
         }
     }
 }
