@@ -40,5 +40,5 @@ private[jobmethods] object TestJob {
   val SpoolerProcessName = "spooler_process"
   val SpoolerOnErrorName = "spooler_on_error"
   val SpoolerOnSuccessName = "spooler_on_success"
-  val AllMethodNames = List(SpoolerInitName, SpoolerOpenName, SpoolerProcessName, SpoolerCloseName, SpoolerOnSuccessName, SpoolerOnErrorName, SpoolerExitName)
+  val AllMethodNames = Set(SpoolerInitName, SpoolerOpenName, SpoolerProcessName, SpoolerCloseName, SpoolerOnSuccessName, SpoolerOnErrorName, SpoolerExitName)
 }
