@@ -60,15 +60,20 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
     awaitResult(started, 10.seconds)
   }
 
-  "sos.spooler.Log methods" in {
-    val taskResult: TaskResult = runJobAndWaitForEnd(JobPath("/log"))
-    for (level <- LogJob.LogMessages.keySet()) {
-      taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
+  "sos.spooler.Log methods" - {
+    for ((name, jobPath) ← List("Without Agent" → LogJobPath, "With Agent" -> LogJobPath.asAgent)) {
+      name in {
+        val taskResult: TaskResult = runJobAndWaitForEnd(jobPath)
+        for (level <- LogJob.LogMessages.keySet()) {
+          taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
+        }
+        taskResult.logString should include(LogJob.SpoolerInitMessage)
+        taskResult.logString should include(LogJob.SpoolerExitMessage)
+        taskResult.logString should include(LogJob.SpoolerOpenMessage)
+        taskResult.logString should include(LogJob.SpoolerCloseMessage)
+        taskResult.logString should include(LogJob.StdOutMessage)
+      }
     }
-    taskResult.logString should include(LogJob.SpoolerInitMessage)
-    taskResult.logString should include(LogJob.SpoolerExitMessage)
-    taskResult.logString should include(LogJob.SpoolerOpenMessage)
-    taskResult.logString should include(LogJob.SpoolerCloseMessage)
   }
 
   "sos.spooler.Job methods" in {
@@ -124,6 +129,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
 }
 
 object SchedulerAPIIT {
+  private val LogJobPath = JobPath("/log")
   private val VariablesJobchainPath = JobChainPath("/variables")
   private val VariablesJobPath = JobPath("/variables")
   private val VariablesOrderKey = VariablesJobchainPath orderKey "1"
@@ -147,6 +153,11 @@ object SchedulerAPIIT {
     def expectedString = s"$name=$value"
 
     def pair = name → value
+  }
+
+  //TODO: move this copied code to some global place
+  implicit class AgentJobPath(val s: JobPath){
+    def asAgent = JobPath(s.string.concat("-agent"))
   }
 
   private val VariablesJobElem =
