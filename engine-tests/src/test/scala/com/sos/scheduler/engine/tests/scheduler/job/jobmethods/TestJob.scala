@@ -32,7 +32,7 @@ final class TestJob extends sos.spooler.Job_impl {
   }
 }
 
-object TestJob {
+private[jobmethods] object TestJob {
   val SpoolerInitName = "spooler_init"
   val SpoolerExitName = "spooler_exit"
   val SpoolerOpenName = "spooler_open"
@@ -40,4 +40,5 @@ object TestJob {
   val SpoolerProcessName = "spooler_process"
   val SpoolerOnErrorName = "spooler_on_error"
   val SpoolerOnSuccessName = "spooler_on_success"
+  val AllMethodNames = List(SpoolerInitName, SpoolerOpenName, SpoolerProcessName, SpoolerCloseName, SpoolerOnSuccessName, SpoolerOnErrorName, SpoolerExitName)
 }
