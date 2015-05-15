@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.tests.database
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.common.time.{WaitForCondition, TimeoutWithSteps}
+import com.sos.scheduler.engine.common.time.TimeoutWithSteps
+import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
@@ -18,7 +19,6 @@ import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
 import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime

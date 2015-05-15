@@ -139,12 +139,13 @@ object SchedulerTestUtils {
     result
   }
 
-  def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ErrorLogEvent =
-    controller.toleratingErrorCodes(Set(errorCode)) {
-      controller.eventBus.awaitingEvent[ErrorLogEvent](_.codeOption == Some(errorCode)) {
-        body
-      }
-    }
+  def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
+    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.codeOption == Some(errorCode) }
+    val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
+    val event = try awaitResult(eventFuture, timeout.concurrentDuration)
+      catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
+    ResultAndEvent(result, event)
+  }
 
   def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
     controller.toleratingErrorCodes(errorCodes.toSet) {
@@ -155,4 +156,6 @@ object SchedulerTestUtils {
         case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error messages $errorCodes")
       }
     }
+
+  final case class ResultAndEvent[A](result: A, event: ErrorLogEvent)
 }

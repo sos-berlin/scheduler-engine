@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.jobmethods
 
-import com.sos.scheduler.engine.common.scalautil.ScalazStyle._
 import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.common.scalautil.ScalazStyle._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -163,10 +163,10 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentTest
         s"$monitorTestGroupName => ${expectedCalls mkString ", "}" - {
           for (language ← List("java", "javascript");
                agentMode ← List("", "agent")) {
-            val jobName = List(language, agentMode) ++ withMonitor.option("monitor") filter { _.nonEmpty } mkString("test-", "-", "")
+            val jobName = List(language, agentMode) ++ withMonitor.option("monitor") filter { _.nonEmpty } mkString ("test-", "-", "")
             jobName in {
               val taskResult = controller.toleratingErrorCodes(toleratedErrorCodes) {
-                runJobAndWaitForEnd(JobPath.makeAbsolute(jobName), variables = MethodDefaults.toMap ++ methodReturns)
+                runJobAndWaitForEnd(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ methodReturns)
               }
               assert(calls(taskResult.logString) == expectedCalls)
             }
@@ -174,6 +174,25 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentTest
         }
       }
     }
+
+  s"Shell job with monitor => $ExpectedShellMonitorCalls" - {
+    for (exitCode <- List(0, 1)) {
+      for (agentMode ← List("", "agent")) {
+        val jobName = List("test-shell", agentMode, "monitor") filter { _.nonEmpty } mkString "-"
+        s"$jobName exits with $exitCode" in {
+          def run() = runJobAndWaitForEnd(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ List("EXIT" → exitCode.toString))
+          val taskResult =
+            exitCode match {
+              case 1 ⇒ interceptErrorLogEvent(MessageCode("SCHEDULER-280")) { run() } .result
+              case 0 ⇒ run()
+            }
+          val c = calls(taskResult.logString)
+          if (agentMode.isEmpty) assert(c.toSet == ExpectedShellMonitorCalls.toSet) // C++ logs shell output after spooler_task_after
+          else assert(c == ExpectedShellMonitorCalls)
+        }
+      }
+    }
+  }
 
   /** Selects all lines matching `CalledPattern` and returns a list of the names. */
   private def calls(logString: String): List[String] = {
@@ -187,7 +206,9 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentTest
 object JobMethodsIT {
   private val False = false.toString
   private val CalledPattern = ">([a-z_]+)< CALLED".r
+  private val ShellCalled = "shell_script"
   private val Error = "ERROR"  // lets .toBoolean fail
   private val MethodDefaults: Map[String, String] = ((TestJob.AllMethodNames ++ TestMonitor.AllMethodNames) map { _ → true.toString }).toMap ++
       Set(SpoolerProcessAfterName → KeepResult)
+  private val ExpectedShellMonitorCalls = List(SpoolerTaskBeforeName, SpoolerProcessBeforeName, ShellCalled, SpoolerProcessAfterName, SpoolerTaskAfterName)
 }
