@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+     process_class="test"
+>
+    <script language="shell"><![CDATA[
+        echo SIMPLE-SHELL-STDOUT-1
+        echo SIMPLE-SHELL-STDERR-1 1>&2
+
+        :;if false; then :
+        goto WINDOWS
+        fi
+
+        sleep 20
+        echo SIMPLE-SHELL-STDOUT-2
+        echo SIMPLE-SHELL-STDERR-2 1>&2
+        exit
+
+        :WINDOWS
+        ping -n 21 127.0.0.1
+        echo SIMPLE-SHELL-STDOUT-2
+        echo SIMPLE-SHELL-STDERR-2 1>&2
+    ]]></script>
+</job>

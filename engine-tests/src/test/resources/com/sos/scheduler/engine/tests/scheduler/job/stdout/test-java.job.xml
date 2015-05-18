@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+     process_class="test"
+>
+    <script java_class="com.sos.scheduler.engine.tests.scheduler.job.stdout.TestJob"/>
+</job>
