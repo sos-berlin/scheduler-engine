@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.java
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.test.AgentTest._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -12,7 +13,9 @@ import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderStepEndedEvent
+import com.sos.scheduler.engine.data.order.SuccessOrderStateTransition
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
@@ -87,10 +90,6 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
     taskLog should include(s"process_class max_processes=$MaxProcesses")
   }
 
-  "Measure api call duration" in {
-    val taskLog = runJobAndWaitForEnd(MeasureTimeJobPath).logString
-    //TODO: check times
-  }
 
   "Run variables job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
@@ -153,11 +152,6 @@ object SchedulerAPIIT {
     def expectedString = s"$name=$value"
 
     def pair = name → value
-  }
-
-  //TODO: move this copied code to some global place
-  implicit class AgentJobPath(val s: JobPath){
-    def asAgent = JobPath(s.string.concat("-agent"))
   }
 
   private val VariablesJobElem =
