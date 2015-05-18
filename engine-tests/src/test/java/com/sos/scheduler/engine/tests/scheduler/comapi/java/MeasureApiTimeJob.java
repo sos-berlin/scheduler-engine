@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.tests.scheduler.comapi.java;
 
-import sos.spooler.Job_impl;
-
 import java.util.function.Consumer;
+import sos.spooler.Job_impl;
 
 /**
  * @author Andreas Liebert
  */
-public class MeasureApiTimeJob extends Job_impl {
+public final class MeasureApiTimeJob extends Job_impl {
     @Override
     public boolean spooler_process() throws Exception {
         DurationMeasurement infoDuration = measureTotal(20,
@@ -22,7 +21,7 @@ public class MeasureApiTimeJob extends Job_impl {
         return super.spooler_process();
     }
 
-    private DurationMeasurement measureTotal(int repeat, Consumer<String> consumer) {
+    private static DurationMeasurement measureTotal(int repeat, Consumer<String> consumer) {
         long duration = 0;
         for (int i = 0; i < repeat; i++) {
             duration += measureSingle(consumer);
@@ -38,21 +37,21 @@ public class MeasureApiTimeJob extends Job_impl {
     }
 
     private static class DurationMeasurement {
-        private long totalDuration;
-        private long averageDuration;
+        private final long totalDuration;
+        private final long averageDuration;
 
-        final static int nano2msDivisor = 1000000;
+        private static final int nano2msDivisor = 1000000;
 
-        public DurationMeasurement(long total, long average) {
+        private DurationMeasurement(long total, long average) {
             totalDuration = total;
             averageDuration = average;
         }
 
-        public final long totalAsMilliseconds() {
+        private long totalAsMilliseconds() {
             return totalDuration / nano2msDivisor;
         }
 
-        public final long averageAsMilliseconds() {
+        private long averageAsMilliseconds() {
             return averageDuration / nano2msDivisor;
         }
     }
