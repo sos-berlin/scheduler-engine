@@ -16,6 +16,7 @@ public final class LogJob extends Job_impl {
     public static final String SpoolerOpenMessage = LogTestPrefix + "spooler_open" + LogTestSuffix;
     public static final String SpoolerCloseMessage = LogTestPrefix + "spooler_close" + LogTestSuffix;
     public static final String SpoolerExitMessage = LogTestPrefix + "spooler_exit" + LogTestSuffix;
+    public static final String StdOutMessage = LogTestPrefix + "stdout" + LogTestSuffix;
 
     public static final Map<String,String> LogMessages = new HashMap<String,String>() {
         {
@@ -117,6 +118,6 @@ public final class LogJob extends Job_impl {
         spooler_log.set_mail_on_process(spooler_log.mail_on_process());
         spooler_log.set_mail_on_success(spooler_log.mail_on_success());
         spooler_log.set_mail_on_warning(spooler_log.mail_on_warning());
-        //TODO Fails: spooler_log.start_new_file();
+        System.out.println(StdOutMessage);
     }
 }

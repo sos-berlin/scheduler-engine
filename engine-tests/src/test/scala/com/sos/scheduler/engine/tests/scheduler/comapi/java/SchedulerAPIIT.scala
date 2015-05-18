@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.java
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.test.AgentTest._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -12,7 +13,9 @@ import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderStepEndedEvent
+import com.sos.scheduler.engine.data.order.SuccessOrderStateTransition
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
@@ -60,15 +63,20 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
     awaitResult(started, 10.seconds)
   }
 
-  "sos.spooler.Log methods" in {
-    val taskResult: TaskResult = runJobAndWaitForEnd(JobPath("/log"))
-    for (level <- LogJob.LogMessages.keySet()) {
-      taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
+  "sos.spooler.Log methods" - {
+    for ((name, jobPath) ← List("Without Agent" → LogJobPath, "With Agent" -> LogJobPath.asAgent)) {
+      name in {
+        val taskResult: TaskResult = runJobAndWaitForEnd(jobPath)
+        for (level <- LogJob.LogMessages.keySet()) {
+          taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
+        }
+        taskResult.logString should include(LogJob.SpoolerInitMessage)
+        taskResult.logString should include(LogJob.SpoolerExitMessage)
+        taskResult.logString should include(LogJob.SpoolerOpenMessage)
+        taskResult.logString should include(LogJob.SpoolerCloseMessage)
+        taskResult.logString should include(LogJob.StdOutMessage)
+      }
     }
-    taskResult.logString should include(LogJob.SpoolerInitMessage)
-    taskResult.logString should include(LogJob.SpoolerExitMessage)
-    taskResult.logString should include(LogJob.SpoolerOpenMessage)
-    taskResult.logString should include(LogJob.SpoolerCloseMessage)
   }
 
   "sos.spooler.Job methods" in {
@@ -81,6 +89,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
     taskLog should include(s"process_class remote_scheduler=$remoteSchedulerAddress")
     taskLog should include(s"process_class max_processes=$MaxProcesses")
   }
+
 
   "Run variables job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
@@ -119,9 +128,11 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
 }
 
 object SchedulerAPIIT {
+  private val LogJobPath = JobPath("/log")
   private val VariablesJobchainPath = JobChainPath("/variables")
   private val VariablesJobPath = JobPath("/variables")
   private val VariablesOrderKey = VariablesJobchainPath orderKey "1"
+  private val MeasureTimeJobPath = JobPath("/measure_time")
   val OrderVariable = Variable("orderparam", "ORDERVALUE")
   val OrderVariableSetInJob = Variable("orderparaminjob", "qwertzui")
   val OrderParamOverridesJobParam = Variable("ORDEROVERRIDESJOBPARAM", "ORDEROVERRIDESJOBVALUE")

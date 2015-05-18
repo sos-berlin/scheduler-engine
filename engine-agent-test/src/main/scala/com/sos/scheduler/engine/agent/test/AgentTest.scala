@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.agent.test.AgentTest._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import scala.concurrent.duration._
@@ -27,4 +28,8 @@ trait AgentTest extends HasCloser {
 
 object AgentTest {
   val AgentProcessClassPath = ProcessClassPath("/test-agent")
+
+  implicit class AgentJobPath(val s: JobPath) extends AnyVal {
+    def asAgent = JobPath(s.string.concat("-agent"))
+  }
 }
