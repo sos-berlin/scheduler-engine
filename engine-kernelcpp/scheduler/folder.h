@@ -744,9 +744,9 @@ struct file_based_subsystem : File_based_subsystem
         return active_file_based(Absolute_path(path));
     }
 
-    javaproxy::java::util::ArrayList java_file_baseds() 
+    ArrayListJ java_file_baseds() 
     {
-        javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(int_cast(_file_based_map.size()));
+        ArrayListJ result = ArrayListJ::new_instance(int_cast(_file_based_map.size()));
         Z_FOR_EACH (typename File_based_map, _file_based_map, it)
             if (FILE_BASED* file_based = it->second)
                 result.add(file_based->java_sister());

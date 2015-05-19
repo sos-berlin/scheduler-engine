@@ -62,6 +62,8 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::plugin::PluginSubsyste
 
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
+typedef ::javaproxy::java::util::ArrayList ArrayListJ;
+typedef ::javaproxy::java::util::List ListJ;
 typedef ::javaproxy::scala::util::Try TryJ;
 
 }} //namespaces

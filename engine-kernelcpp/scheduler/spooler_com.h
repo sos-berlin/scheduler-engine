@@ -166,7 +166,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     int64                       get_int64                   ( const string& name, int64 deflt ) const;
     bool                        get_bool                    ( const string& name, bool deflt ) const;
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
-    javaproxy::java::util::ArrayList java_names             () const; 
+    ArrayListJ java_names() const; 
     void                        merge                       ( const Ivariable_set* );
     ptr<Com_variable_set>       clone                       ();
     string                      to_environment_string       () const;

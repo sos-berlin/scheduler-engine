@@ -590,8 +590,8 @@ string Com_variable_set::get_string_by_name( const string& name, bool* name_foun
 
 //---------------------------------------------------------------------Com_variable_set::java_names
 
-javaproxy::java::util::ArrayList Com_variable_set::java_names() const {
-    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(int_cast(_map.size()));
+ArrayListJ Com_variable_set::java_names() const {
+    ArrayListJ result = ArrayListJ::new_instance(int_cast(_map.size()));
     Z_FOR_EACH_CONST(Map, _map, it)
         result.add(javaproxy::java::lang::String(it->second->_name));
     return result;

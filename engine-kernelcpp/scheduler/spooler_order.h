@@ -932,7 +932,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            node_from_state             ( const Order::State& ) const;
     job_chain::Node*            node_from_state_or_null     ( const Order::State& ) const;
     job_chain::Job_node*        node_from_job               ( Job* );
-    javaproxy::java::util::ArrayList java_nodes             ();
+    ArrayListJ java_nodes();
 
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );

@@ -1930,7 +1930,7 @@ vector<Order_queue_node*> Job_chain::skipped_order_queue_nodes(const Order::Stat
 }
 
 vector<Order::State> Job_chain::skipped_states(const Order::State& state) const {
-    javaproxy::java::util::ArrayList arrayList = _typed_java_sister.cppSkippedStates(state.as_string());
+    ArrayListJ arrayList = _typed_java_sister.cppSkippedStates(state.as_string());
     int n = arrayList.size();
     vector<Order::State> result;
     result.reserve(n);
@@ -2382,9 +2382,9 @@ Node* Job_chain::add_end_node( const Order::State& state )
 
 //----------------------------------------------------------------------------Job_chain::java_nodes
 
-javaproxy::java::util::ArrayList Job_chain::java_nodes() 
+ArrayListJ Job_chain::java_nodes() 
 {
-    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(int_cast(_node_list.size()));
+    ArrayListJ result = ArrayListJ::new_instance(int_cast(_node_list.size()));
     Z_FOR_EACH (Node_list, _node_list, it)
         result.add((*it)->java_sister());
     return result;
