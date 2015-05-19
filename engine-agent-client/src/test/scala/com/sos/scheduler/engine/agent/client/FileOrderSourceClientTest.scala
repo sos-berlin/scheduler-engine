@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.google.common.io.Files._
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.data.FileOrderSourceContent
+import com.sos.scheduler.engine.agent.data.{FileOrderSourceContent, RequestFileOrderSourceContent}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
@@ -48,7 +48,8 @@ final class FileOrderSourceClientTest extends FreeSpec with ScalaFutures {
       }
       autoClosing(Agent.forTest()) { agent ⇒
         whenReady(agent.start()) { _ ⇒
-          whenReady(client.readFiles(agentUri = agent.localUri, directory = dir.toString)) { o ⇒
+          val request = RequestFileOrderSourceContent(directory = dir.toString, regex = "", durationMillis = Long.MaxValue, knownFiles = Set())   // TODO regex und knownFiles
+          whenReady(client.readNewFiles(agentUri = agent.localUri, request)) { o ⇒
             assert(o == expectedResult)
           }
         }

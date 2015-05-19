@@ -14,6 +14,7 @@ namespace javaproxy { namespace com { namespace google { namespace inject { stru
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace async { struct CppCall; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
+namespace javaproxy { namespace java { namespace util { struct List; }}}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace client { namespace agent { 
@@ -51,8 +52,8 @@ struct CppFileOrderSourceClient : ::zschimmer::javabridge::proxy_jobject< CppFil
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::client::agent::CppFileOrderSourceClient apply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::google::inject::Injector >& p2);
-    void readFiles(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
+    static ::javaproxy::com::sos::scheduler::engine::client::agent::CppFileOrderSourceClient apply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, jlong p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::google::inject::Injector >& p4);
+    void readFiles(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::util::List >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p1) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

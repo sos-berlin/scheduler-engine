@@ -78,7 +78,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );
     void on_directory_read();
-    void repeat();
+    void repeat_after_delay();
     void                        close_notification      ();
     void                        read_directory          ( bool was_notified, const string& cause );
     void start_read_new_files_from_agent();
@@ -284,7 +284,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
     _alert_when_directory_missing = element.bool_getAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
     if (_remote_scheduler != "") {
-        _fileOrderSourceClientJ = CppFileOrderSourceClientJ::apply(_remote_scheduler, (string)_path, _spooler->injectorJ());
+        _fileOrderSourceClientJ = CppFileOrderSourceClientJ::apply(_remote_scheduler, (string)_path, _regex_string, _repeat.millis(), _spooler->injectorJ());
     }
 }
 
@@ -538,10 +538,19 @@ void Directory_file_order_source::withdraw_order_request()
 void Directory_file_order_source::start_read_new_files_from_agent() {
     if (_in_directory_read_result_call) {
         Z_LOG2("scheduler", Z_FUNCTION << " Still waiting for agent's response\n");
-        repeat();
+        repeat_after_delay();
     } else {
-        // Auftragskennungen in ArrayList übergeben, an Webservice, mitsamt Regex, der antwortet mit der einen nächsten neuen Datei.
-        _fileOrderSourceClientJ.readFiles(_directory_read_result_call->java_sister());
+        ListJ knownFiles;
+        if (_job_chain->is_distributed()) {
+            String_set known_orders;
+            read_known_orders(&known_orders);
+            knownFiles = ArrayListJ::new_instance(known_orders.size());
+            Z_FOR_EACH_CONST(String_set, known_orders, i) knownFiles.add((StringJ)*i);
+        } else {
+            knownFiles = ArrayListJ::new_instance(_job_chain->_order_map.size());
+            Z_FOR_EACH_CONST(Job_chain::Order_map, _job_chain->_order_map, i) knownFiles.add((StringJ)i->first);
+        }
+        _fileOrderSourceClientJ.readFiles(knownFiles, _directory_read_result_call->java_sister());
     }
 }
 
@@ -552,7 +561,7 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
     clear_new_files();
     _new_files_time  = Time::now();
     try {
-        javaproxy::java::util::List javaList = (javaproxy::java::util::List)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
+        ListJ javaList = (ListJ)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
         int n = javaList.size();
         _new_files.reserve(n);
         for (int i = 0; i < n; i++) {
@@ -563,22 +572,13 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
             _new_files_count++;
         }
         on_directory_read();
+        _directory_error = NULL;
     } catch (exception& x) {
+        _directory_error = x;
         log()->error(x.what());
     }
-    repeat();
+    repeat_after_delay();
 }
-
-
-//void Directory_file_order_source::handle_blacklist() {
-//    // In Scala?
-//    if (blacklist.non_empty()) {
-//        _agentJ.send(blacklisted files);
-//    oncall:
-//        Zu jeder gelöschten Datei den Auftrag aus der schwarzen Liste nehmen.
-//        send erneuern;
-//    }
-//}
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
@@ -764,6 +764,10 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
         }
 
         _new_files_index++;
+    }
+
+    if (!_remote_scheduler.empty()) {
+        _expecting_request_order = true;
     }
 
     return result;
@@ -1011,14 +1015,13 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
                     flags & cont_next_gmtime_reached? "Wartezeit abgelaufen"   // Das Flag ist doch immer gesetzt, oder?
                                                     : Z_FUNCTION;
 
-    _notification_event.reset();
-
     if (_remote_scheduler != "") {
         start_read_new_files_from_agent();
     } else {
+        _notification_event.reset();
         read_directory( was_notified, cause );
         on_directory_read();
-        repeat();
+        repeat_after_delay();
     }
 
     return true;
@@ -1029,11 +1032,11 @@ void Directory_file_order_source::on_directory_read() {
     if (has_new_file()) {
         _job_chain->tip_for_new_order(_next_state);
     }
-    repeat();
+    repeat_after_delay();
 }
 
 
-void Directory_file_order_source::repeat() {
+void Directory_file_order_source::repeat_after_delay() {
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
                                                  : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen

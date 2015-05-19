@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.data.FileOrderSourceContent
+import com.sos.scheduler.engine.agent.data.{FileOrderSourceContent, RequestFileOrderSourceContent}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -21,8 +21,6 @@ final class FileOrderSourceClient @Inject private(implicit actorSystem: ActorSys
   private implicit val timeout = 60.seconds
   private val readFilesPipeline = sendReceive ~> decode(Deflate) ~> decode(Gzip) ~> unmarshal[FileOrderSourceContent]
 
-  def readFiles(agentUri: String, directory: String): Future[FileOrderSourceContent] =
-    readFilesPipeline(Get(Uri(s"$agentUri/jobscheduler/agent/fileOrderSource/files").withQuery(
-      "directory" → directory,
-      "order" → "latest-access-first")))
+  def readNewFiles(agentUri: String, request: RequestFileOrderSourceContent): Future[FileOrderSourceContent] =
+    readFilesPipeline(Post(Uri(s"$agentUri/jobscheduler/agent/fileOrderSource/newFiles"), request))
 }
