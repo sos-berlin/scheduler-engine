@@ -37,12 +37,3 @@ final class FileWatcherTest extends FreeSpec with HasCloser {
     fileWatcher.nextChanges().toSet shouldEqual Set(FileRemoved(b), FileAdded(c), FileAdded(d))
   }
 }
-
-/*
-  XML-Kommando, das COM-Server mit neuer COM-Klasse AgentFileOrderSource einrichtet.
-  XML-Kommando, das COM-Server schließt. Dabei wird laufender Aufruf awaitDirectoryChange() beendet.
-  COM-Klasse AgentFileOrderSource(dir, regex, timeout)
-  mit Method awaitDirectoryChange,  ** Wie gleichen wir mit den Aufträgen ab?
-  wartet Änderung ab,
-  liefert die neuen und gelöschten Dateinamen.
-*/
