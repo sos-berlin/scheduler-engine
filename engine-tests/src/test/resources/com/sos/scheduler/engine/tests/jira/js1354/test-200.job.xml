@@ -5,10 +5,14 @@
         goto WINDOWS
         fi
 
+        set -e
         sleep 5
+        rm -v "$SCHEDULER_PARAM_SCHEDULER_FILE_PATH"
         exit
 
         :WINDOWS
+        del "%SCHEDULER_PARAM_SCHEDULER_FILE_PATH%"
         ping -n 6 127.0.0.1
+        exit
     </script>
 </job>

@@ -29,27 +29,34 @@ final class JS1354IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val fileOrderDir = testEnvironment.newFileOrderSourceDirectory()
   private implicit lazy val entityManagerFactory: EntityManagerFactory = instance[EntityManagerFactory]
 
-  "Database variable for next task ID is not incremented while JobScheduler idles" in {
-    val preId = nextTaskId
-
+  "Database variable for next task ID is not incremented while JobScheduler waits for a file order" in {
     testEnvironment.fileFromPath(TestJobChainPath).xml =
       <job_chain>
         <file_order_source directory={fileOrderDir.getPath} repeat="1"/>
         <job_chain_node state="100" job="/test-100"/>
         <job_chain_node state="200" job="/test-200"/>
-        <file_order_sink state="SINK" remove="yes"/>
-        <job_chain_node.end state="END"/>
       </job_chain>
     instance[FolderSubsystem].updateFolders()
+    runFile("TESTFILE-1")
+  }
 
-    val file = fileOrderDir / "TESTFILE"
+  "Second file" in {
+    runFile("TESTFILE-2")
+  }
+
+  "Third file" in {
+    runFile("TESTFILE-3")
+  }
+
+  private def runFile(name: String): Unit = {
+    val preId = nextTaskId
+    val file = fileOrderDir / name
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestJobChainPath orderKey file.getPath) {
       touch(file)
     }
-
     val postId = nextTaskId
     assert(postId == TaskId(preId.value + JobChainTaskCount))
-    sleep(3.s)
+    sleep(1.s)
     assert(nextTaskId == postId)
   }
 
@@ -58,5 +65,5 @@ final class JS1354IT extends FreeSpec with ScalaSchedulerTest {
 
 private object JS1354IT {
   private val TestJobChainPath = JobChainPath("/test")
-  private val JobChainTaskCount = 3   // Job chain contains three jobs (nodes 100, 200 and SINK), for each a task is being started
+  private val JobChainTaskCount = 2   // Job chain contains two jobs, for each a task will be started
 }

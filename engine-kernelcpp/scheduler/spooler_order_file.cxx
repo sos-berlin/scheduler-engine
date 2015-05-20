@@ -489,14 +489,14 @@ void Directory_file_order_source::activate()
 
 bool Directory_file_order_source::request_order( const string& cause )
 {
+    Z_LOG2("scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n");
     if (has_new_file()) 
         return true;
     else {
         if( _expecting_request_order 
          || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
         {
-            Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n" );
-
+            Z_LOG2("scheduler.file_order", Z_FUNCTION << " async_wake()\n");
             async_wake();   // Veranlasst Aufruf von async_continue_()
 
             _expecting_request_order = false;
@@ -971,13 +971,17 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
 bool Directory_file_order_source::has_new_file() {
     // read_known_orders, also Lesen der Datenbank, ist nicht aktiv, weil request_order und dmait has_new_file sehr oft aufgerufen wird. Jedenfalls mit dem alten (<2013) Mikroscheduling
-    // Bei verteilter Jobkette wir das Problem JS-1354 (hochzählen der nächsten Task-ID in der Datenbank) weiterhin bestehen.
+    // Bei verteilter Jobkette wird das Problem JS-1354 (hochzählen der nächsten Task-ID in der Datenbank) weiterhin bestehen.
     //String_set known_orders;
     //bool known_orders_has_been_read = false;
     for (int i = _new_files_index; i < _new_files.size(); i++) {
         if (file::File_info* f = _new_files[i]) {
             File_path path = f->path();
-            if (path.exists() && !_job_chain->order_id_space_contains_order_id(path)) {
+            if (!path.exists()) {
+                _new_files[i] = NULL;  // Clean up the entry for the by now deleted file
+                while( _new_files_index < _new_files.size()  &&  _new_files[ _new_files_index ] == NULL )  _new_files_index++;
+            } else 
+            if(!_job_chain->order_id_space_contains_order_id(path)) {
                 //if (!_job_chain->is_distributed()) {
                     return true;
                 //} else {
