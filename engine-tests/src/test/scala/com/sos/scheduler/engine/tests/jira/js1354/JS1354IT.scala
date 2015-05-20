@@ -19,7 +19,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 /**
- * JS-1354 Avoid unneccessary creation of new ids for table scheduler_history.
+ * JS-1354, JS-1390 Avoid unneccessary creation of new ids for table scheduler_history.
  *
  * @author Joacim Zschimmer
  */
