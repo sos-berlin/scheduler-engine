@@ -954,7 +954,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     read_directory( was_notified, cause );
 
-    if (has_new_file()) {
+    if (_job_chain->untouched_is_allowed() && has_new_file()) {
         _job_chain->tip_for_new_order(_next_state);
     }
 
