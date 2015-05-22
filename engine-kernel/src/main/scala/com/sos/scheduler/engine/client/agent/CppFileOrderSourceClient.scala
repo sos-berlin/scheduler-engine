@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.sos.scheduler.engine.agent.client.FileOrderSourceClient
-import com.sos.scheduler.engine.agent.data.RequestFileOrderSourceContent
+import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.client.agent.CppFileOrderSourceClient._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Logger

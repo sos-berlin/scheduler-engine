@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.agent
 
-import com.sos.scheduler.engine.data.agent.AgentProcessId
+import com.sos.scheduler.engine.agent.data.AgentProcessId
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

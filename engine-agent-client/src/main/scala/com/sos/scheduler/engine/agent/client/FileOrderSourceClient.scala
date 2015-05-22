@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.data.{FileOrderSourceContent, RequestFileOrderSourceContent}
+import com.sos.scheduler.engine.agent.data.commands.{FileOrderSourceContent, RequestFileOrderSourceContent}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.concurrent.duration._

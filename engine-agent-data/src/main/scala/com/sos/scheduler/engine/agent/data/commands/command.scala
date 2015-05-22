@@ -1,6 +1,8 @@
-package com.sos.scheduler.engine.agent.commands
+package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.data.agent.AgentProcessId
+import com.sos.scheduler.engine.agent.data.AgentProcessId
+import scala.collection.immutable
+import spray.json.DefaultJsonProtocol._
 
 /**
  * @author Joacim Zschimmer
@@ -48,3 +50,27 @@ extends ProcessCommand
  * @author Joacim Zschimmer
  */
 object CloseProcessResponse extends Response
+
+
+final case class RequestFileOrderSourceContent(
+  directory: String,
+  regex: String,
+  durationMillis: Long,
+  knownFiles: immutable.Set[String])
+  extends Command
+
+object RequestFileOrderSourceContent {
+  implicit val MyJsonFormat = jsonFormat4(apply)
+}
+
+final case class FileOrderSourceContent(files: immutable.Seq[FileOrderSourceContent.Entry])
+
+object FileOrderSourceContent {
+  final case class Entry(path: String, lastModifiedTime: Long)
+
+  object Entry {
+    implicit val MyJsonFormat = jsonFormat2(apply)
+  }
+
+  implicit val MyJsonFormat = jsonFormat1(apply)
+}

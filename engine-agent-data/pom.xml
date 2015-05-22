@@ -34,6 +34,11 @@
     <dependencies>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
+            <artifactId>engine-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-common</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -49,6 +54,11 @@
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.binaryVersion}</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

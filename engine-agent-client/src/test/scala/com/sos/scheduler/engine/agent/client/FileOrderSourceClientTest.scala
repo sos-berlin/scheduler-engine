@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.google.common.io.Files._
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.data.{FileOrderSourceContent, RequestFileOrderSourceContent}
+import com.sos.scheduler.engine.agent.data.commands.{FileOrderSourceContent, RequestFileOrderSourceContent}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
