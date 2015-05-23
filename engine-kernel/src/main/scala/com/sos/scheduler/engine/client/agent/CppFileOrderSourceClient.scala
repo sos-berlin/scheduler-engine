@@ -24,8 +24,8 @@ final class CppFileOrderSourceClient private(client: FileOrderSourceClient, agen
 
   @ForCpp
   def readFiles(knownFiles: java.util.List[String], resultCppCall: CppCall): Unit = {
-    val request = RequestFileOrderSourceContent(directory = directory, regex = regex, durationMillis = durationMillis, knownFiles.toSet)
-    client.readNewFiles(agentUri = agentUri, request) onComplete { completion ⇒
+    val command = RequestFileOrderSourceContent(directory = directory, regex = regex, durationMillis = durationMillis, knownFiles.toSet)
+    client.execute(agentUri = agentUri, command) onComplete { completion ⇒
       try completion match {
         case Success(result) ⇒ resultCppCall.call(Success(result.files map {_.path }: java.util.List[String]))
         case Failure(t) ⇒ resultCppCall.call(Failure(t))

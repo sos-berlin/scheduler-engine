@@ -14,13 +14,16 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
 import java.nio.file.{Files, Paths}
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.junit.JUnitRunner
 import scala.concurrent.duration._
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class FileOrderSourceClientTest extends FreeSpec with ScalaFutures {
 
   override implicit val patienceConfig = PatienceConfig(timeout = 10.seconds)
@@ -48,8 +51,8 @@ final class FileOrderSourceClientTest extends FreeSpec with ScalaFutures {
       }
       autoClosing(Agent.forTest()) { agent ⇒
         whenReady(agent.start()) { _ ⇒
-          val request = RequestFileOrderSourceContent(directory = dir.toString, regex = "", durationMillis = Long.MaxValue, knownFiles = Set())   // TODO regex und knownFiles
-          whenReady(client.readNewFiles(agentUri = agent.localUri, request)) { o ⇒
+          val command = RequestFileOrderSourceContent(directory = dir.toString, regex = "", durationMillis = Long.MaxValue, knownFiles = Set())   // TODO regex und knownFiles
+          whenReady(client.execute(agentUri = agent.localUri, command)) { o ⇒
             assert(o == expectedResult)
           }
         }
