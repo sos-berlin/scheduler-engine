@@ -13,7 +13,6 @@ final case class CloseProcess(processId: AgentProcessId, kill: Boolean)
   type Response = CloseProcessResponse.type
 }
 
-/**
- * @author Joacim Zschimmer
- */
-object CloseProcessResponse extends Response
+object CloseProcess {
+  val XmlElementName = "remote_scheduler.remote_task.close"
+}

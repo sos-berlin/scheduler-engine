@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.FileOrderSourceClient._
+import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.commands._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
@@ -15,14 +15,14 @@ import spray.httpx.encoding.{Deflate, Gzip}
  * @author Joacim Zschimmer
  */
 @Singleton
-final class FileOrderSourceClient @Inject private(implicit actorSystem: ActorSystem) {
+final class AgentClient @Inject private(implicit actorSystem: ActorSystem) {
 
   import actorSystem.dispatcher
 
   private val pipelineTrunk = sendReceive ~> decode(Deflate) ~> decode(Gzip)
   private val requestFileOrderSourceContentPipeline = pipelineTrunk ~> unmarshal[FileOrderSourceContent]
 
-  def execute(agentUri: String, command: Command): Future[command.Response] = {
+  def executeCommand(agentUri: String, command: Command): Future[command.Response] = {
     val response = command match {
       case cmd: RequestFileOrderSourceContent ⇒ exec(agentUri, cmd)
     }
@@ -35,6 +35,6 @@ final class FileOrderSourceClient @Inject private(implicit actorSystem: ActorSys
   }
 }
 
-object FileOrderSourceClient {
+object AgentClient {
   private val CommandPath = Path("/jobscheduler/agent/command")
 }

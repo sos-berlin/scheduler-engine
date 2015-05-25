@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.sos.scheduler.engine.agent.client.FileOrderSourceClient
+import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.client.agent.CppFileOrderSourceClient._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
  * @author Joacim Zschimmer
  */
 @ForCpp
-final class CppFileOrderSourceClient private(client: FileOrderSourceClient, agentUri: String, directory: String, regex: String, durationMillis: Long)
+final class CppFileOrderSourceClient private(agent: AgentClient, agentUri: String, directory: String, regex: String, durationMillis: Long)
   (implicit actorSystem: ActorSystem) {
 
   import actorSystem.dispatcher
@@ -25,7 +25,7 @@ final class CppFileOrderSourceClient private(client: FileOrderSourceClient, agen
   @ForCpp
   def readFiles(knownFiles: java.util.List[String], resultCppCall: CppCall): Unit = {
     val command = RequestFileOrderSourceContent(directory = directory, regex = regex, durationMillis = durationMillis, knownFiles.toSet)
-    client.execute(agentUri = agentUri, command) onComplete { completion ⇒
+    agent.executeCommand(agentUri = agentUri, command) onComplete { completion ⇒
       try completion match {
         case Success(result) ⇒ resultCppCall.call(Success(result.files map {_.path }: java.util.List[String]))
         case Failure(t) ⇒ resultCppCall.call(Failure(t))
@@ -41,7 +41,7 @@ object CppFileOrderSourceClient {
   @ForCpp
   def apply(agentUri: String, directory: String, regex: String, durationMillis: Long)(injector: Injector) =
     new CppFileOrderSourceClient(
-      injector.instance[FileOrderSourceClient],
+      injector.instance[AgentClient],
       agentUri = agentUri,
       directory = directory,
       regex = regex,
