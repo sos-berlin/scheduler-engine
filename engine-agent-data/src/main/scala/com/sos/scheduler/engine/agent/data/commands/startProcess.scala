@@ -3,9 +3,13 @@ package com.sos.scheduler.engine.agent.data.commands
 /**
  * @author Joacim Zschimmer
  */
-trait StartProcess extends ProcessCommand {
+sealed trait StartProcess extends ProcessCommand {
   type Response = StartProcessResponse
   val controllerAddress: String
+}
+
+object StartProcess {
+  val XmlElementName = "remote_scheduler.start_remote_task"
 }
 
 final case class StartThread(controllerAddress: String)
