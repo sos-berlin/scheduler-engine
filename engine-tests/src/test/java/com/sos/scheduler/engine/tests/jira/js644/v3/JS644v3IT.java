@@ -26,7 +26,7 @@ public final class JS644v3IT extends SchedulerTest {
     private static final JobChainPath lowerCaseJobChainPath = new JobChainPath("/lowerCase");
     private static final JobChainPath upperCaseJobChainPath = new JobChainPath("/upperCase");
     private static final JobPath jobPath = new JobPath("/a");
-    private static final Duration orderTimeout = Duration.standardSeconds(10);
+    private static final Duration orderTimeout = Duration.standardSeconds(20);
 
     private final Gate<Boolean> lowerCaseGate = new Gate<Boolean>(lowerCaseJobChainPath.toString());
     private final Gate<Boolean> upperCaseGate = new Gate<Boolean>(upperCaseJobChainPath.toString());
