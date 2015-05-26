@@ -2781,9 +2781,8 @@ void Order::handle_end_state()
         {
             if( _job_chain )
             {
-                if( is_file_order()  &&  file_path().file_exists() )
-                {
-                    _log->error( message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
+                if (is_agent_file_order() || file_path().file_exists()) {
+                    _log->log(is_agent_file_order()? log_debug : log_error, message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
                     set_on_blacklist();
                 }
                 

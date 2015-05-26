@@ -391,7 +391,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-978", "Job is stopping because of <job stop_on_error=\"yes\">. Task error was: $1" },
     { "SCHEDULER-979", "Removing file $1" },
     { "SCHEDULER-980", "Moving file $1 to $2" },
-    { "SCHEDULER-981", "File on blacklist has been removed" },
+    { "SCHEDULER-981", "File has been removed" },
     { "SCHEDULER-982", "File has been removed, so the file order is being removed too" },
     { "SCHEDULER-983", "New file, $2: Added $1" },
     { "SCHEDULER-984", "Recovered from previous error in directory $1" },

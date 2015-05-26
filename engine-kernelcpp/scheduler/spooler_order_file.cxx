@@ -87,6 +87,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Duration                    delay_after_error       ();
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
+    void get_blacklisted_files(hash_set<string>* result);
     bool has_new_file();
 
     Fill_zero                  _zero_;
@@ -121,7 +122,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Bad_map                    _bad_map;
 
     bool                       _are_blacklisted_orders_cleaned_up;
-    CppFileOrderSourceClientJ     _fileOrderSourceClientJ;
+    CppFileOrderSourceClientJ _fileOrderSourceClientJ;
     ptr<Directory_read_result_call> const _directory_read_result_call;
     bool _in_directory_read_result_call;
 };
@@ -539,17 +540,19 @@ void Directory_file_order_source::start_read_new_files_from_agent() {
         Z_LOG2("scheduler", Z_FUNCTION << " Still waiting for agent's response\n");
         repeat_after_delay();
     } else {
-        ListJ knownFiles;
+        String_set known_files;
         if (_job_chain->is_distributed()) {
-            String_set known_orders;
-            read_known_orders(&known_orders);
-            knownFiles = ArrayListJ::new_instance(known_orders.size());
-            Z_FOR_EACH_CONST(String_set, known_orders, i) knownFiles.add((StringJ)*i);
+            read_known_orders(&known_files);
         } else {
-            knownFiles = ArrayListJ::new_instance(_job_chain->_order_map.size());
-            Z_FOR_EACH_CONST(Job_chain::Order_map, _job_chain->_order_map, i) knownFiles.add((StringJ)i->first);
+            Z_FOR_EACH_CONST(Job_chain::Order_map, _job_chain->_order_map, i) known_files.insert(i->first);
         }
-        _fileOrderSourceClientJ.readFiles(knownFiles, _directory_read_result_call->java_sister());
+        String_set blacklisted_files;
+        get_blacklisted_files(&blacklisted_files);
+        Z_FOR_EACH_CONST(String_set, blacklisted_files, i) known_files.erase(*i);
+        ListJ list;
+        list = ArrayListJ::new_instance(known_files.size());
+        Z_FOR_EACH_CONST(String_set, known_files, i) list.add((StringJ)*i);
+        _fileOrderSourceClientJ.readFiles(list, _directory_read_result_call->java_sister());
     }
 }
 
@@ -570,6 +573,7 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
             _new_files.push_back(file_info);
             _new_files_count++;
         }
+        clean_up_blacklisted_files();
         on_directory_read();
         _directory_error = NULL;
     } catch (exception& x) {
@@ -913,6 +917,15 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
     }
 
     return result;
+}
+
+
+void Directory_file_order_source::get_blacklisted_files(hash_set<string>* result) {
+    try
+    {
+        *result = _job_chain->db_get_blacklisted_order_id_set( _path, _regex );
+    }
+    catch( exception& x )  { _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", db_get_blacklisted_order_id_set()\n" ); }
 }
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail
