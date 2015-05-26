@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.sos.scheduler.engine.agent.client.AgentClient
+import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.client.agent.CppFileOrderSourceClient._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
@@ -19,7 +19,7 @@ import scala.util.Try
  */
 @ForCpp
 final class CppFileOrderSourceClient private(
-  agent: AgentClient,
+  agentClientFactory: AgentClientFactory,
   agentUri: String,
   directory: String,
   regex: String,
@@ -29,10 +29,12 @@ final class CppFileOrderSourceClient private(
 
   import schedulerThreadCallQueue.implicits.executionContext
 
+  private val agent = agentClientFactory.apply(agentUri = agentUri)
+
   @ForCpp
   def readFiles(knownFiles: java.util.List[String], resultCppCall: CppCall): Unit = {
     val command = RequestFileOrderSourceContent(directory = directory, regex = regex, durationMillis = durationMillis, knownFiles.toSet)
-    agent.executeCommand(agentUri = agentUri, command) onComplete { completion ⇒
+    agent.executeCommand(command) onComplete { completion ⇒
       val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
       try resultCppCall.call(forCpp.withThisStackTrace)
       catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t") } // Okay if C++ object (Directory_file_order_source) has been closed
@@ -46,7 +48,7 @@ object CppFileOrderSourceClient {
   @ForCpp
   def apply(agentUri: String, directory: String, regex: String, durationMillis: Long)(injector: Injector) =
     new CppFileOrderSourceClient(
-      injector.instance[AgentClient],
+      injector.instance[AgentClientFactory],
       agentUri = agentUri,
       directory = directory,
       regex = regex,

@@ -24,7 +24,7 @@ import scala.concurrent.duration._
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class AgentClientTest extends FreeSpec with ScalaFutures {
+final class AgentClientFactoryTest extends FreeSpec with ScalaFutures {
 
   override implicit val patienceConfig = PatienceConfig(timeout = 10.seconds)
 
@@ -33,7 +33,6 @@ final class AgentClientTest extends FreeSpec with ScalaFutures {
       val injector = Guice.createInjector(new ScalaAbstractModule {
         def configure() = bindInstance[ActorSystem] { ActorSystem() }
       })
-      val client = injector.instance[AgentClient]
       val dir = createTempDirectory("agent-")
       val aTime = 1000L * 1000 * 1000 * 1000
       val xTime = aTime + 2000
@@ -52,7 +51,8 @@ final class AgentClientTest extends FreeSpec with ScalaFutures {
       autoClosing(Agent.forTest()) { agent ⇒
         whenReady(agent.start()) { _ ⇒
           val command = RequestFileOrderSourceContent(directory = dir.toString, regex = "", durationMillis = Long.MaxValue, knownFiles = Set())   // TODO regex und knownFiles
-          whenReady(client.executeCommand(agentUri = agent.localUri, command)) { o ⇒
+          val client = injector.instance[AgentClientFactory].apply(agentUri = agent.localUri)
+          whenReady(client.executeCommand(command)) { o ⇒
             assert(o == expectedResult)
           }
         }
