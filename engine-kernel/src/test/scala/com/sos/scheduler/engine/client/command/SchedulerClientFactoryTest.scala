@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Guice}
-import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClientTest._
+import com.sos.scheduler.engine.client.command.SchedulerClientFactoryTest._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
@@ -23,7 +23,7 @@ import scala.util.Failure
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterAll {
+final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
 
   private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val injector = Guice.createInjector(new AbstractModule {
@@ -33,8 +33,9 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
     }
   })
   private lazy val server = injector.instance[TestCommandExecutorHttpServer.Factory].apply(httpPort, executeCommand)
-  private lazy val client = injector.instance[HttpSchedulerCommandClient]
+  private lazy val clientFactory = injector.instance[SchedulerClientFactory]
   private lazy val uri = s"http://$HttpInterface:$httpPort/"
+  private lazy val client = clientFactory.apply(uri)
 
   override def beforeAll(): Unit = {
     val future = server.start()
@@ -46,11 +47,11 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
   }
 
   "execute" in {
-    expectError(client.execute(uri, TestCommandElem))
+    expectError(client.execute(TestCommandElem))
   }
 
   "executeXml" in {
-    expectError(client.executeXml(uri, TestCommandElem.toBytes(schedulerEncoding)))
+    expectError(client.executeXml(TestCommandElem.toBytes(schedulerEncoding)))
   }
 
   private def expectError[A](future: Future[A]): Unit =
@@ -59,17 +60,17 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
     }
 
   "uncheckedExecute" in {
-    val startFuture = client.uncheckedExecute(uri, TestCommandElem)
+    val startFuture = client.uncheckedExecute(TestCommandElem)
     awaitResult(startFuture, Duration.Inf) shouldEqual TestResponseString
   }
 
   "uncheckedExecuteXml" in {
-    val startFuture = client.uncheckedExecuteXml(uri, TestCommandElem.toBytes(schedulerEncoding))
+    val startFuture = client.uncheckedExecuteXml(TestCommandElem.toBytes(schedulerEncoding))
     awaitResult(startFuture, Duration.Inf) shouldEqual TestResponseString
   }
 
   "Server error" in {
-    val startFuture = client.uncheckedExecute(uri, <INVALID/>)
+    val startFuture = client.uncheckedExecute(<INVALID/>)
     Await.ready(startFuture, TestTimeout).value.get match {
       case Failure(t) ⇒ // Okay
       case o ⇒ fail(o.toString)
@@ -78,7 +79,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
 
   "Client error" in {
     val errorPort = findRandomFreeTcpPort()
-    val startFuture = client.uncheckedExecute(s"http://$HttpInterface:$errorPort/", <INVALID/>)
+    val startFuture = clientFactory.apply(s"http://$HttpInterface:$errorPort/").uncheckedExecute(<INVALID/>)
     Await.ready(startFuture, TestTimeout).value.get match {
       case Failure(t) ⇒ // Okay
       case o ⇒ fail(o.toString)
@@ -86,7 +87,7 @@ final class HttpSchedulerCommandClientTest extends FreeSpec with BeforeAndAfterA
   }
 }
 
-private object HttpSchedulerCommandClientTest {
+private object SchedulerClientFactoryTest {
   private val AkkaConfig = ConfigFactory.parseString("spray.can.host-connector.max-retries = 0")
   private val HttpInterface = "127.0.0.1"
   private val TestCommandElem = <COMMAND/>

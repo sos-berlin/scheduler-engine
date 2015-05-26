@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.google.common.base.MoreObjects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
-import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
+import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
@@ -159,7 +159,7 @@ with HasCloser {
   }
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
-    val future = injector.instance[HttpSchedulerCommandClient].uncheckedExecute(uri, SafeXML.load(new ByteArrayInputStream(bytes)))
+    val future = injector.instance[SchedulerClientFactory].apply(uri).uncheckedExecute(SafeXML.load(new ByteArrayInputStream(bytes)))
     val response: String = awaitResult(future, Duration.Inf)
     System.out.println(response)
   }

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
+import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
@@ -18,7 +18,7 @@ final class ClusterScheduler(
   databaseConfiguration: H2DatabaseServer.Configuration,
   tcpPort: Int,
   httpPort: Int,
-  commandClient: HttpSchedulerCommandClient)
+  schedulerClientFactory: SchedulerClientFactory)
 extends AutoCloseable {
 
   private val extraScheduler = {
@@ -52,14 +52,14 @@ extends AutoCloseable {
   def close(): Unit = extraScheduler.close()
 
   def postCommand(xmlCommand: XmlCommand): Future[String] =
-    commandClient.execute(extraScheduler.uri, xmlCommand.xmlElem)
+    schedulerClientFactory.apply(extraScheduler.uri).execute(xmlCommand.xmlElem)
 
   def uri = extraScheduler.uri
 }
 
 private object ClusterScheduler {
   @Singleton
-  final class Factory @Inject private(commandClient: HttpSchedulerCommandClient) {
+  final class Factory @Inject private(commandClient: SchedulerClientFactory) {
     def apply(
       testEnvironment: TestEnvironment,
       controller: TestSchedulerController,

@@ -17,16 +17,15 @@ import scala.util.Try
 final class CppHttpSchedulerCommandClient @Inject private(
   callQueue: SchedulerThreadCallQueue,
   actorSystem: ActorSystem,
-  commandClient: HttpSchedulerCommandClient)
+  schedulerClientFactory: SchedulerClientFactory)
   (implicit executionContext: ExecutionContext) {
 
   @ForCpp
-  def postXml(uri: String, xmlBytes: Array[Byte], resultCall: CppCall): Unit = {
-    commandClient.uncheckedExecuteXml(uri, xmlBytes).onComplete { o: Try[String] ⇒
+  def postXml(uri: String, xmlBytes: Array[Byte], resultCall: CppCall): Unit =
+    schedulerClientFactory.apply(uri).uncheckedExecuteXml(xmlBytes).onComplete { o: Try[String] ⇒
       val documentTry = o map loadXml
       callQueue {
         resultCall.call(documentTry: Try[Document])
       }
     }
-  }
 }

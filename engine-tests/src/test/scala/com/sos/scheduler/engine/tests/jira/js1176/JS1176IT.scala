@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1176
 
-import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
+import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
@@ -35,7 +35,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
     def tcpPort = databaseTcpPort
   }
   private lazy val databaseServer = new H2DatabaseServer(databaseConfiguration)
-  private lazy val commandClient = instance[HttpSchedulerCommandClient]
+  private lazy val schedulerClientFactory = instance[SchedulerClientFactory]
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-tcp-port=$httpPort"),
     database = Some(databaseConfiguration))
@@ -72,7 +72,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def checkFolders(): Future[String] = commandClient.execute(s"http://127.0.0.1:$httpPort", <check_folders/>)
+  private def checkFolders(): Future[String] = schedulerClientFactory.apply(s"http://127.0.0.1:$httpPort").execute(<check_folders/>)
 }
 
 private object JS1176IT {
