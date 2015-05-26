@@ -121,7 +121,6 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     typedef stdext::hash_map< string, ptr<Bad_entry> >  Bad_map;
     Bad_map                    _bad_map;
 
-    bool                       _are_blacklisted_orders_cleaned_up;
     CppFileOrderSourceClientJ _fileOrderSourceClientJ;
     ptr<Directory_read_result_call> const _directory_read_result_call;
     bool _in_directory_read_result_call;
@@ -806,8 +805,6 @@ void Directory_file_order_source::clear_new_files()
     _new_files.reserve( 1000 );
     _new_files_index = 0;
     _new_files_count = 0;
-
-    _are_blacklisted_orders_cleaned_up = false;
 }
 
 //------------------------------------------------------Directory_file_order_source::read_new_files
@@ -855,67 +852,54 @@ bool Directory_file_order_source::read_new_files()
 bool Directory_file_order_source::clean_up_blacklisted_files()
 {
     bool result = false;
+    hash_set<string> blacklisted_files;
+    get_blacklisted_files(&blacklisted_files);
 
-    if( !_are_blacklisted_orders_cleaned_up )
+    if( !blacklisted_files.empty() )
     {
-        hash_set<string> blacklisted_files;
+        hash_set<string> removed_blacklisted_files = blacklisted_files;
 
-
-        try
+        for( int i = 0; i < _new_files.size(); i++ )
         {
-            blacklisted_files = _job_chain->db_get_blacklisted_order_id_set( _path, _regex );
+            Z_LOG2("scheduler", Z_FUNCTION << " _new_files[i]=" << _new_files[i]->path() << "\n");
+            if( zschimmer::file::File_info* new_file = _new_files[ i ] )
+                removed_blacklisted_files.erase( new_file->path() );
         }
-        catch( exception& x )  { _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", db_get_blacklisted_order_id_set()\n" ); }
 
 
-        if( !blacklisted_files.empty() )
+        Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
         {
-            hash_set<string> removed_blacklisted_files = blacklisted_files;
+            string path = *it;
 
-            for( int i = 0; i < _new_files.size(); i++ )
+            try
             {
-                if( zschimmer::file::File_info* new_file = _new_files[ i ] )
-                    removed_blacklisted_files.erase( new_file->path() );
-            }
-
-
-            Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
-            {
-                string path = *it;
-
-                try
+                if( ptr<Order> order = _job_chain->order_or_null( path ) )  // Kein Datenbankzugriff 
                 {
-                    if( ptr<Order> order = _job_chain->order_or_null( path ) )  // Kein Datenbankzugriff 
+                    order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+                    order->remove_from_job_chain();   
+                    order->close();
+                }
+                else
+                if( _job_chain->is_distributed() )
+                {
+                    Transaction ta ( _spooler->db() ); 
+
+                    ptr<Order> order = order_subsystem()->try_load_distributed_order_from_database( &ta, _job_chain->path(), path, Order_subsystem::lo_blacklisted_lock );
+                    if( order )
                     {
                         order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-                        order->remove_from_job_chain();   
-                        order->close();
+                        order->db_delete( Order::update_not_occupied, &ta );
                     }
-                    else
-                    if( _job_chain->is_distributed() )
-                    {
-                        Transaction ta ( _spooler->db() ); 
 
-                        ptr<Order> order = order_subsystem()->try_load_distributed_order_from_database( &ta, _job_chain->path(), path, Order_subsystem::lo_blacklisted_lock );
-                        if( order )
-                        {
-                            order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-                            order->db_delete( Order::update_not_occupied, &ta );
-                        }
-
-                        ta.commit( Z_FUNCTION );
-                    }
-                }
-                catch( exception& x )
-                {
-                    _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", " << path << "\n" );
+                    ta.commit( Z_FUNCTION );
                 }
             }
+            catch( exception& x )
+            {
+                _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", " << path << "\n" );
+            }
         }
-
-        _are_blacklisted_orders_cleaned_up = true;
     }
-
     return result;
 }
 
