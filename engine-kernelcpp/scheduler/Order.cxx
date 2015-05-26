@@ -12,6 +12,8 @@ using namespace job_chain;
 //---------------------------------------------------------------------------------------------const
 
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
+const string scheduler_file_order_path_variable_name = "scheduler_file_path";
+const string scheduler_file_order_agent_variable_name = "scheduler_file_agent";
 
 //-------------------------------------------------------------------------------Order_schedule_use
 
@@ -1910,17 +1912,20 @@ void Order::set_default_id()
 
 //-----------------------------------------------------------------------------Order::set_file_path
 
-void Order::set_file_path( const File_path& path )
+void Order::set_file_path(const File_path& path, const string& agent_address)
 {
     string p = path.path();
 
     set_id( p );
-    set_param( scheduler_file_path_variable_name, p );
+    set_param( scheduler_file_order_path_variable_name, p );
+    if (!agent_address.empty()) {
+        set_param(scheduler_file_order_agent_variable_name, agent_address);
+    }
 }
 
 //---------------------------------------------------------------------------------Order::file_path
 
-File_path Order::file_path()
+File_path Order::file_path() const
 {
     File_path result;
 
@@ -1929,7 +1934,7 @@ File_path Order::file_path()
         if( ptr<Com_variable_set> order_params = params_or_null() )
         {
             Variant path;
-            order_params->get_Var( Bstr( scheduler_file_path_variable_name ), &path );
+            order_params->get_Var( Bstr( scheduler_file_order_path_variable_name ), &path );
             result.set_path( string_from_variant( path ) );
         }
     }
@@ -1940,9 +1945,19 @@ File_path Order::file_path()
 
 //-----------------------------------------------------------------------------Order::is_file_order
 
-bool Order::is_file_order()
+bool Order::is_file_order() const
 {
     return file_path() != "";
+}
+
+
+bool Order::is_agent_file_order() const {
+    return is_file_order() && !file_agent_address().empty();
+}
+
+
+string Order::file_agent_address() const {
+    return string_from_variant(param(scheduler_file_order_agent_variable_name));
 }
 
 //----------------------------------------------------------------------------Order::string_payload
@@ -2019,7 +2034,7 @@ void Order::set_param( const string& name, const Variant& value )
 
 //-------------------------------------------------------------------------------------Order::param
 
-Variant Order::param( const string& name )
+Variant Order::param( const string& name ) const
 {
     Variant result;
 

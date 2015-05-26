@@ -28,7 +28,6 @@ using namespace job_chain;
 
 //--------------------------------------------------------------------------------------------const
 
-const string                    scheduler_file_path_variable_name         = "scheduler_file_path";
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
@@ -146,7 +145,7 @@ struct File_order_sink_module_instance : Internal_module_instance
 
         if( !order )  return false;         // Fehler
 
-        File_path path = string_from_variant( order->param( scheduler_file_path_variable_name ) );
+        File_path path = order->file_path();
         if( path == "" )
         {
             _log->warn( message_string( "SCHEDULER-343", order->obj_name() ) );
@@ -685,7 +684,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
 
                     order = _spooler->standing_order_subsystem()->new_order();
 
-                    order->set_file_path( path );
+                    order->set_file_path(path, _remote_scheduler);
                     order->set_state(fetching_state);
 
                     bool ok = true;

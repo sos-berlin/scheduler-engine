@@ -38,10 +38,6 @@ namespace job_chain
     Z_FOR_EACH( Order_subsystem::File_based_map, spooler()->order_subsystem()->_file_based_map, __job_chain_iterator__ )  \
         if( Job_chain* JOB_CHAIN = __job_chain_iterator__->second )
 
-//--------------------------------------------------------------------------------------------const
-
-extern const string             scheduler_file_path_variable_name;
-
 //-------------------------------------------------------------------------------------------------
 
 typedef stdext::hash_set<Job_chain*>   Job_chain_set;
@@ -241,9 +237,11 @@ struct Order : Com_order,
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
 
-    void                    set_file_path               ( const File_path& );                       // Für einen Dateiauftrag (file order)
-    File_path                   file_path               ();
-    bool                        is_file_order           ();
+    void                    set_file_path               (const File_path&, const string& agent_address = "");                       // Für einen Dateiauftrag (file order)
+    File_path                   file_path               () const;
+    bool                        is_file_order           () const;
+    bool                        is_agent_file_order     () const;
+    string                      file_agent_address      () const;
     
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
@@ -253,7 +251,7 @@ struct Order : Com_order,
     ptr<Com_variable_set>       params_or_null          () const;
     ptr<Com_variable_set>       params                  ();
     void                    set_param                   ( const string& name, const Variant& value );
-    Variant                     param                   ( const string& name );
+    Variant                     param                   ( const string& name ) const;
 
     void                    set_payload_xml_string      ( const string& xml );
     void                    set_payload_xml             ( const xml::Element_ptr& );
