@@ -34,7 +34,8 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
 
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List("-distributed-orders"))
   private implicit lazy val entityManagerFactory = instance[EntityManagerFactory]
-  private val directory = testEnvironment.newFileOrderSourceDirectory()
+  private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
+  private lazy val matchingFile = directory / "X-MATCHING-FILE"
 
   for (isDistributed ← List(false, true)) {
     (if (isDistributed) "Distributed" else "Not distributed") - {
@@ -42,11 +43,10 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
         val repeat = if (isDistributed) 1.s else 3600.s  // Short period when distributed, because JobScheduler cannot immediately check file existence via Agent (because the order vanishes)
         scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-delete"), repeat = repeat, isDistributed = isDistributed)
         for (_ ← 1 to 3) {
-          val file = directory / "TEST-DELETE"
-          val orderKey = TestJobChainPath orderKey file.toString
+          val orderKey = TestJobChainPath orderKey matchingFile.toString
           eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) {
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-              touch(file)
+              touch(matchingFile)
             }
           }
         }
@@ -56,7 +56,7 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
         val repeat = 1.s
         val delay = repeat dividedBy 2
         scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-dont-delete"), repeat, isDistributed = isDistributed)
-        val file = directory / "TEST-DONT-DELETE"
+        val file = directory / "MATCHING-TEST-DONT-DELETE"
         val orderKey = TestJobChainPath orderKey file.toString
         eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) {
           eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
@@ -85,6 +85,23 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
     }
   }
 
+  "regex filters files" in {
+    scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-delete"), repeat = 3600.s, isDistributed = false)
+    val ignoredFile = directory / "IGNORED-FILE"
+    val List(matchingOrderKey, ignoredOrderKey) = for (file ← List(matchingFile, ignoredFile)) yield {
+      touch(file)
+      TestJobChainPath orderKey file.toString
+    }
+    val ignoredStarted = eventBus.keyedEventFuture[OrderTouchedEvent](ignoredOrderKey)
+    eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) {
+      eventBus.awaitingKeyedEvent[OrderFinishedEvent](matchingOrderKey) {
+        touch(matchingFile)
+      }
+    }
+    sleep(2.s)
+    assert(!ignoredStarted.isCompleted)
+  }
+
   private def orderIsOnBlacklist(orderKey: OrderKey): Boolean =
     if (jobChain(orderKey.jobChainPath).isDistributed)
       transaction { implicit entityManager ⇒
@@ -100,7 +117,7 @@ private object JS1300IT {
 
   private def newJobChainElem(directory: Path, agentUri: String, jobPath: JobPath, repeat: Duration, isDistributed: Boolean): xml.Elem =
     <job_chain name={TestJobChainPath.withoutStartingSlash} distributed={isDistributed.toString}>
-      <file_order_source directory={directory.toString} remote_scheduler={agentUri} repeat={repeat.getSeconds.toString}/>
+      <file_order_source directory={directory.toString} regex="MATCHING-" remote_scheduler={agentUri} repeat={repeat.getSeconds.toString}/>
       <job_chain_node state="100" job={jobPath.string}/>
       <job_chain_node.end state="END"/>
     </job_chain>
