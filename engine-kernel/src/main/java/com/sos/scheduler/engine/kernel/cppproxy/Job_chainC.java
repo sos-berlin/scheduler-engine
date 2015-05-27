@@ -18,4 +18,5 @@ public interface Job_chainC extends CppProxyWithSister<JobChain>, File_basedC<Jo
     void set_stopped(boolean o);
     int max_orders();
     void remove();
+    boolean is_distributed();
 }

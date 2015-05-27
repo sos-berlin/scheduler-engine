@@ -146,6 +146,8 @@ with UnmodifiableJobChain {
   private[order] def remove(): Unit = {
     cppProxy.remove()
   }
+
+  def isDistributed: Boolean = cppProxy.is_distributed()
 }
 
 

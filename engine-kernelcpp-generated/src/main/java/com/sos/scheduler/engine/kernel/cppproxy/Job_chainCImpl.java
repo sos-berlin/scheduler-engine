@@ -74,6 +74,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native boolean has_base_file__native(long cppReference);
 
 
+    @Override public boolean is_distributed() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_distributed__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_distributed__native(long cppReference);
+
+
     @Override public boolean is_file_based_reread() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
