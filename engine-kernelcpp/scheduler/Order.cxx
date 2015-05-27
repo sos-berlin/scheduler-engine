@@ -2785,7 +2785,7 @@ void Order::handle_end_state()
         {
             if( _job_chain )
             {
-                if (is_agent_file_order() || file_path().file_exists()) {
+                if (is_file_order() && (is_agent_file_order() || file_path().file_exists())) {
                     // Auslösende Datei darf nach Auftragsende nicht mehr da sein, damit sie nicht erneut zu einem Auftrag führt.
                     if (is_agent_file_order()) {
                         if (!is_distributed()) {
