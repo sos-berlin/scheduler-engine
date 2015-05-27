@@ -72,6 +72,7 @@ javaproxy_objects=\
  com__sos__scheduler__engine__main__SchedulerControllerBridge.o\
  com__sos__scheduler__engine__newkernel__job__CppNewJob.o\
  java__io__File.o\
+ java__lang__Boolean.o\
  java__lang__Class.o\
  java__lang__Object.o\
  java__lang__String.o\

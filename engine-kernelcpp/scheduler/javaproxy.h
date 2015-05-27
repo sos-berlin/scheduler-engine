@@ -33,6 +33,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
 #include "../javaproxy/java__util__ArrayList.h"
 #include "../javaproxy/java__util__List.h"
+#include "../javaproxy/java__lang__Boolean.h"
 #include "../javaproxy/java__lang__Object.h"
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/org__joda__time__Duration.h"
@@ -60,6 +61,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Neste
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Node NodeJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::plugin::PluginSubsystem PluginSubsystemJ;
 
+typedef ::javaproxy::java::lang::Boolean BooleanJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 typedef ::javaproxy::java::util::ArrayList ArrayListJ;

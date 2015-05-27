@@ -358,6 +358,9 @@
     <ClCompile Include="com__sos__scheduler__engine__client__agent__CppFileOrderSourceClient.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
+    <ClCompile Include="java__lang__Boolean.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h">

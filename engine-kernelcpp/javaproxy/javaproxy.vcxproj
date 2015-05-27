@@ -286,6 +286,7 @@
   <ClCompile Include="com__sos__scheduler__engine__kernel__plugin__PluginSubsystem.cxx" />
     <ClCompile Include="java__util__List.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__client__agent__CppFileOrderSourceClient.cxx" />
+    <ClCompile Include="java__lang__Boolean.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
