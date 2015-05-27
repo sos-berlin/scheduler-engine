@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{implicitClass, withToString1}
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
@@ -18,10 +18,7 @@ object EventBusTestFutures {
     implicit class RichEventBus(val delegate: EventBus) extends AnyVal {
 
       def awaitingKeyedEvent[E <: KeyedEvent](key: E#Key)(f: ⇒ Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
-        try awaitingEvent2[E](predicate = _.key == key, timeout = timeout.duration)(f)(e)
-        catch {
-          case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, key=$key")
-        }
+        awaitingEvent2[E](predicate = withToString1(s"'$key'") { _.key == key }, timeout = timeout.duration)(f)(e)
 
       def awaitingEvent[E <: Event](predicate: E ⇒ Boolean = EveryEvent)(f: ⇒ Unit)(implicit e: ClassTag[E], timeout: ImplicitTimeout): E =
         awaitingEvent2[E](predicate = predicate, timeout = timeout.duration)(f)(e)
@@ -31,7 +28,7 @@ object EventBusTestFutures {
         f
         try awaitResult(future, timeout)
         catch {
-          case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for event ${implicitClass[E].getName}")
+          case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for event ${implicitClass[E].getName} (with $predicate)")
         }
       }
 
