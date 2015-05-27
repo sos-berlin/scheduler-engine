@@ -537,7 +537,7 @@ bool Directory_observer::async_continue_( Continue_flags )
             {
                 Z_LOG2( "zschimmer", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
                 BOOL ok = FindNextChangeNotification( _directory_event );
-                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+                if (!ok)  throw_mswin_error("FindNextChangeNotification", _directory_event.name());
 
                 DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
                 if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
