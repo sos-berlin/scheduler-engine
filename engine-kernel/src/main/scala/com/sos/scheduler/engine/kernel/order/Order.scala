@@ -2,8 +2,9 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
@@ -11,6 +12,7 @@ import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
+import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisToNoneInstant
@@ -41,11 +43,13 @@ with OrderPersistence {
   @ForCpp
   def agentFileExists(cppCall: CppCall): Unit = {
     import subsystem.schedulerThreadCallQueue.implicits.executionContext
+    val orderId = id
     val p = parameters
     val file = p("scheduler_file_path")
     val agentUri = p("scheduler_file_agent")
     for (exists ← agentClientFactory.apply(agentUri).fileExists(file)) {
-      cppCall.call(Boolean.box(exists))
+      try cppCall.call(exists: java.lang.Boolean)
+      catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Order '$orderId' has vanished while agentFileExists returns $exists") }
     }
   }
 
@@ -131,4 +135,6 @@ object Order {
       new Order(proxy, injector.instance[StandingOrderSubsystem])
     }
   }
+
+  private val logger = Logger(getClass)
 }
