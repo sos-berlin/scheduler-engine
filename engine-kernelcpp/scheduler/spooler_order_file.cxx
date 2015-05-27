@@ -88,6 +88,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
     void get_blacklisted_files(hash_set<string>* result);
+    void on_file_removed(Order*);
     bool has_new_file();
 
     Fill_zero                  _zero_;
@@ -875,9 +876,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
             {
                 if( ptr<Order> order = _job_chain->order_or_null( path ) )  // Kein Datenbankzugriff 
                 {
-                    order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-                    order->remove_from_job_chain();   
-                    order->close();
+                    order->on_blacklisted_file_removed();   // Removes the order
                 }
                 else
                 if( _job_chain->is_distributed() )

@@ -10,6 +10,7 @@
 #include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace async { struct CppCall; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace filebased { struct FileBased; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
@@ -51,6 +52,7 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::jav
     }
   public:
 
+    void agentFileExists(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     void persistState() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

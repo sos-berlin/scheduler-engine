@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.kernel.order
 
+import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.{OrderC, Standing_order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
-import javax.inject.{Provider, Inject, Singleton}
+import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 
 @Singleton
@@ -14,7 +15,8 @@ final class StandingOrderSubsystem @Inject private(
   protected[this] val cppProxy: Standing_order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   entityManagerFactoryProvider: Provider[EntityManagerFactory],
-  orderStoreProvider: Provider[HibernateOrderStore])
+  orderStoreProvider: Provider[HibernateOrderStore],
+  val agentClientFactory: AgentClientFactory)
 extends FileBasedSubsystem {
 
   type ThisSubsystem = StandingOrderSubsystem

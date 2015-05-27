@@ -9,4 +9,6 @@ import scala.concurrent.Future
 trait AgentClient {
 
   def executeCommand(command: Command): Future[command.Response]
+
+  def fileExists(file: String): Future[Boolean]
 }

@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1300.JS1300IT._
 import java.nio.file.Files.delete
 import java.nio.file.Path
+import java.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -30,7 +31,8 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
   private val directory = testEnvironment.newFileOrderSourceDirectory()
 
   "Some files, one after the other" in {
-    scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-delete"))
+    val repeat = 3600.s
+    scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-delete"), repeat = repeat)
     for (_ ← 1 to 3) {
       val file = directory / "TEST-DELETE"
       val orderKey = TestJobChainPath orderKey file.toString
@@ -43,7 +45,9 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
   }
 
   "A file, not deleted by job chain, stays on blacklist" in {
-    scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-dont-delete"))
+    val repeat = 1.s
+    val delay = repeat dividedBy 2
+    scheduler executeXml newJobChainElem(directory, agentUri = agentUri, JobPath("/test-dont-delete"), repeat)
     val file = directory / "TEST-DONT-DELETE"
     val orderKey = TestJobChainPath orderKey file.toString
     eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) {
@@ -52,7 +56,7 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
       }
       val startedAgain = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
       assert(order(orderKey).isOnBlacklist)
-      sleep(Repeat + Delay)
+      sleep(repeat + delay)
       assert(order(orderKey).isOnBlacklist)
       assert(!startedAgain.isCompleted)
       delete(file)
@@ -61,7 +65,7 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
       val started = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
       assert(!started.isCompleted)
-      sleep(Repeat + Delay)
+      sleep(repeat + delay)
       assert(!started.isCompleted)
       touch(file)
     }
@@ -71,12 +75,10 @@ final class JS1300IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
 
 private object JS1300IT {
   private val TestJobChainPath = JobChainPath("/test")
-  private val Repeat = 1.s
-  private val Delay = Repeat dividedBy 2
 
-  private def newJobChainElem(directory: Path, agentUri: String, jobPath: JobPath): xml.Elem =
+  private def newJobChainElem(directory: Path, agentUri: String, jobPath: JobPath, repeat: Duration): xml.Elem =
     <job_chain name={TestJobChainPath.withoutStartingSlash}>
-      <file_order_source directory={directory.toString} remote_scheduler={agentUri} repeat={Repeat.getSeconds.toString}/>
+      <file_order_source directory={directory.toString} remote_scheduler={agentUri} repeat={repeat.getSeconds.toString}/>
       <job_chain_node state="100" job={jobPath.string}/>
       <job_chain_node.end state="END"/>
     </job_chain>

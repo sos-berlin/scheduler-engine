@@ -2,6 +2,7 @@
 
 #include "spooler.h"
 #include "Order_subsystem_impl.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
 
 namespace sos {
 namespace scheduler {
@@ -14,6 +15,8 @@ using namespace job_chain;
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
 const string scheduler_file_order_path_variable_name = "scheduler_file_path";
 const string scheduler_file_order_agent_variable_name = "scheduler_file_agent";
+
+DEFINE_SIMPLE_CALL(Order, File_exists_call)
 
 //-------------------------------------------------------------------------------Order_schedule_use
 
@@ -73,6 +76,7 @@ Order::Order( Standing_order_subsystem* subsystem )
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     javabridge::has_proxy<Order>(subsystem->spooler()),
     _typed_java_sister(java_sister()),
+    _file_exists_call(Z_NEW(File_exists_call(this))),
     _zero_(this+1)
 {
     _com_log = new Com_log;
@@ -2782,7 +2786,15 @@ void Order::handle_end_state()
             if( _job_chain )
             {
                 if (is_agent_file_order() || file_path().file_exists()) {
-                    _log->log(is_agent_file_order()? log_debug : log_error, message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
+                    // Auslösende Datei darf nach Auftragsende nicht mehr da sein, damit sie nicht erneut zu einem Auftrag führt.
+                    if (is_agent_file_order()) {
+                        if (!is_distributed()) {
+                            typed_java_sister().agentFileExists(_file_exists_call->java_sister());
+                        }
+                        _log->log(log_debug, message_string("SCHEDULER-341"));
+                    } else {
+                        _log->log(log_error, message_string("SCHEDULER-340"));
+                    }
                     set_on_blacklist();
                 }
                 
@@ -2805,6 +2817,28 @@ void Order::handle_end_state()
         on_carried_out();   // Kann Auftrag aus der Jobkette nehmen
     }
 }
+
+
+void Order::on_call(const File_exists_call& call) {
+    if (!((BooleanJ)call.value()).booleanValue()) {
+        on_blacklisted_file_removed();
+    }
+}
+
+
+void Order::on_blacklisted_file_removed() {
+    ptr<Order> hold_me = this;
+    try {
+        assert_no_task(Z_FUNCTION);
+        _log->info(message_string("SCHEDULER-981"));   // "File has been removed"
+        remove_from_job_chain();
+        close();
+    } 
+    catch (exception& x) {
+        _log->error(S() << x.what() << ", in " << Z_FUNCTION << "\n");
+    }
+}
+
 
 //------------------------------------------------------Order::handle_end_state_of_nested_job_chain
 

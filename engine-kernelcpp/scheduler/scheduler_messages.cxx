@@ -191,6 +191,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-338", "Order.payload is not a Variable_set" },
     { "SCHEDULER-339", "File does not exist and can therefore neither be moved nor removed: $1" },
     { "SCHEDULER-340", "File still exists. Order has been set on the blacklist" },
+    { "SCHEDULER-341", "Order has been set on the blacklist and is removed as soon as the Agent confirms the file removal" },
     { "SCHEDULER-342", "There is no job between order source and order sink in $1" },
     { "SCHEDULER-343", "This is no file order: $1" },
     { "SCHEDULER-344", "order.id has more than $2 characters: $1" },

@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__Order.h"
+#include "com__sos__scheduler__engine__kernel__async__CppCall.h"
 #include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "java__lang__Object.h"
@@ -15,6 +16,7 @@ struct Order__class : ::zschimmer::javabridge::Class
     Order__class(const string& class_name);
    ~Order__class();
 
+    ::zschimmer::javabridge::Method const _agentFileExists__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _persistState____method;
 
     static const ::zschimmer::javabridge::class_factory< Order__class > class_factory;
@@ -24,6 +26,7 @@ const ::zschimmer::javabridge::class_factory< Order__class > Order__class::class
 
 Order__class::Order__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
+    ,_agentFileExists__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "agentFileExists", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_persistState____method(this, "persistState", "()V"){}
 
 Order__class::~Order__class() {}
@@ -43,6 +46,13 @@ Order::~Order() { assign_(NULL); }
 
 
 
+
+void Order::agentFileExists(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    Order__class* cls = _class.get();
+    cls->_agentFileExists__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method.call(get_jobject(), parameter_list);
+}
 
 void Order::persistState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;

@@ -21,6 +21,7 @@ struct Order_schedule_use;
 struct Order_subsystem_impl;
 struct Standing_order_folder;
 struct Standing_order_subsystem;
+struct File_exists_call;
 
 namespace job_chain
 {
@@ -242,6 +243,7 @@ struct Order : Com_order,
     bool                        is_file_order           () const;
     bool                        is_agent_file_order     () const;
     string                      file_agent_address      () const;
+    void on_blacklisted_file_removed();
     
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
@@ -378,6 +380,7 @@ struct Order : Com_order,
 
     void db_start_order_history();
     void on_occupied();
+    void on_call(const File_exists_call&);
 
   private:
     Time                        first_start_time();
@@ -386,7 +389,7 @@ struct Order : Com_order,
     xml::Element_ptr            append_calendar_dom_element_for_setback(  const xml::Element_ptr& element, Show_calendar_options* options );
     void                        set_attributes_and_remove_duplicates( const xml::Element_ptr& element, xml::Simple_node_ptr node, xml::Element_ptr setback_element );
     bool                        order_is_removable_or_replaceable();
-
+    
     friend struct               job_chain::Order_queue_node;
     friend struct               Order_queue;
     friend struct               Job_chain;
@@ -473,6 +476,7 @@ struct Order : Com_order,
     ptr<Com_log>               _com_log;                // COM-Hülle für Log
     bool                       _ignore_max_orders;
     OrderJ                     _typed_java_sister;
+    ptr<File_exists_call>      _file_exists_call;
 };
 
 //-------------------------------------------------------------------------------------------------

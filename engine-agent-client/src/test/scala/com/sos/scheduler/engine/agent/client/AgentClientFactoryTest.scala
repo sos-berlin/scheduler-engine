@@ -78,5 +78,11 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
         assert(o == expectedResult)
       }
   }
+
+  "fileExists" in {
+    val file = createTempFile("sos", ".tmp")
+    closer.onClose { delete(file) }
+    whenReady(client.fileExists(file.toString)) { exists ⇒ assert(exists) }
+    whenReady(client.fileExists("--NOT EXISTENT--")) { exists ⇒ assert(!exists) }
   }
 }

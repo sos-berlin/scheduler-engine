@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
+import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
@@ -25,6 +26,8 @@ with UnmodifiableOrder
 with HasUnmodifiableDelegate[UnmodifiableOrder]
 with OrderPersistence {
 
+  import subsystem.agentClientFactory
+
   type Path = OrderKey
 
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
@@ -33,6 +36,17 @@ with OrderPersistence {
 
   def remove(): Unit = {
     cppProxy.java_remove()
+  }
+
+  @ForCpp
+  def agentFileExists(cppCall: CppCall): Unit = {
+    import subsystem.schedulerThreadCallQueue.implicits.executionContext
+    val p = parameters
+    val file = p("scheduler_file_path")
+    val agentUri = p("scheduler_file_agent")
+    for (exists ← agentClientFactory.apply(agentUri).fileExists(file)) {
+      cppCall.call(Boolean.box(exists))
+    }
   }
 
   def stringToPath(o: String) = OrderKey(o)
