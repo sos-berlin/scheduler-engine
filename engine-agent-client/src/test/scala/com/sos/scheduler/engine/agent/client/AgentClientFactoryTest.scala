@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import java.nio.file.Files._
 import java.nio.file.Paths
 import java.nio.file.attribute.FileTime
@@ -48,7 +47,6 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
   "commandMillisToRequestTimeout" in {
     val upperBound = RequestFileOrderSourceContent.MaxDuration  // The upper bound depends on Akka tick length (Int.MaxValue ticks, a tick can be as short as 1ms)
     for (millis ← List[Long](0, 1, upperBound.toMillis)) {
-      Logger(getClass).debug(s"millis=$millis")
       assert(commandMillisToRequestTimeout(millis) == Timeout(RequestTimeout.toMillis + millis, MILLISECONDS))
     }
   }
@@ -81,8 +79,12 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
 
   "fileExists" in {
     val file = createTempFile("sos", ".tmp")
-    closer.onClose { delete(file) }
-    whenReady(client.fileExists(file.toString)) { exists ⇒ assert(exists) }
-    whenReady(client.fileExists("--NOT EXISTENT--")) { exists ⇒ assert(!exists) }
+    closer.onClose { deleteIfExists(file) }
+    for (i ← 1 to 3) {   // Check no-cache
+      touch(file)
+      whenReady(client.fileExists(file.toString)) { exists ⇒ assert(exists) }
+      delete(file)
+      whenReady(client.fileExists(file.toString)) { exists ⇒ assert(!exists) }
+    }
   }
 }

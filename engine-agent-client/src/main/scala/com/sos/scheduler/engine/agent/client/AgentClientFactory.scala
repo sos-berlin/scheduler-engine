@@ -4,11 +4,13 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClientFactory._
 import com.sos.scheduler.engine.agent.data.commands._
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import javax.inject.{Inject, Singleton}
 import org.scalactic.Requirements._
+import scala.concurrent.Future
 import spray.client.pipelining._
+import spray.http.CacheDirectives.`no-cache`
+import spray.http.HttpHeaders.`Cache-Control`
 import spray.http.StatusCodes.{NotFound, OK}
 import spray.http.Uri
 import spray.httpx.SprayJsonSupport._
@@ -22,7 +24,7 @@ final class AgentClientFactory @Inject private(implicit actorSystem: ActorSystem
 
   import actorSystem.dispatcher
 
-  private val httpResponsePipeline = sendReceive ~> decode(Deflate) ~> decode(Gzip)
+  private val httpResponsePipeline = addHeader(`Cache-Control`(`no-cache`)) ~> sendReceive ~> decode(Deflate) ~> decode(Gzip)
 
   def apply(agentUri: String): AgentClient = new AgentClient {
     private val baseUri: String = agentUri stripSuffix "/"
@@ -34,11 +36,11 @@ final class AgentClientFactory @Inject private(implicit actorSystem: ActorSystem
       response map { _.asInstanceOf[command.Response] }
     }
 
-    private def executeRequestFileOrderSourceContent(cmd: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
-      val timeout = commandMillisToRequestTimeout(cmd.durationMillis)
-      val pipeline = sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
-        decode(Deflate) ~> decode(Gzip) ~> unmarshal[FileOrderSourceContent]
-      pipeline(Post(baseUri concat CommandPath, cmd: Command))
+    private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
+      val timeout = commandMillisToRequestTimeout(command.durationMillis)
+      val pipeline = encode(Gzip) ~> sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
+        decode(Gzip) ~> unmarshal[FileOrderSourceContent]
+      pipeline(Post(baseUri concat CommandPath, command: Command))
     }
 
     def fileExists(filePath: String): Future[Boolean] =
@@ -65,7 +67,6 @@ object AgentClientFactory {
    */
   private[client] def commandMillisToRequestTimeout(millis: Long): Timeout = {
     require(millis >= 0)
-    val m = (BigDecimal(millis) + RequestTimeout.toMillis)
-    Timeout(bigDecimalToDuration(m.setScale(3) / 1000))
+    Timeout(bigDecimalToDuration((BigDecimal(millis).setScale(3) + RequestTimeout.toMillis) / 1000))
   }
 }
