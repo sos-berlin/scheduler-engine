@@ -104,6 +104,10 @@ struct File_info : Object
     time_t                      last_access_time            ();
     void                    set_last_write_time             ( time_t );
     time_t                      last_write_time             ();
+    
+    time_t last_write_time_or_zero() const { 
+        return !_last_write_time_filled? 0 : _last_write_time;
+    }
 
     bool                        try_call_stat               ();
     void                        call_stat                   ();

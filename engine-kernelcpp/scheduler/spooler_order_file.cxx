@@ -344,7 +344,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
                     if( f )
                     {
                         xml::Element_ptr file_element = document.createElement( "file" );
-                        file_element.setAttribute( "last_write_time", xml_of_time_t(f->last_write_time()));
+                        if (time_t t = f->last_write_time_or_zero()) file_element.setAttribute("last_write_time", xml_of_time_t(t));
                         file_element.setAttribute( "path"           , f->path() );
 
                         files_element.appendChild( file_element );
@@ -568,8 +568,9 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
         _new_files.reserve(n);
         for (int i = 0; i < n; i++) {
             string path = (javaproxy::java::lang::String)javaList.get(i);
-            ptr<file::File_info> file_info = Z_NEW(file::File_info(path));
-            //file_info->set_last_access_time(???);
+            ptr<file::File_info> file_info = Z_NEW(file::File_info);
+            file_info->set_path(path);
+            //file_info->set_last_write_time(???);
             _new_files.push_back(file_info);
             _new_files_count++;
         }
@@ -721,8 +722,9 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     if( ok )
                     {
                         result = order;
-                        string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
-                        log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+                        string written_at;
+                        if (time_t t = new_file->last_write_time_or_zero()) written_at = "written at" + Time(t, Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms);
+                        log()->info(message_string("SCHEDULER-983", order->obj_name(), written_at));
                     }
 
                     if( !ok )  
@@ -862,7 +864,6 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
         for( int i = 0; i < _new_files.size(); i++ )
         {
-            Z_LOG2("scheduler", Z_FUNCTION << " _new_files[i]=" << _new_files[i]->path() << "\n");
             if( zschimmer::file::File_info* new_file = _new_files[ i ] )
                 removed_blacklisted_files.erase( new_file->path() );
         }
