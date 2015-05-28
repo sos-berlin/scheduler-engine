@@ -2785,19 +2785,23 @@ void Order::handle_end_state()
         {
             if( _job_chain )
             {
-                if (is_file_order() && (is_agent_file_order() || file_path().file_exists())) {
+                if (is_file_order()) {
                     // Auslösende Datei darf nach Auftragsende nicht mehr da sein, damit sie nicht erneut zu einem Auftrag führt.
                     if (is_agent_file_order()) {
-                        if (!is_distributed()) {
+                        if (!is_distributed()) {    // Bei verteilter Jobkette ist der Auftrag nur flüchtig im Speicher und verschwunden, wenn fileExists beantwortet ist
                             typed_java_sister().agentFileExists(_file_exists_call->java_sister());
                         }
-                        _log->log(log_debug, message_string("SCHEDULER-341"));
+                        _log->debug(message_string("SCHEDULER-341"));
+                        set_on_blacklist();
                     } else {
-                        _log->log(log_error, message_string("SCHEDULER-340"));
+                        if (file_path().file_exists()) {
+                            _log->error(message_string("SCHEDULER-340"));
+                            set_on_blacklist();
+                        } else {
+                            _log->debug(message_string("SCHEDULER-981"));   // "File has been removed" (needed for test)
+                        }
                     }
-                    set_on_blacklist();
                 }
-                
                 if( _suspended )
                 {
                     set_on_blacklist();
