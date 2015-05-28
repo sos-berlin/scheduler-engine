@@ -84,6 +84,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
     bool has_new_file();
+    void get_blacklisted_files(String_set* result);
 
     Fill_zero                  _zero_;
     File_path                  _path;
@@ -786,20 +787,13 @@ bool Directory_file_order_source::read_new_files()
 
 bool Directory_file_order_source::clean_up_blacklisted_files()
 {
+    Z_LOGI2("scheduler.file_order", Z_FUNCTION << "\n");
     bool result = false;
 
     if( !_are_blacklisted_orders_cleaned_up )
     {
-        hash_set<string> blacklisted_files;
-
-
-        try
-        {
-            blacklisted_files = _job_chain->db_get_blacklisted_order_id_set( _path, _regex );
-        }
-        catch( exception& x )  { _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", db_get_blacklisted_order_id_set()\n" ); }
-
-
+        String_set blacklisted_files;
+        get_blacklisted_files(&blacklisted_files);
         if( !blacklisted_files.empty() )
         {
             hash_set<string> removed_blacklisted_files = blacklisted_files;
@@ -849,6 +843,19 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
     }
 
     return result;
+}
+
+void Directory_file_order_source::get_blacklisted_files(String_set* result) {
+    if (_job_chain->is_distributed()) {
+        try {
+            *result = _job_chain->db_get_blacklisted_order_id_set( _path, _regex );
+        }
+        catch( exception& x )  { _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", db_get_blacklisted_order_id_set()\n" ); }
+    } else {
+        result->clear();
+        result->reserve(_job_chain->_blacklist_map.size());
+        Z_FOR_EACH_CONST(Job_chain::Blacklist_map, _job_chain->_blacklist_map, i) result->insert(i->first);
+    }
 }
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail
@@ -974,8 +981,8 @@ bool Directory_file_order_source::has_new_file() {
     // Bei verteilter Jobkette wir das Problem JS-1354 (hochzählen der nächsten Task-ID in der Datenbank) weiterhin bestehen.
     //String_set known_orders;
     //bool known_orders_has_been_read = false;
-    for (int i = _new_files_index; i < _new_files.size(); i++) {
-        if (file::File_info* f = _new_files[i]) {
+    while (_new_files_index < _new_files.size()) {
+        if (file::File_info* f = _new_files[_new_files_index]) {
             File_path path = f->path();
             if (path.exists() && !_job_chain->order_id_space_contains_order_id(path)) {
                 //if (!_job_chain->is_distributed()) {
@@ -989,6 +996,7 @@ bool Directory_file_order_source::has_new_file() {
                 //}
             }
         }
+        _new_files_index++;
     }
     return false;
 }
