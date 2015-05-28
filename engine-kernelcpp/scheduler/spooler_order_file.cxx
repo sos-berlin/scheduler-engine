@@ -679,7 +679,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
 
             try
             {
-                if( path.file_exists()  &&  !_job_chain->order_or_null( path ) )
+                if ((_remote_scheduler != "" || path.file_exists()) && !_job_chain->order_or_null(path))
                 {
                     if( !known_orders_has_been_read )   // Eine Optimierung: Damit try_place_in_job_chain() nicht bei jeder Datei feststellen muss, dass es bereits einen Auftrag in der Datenbank gibt.
                     {
@@ -707,7 +707,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     {
                         ok = order->db_occupy_for_processing();
 
-                        if( !path.file_exists() )
+                        if (_remote_scheduler == "" && !path.file_exists())
                         {
                             // Ein anderer Scheduler hat vielleicht den Dateiauftrag blitzschnell erledigt
                             order->db_release_occupation(); 
@@ -723,7 +723,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                     {
                         result = order;
                         string written_at;
-                        if (time_t t = new_file->last_write_time_or_zero()) written_at = "written at" + Time(t, Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms);
+                        if (time_t t = new_file->last_write_time_or_zero()) written_at = "written at " + Time(t, Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms);
                         log()->info(message_string("SCHEDULER-983", order->obj_name(), written_at));
                     }
 
