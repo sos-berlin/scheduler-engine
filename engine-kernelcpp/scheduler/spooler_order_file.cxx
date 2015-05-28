@@ -910,7 +910,7 @@ void Directory_file_order_source::get_blacklisted_files(String_set* result) {
         catch( exception& x )  { _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", db_get_blacklisted_order_id_set()\n" ); }
     } else {
         result->clear();
-        result->reserve(_job_chain->_blacklist_map.size());
+        // Not g++ 4.8.3: result->reserve(_job_chain->_blacklist_map.size());
         Z_FOR_EACH_CONST(Job_chain::Blacklist_map, _job_chain->_blacklist_map, i) result->insert(i->first);
     }
 }
