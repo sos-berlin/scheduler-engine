@@ -39,11 +39,13 @@ object SchedulerTestUtils {
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
     instance[OrderSubsystem].jobChain(jobChainPath)
 
-  def order(key: OrderKey)(implicit hasInjector: HasInjector): Order =
-    instance[OrderSubsystem].order(key)
+  def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
+    instance[OrderSubsystem].order(orderKey)
 
-  def orderOption(key: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
-    instance[OrderSubsystem].orderOption(key)
+  def orderExists(orderKey: OrderKey)(implicit hasInjector: HasInjector): Boolean = orderOption(orderKey).isDefined
+
+  def orderOption(orderKey: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
+    instance[OrderSubsystem].orderOption(orderKey)
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystem].task(taskId)
