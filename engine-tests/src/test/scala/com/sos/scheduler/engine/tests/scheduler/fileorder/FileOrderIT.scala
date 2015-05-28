@@ -4,6 +4,7 @@ import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -48,7 +49,9 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
 
       "Some files, one after the other" in {
-        val repeat = if (isDistributed) 1.s else 3600.s // Short period when distributed, because JobScheduler cannot immediately check file existence via Agent (because the order vanishes)
+        // Long period to check use of agentFileExists (with notification only, which despite the long period notifies about new files)
+        // Therefore, agentFileExist is not tested under Linux!!!
+        val repeat = if (withAgent && !isDistributed && HasDirectoryChangeNotification) 1.h else 1.s
         scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = repeat, isDistributed = isDistributed)
         for (_ ← 1 to 3) {
           val orderKey = TestJobChainPath orderKey matchingFile.toString
@@ -99,10 +102,8 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
     "regex filters files" in {
       scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = 3600.s, isDistributed = false)
       val ignoredFile = directory / "IGNORED-FILE"
-      val List(matchingOrderKey, ignoredOrderKey) = for (file ← List(matchingFile, ignoredFile)) yield {
-        touch(file)
-        TestJobChainPath orderKey file.toString
-      }
+      List(matchingFile, ignoredFile) foreach touch
+      val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }
       val ignoredStarted = eventBus.keyedEventFuture[OrderTouchedEvent](ignoredOrderKey)
       controller.toleratingErrorCodes(orderSetOnBlacklistErrorSet) {
         runUntilFileRemovedMessage(matchingOrderKey) {
@@ -132,6 +133,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
 }
 
 private object FileOrderIT {
+  private val HasDirectoryChangeNotification = isWindows
   private val TestJobChainPath = JobChainPath("/test")
 
   private def newJobChainElem(directory: Path, agentUri: Option[String], jobPath: JobPath, repeat: Duration, isDistributed: Boolean): xml.Elem =
