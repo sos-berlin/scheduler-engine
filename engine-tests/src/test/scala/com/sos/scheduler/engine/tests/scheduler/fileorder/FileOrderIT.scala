@@ -41,7 +41,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List("-distributed-orders"))
   private implicit lazy val entityManagerFactory = instance[EntityManagerFactory]
   private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
-  private lazy val matchingFile = directory / "MATCHING-FILE"
+  private lazy val matchingFile = directory / "X-MATCHING-FILE"
 
   for ((withAgent, testGroupName) ← List(true → "With Agent", false → "Without Agent")) testGroupName - {
     lazy val agentUriOption = withAgent.option(agentUri)
@@ -67,7 +67,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
         val repeat = 1.s
         val delay = repeat dividedBy 2
         scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-dont-delete"), repeat, isDistributed = isDistributed)
-        val file = directory / "MATCHING-TEST-DONT-DELETE"
+        val file = directory / "X-MATCHING-TEST-DONT-DELETE"
         val orderKey = TestJobChainPath orderKey file.toString
         controller.toleratingErrorCodes(orderSetOnBlacklistErrorSet) {
           runUntilFileRemovedMessage(orderKey) {
