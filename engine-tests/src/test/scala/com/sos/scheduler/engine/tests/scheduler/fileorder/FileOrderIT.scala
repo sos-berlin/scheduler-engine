@@ -42,7 +42,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
   private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
   private lazy val matchingFile = directory / "MATCHING-FILE"
 
-  for ((withAgent, testGroupName) ← List(/*true → "With Agent",*/ false → "Without Agent")) testGroupName - {
+  for ((withAgent, testGroupName) ← List(true → "With Agent", false → "Without Agent")) testGroupName - {
     lazy val agentUriOption = withAgent.option(agentUri)
     lazy val orderSetOnBlacklistErrorSet = (!withAgent).option(MessageCode("SCHEDULER-340")).toSet
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
