@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisToNoneInstant
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import org.joda.time.Instant
+import scala.util.{Success, Failure}
 
 @ForCpp
 final class Order private(
@@ -46,10 +47,14 @@ with OrderPersistence {
     val orderId = id
     val p = parameters
     val file = p("scheduler_file_path")
+    require(file.nonEmpty, "Order variable scheduler_file_path must not be empty")
     val agentUri = p("scheduler_file_agent")
-    for (exists ← agentClientFactory.apply(agentUri).fileExists(file)) {
-      try cppCall.call(exists: java.lang.Boolean)
-      catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Order '$orderId' has vanished while agentFileExists returns $exists") }
+    require(agentUri.nonEmpty, "Order variable scheduler_file_agent must not be empty")
+    agentClientFactory.apply(agentUri).fileExists(file) onComplete {
+      case Success(exists) ⇒
+        try cppCall.call(exists: java.lang.Boolean)
+        catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Order '$orderId' has vanished while agentFileExists returns $exists") }
+      case Failure(t) ⇒ log.error(t.toString)
     }
   }
 
