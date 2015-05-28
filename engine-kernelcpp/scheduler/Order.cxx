@@ -2766,10 +2766,13 @@ void Order::handle_end_state()
         {
             if( _job_chain )
             {
-                if( is_file_order()  &&  file_path().file_exists() )
-                {
-                    _log->error( message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
-                    set_on_blacklist();
+                if (is_file_order()) {
+                    if (file_path().file_exists()) {
+                        _log->error( message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
+                        set_on_blacklist();
+                    } else {
+                        log()->debug(message_string("SCHEDULER-981"));   // "File has been removed" (needed for test)
+                    }
                 }
                 
                 if( _suspended )
