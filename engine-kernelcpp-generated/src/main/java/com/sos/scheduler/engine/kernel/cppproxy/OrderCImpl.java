@@ -184,6 +184,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native boolean is_file_based_reread__native(long cppReference);
 
 
+    @Override public boolean is_on_blacklist() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_on_blacklist__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_on_blacklist__native(long cppReference);
+
+
     @Override public boolean is_to_be_removed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

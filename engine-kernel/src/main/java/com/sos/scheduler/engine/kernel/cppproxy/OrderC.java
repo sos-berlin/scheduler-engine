@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
+import com.sos.scheduler.engine.kernel.order.Order;
 
 @CppClass(clas="sos::scheduler::order::Order", directory="scheduler", include="spooler.h")
 public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
@@ -31,4 +31,5 @@ public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
     void set_suspended(boolean o);
     long next_time_millis();
     String calculate_db_distributed_next_time();
+    boolean is_on_blacklist();
 }

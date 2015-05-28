@@ -74,6 +74,8 @@ with OrderPersistence {
     cppProxy.set_suspended(b)
   }
 
+  def isOnBlacklist = cppProxy.is_on_blacklist()
+
   def title: String =
     cppProxy.title
 
