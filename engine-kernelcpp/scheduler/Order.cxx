@@ -2793,13 +2793,12 @@ void Order::handle_end_state()
                         }
                         _log->debug(message_string("SCHEDULER-341"));
                         set_on_blacklist();
+                    } else
+                    if (file_path().file_exists()) {
+                        _log->error(message_string("SCHEDULER-340"));
+                        set_on_blacklist();
                     } else {
-                        if (file_path().file_exists()) {
-                            _log->error(message_string("SCHEDULER-340"));
-                            set_on_blacklist();
-                        } else {
-                            _log->debug(message_string("SCHEDULER-981"));   // "File has been removed" (needed for test)
-                        }
+                        _log->debug(message_string("SCHEDULER-981"));   // "File has been removed" (needed for test)
                     }
                 }
                 if( _suspended )
