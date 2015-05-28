@@ -79,11 +79,11 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void on_directory_read();
     void repeat_after_delay();
     void                        close_notification      ();
-    void                        read_directory          ( bool was_notified, const string& cause );
+    void                        read_directory          (bool was_notified);
     void start_read_new_files_from_agent();
     void                        read_new_files_and_handle_deleted_files( const string& cause );
     bool                        read_new_files          ();
-    bool                        clean_up_blacklisted_files();
+    void                        clean_up_blacklisted_files();
     Duration                    delay_after_error       ();
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
@@ -586,7 +586,7 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
-void Directory_file_order_source::read_directory( bool was_notified, const string& )
+void Directory_file_order_source::read_directory(bool was_notified)
 {
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
     {
@@ -601,7 +601,7 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
 #           endif
 
 
-            if( _new_files_index == _new_files.size() )     // Noch Dateien im Puffer
+            if( _new_files_index == _new_files.size() )     // Keine Dateien mehr im Puffer?
             {
                 //read_new_files_and_handle_deleted_files( cause );
                 read_new_files();
@@ -852,9 +852,8 @@ bool Directory_file_order_source::read_new_files()
 
 //------------------------------------------Directory_file_order_source::clean_up_blacklisted_files
 
-bool Directory_file_order_source::clean_up_blacklisted_files()
+void Directory_file_order_source::clean_up_blacklisted_files()
 {
-    bool result = false;
     hash_set<string> blacklisted_files;
     get_blacklisted_files(&blacklisted_files);
 
@@ -900,7 +899,6 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
             }
         }
     }
-    return result;
 }
 
 
@@ -1005,17 +1003,13 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
 
 bool Directory_file_order_source::async_continue_( Async_operation::Continue_flags flags )
 {
-    bool    was_notified = _notification_event.signaled_flag();
-
-    string  cause = was_notified                    ? "Notification" :
-                    flags & cont_next_gmtime_reached? "Wartezeit abgelaufen"   // Das Flag ist doch immer gesetzt, oder?
-                                                    : Z_FUNCTION;
+    bool was_notified = _notification_event.signaled_flag();
 
     if (_remote_scheduler != "") {
         start_read_new_files_from_agent();
     } else {
         _notification_event.reset();
-        read_directory( was_notified, cause );
+        read_directory(was_notified);
         on_directory_read();
         repeat_after_delay();
     }
