@@ -93,4 +93,10 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
       whenReady(client.fileExists(file.toString)) { exists ⇒ assert(!exists) }
     }
   }
+
+  "Invalid URI" in {
+    val client = injector.instance[AgentClientFactory].apply(agentUri = "INVALID-URI")
+    val e = intercept[RuntimeException] { Await.result(client.fileExists("FILE"), 10.seconds) }
+    assert(e.toString contains "INVALID-URI")
+  }
 }
