@@ -7,7 +7,9 @@ import spray.json.DefaultJsonProtocol._
  * @author Joacim Zschimmer
  */
 final case class FileOrderSourceContent(files: immutable.Seq[FileOrderSourceContent.Entry])
-extends Response
+extends Response {
+  def isEmpty = files.isEmpty
+}
 
 object FileOrderSourceContent {
   final case class Entry(path: String, lastModifiedTime: Long)

@@ -49,11 +49,13 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
 
       "Some files, one after the other" in {
-        // Long period to check use of agentFileExists (with notification only, which despite the long period notifies about new files)
-        // Therefore, agentFileExist is not tested under Linux!!!
-        val repeat = if (withAgent && !isDistributed && HasDirectoryChangeNotification) 1.h else 1.s
+        // Very long period ("repeat") to check directory change notification (not under Linux
+        // But short period when agentFileExist does not applies, to allow check for file removal
+        val notificationIsActive = withAgent || isWindows
+        val repeat = if (withAgent && isDistributed || !notificationIsActive) 1.s else 1.h
         scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = repeat, isDistributed = isDistributed)
         for (_ ← 1 to 3) {
+          sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
           val orderKey = TestJobChainPath orderKey matchingFile.toString
           runUntilFileRemovedMessage(orderKey) {
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
@@ -100,7 +102,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
     }
 
     "regex filters files" in {
-      scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = 3600.s, isDistributed = false)
+      scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = 1.h, isDistributed = false)
       val ignoredFile = directory / "IGNORED-FILE"
       List(matchingFile, ignoredFile) foreach touch
       val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }
@@ -133,7 +135,6 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
 }
 
 private object FileOrderIT {
-  private val HasDirectoryChangeNotification = isWindows
   private val TestJobChainPath = JobChainPath("/test")
 
   private def newJobChainElem(directory: Path, agentUri: Option[String], jobPath: JobPath, repeat: Duration, isDistributed: Boolean): xml.Elem =
