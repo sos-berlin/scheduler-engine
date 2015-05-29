@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.touchAndDeleteWithCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
@@ -54,8 +55,7 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
   }
 
   "readFiles" in {
-    val dir = createTempDirectory("agent-")
-    closer.onClose { delete(dir) }
+    val dir = createTempDirectory("agent-") withCloser delete
     val knownFile = dir / "x-known"
     val instant = Instant.parse("2015-01-01T12:00:00Z")
     val expectedFiles = List(
@@ -67,9 +67,8 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
       (knownFile, instant),
       (dir / "ignore-4", instant))
     for ((file, t) ← expectedFiles ++ ignoredFiles) {
-      touch(file)
+      touchAndDeleteWithCloser(file)
       setLastModifiedTime(file, FileTime.from(t))
-      closer.onClose { delete(file) }
     }
     val regex = "x-"
     assert(new Regex(regex).findFirstIn(knownFile.toString).isDefined)

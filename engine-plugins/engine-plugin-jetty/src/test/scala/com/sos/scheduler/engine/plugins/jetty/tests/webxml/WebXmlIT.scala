@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.tests.webxml
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAny
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
@@ -50,13 +51,11 @@ final class WebXmlIT extends FreeSpec with ScalaSchedulerTest with JettyPluginJe
 
   if (!isWindows) {  // Windows mklink needs the special policy right "Local Policies\User Rights Assignment\Create symbolic links"
     "Symlink is accessible" in {
-      val symlinkedFile = createTempFile("JettyPlugin-", ".tmp").toFile
-      onClose { Files.delete(symlinkedFile) }
+      val symlinkedFile = createTempFile("JettyPlugin-", ".tmp") withCloser Files.delete
       symlinkedFile.contentString = "TEST"
       val name = "symlink.html"
       val symlinkFile = webDirectory / name
-      createSymbolicLink(symlinkFile, symlinkedFile)
-      onClose { Files.delete(symlinkFile) }
+      createSymbolicLink(symlinkFile, symlinkedFile) withCloser Files.delete
       get[String](s"/jobscheduler/$WebDirectoryName/$name") shouldEqual symlinkFile.contentString
     }
   }
