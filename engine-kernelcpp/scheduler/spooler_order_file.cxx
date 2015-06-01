@@ -980,6 +980,7 @@ bool Directory_file_order_source::has_new_file() {
             if (!path.exists()) {
                 _new_files[i] = NULL;  // Clean up the entry for the by now deleted file
                 while( _new_files_index < _new_files.size()  &&  _new_files[ _new_files_index ] == NULL )  _new_files_index++;
+                continue;
             } else 
             if(!_job_chain->order_id_space_contains_order_id(path)) {
                 //if (!_job_chain->is_distributed()) {
