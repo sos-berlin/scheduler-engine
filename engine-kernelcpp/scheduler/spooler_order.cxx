@@ -1388,7 +1388,7 @@ bool Order_queue_node::is_ready_for_order_processing()
 bool Order_queue_node::request_order(const Time& now, const string& cause)
 {
     bool result = order_queue()->request_order(now, cause);
-    if (!result) {
+    if (!result && _job_chain->untouched_is_allowed()) {
         Z_FOR_EACH(Order_source_list, _order_source_list, j) {
             result = (*j)->request_order(cause);
             if (result)  break;
