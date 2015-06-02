@@ -342,8 +342,6 @@ struct Task_history
     xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what& );
 
   private:
-    void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }
-    void                        append_tabbed           ( string );
     void                        write                   ( bool start );
 
 
@@ -354,7 +352,6 @@ struct Task_history
     bool                       _start_called;
 
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
-    string                     _tabbed_record;
     Record                     _extra_record;
     int                        _task_id;
 };

@@ -37,9 +37,7 @@ const char history_column_names[] =    "id"           ":numeric,"
 
 const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Daten..bank
 
-const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
 const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
-const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
 const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
 const int order_title_column_size = 200;
 const int order_state_text_column_size = 100;
@@ -2003,27 +2001,6 @@ Task_history::Task_history( Job_history* job_history, Task* task )
 Task_history::~Task_history()
 {
     if( _job_history->_last_task == _task )  _job_history->_last_task = NULL;
-}
-
-//----------------------------------------------------------------------Task_history::append_tabbed
-
-void Task_history::append_tabbed( string value )
-{
-    if( !_tabbed_record.empty() )  _tabbed_record += '\t';
-
-    size_t i = _tabbed_record.length();
-
-    _tabbed_record += value.substr( 0, max_field_length );
-
-    if( strchr( value.c_str(), '\t' )
-     || strchr( value.c_str(), '\n' ) )
-    {
-        for(; i < _tabbed_record.length(); i++ )  
-        {
-            if( _tabbed_record[i] == '\t' )  _tabbed_record[i] = ' ';
-            if( _tabbed_record[i] == '\n' )  _tabbed_record[i] = ' ';
-        }
-    }
 }
 
 //------------------------------------------------------------------------------Task_history::write
