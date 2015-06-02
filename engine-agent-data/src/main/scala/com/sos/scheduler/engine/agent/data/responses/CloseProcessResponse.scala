@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.data.commands
+package com.sos.scheduler.engine.agent.data.responses
 
 /**
  * @author Joacim Zschimmer

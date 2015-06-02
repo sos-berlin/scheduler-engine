@@ -7,7 +7,8 @@ import com.google.common.io.Files._
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.client.AgentClientFactory._
-import com.sos.scheduler.engine.agent.data.commands.{FileOrderSourceContent, RequestFileOrderSourceContent}
+import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
+import com.sos.scheduler.engine.agent.data.responses.FileOrderSourceContent
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._

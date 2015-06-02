@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.data.commands
+package com.sos.scheduler.engine.agent.data.responses
 
 import scala.collection.immutable
 import spray.json.DefaultJsonProtocol._

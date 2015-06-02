@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.data.commands
+package com.sos.scheduler.engine.agent.data.responses
 
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

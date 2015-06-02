@@ -6,7 +6,7 @@ import spray.json._
  * @author Joacim Zschimmer
  */
 trait Command {
-  type Response <: com.sos.scheduler.engine.agent.data.commands.Response
+  type Response <: com.sos.scheduler.engine.agent.data.responses.Response
 
   def toShortString = toString
 
