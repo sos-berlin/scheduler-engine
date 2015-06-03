@@ -63,16 +63,16 @@ extends AutoCloseable {
       case Success((agent, httpRemoteProcess)) ⇒
         logger.debug(s"Process on agent $agent started: $httpRemoteProcess")
         resultCall.call(Success(()))
-      case x @ Failure(throwable) if waitStopped ⇒
+      case f @ Failure(throwable) if waitStopped ⇒
         logger.debug(s"Waiting for agent has been stopped: $throwable")
-        resultCall.call(Failure(throwable))
-      case x @ Failure(_: FailableSelector.CancelledException) ⇒
-        logger.debug(s"$x")
+        resultCall.call(f)
+      case f @ Failure(_: FailableSelector.CancelledException) ⇒
+        logger.debug(s"$f")
       case x @ Failure(throwable) ⇒
         if (result.isCancelled) {
           logger.debug(s"$x")
         } else {
-          logger.debug(s"Process on $result could not be started: $throwable")
+          logger.debug(s"Process on $result could not be started: $throwable", throwable)
           resultCall.call(Failure(throwable))
         }
     }
