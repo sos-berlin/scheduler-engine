@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.scheduler.fileorder
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -43,16 +44,17 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
   private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
   private lazy val matchingFile = directory / "X-MATCHING-FILE"
 
-  for ((withAgent, testGroupName) ← List(true → "With Agent", false → "Without Agent")) testGroupName - {
+  for ((withAgent, testGroupName) ← List(false → "Without Agent", true → "With Agent")) testGroupName - {
     lazy val agentUriOption = withAgent.option(agentUri)
     lazy val orderSetOnBlacklistErrorSet = (!withAgent).option(MessageCode("SCHEDULER-340")).toSet
+    lazy val notificationIsActive = withAgent || isWindows
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
 
       "Some files, one after the other" in {
         // Very long period ("repeat") to check directory change notification (not under Linux
         // But short period when agentFileExist does not applies, to allow check for file removal
-        val notificationIsActive = withAgent || isWindows
         val repeat = if (withAgent && isDistributed || !notificationIsActive) 1.s else 1.h
+        scheduler executeXml newProcessClass(agentUriOption)
         scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = repeat, isDistributed = isDistributed)
         for (_ ← 1 to 3) {
           sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
@@ -66,8 +68,10 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
       }
 
       "A file, not removed by job chain, stays on blacklist until removed later" in {
+        logger.info(s"Test: $testName")
         val repeat = 1.s
         val delay = repeat dividedBy 2
+        scheduler executeXml newProcessClass(agentUriOption)
         scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-dont-delete"), repeat, isDistributed = isDistributed)
         val file = directory / "X-MATCHING-TEST-DONT-DELETE"
         val orderKey = TestJobChainPath orderKey file.toString
@@ -81,6 +85,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
             sleep(repeat + delay)
             assert(orderIsOnBlacklist(orderKey))
             assert(!startedAgain.isCompleted)
+            logger.info(s"delete $file")
             delete(file)
           }
         }
@@ -95,6 +100,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
               touch(file)
             }
             assert(orderIsOnBlacklist(orderKey))
+            logger.info(s"delete $file")
             delete(file)
           }
         }
@@ -102,7 +108,9 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
     }
 
     "regex filters files" in {
-      scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = 1.h, isDistributed = false)
+      scheduler executeXml newProcessClass(agentUriOption)
+      val repeat = if (!notificationIsActive) 1.s else 1.h
+      scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = repeat, isDistributed = false)
       val ignoredFile = directory / "IGNORED-FILE"
       List(matchingFile, ignoredFile) foreach touch
       val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }
@@ -116,6 +124,11 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
       }
       sleep(2.s)
       assert(!ignoredStarted.isCompleted)
+    }
+
+    "Ordinary job is still startable" in {
+      scheduler executeXml newProcessClass(agentUriOption)
+      runJobAndWaitForEnd(JobPath("/test-ordinary"))
     }
   }
 
@@ -136,6 +149,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest 
 
 private object FileOrderIT {
   private val TestJobChainPath = JobChainPath("/test")
+  private val logger = Logger(getClass)
 
   private def newJobChainElem(directory: Path, agentUri: Option[String], jobPath: JobPath, repeat: Duration, isDistributed: Boolean): xml.Elem =
     <job_chain name={TestJobChainPath.withoutStartingSlash} distributed={isDistributed.toString}>
@@ -143,4 +157,6 @@ private object FileOrderIT {
       <job_chain_node state="100" job={jobPath.string}/>
       <job_chain_node.end state="END"/>
     </job_chain>
+
+  private def newProcessClass(agentUri: Option[String]) = <process_class replace="true" name="test" remote_scheduler={agentUri.orNull} />
 }
