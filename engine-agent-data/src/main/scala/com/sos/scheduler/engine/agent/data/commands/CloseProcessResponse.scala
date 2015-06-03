@@ -3,4 +3,4 @@ package com.sos.scheduler.engine.agent.data.commands
 /**
  * @author Joacim Zschimmer
  */
-object CloseProcessResponse extends Response
+case object CloseProcessResponse extends Response

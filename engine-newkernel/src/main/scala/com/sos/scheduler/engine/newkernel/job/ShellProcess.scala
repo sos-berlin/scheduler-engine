@@ -97,7 +97,7 @@ object ShellProcess {
     var file: File = null
 
     def newProcessBuilder(shellScript: ShellScript) = {
-      file = File.createTempFile("sos", ".sh")
+      file = File.createTempFile("sos-", ".sh")
       Files.write(shellScript.text, file, defaultCharset)
       val processBuilder = new ProcessBuilder
       processBuilder.command("/bin/sh", "-c", shellScript.toString)

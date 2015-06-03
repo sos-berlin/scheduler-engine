@@ -87,9 +87,9 @@ object FailableSelector {
 
   trait Callbacks[Failable, Result] {
     /**
-     * @return Future resulting in
-     *         Success(Sucess(x)) => a selected,
-     *         Success(Failure(t)) => a inaccessible,
+     * @return Future resulting in<br/>
+     *         Success(Success(x)) => a selected,<br/>
+     *         Success(Failure(t)) => a inaccessible,<br/>
      *         or Failure(t) => failure, abort
      */
     def apply(o: Failable): Future[Try[Result]]
