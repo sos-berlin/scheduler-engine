@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.common.scalautil.Tries._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
+import org.scalactic.Requirements._
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -30,12 +31,16 @@ final class CppFileOrderSourceClient private(
   import schedulerThreadCallQueue.implicits.executionContext
 
   private val agent = agentClientFactory.apply(agentUri = agentUri)
+  private var isInCall = false
 
   @ForCpp
   def readFiles(knownFiles: java.util.List[String], resultCppCall: CppCall): Unit = {
+    requireState(!isInCall)
+    isInCall = true
     val command = RequestFileOrderSourceContent(directory = directory, regex = regex, durationMillis = durationMillis, knownFiles.toSet)
     agent.executeCommand(command) onComplete { completion ⇒
       val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
+      isInCall = false
       try resultCppCall.call(forCpp.withThisStackTrace)
       catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t") } // Okay if C++ object (Directory_file_order_source) has been closed
     }

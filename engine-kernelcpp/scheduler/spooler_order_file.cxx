@@ -125,6 +125,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     CppFileOrderSourceClientJ _fileOrderSourceClientJ;
     ptr<Directory_read_result_call> const _directory_read_result_call;
     bool _in_directory_read_result_call;
+    String_set _agent_request_known_files;
 };
 
 //------------------------------------------------------------------File_order_sink_module_instance
@@ -505,7 +506,7 @@ void Directory_file_order_source::activate()
 bool Directory_file_order_source::request_order( const string& cause )
 {
     Z_LOG2("scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n");
-    if (has_new_file()) 
+    if (has_new_file())
         return true;
     else {
         if( _expecting_request_order 
@@ -540,19 +541,20 @@ void Directory_file_order_source::start_read_new_files_from_agent() {
         Z_LOG2("scheduler", Z_FUNCTION << " Still waiting for agent's response\n");
         repeat_after_delay();
     } else {
-        String_set known_files;
+        _agent_request_known_files.clear();
         if (_job_chain->is_distributed()) {
-            read_known_orders(&known_files);
+            read_known_orders(&_agent_request_known_files);
         } else {
-            Z_FOR_EACH_CONST(Job_chain::Order_map, _job_chain->_order_map, i) known_files.insert(i->first);
+            Z_FOR_EACH_CONST(Job_chain::Order_map, _job_chain->_order_map, i) _agent_request_known_files.insert(i->first);
         }
         String_set blacklisted_files;
         get_blacklisted_files(&blacklisted_files);
-        Z_FOR_EACH_CONST(String_set, blacklisted_files, i) known_files.erase(*i);
+        Z_FOR_EACH_CONST(String_set, blacklisted_files, i) _agent_request_known_files.erase(*i);
         ListJ list;
-        list = ArrayListJ::new_instance(known_files.size());
-        Z_FOR_EACH_CONST(String_set, known_files, i) list.add((StringJ)*i);
+        list = ArrayListJ::new_instance(_agent_request_known_files.size());
+        Z_FOR_EACH_CONST(String_set, _agent_request_known_files, i) list.add((StringJ)*i);
         _fileOrderSourceClientJ.readFiles(list, _directory_read_result_call->java_sister());
+        _in_directory_read_result_call = true;
     }
 }
 
@@ -575,6 +577,7 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
             _new_files_count++;
         }
         clean_up_blacklisted_files();
+        _agent_request_known_files.clear();
         on_directory_read();
         _directory_error = NULL;
     } catch (exception& x) {
@@ -855,20 +858,22 @@ bool Directory_file_order_source::read_new_files()
 void Directory_file_order_source::clean_up_blacklisted_files()
 {
     Z_LOGI2("scheduler.file_order", Z_FUNCTION << "\n");
-    String_set blacklisted_files;
-    get_blacklisted_files(&blacklisted_files);
-    if( !blacklisted_files.empty() )
+    String_set files;
+    get_blacklisted_files(&files);
+    // Dem Agenten gemeldete bekannte Dateien ignorieren, denn sie sind vom Agenten ignoriert worden und deshalb nicht zurückgemeldet.
+    Z_FOR_EACH_CONST(String_set, _agent_request_known_files, i) {
+        Z_LOG2("scheduler", Z_FUNCTION << " _blacklisted_files_at_agent_request " << *i << "\n");
+        files.erase(*i);
+    }
+    if( !files.empty() )
     {
-        hash_set<string> removed_blacklisted_files = blacklisted_files;
-
         for( int i = 0; i < _new_files.size(); i++ )
         {
             if( zschimmer::file::File_info* new_file = _new_files[ i ] )
-                removed_blacklisted_files.erase( new_file->path() );
+                files.erase( new_file->path() );
         }
 
-
-        Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
+        Z_FOR_EACH(String_set, files, it)   // Removed blacklisted file
         {
             string path = *it;
 
@@ -1053,7 +1058,7 @@ bool Directory_file_order_source::has_new_file() {
                 _new_files[_new_files_index] = NULL;  // Clean up the entry for the by now deleted file
                 while( _new_files_index < _new_files.size()  &&  _new_files[ _new_files_index ] == NULL )  _new_files_index++;
                 continue;
-            } else 
+            } else
             if (!_job_chain->order_id_space_contains_order_id(path)) {
                 //if (!_job_chain->is_distributed()) {
                     return true;
