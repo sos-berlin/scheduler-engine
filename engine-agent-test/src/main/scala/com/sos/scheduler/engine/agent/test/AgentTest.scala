@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.agent.test
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.test.AgentTest._
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import scala.concurrent.duration._
 
@@ -16,8 +16,13 @@ import scala.concurrent.duration._
 trait AgentTest extends HasCloser {
   this: ScalaSchedulerTest ⇒
 
-  protected lazy val agent = Agent.forTest().closeWithCloser
+  protected lazy val agent = {
+    val agent = Agent.forTest()
+    eventBus.on[SchedulerCloseEvent] { case _ ⇒ agent.close() }   // Shutdown the server Agent after the client Engine
+    agent
+  }
   protected lazy val agentUri = agent.localUri
+
 
   protected override def onSchedulerActivated() = {
     val started = agent.start()
