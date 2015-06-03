@@ -7,6 +7,13 @@ import spray.json._
  */
 trait Command {
   type Response <: com.sos.scheduler.engine.agent.data.commands.Response
+
+  def toShortString = toString
+
+  /**
+   * true if toString returns a longer string than toShortString.
+   */
+  def toStringIsLonger = false
 }
 
 object Command {

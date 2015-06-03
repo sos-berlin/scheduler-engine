@@ -14,6 +14,10 @@ final case class RequestFileOrderSourceContent(
   knownFiles: immutable.Set[String])
 extends Command {
   type Response = FileOrderSourceContent
+
+  override def toShortString = s"RequestFileOrderSourceContent($directory,$regex,$durationMillis,${knownFiles.size} known files})"
+
+  override def toStringIsLonger = knownFiles.nonEmpty
 }
 
 object RequestFileOrderSourceContent {
