@@ -164,7 +164,7 @@ void log_start( const char* filename_ )
 
         *s << "Aufruf: ";
         for( int i = 0; i < _argc; i++ )  *s << ( _argv[i]? _argv[i] : "" ) << "  ";
-      //for( int i = 0; i < _argc; i++ )  *s << quoted_string( _argv[i]? _argv[i] : "", '\'', '\\' ).c_str() << " ";
+        *s << " // log=" << filename_;
         *s << '\n';
 
         if( filename[0] != '+' )        // Etwas provisorisch: Der Scheduler startet Subprozesse mit -log=+scheduler.log. Dann soll der Log kleiner werden.
