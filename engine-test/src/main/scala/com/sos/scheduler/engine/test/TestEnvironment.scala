@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.test
 
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichPairTraversable
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
@@ -52,6 +51,10 @@ extends HasCloser {
   }
 
   private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Seq[String] = {
+    val logCategoriesPrefix = logCategories.trim match {
+      case "" ⇒ ""
+      case o ⇒ s"$o>"
+    }
     List(
       cppBinaries.file(CppBinary.exeFilename).getPath,
       s"-job-java-options=$JobJavaOptions",
@@ -60,7 +63,7 @@ extends HasCloser {
       s"-ini=$iniFile",
       s"-log-level=debug9",
       s"-log-dir=${logDirectory.getPath}",
-      s"-log=${logCategories.trim}>+${schedulerLog.getPath}",   // "+" (append) in case some ExtraScheduler has been started before
+      s"-log=$logCategoriesPrefix+$schedulerLog",   // "+" (append) in case some ExtraScheduler has been started before
       "-ip-address=127.0.0.1",
       s"-env=JAVA_HOME=${sys.props("java.home")}",
       if (OperatingSystem.isUnix) "-env=" + libraryPathEnv(cppBinaries.directory) else "",
