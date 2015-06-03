@@ -732,13 +732,14 @@ bool Order::db_try_insert( bool throw_exists_exception )
             }
             catch( exception& x )     // Datensatz ist bereits vorhanden?
             {
+                Z_LOG2("scheduler", Z_FUNCTION << " Trying to recover if key is duplicate: " << x.what() << "\n");
                 ta.intermediate_rollback( Z_FUNCTION );      // Postgres verlangt nach Fehler ein Rollback
 
                 if( insert_race_retry_count > max_insert_race_retry_count )  throw;
 
                 Any_file result_set = ta.open_result_set
                     ( 
-                        S() << "select " << db_text_distributed_next_time() << " as distributed_next_time, order_xml"
+                        S() << "select " << db_text_distributed_next_time() << " as distributed_next_time"
                                " from " << db()->_orders_tablename << 
                                db_where_clause().where_string(), 
                         Z_FUNCTION 
@@ -754,8 +755,8 @@ bool Order::db_try_insert( bool throw_exists_exception )
                         record_exists_insertion = record_order_is_distributed ? "distributed" : "in database, not distributed";
 
                         if (_is_distributed && is_file_based() && record_order_is_distributed) {
-                            if (!record.null("order_xml")) {
-                                string order_xml = record.as_string("order_xml");
+                            string order_xml = db_read_clob(&ta, "order_xml");
+                            if (order_xml != "") {
                                 tolerated_distributed_filebased_collision = xml::Document_ptr::from_xml_string(order_xml).documentElement().select_node("file_based");
                             }
                         }
