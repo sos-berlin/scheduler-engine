@@ -108,10 +108,10 @@ extends AutoCloseable {
             killOnlySignal match {
               case Some(signal) ⇒
                 httpRemoteProcess.killRemoteTask(unixSignal = signal) onFailure {
-                  case t ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
+                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled or closed : $t")
                 }
               case None ⇒ httpRemoteProcess.closeRemoteTask(kill = kill) onFailure {
-                case t ⇒ logger.error(s"Process $httpRemoteProcess on agent $agentSelector could not be signalled or closed : $t")
+                case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled or closed : $t")
               }
               remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
             }
