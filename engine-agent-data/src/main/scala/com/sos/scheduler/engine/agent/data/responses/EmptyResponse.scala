@@ -5,5 +5,5 @@ package com.sos.scheduler.engine.agent.data.responses
  */
 case object EmptyResponse extends Response {
 
-  val XmlElem = <ok/>
+  def toXmlElem = <ok/>
 }

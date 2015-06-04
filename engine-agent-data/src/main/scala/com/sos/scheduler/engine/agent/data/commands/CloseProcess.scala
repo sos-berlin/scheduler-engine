@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.agent.data.commands
 
 import com.sos.scheduler.engine.agent.data.AgentProcessId
-import com.sos.scheduler.engine.agent.data.responses.CloseProcessResponse
+import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
 
 /**
  * @author Joacim Zschimmer
  */
 final case class CloseProcess(processId: AgentProcessId, kill: Boolean)
 extends ProcessCommand {
-  type Response = CloseProcessResponse.type
+  type Response = EmptyResponse.type
 }
 
 object CloseProcess {

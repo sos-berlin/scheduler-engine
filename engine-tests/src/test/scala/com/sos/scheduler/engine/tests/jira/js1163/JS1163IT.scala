@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
+import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -16,13 +18,14 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import scala.concurrent.Future
 
 /**
  * Tickets JS-1163, JS-1307.
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
 
   private lazy val List(httpPort, tcpPort) = findRandomFreeTcpPorts(2)
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-http-port=$httpPort", s"-tcp-port=$tcpPort"))
@@ -55,59 +58,68 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest {
 
   private def addUnixTests(): Unit = {
     val settings = List(
-      "Without agent" → { () ⇒ None },
-      "With agent" → { () ⇒ Some(s"http://127.0.0.1:$httpPort") })
-    for ((testVariantName, agentAddressOption) ← settings) {
-
-      s"$testVariantName - (Run and kill tasks)" in {
-        scheduler executeXml testProcessClass(agentAddressOption())
-
-        controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          val jobPaths = List(
-            StandardJobPath, StandardMonitorJobPath,
-            TrapJobPath, TrapMonitorJobPath,
-            IgnoringJobPath, IgnoringMonitorJobPath,
-            ApiJobPath)
-          val t = now()
-          val runs = jobPaths map { runJobFuture(_) }
-          for (run ← runs) awaitSuccess(run.started)
-          // Now, during slow Java start, shell scripts should have executed their "trap" commands
-          sleep(1.s)
-          killTime = now()
-          for (run ← runs) scheduler executeXml
-              <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getStandardSeconds.toString}/>
-          results = awaitResults(runs map { _.result }) toKeyedMap { _.jobPath }
+      ("Without agent", true, { () ⇒ None }),
+      ("With C++ agent", true, { () ⇒ Some(s"http://127.0.0.1:$httpPort") }),
+      ("With Java Agent", false, { () ⇒ Some(agentUri) }))
+    for ((testVariantName, monitorForwardsSignal, agentAddressOption) ← settings) {
+      // monitorForwardsSignal: Java Agent monitor does not forward signal to shell process!!!
+      testVariantName - {
+        s"(preparation: run and kill tasks)" in {
+          scheduler executeXml testProcessClass(agentAddressOption())
+          controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
+            val jobPaths = List(
+              StandardJobPath, StandardMonitorJobPath,
+              TrapJobPath, TrapMonitorJobPath,
+              IgnoringJobPath, IgnoringMonitorJobPath,
+              ApiJobPath)
+            val runs = jobPaths map {runJobFuture(_)}
+            awaitSuccess(Future.sequence(runs map {_.started}))
+            // Now, during slow Java start, shell scripts should have executed their "trap" commands
+            sleep(1.s)
+            killTime = now()
+            for (run ← runs) scheduler executeXml
+                <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getStandardSeconds.toString}/>
+            results = awaitResults(runs map {_.result}) toKeyedMap {_.jobPath}
+          }
         }
-      }
 
-      for (jobPath ← List(StandardJobPath, StandardMonitorJobPath)) {
-        s"$testVariantName - $jobPath - Without trap, SIGTERM directly aborted process" in {
-          results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
-          results(jobPath).duration should be < UndisturbedDuration
-          results(jobPath).endedInstant should be < killTime + MaxKillDuration
+        for (jobPath ← List(StandardJobPath) ++ monitorForwardsSignal.option(StandardMonitorJobPath)) {
+          s"$jobPath - Without trap, SIGTERM directly aborted process" in {
+            results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
+            results(jobPath).duration should be < UndisturbedDuration
+            results(jobPath).endedInstant should be < killTime + MaxKillDuration
+          }
         }
-      }
 
-      for (jobPath ← List(TrapJobPath, TrapMonitorJobPath)) {
-        s"$testVariantName - $jobPath - With SIGTERM trapped, SIGTERM aborted process after signal was handled" in {
-          results(jobPath).logString should (not include FinishedNormally and include (SigtermTrapped))
-          results(jobPath).duration should be < UndisturbedDuration
-          results(jobPath).endedInstant should be < killTime + MaxKillDuration + TrapDuration
+        for (jobPath ← List(TrapJobPath) ++ monitorForwardsSignal.option(TrapMonitorJobPath)) {
+          s"$jobPath - With SIGTERM trapped, SIGTERM aborted process after signal was handled" in {
+            results(jobPath).logString should (not include FinishedNormally and include(SigtermTrapped))
+            results(jobPath).duration should be < UndisturbedDuration
+            results(jobPath).endedInstant should be < killTime + MaxKillDuration + TrapDuration
+          }
         }
-      }
 
-      for (jobPath ← List(IgnoringJobPath, IgnoringMonitorJobPath)) {
-        s"$testVariantName - $jobPath - With SIGTERM ignored, timeout took effect" in {
-          results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
-          results(jobPath).endedInstant should be > killTime + KillTimeout - 1.s
-          results(jobPath).endedInstant should be < killTime + MaxKillDuration + KillTimeout
-          results(jobPath).duration should be < UndisturbedDuration
+        for (jobPath ← List(IgnoringJobPath) ++ monitorForwardsSignal.option(IgnoringMonitorJobPath)) {
+          s"$jobPath - With SIGTERM ignored, timeout took effect" in {
+            results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
+            results(jobPath).endedInstant should be > killTime + KillTimeout - 1.s
+            results(jobPath).endedInstant should be < killTime + MaxKillDuration + KillTimeout
+            results(jobPath).duration should be < UndisturbedDuration
+          }
         }
-      }
 
-      s"$testVariantName - API job was aborted directly" in {
-        results(ApiJobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
-        results(ApiJobPath).endedInstant should be < killTime + 2.s
+        if (monitorForwardsSignal) {
+          for ((jobPath, expectedSpoolerProcessResult) ← List(StandardMonitorJobPath → false, TrapMonitorJobPath → true/*, IgnoringMonitorJobPath → true ???*/)) {
+            s"$jobPath - spooler_process_after was called" in {
+              results(jobPath).logString should include(TestMonitor.spoolerProcessAfterString(expectedSpoolerProcessResult))
+            }
+          }
+        }
+
+        s"$testVariantName - API job was aborted directly" in {
+          results(ApiJobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
+          results(ApiJobPath).endedInstant should be < killTime + 2.s
+        }
       }
     }
 
