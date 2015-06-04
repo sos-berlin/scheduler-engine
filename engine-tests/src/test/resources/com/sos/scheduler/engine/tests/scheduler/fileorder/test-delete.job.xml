@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
-     process_class="/test"
+<job process_class="/test" order="true" idle_timeout="60"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
 >
-    <script language="shell">
-        :;if false; then :
-        goto WINDOWS
-        fi
-
-        set -e
-        rm -v "$SCHEDULER_PARAM_SCHEDULER_FILE_PATH"
-        exit
-
-        :WINDOWS
-        del "%SCHEDULER_PARAM_SCHEDULER_FILE_PATH%"
-    </script>
+    <script java_class="com.sos.scheduler.engine.tests.scheduler.fileorder.TestDeleteJob"/>
 </job>
