@@ -115,6 +115,15 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTes
     }
   }
 
+
+  "Task log contains stdout and stderr of a shell script with monitor" in {
+    toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+      val logString = awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString
+      logString should include ("SPOOLER_PROCESS_AFTER")
+      logString should include ("TEXT FOR STDOUT äöü")
+      logString should include ("TEXT FOR STDERR å")
+    }
+  }
   "Exception in Monitor" in {
     toleratingErrorLogEvent({ e ⇒ e.codeOption == Some(MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
     //toleratingErrorCodes(Set(MessageCode("COM-80020009"), MessageCode("SCHEDULER-280"))) {
