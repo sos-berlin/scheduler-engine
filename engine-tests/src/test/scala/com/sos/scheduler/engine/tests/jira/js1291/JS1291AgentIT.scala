@@ -5,17 +5,20 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{TaskEndedEvent, JobPath, ReturnCode}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT._
 import java.nio.file.Files
@@ -36,104 +39,121 @@ import scala.concurrent.Promise
 final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
 
   import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogEvent}
+  private lazy val List(tcpPort, httpPort) = findRandomFreeTcpPorts(2)
+  override protected lazy val testConfiguration = TestConfiguration(getClass,
+    mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
-  private val eventsPromise = Promise[immutable.Seq[Event]]()
-  private lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
-  private lazy val taskLogLines = eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message }
-  private val finishedOrderParametersPromise = Promise[Map[String, String]]()
+  "(prepare)" in {
+    scheduler executeXml <process_class name={TcpCppAgentProcessClass.withoutStartingSlash} remote_scheduler={s"127.0.0.1:$tcpPort"}/>
+    scheduler executeXml <process_class name={HttpCppAgentProcessClass.withoutStartingSlash} remote_scheduler={s"http://127.0.0.1:$httpPort"}/>
+  }
 
-  "Run shell job via order" in {
-    scheduler executeXml TestJobElem
-    autoClosing(newEventPipe()) { eventPipe ⇒
-      toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
-        val orderKey = TestJobchainPath orderKey "1"
-        eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
-          case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.success(order.parameters.toMap)
-        }
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-          scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
+  List(
+    "With TCP C++ Agent" → TcpCppAgentProcessClass,
+    "With HTTP C++ Agent" → HttpCppAgentProcessClass,
+    "With Java Agent" → AgentTest.AgentProcessClassPath)
+  .foreach { case (testGroupName, processClassPath) ⇒
+    testGroupName - {
+      val eventsPromise = Promise[immutable.Seq[Event]]()
+      lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
+      lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
+      val finishedOrderParametersPromise = Promise[Map[String, String]]()
+
+      "Run shell job via order" in {
+        scheduler executeXml newJobElem(processClassPath)
+        autoClosing(newEventPipe()) { eventPipe ⇒
+          toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
+            val orderKey = TestJobchainPath orderKey testGroupName
+            eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
+              case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.trySuccess(order.parameters.toMap)
+            }
+            eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+              scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
+            }
+          }
+          eventsPromise.success(eventPipe.queued[Event])
         }
       }
-      eventsPromise.success(eventPipe.queued[Event])
-    }
-  }
 
-  "Shell script exit code" in {
-    assertResult(List(TestReturnCode)) {
-      eventsPromise.successValue collect { case TaskEndedEvent(_, TestJobPath, returnCode) ⇒ returnCode }
-    }
-    eventBus.dispatchEvents()
-  }
+      "Shell script exit code" in {
+        assertResult(List(TestReturnCode)) {
+          eventsPromise.successValue collect { case TaskEndedEvent(_, TestJobPath, returnCode) ⇒ returnCode }
+        }
+        eventBus.dispatchEvents()
+      }
 
-  "Order variable" in {
-    assert(shellOutput contains OrderVariable.expectedString)
-  }
+      "Order variable" in {
+        assert(shellOutput contains OrderVariable.expectedString)
+      }
 
-  "Order variable overrides job variable with same name" in {
-    assert(shellOutput contains OrderParamOverridesJobParam.expectedString)
-  }
+      "Order variable overrides job variable with same name" in {
+        assert(shellOutput contains OrderParamOverridesJobParam.expectedString)
+      }
 
-  "Job parameter" in {
-    assert(shellOutput contains JobParam.expectedString)
-  }
+      "Job parameter" in {
+        assert(shellOutput contains JobParam.expectedString)
+      }
 
-  "Job environment variable" in {
-    assert(shellOutput contains EnvironmentVariable.expectedString)
-  }
+      "Job environment variable" in {
+        assert(shellOutput contains EnvironmentVariable.expectedString)
+      }
 
-  "Other environment variables are unchanged" in {
-    val path = (sys.env collectFirst { case ("PATH" | "Path", v) ⇒ v }).head
-    assert(shellOutput contains s"""PATH="$path"""")
-  }
+      "Other environment variables are unchanged" in {
+        val path = (sys.env collectFirst { case ("PATH" | "Path", v) ⇒ v }).head
+        assert(shellOutput contains s"""PATH="$path"""")
+      }
 
-  "stdout in task log" in {
-    assert(shellOutput contains "STDOUT AGENT ECHO")
-  }
+      "stdout in task log" in {
+        assert(shellOutput contains "STDOUT AGENT ECHO")
+      }
 
-  "stderr in task log" in {
-    assert(shellOutput contains "STDERR AGENT ECHO")
-  }
+      "stderr in task log" in {
+        assert(shellOutput contains "STDERR AGENT ECHO")
+      }
 
-  "Job.stateText" in {
-    assert(job(TestJobPath).stateText == s"!$FirstStdoutLine")
-  }
+      "Job.stateText" in {
+        assert(job(TestJobPath).stateText == s"!$FirstStdoutLine")
+      }
 
-  "SCHEDULER_RETURN_VALUES" in {
-    finishedOrderParametersPromise.successValue should contain (ChangedVariable.pair)
-  }
+      "SCHEDULER_RETURN_VALUES" in {
+        finishedOrderParametersPromise.successValue should contain(ChangedVariable.pair)
+      }
 
-  "Multiple concurrent tasks" in {
-    pending
-  }
+      "Multiple concurrent tasks" in {
+        pending
+      }
 
-  "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
-    val file = createTempFile("sos", ".tmp") withCloser Files.delete
-    toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
-      val test = runJobFuture(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
-      awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include ("SCHEDULER-202")
-      awaitSuccess(test.result).logString should include ("SPOOLER_PROCESS_AFTER")
-    }
-  }
+      "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
+        val file = createTempFile("sos", ".tmp") withCloser Files.delete
+        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+          val test = runJobFuture(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
+          awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include("SCHEDULER-202")
+          awaitSuccess(test.result).logString should include("SPOOLER_PROCESS_AFTER")
+        }
+      }
 
 
-  "Task log contains stdout and stderr of a shell script with monitor" in {
-    toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
-      val logString = awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString
-      logString should include ("SPOOLER_PROCESS_AFTER")
-      logString should include ("TEXT FOR STDOUT äöü")
-      logString should include ("TEXT FOR STDERR å")
-    }
-  }
+      "Task log contains stdout and stderr of a shell script with monitor" in {
+        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+          val logString = awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString
+          logString should include("SPOOLER_PROCESS_AFTER")
+          logString should include("TEXT FOR STDOUT äöü")
+          logString should include("TEXT FOR STDERR å")
+        }
+      }
 
-  "Exception in Monitor" in {
-    toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
-    //toleratingErrorCodes(Set(MessageCode("COM-80020009"), MessageCode("SCHEDULER-280"))) {
-      runJobAndWaitForEnd(JobPath("/throwing-monitor"))
+      "Exception in Monitor" in {
+        toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
+          runJobAndWaitForEnd(JobPath("/throwing-monitor"))
+        }
+      }
     }
   }
 }
 
 object JS1291AgentIT {
+  private val TcpCppAgentProcessClass = ProcessClassPath("/tcp-cpp-agent")
+  private val HttpCppAgentProcessClass = ProcessClassPath("/http-cpp-agent")
   private val TestJobchainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
   private val TestReturnCode = ReturnCode(42)
@@ -153,8 +173,8 @@ object JS1291AgentIT {
     def pair = name → value
   }
 
-  private val TestJobElem =
-    <job name={TestJobPath.name} process_class="test-agent" stop_on_error="false">
+  private def newJobElem(processClassPath: ProcessClassPath) =
+    <job name={TestJobPath.name} process_class={processClassPath.withoutStartingSlash} stop_on_error="false">
       <params>
         <param name={JobParam.name} value={JobParam.value}/>
         <param name={OrderParamOverridesJobParam.name} value="OVERRIDDEN-JOB-VALUE"/>
@@ -187,7 +207,7 @@ object JS1291AgentIT {
         ) +
         (SchedulerVariables map variableToEcho).mkString + s"""
           |echo !STDOUT AGENT ECHO
-          |echo !STDERR AGENT ECHO 1>&2
+          |echo !STDERR AGENT ECHO >&2
           |exit ${TestReturnCode.toInt}
           |""".stripMargin
       }</script>
