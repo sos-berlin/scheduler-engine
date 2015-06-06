@@ -3,7 +3,9 @@ package com.sos.scheduler.engine.tests.jira.js1291
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT.SignalName
+import java.nio.charset.StandardCharsets.ISO_8859_1
 import java.nio.file.Paths
+import org.scalatest.Assertions._
 
 final class TestMonitor extends sos.spooler.Monitor_impl {
 
@@ -18,6 +20,13 @@ final class TestMonitor extends sos.spooler.Monitor_impl {
 
   override def spooler_process_after(returnCode: Boolean) = {
     spooler_log.info("SPOOLER_PROCESS_AFTER")
+    // JS-1371 Test locally executed proxy code
+    assert(spooler_task.stdout_path.nonEmpty)
+    assert(spooler_task.stderr_path.nonEmpty)
+    assert(spooler_task.stdout_text == Paths.get(spooler_task.stdout_path).contentString(ISO_8859_1))
+    assert(spooler_task.stderr_text == Paths.get(spooler_task.stderr_path).contentString(ISO_8859_1))
+    assert(spooler_task.stdout_text contains "TEXT FOR STDOUT äöü")
+    assert(spooler_task.stderr_text contains "TEXT FOR STDERR å")
     returnCode
   }
 
