@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{TaskEndedEvent, JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -124,8 +124,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTes
       logString should include ("TEXT FOR STDERR å")
     }
   }
+
   "Exception in Monitor" in {
-    toleratingErrorLogEvent({ e ⇒ e.codeOption == Some(MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
+    toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
     //toleratingErrorCodes(Set(MessageCode("COM-80020009"), MessageCode("SCHEDULER-280"))) {
       runJobAndWaitForEnd(JobPath("/throwing-monitor"))
     }
@@ -142,7 +143,7 @@ object JS1291AgentIT {
   private val JobParam = Variable("testparam", "PARAM-VALUE")
   private val EnvironmentVariable = Variable("TESTENV", "ENV-VALUE")
   private val SchedulerVariables = List(OrderVariable, OrderParamOverridesJobParam, JobParam)
-  private val ScriptOutputRegex = "[^!]*!(.*)".r  // Our test script output start with '!'
+  private val ScriptOutputRegex = "[^!]*!(.*)".r  // Our test script output starts with '!'
   private val ChangedVariable = Variable("CHANGED", "CHANGED-VALUE")
   val SignalName = "signalFile"
 
@@ -192,6 +193,5 @@ object JS1291AgentIT {
       }</script>
     </job>
 
-  // use upper case here. Even if scheduler variable is lower case, it must be converted to upper case by the agent.
   private def paramToEnvName(name: String) = s"SCHEDULER_PARAM_${name.toUpperCase}"
 }
