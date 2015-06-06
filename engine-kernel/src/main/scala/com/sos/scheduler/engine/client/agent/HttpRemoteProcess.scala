@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.client.agent.HttpRemoteProcess._
-import com.sos.scheduler.engine.client.command.SchedulerCommandClient
 import com.sos.scheduler.engine.client.command.RemoteSchedulers._
+import com.sos.scheduler.engine.client.command.SchedulerCommandClient
 import com.sos.scheduler.engine.common.scalautil.xmls.StringSource
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +24,7 @@ final class HttpRemoteProcess(client: SchedulerCommandClient, processDescriptor:
     client.uncheckedExecute(command) map OkResult.fromXml
   }
 
-  override def toString = s"${getClass.getSimpleName}(processId=${processDescriptor.agentProcessId.string} pid=${processDescriptor.pid})"
+  override def toString = s"${getClass.getSimpleName}(${processDescriptor.agentProcessId} pid=${processDescriptor.pid})"
 }
 
 object HttpRemoteProcess {
