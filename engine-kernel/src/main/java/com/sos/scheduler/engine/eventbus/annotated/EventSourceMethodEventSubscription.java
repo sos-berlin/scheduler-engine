@@ -8,10 +8,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /** Eine {@link com.sos.scheduler.engine.eventbus.EventSubscription} für eine mit
- * @{@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit einem
+ * {@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit einem
  * Parameter für das {@link Event} und einem zweiten Parameter für {@link EventSource}
  * mit dem auslösenden Objekt. Das auslösende Objekt (zum Beispiel eine Order) ist nur in einem
- * @{@code HotEventHandler} gültig, weshalb es nicht ins {@code Event} aufgenommen wird. */
+ * {@code HotEventHandler} gültig, weshalb es nicht ins {@code Event} aufgenommen wird. */
 public class EventSourceMethodEventSubscription extends MethodEventSubscription {
     private final Class<? extends EventSource> eventSourceClass;
 

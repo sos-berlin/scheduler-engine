@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 
-/** Stellt Resourcen als Dateien zur Verfügung -
-  * basiert auf [[org.springframework.core.io.support.PathMatchingResourcePatternResolver]], das nicht in jeder Umgebung funktionieren muss.
+/** Stellt Resourcen als Dateien zur Verfügung.
+  * Basiert auf [[org.springframework.core.io.support.PathMatchingResourcePatternResolver]], das nicht in jeder Umgebung funktionieren muss.
   * Ist also nur für den Test des Schedulers geeignet, nicht unbedingt für die Produktion. */
 class ResourcesAsFilesProvider(resources: Iterable[Resource], directory: File) {
 

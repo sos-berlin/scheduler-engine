@@ -9,8 +9,8 @@ import java.lang.reflect.Method;
 
 import static com.google.common.base.Throwables.propagate;
 
-/** Eine {@link EventSubscription} für eine mit @{@link com.sos.scheduler.engine.eventbus.EventHandler} oder
- * @{@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode. */
+/** Eine {@link EventSubscription} für eine mit {@link com.sos.scheduler.engine.eventbus.EventHandler} oder
+ * {@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode. */
 abstract class MethodEventSubscription implements EventSubscription {
     private final Class<? extends Event> eventClass;
     private final EventHandlerAnnotated annotatedObject;
