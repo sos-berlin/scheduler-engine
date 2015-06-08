@@ -29,7 +29,7 @@ private[jobchain] trait JobChainNodeParserAndHandler {
    * May not be called.
    * @param xmlSource The `&lt;job_chain_node>...&lt;/job_chain_node>` to be parsed
    * @param namespaceToOnReturnCodeParser Function, mapping an XML namespace to an XML parser (or None when no XML parser is available),
-   *                                      parsing the XML extension and returning a side-effecting function [[Order]] ⇒ [[Unit]]
+   *                                      parsing the XML extension and returning a side-effecting function [[Order]] ⇒ `Unit`.
    */
   def initializeWithNodeXml(xmlSource: XmlSource, namespaceToOnReturnCodeParser: String ⇒ Option[OnReturnCodeParser]) = {
     if (returnCodeToOnReturnCode ne PartialFunction.empty) throw new IllegalStateException
@@ -47,7 +47,7 @@ private[jobchain] trait JobChainNodeParserAndHandler {
     }
 
   /**
-   * @return All functions [[Order]] ⇒ [[Unit]] to be executed when an order step ended with given `return_code`
+   * @return All functions [[Order]] ⇒ `Unit` to be executed when an order step ended with given `return_code`
    */
   def returnCodeToOrderFunctions(returnCode: ReturnCode): immutable.Seq[OrderFunction] = {
     returnCodeToOnReturnCode.lift(returnCode) match {

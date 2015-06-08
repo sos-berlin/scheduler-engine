@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /** JUnit-{@link TestRule}, die einen Test als langsam markiert und ihn nur ausführen lässt,
  * wenn die Property slowTest gesetzt ist.
  *
- * Verwendung: @{@link org.junit.ClassRule} public static final TestRule slowTestRule = {@link SlowTestRule}.singleton;
+ * Verwendung: {@link org.junit.ClassRule} public static final TestRule slowTestRule = {@link SlowTestRule}.singleton;
  */
 public final class SlowTestRule implements TestRule {
     private static final Logger logger = LoggerFactory.getLogger(SlowTestRule.class);

@@ -7,8 +7,8 @@ import com.sos.scheduler.engine.eventbus.EventSubscription;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/** Eine {@link EventSubscription} für eine mit @{@link com.sos.scheduler.engine.eventbus.EventHandler} oder
- * @{@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit nur einem Parameter für das {@link Event}. */
+/** Eine {@link EventSubscription} für eine mit {@link com.sos.scheduler.engine.eventbus.EventHandler} oder
+ * {@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit nur einem Parameter für das {@link Event}. */
 public class SimpleMethodEventSubscription extends MethodEventSubscription {
     public SimpleMethodEventSubscription(EventHandlerAnnotated annotatedObject, Method method) {
         super(annotatedObject, method);
