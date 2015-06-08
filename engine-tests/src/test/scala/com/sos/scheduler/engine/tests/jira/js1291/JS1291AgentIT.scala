@@ -119,10 +119,6 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTes
         finishedOrderParametersPromise.successValue should contain(ChangedVariable.pair)
       }
 
-      "Multiple concurrent tasks" in {
-        pending
-      }
-
       "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
         toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
@@ -148,6 +144,10 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTes
         }
       }
     }
+  }
+
+  "Java Agent sos.spooler API characteristics" in {
+    runJobAndWaitForEnd(JobPath("/test-api"))
   }
 }
 
