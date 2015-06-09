@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.util
+package com.sos.scheduler.engine.common.maven
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.utils.JavaResource
@@ -17,11 +17,11 @@ final class MavenProperties(resourcePath: JavaResource) {
 
   override def toString = s"$groupId:$artifactId-$version $branchAndCommitSuffix"
 
-  def groupId = asString("project.groupId")
+  lazy val groupId = asString("project.groupId")
 
-  def artifactId = asString("project.artifactId")
+  lazy val artifactId = asString("project.artifactId")
 
-  def buildVersion: String = {
+  lazy val buildVersion: String = {
     var result = version
     if (version endsWith "-SNAPSHOT") result += s" $branchAndCommitSuffix"
     result
@@ -31,22 +31,24 @@ final class MavenProperties(resourcePath: JavaResource) {
     (List("branch", versionBranch, versionCommitHash) filter { _.nonEmpty } mkString " ") +
     s", built $buildDateTime)"
 
-  def version: String =
-    asString("project.version") match {
-      case "${project.version}" ⇒ "(IDE development)"
-      case o ⇒ o
-    }
+  lazy val version: String = asString("project.version")
 
-  def versionCommitHash = asString("sourceVersion.commitHash")
+  lazy val versionCommitHash = asString("sourceVersion.commitHash") match {
+    case "" ⇒ "(unknown-commit)"
+    case o ⇒ o
+  }
 
-  def versionBranch = asString("sourceVersion.branch") match {
+  lazy val versionBranch = asString("sourceVersion.branch") match {
     case o @ "UNKNOWN" ⇒ properties.getOrElse("GIT_BRANCH", o)  // Jenkins Git plugin
     case o ⇒ o
   }
 
-  def buildDateTime: DateTime =
-    ISODateTimeFormat.dateTime.parseDateTime(asString("maven.build.timestamp"))
+  lazy val buildDateTime: DateTime = ISODateTimeFormat.dateTime.parseDateTime(asString("maven.build.timestamp"))
 
   private def asString(name: String): String =
     properties.getOrElse(name, throw new NoSuchElementException(s"Unknown property '$name'"))
+}
+
+object MavenProperties {
+  val EngineCommonMavenProperties = new MavenProperties(JavaResource("com/sos/scheduler/engine/common/maven/maven.properties"))
 }

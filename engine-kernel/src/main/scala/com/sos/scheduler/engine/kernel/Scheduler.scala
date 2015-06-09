@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
+import com.sos.scheduler.engine.common.maven.MavenProperties
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
@@ -36,7 +37,6 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Res
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
-import com.sos.scheduler.engine.kernel.util.MavenProperties
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
