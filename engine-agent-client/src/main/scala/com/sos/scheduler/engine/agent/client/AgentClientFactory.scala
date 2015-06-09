@@ -10,10 +10,11 @@ import javax.inject.{Inject, Singleton}
 import org.scalactic.Requirements._
 import scala.concurrent.Future
 import spray.client.pipelining._
-import spray.http.CacheDirectives.`no-cache`
-import spray.http.HttpHeaders.`Cache-Control`
+import spray.http.CacheDirectives.{`no-cache`, `no-store`}
+import spray.http.HttpHeaders.{Accept, `Cache-Control`}
+import spray.http.MediaTypes.`application/json`
 import spray.http.StatusCodes.{NotFound, OK}
-import spray.http.Uri
+import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding.{Deflate, Gzip}
 
@@ -25,7 +26,12 @@ final class AgentClientFactory @Inject private(implicit actorSystem: ActorSystem
 
   import actorSystem.dispatcher
 
-  private val httpResponsePipeline = addHeader(`Cache-Control`(`no-cache`)) ~> sendReceive ~> decode(Deflate) ~> decode(Gzip)
+  private val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+    addHeader(Accept(`application/json`)) ~>
+    addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
+    sendReceive ~>
+    decode(Deflate) ~>
+    decode(Gzip)
 
   def apply(agentUri: String): AgentClient = new AgentClient {
     private val baseUri: String = agentUri stripSuffix "/"
@@ -39,13 +45,17 @@ final class AgentClientFactory @Inject private(implicit actorSystem: ActorSystem
 
     private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
       val timeout = commandMillisToRequestTimeout(command.durationMillis)
-      val pipeline = encode(Gzip) ~> sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
-        decode(Gzip) ~> unmarshal[FileOrderSourceContent]
+      val pipeline =
+        addHeader(Accept(`application/json`)) ~>
+        encode(Gzip) ~>
+        sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
+        decode(Gzip) ~>
+        unmarshal[FileOrderSourceContent]
       pipeline(Post(baseUri concat CommandPath, command: Command))
     }
 
     def fileExists(filePath: String): Future[Boolean] =
-      httpResponsePipeline(Get(Uri(s"$baseUri$FileStatusPath").withQuery("file" → filePath))) map { r ⇒
+      nonCachingHttpResponsePipeline(Get(Uri(s"$baseUri$FileStatusPath").withQuery("file" → filePath))) map { r ⇒
         r.status match {
           case OK ⇒ true
           case NotFound ⇒ false
