@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.test.configuration.TestConfiguration;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
-import org.joda.time.Duration;
+import java.time.Duration;
 import org.junit.After;
 import org.junit.Before;
 

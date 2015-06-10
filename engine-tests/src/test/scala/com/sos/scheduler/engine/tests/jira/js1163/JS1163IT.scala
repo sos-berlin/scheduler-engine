@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -12,8 +12,8 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._
-import org.joda.time.Instant
-import org.joda.time.Instant.now
+import java.time.Instant
+import java.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -78,7 +78,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
             sleep(1.s)
             killTime = now()
             for (run ← runs) scheduler executeXml
-                <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getStandardSeconds.toString}/>
+                <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getSeconds.toString}/>
             results = awaitResults(runs map {_.result}) toKeyedMap {_.jobPath}
           }
         }
@@ -128,7 +128,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
       interceptSchedulerError(MessageCode("SCHEDULER-468")) {  // "Using this call is not possible in this context [kill timeout] [TCP based agent connection - please connect agent with HTTP]"
         val run = runJobFuture(StandardJobPath)
         awaitSuccess(run.started)
-        scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getStandardSeconds.toString}/>
+        scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getSeconds.toString}/>
       }
     }
   }

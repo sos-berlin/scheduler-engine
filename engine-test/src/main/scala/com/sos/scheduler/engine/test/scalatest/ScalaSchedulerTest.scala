@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.test._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest._
 import com.sos.scheduler.engine.test.scalatest.Utils._
-import org.joda.time.Duration
+import java.time.Duration
 import org.scalatest.Suite
 import scala.reflect.ClassTag
 

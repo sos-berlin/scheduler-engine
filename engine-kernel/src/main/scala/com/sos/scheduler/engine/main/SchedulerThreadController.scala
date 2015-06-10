@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.main
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sync.ThrowableMailbox
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.Scheduler
@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.settings.CppSettings
 import com.sos.scheduler.engine.main.SchedulerThreadController._
 import java.io.File
 import java.util.concurrent.TimeUnit
-import org.joda.time.Duration
+import java.time.Duration
 import org.scalactic.Requirements._
 import scala.collection.JavaConversions._
 
@@ -41,7 +41,7 @@ final class SchedulerThreadController(val name: String, cppSettings: CppSettings
     terminateScheduler()
     if (!tryJoinThread(terminationTimeout)) {
       logger.warn(s"Still waiting for JobScheduler termination (${terminationTimeout.pretty}) ...")
-      tryJoinThread(new Duration(Long.MaxValue))
+      tryJoinThread(Duration.ofMillis(Long.MaxValue))
       logger.info(s"JobScheduler has been terminated after $stopwatch")
     }
     controllerBridge.close()
@@ -74,10 +74,10 @@ final class SchedulerThreadController(val name: String, cppSettings: CppSettings
   }
 
   private def tryJoinThread(timeout: Duration): Boolean = {
-    if (timeout.getMillis == Long.MaxValue) {
+    if (timeout.toMillis == Long.MaxValue) {
       thread.join()
     } else {
-      TimeUnit.MILLISECONDS.timedJoin(thread, timeout.getMillis)
+      TimeUnit.MILLISECONDS.timedJoin(thread, timeout.toMillis)
     }
     !thread.isAlive
   }

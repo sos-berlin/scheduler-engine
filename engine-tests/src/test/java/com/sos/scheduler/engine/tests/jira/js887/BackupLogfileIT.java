@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.joda.time.Duration;
+import java.time.Duration;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 public class BackupLogfileIT extends SchedulerTest {
 
-    private static final Duration timeout = Duration.standardSeconds(30);
+    private static final Duration timeout = Duration.ofSeconds(30);
     private static File testDirectory;
     private static File tempDirWithoutDot;
     private static File tempDirWithDot;

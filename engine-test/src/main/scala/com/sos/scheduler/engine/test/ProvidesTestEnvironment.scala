@@ -5,7 +5,8 @@ import com.sos.scheduler.engine.persistence.SchedulerDatabases.persistenceUnitNa
 import com.sos.scheduler.engine.test.configuration.{JdbcDatabaseConfiguration, TestConfiguration}
 import javax.persistence.Persistence.createEntityManagerFactory
 import javax.persistence.PersistenceException
-import org.joda.time.Duration
+import java.time.Duration
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import scala.collection.JavaConversions._
 
 trait ProvidesTestEnvironment extends ProvidesTestDirectory {
@@ -45,7 +46,7 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
     } finally
       if (controller.isStarted) {
         controller.terminateScheduler()
-        try controller.waitForTermination(Duration.standardHours(3))
+        try controller.waitForTermination(3.h)
         finally controller.close()
       }
   }

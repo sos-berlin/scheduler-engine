@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.joda.time.Duration;
+import java.time.Duration;
 import org.junit.Test;
 
 import static java.lang.Math.max;
@@ -22,7 +22,7 @@ public final class MaxOrderIT extends SchedulerTest {
 
     @Test public void test() throws Exception {
         controller().activateScheduler();
-        controller().waitForTermination(Duration.standardSeconds(5*60));
+        controller().waitForTermination(Duration.ofSeconds(5*60));
     }
 
     @EventHandler public void handleEvent(OrderTouchedEvent e) {

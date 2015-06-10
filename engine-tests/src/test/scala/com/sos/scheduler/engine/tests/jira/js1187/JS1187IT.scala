@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}

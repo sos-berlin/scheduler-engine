@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.main
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import org.joda.time.Duration
+import java.time.Duration
 
 /**
  * Steuerung für den C++-Scheduler in einem eigenen nebenläufigen Thread.

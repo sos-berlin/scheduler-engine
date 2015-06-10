@@ -3,14 +3,14 @@ package com.sos.scheduler.engine.test
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
 import com.sos.scheduler.engine.test.EventPipe._
 import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
-import org.joda.time.Instant.now
-import org.joda.time.{Duration, ReadableDuration}
+import java.time.Instant.now
+import java.time.{Duration}
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
@@ -68,11 +68,11 @@ extends EventHandlerAnnotated with HasCloser {
     waitForEvent()
   }
 
-  def poll(t: ReadableDuration): Event =
+  def poll(t: Duration): Event =
     tryPoll(t) getOrElse sys.error(s"Event has not arrived within ${t.pretty}")
 
-  def tryPoll(t: ReadableDuration): Option[Event] =
-    Option(queue.poll(t.getMillis, TimeUnit.MILLISECONDS))
+  def tryPoll(t: Duration): Option[Event] =
+    Option(queue.poll(t.toMillis, TimeUnit.MILLISECONDS))
 }
 
 object EventPipe {

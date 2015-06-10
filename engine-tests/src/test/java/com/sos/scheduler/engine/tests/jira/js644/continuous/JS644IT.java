@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.TestEnvironment;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
-import org.joda.time.Duration;
+import java.time.Duration;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public final class JS644IT extends SchedulerTest {
     private static final Logger logger = LoggerFactory.getLogger(JS644IT.class);
     private static final JobChainPath jobChainPath = new JobChainPath("/A");
     private static final ImmutableList<String> jobPaths = ImmutableList.of("/a", "/b", "/c");
-    private static final Duration orderTimeout = Duration.standardSeconds(60);
+    private static final Duration orderTimeout = Duration.ofSeconds(60);
     private static final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate = new Predicate<ErrorLogEvent>() {
         @Override public boolean apply(ErrorLogEvent o) { return "SCHEDULER-226".equals(o.getCodeOrNull()); }
     };

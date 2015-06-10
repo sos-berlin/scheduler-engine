@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1145
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode

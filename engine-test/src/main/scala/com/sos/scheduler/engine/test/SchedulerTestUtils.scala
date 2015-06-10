@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.test
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
@@ -22,7 +22,7 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
 import java.util.concurrent.TimeoutException
-import org.joda.time.{Duration, Instant}
+import java.time.{Duration, Instant}
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -74,7 +74,7 @@ object SchedulerTestUtils {
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
       val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
       val result = for (_ ← closed; s ← startedTime; e ← endedTime)
-                   yield TaskResult(jobPath, taskId, endedInstant = new Instant(e), duration = max(0, e - s).ms)
+                   yield TaskResult(jobPath, taskId, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
       TaskRun(jobPath, taskId, started, ended, closed, result)
     }
   }

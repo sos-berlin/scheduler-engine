@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.filebased.FileBasedReplacedEvent
@@ -48,7 +48,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"),
-    cppSettings = Map(CppSettingName.agentConnectRetryDelay → AgentConnectRetryDelay.getStandardSeconds.toString))
+    cppSettings = Map(CppSettingName.agentConnectRetryDelay → AgentConnectRetryDelay.getSeconds.toString))
 
   "ignoreExtraEntries" in {
     val x = -9
@@ -74,7 +74,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
       waitingStopwatch = new Stopwatch
       sleep(1.s)
       requireTaskIsWaitingForAgent(taskRun.taskId)
-      sleep((2.5 * AgentConnectRetryDelay.getMillis).toLong)
+      sleep((2.5 * AgentConnectRetryDelay.toMillis).toLong)
       requireTaskIsWaitingForAgent(taskRun.taskId)
       val expectedWarnings = fill(3)(fill(n)(InaccessibleAgentMessageCode) :+ WaitingForAgentMessageCode).flatten map Some.apply
       assertResult(expectedWarnings) {

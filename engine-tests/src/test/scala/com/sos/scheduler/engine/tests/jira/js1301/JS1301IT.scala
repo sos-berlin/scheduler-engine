@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAu
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.filebased.{FileBasedAddedEvent, FileBasedRemovedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}

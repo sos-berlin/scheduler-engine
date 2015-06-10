@@ -4,7 +4,7 @@ import com.google.common.base.Splitter
 import com.google.common.io.Files.{move, touch}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, SchedulerEventBus}

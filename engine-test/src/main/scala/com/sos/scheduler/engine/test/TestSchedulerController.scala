@@ -6,7 +6,7 @@ import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguratio
 import com.sos.scheduler.engine.test.util.IDE.isRunningUnderIDE
 import java.io.File
 import java.sql.{Connection, DriverManager}
-import org.joda.time.Duration
+import java.time.Duration
 import org.scalactic.Requirements._
 import scala.collection.JavaConversions.iterableAsScalaIterable
 import scala.reflect.ClassTag

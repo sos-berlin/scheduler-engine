@@ -3,14 +3,14 @@ package com.sos.scheduler.engine.plugins.databasequery;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.joda.time.Duration;
+import java.time.Duration;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
 public final class DatabaseQueryPluginIT extends SchedulerTest {
-    private final Duration timeout = Duration.standardSeconds(20);
+    private final Duration timeout = Duration.ofSeconds(20);
 
     @Test public void testShowTaskHistory() throws Exception {
         controller().activateScheduler();

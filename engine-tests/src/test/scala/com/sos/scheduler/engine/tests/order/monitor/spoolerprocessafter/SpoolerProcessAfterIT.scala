@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
@@ -97,7 +98,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
         eventPipe.nextAny[TaskClosedEvent] match { case e ⇒
           assert(e.taskId == expectedTaskId, "TaskClosedEvent not for expected task - probably a previous test failed")
         }
-        waitForCondition(TimeoutWithSteps(millis(3000), millis(10))) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+        waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
       }
 
       def checkAssertions(event: MyFinishedEvent): Unit = {

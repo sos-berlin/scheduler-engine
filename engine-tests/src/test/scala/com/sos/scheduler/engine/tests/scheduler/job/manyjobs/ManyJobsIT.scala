@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.manyjobs
 
-import com.sos.scheduler.engine.common.time.ScalaJoda.{DurationRichInt, sleep}
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
@@ -38,7 +38,7 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
       System.err.println(s"${jobs.size} added in $stopwatch (${1000f * jobs.size / stopwatch.elapsedMs} jobs/s)")
     }
 
-    test(s"Running 1 task/job/s in ${duration.getMillis}ms") {
+    test(s"Running 1 task/job/s in ${duration.pretty}") {
       if (n == 0) pending
       else {
         scheduler executeXmls (
@@ -48,7 +48,7 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
               })
         sleep(duration)
         eventBus.dispatchEvents()
-        System.err.println(s"$taskCount tasks in ${duration.getStandardSeconds}s, ${1000f * taskCount / duration.getMillis} tasks/s")
+        System.err.println(s"$taskCount tasks in ${duration.pretty}, ${1000f * taskCount / duration.toMillis} tasks/s")
       }
     }
   }

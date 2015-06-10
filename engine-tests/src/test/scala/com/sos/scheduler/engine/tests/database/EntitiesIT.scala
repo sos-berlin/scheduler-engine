@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.database
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}

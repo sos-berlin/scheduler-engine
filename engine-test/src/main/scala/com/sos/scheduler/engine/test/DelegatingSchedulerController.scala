@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.main.SchedulerController
-import org.joda.time.Duration
+import java.time.Duration
 
 trait DelegatingSchedulerController extends SchedulerController {
 
