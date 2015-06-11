@@ -29,12 +29,14 @@ object Command {
     def write(command: Command) =
       command match {
         case o: RequestFileOrderSourceContent ⇒ o.toJson.asJsObject withTypeField RequestFileOrderSourceContent.SerialTypeName
+        case o: Terminate ⇒ o.toJson.asJsObject withTypeField Terminate.SerialTypeName
         case o ⇒ throw new UnsupportedOperationException(s"Class ${o.getClass.getName} is not serializable to JSON")
       }
 
     def read(value: JsValue) =
       splitTypeAndJsObject(value) match {
         case (RequestFileOrderSourceContent.SerialTypeName, o) ⇒ o.convertTo[RequestFileOrderSourceContent]
+        case (Terminate.SerialTypeName, o) ⇒ o.convertTo[Terminate]
         case (typeName, _) ⇒ throw new IllegalArgumentException(s"Unknown JSON $$TYPE '$typeName'")
       }
   }
