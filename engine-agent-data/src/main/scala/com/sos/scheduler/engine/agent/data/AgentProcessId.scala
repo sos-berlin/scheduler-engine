@@ -1,16 +1,16 @@
 package com.sos.scheduler.engine.agent.data
 
-import com.sos.scheduler.engine.data.base.GenericLong
+import com.sos.scheduler.engine.data.base.IsString
 import org.jetbrains.annotations.TestOnly
 import scala.math.{abs, signum}
 
 /**
  * @author Joacim Zschimmer
  */
-final case class AgentProcessId(value: Long) extends GenericLong {
+final case class AgentProcessId(value: Long) extends IsString {
   import com.sos.scheduler.engine.agent.data.AgentProcessId._
 
-  def string = value.toString
+  def string = s"$index-$salt"
 
   /**
    *  Meaningless, just a hint for debugging.
@@ -23,9 +23,30 @@ final case class AgentProcessId(value: Long) extends GenericLong {
   private def salt = abs(value) % Factor
 }
 
-object AgentProcessId extends GenericLong.HasJsonFormat[AgentProcessId] {
+object AgentProcessId extends IsString.HasJsonFormat[AgentProcessId] {
 
   private val Factor = 1000*1000*1000L
+
+  /**
+   * Accepts a plain long number or the more readable form "index-salt".
+   */
+  def apply(string: String): AgentProcessId =
+    try {
+      val minus = string.length - (string.reverse indexOf '-') - 1
+      if (minus == 0 | minus == string.length) {
+        val number = string.toLong
+        require(number.toString == string)
+        new AgentProcessId(number)
+      } else {
+        val index = string take minus
+        val salt = string drop (minus + 1)
+        val result = AgentProcessId(index.toLong, salt.toLong)
+        require(result.string == string)
+        result
+      }
+    } catch {
+      case _: Exception ⇒ throw new IllegalArgumentException(s"Invalid AgentProcessId($string)")
+    }
 
   def apply(index: Long, salt: Long) = new AgentProcessId(index * Factor + signum(index) * abs(salt) % Factor)
 }

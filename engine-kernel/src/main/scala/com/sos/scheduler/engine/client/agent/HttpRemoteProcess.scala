@@ -15,12 +15,12 @@ final class HttpRemoteProcess(client: SchedulerCommandClient, processDescriptor:
 
   def killRemoteTask(unixSignal: Int): Future[Unit] = {
     require(unixSignal == 15, "SIGTERM (15) required")
-    val command = <remote_scheduler.remote_task.kill process_id={processDescriptor.agentProcessId.string} signal="SIGTERM"/>
+    val command = <remote_scheduler.remote_task.kill process_id={processDescriptor.agentProcessId.value.toString} signal="SIGTERM"/>
     client.uncheckedExecute(command) map OkResult.fromXml
   }
 
   def closeRemoteTask(kill: Boolean): Future[Unit] = {
-    val command = <remote_scheduler.remote_task.close process_id={processDescriptor.agentProcessId.string} kill={if (kill) true.toString else null}/>
+    val command = <remote_scheduler.remote_task.close process_id={processDescriptor.agentProcessId.value.toString} kill={if (kill) true.toString else null}/>
     client.uncheckedExecute(command) map OkResult.fromXml
   }
 

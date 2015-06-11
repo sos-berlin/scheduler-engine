@@ -23,4 +23,19 @@ final class AgentProcessIdTest extends FreeSpec {
     assert(AgentProcessId(123, 789).toString == "AgentProcessId(123-789)")
     assert(AgentProcessId(-123, 789).toString == "AgentProcessId(-123-789)")
   }
+
+  "apply(number)" in {
+    assert(AgentProcessId(123000000789L) == AgentProcessId(123, 789))
+    assert(AgentProcessId(-123000000789L) == AgentProcessId(-123, 789))
+  }
+
+  "apply(string)" in {
+    assert(AgentProcessId("123-789").string == "123-789")
+    assert(AgentProcessId("-123-789").string == "-123-789")
+    assert(AgentProcessId("123000000789").string == "123-789")
+    assert(AgentProcessId("-123000000789").string == "-123-789")
+    intercept[IllegalArgumentException] { AgentProcessId("") }
+    intercept[IllegalArgumentException] { AgentProcessId("123-") }
+    intercept[IllegalArgumentException] { AgentProcessId("-789-") }
+  }
 }
