@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1081
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
@@ -12,7 +13,6 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.{Duration, Instant, LocalTime}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
-import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /** JS-1081 */
@@ -26,7 +26,7 @@ final class JS1081IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml myOrderElem
       for (i <- 0 to 2) {
         withClue(s"Instant $i, $myOrderElem") {
-          order(AOrderKey).nextInstantOption shouldEqual Some(instants(i))
+          assert(order(AOrderKey).nextInstantOption contains asJavaInstant(instants(i)))
           eventPipe.nextKeyed[OrderFinishedEvent](AOrderKey)
         }
       }

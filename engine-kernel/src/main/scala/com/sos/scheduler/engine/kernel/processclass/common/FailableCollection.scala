@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.SingleThreaded
 import com.sos.scheduler.engine.kernel.processclass.common.EndlessRepeatedIterator.endlessRepeatedIterator
-import org.joda.time.{Duration, Instant}
+import java.time.{Duration, Instant}
 import org.scalactic.Requirements._
 import scala.collection.{immutable, mutable}
 

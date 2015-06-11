@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.WebServiceActor._
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import org.joda.time.Duration
+import java.time.Duration
 import scala.util.Try
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
@@ -26,7 +26,7 @@ extends HttpServiceActor with ActorLogging {
 
   //private implicit def executionContext = actorRefFactory.dispatcher  // For Futures and actorSystem.schedule()
 
-  private val tickDuration = new Duration(Try { context.system.settings.config.getDuration("akka.scheduler.tick-duration", TimeUnit.MILLISECONDS) } getOrElse Int.MaxValue)
+  private val tickDuration = Duration.ofMillis(Try { context.system.settings.config.getDuration("akka.scheduler.tick-duration", TimeUnit.MILLISECONDS) } getOrElse Int.MaxValue)
 
   // Die Scheduler-Objekte stehen beim Start noch nicht bereit (es käme zu einem Deadlock, weil wir in einem anderem Thread sind).
   private lazy val schedulerConfiguration = injector.instance[SchedulerConfiguration]

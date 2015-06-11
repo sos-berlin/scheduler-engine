@@ -40,11 +40,12 @@ import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
+import java.time.{ZoneId, ZoneOffset}
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
+import java.time.ZoneOffset.UTC
+import java.time.Instant.now
 import org.joda.time.DateTimeZone
-import org.joda.time.DateTimeZone.UTC
-import org.joda.time.Instant.now
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
 import scala.concurrent.duration.Duration
@@ -79,7 +80,7 @@ with HasCloser {
   enableJavaUtilLoggingOverSLF4J()
   TimeZones.initialize()
   //DateTimeZone.setDefault(UTC);
-  java.util.TimeZone.setDefault(UTC.toTimeZone)       // Für JPA @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
+  java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone(UTC))       // Für JPA @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
   Thread.currentThread.setContextClassLoader(getClass.getClassLoader)   // Für Mail, http://stackoverflow.com/questions/1969667
 
   cppProxy.setSister(this)

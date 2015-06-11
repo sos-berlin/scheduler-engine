@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobChain
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet
 import javax.annotation.Nullable
-import org.joda.time.Instant
+import java.time.Instant
 
 @ForCpp trait UnmodifiableOrder
 extends EventSource {

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test.configuration
 
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.io.File
-import org.joda.time.Duration
+import java.time.Duration
 
 sealed trait DatabaseConfiguration
 
@@ -24,7 +24,7 @@ extends JdbcDatabaseConfiguration {
 
   def testJdbcUrl(testName: String, directory: File) = {
     val suffix =
-      (if (closeDelay == Duration.ZERO) "" else ";DB_CLOSE_DELAY=" + closeDelay.plus(999).getStandardSeconds) +
+      (if (closeDelay == Duration.ZERO) "" else ";DB_CLOSE_DELAY=" + (closeDelay + 999.ms).getSeconds) +
       (if (!autoServer) "" else ";AUTO_SERVER=TRUE")
     //s"jdbc:h2:mem:scheduler-$testName$suffix"
     s"jdbc:h2:$directory/database$suffix"

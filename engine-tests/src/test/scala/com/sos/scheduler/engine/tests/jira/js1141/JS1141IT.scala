@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1141
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1141.JS1141IT._
-import org.joda.time.Instant.now
+import java.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -71,8 +71,8 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def modifyIncludes(sign: Int): Unit = {
-    aIncludeFile.setLastModified((now() + sign * (4*30).days).getMillis)
-    bIncludeFile.setLastModified((now() + sign * (8*30).days).getMillis)
+    aIncludeFile.setLastModified((now() + sign * (4*30) * 24.h).toEpochMilli)
+    bIncludeFile.setLastModified((now() + sign * (8*30) * 24.h).toEpochMilli)
   }
 
   private def jobFile = testEnvironment.fileFromPath(TestJobPath)

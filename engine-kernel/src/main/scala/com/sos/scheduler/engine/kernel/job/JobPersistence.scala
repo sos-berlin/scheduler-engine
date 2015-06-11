@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.kernel.job
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{TaskId, TaskPersistentState, JobPersistentState}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import javax.annotation.Nullable
-import org.joda.time.{Duration, Instant}
+import java.time.{Duration, Instant}
+import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits._
 
 private[job] trait JobPersistence {
   this: Job =>
@@ -41,8 +42,8 @@ private[job] trait JobPersistence {
       taskStore.insert(TaskPersistentState(
         TaskId(taskId),
         path,
-        new Instant(enqueueTimeMillis),
-        zeroCppMillisToNoneInstant(startTimeMillis),
+        Instant.ofEpochMilli(enqueueTimeMillis),
+        zeroCppMillisToNoneInstant(startTimeMillis) map asJodaInstant,
         parametersXml,
         xml))
     }

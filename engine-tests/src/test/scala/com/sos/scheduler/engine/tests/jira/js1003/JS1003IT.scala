@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1003
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.Action
@@ -10,7 +11,8 @@ import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.SchedulerTestUtils.order
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1003.JS1003IT._
-import org.joda.time.{DateTime, Instant}
+import java.time.Instant
+import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -85,7 +87,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS1003IT {
-  private val ScheduledStart = new DateTime(2030, 12, 31, 12, 0).toInstant
+  private val ScheduledStart = asJavaInstant(new DateTime(2030, 12, 31, 12, 0).toInstant)
   private val TestJobChainPath = JobChainPath("/test")
   private val State100 = OrderState("100")
   private val State200 = OrderState("200")

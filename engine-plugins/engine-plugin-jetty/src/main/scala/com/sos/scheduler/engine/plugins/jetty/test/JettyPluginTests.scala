@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.test
 
 import com.google.inject.{ConfigurationException, Injector}
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
@@ -12,7 +12,7 @@ import com.sun.jersey.api.client.Client
 import com.sun.jersey.api.client.config.{ClientConfig, DefaultClientConfig}
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import java.net.URI
-import org.joda.time.Duration
+import java.time.Duration
 import scala.math.min
 import scala.util.control.NonFatal
 
@@ -44,7 +44,7 @@ object JettyPluginTests {
       o.getProperties.put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, false: java.lang.Boolean)
     }
     Client.create(config) sideEffect { client ⇒
-      client.setReadTimeout(min(timeout.getMillis.toInt, Int.MaxValue))
+      client.setReadTimeout(min(timeout.toMillis.toInt, Int.MaxValue))
       client.addFilter(new HTTPBasicAuthFilter("testName", "testPassword"))
       for (f <- filters) client.addFilter(f)
     }

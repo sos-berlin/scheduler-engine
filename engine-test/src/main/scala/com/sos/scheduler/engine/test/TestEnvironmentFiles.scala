@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.test.TestEnvironmentFiles._
 import com.sos.scheduler.engine.test.util.JavaResourceResolver._
 import java.io.File
 import java.net.URL
 import java.nio.file.Files._
-import org.joda.time.Instant.now
+import java.time.Instant.now
 import scala.collection.immutable
 
 private class TestEnvironmentFiles(
@@ -36,7 +36,7 @@ private class TestEnvironmentFiles(
     val f = directory / relativePath
     createDirectories(f.getParentFile)
     fileTransformer.transform(url, f)
-    f.setLastModified(lastModified.getMillis)
+    f.setLastModified(lastModified.toEpochMilli)
   }
 
   private def urlToDestinationRelativePath(u: URL): String = {

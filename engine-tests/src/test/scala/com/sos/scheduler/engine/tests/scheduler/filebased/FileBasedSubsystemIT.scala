@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.filebased
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.data.filebased.TypedPath.ordering
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, TypedPath}
@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.filebased.FileBasedSubsystemIT._
-import org.joda.time.Instant.now
+import java.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

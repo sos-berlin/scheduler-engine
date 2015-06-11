@@ -15,9 +15,9 @@ import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
-import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisToNoneInstant
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions.eternalCppMillisToNoneInstant
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import org.joda.time.Instant
+import java.time.Instant
 import scala.util.{Success, Failure}
 
 @ForCpp

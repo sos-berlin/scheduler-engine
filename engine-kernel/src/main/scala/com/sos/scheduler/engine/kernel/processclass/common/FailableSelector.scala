@@ -4,9 +4,9 @@ import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTi
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.withToString
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
-import org.joda.time.{Duration, Instant}
+import java.time.{Duration, Instant}
 import scala.concurrent.{Future, Promise}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}

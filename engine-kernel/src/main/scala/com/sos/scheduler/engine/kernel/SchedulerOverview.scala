@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
-import org.joda.time.Instant
+import java.time.Instant
 import spray.json.DefaultJsonProtocol._
-import com.sos.scheduler.engine.data.base.JodaJsonFormats._
+import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 
 final case class SchedulerOverview(
   version: String,

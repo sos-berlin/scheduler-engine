@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.async
 
 import com.sos.scheduler.engine.common.async.FutureCompletion.{callFuture, timedCallFuture}
 import java.lang.Thread.currentThread
-import org.joda.time.Instant
+import java.time.Instant
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}

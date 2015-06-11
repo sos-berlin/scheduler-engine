@@ -9,8 +9,8 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThr
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
-import org.joda.time.Instant
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
+import java.time.Instant
 
 @ForCpp
 final class Job(protected[this] val cppProxy: JobC, protected val subsystem: JobSubsystem)

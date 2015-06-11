@@ -22,7 +22,6 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
-import org.joda.time.Duration.millis
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

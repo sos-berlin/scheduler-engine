@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.eventbus.HotEventHandler

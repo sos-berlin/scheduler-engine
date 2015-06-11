@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.playground.zschimmer
 
 import java.lang.System.currentTimeMillis
-import org.joda.time.Duration
+import java.time.Duration
 
 final class Timer(duration: Duration) {
   val startTime = now
-  val endTime = startTime + duration.getMillis
+  val endTime = startTime + duration.toMillis
 
   def isElapsed =
     now >= endTime

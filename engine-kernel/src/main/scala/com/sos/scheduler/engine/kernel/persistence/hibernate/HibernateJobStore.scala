@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.persistence.SchedulerDatabases.schedulerIdToData
 import com.sos.scheduler.engine.persistence.entities.{JobEntityConverter, JobEntity}
 import javax.inject.{Inject, Singleton}
 import javax.persistence.{EntityManager, EntityManagerFactory}
-import org.joda.time.Duration
+import java.time.Duration
 
 @Singleton
 final class HibernateJobStore @Inject()(
@@ -25,7 +25,7 @@ with JobEntityConverter {
       stmt.setString(2, jobPath.withoutStartingSlash)
       val resultSet = stmt.executeQuery()
       if (resultSet.next())
-        Some(new Duration(resultSet.getLong(1) * 1000))
+        Some(Duration.ofSeconds(resultSet.getLong(1)))
       else
         None
     }

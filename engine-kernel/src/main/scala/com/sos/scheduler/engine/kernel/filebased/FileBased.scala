@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.cppproxy.File_basedC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import java.io.File
-import org.joda.time.Instant
+import java.time.Instant
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -70,7 +70,7 @@ with EventSource {
   def fileModificationInstantOption: Option[Instant] =
     cppProxy.file_modification_time_t match {
       case 0 ⇒ None
-      case n ⇒ Some(new Instant(n * 1000))
+      case n ⇒ Some(Instant.ofEpochSecond(n))
     }
 
   def sourceXmlBytes: Array[Byte] =

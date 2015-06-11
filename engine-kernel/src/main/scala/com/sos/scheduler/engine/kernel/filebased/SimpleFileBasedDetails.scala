@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernel.filebased
 
 import com.sos.scheduler.engine.data.base.JavaJsonFormats._
-import com.sos.scheduler.engine.data.base.JodaJsonFormats._
+import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedDetails, TypedPath}
 import java.io.File
-import org.joda.time.Instant
+import java.time.Instant
 import spray.json.DefaultJsonProtocol._
 
 final case class SimpleFileBasedDetails(

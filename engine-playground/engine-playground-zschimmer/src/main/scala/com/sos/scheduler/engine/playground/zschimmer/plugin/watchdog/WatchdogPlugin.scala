@@ -46,11 +46,11 @@ extends Plugin {
         val future = schedulerThreadFuture { scheduler.callCppAndDoNothing() }
         val t = new Timer(configuration.timeout)
         try {
-          awaitResult(future, Duration(configuration.timeout.getMillis, TimeUnit.MILLISECONDS))
+          awaitResult(future, Duration(configuration.timeout.toMillis, TimeUnit.MILLISECONDS))
           logger.info(s"Scheduler response time was $t")
         }
         catch {
-          case _: TimeoutException => logger.warn(s"Scheduler does not respond after ${configuration.timeout.getStandardSeconds}s")
+          case _: TimeoutException => logger.warn(s"Scheduler does not respond after ${configuration.timeout.getSeconds}s")
         }
       }
     }

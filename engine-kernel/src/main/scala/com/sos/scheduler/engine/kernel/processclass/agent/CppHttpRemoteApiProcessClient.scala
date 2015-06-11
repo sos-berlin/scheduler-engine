@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.processclass.agent.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.kernel.processclass.common.{FailableCollection, FailableSelector}
 import javax.inject.Inject
-import org.joda.time.Duration
+import java.time.Duration
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 

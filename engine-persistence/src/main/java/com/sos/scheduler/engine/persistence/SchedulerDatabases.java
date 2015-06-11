@@ -1,20 +1,15 @@
 package com.sos.scheduler.engine.persistence;
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Instant;
-import org.joda.time.ReadableInstant;
+import java.time.Instant;
 
 import java.util.Date;
-
-import static org.joda.time.DateTimeZone.UTC;
 
 public final class SchedulerDatabases {
     private SchedulerDatabases() {}
 
     public static final String persistenceUnitName = "JobScheduler-Engine";
     public static final String emptyIdInDatabase = "-";
-    public static final DateTimeZone databaseTimeZone = UTC;
 
     public static String schedulerIdToDatabase(SchedulerId id) {
         return id.isEmpty()? emptyIdInDatabase : id.string();
@@ -24,11 +19,19 @@ public final class SchedulerDatabases {
         return new SchedulerId(id.equals(emptyIdInDatabase)? "" : id);
     }
 
-    public static ReadableInstant databaseToInstant(Date o) {
-        return new Instant(o.getTime());
+    public static Instant databaseToInstant(Date o) {
+        return Instant.ofEpochMilli(o.getTime());
     }
 
-    public static Date instantToDatabase(ReadableInstant o) {
+    public static org.joda.time.Instant databaseToJodaInstant(Date o) {
+        return new org.joda.time.Instant(o.getTime());
+    }
+
+    public static Date instantToDatabase(Instant o) {
+        return new Date(o.toEpochMilli());
+    }
+
+    public static Date instantToDatabase(org.joda.time.ReadableInstant o) {
         return new Date(o.getMillis());
     }
 }

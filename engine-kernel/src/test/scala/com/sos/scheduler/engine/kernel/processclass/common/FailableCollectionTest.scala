@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollectionTest._
-import org.joda.time.{Duration, Instant}
+import java.time.{Duration, Instant}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -28,7 +28,7 @@ final class FailableCollectionTest extends FreeSpec {
   }
 
   "Behaviour sequence" - {
-    val startInstant = new Instant(10 * 24 * 3600 * 1000) // Some time
+    val startInstant = Instant.ofEpochSecond(10 * 24 * 3600) // Some time
     var _now = startInstant
     val as = 0 to 2 map A
     val delay = 30.s

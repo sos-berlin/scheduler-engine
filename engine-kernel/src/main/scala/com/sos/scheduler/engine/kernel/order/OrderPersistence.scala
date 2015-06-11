@@ -6,9 +6,10 @@ import com.sos.scheduler.engine.data.order.OrderPersistentState
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.order.OrderPersistence._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import org.joda.time.Instant.now
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTimeZone, Instant}
+import java.time.Instant.now
+import java.time.ZoneOffset.UTC
+import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, Instant}
 
 trait OrderPersistence {
   this: Order =>
@@ -47,9 +48,9 @@ trait OrderPersistence {
 
 private object OrderPersistence {
   private val titleColumnSize = 200
-  private val dateTimeFormatter = DateTimeFormat forPattern "yyyy-MM-dd HH:mm:ss" withZone DateTimeZone.UTC
+  private val dateTimeFormatter = DateTimeFormatter ofPattern "yyyy-MM-dd HH:mm:ss" withZone UTC
 
   private def parseInstantOption(o: String): Option[Instant] =
     if (o.isEmpty) None
-    else Some(dateTimeFormatter.parseDateTime(o).toInstant)
+    else Some(Instant.from(dateTimeFormatter.parse(o)))
 }

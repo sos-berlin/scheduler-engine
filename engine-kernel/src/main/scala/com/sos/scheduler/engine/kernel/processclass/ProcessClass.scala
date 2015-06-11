@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.processclass
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.kernel.processclass.ProcessClass._
 import com.sos.scheduler.engine.kernel.processclass.agent.{Agent, CppHttpRemoteApiProcessClient}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollection
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import org.joda.time.Duration
+import java.time.Duration
 import org.scalactic.Requirements._
 import org.w3c.dom
 import scala.collection.{immutable, mutable}

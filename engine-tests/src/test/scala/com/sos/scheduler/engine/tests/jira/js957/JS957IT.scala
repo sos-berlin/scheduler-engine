@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js957
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
-import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem

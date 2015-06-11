@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
-import com.sos.scheduler.engine.common.time.ScalaJoda._
-import org.joda.time.Duration
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import java.time.Duration
 
 final case class Configuration(checkEvery: Duration, timeout: Duration, warnEvery: Duration)
 

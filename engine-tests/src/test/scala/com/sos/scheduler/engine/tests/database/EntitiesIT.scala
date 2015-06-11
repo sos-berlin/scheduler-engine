@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.database
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
@@ -13,7 +14,6 @@ import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
@@ -21,9 +21,8 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
 import javax.persistence.EntityManagerFactory
-import org.joda.time.DateTime
-import org.joda.time.DateTime.now
-import org.joda.time.format.DateTimeFormat
+import java.time.Instant
+import java.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
@@ -36,7 +35,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     testClass = getClass,
     cppSettings = CppSettings.TestMap + (CppSettingName.useJavaPersistence -> true.toString))
 
-  private val testStartTime = now() withMillisOfSecond 0
+  private val testStartTime = Instant.ofEpochSecond(now().getEpochSecond)
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
 
@@ -77,8 +76,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
         'errorCode (null),
         'errorText (null)
       )
-      assert(e.startTime.getTime >= testStartTime.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be before testStartTime=$testStartTime")
-      now() match { case n => assert(e.startTime.getTime <= n.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be after now=$n") }
+      assert(e.startTime.getTime >= testStartTime.toEpochMilli, s"TaskHistoryEntity.startTime=${e.startTime} should not be before testStartTime=$testStartTime")
+      now() match { case n => assert(e.startTime.getTime <= n.toEpochMilli, s"TaskHistoryEntity.startTime=${e.startTime} should not be after now=$n") }
     }
   }
 
@@ -94,8 +93,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
         'errorCode (null),
         'errorText (null)
       )
-      assert(e.startTime.getTime >= testStartTime.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be before testStartTime=$testStartTime")
-      now() match { case n => assert(e.startTime.getTime <= n.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be after now=$n") }
+      assert(e.startTime.getTime >= testStartTime.toEpochMilli, s"TaskHistoryEntity.startTime=${e.startTime} should not be before testStartTime=$testStartTime")
+      now() match { case n => assert(e.startTime.getTime <= n.toEpochMilli, s"TaskHistoryEntity.startTime=${e.startTime} should not be after now=$n") }
     }
   }
 
@@ -112,15 +111,15 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       'parameterXml (null)
     )
     SafeXML.loadString(e(0).xml) shouldEqual <task force_start="no"/>
-    assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be before testStartTime=$testStartTime")
-    assert(e(0).enqueueTime.getTime <= now().getMillis, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be after now")
+    assert(e(0).enqueueTime.getTime >= testStartTime.toEpochMilli, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be before testStartTime=$testStartTime")
+    assert(e(0).enqueueTime.getTime <= now().toEpochMilli, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be after now")
 
     SafeXML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
-    new DateTime(e(1).startTime) shouldEqual new DateTime(2029, 10, 11, 22, 33, 44)
+    Instant.ofEpochMilli(e(1).startTime.getTime) shouldEqual asJavaInstant(new org.joda.time.DateTime(2029, 10, 11, 22, 33, 44).toInstant)
 
     SafeXML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
     SafeXML.loadString(e(2).parameterXml) shouldEqual <sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>
-    new DateTime(e(2).startTime) shouldEqual new DateTime(2029, 11, 11, 11, 11, 11)
+    Instant.ofEpochMilli(e(2).startTime.getTime) shouldEqual asJavaInstant(new org.joda.time.DateTime(2029, 11, 11, 11, 11, 11).toInstant)
   }
 
   test("TaskEntity is read as expected") {
@@ -130,7 +129,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     queuedTaskElems should have size 3
     for (q <- queuedTaskElems) {
       val enqueuedString = (q \ "@enqueued").text
-      val t = xmlDateTimeFormatter.parseDateTime(enqueuedString)
+      val t = Instant.parse(enqueuedString)
       assert(!(t isBefore testStartTime), s"<queued_task enqueued=$enqueuedString> should not be before testStartTime=$testStartTime")
       assert(!(t isAfter now()), s"<queued_task enqueued=$enqueuedString> should not be after now")
     }
@@ -157,7 +156,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   test("Job.tryFetchAverageStepDuration()") {
     val duration = job(simpleJobPath).tryFetchAverageStepDuration().get
-    duration.getMillis should (be >= 0L and be <= 10*1000L)
+    duration.toMillis should (be >= 0L and be <= 10*1000L)
   }
 
   test("JobChainEntity") {
@@ -256,5 +255,4 @@ private object EntitiesIT {
   private val orderJobPath = JobPath("/test-order-job")
   private val simpleJobPath = JobPath("/test-simple-job")
   private val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
-  private val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ") withZone schedulerTimeZone
 }

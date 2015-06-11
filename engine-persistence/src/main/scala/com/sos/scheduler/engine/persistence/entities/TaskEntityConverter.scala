@@ -33,8 +33,8 @@ trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistentState, Tas
     TaskPersistentState(
       taskId = TaskId(e.taskId),
       jobPath = JobPath("/"+ e.jobPath),
-      enqueueTime = databaseToInstant(e.enqueueTime),
-      startTimeOption = Option(e.startTime) map databaseToInstant,
+      enqueueTime = databaseToJodaInstant(e.enqueueTime),
+      startTimeOption = Option(e.startTime) map databaseToJodaInstant,
       parametersXml = nullToEmpty(e.parameterXml),
       xml = nullToEmpty(e.xml))
 }

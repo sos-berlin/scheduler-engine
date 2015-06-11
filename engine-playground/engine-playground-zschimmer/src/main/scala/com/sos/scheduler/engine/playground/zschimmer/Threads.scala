@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.playground.zschimmer
 
-import org.joda.time.Duration
+import java.time.Duration
 
 object Threads {
 
   def untilInterruptedEvery(duration: Duration)(f: => Unit): Unit = {
-    val timer = new IntervalTimer(duration.getMillis)
+    val timer = new IntervalTimer(duration.toMillis)
     untilInterrupted {
       f
       Thread.sleep(timer.msUntilNextInterval())

@@ -2,9 +2,8 @@ package com.sos.scheduler.engine.persistence.entities
 
 import com.sos.scheduler.engine.data.job.{JobPath, JobPersistentState}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
-import com.sos.scheduler.engine.persistence.SchedulerDatabases.databaseTimeZone
 import java.util.{Date => JavaDate}
-import org.joda.time.DateTime
+import java.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
@@ -32,23 +31,23 @@ final class JobEntityConverterTest extends FunSuite {
     }
 
     test(testKey +"toEntity ") {
-      val timestamp = new DateTime(2012, 10, 2, 22, 33, 44)
+      val timestamp = Instant.parse("2012-10-02T22:33:44Z")
       val e =  converter.toEntity(JobPersistentState(JobPath("/path/name"), testStopped, Some(timestamp)))
       e.schedulerId should equal("SCHEDULER-ID")
       e.clusterMemberId should equal (entityClusterMemberId)
       e.jobPath should equal ("path/name")
       e.isStopped should equal (testStopped)
-      e.nextStartTime should equal (new JavaDate(timestamp.getMillis))
+      e.nextStartTime should equal (new JavaDate(timestamp.toEpochMilli))
     }
 
     test(testKey +"toObject") {
-      val timestamp = new DateTime(2012, 10, 2, 22, 33, 44, databaseTimeZone)   // DateTime.equals() vergleicht auch die Zeitzone
+      val timestamp = Instant.parse("2012-10-02T22:33:44Z")
       val e =  converter.toEntity(JobPersistentState(JobPath("/path/name"), true, Some(timestamp)))
       e.schedulerId = "SCHEDULER-ID"
       e.clusterMemberId = null
       e.jobPath = "path/name"
       e.isStopped = testStopped
-      e.nextStartTime = new JavaDate(timestamp.getMillis)
+      e.nextStartTime = new JavaDate(timestamp.toEpochMilli)
       converter.toObject(e) should equal (JobPersistentState(JobPath("/path/name"), testStopped, Some(timestamp)))
     }
   }
