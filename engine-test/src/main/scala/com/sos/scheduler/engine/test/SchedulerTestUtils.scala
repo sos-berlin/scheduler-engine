@@ -21,8 +21,8 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
-import java.util.concurrent.TimeoutException
 import java.time.{Duration, Instant}
+import java.util.concurrent.TimeoutException
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -107,11 +107,11 @@ object SchedulerTestUtils {
 
   implicit def executionContext(implicit hasInjector: HasInjector): ExecutionContext = instance[ExecutionContext]
 
-  def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = Await.ready(f, t.concurrentDuration).successValue
+  def awaitSuccess[A](f: Future[A])(implicit t: ImplicitTimeout): A = Await.ready(f, t.concurrentDuration.toCoarsest).successValue
 
   def awaitFailure[A](f: Future[A])(implicit t: ImplicitTimeout): Throwable = awaitCompletion(f).failed.get
 
-  def awaitCompletion[A](f: Future[A])(implicit t: ImplicitTimeout): Try[A] = Await.ready(f, t.concurrentDuration).value.get
+  def awaitCompletion[A](f: Future[A])(implicit t: ImplicitTimeout): Try[A] = Await.ready(f, t.concurrentDuration.toCoarsest).value.get
 
   def awaitResults[A, M[X] <: TraversableOnce[X]](o: M[Future[A]])
       (implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext, timeout: ImplicitTimeout) =
@@ -142,7 +142,7 @@ object SchedulerTestUtils {
   }
 
   def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
-    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.codeOption == Some(errorCode) }
+    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.codeOption contains errorCode }
     val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
     val event = try awaitResult(eventFuture, timeout.concurrentDuration)
       catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
@@ -151,7 +151,7 @@ object SchedulerTestUtils {
 
   def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
     controller.toleratingErrorCodes(errorCodes.toSet) {
-      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.codeOption == Some(o)) }
+      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.codeOption contains o) }
       body
       try awaitResults(futures)
       catch {
