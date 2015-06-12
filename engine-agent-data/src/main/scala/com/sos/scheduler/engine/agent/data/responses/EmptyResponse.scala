@@ -5,7 +5,7 @@ import spray.json.DefaultJsonProtocol.jsonFormat0
 /**
  * @author Joacim Zschimmer
  */
-case object EmptyResponse extends Response {
+case object EmptyResponse extends XmlResponse {
 
   def toXmlElem = <ok/>
 
