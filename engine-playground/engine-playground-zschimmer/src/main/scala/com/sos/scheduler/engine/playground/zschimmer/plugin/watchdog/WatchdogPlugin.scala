@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.playground.zschimmer.Threads._
 import com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugin._
 import com.sos.scheduler.engine.playground.zschimmer.{Timer, XMLs}
 import java.util.concurrent.TimeUnit
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import javax.inject.{Inject, Named}
 import org.w3c.dom.Element
 import scala.concurrent._
@@ -46,11 +47,11 @@ extends Plugin {
         val future = schedulerThreadFuture { scheduler.callCppAndDoNothing() }
         val t = new Timer(configuration.timeout)
         try {
-          awaitResult(future, Duration(configuration.timeout.toMillis, TimeUnit.MILLISECONDS))
+          awaitResult(future, configuration.timeout)
           logger.info(s"Scheduler response time was $t")
         }
         catch {
-          case _: TimeoutException => logger.warn(s"Scheduler does not respond after ${configuration.timeout.getSeconds}s")
+          case _: TimeoutException => logger.warn(s"Scheduler does not respond after ${configuration.timeout.pretty}")
         }
       }
     }

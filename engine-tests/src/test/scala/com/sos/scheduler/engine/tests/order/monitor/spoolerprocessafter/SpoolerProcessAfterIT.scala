@@ -70,7 +70,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  protected override def onSchedulerActivated() = awaitResult(agent.start(), 10.seconds)
+  protected override def onSchedulerActivated() = awaitResult(agent.start(), 10.s)
 
   private def myTest(index: Int, agentMode: AgentMode, setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒

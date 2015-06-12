@@ -78,6 +78,7 @@ object AgentClientFactory {
    */
   private[client] def commandMillisToRequestTimeout(millis: Long): Timeout = {
     require(millis >= 0)
-    Timeout(bigDecimalToDuration((BigDecimal(millis).setScale(3) + RequestTimeout.toMillis) / 1000))
+    val m = (BigDecimal(millis).setScale(3) + RequestTimeout.toMillis) / 1000
+    Timeout(bigDecimalToDuration(m).toFiniteDuration)
   }
 }

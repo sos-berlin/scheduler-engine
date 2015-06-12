@@ -27,7 +27,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.concurrent.duration._
 
 /**
  * JS-1301 &lt;job_chain process_class=""/>.
@@ -47,7 +46,7 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   protected override def onSchedulerActivated(): Unit =
-    awaitResult(agent.start(), 10.seconds)
+    awaitResult(agent.start(), 10.s)
 
   "Order changes to error state when job chain process class is missing" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {

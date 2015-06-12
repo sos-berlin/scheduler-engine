@@ -13,6 +13,7 @@ import com.typesafe.config.ConfigFactory
 import org.junit.runner.RunWith
 import org.scalatest.Inside.inside
 import org.scalatest.Matchers._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.duration._
@@ -61,17 +62,17 @@ final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
 
   "uncheckedExecute" in {
     val startFuture = client.uncheckedExecute(TestCommandElem)
-    awaitResult(startFuture, Duration.Inf) shouldEqual TestResponseString
+    awaitResult(startFuture, MaxDuration) shouldEqual TestResponseString
   }
 
   "uncheckedExecuteXml" in {
     val startFuture = client.uncheckedExecuteXml(TestCommandElem.toBytes(schedulerEncoding))
-    awaitResult(startFuture, Duration.Inf) shouldEqual TestResponseString
+    awaitResult(startFuture, MaxDuration) shouldEqual TestResponseString
   }
 
   "Server error" in {
     val startFuture = client.uncheckedExecute(<INVALID/>)
-    Await.ready(startFuture, TestTimeout).value.get match {
+    Await.ready(startFuture, TestTimeout.toConcurrent).value.get match {
       case Failure(t) ⇒ // Okay
       case o ⇒ fail(o.toString)
     }
@@ -80,7 +81,7 @@ final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
   "Client error" in {
     val errorPort = findRandomFreeTcpPort()
     val startFuture = clientFactory.apply(s"http://$HttpInterface:$errorPort/").uncheckedExecute(<INVALID/>)
-    Await.ready(startFuture, TestTimeout).value.get match {
+    Await.ready(startFuture, TestTimeout.toConcurrent).value.get match {
       case Failure(t) ⇒ // Okay
       case o ⇒ fail(o.toString)
     }
@@ -93,7 +94,7 @@ private object SchedulerClientFactoryTest {
   private val TestCommandElem = <COMMAND/>
   private val ErrorMessage = "TEST-ERRÖR"
   private val TestResponseString = <spooler><answer><ERROR text={ErrorMessage}/></answer></spooler>.toString()
-  private val TestTimeout = 15.seconds
+  private val TestTimeout = 15.s
 
   private def executeCommand(command: String) =
     SafeXML.loadString(command) match {

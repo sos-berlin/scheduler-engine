@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.common.maven.MavenProperties
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
@@ -40,15 +41,13 @@ import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
-import java.time.{ZoneId, ZoneOffset}
+import java.time.Instant.now
+import java.time.ZoneOffset.UTC
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
-import java.time.ZoneOffset.UTC
-import java.time.Instant.now
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
-import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -161,7 +160,7 @@ with HasCloser {
 
   @ForCpp private def sendCommandAndReplyToStout(uri: String, bytes: Array[Byte]): Unit = {
     val future = injector.instance[SchedulerClientFactory].apply(uri).uncheckedExecute(SafeXML.load(new ByteArrayInputStream(bytes)))
-    val response: String = awaitResult(future, Duration.Inf)
+    val response: String = awaitResult(future, MaxDuration)
     System.out.println(response)
   }
 

@@ -55,7 +55,7 @@ object SchedulerTestUtils {
 
   def runJobAndWaitForEnd(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult = {
     val run = runJobFuture(jobPath, variables)
-    awaitResult(run.result, timeout.concurrentDuration)
+    awaitResult(run.result, timeout.duration)
   }
 
   def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskResult = {
@@ -144,7 +144,7 @@ object SchedulerTestUtils {
   def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
     val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.codeOption contains errorCode }
     val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
-    val event = try awaitResult(eventFuture, timeout.concurrentDuration)
+    val event = try awaitResult(eventFuture, timeout.duration)
       catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
     ResultAndEvent(result, event)
   }

@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import com.sos.scheduler.engine.common.time.ScalaTime._
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable
@@ -60,7 +61,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
     scheduler executeXml <process_class name={s"$ProcessClassName"}
                                         remote_scheduler={s"$remoteSchedulerAddress"}
                                         max_processes={s"$MaxProcesses"}/>
-    awaitResult(started, 10.seconds)
+    awaitResult(started, 10.s)
   }
 
   "sos.spooler.Log methods" - {

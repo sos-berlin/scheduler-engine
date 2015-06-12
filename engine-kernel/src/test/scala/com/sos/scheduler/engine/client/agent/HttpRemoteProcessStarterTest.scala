@@ -6,13 +6,13 @@ import com.sos.scheduler.engine.client.agent.HttpRemoteProcessStarterTest._
 import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 
 /**
  * @author Joacim Zschimmer
@@ -36,7 +36,7 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
 
   override def beforeAll(): Unit = {
     val future = server.start()
-    awaitResult(future, 15.seconds)
+    awaitResult(future, 15.s)
   }
 
   override def afterAll(): Unit = {
@@ -45,9 +45,9 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
 
   "startRemoteTask and closeRemoteTask" in {
     val startFuture = client.startRemoteTask(schedulerApiTcpPort = DummyApiTcpPort, conf, remoteUri = server.baseUri.toString)
-    val httpRemoteProcess: HttpRemoteProcess = awaitResult(startFuture, Duration.Inf)
+    val httpRemoteProcess: HttpRemoteProcess = awaitResult(startFuture, MaxDuration)
     val closeFuture = httpRemoteProcess.closeRemoteTask(kill = true)
-    awaitResult(closeFuture, Duration.Inf)
+    awaitResult(closeFuture, MaxDuration)
     commandExecutor.startCommandReceived shouldBe true
     commandExecutor.closeCommandReceived shouldBe true
   }
