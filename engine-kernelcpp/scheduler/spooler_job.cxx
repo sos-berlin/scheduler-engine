@@ -1850,7 +1850,7 @@ void Standard_job::enqueue_taskPersistentState(const TaskPersistentStateJ& taskP
     if( task_dom )  task->set_dom( task_dom.documentElement() );
     task->_is_in_database = true;
     task->_let_run        = true;
-    task->_enqueue_time = Time::of_millis(taskPersistentStateJ.enqueueTime().getMillis());
+    task->_enqueue_time = Time::of_millis(taskPersistentStateJ.enqueueTimeMillis());
     
     if (!start_at && !_schedule_use->period_follows(Time::now())) {
         try { z::throw_xc( "SCHEDULER-143" ); } 

@@ -52,6 +52,7 @@ struct TaskPersistentState : ::zschimmer::javabridge::proxy_jobject< TaskPersist
   public:
 
     ::javaproxy::org::joda::time::ReadableInstant enqueueTime() const;
+    jlong enqueueTimeMillis() const;
     ::javaproxy::java::lang::String parametersXml() const;
     jlong startTimeMillis() const;
     ::javaproxy::com::sos::scheduler::engine::data::job::TaskId taskId() const;

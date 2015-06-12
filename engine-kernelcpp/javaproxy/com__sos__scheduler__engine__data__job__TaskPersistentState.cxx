@@ -16,6 +16,7 @@ struct TaskPersistentState__class : ::zschimmer::javabridge::Class
    ~TaskPersistentState__class();
 
     ::zschimmer::javabridge::Method const _enqueueTime____method;
+    ::zschimmer::javabridge::Method const _enqueueTimeMillis____method;
     ::zschimmer::javabridge::Method const _parametersXml____method;
     ::zschimmer::javabridge::Method const _startTimeMillis____method;
     ::zschimmer::javabridge::Method const _taskId____method;
@@ -29,6 +30,7 @@ const ::zschimmer::javabridge::class_factory< TaskPersistentState__class > TaskP
 TaskPersistentState__class::TaskPersistentState__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_enqueueTime____method(this, "enqueueTime", "()Lorg/joda/time/ReadableInstant;")
+    ,_enqueueTimeMillis____method(this, "enqueueTimeMillis", "()J")
     ,_parametersXml____method(this, "parametersXml", "()Ljava/lang/String;")
     ,_startTimeMillis____method(this, "startTimeMillis", "()J")
     ,_taskId____method(this, "taskId", "()Lcom/sos/scheduler/engine/data/job/TaskId;")
@@ -58,6 +60,12 @@ TaskPersistentState::~TaskPersistentState() { assign_(NULL); }
     ::javaproxy::org::joda::time::ReadableInstant result;
     result.steal_local_ref(cls->_enqueueTime____method.jobject_call(get_jobject(), parameter_list));
     return result;
+}
+
+jlong TaskPersistentState::enqueueTimeMillis() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    TaskPersistentState__class* cls = _class.get();
+    return cls->_enqueueTimeMillis____method.long_call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String TaskPersistentState::parametersXml() const {
