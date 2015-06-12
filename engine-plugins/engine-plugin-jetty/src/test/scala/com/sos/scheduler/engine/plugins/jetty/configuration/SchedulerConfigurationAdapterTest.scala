@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.scalautil.xmls.XmlException
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader.XmlException
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, WarEntry}
