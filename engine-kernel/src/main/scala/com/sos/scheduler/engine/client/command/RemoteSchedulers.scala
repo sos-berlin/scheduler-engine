@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.command
 
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlException}
 import com.sos.scheduler.engine.data.message.MessageCode
 import javax.xml.transform.Source
 import scala.collection.immutable
@@ -38,7 +38,7 @@ object RemoteSchedulers {
       }
       result.values.toImmutableSeq
     } catch {
-      case ScalaXMLEventReader.XmlException(x: XmlResponseException) ⇒ throw x
+      case XmlException(x: XmlResponseException) ⇒ throw x
     }
   }
 
