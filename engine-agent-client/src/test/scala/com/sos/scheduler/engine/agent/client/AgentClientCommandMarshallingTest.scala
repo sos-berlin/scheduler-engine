@@ -19,6 +19,7 @@ import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import spray.json.JsonParser
 
 /**
  * @author Joacim Zschimmer
@@ -66,6 +67,17 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
         assert(o == response)
       }
     }
+  }
+
+  "syncExecuteJsonCommand" in {
+    val command = """{
+      "$TYPE":"Terminate",
+      "sigtermProcesses": true,
+      "sigkillProcessesAfter": "PT10S"
+    }"""
+    val expectedResponse = "{}"
+    val response = client.synchronouslyExecuteJsonCommand(command)
+    assert(JsonParser(response) == JsonParser(expectedResponse))
   }
 }
 
