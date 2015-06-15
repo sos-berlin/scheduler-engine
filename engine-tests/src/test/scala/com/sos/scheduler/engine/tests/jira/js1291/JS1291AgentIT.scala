@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1291
 
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -18,6 +17,7 @@ import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT._

@@ -1,13 +1,13 @@
-package com.sos.scheduler.engine.agent.test
+package com.sos.scheduler.engine.test.agent
 
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 
 /**

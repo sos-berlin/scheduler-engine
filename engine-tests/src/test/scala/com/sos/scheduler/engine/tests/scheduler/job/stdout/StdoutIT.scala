@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout
 
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.stdout.StdoutIT._

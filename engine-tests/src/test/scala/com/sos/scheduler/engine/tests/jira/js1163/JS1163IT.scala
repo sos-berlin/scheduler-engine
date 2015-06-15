@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
@@ -9,6 +8,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._

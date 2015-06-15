@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.javascript
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
+import AgentWithSchedulerTest._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.comapi.javascript.SchedulerAPIJavascriptIT._
 import org.junit.runner.RunWith

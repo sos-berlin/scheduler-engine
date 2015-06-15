@@ -39,12 +39,16 @@
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-test</artifactId>
+            <artifactId>engine-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binaryVersion}</artifactId>
         </dependency>
     </dependencies>
 </project>

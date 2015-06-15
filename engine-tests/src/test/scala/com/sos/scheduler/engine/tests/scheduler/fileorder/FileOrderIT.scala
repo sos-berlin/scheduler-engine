@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.fileorder
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
@@ -17,6 +16,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.fileorder.FileOrderIT._
