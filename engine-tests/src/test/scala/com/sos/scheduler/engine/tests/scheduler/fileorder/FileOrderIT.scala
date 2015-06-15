@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderTouchedEvent}
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -55,7 +56,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         // But short period when agentFileExist does not applies, to allow check for file removal
         val repeat = if (withAgent && isDistributed || !notificationIsActive) 1.s else 1.h
         scheduler executeXml newProcessClass(agentUriOption)
-        scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, JobPath("/test-delete"), repeat = repeat, isDistributed = isDistributed)
+        scheduler executeXml newJobChainElem(directory, agentUri = agentUriOption, DeleteJobPath, repeat = repeat, isDistributed = isDistributed)
         for (_ ← 1 to 3) {
           sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
           val orderKey = TestJobChainPath orderKey matchingFile.toString
@@ -63,6 +64,18 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
               touch(matchingFile)
             }
+          }
+        }
+      }
+
+      "Change of first job definition does not disturb processing" in {
+        // Needs the process class defined in previous test
+        val orderKey = TestJobChainPath orderKey matchingFile.toString
+        runUntilFileRemovedMessage(orderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+            testEnvironment.fileFromPath(DeleteJobPath).append(" ")
+            instance[FolderSubsystem].updateFolders()
+            touch(matchingFile)
           }
         }
       }
@@ -150,6 +163,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
 private object FileOrderIT {
   private val TestJobChainPath = JobChainPath("/test")
   private val logger = Logger(getClass)
+  private val DeleteJobPath = JobPath("/test-delete")
 
   private def newJobChainElem(directory: Path, agentUri: Option[String], jobPath: JobPath, repeat: Duration, isDistributed: Boolean): xml.Elem =
     <job_chain name={TestJobChainPath.withoutStartingSlash} distributed={isDistributed.toString}>
