@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.javascript
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.test.AgentTest
-import com.sos.scheduler.engine.agent.test.AgentTest._
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -27,7 +27,7 @@ import scala.concurrent.duration._
  * @author Andreas Liebert
  */
 @RunWith(classOf[JUnitRunner])
-final class SchedulerAPIJavascriptIT extends FreeSpec with ScalaSchedulerTest with AgentTest{
+final class SchedulerAPIJavascriptIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest{
 
   private val finishedOrderParametersPromise = Promise[Map[String, String]]()
   private val eventsPromise = Promise[immutable.Seq[Event]]()

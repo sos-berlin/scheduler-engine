@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.java
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.agent.test.AgentTest._
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._

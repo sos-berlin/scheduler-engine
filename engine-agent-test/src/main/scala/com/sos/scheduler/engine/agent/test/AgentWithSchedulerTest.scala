@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.test
 
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.test.AgentTest._
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 /**
  * @author Joacim Zschimmer
  */
-trait AgentTest extends HasCloser {
+trait AgentWithSchedulerTest extends HasCloser {
   this: ScalaSchedulerTest ⇒
 
   protected lazy val agent = {
@@ -31,7 +31,7 @@ trait AgentTest extends HasCloser {
   }
 }
 
-object AgentTest {
+object AgentWithSchedulerTest {
   val AgentProcessClassPath = ProcessClassPath("/test-agent")
 
   implicit class AgentJobPath(val s: JobPath) extends AnyVal {

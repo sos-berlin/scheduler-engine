@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
-import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
@@ -25,7 +25,7 @@ import scala.concurrent.Future
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentTest {
+final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   private lazy val List(httpPort, tcpPort) = findRandomFreeTcpPorts(2)
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-http-port=$httpPort", s"-tcp-port=$tcpPort"))

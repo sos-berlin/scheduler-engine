@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1291
 
-import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -36,7 +36,7 @@ import scala.concurrent.Promise
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
+final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogEvent}
   private lazy val List(tcpPort, httpPort) = findRandomFreeTcpPorts(2)
@@ -51,7 +51,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentTes
   List(
     "With TCP C++ Agent" → TcpCppAgentProcessClass,
     "With HTTP C++ Agent" → HttpCppAgentProcessClass,
-    "With Java Agent" → AgentTest.AgentProcessClassPath)
+    "With Java Agent" → AgentWithSchedulerTest.AgentProcessClassPath)
   .foreach { case (testGroupName, processClassPath) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[Event]]()

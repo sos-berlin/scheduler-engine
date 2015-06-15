@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.fileorder
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
@@ -37,7 +37,7 @@ import org.scalatest.junit.JUnitRunner
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
+final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List("-distributed-orders"))
   private implicit lazy val entityManagerFactory = instance[EntityManagerFactory]

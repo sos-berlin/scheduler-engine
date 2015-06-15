@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout
 
-import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
@@ -21,7 +21,7 @@ import org.scalatest.junit.JUnitRunner
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
+final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass,

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.jobmethods
 
-import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.agent.test.AgentWithSchedulerTest
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
@@ -19,7 +19,7 @@ import org.scalatest.junit.JUnitRunner
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentTest {
+final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
