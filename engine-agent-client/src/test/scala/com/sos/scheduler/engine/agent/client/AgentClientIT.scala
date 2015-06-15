@@ -6,7 +6,7 @@ import com.google.common.io.Closer
 import com.google.common.io.Files._
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.client.AgentClientFactory._
+import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandMillisToRequestTimeout}
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.agent.data.responses.FileOrderSourceContent
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
@@ -31,7 +31,7 @@ import scala.util.matching.Regex
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with BeforeAndAfterAll {
+final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfterAll {
 
   override implicit val patienceConfig = PatienceConfig(timeout = 10.seconds)
   private implicit val closer = Closer.create()
@@ -55,7 +55,7 @@ final class AgentClientFactoryTest extends FreeSpec with ScalaFutures with Befor
     }
   }
 
-  "readFiles" in {
+  "RequestFileOrderSourceContent" in {
     val dir = createTempDirectory("agent-") withCloser delete
     val knownFile = dir / "x-known"
     val instant = Instant.parse("2015-01-01T12:00:00Z")
