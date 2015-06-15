@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.data.commands
 
 import spray.json._
+import com.sos.scheduler.engine.agent.data.sprayjson.TypedJson._
 
 /**
  * @author Joacim Zschimmer
@@ -17,13 +18,6 @@ trait Command {
 }
 
 object Command {
-
-  implicit class WithFieldsJsObject(val delegate: JsObject) extends AnyVal {
-    def withTypeField(typeName: String) = JsObject(delegate.fields + ("$TYPE" → JsString(typeName)))
-  }
-
-  def splitTypeAndJsObject(value: JsValue): (String, JsObject) =
-    value.asJsObject.fields("$TYPE").asInstanceOf[JsString].value → JsObject(value.asJsObject.fields - "$TYPE")
 
   implicit object MyJsonFormat extends RootJsonFormat[Command] {
     def write(command: Command) =
