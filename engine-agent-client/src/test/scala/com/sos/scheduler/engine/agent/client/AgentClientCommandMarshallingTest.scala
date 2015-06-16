@@ -48,7 +48,7 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
   }
 
   override implicit val patienceConfig = PatienceConfig(timeout = 10.seconds)
-  private lazy val client = StandAloneAgentClient(agentUri = agent.localUri).closeWithCloser
+  private lazy val client = SimpleAgentClient(agentUri = agent.localUri).closeWithCloser
 
   "commandMillisToRequestTimeout" in {
     val upperBound = RequestFileOrderSourceContent.MaxDuration  // The upper bound depends on Akka tick length (Int.MaxValue ticks, a tick can be as short as 1ms)
@@ -69,14 +69,14 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
     }
   }
 
-  "syncExecuteJsonCommand" in {
+  "executeJsonCommandSynchronously" in {
     val command = """{
-      "$TYPE":"Terminate",
+      "$TYPE": "Terminate",
       "sigtermProcesses": true,
       "sigkillProcessesAfter": "PT10S"
     }"""
     val expectedResponse = "{}"
-    val response = client.synchronouslyExecuteJsonCommand(command)
+    val response = client.executeJsonCommandSynchronously(command)
     assert(JsonParser(response) == JsonParser(expectedResponse))
   }
 }

@@ -21,6 +21,8 @@ import spray.httpx.marshalling.Marshaller
 
 /**
  * Client for JobScheduler Agent.
+ * The HTTP requests are considerd to be responded within `RequestTimeout`.
+ * The command [[RequestFileOrderSourceContent]] has an own timeout, which is used for the HTTP request, too (instead of `RequestTimeout`).
  *
  * @author Joacim Zschimmer
  */
@@ -41,8 +43,9 @@ trait AgentClient {
 
   /**
    * Sends a JSON string containing a command to the Agent and awaits the response, returning it as a JSON string.
+   * The HTTP request is considerd to be responded within `RequestTimeout`.
    */
-  def synchronouslyExecuteJsonCommand(commandJson: String): String =
+  def executeJsonCommandSynchronously(commandJson: String): String =
     awaitResult(executeJsonCommand(commandJson), 2 * RequestTimeout)
 
   private def executeJsonCommand(commandJson: String): Future[String] =
@@ -67,7 +70,6 @@ trait AgentClient {
     pipeline(Post(commandUri, command: Command))
   }
 
-
   final def fileExists(filePath: String): Future[Boolean] =
     nonCachingHttpResponsePipeline(Get(Uri(s"$baseUri$FileStatusPath").withQuery("file" → filePath))) map { httpResponse ⇒
       httpResponse.status match {
@@ -81,7 +83,7 @@ trait AgentClient {
 }
 
 object AgentClient {
-  private[client] val RequestTimeout = 60.s
+  val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
   private val CommandPath = "/jobscheduler/agent/command"
   private val FileStatusPath = "/jobscheduler/agent/fileStatus"
