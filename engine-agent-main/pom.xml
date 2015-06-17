@@ -83,7 +83,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/maven-assembly.xml</descriptor>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
                             </descriptors>
                             <archive>
                                 <manifest>
