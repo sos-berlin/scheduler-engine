@@ -90,5 +90,5 @@ private object AgentClientCommandMarshallingTest {
   private val ExpectedFileOrderSourceContent = FileOrderSourceContent(List(
     FileOrderSourceContent.Entry("a.txt", 23334445555L),
     FileOrderSourceContent.Entry("b.txt", 20000000000L)))
-  private val ExpectedTerminate = Terminate(sigtermProcesses = true, sigkillProcessesAfter = 10.s)
+  private val ExpectedTerminate = Terminate(sigtermProcesses = true, sigkillProcessesAfter = Some(10.s))
 }

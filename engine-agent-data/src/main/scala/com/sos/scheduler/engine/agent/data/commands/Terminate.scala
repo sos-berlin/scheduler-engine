@@ -11,7 +11,7 @@ import spray.json.DefaultJsonProtocol._
  */
 final case class Terminate(
   sigtermProcesses: Boolean = false,
-  sigkillProcessesAfter: Duration = Duration.ofSeconds(Long.MaxValue))
+  sigkillProcessesAfter: Option[Duration] = None)
 extends TerminateOrAbort {
   type Response = EmptyResponse.type
 }
