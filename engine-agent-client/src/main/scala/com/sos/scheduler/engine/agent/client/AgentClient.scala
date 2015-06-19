@@ -32,8 +32,7 @@ trait AgentClient {
   protected[client] val agentUri: String
   implicit protected val actorSystem: ActorSystem
 
-  private lazy val baseUri: String = agentUri stripSuffix "/"
-  private lazy val commandUri = baseUri concat CommandPath
+  private lazy val uris = AgentUris(agentUri)
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
@@ -43,18 +42,18 @@ trait AgentClient {
 
   /**
    * Sends a JSON string containing a command to the Agent and awaits the response, returning it as a JSON string.
-   * The HTTP request is considerd to be responded within `RequestTimeout`.
+   * The HTTP request is considered to be responded within `RequestTimeout`.
    */
   def executeJsonCommandSynchronously(commandJson: String): String =
     awaitResult(executeJsonCommand(commandJson), 2 * RequestTimeout)
 
   private def executeJsonCommand(commandJson: String): Future[String] =
-    (nonCachingHttpResponsePipeline ~> unmarshal[String]).apply(Post(commandUri, commandJson)(StringToJsonMarshaller))
+    (nonCachingHttpResponsePipeline ~> unmarshal[String]).apply(Post(uris.command, commandJson)(StringToJsonMarshaller))
 
   final def executeCommand(command: Command): Future[command.Response] = {
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
-      case _: Terminate | AbortImmediately ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(commandUri, command: Command))
+      case _: Terminate | AbortImmediately ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(uris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] }
   }
@@ -67,11 +66,11 @@ trait AgentClient {
         sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
         decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
-    pipeline(Post(commandUri, command: Command))
+    pipeline(Post(uris.command, command: Command))
   }
 
   final def fileExists(filePath: String): Future[Boolean] =
-    nonCachingHttpResponsePipeline(Get(Uri(s"$baseUri$FileStatusPath").withQuery("file" → filePath))) map { httpResponse ⇒
+    nonCachingHttpResponsePipeline(Get(Uri(uris.fileStatus(filePath)))) map { httpResponse ⇒
       httpResponse.status match {
         case OK ⇒ true
         case NotFound ⇒ false
@@ -85,8 +84,6 @@ trait AgentClient {
 object AgentClient {
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
-  private val CommandPath = "/jobscheduler/agent/command"
-  private val FileStatusPath = "/jobscheduler/agent/fileStatus"
 
   private val StringToJsonMarshaller = Marshaller.of[String](`application/json`) { (string, contentType, ctx) ⇒
     ctx.marshalTo(HttpEntity(contentType, string))
