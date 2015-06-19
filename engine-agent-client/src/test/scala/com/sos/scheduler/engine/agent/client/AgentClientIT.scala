@@ -84,7 +84,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
   }
 
   "fileExists" in {
-    val file = createTempFile("sos", ".tmp")
+    val file = createTempFile("AgentClientIT with blank", ".tmp")
     closer.onClose { deleteIfExists(file) }
     for (i ← 1 to 3) {   // Check no-cache
       touch(file)
