@@ -11,9 +11,15 @@ final class AgentUris private(agentUri: String) {
 
   val command = toAgentUri(Uri("command"))
 
+  def overview = toAgentUri(Uri("overview"))
+
   def fileStatus(filePath: String) = toAgentUri(Uri("fileStatus") withQuery ("file" → filePath))
 
+  def apply(relativeUri: String) = toAgentUri(relativeUri stripPrefix "/")
+
   private def toAgentUri(u: Uri) = s"$agentUri/jobscheduler/agent/$u"
+
+  override def toString = agentUri
 }
 
 object AgentUris {

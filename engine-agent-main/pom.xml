@@ -104,6 +104,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <!-- The agent-client is only for assembled .tar.gz, which should include the client, too. See above, maven-assembly-plugin -->
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
+            <artifactId>engine-agent-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>
