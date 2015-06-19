@@ -1,4 +1,6 @@
-[ -z "$SCHEDULER_AGENT_HOME" ] && SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.."; pwd)
+if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
+    SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.."; pwd)
+fi
 
 if [ "$OSTYPE" = "cygwin" ]; then
     jarDir=$(cygpath -w "$SCHEDULER_AGENT_HOME/jar")
@@ -10,4 +12,6 @@ else
 fi
 
 java=java
-[ -n "$javaHome" ] && java="$javaHome/bin/java"
+if [ -n "$javaHome" ]; then :
+    java="$javaHome/bin/java"
+fi
