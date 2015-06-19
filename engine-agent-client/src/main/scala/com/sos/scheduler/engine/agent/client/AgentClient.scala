@@ -5,7 +5,6 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent}
-import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import org.scalactic.Requirements._
 import scala.concurrent.Future
@@ -14,10 +13,9 @@ import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.{NotFound, OK}
-import spray.http.{HttpEntity, HttpRequest, HttpResponse, Uri}
+import spray.http.{HttpRequest, HttpResponse, Uri}
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding.Gzip
-import spray.httpx.marshalling.Marshaller
 
 /**
  * Client for JobScheduler Agent.
@@ -39,16 +37,6 @@ trait AgentClient {
       encode(Gzip) ~>
       sendReceive ~>
       decode(Gzip)
-
-  /**
-   * Sends a JSON string containing a command to the Agent and awaits the response, returning it as a JSON string.
-   * The HTTP request is considered to be responded within `RequestTimeout`.
-   */
-  def executeJsonCommandSynchronously(commandJson: String): String =
-    awaitResult(executeJsonCommand(commandJson), 2 * RequestTimeout)
-
-  private def executeJsonCommand(commandJson: String): Future[String] =
-    (nonCachingHttpResponsePipeline ~> unmarshal[String]).apply(Post(uris.command, commandJson)(StringToJsonMarshaller))
 
   final def executeCommand(command: Command): Future[command.Response] = {
     val response = command match {
@@ -84,10 +72,6 @@ trait AgentClient {
 object AgentClient {
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
-
-  private val StringToJsonMarshaller = Marshaller.of[String](`application/json`) { (string, contentType, ctx) ⇒
-    ctx.marshalTo(HttpEntity(contentType, string))
-  }
 
   /**
    * The returns timeout for the HTTP request is longer than the expected duration of the request
