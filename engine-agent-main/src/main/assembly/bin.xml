@@ -16,11 +16,13 @@
     </files>
     <fileSets>
         <fileSet>
-            <directory>${basedir}/src/main/resources/com/sos/scheduler/engine/agent/main</directory>
+            <directory>${basedir}/src/main/scripts</directory>
             <outputDirectory>agent/bin</outputDirectory>
             <fileMode>0755</fileMode>
             <includes>
                 <include>agent.sh</include>
+                <include>agent-client.sh</include>
+                <include>set-context.sh</include>
             </includes>
         </fileSet>
         <fileSet>
