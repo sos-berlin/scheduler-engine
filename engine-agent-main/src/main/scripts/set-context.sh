@@ -11,6 +11,10 @@ else
     javaHome="$JAVA_HOME"
 fi
 
+if [ -z "$SCHEDULER_AGENT_WORK" ]; then :
+    SCHEDULER_AGENT_WORK="$SCHEDULER_AGENT_HOME"
+fi
+
 java=java
 if [ -n "$javaHome" ]; then :
     java="$javaHome/bin/java"

@@ -6,7 +6,13 @@ if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
 fi
 . "$SCHEDULER_AGENT_HOME/bin/set-context.sh"
 
-"$java" -classpath "$jarDir/*" com.sos.scheduler.engine.agent.main.AgentMain "$@" &
+if [ -f "$SCHEDULER_AGENT_WORK/etc/logback.xml" ]; then :
+    logbackConfig="file:$SCHEDULER_AGENT_WORK/etc/logback.xml"
+else
+    logbackConfig="com/sos/scheduler/engine/agent/main/logback.xml"
+fi
+
+"$java" -classpath "$jarDir/*" -Dlogback.configurationFile="$logbackConfig" com.sos.scheduler.engine.agent.main.AgentMain "$@" &
 pid=$!
 trap "kill -s SIGTERM $pid && wait" SIGTERM SIGINT  # For Docker
 wait
