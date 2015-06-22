@@ -6,4 +6,7 @@ if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
 fi
 . "$SCHEDULER_AGENT_HOME/bin/set-context.sh"
 
-"$java" -classpath "$jarDir/*" com.sos.scheduler.engine.agent.main.AgentMain "$@"
+"$java" -classpath "$jarDir/*" com.sos.scheduler.engine.agent.main.AgentMain "$@" &
+pid=$!
+trap "kill -s SIGTERM $pid && wait" SIGTERM SIGINT  # For Docker
+wait
