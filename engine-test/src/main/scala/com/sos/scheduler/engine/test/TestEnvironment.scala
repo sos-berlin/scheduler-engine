@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.test
 
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
+import com.sos.scheduler.engine.common.scalautil.FileUtils.createShortNamedDirectory
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
@@ -17,7 +18,7 @@ import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.TestEnvironment._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
-import java.nio.file.Files
+import java.nio.file._
 import scala.collection.immutable
 
 /** Build the environment for the scheduler binary. */
@@ -95,12 +96,12 @@ extends HasCloser {
     new File(directory, name) sideEffect makeDirectory
 
   /** @return a temporary directory for use in &lt;file_order_source>.
-    *         Under Windows, which allows not more than 250 character in a file path (the order log file),
+    *         Under Windows, which allows not more than 260 character in a file path (the order log file),
     *         the directory is placed in the original Windows temporary directory as denoted by the environment variable TEMP. */
   def newFileOrderSourceDirectory(): File =
     (if (OperatingSystem.isWindows) sys.env.get("TEMP") else None) match {
       case Some(t) ⇒
-        Files.createTempDirectory(new File(t).toPath, "sos-").toFile sideEffect { dir ⇒ onClose { removeDirectoryRecursivly(dir) } }
+        createShortNamedDirectory(new File(t).toPath, "test-").toFile sideEffect { dir ⇒ onClose { removeDirectoryRecursivly(dir) } }
       case None ⇒
         Files.createTempDirectory(null).toFile  // Directory based in java.io.tmpdir, which is modified by Maven pom.xml (target)
     }
@@ -123,6 +124,6 @@ object TestEnvironment {
   private def libraryPathEnv(directory: File): String = {
     val varName = operatingSystem.getDynamicLibraryEnvironmentVariableName
     val previous = nullToEmpty(System.getenv(varName))
-    s"$varName="+ OperatingSystem.concatFileAndPathChain(directory, previous)
+    s"$varName=" + OperatingSystem.concatFileAndPathChain(directory, previous)
   }
 }
