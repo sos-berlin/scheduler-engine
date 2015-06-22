@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.agent.client
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandMillisToRequestTimeout}
 import com.sos.scheduler.engine.agent.client.AgentClientCommandMarshallingTest._
-import com.sos.scheduler.engine.agent.commandexecutor.CommandExecutor
+import com.sos.scheduler.engine.agent.command.CommandExecutor
 import com.sos.scheduler.engine.agent.data.commands.{AbortImmediately, Command, RequestFileOrderSourceContent, Terminate}
 import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, Response}
 import com.sos.scheduler.engine.agent.test.AgentTest
