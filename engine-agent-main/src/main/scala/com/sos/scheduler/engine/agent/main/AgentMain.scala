@@ -20,7 +20,8 @@ object AgentMain {
   private val ShutdownTimeout = OnJavaShutdownSigkillProcessesAfter + 2.s
 
   def main(args: Array[String]): Unit = {
-    try runWithGui(AgentConfiguration(args))
+    val conf = AgentConfiguration(args)
+    try run(conf)
     catch { case NonFatal(t) ⇒
       println(s"AGENT TERMINATED DUE TO ERROR: $t")
       logger.error(t.toString, t)
@@ -28,7 +29,7 @@ object AgentMain {
     }
   }
 
-  def runWithGui(conf: AgentConfiguration): Unit =
+  def run(conf: AgentConfiguration): Unit =
     autoClosing(new Agent(conf)) { agent ⇒
       def atShutdown() = {
         agent.executeCommand(Terminate(sigtermProcesses = true, sigkillProcessesAfter = Some(OnJavaShutdownSigkillProcessesAfter)))
