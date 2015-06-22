@@ -16,7 +16,7 @@ object AgentClientMain {
   def main(args: Array[String]): Unit =
     try run(args, println)
     catch { case NonFatal(t) ⇒
-      println(t.toString)
+      println(s"ERROR: $t")
       logger.error(t.toString, t)
       System.exit(1)
     }
