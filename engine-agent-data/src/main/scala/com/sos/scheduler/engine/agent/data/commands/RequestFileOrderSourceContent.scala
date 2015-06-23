@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.data.commands
 
 import com.sos.scheduler.engine.agent.data.responses.FileOrderSourceContent
+import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import java.time.Duration
 import scala.collection.immutable
 import spray.json.DefaultJsonProtocol._
@@ -11,12 +12,12 @@ import spray.json.DefaultJsonProtocol._
 final case class RequestFileOrderSourceContent(
   directory: String,
   regex: String,
-  durationMillis: Long,
+  duration: Duration,
   knownFiles: immutable.Set[String])
 extends Command {
   type Response = FileOrderSourceContent
 
-  override def toShortString = s"RequestFileOrderSourceContent($directory,$regex,$durationMillis,${knownFiles.size} known files})"
+  override def toShortString = s"RequestFileOrderSourceContent($directory,$regex,$duration,${knownFiles.size} known files})"
 
   override def toStringIsLonger = knownFiles.nonEmpty
 }

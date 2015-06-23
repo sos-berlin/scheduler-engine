@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.common.scalautil.Tries._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
+import java.time.Duration
 import org.scalactic.Requirements._
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -24,7 +25,7 @@ final class CppFileOrderSourceClient private(
   agentUri: String,
   directory: String,
   regex: String,
-  durationMillis: Long,
+  duration: Duration,
   schedulerThreadCallQueue: SchedulerThreadCallQueue)
   (implicit actorSystem: ActorSystem) {
 
@@ -37,7 +38,7 @@ final class CppFileOrderSourceClient private(
   def readFiles(knownFiles: java.util.List[String], resultCppCall: CppCall): Unit = {
     requireState(!isInCall)
     isInCall = true
-    val command = RequestFileOrderSourceContent(directory = directory, regex = regex, durationMillis = durationMillis, knownFiles.toSet)
+    val command = RequestFileOrderSourceContent(directory = directory, regex = regex, duration = duration, knownFiles.toSet)
     agent.executeCommand(command) onComplete { completion ⇒
       val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
       isInCall = false
@@ -57,7 +58,7 @@ object CppFileOrderSourceClient {
       agentUri = agentUri,
       directory = directory,
       regex = regex,
-      durationMillis = durationMillis,
+      duration = Duration.ofMillis(durationMillis),
       injector.instance[SchedulerThreadCallQueue])(
         injector.instance[ActorSystem])
 }

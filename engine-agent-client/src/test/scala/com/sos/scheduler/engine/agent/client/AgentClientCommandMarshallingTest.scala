@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.util.Timeout
-import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandMillisToRequestTimeout}
+import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.client.AgentClientCommandMarshallingTest._
 import com.sos.scheduler.engine.agent.command.CommandExecutor
 import com.sos.scheduler.engine.agent.data.commands.{AbortImmediately, Command, RequestFileOrderSourceContent, Terminate}
@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
@@ -18,7 +19,6 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 /**
  * @author Joacim Zschimmer
@@ -46,13 +46,13 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
     }
   }
 
-  override implicit val patienceConfig = PatienceConfig(timeout = 10.seconds)
+  override implicit val patienceConfig = PatienceConfig(timeout = 10.s.toConcurrent)
   private lazy val client = SimpleAgentClient(agentUri = agent.localUri).closeWithCloser
 
-  "commandMillisToRequestTimeout" in {
+  "commandDurationToRequestTimeout" in {
     val upperBound = RequestFileOrderSourceContent.MaxDuration  // The upper bound depends on Akka tick length (Int.MaxValue ticks, a tick can be as short as 1ms)
-    for (millis ← List[Long](0, 1, upperBound.toMillis)) {
-      assert(commandMillisToRequestTimeout(millis) == Timeout(RequestTimeout.toMillis + millis, MILLISECONDS))
+    for (duration ← List[Duration](0.s, 1.s, upperBound)) {
+      assert(commandDurationToRequestTimeout(duration) == Timeout((RequestTimeout + duration).toMillis, MILLISECONDS))
     }
   }
 
@@ -73,7 +73,7 @@ private object AgentClientCommandMarshallingTest {
   private val ExpectedRequestFileOrderSourceContent = RequestFileOrderSourceContent(
     directory = "DIRECTORY",
     regex = "REGEX",
-    durationMillis = 111222,
+    duration= 111222.ms,
     knownFiles = Set("a", "b"))
   private val ExpectedFileOrderSourceContent = FileOrderSourceContent(List(
     FileOrderSourceContent.Entry("a.txt", 23334445555L),

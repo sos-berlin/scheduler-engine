@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import java.time.Duration
 import org.scalactic.Requirements._
 import scala.concurrent.Future
 import spray.client.pipelining._
@@ -47,7 +48,7 @@ trait AgentClient {
   }
 
   private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
-    val timeout = commandMillisToRequestTimeout(command.durationMillis)
+    val timeout = commandDurationToRequestTimeout(command.duration)
     val pipeline =
       addHeader(Accept(`application/json`)) ~>
         encode(Gzip) ~>
@@ -76,9 +77,8 @@ object AgentClient {
   /**
    * The returns timeout for the HTTP request is longer than the expected duration of the request
    */
-  private[client] def commandMillisToRequestTimeout(millis: Long): Timeout = {
-    require(millis >= 0)
-    val m = (BigDecimal(millis).setScale(3) + RequestTimeout.toMillis) / 1000
-    Timeout(bigDecimalToDuration(m).toFiniteDuration)
+  private[client] def commandDurationToRequestTimeout(duration: Duration): Timeout = {
+    require(duration >= 0.s)
+    Timeout((duration  + RequestTimeout).toFiniteDuration)
   }
 }

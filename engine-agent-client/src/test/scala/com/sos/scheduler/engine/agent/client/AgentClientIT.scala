@@ -6,7 +6,7 @@ import com.google.common.io.Closer
 import com.google.common.io.Files._
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandMillisToRequestTimeout}
+import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.agent.data.responses.FileOrderSourceContent
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
@@ -14,17 +14,16 @@ import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.touchAndDeleteWithCloser
+import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
-import java.time.Instant
+import java.time.{Duration, Instant}
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.matching.Regex
 
 /**
@@ -33,7 +32,7 @@ import scala.util.matching.Regex
 @RunWith(classOf[JUnitRunner])
 final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfterAll {
 
-  override implicit val patienceConfig = PatienceConfig(timeout = 10.seconds)
+  override implicit val patienceConfig = PatienceConfig(timeout = 10.s.toConcurrent)
   private implicit val closer = Closer.create()
   private lazy val agent = Agent.forTest().closeWithCloser
   private val injector = Guice.createInjector(new ScalaAbstractModule {
@@ -41,7 +40,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
   })
   private lazy val client = injector.instance[AgentClientFactory].apply(agentUri = agent.localUri)
 
-  override def beforeAll() = Await.result(agent.start(), 10.seconds)
+  override def beforeAll() = awaitResult(agent.start(), 10.s)
 
   override def afterAll() = {
     closer.close()
@@ -50,8 +49,8 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
 
   "commandMillisToRequestTimeout" in {
     val upperBound = RequestFileOrderSourceContent.MaxDuration  // The upper bound depends on Akka tick length (Int.MaxValue ticks, a tick can be as short as 1ms)
-    for (millis ← List[Long](0, 1, upperBound.toMillis)) {
-      assert(commandMillisToRequestTimeout(millis) == Timeout(RequestTimeout.toMillis + millis, MILLISECONDS))
+    for (duration ← List[Duration](0.s, 1.s, upperBound)) {
+      assert(commandDurationToRequestTimeout(duration) == Timeout((RequestTimeout + duration).toMillis, MILLISECONDS))
     }
   }
 
@@ -76,7 +75,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
     val command = RequestFileOrderSourceContent(
       directory = dir.toString,
       regex = regex,
-      durationMillis = RequestFileOrderSourceContent.MaxDuration.toMillis,
+      duration = RequestFileOrderSourceContent.MaxDuration,
       knownFiles = Set(knownFile.toString))
     whenReady(client.executeCommand(command)) { o ⇒
       assert(o == expectedResult)
@@ -96,7 +95,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
 
   "Invalid URI" in {
     val client = injector.instance[AgentClientFactory].apply(agentUri = "INVALID-URI")
-    val e = intercept[RuntimeException] { Await.result(client.fileExists("FILE"), 10.seconds) }
+    val e = intercept[RuntimeException] { awaitResult(client.fileExists("FILE"), 10.s) }
     assert(e.toString contains "INVALID-URI")
   }
 }
