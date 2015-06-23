@@ -101,6 +101,7 @@ struct Time
     void                        operator -=                 (const Duration&);
 
     Time                        operator +                  ( const Duration& ) const;
+    Time                        operator -                  (const Duration& o) const;
     Duration                    operator -                  ( const Time& ) const;
 
     bool                        operator <                  ( const Time& t ) const         { return _time <  t._time; }

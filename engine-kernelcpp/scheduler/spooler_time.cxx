@@ -184,6 +184,13 @@ Time Time::operator + ( const Duration& d ) const
                                        : Time(min(never_double, as_double() + d.as_double()));
 }
 
+//---------------------------------------------------------------------------------Time::operator -
+
+Time Time::operator - ( const Duration& d ) const
+{ 
+    return *this + Duration(-d.as_double());
+}
+
 //---------------------------------------------------------------------------------Time::operator +
 
 //Time Time::operator + ( double t ) const
