@@ -77,7 +77,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );
     void on_directory_read();
-    void repeat_after_delay();
+    void repeat_after_delay(const Duration& duration);
     void                        close_notification      ();
     void                        read_directory          (bool was_notified);
     void start_read_new_files_from_agent();
@@ -539,7 +539,6 @@ void Directory_file_order_source::withdraw_order_request()
 void Directory_file_order_source::start_read_new_files_from_agent() {
     if (_in_directory_read_result_call) {
         Z_LOG2("scheduler", Z_FUNCTION << " Still waiting for agent's response\n");
-        repeat_after_delay();
     } else {
         _agent_request_known_files.clear();
         if (_job_chain->is_distributed()) {
@@ -561,12 +560,19 @@ void Directory_file_order_source::start_read_new_files_from_agent() {
 
 void Directory_file_order_source::on_call(const Directory_read_result_call& call) {
     assert(&call == _directory_read_result_call);
+    Duration next_call_after = Duration(0.1);  // Little delay to prevent hot loop in case of error
     _in_directory_read_result_call = false;
     clear_new_files();
-    _new_files_time  = Time::now();
     try {
         ListJ javaList = (ListJ)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
         int n = javaList.size();
+        if (n == 0) {
+            next_call_after = max(Duration(1), _new_files_time + _repeat - Time::now());
+            if (next_call_after > Duration(1)) {
+                // Normally, Agent call should response after _repeat, so next_call_after should be zero.
+                Z_LOG2("scheduler", obj_name() << " No files received. Next call after " + next_call_after.as_string());
+            }
+        }
         _new_files.reserve(n);
         for (int i = 0; i < n; i++) {
             string path = (javaproxy::java::lang::String)javaList.get(i);
@@ -584,7 +590,8 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
         _directory_error = x;
         log()->error(x.what());
     }
-    repeat_after_delay();
+    _new_files_time  = Time::now();
+    repeat_after_delay(next_call_after);
 }
 
 //------------------------------------------------------Directory_file_order_source::read_directory
@@ -1021,7 +1028,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
         _notification_event.reset();
         read_directory(was_notified);
         on_directory_read();
-        repeat_after_delay();
+        repeat_after_delay(_repeat);
     }
 
     return true;
@@ -1032,14 +1039,13 @@ void Directory_file_order_source::on_directory_read() {
     if (_job_chain->untouched_is_allowed() && has_new_file()) {
         _job_chain->tip_for_new_order(_next_state);
     }
-    repeat_after_delay();
 }
 
 
-void Directory_file_order_source::repeat_after_delay() {
+void Directory_file_order_source::repeat_after_delay(const Duration& duration) {
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
-                                                 : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+                                                 : duration.seconds());    // Unter Unix (C++) funktioniert's _nur_ durch wiederkehrendes Nachsehen
     set_async_delay(max(1, delay));
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
