@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.agent.data.responses.StartProcessResponse
  */
 trait StartProcess extends ProcessCommand {
   type Response = StartProcessResponse
-  val controllerAddress: String
+  val controllerAddressOption: Option[String]
 }
 
 object StartProcess {
