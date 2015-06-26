@@ -1,9 +1,9 @@
-package com.sos.scheduler.engine.tunnel
+package com.sos.scheduler.engine.tunnel.data
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch.measureTime
-import com.sos.scheduler.engine.tunnel.TunnelIdTest._
+import com.sos.scheduler.engine.tunnel.data.TunnelIdTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
