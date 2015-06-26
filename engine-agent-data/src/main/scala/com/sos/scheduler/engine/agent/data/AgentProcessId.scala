@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.agent.data
 
 import com.sos.scheduler.engine.data.base.IsString
 import org.jetbrains.annotations.TestOnly
-import scala.math.{abs, signum}
+import scala.math.abs
 
 /**
  * @author Joacim Zschimmer
@@ -25,7 +25,7 @@ final case class AgentProcessId(value: Long) extends IsString {
 
 object AgentProcessId extends IsString.HasJsonFormat[AgentProcessId] {
 
-  private val Factor = 1000*1000*1000L
+  private val Factor = 1000*1000*1000L  // So the index is human readable if C++ Scheduler displays Process_id as 64bit integer.
 
   /**
    * Accepts a plain long number or the more readable form "index-salt".
@@ -48,5 +48,8 @@ object AgentProcessId extends IsString.HasJsonFormat[AgentProcessId] {
       case _: Exception ⇒ throw new IllegalArgumentException(s"Invalid AgentProcessId($string)")
     }
 
-  def apply(index: Long, salt: Long) = new AgentProcessId(index * Factor + signum(index) * abs(salt) % Factor)
+  def apply(index: Long, salt: Long) = {
+    val sign = if (index < 0) -1 else +1
+    new AgentProcessId(index * Factor + sign * abs(salt) % Factor)
+  }
 }

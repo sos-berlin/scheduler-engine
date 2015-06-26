@@ -16,7 +16,7 @@ object ProcessDescriptor {
       import eventReader._
       parseElement("process") {
         ProcessDescriptor(
-          agentProcessId = AgentProcessId(attributeMap("process_id").toLong),
+          agentProcessId = AgentProcessId(attributeMap("process_id")),
           pid = attributeMap.getConverted("pid") { _.toInt } getOrElse 0)
       }
     }
