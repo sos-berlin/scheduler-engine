@@ -31,7 +31,7 @@ trait AgentClient {
   protected[client] val agentUri: String
   implicit protected val actorSystem: ActorSystem
 
-  private lazy val uris = AgentUris(agentUri)
+  protected lazy val agentUris = AgentUris(agentUri)
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
@@ -42,7 +42,7 @@ trait AgentClient {
   final def executeCommand(command: Command): Future[command.Response] = {
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
-      case _: Terminate | AbortImmediately ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(uris.command, command: Command))
+      case _: Terminate | AbortImmediately ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] }
   }
@@ -55,11 +55,11 @@ trait AgentClient {
         sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
         decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
-    pipeline(Post(uris.command, command: Command))
+    pipeline(Post(agentUris.command, command: Command))
   }
 
   final def fileExists(filePath: String): Future[Boolean] =
-    nonCachingHttpResponsePipeline(Get(Uri(uris.fileStatus(filePath)))) map { httpResponse ⇒
+    nonCachingHttpResponsePipeline(Get(Uri(agentUris.fileStatus(filePath)))) map { httpResponse ⇒
       httpResponse.status match {
         case OK ⇒ true
         case NotFound ⇒ false
