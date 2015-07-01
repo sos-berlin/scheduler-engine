@@ -5,7 +5,7 @@ import akka.util.ByteString
 import com.sos.scheduler.engine.agent.client.AgentUris
 import com.sos.scheduler.engine.common.sprayutils.ByteStreamMarshallers._
 import com.sos.scheduler.engine.tunnel.data.Http._
-import com.sos.scheduler.engine.tunnel.data.TunnelId
+import com.sos.scheduler.engine.tunnel.data.TunnelToken
 import scala.concurrent.Future
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Accept
@@ -29,10 +29,10 @@ trait AgentTunnelClient {
       decode(Gzip) ~>
       unmarshal[ByteString]
 
-  private[tunnel] final def tunnelRequest(tunnelIdWithPassword: TunnelId.WithPassword, requestMessage: ByteString): Future[ByteString] = {
-    val pipeline = addHeader(PasswordHeaderName, tunnelIdWithPassword.password.string) ~> pipelineTrunk
-    pipeline(Post(agentUris.tunnel(tunnelIdWithPassword.id), requestMessage))
+  private[tunnel] final def tunnelRequest(tunnelToken: TunnelToken, requestMessage: ByteString): Future[ByteString] = {
+    val pipeline = addHeader(PasswordHeaderName, tunnelToken.password.string) ~> pipelineTrunk
+    pipeline(Post(agentUris.tunnel(tunnelToken.id), requestMessage))
   }
 
-  def tunnelClient(tunnelIdWithPassword: TunnelId.WithPassword) = new TunnelClient(this, tunnelIdWithPassword)
+  def tunnelClient(tunnelToken: TunnelToken) = new TunnelClient(this, tunnelToken)
 }
