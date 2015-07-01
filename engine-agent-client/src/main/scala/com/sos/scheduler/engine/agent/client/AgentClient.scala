@@ -3,8 +3,9 @@ package com.sos.scheduler.engine.agent.client
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
+import com.sos.scheduler.engine.agent.client.tunnel.AgentTunnelClient
 import com.sos.scheduler.engine.agent.data.commands._
-import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent}
+import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, StartProcessResponse}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -25,7 +26,7 @@ import spray.httpx.encoding.Gzip
  *
  * @author Joacim Zschimmer
  */
-trait AgentClient {
+trait AgentClient extends AgentTunnelClient {
   import actorSystem.dispatcher
 
   protected[client] val agentUri: String
@@ -42,6 +43,7 @@ trait AgentClient {
   final def executeCommand(command: Command): Future[command.Response] = {
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
+      case command: StartProcess ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[StartProcessResponse]).apply(Post(agentUris.command, command: Command))
       case _: Terminate | AbortImmediately ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] }
@@ -79,6 +81,6 @@ object AgentClient {
    */
   private[client] def commandDurationToRequestTimeout(duration: Duration): Timeout = {
     require(duration >= 0.s)
-    Timeout((duration  + RequestTimeout).toFiniteDuration)
+    Timeout((duration + RequestTimeout).toFiniteDuration)
   }
 }
