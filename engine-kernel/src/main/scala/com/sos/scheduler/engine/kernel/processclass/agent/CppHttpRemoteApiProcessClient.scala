@@ -6,10 +6,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.processclass.agent.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.kernel.processclass.common.{FailableCollection, FailableSelector}
-import javax.inject.Inject
 import java.time.Duration
+import javax.inject.Inject
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 /**
  * @author Joacim Zschimmer
@@ -23,12 +23,12 @@ extends AutoCloseable {
   import callQueue.implicits.executionContext
 
   private object callbacks extends FailableSelector.Callbacks[Agent, HttpRemoteProcess] {
-    def apply(agent: Agent) = {
-      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, remoteUri = agent.address)
-      future map Success.apply recoverWith {
+    def apply(agent: Agent): Future[Try[HttpRemoteProcess]] = {
+      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, agentUri = agent.address)
+      future map Success.apply recover {
         case e: spray.can.Http.ConnectionAttemptFailedException ⇒
           warningCall.call(e)
-          Future { Failure(e) }
+          Failure(e)
       }
     }
 
@@ -62,6 +62,7 @@ extends AutoCloseable {
     result.start() onComplete {
       case Success((agent, httpRemoteProcess)) ⇒
         logger.debug(s"Process on agent $agent started: $httpRemoteProcess")
+        httpRemoteProcess.start()
         resultCall.call(Success(()))
       case f @ Failure(throwable) if waitStopped ⇒
         logger.debug(s"Waiting for agent has been stopped: $throwable")
@@ -95,10 +96,7 @@ extends AutoCloseable {
   @ForCpp
   def killRemoteTask(killOnlySignal: Int): Boolean = killOrCloseRemoteTask(kill = true, killOnlySignal = Some(killOnlySignal))
 
-  def killOrCloseRemoteTask(kill: Boolean, killOnlySignal: Option[Int]): Boolean = {
-    // TODO Race condition? Wenn das <start>-Kommando gerade rübergeschickt wird, startet der Prozess und verbindet sich
-    // mit einem com_remote-Port. Der aber ist vielleicht schon von der nächsten Task, die gerade gestartet wird.
-    // Wird die dann gestört? Wenigstens ist es wenig wahrscheinlich.
+  def killOrCloseRemoteTask(kill: Boolean, killOnlySignal: Option[Int]): Boolean =
     agentSelector match {
       case null ⇒ false
       case _ ⇒
@@ -108,18 +106,20 @@ extends AutoCloseable {
             killOnlySignal match {
               case Some(signal) ⇒
                 httpRemoteProcess.killRemoteTask(unixSignal = signal) onFailure {
-                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled or closed : $t")
+                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
                 }
-              case None ⇒ httpRemoteProcess.closeRemoteTask(kill = kill) onFailure {
-                case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled or closed : $t")
-              }
-              remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
+              case None ⇒
+                val closed = httpRemoteProcess.closeRemoteTask(kill = kill)
+                closed onFailure {
+                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be closed: $t", t)
+                }
+                closed onComplete { _ ⇒ httpRemoteProcess.close() }
+                remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
             }
             // C++ will keine Bestätigung
         }
         true
     }
-  }
 
   @ForCpp
   override def toString = if (agentSelector != null) agentSelector.selectedString else "CppHttpRemoteApiProcessClient (not started)"
