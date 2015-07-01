@@ -29,8 +29,10 @@ trait AgentTunnelClient {
       decode(Gzip) ~>
       unmarshal[ByteString]
 
-  final def tunnelRequest(tunnelIdWithPassword: TunnelId.WithPassword, requestMessage: ByteString): Future[ByteString] = {
+  private[tunnel] final def tunnelRequest(tunnelIdWithPassword: TunnelId.WithPassword, requestMessage: ByteString): Future[ByteString] = {
     val pipeline = addHeader(PasswordHeaderName, tunnelIdWithPassword.password.string) ~> pipelineTrunk
     pipeline(Post(agentUris.tunnel(tunnelIdWithPassword.id), requestMessage))
   }
+
+  def tunnelClient(tunnelIdWithPassword: TunnelId.WithPassword) = new TunnelClient(this, tunnelIdWithPassword)
 }
