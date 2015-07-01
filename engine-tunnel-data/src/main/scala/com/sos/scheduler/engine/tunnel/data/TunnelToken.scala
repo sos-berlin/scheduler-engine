@@ -9,7 +9,9 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-final case class TunnelToken(id: TunnelId, password: Password)
+final case class TunnelToken(id: TunnelId, password: Password) {
+  override def toString = id.toString
+}
 
 object TunnelToken {
   implicit val MyJsonFormat = jsonFormat2(apply)
