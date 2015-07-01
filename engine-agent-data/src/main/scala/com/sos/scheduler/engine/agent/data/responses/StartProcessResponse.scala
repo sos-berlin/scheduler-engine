@@ -8,5 +8,5 @@ import com.sos.scheduler.engine.tunnel.data.TunnelToken
  */
 final case class StartProcessResponse(
   processId: AgentProcessId,
-  tunnelIdWithPasswordOption: Option[TunnelToken])
+  tunnelTokenOption: Option[TunnelToken])
 extends Response
