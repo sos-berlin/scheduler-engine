@@ -119,15 +119,21 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         finishedOrderParametersPromise.successValue should contain(ChangedVariable.pair)
       }
 
+      "Shell with monitor - handling unexpected process termination of monitor" in {
+        val file = createTempFile("sos", ".tmp") withCloser Files.delete
+        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+          awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include("SCHEDULER-202")
+        }
+      }
+
       "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
-        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
           val test = runJobFuture(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
           awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include("SCHEDULER-202")
           awaitSuccess(test.result).logString should include("SPOOLER_PROCESS_AFTER")
         }
       }
-
 
       "Task log contains stdout and stderr of a shell script with monitor" in {
         toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
@@ -146,7 +152,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     }
   }
 
-  "Java Agent sos.spooler API characteristics" in {
+  "Universal Agent sos.spooler API characteristics" in {
     runJobAndWaitForEnd(JobPath("/test-api"))
   }
 }
