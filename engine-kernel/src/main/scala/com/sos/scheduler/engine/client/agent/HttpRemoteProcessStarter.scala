@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.AgentClientFactory
+import com.sos.scheduler.engine.agent.client.{AgentClientFactory, AgentUris}
 import com.sos.scheduler.engine.client.agent.HttpRemoteProcessStarter._
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.tunnel.WebTunnelClient.OfBaseUri
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Success, Try}
-import spray.http.StatusCodes.NotFound
+import scala.concurrent.Future
+import spray.http.Uri.Path
 
 /**
  * @author Joacim Zschimmer
@@ -23,36 +22,27 @@ final class HttpRemoteProcessStarter @Inject private(
 
   def startRemoteTask(schedulerApiTcpPort: Int, configuration: ApiProcessConfiguration, agentUri: String): Future[HttpRemoteProcess] = {
     val universalClient = agentClientFactory.apply(agentUri)
-    val classicClient = schedulerClientFactory.apply(agentUri)
-    if (TryClassicAgentToo) {
-      val promise = Promise[HttpRemoteProcess]()
-      universalClient.executeCommand(configuration.toUniversalAgentCommand)
-      .onComplete {
-        case Success(response) ⇒
-          promise.complete(Try {
-            val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
-            val tunnelToken = response.tunnelTokenOption.getOrElse { sys.error("TunnelToken expected") }
-            new TunnelledHttpRemoteProcess(actorSystem, classicClient, processDescriptor, schedulerApiTcpPort = schedulerApiTcpPort, universalClient, tunnelToken)
-          })
-        case Failure(t: spray.httpx.UnsuccessfulResponseException) if t.response.status == NotFound ⇒
-          logger.info(s"$agentUri doesn't seem to be an Universal Agent: '${t.response.status}'. Switching to Classic Agent client")
-          promise.completeWith(
-            classicClient.uncheckedExecute(configuration.toClassicXmlElem(schedulerApiTcpPort))
-            map ProcessDescriptor.fromXml
-            map { pd ⇒ new HttpRemoteProcess.Standard(classicClient, pd, actorSystem.dispatcher) })
-      }
-      promise.future
-    } else {
-      universalClient.executeCommand(configuration.toUniversalAgentCommand) map { response ⇒
-        val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
-        val tunnelToken = response.tunnelTokenOption.getOrElse { sys.error(s"Missing TunnelToken from agent $agentUri") }
-        new TunnelledHttpRemoteProcess(actorSystem, classicClient, processDescriptor, schedulerApiTcpPort = schedulerApiTcpPort, universalClient, tunnelToken)
-      }
+    agentUri match {
+      case HasClassicAgentPrefix(classicAgentUri) ⇒
+        val classicClient = schedulerClientFactory.apply(classicAgentUri)
+        (classicClient.uncheckedExecute(configuration.toClassicXmlElem(schedulerApiTcpPort))
+          map ProcessDescriptor.fromXml
+          map { pd ⇒ new HttpRemoteProcess.Standard(classicClient, pd, actorSystem.dispatcher) })
+      case _ ⇒
+        val classicClient = schedulerClientFactory.apply(agentUri)
+        universalClient.executeCommand(configuration.toUniversalAgentCommand) map { response ⇒
+          val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
+          val tunnelToken = response.tunnelTokenOption.getOrElse { sys.error(s"Missing TunnelToken from agent $agentUri") }
+          val tunnelClient = new OfBaseUri {
+            protected val baseUri = AgentUris(agentUri).withPath(Path("/tunnel"))
+            protected def actorRefFactory = actorSystem
+          }
+          new TunnelledHttpRemoteProcess(actorSystem, classicClient, processDescriptor, schedulerApiTcpPort = schedulerApiTcpPort, tunnelClient, tunnelToken)
+        }
     }
   }
 }
 
 object HttpRemoteProcessStarter {
-  private val logger = Logger(getClass)
-  val TryClassicAgentToo = !(sys.props.get("jobscheduler.tryClassicAgent") exists { _.toBoolean })
+  private val HasClassicAgentPrefix = "classic:(.*)".r
 }

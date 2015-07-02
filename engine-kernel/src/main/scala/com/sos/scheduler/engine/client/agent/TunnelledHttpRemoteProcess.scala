@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.tunnel.AgentTunnelClient
 import com.sos.scheduler.engine.client.command.SchedulerCommandClient
-import com.sos.scheduler.engine.tunnel.TcpToRequestResponse
 import com.sos.scheduler.engine.tunnel.data.TunnelToken
+import com.sos.scheduler.engine.tunnel.{TcpToHttpBridge, WebTunnelClient}
 import java.net.InetSocketAddress
 
 /**
@@ -17,16 +16,13 @@ private[agent] final class TunnelledHttpRemoteProcess(
   protected val classicClient: SchedulerCommandClient,
   protected val processDescriptor: ProcessDescriptor,
   schedulerApiTcpPort: Int,
-  tunnelClient: AgentTunnelClient,
+  tunnelClient: WebTunnelClient,
   tunnelToken: TunnelToken)
 extends HttpRemoteProcess {
 
   protected def executionContext = actorSystem.dispatcher
 
-  private val tcpHttpBridge = new TcpToRequestResponse(
-    actorSystem,
-    remoteAddress = new InetSocketAddress("127.0.0.1", schedulerApiTcpPort),
-    executeRequest = request ⇒ tunnelClient.tunnelRequest(tunnelToken, request))
+  private val tcpHttpBridge = new TcpToHttpBridge(actorSystem, connectTo = new InetSocketAddress("127.0.0.1", schedulerApiTcpPort), tunnelToken = tunnelToken, tunnelClient = tunnelClient)
 
   def start() = tcpHttpBridge.start()
 
