@@ -25,8 +25,8 @@ final class TestMonitor extends sos.spooler.Monitor_impl {
     assert(spooler_task.stderr_path.nonEmpty)
     assert(spooler_task.stdout_text == Paths.get(spooler_task.stdout_path).contentString(ISO_8859_1))
     assert(spooler_task.stderr_text == Paths.get(spooler_task.stderr_path).contentString(ISO_8859_1))
-    assert(spooler_task.stdout_text contains "TEXT FOR STDOUT äöü")
-    assert(spooler_task.stderr_text contains "TEXT FOR STDERR å")
+    assert(spooler_task.stdout_text contains "TEXT FOR STDOUT")
+    assert(spooler_task.stderr_text contains "TEXT FOR STDERR")
     returnCode
   }
 
