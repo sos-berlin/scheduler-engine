@@ -3,9 +3,9 @@ package com.sos.scheduler.engine.agent.client
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
-import com.sos.scheduler.engine.agent.client.tunnel.AgentTunnelClient
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, StartProcessResponse}
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -26,7 +26,7 @@ import spray.httpx.encoding.Gzip
  *
  * @author Joacim Zschimmer
  */
-trait AgentClient extends AgentTunnelClient {
+trait AgentClient {
   import actorSystem.dispatcher
 
   protected[client] val agentUri: String
@@ -41,6 +41,7 @@ trait AgentClient extends AgentTunnelClient {
       decode(Gzip)
 
   final def executeCommand(command: Command): Future[command.Response] = {
+    logger.debug(s"Execute $command")
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
       case command: StartProcess ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[StartProcessResponse]).apply(Post(agentUris.command, command: Command))
@@ -75,6 +76,7 @@ trait AgentClient extends AgentTunnelClient {
 object AgentClient {
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
+  private val logger = Logger(getClass)
 
   /**
    * The returns timeout for the HTTP request is longer than the expected duration of the request
