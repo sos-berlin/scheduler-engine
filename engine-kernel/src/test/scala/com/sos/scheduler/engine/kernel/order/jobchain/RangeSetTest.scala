@@ -2,12 +2,15 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.sos.scheduler.engine.common.scalautil.DuplicateKeyException
 import com.sos.scheduler.engine.kernel.order.jobchain.RangeSet.InclusiveRange
+import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author Joacim Zschimmer
  */
+@RunWith(classOf[JUnitRunner])
 final class RangeSetTest extends FreeSpec {
 
   "Parser" - {
