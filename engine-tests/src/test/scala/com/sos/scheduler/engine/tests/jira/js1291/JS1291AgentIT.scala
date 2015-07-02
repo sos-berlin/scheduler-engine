@@ -46,7 +46,6 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
   List(
     "With TCP C++ Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={s"127.0.0.1:$tcpPort"}/>,
-    "With HTTP C++ Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={s"classic:http://127.0.0.1:$httpPort"}/>,
     "With Java Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={agentUri}/>)
   .foreach { case (testGroupName, processClassElem) ⇒
     testGroupName - {
