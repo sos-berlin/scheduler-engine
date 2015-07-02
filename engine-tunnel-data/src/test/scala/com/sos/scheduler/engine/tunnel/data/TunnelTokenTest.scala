@@ -15,14 +15,14 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class TunnelTokenTest extends FreeSpec {
 
-  "newPassword" in {
-    logger.debug(newPassword().toString)
-    val result = measureTime(1000, "newPassword") { newPassword() }
+  "newSecret" in {
+    logger.debug(newSecret().toString)
+    val result = measureTime(1000, "newSecret") { newSecret() }
     assert(result.singleDuration < 1.ms)
   }
 
-  "Password.toString does not show password" in {
-    assert(TunnelToken.Password("secret").toString == "Password(...)")
+  "Secret.toString does not show secret" in {
+    assert(TunnelToken.Secret("secret").toString == "Secret(...)")
   }
 }
 

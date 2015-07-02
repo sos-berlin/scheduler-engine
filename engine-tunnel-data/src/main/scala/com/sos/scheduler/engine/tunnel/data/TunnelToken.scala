@@ -9,25 +9,25 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-final case class TunnelToken(id: TunnelId, password: Password) {
+final case class TunnelToken(id: TunnelId, secret: Secret) {
   override def toString = id.toString
 }
 
 object TunnelToken {
   implicit val MyJsonFormat = jsonFormat2(apply)
 
-  private val PasswordLength = 20
+  private val SecretLength = 20
 
-  private[tunnel] def newPassword() = Password({
-    val bytes = new Array[Byte](PasswordLength)
+  private[tunnel] def newSecret() = Secret({
+    val bytes = new Array[Byte](SecretLength)
     Random.nextBytes(bytes)
     Base64.getUrlEncoder.encodeToString(bytes)
   })
 
-  final case class Password(string: String) extends IsString {
-    override def toString = "Password(...)"
+  final case class Secret(string: String) extends IsString {
+    override def toString = "Secret(...)"
   }
 
-  object Password extends IsString.HasJsonFormat[Password]
+  object Secret extends IsString.HasJsonFormat[Secret]
 }
 
