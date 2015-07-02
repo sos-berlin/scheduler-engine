@@ -118,8 +118,11 @@ namespace zschimmer {
 
 //-------------------------------------------------------------------------------------------Z_INIT
 
+extern Message_code_text com_remote_messages[];
+
 Z_INIT( z_com_remote )
 {
+    add_message_code_texts(com_remote_messages);
     srand( (uint)( double_from_localtime() * 1000 ) );
 }
 
