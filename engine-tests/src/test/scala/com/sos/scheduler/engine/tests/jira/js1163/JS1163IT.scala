@@ -27,8 +27,8 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  private lazy val List(httpPort, tcpPort) = findRandomFreeTcpPorts(2)
-  override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-http-port=$httpPort", s"-tcp-port=$tcpPort"))
+  private lazy val tcpPort = findRandomFreeTcpPort()
+  override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
@@ -59,7 +59,6 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private def addUnixTests(): Unit = {
     val settings = List(
       ("Without agent", true, { () ⇒ None }),
-      ("With C++ agent", true, { () ⇒ Some(s"http://127.0.0.1:$httpPort") }),
       ("With Java Agent", false, { () ⇒ Some(agentUri) }))
     for ((testVariantName, monitorForwardsSignal, agentAddressOption) ← settings) {
       // monitorForwardsSignal: Java Agent monitor does not forward signal to shell process!!!

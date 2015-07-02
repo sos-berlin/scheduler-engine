@@ -120,7 +120,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", List(agentRefs(1)))
         instance[FolderSubsystem].updateFolders()
       }
-      assertResult(List(agentRefs(1).uri)) {
+      assertResult(List(s"classic:${agentRefs(1).uri}")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       // Job should run now with new process class configuration denoting an accessible agent
@@ -130,7 +130,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 
   "Replacing configuration file .process_class.xml, removing remote_schedulers" in {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
-      assertResult(List(agentRefs(1).uri)) {
+      assertResult(List(s"classic:${agentRefs(1).uri}")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       for (a ← runningAgents.values) {
@@ -206,7 +206,7 @@ private object JS1188IT {
   private def processClassXml(name: String, agentRefs: Seq[AgentRef]) =
     <process_class name={name}>
       <remote_schedulers>{
-        agentRefs map { o ⇒ <remote_scheduler remote_scheduler={o.uri}/> }
+        agentRefs map { o ⇒ <remote_scheduler remote_scheduler={s"classic:${o.uri}"}/> }
       }</remote_schedulers>
     </process_class>
 

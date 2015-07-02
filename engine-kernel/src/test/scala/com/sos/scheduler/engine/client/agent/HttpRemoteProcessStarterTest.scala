@@ -44,7 +44,7 @@ final class HttpRemoteProcessStarterTest extends FreeSpec with BeforeAndAfterAll
   }
 
   "startRemoteTask and closeRemoteTask" in {
-    val startFuture = client.startRemoteTask(schedulerApiTcpPort = DummyApiTcpPort, conf, agentUri = server.baseUri.toString)
+    val startFuture = client.startRemoteTask(schedulerApiTcpPort = DummyApiTcpPort, conf, agentUri = s"classic:${server.baseUri}")
     val httpRemoteProcess: HttpRemoteProcess = awaitResult(startFuture, MaxDuration)
     val closeFuture = httpRemoteProcess.closeRemoteTask(kill = true)
     awaitResult(closeFuture, MaxDuration)
