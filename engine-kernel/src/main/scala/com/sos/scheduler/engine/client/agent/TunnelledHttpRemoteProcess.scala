@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.command.SchedulerCommandClient
+import com.sos.scheduler.engine.tunnel.client.{TcpToHttpBridge, WebTunnelClient}
 import com.sos.scheduler.engine.tunnel.data.TunnelToken
-import com.sos.scheduler.engine.tunnel.{TcpToHttpBridge, WebTunnelClient}
 import java.net.InetSocketAddress
 
 /**

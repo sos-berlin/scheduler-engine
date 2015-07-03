@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.{AgentClientFactory, AgentUris}
 import com.sos.scheduler.engine.client.agent.HttpRemoteProcessStarter._
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
-import com.sos.scheduler.engine.tunnel.WebTunnelClient.OfBaseUri
+import com.sos.scheduler.engine.tunnel.client.WebTunnelClient.OfBaseUri
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import spray.http.Uri.Path
