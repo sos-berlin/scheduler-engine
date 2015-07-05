@@ -34,7 +34,7 @@ final class HttpRemoteProcessStarter @Inject private(
           val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
           val tunnelToken = response.tunnelTokenOption.getOrElse { sys.error(s"Missing TunnelToken from agent $agentUri") }
           val tunnelClient = new WebTunnelClient {
-            protected def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnelItem(id)
+            protected def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnelHandler.item(id)
             protected def actorRefFactory = actorSystem
           }
           new TunnelledHttpRemoteProcess(actorSystem, classicClient, processDescriptor, schedulerApiTcpPort = schedulerApiTcpPort, tunnelClient, tunnelToken)

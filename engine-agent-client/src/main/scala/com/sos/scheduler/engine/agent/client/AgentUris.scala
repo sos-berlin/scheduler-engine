@@ -20,7 +20,7 @@ final class AgentUris private(agentUri: String) {
   def fileStatus(filePath: String): String =
     (withPath(Path("fileStatus")) withQuery ("file" → filePath)).toString()
 
-  private[client] object tunnelHandler {
+  object tunnelHandler {
     def overview: String =
       withPath(Path("tunnels")).toString()
 
