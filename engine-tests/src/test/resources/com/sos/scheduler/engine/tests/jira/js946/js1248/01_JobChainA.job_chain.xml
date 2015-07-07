@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+
+<job_chain  orders_recoverable="yes" visible="yes" title="JobChainA" max_orders="3">
+    <job_chain_node  state="100" job="01_TaskA1" next_state="200" error_state="Error"/>
+
+    <job_chain_node  state="200" job="01_TaskA2" next_state="300" error_state="Error"/>
+
+    <job_chain_node  state="300" job="01_TaskA3" next_state="400" error_state="Error"/>
+
+    <job_chain_node  state="400" job="01_TaskA4" next_state="500" error_state="Error"/>
+
+    <job_chain_node  state="500" job="01_TaskA5" next_state="600" error_state="Error"/>
+
+    <job_chain_node  state="600" job="01_TaskA6" next_state="Success" error_state="Error"/>
+
+    <job_chain_node  state="Error"/>
+
+    <job_chain_node  state="Success"/>
+</job_chain>

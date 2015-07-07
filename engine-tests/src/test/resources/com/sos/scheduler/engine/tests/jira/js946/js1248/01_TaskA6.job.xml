@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+
+<job  order="yes" stop_on_error="no" title="initialise parameters" tasks="1" idle_timeout="0" process_class="AE_WHAT_IF">
+    <settings />
+
+    <script  language="shell">
+        <![CDATA[
+@echo %SCHEDULER_JOB_NAME% : job starting
+set /a number=%random% %%6 +1
+@echo %SCHEDULER_JOB_NAME% : saving job parameters for subsequent job steps ...
+@echo .                                      
+echo BOOKING_DATE=20140705 >>%scheduler_return_values%
+echo START_TRX_ID=334233232 >>%scheduler_return_values%
+@echo .                                      
+@echo %SCHEDULER_JOB_NAME% : sleeping for %number% seconds.....
+@echo .                                      
+ping 127.0.0.1 -n %number% > nul
+@echo .                                      
+@echo .                                      
+@echo %SCHEDULER_JOB_NAME% : job ending
+@echo .                                      
+@echo .
+        ]]>
+    </script>
+
+    <run_time />
+</job>
