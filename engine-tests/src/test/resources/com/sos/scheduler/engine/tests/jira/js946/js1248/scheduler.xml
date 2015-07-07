@@ -4,5 +4,8 @@
 		<params>
 		    <param name="scheduler.old_microscheduling.enable_for_jobs" value="false"/>
 		</params>
+		<security>
+			<allowed_host host="127.0.0.1" level="info"/>
+		</security>
 	</config>
 </spooler>
