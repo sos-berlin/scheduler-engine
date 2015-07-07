@@ -299,7 +299,7 @@ string File_logger::File_line_reader::read_lines()
         }
     }
 
-    return lines;
+    return prefix_with_name(lines);
 }
 
 //----------------------------------------------------File_logger::File_line_reader::read_remainder
@@ -320,7 +320,19 @@ string File_logger::File_line_reader::read_remainder()
         }
     }
 
-    return result;
+    return prefix_with_name(result);
+}
+
+string File_logger::File_line_reader::prefix_with_name(const string& lines) const {
+    std::vector<string> result;
+    for (size_t i = 0; i < lines.length();) {
+        result.push_back("[" + _name + "] ");
+        size_t line_end = lines.find('\n', i);
+        line_end = line_end == string::npos? lines.length() : line_end + 1;
+        result.push_back(lines.substr(i, line_end - i));
+        i = line_end;
+    }
+    return join("", result);
 }
 
 //----------------------------------------------File_logger::File_logger_thread::File_logger_thread

@@ -19,6 +19,7 @@ struct File_logger : Async_operation
         void                    close                       ();
         string                  read_lines                  ();
         string                  read_remainder              ();
+        string prefix_with_name(const string& lines) const;
 
         Fill_zero              _zero_;
         File_path              _path;
