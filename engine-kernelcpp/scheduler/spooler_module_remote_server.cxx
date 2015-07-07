@@ -404,7 +404,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                     _server->_module->_monitors->add_module_monitor(monitor);
                 }
                 else
-                   Z_LOG2( "scheduler", Z_FUNCTION << " unknown parameter " << key_word << "=" << value << "\n" );;
+                   Z_LOG2( "scheduler", Z_FUNCTION << " inapplicable parameter" << key_word << "=" << value << "\n" );;
                    // assert(0), throw_xc( "server::construct", as_string(i), key_word );
             }
         }
