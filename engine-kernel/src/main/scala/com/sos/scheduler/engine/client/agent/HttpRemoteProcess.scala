@@ -8,31 +8,48 @@ import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * A remote process started by [[HttpRemoteProcessStarter]].
+ *
  * @author Joacim Zschimmer
  */
-final class HttpRemoteProcess(client: SchedulerCommandClient, processDescriptor: ProcessDescriptor)
-  (implicit executionContext: ExecutionContext) {
+trait HttpRemoteProcess {
 
-  def killRemoteTask(unixSignal: Int): Future[Unit] = {
+  protected def classicClient: SchedulerCommandClient
+  protected def processDescriptor: ProcessDescriptor
+  protected implicit def executionContext: ExecutionContext
+
+  def start(): Unit
+  def close(): Unit
+
+  final def killRemoteTask(unixSignal: Int): Future[Unit] = {
     require(unixSignal == 15, "SIGTERM (15) required")
     val command = <remote_scheduler.remote_task.kill process_id={processDescriptor.agentProcessId.value.toString} signal="SIGTERM"/>
-    client.uncheckedExecute(command) map OkResult.fromXml
+    classicClient.uncheckedExecute(command) map OkResult.fromXml
   }
 
-  def closeRemoteTask(kill: Boolean): Future[Unit] = {
+  final def closeRemoteTask(kill: Boolean): Future[Unit] = {
     val command = <remote_scheduler.remote_task.close process_id={processDescriptor.agentProcessId.value.toString} kill={if (kill) true.toString else null}/>
-    client.uncheckedExecute(command) map OkResult.fromXml
+    classicClient.uncheckedExecute(command) map OkResult.fromXml
   }
 
   override def toString = s"${getClass.getSimpleName}(${processDescriptor.agentProcessId} pid=${processDescriptor.pid})"
 }
 
 object HttpRemoteProcess {
-  case object OkResult {
+  private case object OkResult {
     def fromXml(o: String) =
       readSchedulerResponse(StringSource(o)) { eventReader ⇒
         import eventReader._
         parseElement("ok") {}
       }
+  }
+
+  final class Standard(
+    protected val classicClient: SchedulerCommandClient,
+    protected val processDescriptor: ProcessDescriptor,
+    protected val executionContext: ExecutionContext)
+  extends HttpRemoteProcess {
+
+    def start() = {}
+    def close() = {}
   }
 }

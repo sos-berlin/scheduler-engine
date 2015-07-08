@@ -4,7 +4,6 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.system.Files.makeDirectory
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
@@ -45,7 +44,7 @@ final class JS1159IT extends FreeSpec with ScalaSchedulerTest with BeforeAndAfte
   "Start" in {
     extraScheduler.start()
     scheduler executeXml <process_class name="agent-tcp" remote_scheduler={extraScheduler.tcpAddress.string}/>
-    scheduler executeXml <process_class name="agent-http" remote_scheduler={extraScheduler.uri}/>
+    scheduler executeXml <process_class name="agent-http" remote_scheduler={s"classic:${extraScheduler.uri}"}/>
     awaitResult(extraScheduler.activatedFuture, TestTimeout)
   }
 

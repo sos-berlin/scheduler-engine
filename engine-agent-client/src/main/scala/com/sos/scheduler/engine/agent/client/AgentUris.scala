@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.agent.client
 
+import com.sos.scheduler.engine.tunnel.data.TunnelId
 import spray.http.Uri
+import spray.http.Uri.Path
 
 /**
  * URIs of the JobScheduler Agent.
@@ -9,15 +11,32 @@ import spray.http.Uri
  */
 final class AgentUris private(agentUri: String) {
 
-  val command = toAgentUri(Uri("command"))
+  val command: String =
+    uriString(Path("command"))
 
-  def overview = toAgentUri(Uri("overview"))
+  def overview: String =
+    uriString(Path("overview"))
 
-  def fileStatus(filePath: String) = toAgentUri(Uri("fileStatus") withQuery ("file" → filePath))
+  def fileStatus(filePath: String): String =
+    (withPath(Path("fileStatus")) withQuery ("file" → filePath)).toString()
 
-  def apply(relativeUri: String) = toAgentUri(relativeUri stripPrefix "/")
+  object tunnelHandler {
+    def overview: String =
+      withPath(Path("tunnels")).toString()
 
-  private def toAgentUri(u: Uri) = s"$agentUri/jobscheduler/agent/$u"
+    def items: String =
+      withPath(Path("tunnels") / "item").toString()
+
+    def item(id: TunnelId): String =
+      withPath(Path("tunnels") / "item" / id.string).toString()
+  }
+
+  def apply(relativeUri: String): String =
+    uriString(Path(relativeUri stripPrefix "/"))
+
+  private def uriString(path: Path) = withPath(path).toString
+
+  def withPath(path: Path) = Uri(agentUri) withPath Path(s"/jobscheduler/agent/${path.toString stripPrefix "/"}")
 
   override def toString = agentUri
 }

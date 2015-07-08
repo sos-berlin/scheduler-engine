@@ -26,7 +26,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
@@ -48,10 +47,8 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
   private sealed abstract class AgentMode(override val toString: String, val addressOption: () ⇒ Option[String])
   private object NoAgent          extends AgentMode("No Agent"               , () ⇒ None)
   private object JavaAgent        extends AgentMode("Java Agent"             , () ⇒ Some(s"http://127.0.0.1:$agentHttpPort"))
-  private object JavaHttpCppAgent extends AgentMode("C++ Agent via Java HTTP", () ⇒ Some(s"http://127.0.0.1:$javaPort"))
-  private object CppHttpCppAgent  extends AgentMode("C++ Agent via C++ HTTP" , () ⇒ Some(s"http://127.0.0.1:$tcpPort"))
   private object TcpCppAgent      extends AgentMode("C++ Agent via TCP"      , () ⇒ Some(s"127.0.0.1:$tcpPort"))
-  private val allAgentModes = List(NoAgent, JavaAgent, JavaHttpCppAgent, CppHttpCppAgent, TcpCppAgent)
+  private val allAgentModes = List(NoAgent, JavaAgent, TcpCppAgent)
 
   private val expectedTaskId = Iterator from 3 map TaskId.apply
   Settings.list.zipWithIndex foreach { case ((setting, expected), i) ⇒

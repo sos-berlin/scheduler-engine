@@ -539,7 +539,6 @@ void Task::set_error_xc_only( const zschimmer::Xc& x )
 {
     string code = x.code();
     
-    //if( dynamic_cast<const com::object_server::Connection_reset_exception*>( &x )    Funktioniert nicht mit gcc 3.4.3
     if( x.name() == com::object_server::Connection_reset_exception::exception_name  ||  x.code() == "SCHEDULER-202") {
         if( !_is_connection_reset_error ) { // Bisheriger _error ist kein Connection_reset_error?
             _non_connection_reset_error = _error;  // Bisherigen Fehler (evtl. NULL) merken, falls Verbindungsverlust wegen ignore_signals=".." ignoriert wird
@@ -579,9 +578,14 @@ void Task::set_error_xc_only_base( const Xc& x )
 //-------------------------------------------------------------------------------Task::set_error_xc
 // Siehe auch set_error_xc( const Xc& )
 
-void Task::set_error_xc( const zschimmer::Xc& x )
+void Task::set_error_xc( const zschimmer::Xc& xx )
 {
-    set_error_xc_only( x );
+    Xc_copy x = xx;
+    if (strcmp(x->code(), "Z-REMOTE-101") == 0) {
+        x->set_what(message_string("SCHEDULER-202", state_name(), x->what()));
+        x->set_code("SCHEDULER-202"); // Connection to task has been lost
+    }
+    set_error_xc_only( *x );
     _log->error( x.what() );
 
     if( _is_connection_reset_error  &&  !_non_connection_reset_error ) {

@@ -118,8 +118,11 @@ namespace zschimmer {
 
 //-------------------------------------------------------------------------------------------Z_INIT
 
+extern Message_code_text com_remote_messages[];
+
 Z_INIT( z_com_remote )
 {
+    add_message_code_texts(com_remote_messages);
     srand( (uint)( double_from_localtime() * 1000 ) );
 }
 
@@ -442,7 +445,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                 }
                 else
                 {
-                    Z_LOG2("socket", "accept(" << _connection->_listen_socket << ") => " << _connection->_socket << "\n");
+                    Z_LOG2("socket", "accept(" << _connection->_listen_socket << ") => " << _connection->_socket << " " << Host_and_port(peer_addr).as_string() << "\n");
                     _connection->_peer = peer_addr;
 
                     //Prüfung ist zu streng, wenn der Rechner im Cluster ist. Dann hat er zwei IP-Adressen.

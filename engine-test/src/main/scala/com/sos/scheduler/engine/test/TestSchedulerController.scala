@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinari
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.util.IDE.isRunningUnderIDE
 import java.io.File
+import java.lang.management.ManagementFactory
 import java.sql.{Connection, DriverManager}
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -71,8 +72,9 @@ with HasInjector {
     }
   }
 
+  logger.debug("Java VM arguments:" + (ManagementFactory.getRuntimeMXBean.getInputArguments mkString ", "))
   if (isRunningUnderIDE) {
-    val possiblePid = java.lang.management.ManagementFactory.getRuntimeMXBean.getName takeWhile { _ != '@' }  // http://stackoverflow.com/questions/35842
+    val possiblePid = ManagementFactory.getRuntimeMXBean.getName takeWhile { _ != '@' }  // http://stackoverflow.com/questions/35842
     logger.debug(s"PID is possibly $possiblePid")
   }
 

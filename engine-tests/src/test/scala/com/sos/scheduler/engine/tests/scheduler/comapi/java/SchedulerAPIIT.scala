@@ -1,27 +1,21 @@
 package com.sos.scheduler.engine.tests.scheduler.comapi.java
 
-import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
-import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
-import com.sos.scheduler.engine.data.order.OrderStepEndedEvent
-import com.sos.scheduler.engine.data.order.SuccessOrderStateTransition
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.comapi.java.SchedulerAPIIT._
@@ -29,18 +23,15 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.common.time.ScalaTime._
-
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.concurrent.Promise
-import scala.concurrent.duration._
 
 /**
  * @author Andreas Liebert
  */
 @RunWith(classOf[JUnitRunner])
-final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
+final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
@@ -48,21 +39,17 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
 
   import controller.newEventPipe
 
-  private lazy val agentTcpPort = findRandomFreeTcpPort()
-  private lazy val remoteSchedulerAddress = s"http://127.0.0.1:$agentTcpPort"
-  private lazy val agent = new Agent(AgentConfiguration(httpPort = agentTcpPort, httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
   private val finishedOrderParametersPromise = Promise[Map[String, String]]()
   private val eventsPromise = Promise[immutable.Seq[Event]]()
   private lazy val testTextFile = testEnvironment.configDirectory / TestTextFilename
   private lazy val taskLogLines = eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message }
 
   protected override def onSchedulerActivated() = {
-    val started = agent.start()
     scheduler executeXml VariablesJobElem
-    scheduler executeXml <process_class name={s"$ProcessClassName"}
-                                        remote_scheduler={s"$remoteSchedulerAddress"}
+    scheduler executeXml <process_class name={TestProcessClassPath.withoutStartingSlash}
+                                        remote_scheduler={agentUri}
                                         max_processes={s"$MaxProcesses"}/>
-    awaitResult(started, 10.s)
+    super.onSchedulerActivated()
   }
 
   "sos.spooler.Log methods" - {
@@ -87,8 +74,8 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest {
       taskLog should not include mes.toString
     }
     taskLog should include(s"include_path=$IncludePath")
-    taskLog should include(s"process_class name=$ProcessClassName")
-    taskLog should include(s"process_class remote_scheduler=$remoteSchedulerAddress")
+    taskLog should include(s"process_class name=${TestProcessClassPath.name}")
+    taskLog should include(s"process_class remote_scheduler=$agentUri")
     taskLog should include(s"process_class max_processes=$MaxProcesses")
   }
 
@@ -145,7 +132,7 @@ object SchedulerAPIIT {
   private val IncludePath = "fooo"
   val JobObjectsJobPath = JobPath("/job_object")
   val RemoveMeJobPath = JobPath("/remove_me")
-  private val ProcessClassName = "test-agent"
+  private val TestProcessClassPath = ProcessClassPath("/TEST")
   private val MaxProcesses = 23
 
   final case class Variable(name: String, value: String) {
@@ -157,7 +144,7 @@ object SchedulerAPIIT {
   }
 
   private val VariablesJobElem =
-    <job name={VariablesJobPath.name} process_class="test-agent" stop_on_error="false" order="yes">
+    <job name={VariablesJobPath.name} process_class={TestProcessClassPath.string} stop_on_error="false" order="yes">
       <params>
         <param name={JobParam.name} value={JobParam.value}/>
         <param name={OrderParamOverridesJobParam.name} value="OVERRIDDEN-JOB-VALUE"/>

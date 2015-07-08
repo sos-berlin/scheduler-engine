@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.client.command
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer._
+import com.sos.scheduler.engine.common.sprayutils.XmlString
 import java.net.URI
 import javax.inject.Inject
 import scala.concurrent.Future
@@ -27,10 +28,10 @@ extends SimpleRoutingApp {
       post {
         path("jobscheduler" / "engine" / "command") {
           decompressRequest() {
-            entity(as[String]) { commandString ⇒
+            entity(as[XmlString]) { case XmlString(commandString) ⇒
               try {
                 val result = execute(commandString)
-                complete { result }
+                complete { XmlString(result) }
               }
               catch {
                 case NonFatal(t) ⇒ complete(BadRequest, t.toString)

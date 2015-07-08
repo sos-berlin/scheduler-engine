@@ -31,7 +31,7 @@ trait AgentTest extends BeforeAndAfterAll {
     new Agent(combinedModule).closeWithCloser
   }
 
-  override def beforeAll() = {
+  override protected def beforeAll() = {
     awaitResult(agent.start(), 10.s)
     super.beforeAll()
   }

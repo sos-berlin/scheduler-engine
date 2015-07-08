@@ -579,7 +579,7 @@ struct Abstract_remote_api_process : Abstract_api_process {
     protected: void prepare_connection() {
         assert(!_connection);
         _connection = _spooler->_connection_manager->new_connection();
-        _connection->listen_on_tcp_port( INADDR_ANY );
+        _connection->listen_on_tcp_port(Ip_address::localhost);
     }
 
     public: object_server::Connection* connection() const {
@@ -745,6 +745,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     }
 
     public: bool kill(int unix_signal) {
+        Z_LOG2("scheduler", Z_FUNCTION << " kill " << unix_signal << "\n");
         _spooler->cancel_call(_start_remote_task_callback);
         if (unix_signal == Z_SIGKILL) {
             _clientJ.closeRemoteTask(true);
@@ -1369,7 +1370,7 @@ Process* Process_class::new_process(const Api_process_configuration* c, Prefix_l
 
 bool Process_class::is_http_or_multiple(const string& remote_scheduler_address) const {
     // hasMoreAgents() setzt HTTP voraus.
-    return string_begins_with(remote_scheduler_address, "http://") || typed_java_sister().hasMoreAgents();
+    return string_begins_with(remote_scheduler_address, "http://")  || string_begins_with(remote_scheduler_address, "classic:http://") || typed_java_sister().hasMoreAgents();
 }
 
 //-------------------------------------------------------Process_class::select_process_if_available

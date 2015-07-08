@@ -13,6 +13,6 @@ import org.scalatest.junit.JUnitRunner
 final class ProcessDescriptorTest extends FreeSpec {
   "fromXml" in {
     ProcessDescriptor.fromXml(<spooler><answer><process process_id="111222333444555666" pid="2222"/></answer></spooler>.toString()) shouldEqual
-      ProcessDescriptor(agentProcessId = AgentProcessId(111222333444555666L), pid = 2222)
+      ProcessDescriptor(agentProcessId = AgentProcessId("111222333444555666"), pid = 2222, tunnelTokenOption = None)
   }
 }

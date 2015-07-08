@@ -4,6 +4,10 @@
      stop_on_error="false">
 
     <script language="shell">
+        :;if false; then :
+        goto WINDOWS
+        fi
+
         sleep 1
         sleep 1
         sleep 1
@@ -19,6 +23,25 @@
         sleep 1
         sleep 1
         sleep 1
+        echo "FINISHED NORMALLY"
+        exit 0
+
+        :WINDOWS
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1
         echo "FINISHED NORMALLY"
     </script>
 </job>

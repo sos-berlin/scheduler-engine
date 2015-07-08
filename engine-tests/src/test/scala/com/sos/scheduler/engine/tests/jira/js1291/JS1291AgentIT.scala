@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1291
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
@@ -43,24 +44,22 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
-  "(prepare)" in {
-    scheduler executeXml <process_class name={TcpCppAgentProcessClass.withoutStartingSlash} remote_scheduler={s"127.0.0.1:$tcpPort"}/>
-    scheduler executeXml <process_class name={HttpCppAgentProcessClass.withoutStartingSlash} remote_scheduler={s"http://127.0.0.1:$httpPort"}/>
-  }
-
   List(
-    "With TCP C++ Agent" → TcpCppAgentProcessClass,
-    "With HTTP C++ Agent" → HttpCppAgentProcessClass,
-    "With Java Agent" → AgentWithSchedulerTest.AgentProcessClassPath)
-  .foreach { case (testGroupName, processClassPath) ⇒
+    "With TCP C++ Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={s"127.0.0.1:$tcpPort"}/>,
+    "With Java Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={agentUri}/>)
+  .foreach { case (testGroupName, processClassElem) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[Event]]()
       lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
       lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
+      "(prepare process class)" in {
+        scheduler executeXml processClassElem
+      }
+
       "Run shell job via order" in {
-        scheduler executeXml newJobElem(processClassPath)
+        scheduler executeXml newJobElem()
         autoClosing(newEventPipe()) { eventPipe ⇒
           toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
             val orderKey = TestJobchainPath orderKey testGroupName
@@ -119,41 +118,53 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         finishedOrderParametersPromise.successValue should contain(ChangedVariable.pair)
       }
 
-      "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
+      "Shell with monitor has access to stdout_text" in {
+        awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString should include ("SPOOLER_PROCESS_AFTER")
+      }
+
+      "Shell with monitor - handling unexpected process termination of monitor" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
-        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
-          val test = runJobFuture(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
-          awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include("SCHEDULER-202")
-          awaitSuccess(test.result).logString should include("SPOOLER_PROCESS_AFTER")
+        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+          val run = runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString))
+          file.append("x")
+          awaitSuccess(run.result).logString should include ("SCHEDULER-202")
         }
       }
 
+      "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
+        val file = createTempFile("sos", ".tmp") withCloser Files.delete
+        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+          val noCrash = runJobFuture(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
+          awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include ("SCHEDULER-202")
+          awaitSuccess(noCrash.result).logString should include ("SPOOLER_PROCESS_AFTER")
+        }
+      }
 
       "Task log contains stdout and stderr of a shell script with monitor" in {
         toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
           val logString = awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString
-          logString should include("SPOOLER_PROCESS_AFTER")
-          logString should include("TEXT FOR STDOUT äöü")
-          logString should include("TEXT FOR STDERR å")
+          logString should include ("SPOOLER_PROCESS_AFTER")
+          logString should include ("TEXT FOR STDOUT")
+          logString should include ("TEXT FOR STDERR")
         }
       }
 
       "Exception in Monitor" in {
-        toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
+        toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
+        //toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
           runJobAndWaitForEnd(JobPath("/throwing-monitor"))
         }
       }
     }
   }
 
-  "Java Agent sos.spooler API characteristics" in {
+  "Universal Agent sos.spooler API characteristics" in {
     runJobAndWaitForEnd(JobPath("/test-api"))
   }
 }
 
 object JS1291AgentIT {
-  private val TcpCppAgentProcessClass = ProcessClassPath("/tcp-cpp-agent")
-  private val HttpCppAgentProcessClass = ProcessClassPath("/http-cpp-agent")
+  private val TestProcessClassPath = ProcessClassPath("/test")
   private val TestJobchainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
   private val TestReturnCode = ReturnCode(42)
@@ -173,8 +184,8 @@ object JS1291AgentIT {
     def pair = name → value
   }
 
-  private def newJobElem(processClassPath: ProcessClassPath) =
-    <job name={TestJobPath.name} process_class={processClassPath.withoutStartingSlash} stop_on_error="false">
+  private def newJobElem() =
+    <job name={TestJobPath.name} process_class={TestProcessClassPath.withoutStartingSlash} stop_on_error="false">
       <params>
         <param name={JobParam.name} value={JobParam.value}/>
         <param name={OrderParamOverridesJobParam.name} value="OVERRIDDEN-JOB-VALUE"/>

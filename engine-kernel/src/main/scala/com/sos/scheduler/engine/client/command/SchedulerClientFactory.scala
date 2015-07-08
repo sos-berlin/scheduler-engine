@@ -3,12 +3,17 @@ package com.sos.scheduler.engine.client.command
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.command.RemoteSchedulers.checkResponseForError
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory._
-import com.sos.scheduler.engine.common.scalautil.xmls.StringSource
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.xmls.{SafeXML, StringSource}
+import com.sos.scheduler.engine.common.sprayutils.XmlString
+import java.io.ByteArrayInputStream
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 import spray.client.pipelining._
-import spray.http.MediaTypes.`application/xml`
+import spray.http.HttpHeaders.Accept
+import spray.http.MediaTypes._
 import spray.http.Uri.Path
 import spray.http.{HttpEntity, HttpRequest, Uri}
 import spray.httpx.encoding.{Deflate, Gzip}
@@ -31,12 +36,13 @@ final class SchedulerClientFactory @Inject private(implicit actorSystem: ActorSy
     case _ ⇒ throw new IllegalArgumentException(s"Invalid JobScheduler URL: $baseUri")
   }
 
-  private val pipeline: HttpRequest ⇒ Future[String] =
-    // JettyPlugin dekomprimiert Request nicht: encode(Gzip) ~>(  // Klammerung überlistet IntelliJ Scala 0.38.441
-    sendReceive ~>
+  private val pipeline: HttpRequest ⇒ Future[XmlString] =
+    // JettyPlugin dekomprimiert Request nicht: encode(Gzip) ~>
+    addHeader(Accept(`application/xml`, `text/xml`)) ~>
+      sendReceive ~>
       decode(Deflate) ~>
       decode(Gzip) ~>
-      unmarshal[String]
+      unmarshal[XmlString]
 
   def apply(baseUri: Uri): SchedulerCommandClient = new SchedulerCommandClient {
     def executeXml(xmlBytes: Array[Byte]): Future[String] =
@@ -51,18 +57,24 @@ final class SchedulerClientFactory @Inject private(implicit actorSystem: ActorSy
         response
       }
 
-    def uncheckedExecuteXml(xmlBytes: Array[Byte]): Future[String] =
-      pipeline(Post(commandUri(baseUri), XmlBytes(xmlBytes))(XmlBytesMarshaller))
+    def uncheckedExecuteXml(xmlBytes: Array[Byte]): Future[String] = {
+      logger.debug(s"POST ${commandUri(baseUri)} ${try SafeXML.load(new ByteArrayInputStream(xmlBytes)) catch { case NonFatal(t) ⇒ t }})}")
+      pipeline(Post(commandUri(baseUri), XmlBytes(xmlBytes))(XmlBytesMarshaller)) map { _.string }
+    }
 
-    def uncheckedExecute(elem: xml.Elem): Future[String] =
-      pipeline(Post(commandUri(baseUri), elem))
+    def uncheckedExecute(elem: xml.Elem): Future[String] = {
+      logger.debug(s"POST ${commandUri(baseUri)} $elem")
+      pipeline(Post(commandUri(baseUri), elem)) map { _.string }
+    }
   }
 }
 
 object SchedulerClientFactory {
+  private val logger = Logger(getClass)
+
   final case class XmlBytes(bytes: Array[Byte])
 
-  private implicit val XmlBytesMarshaller = Marshaller.of[XmlBytes](`application/xml`) { (value, contentType, ctx) ⇒
+  private val XmlBytesMarshaller = Marshaller.of[XmlBytes](`application/xml`) { (value, contentType, ctx) ⇒
     val XmlBytes(b) = value
     ctx.marshalTo(HttpEntity(contentType, b))
   }
