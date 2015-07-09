@@ -17,6 +17,7 @@ struct CppFileOrderSourceClient__class : ::zschimmer::javabridge::Class
    ~CppFileOrderSourceClient__class();
 
     ::zschimmer::javabridge::Static_method const _apply__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JLcom_google_inject_Injector_2__method;
+    ::zschimmer::javabridge::Method const _close____method;
     ::zschimmer::javabridge::Method const _readFiles__Ljava_util_List_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
 
     static const ::zschimmer::javabridge::class_factory< CppFileOrderSourceClient__class > class_factory;
@@ -27,6 +28,7 @@ const ::zschimmer::javabridge::class_factory< CppFileOrderSourceClient__class > 
 CppFileOrderSourceClient__class::CppFileOrderSourceClient__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_apply__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JLcom_google_inject_Injector_2__method(this, "apply", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/google/inject/Injector;)Lcom/sos/scheduler/engine/client/agent/CppFileOrderSourceClient;")
+    ,_close____method(this, "close", "()V")
     ,_readFiles__Ljava_util_List_2Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "readFiles", "(Ljava/util/List;Lcom/sos/scheduler/engine/kernel/async/CppCall;)V"){}
 
 CppFileOrderSourceClient__class::~CppFileOrderSourceClient__class() {}
@@ -58,6 +60,12 @@ CppFileOrderSourceClient::~CppFileOrderSourceClient() { assign_(NULL); }
     ::javaproxy::com::sos::scheduler::engine::client::agent::CppFileOrderSourceClient result;
     result.steal_local_ref(cls->_apply__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JLcom_google_inject_Injector_2__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
+}
+
+void CppFileOrderSourceClient::close() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    CppFileOrderSourceClient__class* cls = _class.get();
+    cls->_close____method.call(get_jobject(), parameter_list);
 }
 
 void CppFileOrderSourceClient::readFiles(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::util::List >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p1) const {

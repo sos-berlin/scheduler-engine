@@ -53,6 +53,7 @@ struct CppFileOrderSourceClient : ::zschimmer::javabridge::proxy_jobject< CppFil
   public:
 
     static ::javaproxy::com::sos::scheduler::engine::client::agent::CppFileOrderSourceClient apply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, jlong p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::google::inject::Injector >& p4);
+    void close() const;
     void readFiles(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::util::List >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p1) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

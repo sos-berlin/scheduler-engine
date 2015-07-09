@@ -2,8 +2,9 @@ package com.sos.scheduler.engine.tests.jira.js1039
 
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{runJobAndWaitForEnd, writeConfigurationFile}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1039.JS1039TaskStdoutIT._
@@ -40,7 +41,8 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   protected override def onSchedulerActivated(): Unit = {
-    scheduler executeXml <process_class name="test-remote" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
+    writeConfigurationFile(ProcessClassPath("/test-remote"), <process_class remote_scheduler={s"127.0.0.1:$tcpPort"}/>)
+    super.onSchedulerActivated()
   }
 
   checkJobs(s"Task log should contain output from script") { (result, outOrErr) =>

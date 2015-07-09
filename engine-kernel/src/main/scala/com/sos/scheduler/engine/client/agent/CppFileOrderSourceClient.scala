@@ -33,6 +33,10 @@ final class CppFileOrderSourceClient private(
 
   private val agent = agentClientFactory.apply(agentUri = agentUri)
   private var isInCall = false
+  private var closed = false
+
+  @ForCpp
+  def close(): Unit = closed = true
 
   @ForCpp
   def readFiles(knownFiles: java.util.List[String], resultCppCall: CppCall): Unit = {
@@ -40,10 +44,14 @@ final class CppFileOrderSourceClient private(
     isInCall = true
     val command = RequestFileOrderSourceContent(directory = directory, regex = regex, duration = duration, knownFiles.toSet)
     agent.executeCommand(command) onComplete { completion ⇒
-      val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
       isInCall = false
-      try resultCppCall.call(forCpp.withThisStackTrace)
-      catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t") } // Okay if C++ object (Directory_file_order_source) has been closed
+      if (closed) {
+        logger.debug(s"Closed, response is ignored")
+      } else {
+        val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
+        try resultCppCall.call(forCpp.withThisStackTrace)
+        catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t") } // Okay if C++ object (Directory_file_order_source) has been closed
+      }
     }
   }
 }

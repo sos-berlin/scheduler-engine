@@ -44,7 +44,7 @@ DEFINE_SIMPLE_CALL(Directory_file_order_source, Directory_read_result_call)
 
 //----------------------------------------------------------------------Directory_file_order_source
 
-struct Directory_file_order_source : Directory_file_order_source_interface
+struct Directory_file_order_source : Directory_file_order_source_interface, Dependant
 {
     enum State
     {
@@ -73,6 +73,104 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     string                      obj_name                () const;
     void on_call(const Directory_read_result_call&);
 
+    public: 
+    bool on_requisite_loaded(File_based* file_based) {
+        to_my_process_class(file_based);
+        try_start_watching();
+        return true;
+    }
+
+    public: 
+    bool on_requisite_to_be_removed(File_based* file_based) {
+        to_my_process_class(file_based);
+        stop_watching();
+        return true;
+    }
+
+    private:
+    bool check_and_handle_process_class_replacement() {
+        assert(_is_watching);
+        string r = process_class_remote_scheduler();
+        if (r != _remote_scheduler) {
+            Z_LOG2("scheduler", Z_FUNCTION << " " << obj_name() << ": remote_scheduler=" << r << "\n");
+            restart_watching();
+            assert(_remote_scheduler == r);
+            return true;
+        } else
+            return false;
+    }
+
+    private:
+    void restart_watching() {
+        stop_watching();
+        start_watching();
+    }
+
+    private:
+    void try_start_watching() {
+        bool complete = _process_class_path.empty() || spooler()->process_class_subsystem()->process_class_or_null(_process_class_path) != NULL;
+        if (!complete) {
+            Z_LOG2("scheduler", "<file_order_source> is missing process class " << _process_class_path << "\n");
+        } else {
+            start_watching();
+        }
+    }
+
+    private: 
+    void start_watching() {
+        if (Job_node* job_node = Job_node::try_cast(_next_node)) {
+            if (Job* next_job = job_node->job_or_null()) {
+                if (next_job->state() > Job::s_not_initialized) {
+                    next_job->on_order_possibly_available();     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
+                    _expecting_request_order = true;             // Auf request_order() warten
+                }
+            }
+        }
+        _remote_scheduler = process_class_remote_scheduler();
+        if (_remote_scheduler != "") {
+            _fileOrderSourceClientJ = CppFileOrderSourceClientJ::apply(_remote_scheduler, (string)_path, _regex_string, _repeat.millis(), _spooler->injectorJ());
+        }
+        _is_watching = true;
+        repeat_after_delay(Duration(0));
+    }
+
+    private:
+    void stop_watching() {
+        close_agent_connection();
+        clear_new_files();
+        _is_watching = false;
+        set_async_next_gmtime(double_time_max);
+    }
+
+    private:
+    string process_class_remote_scheduler() {
+        if (_process_class_path.empty()) 
+            return "";
+        else 
+            return spooler()->process_class_subsystem()->process_class(_process_class_path)->remote_scheduler_address();
+    }
+
+    private:
+    void close_agent_connection() {
+        if (_fileOrderSourceClientJ.get_jobject()) {
+            _fileOrderSourceClientJ.close();
+            _fileOrderSourceClientJ = NULL;
+            _in_directory_read_result_call = false;
+        }
+    }
+
+    private: 
+    Process_class* to_my_process_class(File_based* file_based) {
+        assert(file_based->subsystem() == spooler()->process_class_subsystem());
+        assert(file_based->normalized_path() == file_based->subsystem()->normalized_path(_process_class_path));
+        Process_class* result = dynamic_cast<Process_class*>(file_based);
+        assert(result);
+        return result;
+    }
+
+    public: 
+    Prefix_log* log() { return Directory_file_order_source_interface::log(); }
+
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );
@@ -92,12 +190,14 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     bool has_new_file();
 
     Fill_zero                  _zero_;
+    Absolute_path _process_class_path;
     string _remote_scheduler;
     File_path                  _path;
     string                     _regex_string;
     Regex                      _regex;
     Duration                   _delay_after_error;
     Duration                   _repeat;
+    bool _is_watching;
     bool                       _expecting_request_order;
     Xc_copy                    _directory_error;
     bool                       _send_recovered_mail;
@@ -268,7 +368,10 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _alert_when_directory_missing(alert_when_directory_missing_default),
     _directory_read_result_call(Z_NEW(Directory_read_result_call(this)))
 {
-    _remote_scheduler = element.getAttribute("remote_scheduler");
+    _process_class_path = job_chain->default_process_class_path();
+    if (_process_class_path != "") {
+        add_requisite(Requisite_path(spooler()->process_class_subsystem(), _process_class_path));
+    }
     _path = subst_env( element.getAttribute( "directory" ) );
 
     _regex_string = element.getAttribute( "regex" );
@@ -284,13 +387,10 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
 
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
     _alert_when_directory_missing = element.bool_getAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
-    if (_remote_scheduler != "") {
-        _fileOrderSourceClientJ = CppFileOrderSourceClientJ::apply(_remote_scheduler, (string)_path, _regex_string, _repeat.millis(), _spooler->injectorJ());
-    }
 }
 
 //----------------------------------------Directory_file_order_source::~Directory_file_order_source
-    
+
 Directory_file_order_source::~Directory_file_order_source()
 {
     //if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
@@ -302,6 +402,10 @@ Directory_file_order_source::~Directory_file_order_source()
 
 void Directory_file_order_source::close()
 {
+    if (_process_class_path != "") {
+        remove_requisite(Requisite_path(spooler()->process_class_subsystem(), _process_class_path));
+    }
+    close_agent_connection();
     close_notification();
 
     if( _next_node ) 
@@ -482,23 +586,12 @@ void Directory_file_order_source::initialize()
 
 void Directory_file_order_source::activate()
 {
-    Job* next_job = NULL;
-
-    if( Job_node* job_node = Job_node::try_cast(_next_node) )
-    {
-        if( job_node->normalized_job_path() == file_order_sink_job_path )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
-        next_job = job_node->job_or_null();
+    if (Job_node* job_node = Job_node::try_cast(_next_node)) {
+        if (job_node->normalized_job_path() == file_order_sink_job_path)  z::throw_xc("SCHEDULER-342", _job_chain->obj_name());
     }
-
-    _expecting_request_order = true;            // Auf request_order() warten
+    try_start_watching();
     set_async_next_gmtime( double_time_max );
-    //set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
-
     set_async_manager( _spooler->_connection_manager );
-
-
-    if( next_job  &&  next_job->state() > Job::s_not_initialized )  
-        next_job->on_order_possibly_available();     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -506,6 +599,9 @@ void Directory_file_order_source::activate()
 bool Directory_file_order_source::request_order( const string& cause )
 {
     Z_LOG2("scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n");
+    if (!_is_watching)
+        return false;
+    else
     if (has_new_file())
         return true;
     else {
@@ -540,6 +636,7 @@ void Directory_file_order_source::start_read_new_files_from_agent() {
     if (_in_directory_read_result_call) {
         Z_LOG2("scheduler", Z_FUNCTION << " Still waiting for agent's response\n");
     } else {
+        Z_LOG2("scheduler.file_order", Z_FUNCTION << "\n");
         _agent_request_known_files.clear();
         if (_job_chain->is_distributed()) {
             read_known_orders(&_agent_request_known_files);
@@ -559,45 +656,53 @@ void Directory_file_order_source::start_read_new_files_from_agent() {
 
 
 void Directory_file_order_source::on_call(const Directory_read_result_call& call) {
+    Z_LOG2("scheduler.file_order", Z_FUNCTION << "\n");
     assert(&call == _directory_read_result_call);
-    Duration next_call_after = Duration(0.1);  // Little delay to prevent hot loop in case of error
-    _in_directory_read_result_call = false;
-    clear_new_files();
-    try {
-        ListJ javaList = (ListJ)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
-        int n = javaList.size();
-        if (n == 0) {
-            next_call_after = max(Duration(1), _new_files_time + _repeat - Time::now());
-            if (next_call_after > Duration(1)) {
-                // Normally, Agent call should response after _repeat, so next_call_after should be zero.
-                Z_LOG2("scheduler", obj_name() << " No files received. Next call after " + next_call_after.as_string());
+    assert(_is_watching);
+    if (_spooler->state() != Spooler::s_stopping) {
+        Duration next_call_after = Duration(0.1);  // Little delay to prevent hot loop in case of error
+        _in_directory_read_result_call = false;
+        clear_new_files();
+        bool replaced = check_and_handle_process_class_replacement();
+        if (!replaced) {
+            try {
+                ListJ javaList = (ListJ)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
+                int n = javaList.size();
+                if (n == 0) {
+                    next_call_after = max(Duration(1), _new_files_time + _repeat - Time::now());
+                    if (next_call_after > Duration(1)) {
+                        // Normally, Agent call should response after _repeat, so next_call_after should be zero.
+                        Z_LOG2("scheduler", obj_name() << " No files received. Next call after " + next_call_after.as_string());
+                    }
+                }
+                _new_files.reserve(n);
+                for (int i = 0; i < n; i++) {
+                    string path = (javaproxy::java::lang::String)javaList.get(i);
+                    ptr<file::File_info> file_info = Z_NEW(file::File_info);
+                    file_info->set_path(path);
+                    //file_info->set_last_write_time(???);
+                    _new_files.push_back(file_info);
+                    _new_files_count++;
+                }
+                clean_up_blacklisted_files();
+                _agent_request_known_files.clear();
+                on_directory_read();
+                _directory_error = NULL;
+            } catch (exception& x) {
+                _directory_error = x;
+                log()->error(x.what());
             }
+            _new_files_time  = Time::now();
         }
-        _new_files.reserve(n);
-        for (int i = 0; i < n; i++) {
-            string path = (javaproxy::java::lang::String)javaList.get(i);
-            ptr<file::File_info> file_info = Z_NEW(file::File_info);
-            file_info->set_path(path);
-            //file_info->set_last_write_time(???);
-            _new_files.push_back(file_info);
-            _new_files_count++;
-        }
-        clean_up_blacklisted_files();
-        _agent_request_known_files.clear();
-        on_directory_read();
-        _directory_error = NULL;
-    } catch (exception& x) {
-        _directory_error = x;
-        log()->error(x.what());
+        repeat_after_delay(next_call_after);
     }
-    _new_files_time  = Time::now();
-    repeat_after_delay(next_call_after);
 }
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
 void Directory_file_order_source::read_directory(bool was_notified)
 {
+    Z_LOG2("scheduler.file_order", Z_FUNCTION << "\n");
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
     {
         try
@@ -679,112 +784,113 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
     bool        known_orders_has_been_read = false;
 
 
-    while( !result  &&  _new_files_index < _new_files.size() )
-    {
-        if( zschimmer::file::File_info* new_file = _new_files[ _new_files_index ] )
+    if (_is_watching) {
+        while( !result  &&  _new_files_index < _new_files.size() )
         {
-            File_path  path = new_file->path();
-            ptr<Order> order;
-            bool       was_in_job_chain = false;
-
-            try
+            if( zschimmer::file::File_info* new_file = _new_files[ _new_files_index ] )
             {
-                if ((_remote_scheduler != "" || path.file_exists()) && !_job_chain->order_or_null(path))
+                File_path  path = new_file->path();
+                ptr<Order> order;
+                bool       was_in_job_chain = false;
+
+                try
                 {
-                    if( !known_orders_has_been_read )   // Eine Optimierung: Damit try_place_in_job_chain() nicht bei jeder Datei feststellen muss, dass es bereits einen Auftrag in der Datenbank gibt.
+                    if ((_remote_scheduler != "" || path.file_exists()) && !_job_chain->order_or_null(path))
                     {
-                        if( _job_chain->is_distributed() )  read_known_orders( &known_orders );
-                        known_orders_has_been_read = true;
-                    }
-
-                    order = _spooler->standing_order_subsystem()->new_order();
-
-                    order->set_file_path(path, _remote_scheduler);
-                    order->set_state(fetching_state);
-
-                    bool ok = true;
-
-                    if( ok )  ok = known_orders.find( order->string_id() ) == known_orders.end();     // Auftrag ist noch nicht bekannt?
-
-                    if( ok )
-                    {
-                        was_in_job_chain = order->try_place_in_job_chain( _job_chain );
-                        ok &= was_in_job_chain;
-                        // !ok ==> Auftrag ist bereits vorhanden
-                    }
-
-                    if( ok  &&  order->is_distributed() ) 
-                    {
-                        ok = order->db_occupy_for_processing();
-
-                        if (_remote_scheduler == "" && !path.file_exists())
+                        if( !known_orders_has_been_read )   // Eine Optimierung: Damit try_place_in_job_chain() nicht bei jeder Datei feststellen muss, dass es bereits einen Auftrag in der Datenbank gibt.
                         {
-                            // Ein anderer Scheduler hat vielleicht den Dateiauftrag blitzschnell erledigt
-                            order->db_release_occupation(); 
-                            ok = false;
+                            if( _job_chain->is_distributed() )  read_known_orders( &known_orders );
+                            known_orders_has_been_read = true;
+                        }
+
+                        order = _spooler->standing_order_subsystem()->new_order();
+
+                        order->set_file_path(path, _remote_scheduler);
+                        order->set_state(fetching_state);
+
+                        bool ok = true;
+
+                        if( ok )  ok = known_orders.find( order->string_id() ) == known_orders.end();     // Auftrag ist noch nicht bekannt?
+
+                        if( ok )
+                        {
+                            was_in_job_chain = order->try_place_in_job_chain( _job_chain );
+                            ok &= was_in_job_chain;
+                            // !ok ==> Auftrag ist bereits vorhanden
+                        }
+
+                        if( ok  &&  order->is_distributed() ) 
+                        {
+                            ok = order->db_occupy_for_processing();
+
+                            if (_remote_scheduler == "" && !path.file_exists())
+                            {
+                                // Ein anderer Scheduler hat vielleicht den Dateiauftrag blitzschnell erledigt
+                                order->db_release_occupation(); 
+                                ok = false;
+                            }
+                        }
+
+                        if( ok )  order->occupy_for_task( occupying_task, now );
+
+                        if( ok  &&  order->is_distributed() )  _job_chain->add_order( order );
+
+                        if( ok )
+                        {
+                            result = order;
+                            string written_at;
+                            if (time_t t = new_file->last_write_time_or_zero()) written_at = "written at " + Time(t, Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms);
+                            log()->info(message_string("SCHEDULER-983", order->obj_name(), written_at));
+                        }
+
+                        if( !ok )  
+                        {
+                            if( !was_in_job_chain )  order->remove_from_job_chain();
+                            order->close();
+                            //order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
+                            order = NULL;
                         }
                     }
 
-                    if( ok )  order->occupy_for_task( occupying_task, now );
+                    _new_files[ _new_files_index ] = NULL;
+                    --_new_files_count;
 
-                    if( ok  &&  order->is_distributed() )  _job_chain->add_order( order );
-
-                    if( ok )
+                    if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
                     {
-                        result = order;
-                        string written_at;
-                        if (time_t t = new_file->last_write_time_or_zero()) written_at = "written at " + Time(t, Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms);
-                        log()->info(message_string("SCHEDULER-983", order->obj_name(), written_at));
+                        _bad_map.erase( path );
+                        log()->info( message_string( "SCHEDULER-347", path ) );
                     }
 
-                    if( !ok )  
+                }
+                catch( exception& x )   // Möglich bei für Order.id zu langem Pfad
+                {
+                    if( _bad_map.find( path ) == _bad_map.end() )
+                    {
+                        log()->error( x.what() );
+                        z::Xc xx ( "SCHEDULER-346", path );
+                        log()->warn( xx.what() );
+                        _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
+
+                        xx.append_text( x.what() );
+                        send_mail( evt_file_order_error, &xx );
+                    }
+
+                    if( order ) 
                     {
                         if( !was_in_job_chain )  order->remove_from_job_chain();
                         order->close();
                         //order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
-                        order = NULL;
                     }
                 }
-
-                _new_files[ _new_files_index ] = NULL;
-                --_new_files_count;
-
-                if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
-                {
-                    _bad_map.erase( path );
-                    log()->info( message_string( "SCHEDULER-347", path ) );
-                }
-
             }
-            catch( exception& x )   // Möglich bei für Order.id zu langem Pfad
-            {
-                if( _bad_map.find( path ) == _bad_map.end() )
-                {
-                    log()->error( x.what() );
-                    z::Xc xx ( "SCHEDULER-346", path );
-                    log()->warn( xx.what() );
-                    _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
 
-                    xx.append_text( x.what() );
-                    send_mail( evt_file_order_error, &xx );
-                }
-
-                if( order ) 
-                {
-                    if( !was_in_job_chain )  order->remove_from_job_chain();
-                    order->close();
-                    //order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
-                }
-            }
+            _new_files_index++;
         }
 
-        _new_files_index++;
+        if (!_remote_scheduler.empty()) {
+            _expecting_request_order = true;
+        }
     }
-
-    if (!_remote_scheduler.empty()) {
-        _expecting_request_order = true;
-    }
-
     return result;
 }
 
@@ -1020,18 +1126,22 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
 
 bool Directory_file_order_source::async_continue_( Async_operation::Continue_flags flags )
 {
-    bool was_notified = _notification_event.signaled_flag();
-
-    if (_remote_scheduler != "") {
-        start_read_new_files_from_agent();
+    Z_LOG2("scheduler.file_order", Z_FUNCTION << "\n");
+    if (!_is_watching) {
+        return false;
     } else {
-        _notification_event.reset();
-        read_directory(was_notified);
-        on_directory_read();
-        repeat_after_delay(_repeat);
+        check_and_handle_process_class_replacement();
+        if (_remote_scheduler != "") {
+            start_read_new_files_from_agent();
+        } else {
+            bool was_notified = _notification_event.signaled_flag();
+            _notification_event.reset();
+            read_directory(was_notified);
+            on_directory_read();
+            repeat_after_delay(_repeat);
+        }
+        return true;
     }
-
-    return true;
 }
 
 
@@ -1043,6 +1153,7 @@ void Directory_file_order_source::on_directory_read() {
 
 
 void Directory_file_order_source::repeat_after_delay(const Duration& duration) {
+    assert(_is_watching);
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
                                                  : duration.seconds());    // Unter Unix (C++) funktioniert's _nur_ durch wiederkehrendes Nachsehen
