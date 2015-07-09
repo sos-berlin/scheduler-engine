@@ -53,6 +53,7 @@ void Dependencies::announce_requisite_loaded( File_based* found_missing )
             Dependant*              dependant = *it2;
         
             try {
+                Z_LOG2("scheduler", "Requisite " << found_missing->obj_name() << " has been loaded, notifying " << dependant->obj_name() << "\n");
                 dependant->on_requisite_loaded( found_missing );
             }
             catch( exception& x ) {
@@ -81,6 +82,7 @@ bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
         
+            Z_LOG2("scheduler", "Requisite " << to_be_removed->obj_name() << " is to be removed, notifying " << dependant->obj_name() << "\n");
             result = dependant->on_requisite_to_be_removed( to_be_removed );
             if( !result )  break;
         }
@@ -91,11 +93,11 @@ bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
 
 //---------------------------------------------------------Dependencies::announce_requisite_removed
 
-void Dependencies::announce_requisite_removed( File_based* to_be_removed )
+void Dependencies::announce_requisite_removed( File_based* removed )
 {
-    assert( to_be_removed->subsystem() == _subsystem );
+    assert( removed->subsystem() == _subsystem );
 
-    Path_requestors_map::iterator it = _path_requestors_map.find( to_be_removed->normalized_path() );
+    Path_requestors_map::iterator it = _path_requestors_map.find( removed->normalized_path() );
 
     if( it != _path_requestors_map.end() )
     {
@@ -105,8 +107,8 @@ void Dependencies::announce_requisite_removed( File_based* to_be_removed )
         {
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
-        
-            dependant->on_requisite_removed( to_be_removed );
+            Z_LOG2("scheduler", "Requisite " << removed->obj_name() << " has been removed, notifying " << dependant->obj_name() << "\n");
+            dependant->on_requisite_removed( removed );
         }
     }
 }

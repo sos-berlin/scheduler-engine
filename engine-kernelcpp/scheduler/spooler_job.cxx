@@ -2767,6 +2767,7 @@ void Standard_job::on_locks_available()
 
 void Standard_job::on_order_possibly_available()
 {
+    Z_LOG2("scheduler.order", Z_FUNCTION << "\n");
     _call_register.call<Order_possibly_available_call>();
 }
 
