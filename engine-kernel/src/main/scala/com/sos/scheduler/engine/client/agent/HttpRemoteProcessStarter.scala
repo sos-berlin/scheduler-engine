@@ -21,7 +21,6 @@ final class HttpRemoteProcessStarter @Inject private(
   import actorSystem.dispatcher
 
   def startRemoteTask(schedulerApiTcpPort: Int, configuration: ApiProcessConfiguration, agentUri: String): Future[HttpRemoteProcess] = {
-    val universalClient = agentClientFactory.apply(agentUri)
     agentUri match {
       case HasClassicAgentPrefix(classicAgentUri) ⇒
         val classicClient = schedulerClientFactory.apply(classicAgentUri)
@@ -29,15 +28,16 @@ final class HttpRemoteProcessStarter @Inject private(
           map ProcessDescriptor.fromXml
           map { pd ⇒ new HttpRemoteProcess.Standard(classicClient, pd, actorSystem.dispatcher) })
       case _ ⇒
-        val classicClient = schedulerClientFactory.apply(agentUri)
-        universalClient.executeCommand(configuration.toUniversalAgentCommand) map { response ⇒
-          val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
-          val tunnelToken = response.tunnelTokenOption.getOrElse { sys.error(s"Missing TunnelToken from agent $agentUri") }
-          val tunnelClient = new WebTunnelClient {
-            protected def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnelHandler.item(id)
-            protected def actorSystem = HttpRemoteProcessStarter.this.actorSystem
-          }
-          new TunnelledHttpRemoteProcess(actorSystem, classicClient, processDescriptor, schedulerApiTcpPort = schedulerApiTcpPort, tunnelClient, tunnelToken)
+        agentClientFactory.apply(agentUri).executeCommand(configuration.toUniversalAgentCommand) map { response ⇒
+          new TunnelledHttpRemoteProcess(
+            actorSystem,
+            classicClient = schedulerClientFactory.apply(agentUri),
+            processDescriptor = ProcessDescriptor.fromStartProcessResponse(response),
+            schedulerApiTcpPort = schedulerApiTcpPort,
+            tunnelClient = new WebTunnelClient {
+              def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnelHandler.item(id)
+              def actorSystem = HttpRemoteProcessStarter.this.actorSystem
+            })
         }
     }
   }
