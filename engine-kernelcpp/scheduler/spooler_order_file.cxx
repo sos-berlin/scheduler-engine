@@ -190,7 +190,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     bool has_new_file();
 
     Fill_zero                  _zero_;
-    Absolute_path _process_class_path;
+    Absolute_path const _process_class_path;
     string _remote_scheduler;
     File_path                  _path;
     string                     _regex_string;
@@ -366,9 +366,11 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
     _alert_when_directory_missing(alert_when_directory_missing_default),
-    _directory_read_result_call(Z_NEW(Directory_read_result_call(this)))
+    _directory_read_result_call(Z_NEW(Directory_read_result_call(this))),
+    _process_class_path(element.hasAttribute("process_class")? 
+        Absolute_path(job_chain->folder_path(), element.getAttribute("process_class")) 
+        : job_chain->file_watching_process_class_path())
 {
-    _process_class_path = job_chain->default_process_class_path();
     if (_process_class_path != "") {
         add_requisite(Requisite_path(spooler()->process_class_subsystem(), _process_class_path));
     }

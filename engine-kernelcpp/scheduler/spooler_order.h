@@ -1001,6 +1001,10 @@ struct Job_chain : Com_job_chain,
         return _default_process_class_path;
     }
 
+    public: const Absolute_path& file_watching_process_class_path() const {
+        return _file_watching_process_class_path;
+    }
+
   private:
     void                        check_for_removing          ();
     void                        database_record_store       ();
@@ -1026,6 +1030,7 @@ struct Job_chain : Com_job_chain,
 
     bool                       _db_stopped;
     Absolute_path _default_process_class_path;
+    Absolute_path _file_watching_process_class_path;
 
   public:
     typedef stdext::hash_map< string, Order* >   Order_map;

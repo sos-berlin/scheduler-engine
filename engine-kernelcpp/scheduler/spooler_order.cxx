@@ -2025,6 +2025,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
                    element.bool_getAttribute( "visible" )      ? visible_yes 
                                                                : visible_no;
     _default_process_class_path = Absolute_path(folder_path(), element.getAttribute("process_class"));
+    _file_watching_process_class_path = Absolute_path(folder_path(), element.getAttribute("file_watching_process_class", _default_process_class_path));
 
     _orders_are_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_are_recoverable );
 
