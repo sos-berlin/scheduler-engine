@@ -44,6 +44,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.JobC job__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC result = log__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log__native(long cppReference);
+
+
     @Override public java.lang.String log_string() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.kernel.order.Order
 import java.io.File
-import javax.annotation.Nullable
 
+@ForCpp
 final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with EventSource {
 
   def onCppProxyInvalidated(): Unit = {}
@@ -16,8 +17,7 @@ final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with Even
   def job =
     cppProxy.job.getSister
 
-  @Nullable def getOrderOrNull: UnmodifiableOrder =
-    cppProxy.order.getSister
+  def orderOption: Option[Order] = Option(cppProxy.order.getSister)
 
   def id =
     new TaskId(cppProxy.id)
@@ -35,6 +35,8 @@ final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with Even
 
   def stderrFile =
     new File(cppProxy.stderr_path)
+
+  def log: PrefixLog = cppProxy.log.getSister
 
   override def toString =
     s"Task($id)"

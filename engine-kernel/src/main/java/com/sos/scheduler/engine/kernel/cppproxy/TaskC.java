@@ -22,4 +22,5 @@ public interface TaskC extends CppProxyWithSister<Task> {
     String log_string();
     String stdout_path();
     String stderr_path();
+    Prefix_logC log();
 }
