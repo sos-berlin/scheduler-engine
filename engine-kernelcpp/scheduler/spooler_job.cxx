@@ -3624,14 +3624,14 @@ void Standard_job::kill_task(int id, bool immediately, const Duration& timeout)
 
 //-------------------------------------------------------------Standard_job::create_module_instance
 
-ptr<Module_instance> Standard_job::create_module_instance(Process_class* process_class, const string& remote_scheduler)
+ptr<Module_instance> Standard_job::create_module_instance(Process_class* process_class, const string& remote_scheduler, Task* task)
 {
     ptr<Module_instance>  result;
 
     {
         if( _state == s_error      )  z::throw_xc( "SCHEDULER-204", name(), _error.what() );
 
-        result = _module->create_instance(process_class, remote_scheduler);
+        result = _module->create_instance(process_class, remote_scheduler, task);
 
         if( result )
         {

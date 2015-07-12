@@ -313,7 +313,7 @@ struct File_order_sink_module : Internal_module
     }
 
 
-    ptr<Module_instance> create_instance_impl(Process_class*, const string& remote_scheduler)
+    ptr<Module_instance> create_instance_impl(Process_class*, const string& remote_scheduler, Task* task)
     { 
         ptr<File_order_sink_module_instance> result = Z_NEW( File_order_sink_module_instance( this ) );  
         return +result;

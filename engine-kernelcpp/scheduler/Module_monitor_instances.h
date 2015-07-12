@@ -17,7 +17,7 @@ struct Module_monitor_instances : Object
 
     void                        close_instances             ();
     void                        clear_instances             ();
-    void                        create_instances            ();
+    void                        create_instances            (Task* or_null);
     void                        init                        ();
     void                    set_job_name                    ( const string& );
     void                    set_task_id                     ( int id );

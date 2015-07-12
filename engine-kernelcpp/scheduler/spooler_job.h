@@ -365,7 +365,7 @@ struct Standard_job : Job
     bool                        try_to_end_task             (Job* for_job, Process_class*);
     void                        kill_queued_task            ( int task_id );
     void                        end_tasks                   ( const string& task_warning );
-    ptr<Module_instance>        create_module_instance      (Process_class*, const string& remote_scheduler);
+    ptr<Module_instance>        create_module_instance      (Process_class*, const string& remote_scheduler, Task*);
     void                        count_task                  ()                                      { InterlockedIncrement( &_tasks_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
     void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }

@@ -415,7 +415,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
         _server->_module->init();
         _server->_module->_monitors->try_load();
-        _server->_module_instance = _server->_module->create_instance();
+        _server->_module_instance = _server->_module->create_instance((Process_class*)NULL, "", (Task*)NULL);
        
         if( _server->_module_instance )
         {

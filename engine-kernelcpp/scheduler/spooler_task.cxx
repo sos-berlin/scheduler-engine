@@ -2529,7 +2529,7 @@ bool Task::do_load()
 {
     string remote_scheduler = read_remote_scheduler_parameter();
     
-    if (ptr<Module_instance> module_instance = _job->create_module_instance(_process_class, remote_scheduler)) {
+    if (ptr<Module_instance> module_instance = _job->create_module_instance(_process_class, remote_scheduler, this)) {
         module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
 
         _module_instance = module_instance;
@@ -2537,10 +2537,7 @@ bool Task::do_load()
 
         if( !module_instance->loaded() ) {
             module_instance->init();
-            module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
-            module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
-            module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
-            module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
+            module_instance->add_objs(this);
             bool ok =  module_instance->load();
             if( !ok ) return false;
             module_instance->start();

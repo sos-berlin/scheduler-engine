@@ -135,12 +135,9 @@ bool Scheduler_script::on_load()
     //Z_LOGI2( "scheduler", "Scheduler-Skript wird geladen\n" );
 
     _module->_monitors->try_load();
-    _module_instance = _module->create_instance();
+    _module_instance = _module->create_instance((Process_class*)NULL, "", (Task*)NULL);
     _module_instance->init();
-
-    _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"     );
-    _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log" );
-
+    _module_instance->add_objs(NULL);
     _module_instance->load();
     _module_instance->start();
 

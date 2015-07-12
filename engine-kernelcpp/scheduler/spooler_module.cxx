@@ -424,16 +424,16 @@ void Module::init()
 
 //--------------------------------------------------------------------------Module::create_instance
 
-ptr<Module_instance> Module::create_instance(Process_class* process_class_or_null, const string& remote_scheduler)
+ptr<Module_instance> Module::create_instance(Process_class* process_class_or_null, const string& remote_scheduler, Task* task_or_null)
 {
-    ptr<Module_instance> result = create_instance_impl(process_class_or_null, remote_scheduler);
+    ptr<Module_instance> result = create_instance_impl(process_class_or_null, remote_scheduler, task_or_null);
     result->set_process_class(process_class_or_null);
 
     if( !_monitors->is_empty() )
     {
         if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         if (!process_class_or_null && remote_scheduler.empty()) {
-            result->_monitor_instances.create_instances();
+            result->_monitor_instances.create_instances(task_or_null);
         }
     }
 
@@ -442,7 +442,7 @@ ptr<Module_instance> Module::create_instance(Process_class* process_class_or_nul
 
 //---------------------------------------------------------------------Module::create_instance_impl
 
-ptr<Module_instance> Module::create_instance_impl(Process_class* process_class_or_null, const string& remote_scheduler)
+ptr<Module_instance> Module::create_instance_impl(Process_class* process_class_or_null, const string& remote_scheduler, Task*)
 {
     ptr<Module_instance> result;
     bool use_remote_scheduler = (process_class_or_null && process_class_or_null->is_remote_host()) || !remote_scheduler.empty();
@@ -500,7 +500,6 @@ ptr<Module_instance> Module::create_instance_impl(Process_class* process_class_o
     }
 
     result->_kind = kind;
-
     return result;
 }
 
@@ -722,6 +721,20 @@ void Module_instance::detach_task()
     _task = NULL;
     _task_id = 0;
     _monitor_instances.detach_task();
+}
+
+
+void Module_instance::add_objs(Task* task_or_null) {
+    if (_spooler) {
+        add_obj((IDispatch*)_spooler->_com_spooler, "spooler");
+        if (Task* task = task_or_null) {
+            add_obj((IDispatch*)task->job()->com_job(), "spooler_job"); 
+            add_obj((IDispatch*)_com_task, "spooler_task");
+            add_obj((IDispatch*)_com_log, "spooler_log");
+        } else {
+            add_obj((IDispatch*)_spooler->_com_log, "spooler_log");
+        }
+    }
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj

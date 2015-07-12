@@ -101,8 +101,8 @@ struct Module : Object
     void                        init0                       ();
     void                        init                        ();
 
-    ptr<Module_instance>        create_instance             (Process_class* = NULL, const string& remote_scheduler = "");
-    virtual ptr<Module_instance> create_instance_impl       (Process_class*, const string& remote_scheduler);
+    ptr<Module_instance>        create_instance             (Process_class*, const string& remote_scheduler, Task* task_or_null);
+    virtual ptr<Module_instance> create_instance_impl       (Process_class*, const string& remote_scheduler, Task* task_or_null);
     bool                        set                         ()                                      { return _set; }
     bool                        has_api                     () const;
     Kind                        kind                        () const                                { return _kind; }
@@ -212,6 +212,7 @@ struct Module_instance : Object
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
+    void add_objs(Task* task_or_null);
     virtual void                add_obj                     ( IDispatch*, const string& name );
     IDispatch*                  object                      ( const string& name );
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );

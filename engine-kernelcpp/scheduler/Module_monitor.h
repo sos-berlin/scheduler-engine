@@ -26,7 +26,7 @@ struct Module_monitor : Object
         return _monitor_name;
     }
 
-    public: ptr<Module_instance> create_module_instance() const;
+    public: ptr<Module_instance> create_module_instance(Task*) const;
 
     public: Module* module() const {
         return _module;

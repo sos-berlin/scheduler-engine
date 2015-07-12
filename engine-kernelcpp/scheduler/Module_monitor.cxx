@@ -45,8 +45,8 @@ void Module_monitor::set_dom(const xml::Element_ptr& monitor_element) {
     }
 }
 
-ptr<Module_instance> Module_monitor::create_module_instance() const {
-    return _module->create_instance();
+ptr<Module_instance> Module_monitor::create_module_instance(Task* task_or_null) const {
+    return _module->create_instance((Process_class*)NULL, "", task_or_null);
 }
 
 
