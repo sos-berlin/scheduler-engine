@@ -455,6 +455,22 @@ static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cp
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL set_1on_1blacklist(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::set_on_blacklist()");
+        (o_->set_on_blacklist());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL set_1priority__I(JNIEnv* jenv, jobject, jlong cppReference, jint p0)
 {
     Env env = jenv;
@@ -630,6 +646,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"set_end_state__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1end_1state__Ljava_lang_String_2 },
     { (char*)"set_force_file_reread__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1force_1file_1reread },
     { (char*)"set_id__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1id__Ljava_lang_String_2 },
+    { (char*)"set_on_blacklist__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1on_1blacklist },
     { (char*)"set_priority__native", (char*)"(JI)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1priority__I },
     { (char*)"set_suspended__native", (char*)"(JZ)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1suspended__Z },
     { (char*)"set_title__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1title__Ljava_lang_String_2 },

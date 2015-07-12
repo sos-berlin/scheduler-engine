@@ -406,6 +406,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native void set_id__native(long cppReference, java.lang.String p0);
 
 
+    @Override public void set_on_blacklist() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_on_blacklist__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_on_blacklist__native(long cppReference);
+
+
     @Override public void set_priority(int p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -129,6 +129,8 @@ with OrderPersistence {
     else result
   }
 
+  def setOnBlacklist(): Unit = cppProxy.set_on_blacklist()
+
   private def throwNotInAJobChain() = throw new SchedulerException(s"Order is not in a job chain: $toString")
 }
 

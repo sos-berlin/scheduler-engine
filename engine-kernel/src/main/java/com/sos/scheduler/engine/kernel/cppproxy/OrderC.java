@@ -32,4 +32,5 @@ public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
     long next_time_millis();
     String calculate_db_distributed_next_time();
     boolean is_on_blacklist();
+    void set_on_blacklist();
 }
