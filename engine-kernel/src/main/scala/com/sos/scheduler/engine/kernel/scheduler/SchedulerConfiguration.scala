@@ -32,7 +32,7 @@ trait SchedulerConfiguration {
 }
 
 object SchedulerConfiguration {
-  class InjectProvider @Inject private(spoolerC: SpoolerC) extends Provider[SchedulerConfiguration] {
+  final class InjectProvider @Inject private(spoolerC: SpoolerC) extends Provider[SchedulerConfiguration] {
     private lazy val settingsC = spoolerC.settings
 
     def get() = new SchedulerConfiguration {
