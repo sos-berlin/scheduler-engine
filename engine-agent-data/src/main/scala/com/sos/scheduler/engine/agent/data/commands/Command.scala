@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import spray.json._
 import com.sos.scheduler.engine.agent.data.sprayjson.TypedJson._
+import spray.json._
 
 /**
  * @author Joacim Zschimmer
@@ -22,6 +22,8 @@ object Command {
   implicit object MyJsonFormat extends RootJsonFormat[Command] {
     def write(command: Command) =
       command match {
+        case o: DeleteFile ⇒ o.toJson.asJsObject withTypeField DeleteFile.SerialTypeName
+        case o: MoveFile ⇒ o.toJson.asJsObject withTypeField MoveFile.SerialTypeName
         case o: RequestFileOrderSourceContent ⇒ o.toJson.asJsObject withTypeField RequestFileOrderSourceContent.SerialTypeName
         case o: StartSeparateProcess ⇒ o.toJson.asJsObject withTypeField StartSeparateProcess.SerialTypeName
         case o: StartThread ⇒ o.toJson.asJsObject withTypeField StartThread.SerialTypeName
@@ -32,6 +34,8 @@ object Command {
 
     def read(value: JsValue) =
       splitTypeAndJsObject(value) match {
+        case (DeleteFile.SerialTypeName, o) ⇒ o.convertTo[DeleteFile]
+        case (MoveFile.SerialTypeName, o) ⇒ o.convertTo[MoveFile]
         case (RequestFileOrderSourceContent.SerialTypeName, o) ⇒ o.convertTo[RequestFileOrderSourceContent]
         case (StartSeparateProcess.SerialTypeName, o) ⇒ o.convertTo[StartSeparateProcess]
         case (StartThread.SerialTypeName, o) ⇒ o.convertTo[StartThread]

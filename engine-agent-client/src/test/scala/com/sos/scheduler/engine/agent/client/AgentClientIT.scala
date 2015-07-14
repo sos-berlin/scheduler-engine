@@ -7,8 +7,8 @@ import com.google.common.io.Files._
 import com.google.inject.Guice
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
-import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
-import com.sos.scheduler.engine.agent.data.responses.FileOrderSourceContent
+import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile, RequestFileOrderSourceContent}
+import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.touchAndDeleteWithCloser
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import java.nio.file.Files
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
 import java.time.{Duration, Instant}
@@ -54,31 +55,52 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
     }
   }
 
-  "RequestFileOrderSourceContent" in {
-    val dir = createTempDirectory("agent-") withCloser delete
-    val knownFile = dir / "x-known"
-    val instant = Instant.parse("2015-01-01T12:00:00Z")
-    val expectedFiles = List(
-      (dir / "x-1", instant),
-      (dir / "prefix-x-3", instant + 2.s),
-      (dir / "x-2", instant + 4.s))
-    val expectedResult = FileOrderSourceContent(expectedFiles map { case (file, t) ⇒ FileOrderSourceContent.Entry(file.toString, t.toEpochMilli) })
-    val ignoredFiles = List(
-      (knownFile, instant),
-      (dir / "ignore-4", instant))
-    for ((file, t) ← expectedFiles ++ ignoredFiles) {
-      touchAndDeleteWithCloser(file)
-      setLastModifiedTime(file, FileTime.from(t))
+  "Commands" - {
+    "RequestFileOrderSourceContent" in {
+      val dir = createTempDirectory("agent-") withCloser delete
+      val knownFile = dir / "x-known"
+      val instant = Instant.parse("2015-01-01T12:00:00Z")
+      val expectedFiles = List(
+        (dir / "x-1", instant),
+        (dir / "prefix-x-3", instant + 2.s),
+        (dir / "x-2", instant + 4.s))
+      val expectedResult = FileOrderSourceContent(expectedFiles map { case (file, t) ⇒ FileOrderSourceContent.Entry(file.toString, t.toEpochMilli) })
+      val ignoredFiles = List(
+        (knownFile, instant),
+        (dir / "ignore-4", instant))
+      for ((file, t) ← expectedFiles ++ ignoredFiles) {
+        touchAndDeleteWithCloser(file)
+        setLastModifiedTime(file, FileTime.from(t))
+      }
+      val regex = "x-"
+      assert(new Regex(regex).findFirstIn(knownFile.toString).isDefined)
+      val command = RequestFileOrderSourceContent(
+        directory = dir.toString,
+        regex = regex,
+        duration = RequestFileOrderSourceContent.MaxDuration,
+        knownFiles = Set(knownFile.toString))
+      whenReady(client.executeCommand(command)) { o ⇒
+        assert(o == expectedResult)
+      }
     }
-    val regex = "x-"
-    assert(new Regex(regex).findFirstIn(knownFile.toString).isDefined)
-    val command = RequestFileOrderSourceContent(
-      directory = dir.toString,
-      regex = regex,
-      duration = RequestFileOrderSourceContent.MaxDuration,
-      knownFiles = Set(knownFile.toString))
-    whenReady(client.executeCommand(command)) { o ⇒
-      assert(o == expectedResult)
+
+    "DeleteFile" in {
+      val file = Files.createTempFile("TEST-", ".tmp")
+      assert(Files.exists(file))
+      whenReady(client.executeCommand(DeleteFile(file.toString))) { case EmptyResponse ⇒
+        assert(!Files.exists(file))
+      }
+    }
+
+    "MoveFile" in {
+      val file = Files.createTempFile("TEST-", ".tmp")
+      val newFile = file.getParent resolve s"NEW-${file.getFileName}"
+      assert(Files.exists(file))
+      assert(!Files.exists(newFile))
+      whenReady(client.executeCommand(MoveFile(file.toString, newFile.toString))) { case EmptyResponse ⇒
+        assert(!Files.exists(file))
+        assert(Files.exists(newFile))
+      }
     }
   }
 

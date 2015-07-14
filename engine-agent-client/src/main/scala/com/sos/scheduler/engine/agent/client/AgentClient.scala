@@ -45,7 +45,8 @@ trait AgentClient {
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
       case command: StartProcess ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[StartProcessResponse]).apply(Post(agentUris.command, command: Command))
-      case _: Terminate | AbortImmediately ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
+      case (_: DeleteFile | _: MoveFile | _: StartProcess | _: Terminate | AbortImmediately) ⇒
+        (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] }
   }
