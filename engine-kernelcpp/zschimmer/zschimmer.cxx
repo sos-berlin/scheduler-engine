@@ -49,7 +49,7 @@ struct Zschimmer_thread_data
 
 //Mutex                           zschimmer_mutex             ( "Global Mutex" );
 
-static Message_code_text*         error_code_text_list = NULL;
+Message_code_text* error_code_text_list = NULL;
 
 #ifndef Z_WINDOWS
     int                         main_pid = 0;

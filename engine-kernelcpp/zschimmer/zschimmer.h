@@ -51,6 +51,7 @@ namespace zschimmer
 {
 
 extern const string             string_encoding;
+extern Message_code_text* error_code_text_list;
 
 //----------------------------------------------------------------------------------------exception
 

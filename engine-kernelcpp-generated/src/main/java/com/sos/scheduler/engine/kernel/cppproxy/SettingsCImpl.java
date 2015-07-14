@@ -262,6 +262,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native boolean is_freezed__native(long cppReference);
 
 
+    @Override public java.util.ArrayList messageTexts() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.util.ArrayList result = messageTexts__native(cppReference());
+            checkIsNotReleased(java.util.ArrayList.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.util.ArrayList messageTexts__native(long cppReference);
+
+
     @Override public void set(int p0, java.lang.String p1) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

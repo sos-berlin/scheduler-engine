@@ -80,6 +80,8 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
         return _freezed; 
     }
 
+    ArrayListJ messageTexts() const;
+
     Fill_zero                  _zero_;
     bool                       _freezed;       // Some, not all, settings can be changed at runtime
     string                     _db_name;

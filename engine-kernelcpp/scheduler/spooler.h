@@ -56,8 +56,6 @@
 #include "../zschimmer/xml.h"
 #include "../zschimmer/z_io.h"
 
-#include "settings.h"
-
 using namespace zschimmer;
 using namespace zschimmer::com;
 
@@ -241,6 +239,7 @@ typedef stdext::hash_set<string> String_set;
 //-------------------------------------------------------------------------------------------------
 
 #include "javaproxy.h"
+#include "settings.h"
 #include "spooler_com.h"
 #include "spooler_xslt_stylesheet.h"
 #include "spooler_common.h"

@@ -21,6 +21,7 @@ import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
 import com.sos.scheduler.engine.kernel.log.PrefixLog
+import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
@@ -79,7 +80,8 @@ with HasCloser {
     provideSingleton(provider)
   }
 
-  @Provides @Singleton def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =
+  @Provides @Singleton
+  private def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =
     FileBasedSubsystem.Register(injector, List(
       FolderSubsystem,
       JobSubsystem,
@@ -89,14 +91,21 @@ with HasCloser {
       ScheduleSubsystem,
       StandingOrderSubsystem))
 
-  @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
+  @Provides @Singleton
+  private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
     databaseSubsystem.entityManagerFactory
 
-  @Provides @Singleton def provideSchedulerClusterMemberKey(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId) =
+  @Provides @Singleton
+  private def provideSchedulerClusterMemberKey(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId) =
     new SchedulerClusterMemberKey(schedulerId, clusterMemberId)
 
-  @Provides @Singleton def provideCommandSubsystem(pluginSubsystem: PluginSubsystem) =
+  @Provides @Singleton
+  private def provideCommandSubsystem(pluginSubsystem: PluginSubsystem) =
     new CommandSubsystem(asJavaIterable(commandHandlers(List(pluginSubsystem))))
+
+  @Provides @Singleton
+  private def provideMessageCodeHandler(spoolerC: SpoolerC): MessageCodeHandler =
+    MessageCodeHandler.fromCodeAndTextStrings(spoolerC.settings.messageTexts)
 }
 
 object SchedulerModule {

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppField, CppClass}
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppField}
 
 /**
  * @author Joacim Zschimmer
@@ -58,4 +58,6 @@ trait SettingsC extends CppProxy {
 
   @CppField
   def _web_directory: String
+
+  def messageTexts: java.util.ArrayList[String]
 }

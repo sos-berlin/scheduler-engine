@@ -149,4 +149,14 @@ void Settings::require_role(Role role, const string& info) const {
         z::throw_xc("SCHEDULER-487", role_to_string(role), info);
 }
 
+ArrayListJ Settings::messageTexts() const {
+    ArrayListJ result = ArrayListJ::new_instance();
+    for (Message_code_text* block = error_code_text_list; block; block = block->_next) {
+        for (Message_code_text* m = block; m->_code; m++) {
+            result.add((StringJ)(string(m->_code) + " " + m->_text));
+        }
+    }
+    return result;
+}
+
 }} //namespace sos::scheduler
