@@ -166,12 +166,12 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
   "JobChainDetails" - {
     "normal job chain" in {
       val details: JobChainDetails = jobChain(JobChainPath("/test-jobChain")).details
-      details.nodes(0).asInstanceOf[JobNodeOverview] should have (
+      details.nodes(0).asInstanceOf[SimpleJobNodeOverview] should have (
         'orderState (OrderState("A")),
         'nextState (OrderState("SINK")),
         'errorState (OrderState("ERROR")),
         'jobPath (JobPath("/test-job-a")))
-      details.nodes(1).asInstanceOf[JobNodeOverview] should have (
+      details.nodes(1).asInstanceOf[SinkNodeOverview] should have (
         'orderState (OrderState("SINK")),
         'nextState (OrderState("")),
         'errorState (OrderState("")),

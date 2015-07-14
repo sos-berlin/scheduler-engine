@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__jobchain__OrderQueueNode.h"
-#include "com__google__inject__Injector.h"
 #include "com__sos__scheduler__engine__kernel__order__jobchain__Node.h"
 #include "java__lang__String.h"
 
@@ -15,7 +14,6 @@ struct OrderQueueNode__class : ::zschimmer::javabridge::Class
    ~OrderQueueNode__class();
 
     ::zschimmer::javabridge::Method const __constructor____method;
-    ::zschimmer::javabridge::Method const _injector____method;
     ::zschimmer::javabridge::Method const _orderCount____method;
 
     static const ::zschimmer::javabridge::class_factory< OrderQueueNode__class > class_factory;
@@ -26,7 +24,6 @@ const ::zschimmer::javabridge::class_factory< OrderQueueNode__class > OrderQueue
 OrderQueueNode__class::OrderQueueNode__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor____method(this, "<init>", "()V")
-    ,_injector____method(this, "injector", "()Lcom/google/inject/Injector;")
     ,_orderCount____method(this, "orderCount", "()I"){}
 
 OrderQueueNode__class::~OrderQueueNode__class() {}
@@ -55,14 +52,6 @@ OrderQueueNode::~OrderQueueNode() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::google::inject::Injector OrderQueueNode::injector() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderQueueNode__class* cls = _class.get();
-    ::javaproxy::com::google::inject::Injector result;
-    result.steal_local_ref(cls->_injector____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 jint OrderQueueNode::orderCount() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;

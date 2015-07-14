@@ -5,7 +5,7 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
 @SuppressWarnings({"unchecked", "rawtypes"})
 final class Job_nodeCImpl
-extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.JobNode>
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.SimpleJobNode>
 implements com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC {
 
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">

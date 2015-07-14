@@ -11,7 +11,6 @@
 #include "com__sos__scheduler__engine__kernel__order__jobchain__Node.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace google { namespace inject { struct Injector; }}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { struct Node; }}}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -49,7 +48,6 @@ struct OrderQueueNode : ::zschimmer::javabridge::proxy_jobject< OrderQueueNode >
     }
   public:
 
-    ::javaproxy::com::google::inject::Injector injector() const;
     jint orderCount() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

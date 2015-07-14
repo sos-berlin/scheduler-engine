@@ -104,12 +104,12 @@ with UnmodifiableJobChain {
   }
 
   def refersToJob(job: Job): Boolean = nodes exists {
-    case n: JobNode => n.getJob eq job
+    case n: SimpleJobNode => n.getJob eq job
     case _ => false
   }
 
-  def jobNodes: immutable.Seq[JobNode] =
-    nodes collect { case o: JobNode => o }
+  def jobNodes: immutable.Seq[SimpleJobNode] =
+    nodes collect { case o: SimpleJobNode => o }
 
   def node(o: OrderState): Node =
     nodeMap(o)

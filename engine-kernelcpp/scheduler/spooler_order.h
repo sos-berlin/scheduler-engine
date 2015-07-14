@@ -824,6 +824,8 @@ struct Sink_node : Job_node, javabridge::has_proxy<Sink_node>
 
                                 Sink_node                   ( Job_chain*, const Order::State&, const Absolute_path& job_path, const string& move_to, bool remove );
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Sink_node>::java_sister(); }
+    SinkNodeJ&                  typed_java_sister           ()                                      { return _typed_java_sister; }
 
     bool                        file_order_sink_remove      () const                                { return _file_order_sink_remove; }
     File_path                   file_order_sink_move_to     () const                                { return _file_order_sink_move_to; }
@@ -833,6 +835,7 @@ struct Sink_node : Job_node, javabridge::has_proxy<Sink_node>
   private:
     bool                       _file_order_sink_remove;     // <file_order_sink remove="yes"/>
     File_path                  _file_order_sink_move_to;    // <file_order_sink move_to="..."/>
+    SinkNodeJ _typed_java_sister;
 };
 
 //-------------------------------------------------------------------------------------------------

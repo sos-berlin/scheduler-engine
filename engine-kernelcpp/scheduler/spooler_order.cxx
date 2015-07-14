@@ -1774,7 +1774,9 @@ xml::Element_ptr Nested_job_chain_node::dom_element( const xml::Document_ptr& do
 
 Sink_node::Sink_node( Job_chain* job_chain, const Order::State& state, const Absolute_path& job_path, const string& move_to, bool remove ) 
 : 
-    Job_node( job_chain, state, job_path ) 
+    Job_node(job_chain, state, job_path),
+    javabridge::has_proxy<Sink_node>(job_chain->spooler()),
+    _typed_java_sister(java_sister())
 {
     _type = n_file_order_sink;
 

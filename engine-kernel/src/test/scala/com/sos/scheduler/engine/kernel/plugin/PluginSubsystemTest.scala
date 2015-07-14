@@ -4,10 +4,8 @@ import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.eventbus.EventBus
-import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystemTest._
 import java.util.NoSuchElementException
-import javax.xml.stream.XMLEventReader
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -66,7 +64,6 @@ private object PluginSubsystemTest {
 
   private class BPlugin extends NamespaceXmlPlugin {
     def xmlNamespace = Namespace
-    def parseOnReturnCodeXml(node: JobNode, xmlEventReader: XMLEventReader) = throw new NotImplementedError
   }
 
   private class UnregisteredPlugin extends Plugin

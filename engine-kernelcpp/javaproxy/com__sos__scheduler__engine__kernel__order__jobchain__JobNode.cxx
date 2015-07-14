@@ -6,6 +6,7 @@
 #include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__order__jobchain__OrderQueueNode.h"
 #include "java__lang__String.h"
+#include "org__w3c__dom__Element.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
 
@@ -14,8 +15,10 @@ struct JobNode__class : ::zschimmer::javabridge::Class
     JobNode__class(const string& class_name);
    ~JobNode__class();
 
+    ::zschimmer::javabridge::Method const __constructor____method;
     ::zschimmer::javabridge::Method const _onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method;
     ::zschimmer::javabridge::Method const _orderStateTransitionToState__J__method;
+    ::zschimmer::javabridge::Method const _processConfigurationDomElement__Lorg_w3c_dom_Element_2__method;
 
     static const ::zschimmer::javabridge::class_factory< JobNode__class > class_factory;
 };
@@ -24,12 +27,23 @@ const ::zschimmer::javabridge::class_factory< JobNode__class > JobNode__class::c
 
 JobNode__class::JobNode__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
+    ,__constructor____method(this, "<init>", "()V")
     ,_onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method(this, "onOrderStepEnded", "(Lcom/sos/scheduler/engine/kernel/order/Order;I)V")
-    ,_orderStateTransitionToState__J__method(this, "orderStateTransitionToState", "(J)Ljava/lang/String;"){}
+    ,_orderStateTransitionToState__J__method(this, "orderStateTransitionToState", "(J)Ljava/lang/String;")
+    ,_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method(this, "processConfigurationDomElement", "(Lorg/w3c/dom/Element;)V"){}
 
 JobNode__class::~JobNode__class() {}
 
 
+
+JobNode JobNode::new_instance() {
+    JobNode result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    JobNode__class* cls = result._class.get();
+    cls->__constructor____method.call(result.get_jobject(), parameter_list);
+    return result;
+}
 
 
 JobNode::JobNode(jobject jo) { if (jo) assign_(jo); }
@@ -60,6 +74,13 @@ void JobNode::onOrderStepEnded(const ::zschimmer::javabridge::proxy_jobject< ::j
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_orderStateTransitionToState__J__method.jobject_call(get_jobject(), parameter_list));
     return result;
+}
+
+void JobNode::processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    JobNode__class* cls = _class.get();
+    cls->_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method.call(get_jobject(), parameter_list);
 }
 
 

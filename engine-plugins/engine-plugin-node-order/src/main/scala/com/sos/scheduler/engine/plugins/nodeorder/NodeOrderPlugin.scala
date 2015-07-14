@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.plugins.nodeorder
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.xml.VariableSets
-import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey}

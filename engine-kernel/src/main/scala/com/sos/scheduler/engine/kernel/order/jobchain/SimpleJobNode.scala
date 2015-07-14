@@ -1,0 +1,45 @@
+package com.sos.scheduler.engine.kernel.order.jobchain
+
+import com.google.inject.Injector
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.jobchain.SimpleJobNodeOverview
+import com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC
+import com.sos.scheduler.engine.kernel.job.Job
+import com.sos.scheduler.engine.kernel.order.OrderQueue
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+
+@ForCpp
+final class SimpleJobNode(
+  protected val cppProxy: Job_nodeC,
+  protected val injector: Injector)
+extends JobNode {
+
+  def orderCount: Int = cppProxy.order_queue.java_order_count()
+
+  def orderQueue: OrderQueue = cppProxy.order_queue.getSister
+
+  override def toString = s"${getClass.getSimpleName} $nodeKey $jobPath"
+
+  override def overview = SimpleJobNodeOverview(
+    orderState = orderState,
+    nextState = nextState,
+    errorState = errorState,
+    orderCount = orderCount,
+    action = action,
+    jobPath = jobPath)
+
+  def jobPath: JobPath = JobPath(cppProxy.job_path)
+
+  def getJob: Job = cppProxy.job.getSister
+}
+
+object SimpleJobNode {
+  final class Type extends SisterType[SimpleJobNode, Job_nodeC] {
+    def sister(proxy: Job_nodeC, context: Sister): SimpleJobNode = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new SimpleJobNode(proxy, injector)
+    }
+  }
+}
