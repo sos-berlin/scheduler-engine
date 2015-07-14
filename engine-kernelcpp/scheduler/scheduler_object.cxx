@@ -38,6 +38,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_job_chain_node:               return "job_chain::Node";
         case type_job_folder:                   return "Job_folder";
         case type_job_subsystem:                return "Job_subsystem";
+        case type_internal_module:              return "Internal_module";
         case type_lock:                         return "Lock";
         case type_lock_folder:                  return "Lock_folder";
         case type_lock_holder:                  return "Lock.Holder";

@@ -14,6 +14,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public java.lang.String default_process_class_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = default_process_class_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String default_process_class_path__native(long cppReference);
+
+
     @Override public java.lang.String file() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -58,6 +74,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     }
 
     private static native long file_modification_time_t__native(long cppReference);
+
+
+    @Override public java.lang.String file_watching_process_class_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = file_watching_process_class_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String file_watching_process_class_path__native(long cppReference);
 
 
     @Override public boolean has_base_file() {

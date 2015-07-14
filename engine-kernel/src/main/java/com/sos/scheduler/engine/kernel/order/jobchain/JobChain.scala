@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
@@ -9,6 +11,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
@@ -148,6 +151,10 @@ with UnmodifiableJobChain {
   }
 
   def isDistributed: Boolean = cppProxy.is_distributed()
+
+  def processClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+
+  def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
 }
 
 

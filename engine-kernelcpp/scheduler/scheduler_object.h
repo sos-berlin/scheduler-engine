@@ -14,6 +14,7 @@ namespace scheduler {
 //---------------------------------------------------------------------------------Scheduler_object
 
 struct Scheduler_object
+
 {
     enum Type_code
     {
@@ -42,6 +43,7 @@ struct Scheduler_object
         type_job_chain_node,
         type_job_folder,
         type_job_subsystem,
+        type_internal_module,
         type_lock,
         type_lock_folder,
         type_lock_holder,

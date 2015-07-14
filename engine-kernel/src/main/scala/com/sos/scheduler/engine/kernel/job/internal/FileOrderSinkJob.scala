@@ -1,0 +1,95 @@
+package com.sos.scheduler.engine.kernel.job.internal
+
+import com.google.inject.Injector
+import com.sos.scheduler.engine.agent.client.{AgentClient, AgentClientFactory}
+import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile}
+import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
+import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
+import com.sos.scheduler.engine.kernel.job.Task
+import com.sos.scheduler.engine.kernel.job.internal.FileOrderSinkJob._
+import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
+import com.sos.scheduler.engine.kernel.order.Order
+import com.sos.scheduler.engine.kernel.order.jobchain.SinkNode
+import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
+import java.nio.file.{Files, Paths}
+import scala.concurrent.{ExecutionContext, Future}
+
+/**
+ * Implementation of &lt;file_order_sink>.
+ *
+ * @author Joacim Zschimmer
+ */
+final class FileOrderSinkJob private(
+  protected val task: Task,
+  protected val messageCodeToString: MessageCodeHandler,
+  processClassSubsystem: ProcessClassSubsystem,
+  agentClientFactory: AgentClientFactory)
+  (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
+   executionContext: ExecutionContext)
+extends StandardAsynchronousJob with OrderAsynchronousJob {
+
+  import task.log
+
+  protected def processFileOrder(order: Order): Future[Boolean] = {
+    val filePath = order.filePath
+    val fileOperator = (
+      order.jobChain.fileWatchingProcessClassPathOption
+      map processClassSubsystem.processClass
+      flatMap { _.agents.headOption }
+      map { agent ⇒ new AgentFileOperator(agentClientFactory.apply(agent.address)) }
+      getOrElse LocalFileOperator)
+    val node = cast[SinkNode](order.jobChain.node(order.state))
+    ((node.moveFileTo, node.isDeletingFile) match {
+      case ("", true) ⇒
+        log.info(messageCodeToString(MessageCode("SCHEDULER-979"), filePath))
+        fileOperator.deleteFile(filePath)
+      case (destination, false) ⇒
+        log.info(messageCodeToString(MessageCode("SCHEDULER-980"), filePath, destination))
+        fileOperator.moveFile(filePath, newPath = (Paths.get(destination) resolve Paths.get(filePath).getFileName).toString)
+      case _ ⇒ throw new IllegalArgumentException
+    })
+    .map { _ ⇒ true }
+    .recoverWith { case t ⇒
+      log.warn(t.toString)
+      fileOperator.fileExists(filePath) flatMap { exists ⇒
+        schedulerThreadFuture {
+          if (exists) order.setOnBlacklist()
+          !exists
+        }
+      }
+    }
+  }
+}
+
+object FileOrderSinkJob {
+  def apply(injector: Injector)(task: Task) =
+    new FileOrderSinkJob(
+      task,
+      injector.instance[MessageCodeHandler],
+      injector.instance[ProcessClassSubsystem],
+      injector.instance[AgentClientFactory])(
+        injector.instance[SchedulerThreadCallQueue],
+        injector.instance[ExecutionContext])
+
+  private trait FileOperator {
+    def deleteFile(path: String): Future[Unit]
+    def moveFile(path: String, newPath: String): Future[Unit]
+    def fileExists(path: String): Future[Boolean]
+  }
+
+  private object LocalFileOperator extends FileOperator {
+    import Files.{delete, exists, move}
+    def deleteFile(path: String) = Future.successful(delete(Paths.get(path)))
+    def moveFile(path: String, newPath: String) = Future.successful(move(Paths.get(path), Paths.get(newPath)))
+    def fileExists(path: String) = Future.successful(exists(Paths.get(path)))
+  }
+
+  private class AgentFileOperator(agentClient: AgentClient)(implicit ec: ExecutionContext) extends FileOperator {
+    def deleteFile(path: String) = agentClient.executeCommand(DeleteFile(path)) map { _ ⇒ () }
+    def moveFile(path: String, newPath: String) = agentClient.executeCommand(MoveFile(path, newPath)) map { _ ⇒ () }
+    def fileExists(path: String) = agentClient.fileExists(path)
+  }
+}

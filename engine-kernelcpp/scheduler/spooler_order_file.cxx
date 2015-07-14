@@ -228,107 +228,12 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     String_set _agent_request_known_files;
 };
 
-//------------------------------------------------------------------File_order_sink_module_instance
-
-struct File_order_sink_module_instance : Internal_module_instance
-{
-    File_order_sink_module_instance( Module* m ) 
-    : 
-        Internal_module_instance( m ) 
-    {
-    }
-
-
-
-    bool spooler_process()
-    {
-        bool   result = false;
-        Order* order  = _task->order();
-
-        if( !order )  return false;         // Fehler
-
-        File_path path = order->file_path();
-        if( path == "" )
-        {
-            _log->warn( message_string( "SCHEDULER-343", order->obj_name() ) );
-            result = false;
-        }
-        else
-        {
-            Sink_node* sink_node = Sink_node::cast( order->job_chain_node() );
-            if( !sink_node )  assert(0), z::throw_xc( Z_FUNCTION );
-
-            if( !path.file_exists() )
-            {
-                _log->warn( message_string( "SCHEDULER-339", path ) );
-                result = false;
-            }
-            else
-            {
-                try
-                {
-                    if( sink_node->file_order_sink_move_to() != "" )
-                    {
-                        order->log()->info( message_string( "SCHEDULER-980", path, sink_node->file_order_sink_move_to() ) );
-
-                        path.move_to( sink_node->file_order_sink_move_to() );
-
-                        result = true;
-                    }
-                    else
-                    if( sink_node->file_order_sink_remove() )
-                    {
-                        order->log()->info( message_string( "SCHEDULER-979", path ) );
-
-                        path.unlink();
-
-                        result = true;
-                    }
-                    else
-                        assert(0), z::throw_xc( Z_FUNCTION );
-                }
-                catch( exception& x )
-                {
-                    order->log()->warn( x.what() );     // Nicht error(), damit der Job nicht stoppt
-                }
-
-                if( result == false )  order->set_on_blacklist();
-            }
-        }
-
-        order->set_end_state_reached();
-
-        return result;
-    }
-};
-
-//---------------------------------------------------------------------------File_order_sink_module
-
-struct File_order_sink_module : Internal_module
-{
-    File_order_sink_module( Spooler* spooler )
-    :
-        Internal_module(spooler, (Prefix_log*)NULL, false)
-    {
-    }
-
-
-    ptr<Module_instance> create_instance_impl(Process_class*, const string& remote_scheduler, Task* task)
-    { 
-        ptr<File_order_sink_module_instance> result = Z_NEW( File_order_sink_module_instance( this ) );  
-        return +result;
-    }
-};
-
 //------------------------------------------------------------------------------File_order_sink_job
 
-struct File_order_sink_job : Internal_job
-{
-    File_order_sink_job( Scheduler* scheduler )
-    :
-        Internal_job( scheduler, file_order_sink_job_path.without_slash(), +Z_NEW( File_order_sink_module( scheduler ) ) )
-    {
-    }
+struct File_order_sink_job : Internal_job {
+    File_order_sink_job(Scheduler* scheduler) :
+        Internal_job(scheduler, file_order_sink_job_path.without_slash(), new_internal_module(scheduler, log(), "FileOrderSink"))
+    {}
 };
 
 //-----------------------------------------------------------------------------init_file_order_sink
@@ -367,9 +272,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _repeat(directory_file_order_source_repeat_default),
     _alert_when_directory_missing(alert_when_directory_missing_default),
     _directory_read_result_call(Z_NEW(Directory_read_result_call(this))),
-    _process_class_path(element.hasAttribute("process_class")? 
-        Absolute_path(job_chain->folder_path(), element.getAttribute("process_class")) 
-        : job_chain->file_watching_process_class_path())
+    _process_class_path(job_chain->file_watching_process_class_path())
 {
     if (_process_class_path != "") {
         add_requisite(Requisite_path(spooler()->process_class_subsystem(), _process_class_path));
