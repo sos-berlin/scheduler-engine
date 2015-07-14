@@ -14,7 +14,7 @@ using namespace job_chain;
 
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
 const string scheduler_file_order_path_variable_name = "scheduler_file_path";
-const string scheduler_file_order_agent_variable_name = "scheduler_file_agent";
+const string scheduler_file_order_agent_variable_name = "scheduler_file_remote_scheduler";
 
 DEFINE_SIMPLE_CALL(Order, File_exists_call)
 

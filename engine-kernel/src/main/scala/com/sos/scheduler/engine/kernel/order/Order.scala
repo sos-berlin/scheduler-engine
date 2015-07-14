@@ -14,11 +14,12 @@ import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.eternalCppMillisToNoneInstant
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import java.time.Instant
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 @ForCpp
 final class Order private(
@@ -48,8 +49,8 @@ with OrderPersistence {
     val p = parameters
     val file = p("scheduler_file_path")
     require(file.nonEmpty, "Order variable scheduler_file_path must not be empty")
-    val agentUri = p("scheduler_file_agent")
-    require(agentUri.nonEmpty, "Order variable scheduler_file_agent must not be empty")
+    val agentUri = p(FileOrderAgentUriVariableName)
+    require(agentUri.nonEmpty, s"Order variable $FileOrderAgentUriVariableName must not be empty")
     agentClientFactory.apply(agentUri).fileExists(file) onComplete {
       case Success(exists) ⇒
         try cppCall.call(exists: java.lang.Boolean)
@@ -114,6 +115,10 @@ with OrderPersistence {
 
   def jobChainOption: Option[JobChain] =
     Option(cppProxy.job_chain) map { _.getSister }
+
+  def filePath: String = cppProxy.params.get_string(FileOrderPathVariableName)
+
+  def fileAgentUri: String = cppProxy.params.get_string(FileOrderAgentUriVariableName)
 
   def parameters: VariableSet =
     cppProxy.params.getSister
