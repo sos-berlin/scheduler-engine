@@ -31,6 +31,7 @@ using namespace job_chain;
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
+const Duration minimum_delay = Duration(1);
 const int                       max_tries                                 = 2;        // Nach Fehler machen wir sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
 
@@ -195,6 +196,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     File_path                  _path;
     string                     _regex_string;
     Regex                      _regex;
+    Time _last_continue;
     Duration                   _delay_after_error;
     Duration                   _repeat;
     bool _is_watching;
@@ -552,7 +554,7 @@ void Directory_file_order_source::start_read_new_files_from_agent() {
         get_blacklisted_files(&blacklisted_files);
         Z_FOR_EACH_CONST(String_set, blacklisted_files, i) _agent_request_known_files.erase(*i);
         ListJ list;
-        list = ArrayListJ::new_instance(_agent_request_known_files.size());
+        list = ArrayListJ::new_instance(int_cast(_agent_request_known_files.size()));
         Z_FOR_EACH_CONST(String_set, _agent_request_known_files, i) list.add((StringJ)*i);
         _fileOrderSourceClientJ.readFiles(list, _directory_read_result_call->java_sister());
         _in_directory_read_result_call = true;
@@ -1031,6 +1033,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
 
 bool Directory_file_order_source::async_continue_( Async_operation::Continue_flags flags )
 {
+    _last_continue = Time::now();
     Z_LOG2("scheduler.file_order", Z_FUNCTION << "\n");
     if (!_is_watching) {
         return false;
@@ -1059,10 +1062,12 @@ void Directory_file_order_source::on_directory_read() {
 
 void Directory_file_order_source::repeat_after_delay(const Duration& duration) {
     assert(_is_watching);
-    int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
+    double delay = int_cast(_directory_error        ? delay_after_error().seconds() :
                          _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
                                                  : duration.seconds());    // Unter Unix (C++) funktioniert's _nur_ durch wiederkehrendes Nachsehen
-    set_async_delay(max(1, delay));
+    double minimum = ((_last_continue + minimum_delay) - Time::now()).as_double();
+    delay = max(minimum, delay);
+    set_async_delay(delay);
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 }
