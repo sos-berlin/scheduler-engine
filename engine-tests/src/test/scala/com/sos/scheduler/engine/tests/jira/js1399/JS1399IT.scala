@@ -76,7 +76,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   private def newJobChainElem(directory: Path, agentUri: String, repeat: Duration): xml.Elem =
-    <job_chain process_class={TestProcessClassPath.withoutStartingSlash}>
+    <job_chain file_watching_process_class={TestProcessClassPath.withoutStartingSlash}>
       <file_order_source directory={directory.toString} regex="MATCHING-" repeat={repeat.getSeconds.toString}/>
       <job_chain_node state="100" job="/test"/>
       <file_order_sink state="END" remove="true"/>
