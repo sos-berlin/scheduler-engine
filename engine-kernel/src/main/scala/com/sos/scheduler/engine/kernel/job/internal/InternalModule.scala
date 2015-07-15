@@ -4,10 +4,10 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.jobapi.JavaJobSignatures
 import com.sos.scheduler.engine.data.jobapi.JavaJobSignatures.{SpoolerExitSignature, SpoolerOnErrorSignature, SpoolerOnSuccessSignature, SpoolerOpenSignature}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.job.Task
+import scala.concurrent.Future
 import scala.util.{Success, Try}
 
 /**
@@ -16,10 +16,8 @@ import scala.util.{Success, Try}
 @ForCpp
 final class InternalModule private(injector: Injector, moduleName: String, agentUri: String, task: Task) {
 
-  private implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
+  private val schedulerThreadExecutionContext = injector.instance[SchedulerThreadCallQueue].executionContext
   private lazy val instance: AsynchronousJob = newInternalJobInstance(moduleName)(task)
-
-  import schedulerThreadCallQueue.implicits.executionContext
 
   @ForCpp
   def addObj(idispatch: AnyRef, name: String): Unit = {}
@@ -28,17 +26,17 @@ final class InternalModule private(injector: Injector, moduleName: String, agent
   def nameExists(name: String) = false
 
   @ForCpp
-  def start(cppCall: CppCall): Unit = catchInFuture { instance.start() } onComplete cppCall.call
+  def start(resultCall: CppCall): Unit = handleCall(resultCall) { instance.start() }
 
   @ForCpp
-  def begin(cppCall: CppCall): Unit = cppCall.call(Success(true))
+  def begin(resultCall: CppCall): Unit = resultCall.call(Success(true))
 
   @ForCpp
-  def step(cppCall: CppCall): Unit = catchInFuture { instance.step() } onComplete cppCall.call
+  def step(resultCall: CppCall): Unit = handleCall(resultCall) { instance.step() }
 
   @ForCpp
-  def call(name: String, cppCall: CppCall): Unit =
-    cppCall.call(Try {
+  def call(name: String, resultCall: CppCall): Unit =
+    resultCall.call(Try {
       name match {
         case SpoolerOpenSignature ⇒ true
         case SpoolerOnErrorSignature ⇒ ()
@@ -49,13 +47,16 @@ final class InternalModule private(injector: Injector, moduleName: String, agent
     })
 
   @ForCpp
-  def end(success: Boolean, cppCall: CppCall): Unit = catchInFuture { instance.end() } onComplete cppCall.call
+  def end(success: Boolean, resultCall: CppCall): Unit = handleCall(resultCall) { instance.end() }
 
   @ForCpp
   def close(cppCall: CppCall): Unit = cppCall.call(Try { instance.close() })
 
   @ForCpp
-  def release(cppCall: CppCall): Unit = cppCall.call(Success(()))
+  def release(resultCall: CppCall): Unit = resultCall.call(Success(()))
+
+  private def handleCall[A](resultCall: CppCall)(body: ⇒ Future[A]): Unit =
+    catchInFuture { body } .onComplete { result: Try[A] ⇒ resultCall.call(result) } (schedulerThreadExecutionContext)
 
   private def newInternalJobInstance(name: String)(task: Task) =
     name match {

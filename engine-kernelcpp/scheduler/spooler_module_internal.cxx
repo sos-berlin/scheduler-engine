@@ -92,11 +92,6 @@ struct Internal_module_instance : Module_instance, Scheduler_object
         return _log;
     }
 
-    //public: void add_obj(IDispatch* idispatch, const string& name) {
-    //    string java_class_name = Java_subsystem_interface::classname_of_scheduler_object(name);
-    //    _internalModuleJ.addObj(javabridge::Java_idispatch(idispatch, true, java_class_name.c_str()).get_jobject(), name);
-    //}
-
     public: Variant call(const string& name) {
         z::throw_xc(Z_FUNCTION, name);
     }
