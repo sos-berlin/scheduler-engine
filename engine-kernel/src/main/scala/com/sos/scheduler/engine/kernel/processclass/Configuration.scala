@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.processclass
 
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.kernel.processclass.agent.Agent
@@ -28,15 +27,15 @@ private[processclass] object Configuration {
       import eventReader._
       parseElement("process_class") {
         case class Agents(agents: immutable.IndexedSeq[Agent])
-        val idGenerator = Iterator from 0
-        val attributeAgentOption = attributeMap.getConverted("remote_scheduler") { o ⇒ Agent(idGenerator.next(), o) }
+        val nextId: () ⇒ Int = (Iterator from 0).next
+        val attributeAgentOption = attributeMap.get("remote_scheduler") filter { _.nonEmpty } map { o ⇒ Agent(nextId(), o) }
         attributeMap.ignoreUnread()
         val children = forEachStartElement {
           case "remote_schedulers" ⇒ parseElement() {
             val children = forEachStartElement {
               case "remote_scheduler" ⇒ parseElement() {
                 val uri = new URI(attributeMap("remote_scheduler")) // Should be an URI
-                Agent(idGenerator.next(), uri.toString)
+                Agent(nextId(), uri.toString)
               }
               case _ ⇒ ()
             }
