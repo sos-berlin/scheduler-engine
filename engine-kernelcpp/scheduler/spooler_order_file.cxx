@@ -576,7 +576,7 @@ void Directory_file_order_source::on_call(const Directory_read_result_call& call
                 ListJ javaList = (ListJ)((TryJ)call.value()).get();   // Try.get() wirft Exception, wenn call.value() ein Failure ist
                 int n = javaList.size();
                 if (n == 0) {
-                    next_call_after = max(Duration(1), _new_files_time + _repeat - Time::now());
+                    next_call_after = _new_files_time + _repeat - Time::now();
                     if (next_call_after > Duration(1)) {
                         // Normally, Agent call should response after _repeat, so next_call_after should be zero.
                         Z_LOG2("scheduler", obj_name() << " No files received. Next call after " + next_call_after.as_string());
@@ -1062,11 +1062,11 @@ void Directory_file_order_source::on_directory_read() {
 
 void Directory_file_order_source::repeat_after_delay(const Duration& duration) {
     assert(_is_watching);
-    double delay = int_cast(_directory_error        ? delay_after_error().seconds() :
-                         _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
-                                                 : duration.seconds());    // Unter Unix (C++) funktioniert's _nur_ durch wiederkehrendes Nachsehen
-    double minimum = ((_last_continue + minimum_delay) - Time::now()).as_double();
-    delay = max(minimum, delay);
+    double delay = (double)(_directory_error        ? delay_after_error().seconds() :
+                            _expecting_request_order? INT_MAX                 // Nächstes request_order() abwarten
+                                                    : duration.seconds());    // Unter Unix (C++) funktioniert's _nur_ durch wiederkehrendes Nachsehen
+    Duration lower_bound = (_last_continue + minimum_delay) - Time::now();
+    delay = max(lower_bound.as_double(), delay);
     set_async_delay(delay);
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
