@@ -1369,8 +1369,8 @@ Process* Process_class::new_process(const Api_process_configuration* c, Prefix_l
 
 
 bool Process_class::is_http_or_multiple(const string& remote_scheduler_address) const {
-    // hasMoreAgents() setzt HTTP voraus.
-    return string_begins_with(remote_scheduler_address, "http://")  || string_begins_with(remote_scheduler_address, "classic:http://") || typed_java_sister().hasMoreAgents();
+    return remote_scheduler_address.find("://") != string::npos ||  // "[classic:]http[s]://"
+        typed_java_sister().hasMoreAgents();                        // hasMoreAgents() setzt HTTP voraus. 
 }
 
 //-------------------------------------------------------Process_class::select_process_if_available
