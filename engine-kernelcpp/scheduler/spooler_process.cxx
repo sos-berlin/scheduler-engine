@@ -576,10 +576,12 @@ struct Abstract_remote_api_process : Abstract_api_process {
         Abstract_api_process(spooler, log, conf)
     {}
 
+    protected: virtual Ip_address ip_interface() const = 0;
+
     protected: void prepare_connection() {
         assert(!_connection);
         _connection = _spooler->_connection_manager->new_connection();
-        _connection->listen_on_tcp_port(Ip_address::localhost);
+        _connection->listen_on_tcp_port(ip_interface());
     }
 
     public: object_server::Connection* connection() const {
@@ -607,6 +609,10 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         }
         if (_xml_client_connection)
             _xml_client_connection->set_async_manager(NULL);
+    }
+
+    protected: Ip_address ip_interface() const { 
+        return INADDR_ANY;
     }
 
     protected: void do_start() {
@@ -704,6 +710,10 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         if (_clientJ) {
             _process_class->typed_java_sister().removeCppHttpRemoteApiProcessClient(_clientJ);
         }
+    }
+
+    protected: Ip_address ip_interface() const { 
+        return Ip_address::localhost;  // TCP is only used to connect with Scala coded tunnel
     }
 
     protected: void do_start() {
