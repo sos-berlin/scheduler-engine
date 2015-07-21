@@ -145,10 +145,8 @@ void log_start( const char* filename_ )
         if( const char* gt = strchr( filename, '>' ) )
         {
             string log_categories = trim(string(filename, gt - filename));
-            if (!log_categories.empty()) {
-                sos_static_ptr()->_log_categories = log_categories;
-                zschimmer::static_log_categories.set_multiple( log_categories );
-            }
+            sos_static_ptr()->_log_categories = log_categories;
+            zschimmer::static_log_categories.set_multiple( log_categories );
             filename = gt + 1;
             while( filename[0] == ' ' )  filename++;
         }
@@ -226,7 +224,7 @@ void log_stop()
 {
     Z_MUTEX( sos_static_ptr()->_log_lock )
     {
-        zschimmer::Log_ptr::set_log_context( NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
+        //zschimmer::Log_ptr::set_log_context( NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
         //zschimmer::Log_ptr::set_stream_and_system_mutex( NULL, NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
 
         SOS_DELETE( sos_static_ptr()->_log_ptr );
