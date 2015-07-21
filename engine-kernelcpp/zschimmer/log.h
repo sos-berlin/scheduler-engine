@@ -69,7 +69,7 @@ struct Log_ptr
 
   //static int                  log_write                   ( const char*, int length );
     static bool                 logging                     ()                                      { return static_log_context_ptr != NULL; }
-    static void                 disable_logging             ()                                      { static_stream_ptr = NULL; }   // Nach fork() aufzurufen, weil Mutex gesperrt sein kann
+    static void                 disable_logging             ()                                      { set_log_context(NULL); static_stream_ptr = NULL; }   // Nach fork() aufzurufen, weil Mutex gesperrt sein kann
     static void                 set_log_context             ( Log_context** );
     static Log_context**        get_log_context             ()                                      { return static_log_context_ptr; }  // Für hostole.cxx
   //static void                 set_stream_and_system_mutex ( ostream**, System_mutex* );

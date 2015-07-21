@@ -145,10 +145,8 @@ void log_start( const char* filename_ )
         if( const char* gt = strchr( filename, '>' ) )
         {
             string log_categories = trim(string(filename, gt - filename));
-            if (!log_categories.empty()) {
-                sos_static_ptr()->_log_categories = log_categories;
-                zschimmer::static_log_categories.set_multiple( log_categories );
-            }
+            sos_static_ptr()->_log_categories = log_categories;
+            zschimmer::static_log_categories.set_multiple( log_categories );
             filename = gt + 1;
             while( filename[0] == ' ' )  filename++;
         }
@@ -210,10 +208,15 @@ void log_start( const char* filename_ )
             *s << flush;
         }
 
-        Z_MUTEX( sos_static_ptr()->_log_lock )
-        {
+        ostream* old = NULL;
+        Z_MUTEX(sos_static_ptr()->_log_lock) {
+            old = sos_static_ptr()->_log_ptr;
             sos_static_ptr()->_log_ptr = s;
             //zschimmer::Log_ptr::set_stream_and_system_mutex( &sos_static_ptr()->_log_ptr, &sos_static_ptr()->_log_lock._system_mutex );     // Kein Thread darf laufen (und Log_ptr benutzen)!
+        }
+        if (old) {
+            z::sleep(1.0);  // In case a thread is using old _log_ptr we want to delete. Hopefully the thread log call finishes in a second
+            delete old;
         }
         
         Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << filename << "\")   categories: " << zschimmer::static_log_categories.to_string() << "\n" );
@@ -226,7 +229,7 @@ void log_stop()
 {
     Z_MUTEX( sos_static_ptr()->_log_lock )
     {
-        zschimmer::Log_ptr::set_log_context( NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
+        //zschimmer::Log_ptr::set_log_context( NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
         //zschimmer::Log_ptr::set_stream_and_system_mutex( NULL, NULL );      // Kein Thread darf laufen (und Log_ptr benutzen)!
 
         SOS_DELETE( sos_static_ptr()->_log_ptr );
