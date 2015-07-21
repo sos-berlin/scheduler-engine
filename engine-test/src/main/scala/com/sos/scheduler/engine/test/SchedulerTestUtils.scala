@@ -4,7 +4,9 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.data.filebased.{FileBasedReplacedEvent, FileBasedAddedEvent, FileBasedEvent, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
@@ -14,6 +16,7 @@ import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
@@ -33,6 +36,16 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 object SchedulerTestUtils {
+
+  /**
+   * Writes the configuration file and awaits JobScheduler's acceptance.
+   */
+  def writeConfigurationFile[A](path: TypedPath, xmlElem: xml.Elem)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
+    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
+      controller.environment.fileFromPath(path).xml = xmlElem
+      instance[FolderSubsystem].updateFolders()
+    }
+  }
 
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
     instance[JobSubsystem].job(jobPath)
