@@ -27,7 +27,8 @@ string Source_pos::to_string() const
 
 Message_string::Message_string( const string& code )
 :
-    _max_insertion_length( (size_t)-1 )
+    _max_insertion_length( (size_t)-1 ),
+    _log_level(log_info)
 {
     set_code( code );
 }
@@ -36,7 +37,8 @@ Message_string::Message_string( const string& code )
 
 Message_string::Message_string( const char* code )
 :
-    _max_insertion_length( (size_t)-1 )
+    _max_insertion_length( (size_t)-1 ),
+    _log_level(log_info)
 {
     set_code( code );
 }

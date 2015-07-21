@@ -523,6 +523,9 @@ struct Thread_api_process : Abstract_api_process {
                 if (unix_signal != Z_SIGKILL) {
                     system_interface::kill_with_unix_signal(pid, unix_signal);
                 } else {
+                    log()->warn(message_string("SCHEDULER-281"));
+                    Message_string m ( "SCHEDULER-709" );
+                    system_interface::try_kill_process_with_descendants_immediately(pid, log(), &m, Z_FUNCTION );
                     try_kill_process_immediately(pid);   // Für kind_remote kind_process (Process_module_instance)
                 }
             }
