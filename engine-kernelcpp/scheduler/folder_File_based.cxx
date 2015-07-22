@@ -81,6 +81,9 @@ bool File_based::activate()
 {
     bool ok = _state >= s_active;
     if( !ok ) {
+        if (string_ends_with(log()->prefix(), "*")) {  // "*" indicats a File_based not yet in its place. We remove it now.
+            log()->set_prefix(log()->prefix().substr(0, log()->prefix().length() - 1));
+        }
         load();
         if( ( _state == s_loaded  ||  _state == s_incomplete )  &&   subsystem()->subsystem_state() >= subsys_active ) {
             ok = on_activate();

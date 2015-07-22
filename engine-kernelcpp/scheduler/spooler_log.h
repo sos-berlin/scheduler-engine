@@ -107,6 +107,11 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                    set_job_name                    ( const string& job_name )          { _job_name = job_name; }
     void                    set_task                        ( Task* task )                      { _task = task; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
+    
+    const string& prefix() const {
+        return _prefix;
+    }
+
     void                    set_profile_section             ( const string& );
     void                    set_dom_settings                ( xml::Element_ptr settings_element );
     void                    set_order_log                   ( Prefix_log* log )                 { _order_log = log; }
