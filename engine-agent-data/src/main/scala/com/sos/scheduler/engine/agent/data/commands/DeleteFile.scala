@@ -6,7 +6,7 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-final case class DeleteFile(path: String) extends Command {
+final case class DeleteFile(path: String) extends FileCommand {
   type Response = EmptyResponse.type
 }
 
