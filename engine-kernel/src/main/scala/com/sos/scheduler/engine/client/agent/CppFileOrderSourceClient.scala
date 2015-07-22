@@ -5,11 +5,13 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.client.agent.CppFileOrderSourceClient._
+import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.Tries._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -25,11 +27,12 @@ final class CppFileOrderSourceClient private(
   agentUri: String,
   directory: String,
   regex: String,
-  duration: Duration,
-  schedulerThreadCallQueue: SchedulerThreadCallQueue)
-  (implicit actorSystem: ActorSystem) {
+  duration: Duration)
+  (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
+    actorSystem: ActorSystem) {
 
-  import schedulerThreadCallQueue.implicits.executionContext
+  //import schedulerThreadCallQueue.implicits.executionContext
+  import actorSystem.dispatcher
 
   private val agent = agentClientFactory.apply(agentUri = agentUri)
   private var isInCall = false
@@ -49,8 +52,11 @@ final class CppFileOrderSourceClient private(
         logger.debug(s"Closed, response is ignored")
       } else {
         val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
-        try resultCppCall.call(forCpp.withThisStackTrace)
-        catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t") } // Okay if C++ object (Directory_file_order_source) has been closed
+        try inSchedulerThread { resultCppCall.call(forCpp.withThisStackTrace) }
+        catch {
+          case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t")  // Okay if C++ object (Directory_file_order_source) has been closed
+          case t: CallQueue.ClosedException ⇒ logger.trace(s"Ignored: $t")  // Okay if JobScheduler has been closed
+        }
       }
     }
   }
@@ -66,7 +72,7 @@ object CppFileOrderSourceClient {
       agentUri = agentUri,
       directory = directory,
       regex = regex,
-      duration = Duration.ofMillis(durationMillis),
-      injector.instance[SchedulerThreadCallQueue])(
+      duration = Duration.ofMillis(durationMillis))(
+        injector.instance[SchedulerThreadCallQueue],
         injector.instance[ActorSystem])
 }
