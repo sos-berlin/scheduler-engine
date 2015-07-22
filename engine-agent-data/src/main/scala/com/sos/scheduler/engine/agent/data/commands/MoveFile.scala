@@ -6,7 +6,7 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-final case class MoveFile(path: String, newPath: String) extends Command {
+final case class MoveFile(path: String, toDirectory: String) extends FileCommand {
   type Response = EmptyResponse.type
 }
 

@@ -12,11 +12,11 @@ import spray.json._
 final class MoveFileTest extends FreeSpec {
 
    "JSON" in {
-     val obj = MoveFile("OLD", "NEW")
+     val obj = MoveFile("OLD", "TO-DIRECTORY")
      val json = """{
        "$TYPE": "MoveFile",
        "path": "OLD",
-       "newPath": "NEW"
+       "toDirectory": "TO-DIRECTORY"
      }""".parseJson
      assert((obj: Command).toJson == json)   // Command serializer includes $TYPE
      assert(obj == json.convertTo[Command])

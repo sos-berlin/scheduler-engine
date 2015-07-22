@@ -25,6 +25,8 @@ import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.matching.Regex
 
 /**
@@ -94,13 +96,23 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
 
     "MoveFile" in {
       val file = Files.createTempFile("TEST-", ".tmp")
-      val newFile = file.getParent resolve s"NEW-${file.getFileName}"
+      val dir = Files.createTempDirectory("TEST-")
       assert(Files.exists(file))
-      assert(!Files.exists(newFile))
-      whenReady(client.executeCommand(MoveFile(file.toString, newFile.toString))) { case EmptyResponse ⇒
+      val movedPath = dir resolve file.getFileName
+      whenReady(client.executeCommand(MoveFile(file.toString, dir.toString))) { case EmptyResponse ⇒
         assert(!Files.exists(file))
-        assert(Files.exists(newFile))
+        assert(Files.exists(movedPath))
       }
+      Files.delete(movedPath)
+      Files.delete(dir)
+    }
+
+    "MoveFile to file fails" in {
+      val file = Files.createTempFile("TEST-", ".tmp")
+      val destination = file.getParent resolve s"NEW-${file.getFileName}"
+      assert(Files.exists(file))
+      assert(Await.ready(client.executeCommand(MoveFile(file.toString, destination.toString)), 10.seconds).value.get.failed.get.getMessage
+        contains "directory")
     }
   }
 
