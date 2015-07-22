@@ -19,6 +19,8 @@ import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
+import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
+import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -27,6 +29,7 @@ import java.lang.System.currentTimeMillis
 import java.nio.file.Files
 import java.time.{Duration, Instant}
 import java.util.concurrent.TimeoutException
+import javax.persistence.EntityManagerFactory
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -195,6 +198,15 @@ object SchedulerTestUtils {
         case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error messages $errorCodes")
       }
     }
+
+
+  def orderIsOnBlacklist(orderKey: OrderKey)(implicit hasInjector: HasInjector, entityManagerFactory: EntityManagerFactory): Boolean =
+    if (jobChain(orderKey.jobChainPath).isDistributed)
+      transaction { implicit entityManager ⇒
+        instance[HibernateOrderStore].fetch(orderKey).isOnBlacklist
+      }
+    else
+      order(orderKey).isOnBlacklist
 
   final case class ResultAndEvent[A](result: A, event: ErrorLogEvent)
 }

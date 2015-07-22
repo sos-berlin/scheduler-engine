@@ -155,14 +155,6 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
     eventBus.awaitingEvent[LogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
       body
     }
-
-  private def orderIsOnBlacklist(orderKey: OrderKey): Boolean =
-    if (jobChain(orderKey.jobChainPath).isDistributed)
-      transaction { implicit entityManager ⇒
-        instance[HibernateOrderStore].fetch(orderKey).isOnBlacklist
-      }
-    else
-      order(orderKey).isOnBlacklist
 }
 
 private object FileOrderIT {
