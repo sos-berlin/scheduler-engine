@@ -44,7 +44,8 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List("-distributed-orders"))
   private implicit lazy val entityManagerFactory = instance[EntityManagerFactory]
   private lazy val directory = testEnvironment.newFileOrderSourceDirectory()
-  private lazy val matchingFile = directory / "X-MATCHING-FILE"
+  private val numbers = Iterator from 1
+  private def newMatchingFile() = directory / s"X-MATCHING-FILE-${numbers.next()}"
 
   for ((withAgent, testGroupName) ← List(false → "Without Agent", true → "With Agent")) testGroupName - {
     lazy val agentUriOption = withAgent.option(agentUri)
@@ -52,20 +53,22 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
     lazy val notificationIsActive = withAgent || isWindows
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
 
-      "(change ProcessClass)" in {
-        writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUriOption.orNull}/>)
-      }
-
-      "Some files, one after the other" in {
+      "(change ProcessClass and JobChain)" in {
         // Very long period ("repeat") to check directory change notification (not under Linux
         // But short period when agentFileExist does not applies, to allow check for file removal
         val repeat = if (withAgent && isDistributed || !notificationIsActive) 1.s else 1.h
         writeConfigurationFile(TestJobChainPath, makeJobChainElem(directory, DeleteJobPath, repeat = repeat, isDistributed = isDistributed))
+        writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUriOption.orNull}/>)
+      }
+
+      "Some files, one after the other" in {
         for (_ ← 1 to 3) {
           sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
+          val matchingFile = newMatchingFile()
           val orderKey = TestJobChainPath orderKey matchingFile.toString
           runUntilFileRemovedMessage(orderKey) {
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+              logger.info(s"touch $matchingFile")
               touch(matchingFile)
             }
           }
@@ -74,6 +77,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
 
       "Change of first job definition does not disturb processing" in {
         // Needs the process class defined in previous test
+        val matchingFile = newMatchingFile()
         val orderKey = TestJobChainPath orderKey matchingFile.toString
         runUntilFileRemovedMessage(orderKey) {
           eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
@@ -126,6 +130,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
     "regex filters files" in {
       val repeat = if (!notificationIsActive) 1.s else 1.h
       writeConfigurationFile(TestJobChainPath, makeJobChainElem(directory, JobPath("/test-delete"), repeat = repeat, isDistributed = false))
+      val matchingFile = newMatchingFile()
       val ignoredFile = directory / "IGNORED-FILE"
       List(matchingFile, ignoredFile) foreach touch
       val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }

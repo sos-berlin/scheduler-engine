@@ -48,7 +48,7 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
         fileOperator.deleteFile(filePath)
       case (destination, false) ⇒
         log.info(messageCodeToString(MessageCode("SCHEDULER-980"), filePath, destination))
-        fileOperator.moveFile(filePath, newPath = (Paths.get(destination) resolve Paths.get(filePath).getFileName).toString)
+        fileOperator.moveFile(filePath, toDirectory = destination)
       case _ ⇒ throw new IllegalArgumentException
     })
     .map { _ ⇒ true }
@@ -76,7 +76,7 @@ object FileOrderSinkJob {
 
   private trait FileOperator {
     def deleteFile(path: String): Future[Unit]
-    def moveFile(path: String, newPath: String): Future[Unit]
+    def moveFile(path: String, toDirectory: String): Future[Unit]
     def fileExists(path: String): Future[Boolean]
   }
 
@@ -89,7 +89,7 @@ object FileOrderSinkJob {
 
   private class AgentFileOperator(agentClient: AgentClient)(implicit ec: ExecutionContext) extends FileOperator {
     def deleteFile(path: String) = agentClient.executeCommand(DeleteFile(path)) map { _ ⇒ () }
-    def moveFile(path: String, newPath: String) = agentClient.executeCommand(MoveFile(path, newPath)) map { _ ⇒ () }
+    def moveFile(path: String, toDirectory: String) = agentClient.executeCommand(MoveFile(path, toDirectory)) map { _ ⇒ () }
     def fileExists(path: String) = agentClient.fileExists(path)
   }
 }

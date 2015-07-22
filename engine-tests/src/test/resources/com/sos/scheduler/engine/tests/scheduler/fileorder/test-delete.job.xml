@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<job process_class="/test" order="true" idle_timeout="60"
+<job process_class="/test"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
 >
-    <script java_class="com.sos.scheduler.engine.tests.scheduler.fileorder.TestDeleteJob"/>
+    <script language="shell">
+:;if false; then :
+@echo off
+goto WINDOWS
+fi
+
+rm -v "$SCHEDULER_PARAM_SCHEDULER_FILE_PATH"
+exit 0
+
+:WINDOWS
+del "%SCHEDULER_PARAM_SCHEDULER_FILE_PATH%"
+exit 0
+    </script>
 </job>
