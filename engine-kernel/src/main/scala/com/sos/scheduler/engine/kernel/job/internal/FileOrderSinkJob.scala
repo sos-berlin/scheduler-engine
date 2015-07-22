@@ -4,6 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.agent.client.{AgentClient, AgentClientFactory}
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -14,6 +15,8 @@ import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.SinkNode
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
+import java.nio.file.Files._
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Paths}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,15 +45,17 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
       map { agent ⇒ new AgentFileOperator(agentClientFactory.apply(agent.address)) }
       getOrElse LocalFileOperator)
     val node = cast[SinkNode](order.jobChain.node(order.state))
-    ((node.moveFileTo, node.isDeletingFile) match {
-      case ("", true) ⇒
-        log.info(messageCodeToString(MessageCode("SCHEDULER-979"), filePath))
-        fileOperator.deleteFile(filePath)
-      case (destination, false) ⇒
-        log.info(messageCodeToString(MessageCode("SCHEDULER-980"), filePath, destination))
-        fileOperator.moveFile(filePath, toDirectory = destination)
-      case _ ⇒ throw new IllegalArgumentException
-    })
+    catchInFuture {
+      (node.moveFileTo, node.isDeletingFile) match {
+        case ("", true) ⇒
+          log.info(messageCodeToString(MessageCode("SCHEDULER-979"), filePath))
+          fileOperator.deleteFile(filePath)
+        case (destination, false) ⇒
+          log.info(messageCodeToString(MessageCode("SCHEDULER-980"), filePath, destination))
+          fileOperator.moveFile(filePath, toDirectory = destination)
+        case _ ⇒ throw new IllegalArgumentException
+      }
+    }
     .map { _ ⇒ true }
     .recoverWith { case t ⇒
       log.warn(t.toString)
@@ -83,7 +88,14 @@ object FileOrderSinkJob {
   private object LocalFileOperator extends FileOperator {
     import Files.{delete, exists, move}
     def deleteFile(path: String) = Future.successful(delete(Paths.get(path)))
-    def moveFile(path: String, newPath: String) = Future.successful(move(Paths.get(path), Paths.get(newPath)))
+    def moveFile(pathString: String, toDirectoryString: String) = {
+      // Code is duplicate with Agent FileCommandExecutor !!!
+      val path = Paths.get(pathString)
+      val toDirectory = Paths.get(toDirectoryString)
+      require(isDirectory(toDirectory), s"Move destination is not a directory: $toDirectory")
+      move(path, toDirectory resolve path.getFileName, REPLACE_EXISTING)
+      Future.successful(())
+    }
     def fileExists(path: String) = Future.successful(exists(Paths.get(path)))
   }
 
