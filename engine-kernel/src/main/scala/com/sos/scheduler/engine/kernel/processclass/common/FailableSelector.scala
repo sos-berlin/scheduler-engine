@@ -2,13 +2,13 @@ package com.sos.scheduler.engine.kernel.processclass.common
 
 import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
+import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.functionWithToString
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
 import java.time.{Duration, Instant}
 import scala.concurrent.{Future, Promise}
-import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -95,12 +95,6 @@ object FailableSelector {
     def apply(o: Failable): Future[Try[Result]]
     def onDelay(delay: Duration, a: Failable): Unit
   }
-
-  private def catchInFuture[Result](body: ⇒ Future[Result]): Future[Result] =
-    try body
-    catch {
-      case NonFatal(t) ⇒ Promise[Result]().failure(t).future
-    }
 
   final class CancelledException private[FailableSelector] extends RuntimeException
 }
