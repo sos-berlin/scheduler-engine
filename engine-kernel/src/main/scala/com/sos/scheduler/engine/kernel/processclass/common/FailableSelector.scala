@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.processclass.common
 import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.withToString
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.functionWithToString
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
 import java.time.{Duration, Instant}
@@ -33,7 +33,7 @@ class FailableSelector[Failable, Result](
       if (delay > 0.s) {
         callbacks.onDelay(delay, failable)
       }
-      val t = functionToFutureTimedCall[Unit](now + delay, withToString(toString) {
+      val t = functionToFutureTimedCall[Unit](now + delay, functionWithToString(toString) {
         selected = Some(failable)
         catchInFuture { callbacks.apply(failable) } onComplete {
           case Success(Success(result)) ⇒

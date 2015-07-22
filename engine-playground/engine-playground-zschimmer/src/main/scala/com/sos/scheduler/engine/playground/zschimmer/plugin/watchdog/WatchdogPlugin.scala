@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -9,12 +10,9 @@ import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins}
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
 import com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugin._
 import com.sos.scheduler.engine.playground.zschimmer.{Timer, XMLs}
-import java.util.concurrent.TimeUnit
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import javax.inject.{Inject, Named}
 import org.w3c.dom.Element
 import scala.concurrent._
-import scala.concurrent.duration.Duration
 
 /** Prüft periodisch, ob der Scheduler reagiert, also ob er die große Scheduler-Schleife durchläuft und dabei einen API-Aufruf annimmt.
   * Das Plugin startet zwei Threads. Mit nur einem Thread kämen wir aus, wenn der Scheduler selbst periodisch eine Java-Methode aufriefe
