@@ -41,12 +41,24 @@ object SchedulerTestUtils {
   /**
    * Writes the configuration file and awaits JobScheduler's acceptance.
    */
-  def writeConfigurationFile[A](path: TypedPath, xmlElem: xml.Elem)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
+  def deleteAndWriteConfigurationFile[A](path: TypedPath, xmlElem: xml.Elem)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
+    if (Files.exists(controller.environment.fileFromPath(path))) {
+      deleteConfigurationFile(path)
+    }
     controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
       controller.environment.fileFromPath(path).xml = xmlElem
       instance[FolderSubsystem].updateFolders()
     }
   }
+
+  /**
+   * Writes the configuration file and awaits JobScheduler's acceptance.
+   */
+  def writeConfigurationFile[A](path: TypedPath, xmlElem: xml.Elem)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
+    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
+      controller.environment.fileFromPath(path).xml = xmlElem
+      instance[FolderSubsystem].updateFolders()
+    }
 
   /**
    * Delete the configuration file and awaits JobScheduler's acceptance.

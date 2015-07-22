@@ -57,8 +57,8 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         // Very long period ("repeat") to check directory change notification (not under Linux
         // But short period when agentFileExist does not applies, to allow check for file removal
         val repeat = if (withAgent && isDistributed || !notificationIsActive) 1.s else 1.h
-        writeConfigurationFile(TestJobChainPath, makeJobChainElem(directory, DeleteJobPath, repeat = repeat, isDistributed = isDistributed))
-        writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUriOption.orNull}/>)
+        deleteAndWriteConfigurationFile(TestJobChainPath, makeJobChainElem(directory, DeleteJobPath, repeat = repeat, isDistributed = isDistributed))
+        deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUriOption.orNull}/>)
       }
 
       "Some files, one after the other" in {
@@ -92,7 +92,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         logger.info(s"Test: $testName")
         val repeat = 1.s
         val delay = repeat dividedBy 2
-        writeConfigurationFile(TestJobChainPath, makeJobChainElem(directory, JobPath("/test-dont-delete"), repeat, isDistributed = isDistributed))
+        deleteAndWriteConfigurationFile(TestJobChainPath, makeJobChainElem(directory, JobPath("/test-dont-delete"), repeat, isDistributed = isDistributed))
         val file = directory / "X-MATCHING-TEST-DONT-DELETE"
         val orderKey = TestJobChainPath orderKey file.toString
         controller.toleratingErrorCodes(orderSetOnBlacklistErrorSet) {
@@ -129,7 +129,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
 
     "regex filters files" in {
       val repeat = if (!notificationIsActive) 1.s else 1.h
-      writeConfigurationFile(TestJobChainPath, makeJobChainElem(directory, JobPath("/test-delete"), repeat = repeat, isDistributed = false))
+      deleteAndWriteConfigurationFile(TestJobChainPath, makeJobChainElem(directory, JobPath("/test-delete"), repeat = repeat, isDistributed = false))
       val matchingFile = newMatchingFile()
       val ignoredFile = directory / "IGNORED-FILE"
       List(matchingFile, ignoredFile) foreach touch
