@@ -398,6 +398,9 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         if (!log_filename().empty())
              parameters.push_back(object_server::Parameter("param", "-log=" + filtered_log_categories_as_string() + " >+" + log_filename()));
         parameters.push_back(object_server::Parameter("program", _spooler->_my_program_filename));
+        if (_spooler->settings()->_classic_agent_keep_alive_timeout < INT_MAX) {
+            parameters.push_back(object_server::Parameter("keep-alive", as_string(_spooler->settings()->_classic_agent_keep_alive_timeout)));
+        }
         return parameters;
     }
 
@@ -457,8 +460,9 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
 
 struct Thread_api_process : Abstract_api_process {
     struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread {
-        Com_server_thread(object_server::Connection_to_own_server_thread* c) : 
-            object_server::Connection_to_own_server_thread::Server_thread(c)
+        Com_server_thread(object_server::Connection_to_own_server_thread* c, int keep_alive_timeout) : 
+            object_server::Connection_to_own_server_thread::Server_thread(c),
+            _keep_alive_timeout(keep_alive_timeout)
         {
             set_thread_name("scheduler::Thread_api_process::Com_server_thread");
         }
@@ -471,7 +475,7 @@ struct Thread_api_process : Abstract_api_process {
                 _object_server = Z_NEW(Object_server);  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Abstract_process::pid()
                 _object_server->set_stdin_data(_connection->stdin_data());
                 _server = +_object_server;
-                result = run_server();
+                result = run_server(_keep_alive_timeout);
             } catch (exception& x) {
                 string msg = S() << "ERROR in Com_server_thread: " << x.what() << "\n";
                 Z_LOG2("scheduler", msg);
@@ -483,6 +487,7 @@ struct Thread_api_process : Abstract_api_process {
         }
 
         ptr<Object_server> _object_server;
+        int const _keep_alive_timeout;
     };
 
     Thread_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
@@ -494,7 +499,8 @@ struct Thread_api_process : Abstract_api_process {
         Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
         _connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
         fill_connection(_connection);
-        _com_server_thread = Z_NEW(Com_server_thread(_connection));
+        int keep_alive_timeout = _spooler->settings()->_classic_agent_keep_alive_timeout;
+        _com_server_thread = Z_NEW(Com_server_thread(_connection, keep_alive_timeout));
         _connection->start_thread(_com_server_thread);
         _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");

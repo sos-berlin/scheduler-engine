@@ -25,7 +25,8 @@ Settings::Settings()
     _cluster_restart_after_emergency_abort(true),
     _use_old_microscheduling_for_jobs(true), // Das neue Mikroscheduling funktioniert nicht in allen Faellen
     _use_old_microscheduling_for_tasks(true),  // JS-1140 Fehlerbehandlung in Task mit Async_operation-Kindern funktioniert nicht (weil Task async_finished() pollt)
-    _remote_scheduler_connect_retry_delay(30)
+    _remote_scheduler_connect_retry_delay(30),
+    _classic_agent_keep_alive_timeout(INT_MAX)
 {
     if (SOS_LICENCE(licence_scheduler)) 
         _roles.insert(role_scheduler);
@@ -55,6 +56,7 @@ void Settings::set_from_variables(const Com_variable_set& p) {
         _supervisor_configuration_polling_interval = p.get_int("scheduler.configuration.client.polling_interval", _supervisor_configuration_polling_interval);
         _cluster_restart_after_emergency_abort = p.get_bool("scheduler.cluster.restart_after_emergency_abort", _cluster_restart_after_emergency_abort);
         _remote_scheduler_connect_retry_delay = p.get_int("scheduler.remote_scheduler.connect_retry_delay", _remote_scheduler_connect_retry_delay);
+        _classic_agent_keep_alive_timeout = p.get_int("scheduler.agent.keep_alive", _classic_agent_keep_alive_timeout);
     }
     _use_old_microscheduling_for_jobs = p.get_bool("scheduler.old_microscheduling.enable_for_jobs", _use_old_microscheduling_for_jobs);
     _use_old_microscheduling_for_tasks = p.get_bool("scheduler.old_microscheduling.enable_for_tasks", _use_old_microscheduling_for_tasks);

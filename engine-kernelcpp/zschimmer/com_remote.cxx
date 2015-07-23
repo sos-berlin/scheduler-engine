@@ -137,6 +137,49 @@ const int   connect_timeout             = 60;  //1000*24*60*60;     // Nach sovi
 const int   connection_buffer_size      = 50000;
 const string& Connection_reset_exception::exception_name = "zschimmer::com::object_server::Connection_reset_exception";
 
+struct Keep_alive_thread : Thread {
+
+    private: ptr<Session> const _session;
+    private: int const _timeout_seconds;
+    private: Event _stop;
+
+    public: Keep_alive_thread(Session* session, int timeout_seconds) :
+        _session(session),
+        _timeout_seconds(max(1, timeout_seconds))
+    {
+        Z_LOG2("object_server.keep_alive", Z_FUNCTION << " " << timeout_seconds << "s\n");
+    }
+
+    public: void start() {
+        thread_start();
+    }
+
+    public: void stop() {
+        _stop.signal("stop");
+        thread_wait_for_termination();
+        Z_LOG2("object_server.keep_alive", "Stopped\n");
+    }
+
+    protected: int thread_main() {
+        while (!_stop.wait(_timeout_seconds)) {
+            send_and_receive_keep_alive();
+        }
+        return 0;
+    }
+
+    private: void send_and_receive_keep_alive() {
+        ptr<Simple_operation> request_operation = Z_NEW(Simple_operation(_session, NULL, "keep-alive"));
+        request_operation->_output_message.write_char(msg_keep_alive);
+        request_operation->_output_message.finish();
+        if (request_operation->start(Connection::diffthr_thread_allowed)) {  // No need to send something if the main thread (or any other) is sending something already
+            request_operation->async_finish();
+            _session->connection()->pop_operation(NULL, "keep-alive");
+        } else {
+            Z_LOG2("object_server.keep_alive", "Sending suppressed due to other activity\n");
+        }
+    }
+};
+
 //---------------------------------------------------------------------------------------set_linger
 
 static void set_linger( SOCKET socket )
@@ -575,7 +618,7 @@ void Connection::execute( Session* session, Input_message* in, Output_message* o
 //-----------------------------------------------------------------------Connection::push_operation
 // Wird von mehreren Threads gerufen
 
-void Connection::push_operation( Simple_operation* operation, Different_thread_allowed different_thread_allowed )
+bool Connection::push_operation( Simple_operation* operation, Different_thread_allowed different_thread_allowed )
 {
     if( !different_thread_allowed )  assert_is_owners_thread();
     // Nichts am Objekt ändern, wird von verschiedenen Threads gerufen!
@@ -584,9 +627,12 @@ void Connection::push_operation( Simple_operation* operation, Different_thread_a
 
     if( operation->_on_stack )  throw_xc( "Connection::push_operation", operation->async_state_text() );
 
-
-
-    enter_exclusive_mode( __FUNCTION__ );     // Blockiert, wenn wir ein anderer Thread als server_loop() sind und der Server gerade keine Funktion ausführt (also im Leerlauf)
+    if (different_thread_allowed == diffthr_try) {
+        bool entered = try_enter_exclusive_mode(__FUNCTION__);
+        if (!entered) return false;
+    } else {
+        enter_exclusive_mode( __FUNCTION__ );     // Blockiert, wenn wir ein anderer Thread als server_loop() sind und der Server gerade keine Funktion ausführt (also im Leerlauf)
+    }
     // Jetzt haben wir die Connection exklusiv und können sie ändern. 
     // KEINE EXCEPTION MEHR!, außer mit leave_exclusive_mode()
 
@@ -615,6 +661,7 @@ void Connection::push_operation( Simple_operation* operation, Different_thread_a
     operation->_callback_nesting = _callback_nesting;
 
     _operation_count++;
+    return true;
 }
 
 //------------------------------------------------------------------------Connection::pop_operation
@@ -663,11 +710,26 @@ void Connection::enter_exclusive_mode( const char* )
         _exclusive_io_mutex.enter();                                       
         Z_LOG2( "object_server", Z_FUNCTION << "()  OK\n" );
     }
+    begin_exclusive_mode();
+}
 
+
+
+bool Connection::try_enter_exclusive_mode(const char*) {
+    //Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << debug_text << "\")\n" );
+
+    if( !_exclusive_io_mutex.try_enter() )    // Mutex wird von pop_operation() gelöst
+        return false;
+    else {
+        begin_exclusive_mode();
+        return true;
+    }
+}
+
+void Connection::begin_exclusive_mode() {
     assert( !_in_use_by_thread_id );        //? Wird nach einem schlimmeren Fehler vielleicht pop_operation() nicht gerufen? Dann hätte der exklusive Modus verlassen müssen!!!
     _in_use_by_thread_id = current_thread_id();
 }
-
 //-----------------------------------------------------------------Connection::leave_exclusive_mode
 
 void Connection::leave_exclusive_mode( const char* )
@@ -1155,6 +1217,8 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         else
         if( param->first == "param"   )  args_vector.push_back( param->second );
         else
+        if( param->first == "keep-alive" )  { args_vector.push_back(S() << "-keep-alive=" << param->second); }
+        else
             throw_xc( Z_FUNCTION, param->first );
     }
 
@@ -1560,11 +1624,11 @@ Connection_to_own_server_thread::Server_thread::~Server_thread()
 
 //---------------------------------------Connection_to_own_server_thread::Server_thread::run_server
 
-int Connection_to_own_server_thread::Server_thread::run_server()
+int Connection_to_own_server_thread::Server_thread::run_server(int keep_alive_timeout)
 {
     Com_initialize com_initialize;
 
-    _server->simple_server( _connection->_controller_address );
+    _server->simple_server(_connection->_controller_address, keep_alive_timeout);
 
     return 0;
 }
@@ -2215,6 +2279,10 @@ void Session::execute( Input_message* in, Output_message* out )
 
                 break;
             }
+
+            case msg_keep_alive: 
+                Z_LOG2("object_server.keep_alive", "Received\n");
+                break;
 
             case msg_none:
             default:
@@ -3201,11 +3269,16 @@ void Simple_operation::close()
 
 //--------------------------------------------------------------------------Simple_operation::start
 
-void Simple_operation::start( Connection::Different_thread_allowed different_thread_allowed )
+bool Simple_operation::start( Connection::Different_thread_allowed different_thread_allowed )
 {
-    _session->_connection->push_operation( this, different_thread_allowed );
+    bool ok = _session->_connection->push_operation( this, different_thread_allowed );
+    if (!ok) {
+        assert(different_thread_allowed == Connection::Different_thread_allowed::diffthr_try);
+        return false;
+    }
     _state = s_starting;
     async_continue();
+    return true;
 }
 
 //----------------------------------------------------------------Simple_operation::async_continue_
@@ -3344,7 +3417,8 @@ void Simple_operation::async_check_error_()
         throw_xc( x );
     }
     else
-    if( _input_message.peek_char() != msg_answer )  throw_xc( "Z-REMOTE-107", pid() );
+    if( _input_message.peek_char() != msg_answer )  
+        throw_xc( "Z-REMOTE-107", pid() );
 }
 
 //---------------------------------------------------------------------------Simple_operation::send
@@ -3869,26 +3943,38 @@ void Session::close()
 
 //-----------------------------------------------------------------------------Session::server_loop
 
-void Session::server_loop()
+void Session::server_loop(int keep_alive_timeout)
 {
     Connection::In_exclusive_mode in_exclusive_mode ( _connection );       // Ruft _connection->enter_exclusive_mode();
-    
-    
-    while(1)
-    {
-        Input_message  input_message  ( this );
-        Output_message output_message ( this );
+    ptr<Keep_alive_thread> keep_alive_thread = keep_alive_timeout < INT_MAX? Z_NEW(Keep_alive_thread(this, keep_alive_timeout)) : NULL;
+    try {
+        if (keep_alive_thread) {
+            keep_alive_thread->start();
+        }
+        while(1)
+        {
+            Input_message  input_message  ( this );
+            Output_message output_message ( this );
 
-        bool eof = false;
-        _connection->receive( &input_message, &eof );
-        if( eof )  break;
+            bool eof = false;
+            _connection->receive( &input_message, &eof );
+            if( eof )  break;
 
-        bool connection_lost = false;
-        _connection->execute( this, &input_message, &output_message );
+            bool connection_lost = false;
+            _connection->execute( this, &input_message, &output_message );
 
-        send_response( &output_message, &connection_lost );
+            send_response( &output_message, &connection_lost );
 
-        if( connection_lost )  break;
+            if( connection_lost )  break;
+        }
+        if (keep_alive_thread) {
+            keep_alive_thread->stop();
+        }
+    } catch (exception&) {
+        if (keep_alive_thread) {
+            keep_alive_thread->stop();
+        }
+        throw;
     }
 
     // ~In_exclusive_mode() ruft _connection->leave_exclusive_mode();
@@ -3978,7 +4064,7 @@ void Server::server( int server_port )
 
 //----------------------------------------------------------------------------Server::simple_server
 
-void Server::simple_server( const Host_and_port& controller_address )
+void Server::simple_server(const Host_and_port& controller_address, int keep_alive_timeout)
 {
     Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << controller_address << "\n");
     ptr<Connection_manager> connection_manager = Z_NEW( Connection_manager );      // Brauchen wir den?
@@ -3990,7 +4076,7 @@ void Server::simple_server( const Host_and_port& controller_address )
    
     Session session ( this, _connection );
 
-    session.server_loop();
+    session.server_loop(keep_alive_timeout);
     session.close();
 
     _connection->close__start() -> async_finish();
@@ -4019,6 +4105,7 @@ int Server::main( int argc, char** argv )
     int    server_port     = 9000;
     string controller_ip;
     int    controller_port = 0;
+    int keep_alive_timeout = INT_MAX;
 
 
     for( int i = 1; i < argc; i++ )
@@ -4037,6 +4124,12 @@ int Server::main( int argc, char** argv )
         }
         else
         if( string( argv[i] ) == "-server" )  server = true;
+        else
+        if (string_begins_with(argv[i], "-keep-alive=")) {
+            string value = argv[i] + 12;
+            keep_alive_timeout = as_int(value);
+        }
+
     }
 
     if( server )
@@ -4045,7 +4138,7 @@ int Server::main( int argc, char** argv )
     }
     else
     {
-        simple_server( Host_and_port( controller_ip, controller_port ) );
+        simple_server(Host_and_port(controller_ip, controller_port), keep_alive_timeout);
     }
 
     return 0;

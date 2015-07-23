@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <script language="java:javascript"><![CDATA[
+        function spooler_process() {
+            for (var i = 0; i < 1000000; i++) {
+                if (i % 1000 == 0) spooler_log.info(i);
+                spooler.log.start_new_file()
+            }
+            return false
+        }
+    ]]></script>
+</job>

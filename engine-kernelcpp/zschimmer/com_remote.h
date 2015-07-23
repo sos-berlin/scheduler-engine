@@ -58,7 +58,9 @@ enum Message_class
     msg_session         = 'S',      // Nachricht bezieht sich auf eine Session (bezeichnet durch die folgenden Bytes)
     msg_object          = 'O',      // Nachricht bezieht sich auf ein Objekt (bezeichnet durch die folgenden Bytes)
     msg_answer          = 'A',      // Nachricht ist eine Antwort
-    msg_error           = 'E'       // Nachricht ist eine Fehlerantwort
+    msg_error           = 'E',      // Nachricht ist eine Fehlerantwort
+    msg_keep_alive      = 'K'       // Empty operation
+
 };
 
 //--------------------------------------------------------------------------------------Message_cmd
@@ -181,7 +183,7 @@ struct Input_message
 struct Connection : Object,
                     My_thread_only      // Erstmal nur für einen Thread zulassen.
 {
-    enum Different_thread_allowed { diffthr_not_allowed = 0, diffthr_thread_allowed };
+    enum Different_thread_allowed { diffthr_not_allowed = 0, diffthr_thread_allowed, diffthr_try };
 
 
     struct Connect_operation : Async_operation
@@ -320,12 +322,16 @@ struct Connection : Object,
     void                        execute                 ( Session*, Input_message*, Output_message* );
     void                        execute_callback        ( Session*, Input_message*, Output_message* );
     void                        enter_exclusive_mode    ( const char* debug_text );
+    bool try_enter_exclusive_mode(const char* debug_text);
+    void begin_exclusive_mode();
     void                        leave_exclusive_mode    ( const char* debug_text );
     void                        assert_right_thread     ();
 
-    void                        push_operation          ( Simple_operation*, Different_thread_allowed );
+    bool                        push_operation          ( Simple_operation*, Different_thread_allowed );
+    public:
     ptr<Simple_operation>       pop_operation           ( const IDispatch*, const char* method );
 
+    protected:
     void                        update_select_fdsets    ();
 
 
@@ -454,7 +460,7 @@ struct Connection_to_own_server_thread : Connection
                                ~Server_thread           ();
 
       //int                     thread_main             ();
-        int                     run_server              ();
+        int                     run_server              (int keep_alive_timeout);
         Connection_to_own_server_thread* connection     () const                                    { return _connection; }
 
       protected:
@@ -641,7 +647,7 @@ struct Session : Object
     void                        close__end              ()                                          { return; }
 
     void                        execute                 ( Input_message*, Output_message* );
-    void                        server_loop             ();
+    void                        server_loop             (int keep_alive_timeout = INT_MAX);
 
     Connection*                 connection              ()                                          { return _connection; }
 
@@ -924,7 +930,7 @@ struct Simple_operation : Async_operation
                                ~Simple_operation        ();
 
     void                        close                   ();
-    void                        start                   ( Connection::Different_thread_allowed = Connection::diffthr_not_allowed );
+    bool                        start                   ( Connection::Different_thread_allowed = Connection::diffthr_not_allowed );
 
     virtual bool                async_continue_         ( Continue_flags );
     virtual bool                async_finished_         () const                                    { return _state == s_finished; }
@@ -937,7 +943,11 @@ struct Simple_operation : Async_operation
     int                         pid                     () const                                    { return _session? _session->pid() : 0; }
 
     string                      state_name              () const;
-    bool                        is_callback_message     ()                                          { return _input_message.peek_char() == msg_object; }
+    
+    bool is_callback_message() { 
+        char c = _input_message.peek_char();
+        return c == msg_object || c == msg_keep_alive; 
+    }
 
     void                        send                    ();
     bool                        send_async              ();
@@ -1000,7 +1010,7 @@ struct Server : Object
 
 
     int                         main                    ( int, char** );
-    void                        simple_server           ( const Host_and_port& controller );
+    void                        simple_server           ( const Host_and_port& controller, int keep_alive_timeout);
     void                        server                  ( int server_port );
     
     void                        register_class          ( const CLSID&, Create_instance_function* );

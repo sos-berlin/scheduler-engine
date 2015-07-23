@@ -2355,7 +2355,9 @@ Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_,
     }
 
     _node_list.push_back( +node );
-    node->typed_java_sister().processConfigurationDomElement(element);
+    if (element) {
+        node->typed_java_sister().processConfigurationDomElement(element);
+    }
 
     return node;
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+>
+    <script language="java:javascript"><![CDATA[
+function spooler_process() {
+    var jobChain = spooler.create_job_chain();
+    jobChain.name = "test";
+    jobChain.add_job("/test-100", "100", "END", "END");
+    jobChain.add_end_state("END");
+    spooler.add_job_chain(jobChain);
+    return false;
+}
+    ]]></script>
+</job>
