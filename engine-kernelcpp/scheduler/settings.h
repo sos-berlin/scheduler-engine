@@ -99,6 +99,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     int                        _http_port;
     int _remote_scheduler_connect_retry_delay;
     string                     _web_directory;    // For JettyPlugin
+    int                        _classic_agent_keep_alive_timeout;
 };
 
 }} //namespace sos::scheduler
