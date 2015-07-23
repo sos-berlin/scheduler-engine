@@ -140,87 +140,78 @@ void log_start( const char* filename_ )
 
     if( !filename )  return;
 
-    if( !log_ptr ) 
+    if( const char* gt = strchr( filename, '>' ) )
     {
-        if( const char* gt = strchr( filename, '>' ) )
-        {
-            string log_categories = trim(string(filename, gt - filename));
-            sos_static_ptr()->_log_categories = log_categories;
-            zschimmer::static_log_categories.set_multiple( log_categories );
-            filename = gt + 1;
-            while( filename[0] == ' ' )  filename++;
-        }
-
-        ostream* s = 0;
-        s = new Log_ostream( trim( filename ) );
-        if( !s )  return;
-
-        s->setf( ios::uppercase );
-        time_t t = time(0);
-
-        *s << "\n----------------------" << ctime( &t );
-
-        *s << "Aufruf: ";
-        for( int i = 0; i < _argc; i++ )  *s << ( _argv[i]? _argv[i] : "" ) << "  ";
-      //for( int i = 0; i < _argc; i++ )  *s << quoted_string( _argv[i]? _argv[i] : "", '\'', '\\' ).c_str() << " ";
-        *s << '\n';
-
-        if( filename[0] != '+' )        // Etwas provisorisch: Der Scheduler startet Subprozesse mit -log=+scheduler.log. Dann soll der Log kleiner werden.
-        {
-            {
-                char hostname[100];  memset( hostname, 0, sizeof hostname );
-                char username[100];  memset( username, 0, sizeof username );
-
-#               ifdef SYSTEM_WIN
-                    DWORD length = sizeof hostname;
-                    GetComputerName( hostname, &length );
-                    length = sizeof username;
-                    GetUserName( username, &length );
-#                else
-                    gethostname( hostname, sizeof hostname - 1 );
-                    const char* u = getenv("USERNAME");;
-                    if( !u )  u = getenv( "USER" );
-                    strncpy( username, u? u : "", sizeof username - 1 );
-#               endif
-                *s << "host=" << hostname << ", user=" << username;
-            }
-
-            *s << ", pid=" << get_pid() << '\n';
-
-            zschimmer::check_compiler( s );
-
-            *s << "Modul ";
-            try { *s  << module_filename() << "  " << file_version_info(module_filename()); } catch(...) {}
-            *s << "\nProgramm ";
-            try { *s << program_filename() << "  " << file_version_info(program_filename()); } catch(...) {}
-            *s << "\n\n";
-
-            *s << "Hostware " VER_PRODUCTVERSION_STR << "\n";
-
-            print_all_modules( s );
-
-/*
-#           if defined SYSTEM_WIN32
-                // Fehler und Warnungen beim Suchen der sos.ini ausgeben
-                if ( !empty( ::sos::sos_ini_msg() ) ) *s << ::sos::sos_ini_msg() << '\n';
-#           endif
-*/
-            *s << flush;
-        }
-
-        ostream* old = NULL;
-        Z_MUTEX(sos_static_ptr()->_log_lock) {
-            old = sos_static_ptr()->_log_ptr;
-            sos_static_ptr()->_log_ptr = s;
-            //zschimmer::Log_ptr::set_stream_and_system_mutex( &sos_static_ptr()->_log_ptr, &sos_static_ptr()->_log_lock._system_mutex );     // Kein Thread darf laufen (und Log_ptr benutzen)!
-        }
-        if (old) {
-            z::sleep(1.0);  // In case a thread is using old _log_ptr we want to delete. Hopefully the thread log call finishes in a second
-            delete old;
-        }
-        
-        Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << filename << "\")   categories: " << zschimmer::static_log_categories.to_string() << "\n" );
+        string log_categories = trim(string(filename, gt - filename));
+        sos_static_ptr()->_log_categories = log_categories;
+        zschimmer::static_log_categories.set_multiple( log_categories );
+        filename = gt + 1;
+        while( filename[0] == ' ' )  filename++;
     }
+
+    ostream* s = 0;
+    s = new Log_ostream( trim( filename ) );
+    if( !s )  return;
+
+    s->setf( ios::uppercase );
+    time_t t = time(0);
+
+    *s << "\n----------------------" << ctime( &t );
+
+    *s << "Aufruf: ";
+    for( int i = 0; i < _argc; i++ )  *s << ( _argv[i]? _argv[i] : "" ) << "  ";
+    //for( int i = 0; i < _argc; i++ )  *s << quoted_string( _argv[i]? _argv[i] : "", '\'', '\\' ).c_str() << " ";
+    *s << '\n';
+
+    if( filename[0] != '+' )        // Etwas provisorisch: Der Scheduler startet Subprozesse mit -log=+scheduler.log. Dann soll der Log kleiner werden.
+    {
+        {
+            char hostname[100];  memset( hostname, 0, sizeof hostname );
+            char username[100];  memset( username, 0, sizeof username );
+
+#           ifdef SYSTEM_WIN
+                DWORD length = sizeof hostname;
+                GetComputerName( hostname, &length );
+                length = sizeof username;
+                GetUserName( username, &length );
+#            else
+                gethostname( hostname, sizeof hostname - 1 );
+                const char* u = getenv("USERNAME");;
+                if( !u )  u = getenv( "USER" );
+                strncpy( username, u? u : "", sizeof username - 1 );
+#           endif
+            *s << "host=" << hostname << ", user=" << username;
+        }
+
+        *s << ", pid=" << get_pid() << '\n';
+
+        zschimmer::check_compiler( s );
+
+        *s << "Modul ";
+        try { *s  << module_filename() << "  " << file_version_info(module_filename()); } catch(...) {}
+        *s << "\nProgramm ";
+        try { *s << program_filename() << "  " << file_version_info(program_filename()); } catch(...) {}
+        *s << "\n\n";
+
+        *s << "Hostware " VER_PRODUCTVERSION_STR << "\n";
+
+        print_all_modules( s );
+
+        *s << flush;
+    }
+
+    ostream* old = NULL;
+    Z_MUTEX(sos_static_ptr()->_log_lock) {
+        old = sos_static_ptr()->_log_ptr;
+        sos_static_ptr()->_log_ptr = s;
+        //zschimmer::Log_ptr::set_stream_and_system_mutex( &sos_static_ptr()->_log_ptr, &sos_static_ptr()->_log_lock._system_mutex );     // Kein Thread darf laufen (und Log_ptr benutzen)!
+    }
+    if (old) {
+        z::sleep(1.0);  // In case a thread is using old _log_ptr we want to delete. Hopefully the thread log call finishes in a second
+        delete old;
+    }
+        
+    Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << filename << "\")   categories: " << zschimmer::static_log_categories.to_string() << "\n" );
 }
 
 //-----------------------------------------------------------------------------------------log_stop

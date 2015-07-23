@@ -19,15 +19,27 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
 
   override protected lazy val testConfiguration = TestConfiguration(getClass, logCategories = "scheduler.wait")
 
+  private val testCommand = "<params.get/>"
+
   "spooler.log contains log category {scheduler}" in {
+    scheduler executeXml testCommand
+    assert(schedulerLogAsString contains testCommand)
     checkSchedulerLog()
   }
 
   "spooler.log.start_new_file should keep log category {scheduler}" in {
     runJobAndWaitForEnd(JobPath("/start_new_file"))
-    scheduler executeXml <show_state/>  // Logs the command
+    scheduler executeXml <params/>  // Logs the command
+    withClue("New file should not contain previous lines:") {
+      assert(!(schedulerLogAsString contains testCommand))
+    }
     checkSchedulerLog()
   }
+
+  // For manual testing. To be fast, remove sleep(1) from log.cxx.
+  //"Call start_new_files multiple times" in {
+  //  runJobAndWaitForEnd(JobPath("/start_new_file_stress"))
+  //}
 
   private def checkSchedulerLog(): Unit = {
     assert(schedulerLogAsString contains "{scheduler}")
