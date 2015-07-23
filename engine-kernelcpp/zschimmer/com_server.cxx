@@ -18,6 +18,29 @@ namespace com {
 
 #define DEBUG_PRINTF( FORMAT, ... )  //fprintf( stderr, FORMAT, ##__VA_ARGS__ )
 
+//--------------------------------------------------------------------------Apply_com_module_params
+
+HRESULT Apply_com_module_params( Com_module_params* params )
+{
+    HRESULT hr = S_FALSE;
+
+    if( params->_version == 2 )
+    {
+         //if( params->_subversion == 0 )
+         //    Log_ptr::set_stream_and_system_mutex( params->_log_stream, params->_log_system_mutex );
+         if( params->_subversion == 1 )
+         {
+             Log_ptr::set_log_context( params->_log_context );
+         }
+
+         set_com_context( params->_com_context );
+
+         hr = S_OK;
+    }
+
+    return hr;
+}
+
 //-----------------------------------------------------------------------------Com_get_class_object
 
 HRESULT Com_get_class_object( const Com_class_descriptor* class_descriptor, const CLSID& clsid, const IID& iid, void** result )

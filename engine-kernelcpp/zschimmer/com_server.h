@@ -42,6 +42,8 @@ struct Com_module_params
     Log_context**              _log_context;
 };
 
+HRESULT                         Apply_com_module_params ( Com_module_params* );
+
 //--------------------------------------------------------------------------------Com_class_factory
 /*
 struct Com_class_factory : IClassFactory
