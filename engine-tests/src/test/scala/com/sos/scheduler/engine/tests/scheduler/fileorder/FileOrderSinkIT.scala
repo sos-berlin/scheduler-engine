@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.RemoveOrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -70,14 +71,17 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
             <file_order_sink state="SINK" move_to={moveToDirectory.toString}/>
           </job_chain>)
         val file = newMatchingFile()
-        runFile(file)
+        val movedFile = moveToDirectory resolve file.getFileName
+        runFile(file, "FIRST FILE")
         assert(!Files.exists(file))
-        assert(Files.exists(moveToDirectory resolve file.getFileName))
+        assert(Files.exists(movedFile))
+        assert(movedFile.contentString == "FIRST FILE")
 
         // <file_order_sink move_to=".." overwrites existing file in directory
-        runFile(file)
+        runFile(file, "SECOND FILE")
         assert(!Files.exists(file))
-        assert(Files.exists(moveToDirectory resolve file.getFileName))
+        assert(Files.exists(movedFile))
+        assert(movedFile.contentString == "SECOND FILE")
       }
 
       "file_order_sink move_to must denote a directory" in {
@@ -91,23 +95,26 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
         val file = newMatchingFile()
         sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
         val orderKey = TestJobChainPath orderKey file.toString
-        controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-340"))) {
+        controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-340"))) {  // "File still exists. Order has been set on the blacklist"
           eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
             touch(file)
           }
         }
         assert(orderIsOnBlacklist(orderKey))
+        scheduler executeXml RemoveOrderCommand(orderKey)
         assert(Files.exists(file))
+        // ??? Pausenlose RequestFileOrderSource, wenn wir die Datei nicht löschen.
+        Files.delete(file)
       }
     }
   }
 
-  private def runFile(matchingFile: Path): Unit = {
+  private def runFile(matchingFile: Path, content: String = ""): Unit = {
     sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
     val orderKey = TestJobChainPath orderKey matchingFile.toString
     runUntilFileRemovedMessage(orderKey) {
       eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-        touch(matchingFile)
+        matchingFile.contentString = content
       }
     }
   }
