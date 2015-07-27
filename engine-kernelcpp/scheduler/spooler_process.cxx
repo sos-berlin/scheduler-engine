@@ -1347,8 +1347,7 @@ void Process_class::remove_process(Process* process)
 
     if( is_to_be_removed()  &&  can_be_removed_now() )
     {
-        remove();
-        // this ist ungültig!
+        check_for_replacing_or_removing();
     }
     else
     if( !_waiting_jobs.empty() )
@@ -1362,8 +1361,7 @@ void Process_class::remove_file_order_source() {
     assert(_file_order_source_count > 0);
     _file_order_source_count--;
     if (is_to_be_removed() && can_be_removed_now()) {
-        remove();
-        // this is invalid now!
+        check_for_replacing_or_removing();
     }
 }
 
