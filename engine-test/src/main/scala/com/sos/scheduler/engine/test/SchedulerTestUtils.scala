@@ -48,10 +48,7 @@ object SchedulerTestUtils {
     if (Files.exists(controller.environment.fileFromPath(path))) {
       deleteConfigurationFile(path)
     }
-    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
-      controller.environment.fileFromPath(path).xml = xmlElem
-      instance[FolderSubsystem].updateFolders()
-    }
+    writeConfigurationFile(path, xmlElem)
   }
 
   /**
