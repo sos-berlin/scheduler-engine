@@ -79,7 +79,7 @@ struct Dependencies
     void                        add_requisite               ( Dependant*, const string& missing_path );
     void                        remove_requisite            ( Dependant*, const string& missing_path );
     void                        announce_requisite_loaded   ( File_based* found_missing );
-    bool                        announce_requisite_to_be_removed( File_based* to_be_removed );
+    void                        announce_requisite_to_be_removed( File_based* to_be_removed );
     void                        announce_requisite_removed  ( File_based* );
     string                      obj_name                    () const;
 

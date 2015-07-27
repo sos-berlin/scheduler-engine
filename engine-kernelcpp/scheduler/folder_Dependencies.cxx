@@ -67,7 +67,7 @@ void Dependencies::announce_requisite_loaded( File_based* found_missing )
 
 //---------------------------------------------------Dependencies::announce_requisite_to_be_removed
 
-bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
+void Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
 
@@ -87,8 +87,6 @@ bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
             if( !result )  break;
         }
     }
-
-    return result;
 }
 
 //---------------------------------------------------------Dependencies::announce_requisite_removed

@@ -92,13 +92,14 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     bool check_and_handle_process_class_replacement() {
         assert(_is_watching);
         string r = process_class_remote_scheduler();
-        if (r != _remote_scheduler) {
+        if (r == _remote_scheduler) 
+            return false;
+        else {
             Z_LOG2("scheduler", Z_FUNCTION << " " << obj_name() << ": remote_scheduler=" << r << "\n");
             restart_watching();
-            assert(_remote_scheduler == r);
+            assert(r == _remote_scheduler);
             return true;
-        } else
-            return false;
+        } 
     }
 
     private:
