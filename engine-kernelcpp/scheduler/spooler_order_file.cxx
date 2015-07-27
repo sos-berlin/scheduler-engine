@@ -120,6 +120,10 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
 
     private: 
     void start_watching() {
+        assert(!_is_watching);
+        if (!_process_class_path.empty()) {
+            spooler()->process_class_subsystem()->process_class(_process_class_path)->add_file_order_source();
+        }
         if (Job_node* job_node = Job_node::try_cast(_next_node)) {
             if (Job* next_job = job_node->job_or_null()) {
                 if (next_job->state() > Job::s_not_initialized) {
@@ -138,10 +142,15 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
 
     private:
     void stop_watching() {
-        close_agent_connection();
-        clear_new_files();
-        _is_watching = false;
-        set_async_next_gmtime(double_time_max);
+        if (_is_watching) {
+            close_agent_connection();
+            clear_new_files();
+            if (!_process_class_path.empty()) {
+                spooler()->process_class_subsystem()->process_class(_process_class_path)->remove_file_order_source();
+            }
+            _is_watching = false;
+            set_async_next_gmtime(double_time_max);
+        }
     }
 
     private:
@@ -315,7 +324,7 @@ void Directory_file_order_source::close()
     if (_process_class_path != "") {
         remove_requisite(Requisite_path(spooler()->process_class_subsystem(), _process_class_path));
     }
-    close_agent_connection();
+    stop_watching();
     close_notification();
 
     if( _next_node ) 

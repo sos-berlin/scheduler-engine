@@ -155,6 +155,12 @@ struct Process_class : Process_class_configuration,
     void                        add_process                 (Process*);
     void                        remove_process              (Process*);
 
+    void add_file_order_source() {
+        _file_order_source_count++;
+    }
+
+    void remove_file_order_source();
+
     Process*                    new_process                 (const Api_process_configuration*, Prefix_log*);
     Process*                    select_process_if_available (const Api_process_configuration*, Prefix_log*);
     bool                        process_available           ( Job* for_job );
@@ -190,6 +196,8 @@ struct Process_class : Process_class_configuration,
     Process_set                _process_set;
     int                        _process_set_version;
     ProcessClassJ _typed_java_sister;
+
+    int _file_order_source_count;
 };
 
 //-----------------------------------------------------------------------------Process_class_folder

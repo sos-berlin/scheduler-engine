@@ -1280,7 +1280,7 @@ bool Process_class::on_activate()
 
 bool Process_class::can_be_removed_now()
 {
-    return _process_set.empty();
+    return _process_set.empty() && _file_order_source_count == 0;
 }
 
 //----------------------------------------------------------------Process_class::prepare_to_replace
@@ -1355,6 +1355,15 @@ void Process_class::remove_process(Process* process)
     {
         Job* job = *_waiting_jobs.rbegin();
         job->notify_a_process_is_idle();
+    }
+}
+
+void Process_class::remove_file_order_source() {
+    assert(_file_order_source_count > 0);
+    _file_order_source_count--;
+    if (is_to_be_removed() && can_be_removed_now()) {
+        remove();
+        // this is invalid now!
     }
 }
 

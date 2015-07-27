@@ -35,7 +35,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     writeConfigurationFile(TestJobChainPath, newJobChainElem(directory, agentUri, 1.s))
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
       intercept[TimeoutException] {
-        implicit val implicitTimeout = ImplicitTimeout(3.s)
+        implicit val implicitTimeout = ImplicitTimeout(10.s)
         eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {
           touch(matchingFile)
         }
@@ -48,7 +48,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     deleteConfigurationFile(TestProcessClassPath)
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
       intercept[TimeoutException] {
-        implicit val implicitTimeout = ImplicitTimeout(3.s)
+        implicit val implicitTimeout = ImplicitTimeout(10.s)
         eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {
           touch(matchingFile)
         }
@@ -65,7 +65,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         sleep(1.s)  // Wait a second to get a new file timestamp
         writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={s"http://127.0.0.1:$deadPort"}/>)
         intercept[TimeoutException] {
-          implicit val implicitTimeout = ImplicitTimeout(3.s)
+          implicit val implicitTimeout = ImplicitTimeout(10.s)
           eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {
             touch(matchingFile)
           }
