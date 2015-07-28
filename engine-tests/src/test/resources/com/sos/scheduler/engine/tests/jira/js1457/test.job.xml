@@ -11,13 +11,13 @@ goto WINDOWS
 fi
 
 echo Job starts
-sleep 1
+sleep 2
 echo Job ends
 exit 0
 
 :WINDOWS
 echo Job starts
-ping -n 2 127.0.0.1 >nul
+ping -n 3 127.0.0.1 >nul
 echo Job ends
     ]]></script>
 </job>
