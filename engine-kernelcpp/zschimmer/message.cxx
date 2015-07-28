@@ -16,6 +16,47 @@ namespace zschimmer {
     
 const static size_t             max_insertion_length_const = 500;
 
+static string errno_to_name(int e) {
+    switch (e) {
+        case EPERM       : return "EPERM";
+        case ENOENT      : return "ENOENT";
+        case ESRCH       : return "ESRCH";
+        case EINTR       : return "EINTR";
+        case EIO         : return "EIO";
+        case ENXIO       : return "ENXIO";
+        case E2BIG       : return "E2BIG";
+        case ENOEXEC     : return "ENOEXEC";
+        case EBADF       : return "EBADF";
+        case ECHILD      : return "ECHILD";
+        case EAGAIN      : return "EAGAIN";
+        case ENOMEM      : return "ENOMEM";
+        case EACCES      : return "EACCES";
+        case EFAULT      : return "EFAULT";
+        case EBUSY       : return "EBUSY";
+        case EEXIST      : return "EEXIST";
+        case EXDEV       : return "EXDEV";
+        case ENODEV      : return "ENODEV";
+        case ENOTDIR     : return "ENOTDIR";
+        case EISDIR      : return "EISDIR";
+        case ENFILE      : return "ENFILE";
+        case EMFILE      : return "EMFILE";
+        case ENOTTY      : return "ENOTTY";
+        case EFBIG       : return "EFBIG";
+        case ENOSPC      : return "ENOSPC";
+        case ESPIPE      : return "ESPIPE";
+        case EROFS       : return "EROFS";
+        case EMLINK      : return "EMLINK";
+        case EPIPE       : return "EPIPE";
+        case EDOM        : return "EDOM";
+        case EDEADLK     : return "EDEADLK";
+        case ENAMETOOLONG: return "ENAMETOOLONG";
+        case ENOLCK      : return "ENOLCK";
+        case ENOSYS      : return "ENOSYS";
+        case ENOTEMPTY   : return "ENOTEMPTY";
+        default          : return "";
+    }
+}
+
 //----------------------------------------------------------------------------Source_pos::to_string
 
 string Source_pos::to_string() const
@@ -90,7 +131,8 @@ void Message_string::set_code( const char* code )
     else
     if( strncmp( code, "ERRNO-", 6 ) == 0 )
     {
-        _string += z_strerror( atoi( code+6 ) );
+        int e = atoi(code + 6);
+        _string += trim(errno_to_name(e) + " " + z_strerror(e));
     }
     else
         _string += get_error_text( code );
@@ -387,7 +429,8 @@ void Xc::set_what_by_code( const char* code )
     else
     if( strncmp( code, "ERRNO-", 6 ) == 0 )
     {
-        _what += z_strerror( atoi( code+6 ) );
+        int e = atoi(code + 6);
+        _what += trim(errno_to_name(e) + " " + z_strerror(e));
     }
     else
         _what += get_error_text( code );
