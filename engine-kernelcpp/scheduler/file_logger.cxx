@@ -55,6 +55,8 @@ File_logger::~File_logger()
 
 void File_logger::add_file( const File_path& path, Log_level level, const string& name )
 {
+    if (_thread) z::throw_xc(Z_FUNCTION);
+
     if( path != "" )  
     {
         Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << path << "\",\"" << name << "\")\n" );
@@ -66,10 +68,6 @@ void File_logger::add_file( const File_path& path, Log_level level, const string
 
 void File_logger::close()
 {
-    Z_MUTEX(_mutex) {
-        set_async_manager( NULL );
-    }
-
     if( _thread )  
     {
         _thread->terminate();
@@ -79,6 +77,8 @@ void File_logger::close()
     }
 
     Z_MUTEX(_mutex) {
+        set_async_manager( NULL );
+
         Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
         {
             File_line_reader* file_line_reader = *it;
