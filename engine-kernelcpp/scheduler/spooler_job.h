@@ -515,6 +515,7 @@ struct Standard_job : Job
     string                     _warn_if_shorter_than_string;
     string                     _warn_if_longer_than_string;
     bool                       _enabled;
+    Log_level _stderr_log_level;
 };
 
 //-------------------------------------------------------------------------------------Internal_job

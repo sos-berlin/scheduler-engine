@@ -456,6 +456,8 @@ AGAIN:
 
                 if( _has_order )
                 params_array[ nr++ ] = "has_order=1";
+                if (_task->stderr_log_level() != log_info) 
+                    params_array[nr++] = "stderr_log_level=" + as_string(_task->stderr_log_level());
 
                 params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
                 params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;

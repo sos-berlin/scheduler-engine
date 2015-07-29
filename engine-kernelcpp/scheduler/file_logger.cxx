@@ -53,12 +53,12 @@ File_logger::~File_logger()
 
 //----------------------------------------------------------------------------File_logger::add_file
 
-void File_logger::add_file( const File_path& path, const string& name )
+void File_logger::add_file( const File_path& path, Log_level level, const string& name )
 {
     if( path != "" )  
     {
         Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << path << "\",\"" << name << "\")\n" );
-        _file_line_reader_list.push_back( Z_NEW( File_line_reader( path, name ) ) );
+        _file_line_reader_list.push_back(Z_NEW(File_line_reader(path, _log, level, name)));
     }
 }
 
@@ -113,24 +113,19 @@ void File_logger::start_thread()
 
 //-------------------------------------------------------------------------File_logger::flush_lines
 
-bool File_logger::flush_lines()
+void File_logger::flush_lines()
 {
-    bool something_done = false;
-
     Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
     {
         File_line_reader* file_line_reader = *it;
-        something_done |= log_lines( file_line_reader->read_lines() );
+        file_line_reader->log_lines();
     }
-
-    return something_done;
 }
 
 //-------------------------------------------------------------------------------File_logger::flush
 
-bool File_logger::flush()
+void File_logger::flush()
 {
-    bool something_done = false;
     Z_MUTEX(_mutex) {
         string s;
 
@@ -154,28 +149,15 @@ bool File_logger::flush()
         Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
         {
             File_line_reader* file_line_reader = *it;
-
-            while(1)
-            {
-                s = file_line_reader->read_lines();
-                if( s == "" )  break;
-                something_done |= log_lines( s );
-            }
+            while (file_line_reader->log_lines());
         }
 
         Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
         {
             File_line_reader* file_line_reader = *it;
-
-            while(1)
-            {
-                s = file_line_reader->read_remainder();
-                if( s == "" )  break;
-                something_done |= log_lines( s );
-            }
+            file_line_reader->log_remainder();
         }
     }
-    return something_done;
 }
 
 //------------------------------------------------------------------------------File_logger::finish
@@ -230,27 +212,14 @@ string File_logger::async_state_text_() const
     return result;
 }
 
-//---------------------------------------------------------------------------File_logger::log_lines
-
-bool File_logger::log_lines( const string& lines )
-{
-    bool something_done = false;
-
-    if( lines != "" )  
-    {
-        _log->info( lines );
-        something_done = true;
-    }
-
-    return something_done;
-}
-
 //--------------------------------------------------File_logger::File_line_reader::File_line_reader
 
-File_logger::File_line_reader::File_line_reader( const File_path& path, const string& name )                                      
+File_logger::File_line_reader::File_line_reader(const File_path& path, Has_log* log, Log_level level, const string& name)
 : 
     _zero_(this+1),
     _path(path),
+    _log(log),
+    _log_level(level),
     _name(name)
 {
 }
@@ -259,6 +228,24 @@ File_logger::File_line_reader::File_line_reader( const File_path& path, const st
     
 void File_logger::File_line_reader::close()
 {
+}
+
+
+bool File_logger::File_line_reader::log_lines() {
+    string lines = read_lines();
+    if (lines == "")
+        return false;
+    else {
+        _log->log(_log_level, lines);
+        return true;
+    }
+}
+
+void File_logger::File_line_reader::log_remainder() {
+    string lines = read_lines();
+    if ( lines != "") {
+        _log->log(_log_level, lines);
+    }
 }
 
 //--------------------------------------------------------File_logger::File_line_reader::read_lines
@@ -324,15 +311,19 @@ string File_logger::File_line_reader::read_remainder()
 }
 
 string File_logger::File_line_reader::prefix_with_name(const string& lines) const {
-    std::vector<string> result;
-    for (size_t i = 0; i < lines.length();) {
-        result.push_back("[" + _name + "] ");
-        size_t line_end = lines.find('\n', i);
-        line_end = line_end == string::npos? lines.length() : line_end + 1;
-        result.push_back(lines.substr(i, line_end - i));
-        i = line_end;
+    if (_name == "") {
+        return lines;
+    } else {
+        std::vector<string> result;
+        for (size_t i = 0; i < lines.length();) {
+            result.push_back("[" + _name + "] ");
+            size_t line_end = lines.find('\n', i);
+            line_end = line_end == string::npos? lines.length() : line_end + 1;
+            result.push_back(lines.substr(i, line_end - i));
+            i = line_end;
+        }
+        return join("", result);
     }
-    return join("", result);
 }
 
 //----------------------------------------------File_logger::File_logger_thread::File_logger_thread

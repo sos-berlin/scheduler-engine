@@ -145,7 +145,7 @@ struct Task : Object,
 
 
 
-                                Task                        ( Standard_job* );
+                                Task                        (Standard_job*, Log_level stderr_log_level);
                                ~Task                        ();
 
     // Scheduler_object::
@@ -275,6 +275,10 @@ struct Task : Object,
 
     public: Prefix_log* log() {
         return _log;
+    }
+    
+    Log_level stderr_log_level() const {
+        return _stderr_log_level;
     }
 
   protected:
@@ -442,6 +446,7 @@ struct Task : Object,
 
     ptr<File_logger>           _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
     private: ptr<Process_class> _process_class;
+    Log_level const _stderr_log_level;
 };
 
 //----------------------------------------------------------------------------------------Task_list

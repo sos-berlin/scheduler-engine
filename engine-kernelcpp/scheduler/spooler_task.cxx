@@ -167,7 +167,7 @@ int Task_subsystem::count_tasks_exist( ) const
 
 //---------------------------------------------------------------------------------------Task::Task
 
-Task::Task(Standard_job* job)
+Task::Task(Standard_job* job, Log_level stderr_log_level)
 :
     Abstract_scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
     javabridge::has_proxy<Task>(job->_spooler),
@@ -179,7 +179,8 @@ Task::Task(Standard_job* job)
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Duration::eternal ),
     _order_state_transition(Order_state_transition::keep),
-    _process_class(job->default_process_class())
+    _process_class(job->default_process_class()),
+    _stderr_log_level(stderr_log_level)
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -1413,8 +1414,8 @@ bool Task::do_something()
 
                                 if( _job->_history.min_steps() == 0 )  _history.start();
 
-                                _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
-                                _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
+                                _file_logger->add_file(_module_instance->stdout_path(), log_info         , _stderr_log_level == log_info? "stdout" : "");
+                                _file_logger->add_file(_module_instance->stderr_path(), _stderr_log_level, _stderr_log_level == log_info? "stderr" : "");
 
                                 if( _file_logger->has_files() ) {
                                     _file_logger->set_async_manager( _spooler->_connection_manager );

@@ -77,6 +77,7 @@ public:
     com::object_server::Session*  _session;
     ptr<Class_data>               _class_data;
     ptr<Com_log_proxy>            _log;
+    private: z::Log_level _stderr_log_level;
 
   //bool                          _log_stdout_stderr;
 };

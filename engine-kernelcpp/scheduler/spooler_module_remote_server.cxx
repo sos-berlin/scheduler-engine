@@ -229,7 +229,8 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
 :
     Sos_ole_object( remote_module_instance_server_class_ptr, (Iremote_module_instance_server*)this ),
     _zero_(this+1),
-    _session(session)
+    _session(session),
+    _stderr_log_level(z::log_info)
 {
     if( *class_object_ptr )
     {
@@ -368,6 +369,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 }
                 else
                 if( key_word == "has_order"             )  has_order                                = as_bool( value );
+                else
+                if (key_word == "stderr_log_level") _stderr_log_level = make_log_level(value);
                 else
                 if( key_word == "process.filename"      )  _server->_module->_process_filename      = value;
                 else
@@ -562,8 +565,8 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             }
             if (_class_data->_task_process_element.bool_getAttribute("log_stdout_and_stderr", false)) {
                 // Von einem Remote_scheduler gestartet
-                _server->_file_logger->add_file(stdout_path, "stdout");
-                _server->_file_logger->add_file(stderr_path, "stderr");
+                _server->_file_logger->add_file(stdout_path, z::log_info, _stderr_log_level == z::log_info? "stdout" : "");
+                _server->_file_logger->add_file(stderr_path, _stderr_log_level, _stderr_log_level == z::log_info? "stderr" : "");
             }
             if (Com_task_proxy* task_proxy = dynamic_cast<Com_task_proxy*>(_server->_module_instance->object("spooler_task"))) {
                 task_proxy->_stdout_path = stdout_path;

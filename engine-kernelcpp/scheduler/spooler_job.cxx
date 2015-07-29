@@ -571,7 +571,8 @@ Standard_job::Standard_job( Scheduler* scheduler, const string& name, const ptr<
     _history(this),
     _stop_on_error(true),
     _db_next_start_time( Time::never ),
-    _enabled(true)      // JS-551
+    _enabled(true),      // JS-551
+    _stderr_log_level(log_info)
 {
     if( name != "" )  set_name( name );
 
@@ -918,6 +919,12 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
         _warn_if_shorter_than_string = element.getAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
         _warn_if_longer_than_string  = element.getAttribute( "warn_if_longer_than" , _warn_if_longer_than_string  );
         _enabled                     = element.bool_getAttribute( "enabled" , _enabled  );  // JS-551
+        {
+            string s = element.getAttribute("stderr_log_level");
+            if (s != "") {
+                _stderr_log_level = make_log_level(s);
+            }
+        }
         _call_register.call(Z_NEW(State_cmd_call(this, _enabled? sc_enable : sc_disable)));
 
         if( order )  set_order_controlled();
@@ -1429,7 +1436,7 @@ ptr<Task> Standard_job::create_task(Com_variable_set* params, const string& task
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", Job::state_name( s_initialized ), Z_FUNCTION, state_name() );
     }
 
-    ptr<Task> task = Z_NEW( Task( this ) );
+    ptr<Task> task = Z_NEW(Task(this, _stderr_log_level));
 
     task->_id          = id;
     task->_obj_name    = S() << "Task " << path().without_slash() << ":" << task->_id;
