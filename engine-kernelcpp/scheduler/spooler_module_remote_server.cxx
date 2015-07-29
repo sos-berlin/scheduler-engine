@@ -572,16 +572,17 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
                 task_proxy->_stdout_path = stdout_path;
                 task_proxy->_stderr_path = stderr_path;
             }
-            if (_server->_file_logger->has_files()) 
-                _server->_file_logger->start_thread();
-
-            // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurück und
-            // gibt dann selbst stdout und stderr aus (soweit nicht remote)
         }
 
         operation->async_finish();
         result->vt = VT_BOOL;
         V_BOOL(result) = _server->_module_instance->begin__end();
+
+        if (_server->_file_logger && _server->_file_logger->has_files()) {
+            _server->_file_logger->start_thread();
+            // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurück und
+            // gibt dann selbst stdout und stderr aus (soweit nicht remote)
+        }
 
         assert( !_class_data->_remote_instance_pid );
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
