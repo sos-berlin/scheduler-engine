@@ -684,10 +684,6 @@ HRESULT Olechar_to_string( const OLECHAR* olechar, int len, string* result )  th
         int flags = WC_NO_BEST_FIT_CHARS;       // Das wirkt nicht wie gewünscht. Man muss user_default_char setzen und eine eigene Fehlermeldung erzeugen,
                                                 // um auf nicht erlaubte Zeichen zu prüfen.
 
-#       ifdef Z_WINDOWS
-            if( !is_windows2000_or_more() )  flags &= ~WC_NO_BEST_FIT_CHARS;
-#       endif
-
         char  local_buffer [ 200+1 ];
         char* buffer;
         

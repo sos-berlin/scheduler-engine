@@ -34,30 +34,11 @@ void create_mini_dump_on_unhandled_exception();
 
 bool is_windows_version_or_more( int expected_major, int expected_minor );
 
-//---------------------------------------------------------------------------is_windows2000_or_more
-
-inline bool is_windows2000_or_more()
-{
-    // Ab 5.0
-    return ( GetVersion() & 0xFF ) >= 5;
-}
-
 //----------------------------------------------------------------------------is_windows_xp_or_more
 
 inline bool                     is_windows_xp_or_more       ()                                      { return is_windows_version_or_more( 5, 1 ); }
 int                             compare_systemtime          ( const SYSTEMTIME&, const SYSTEMTIME& );
 
-//-----------------------------------------------------------------------------is_platform_win32_nt
-/*
-inline bool is_windows_nt_or_more()
-{
-    return GetVersion() & 0x80000000 != 0;
-    //OSVERSIONINFO v;
-    //v.dwOSVersionInfoSize = sizeof v;
-
-    //return GetVersionEx( &v )  &&  v.dwPlatformId == VER_PLATFORM_WIN32_NT; )  // Windows NT oder Windows 2000?
-}
-*/
 //------------------------------------------------------------------------------int64_from_filetime
 
 inline int64 int64_from_filetime( FILETIME t )
