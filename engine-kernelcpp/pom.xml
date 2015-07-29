@@ -116,7 +116,7 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--Makes "maven clean" impossible due to "Could not find artifact ...": execution>
                         <id>Clean C++</id>
                         <phase>clean</phase>
                         <goals>
@@ -129,7 +129,7 @@
                                 <arguments>make/make-scheduler-phase clean "${cpuArchitecture}" ${cppConf}</arguments>
                             </arguments>
                         </configuration>
-                    </execution>
+                    </execution-->
                     <execution>
                         <id>Compile C++</id>
                         <phase>compile</phase>
@@ -140,7 +140,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase compile "${cpuArchitecture}" ${cppConf}</arguments>
+                                <arguments>make/make-scheduler-phase clean-compile "${cpuArchitecture}" ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>

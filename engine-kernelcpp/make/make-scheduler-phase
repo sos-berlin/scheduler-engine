@@ -10,7 +10,7 @@ function fail() {
 }
 
 cmd="$1"
-[ -n "$cmd" ] || fail "Missing first command argument: clean or compile"
+[ -n "$cmd" ] || fail "Missing first command argument: clean or compile or clean-compile"
 
 cpuArchitecture="$2"
 [ -n "$cpuArchitecture" ] || fail "Missing second command argument: x86 or x64"
@@ -50,18 +50,12 @@ fi
 #--------------------------------------------------------------------------------------------------
 
 function main() {
-    cmd_generic_${cmd}
-    cmd_${os}_${cmd}
-}
-
-#-------------------------------------------------------------------------------------------Generic
-
-function cmd_generic_clean() {
-    :
-}
-
-function cmd_generic_compile() {
-    :
+    if [ "$cmd" == "clean-compile" ]; then :
+        cmd_${os}_clean
+        cmd_${os}_compile
+    else :
+        cmd_${os}_${cmd}
+    fi
 }
 
 #-------------------------------------------------------------------------------------------Windows
