@@ -1778,6 +1778,12 @@ void Spooler::open_pid_file()
 {
     if( _pid_filename != ""  &&  !_pid_file.opened() ) {
         _pid_file.open( _pid_filename, "w" );
+        #ifdef Z_UNIX
+            struct stat stat;
+            if (fstat(_pid_file, &stat) == 0) {
+                fchmod(_pid_file, stat.st_mode | 0444);
+            }
+        #endif
         _pid_file.unlink_later();
         _pid_file.print( as_string( getpid() ) );
         _pid_file.print( "\n" );
