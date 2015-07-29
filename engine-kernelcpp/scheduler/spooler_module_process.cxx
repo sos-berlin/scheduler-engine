@@ -134,7 +134,7 @@ bool Process_module_instance::load()
             for( int i = 1; i < 10000; i++ )
             {
                 int random = ( rand() ^ (int)::time(NULL) ) & 0xfffff;
-                bool ok = _shell_file.try_open( prefix + as_hex_string( random ) + ".cmd", _O_CREAT | _O_EXCL | _O_WRONLY | _O_SHORT_LIVED, 0600 );
+                bool ok = _shell_file.try_open( prefix + as_hex_string( random ) + ".cmd", _O_CREAT | _O_EXCL | _O_WRONLY | _O_SHORT_LIVED | _O_NOINHERIT, 0600 );
                 if( ok )  break;
                 if( _shell_file.last_errno() == EEXIST )  continue;
                 _shell_file.check_error( "open" );
