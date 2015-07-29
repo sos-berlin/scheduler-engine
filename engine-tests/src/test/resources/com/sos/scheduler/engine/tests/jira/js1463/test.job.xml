@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
-     process_class="/test-agent"
-     tasks="10000"
+     timeout="2"
 >
     <script language="shell"><![CDATA[
 :;if false; then :
@@ -10,14 +9,10 @@
 goto WINDOWS
 fi
 
-echo Job starts
-sleep 2
-echo Job ends
+sleep 600
 exit 0
 
 :WINDOWS
-echo Job starts
-ping -n 3 127.0.0.1 >nul
-echo Job ends
+ping -n 601 127.0.0.1 >nul
     ]]></script>
 </job>

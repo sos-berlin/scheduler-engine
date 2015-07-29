@@ -1,18 +1,20 @@
 package com.sos.scheduler.engine.tests.jira.js1457
 
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
+import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.job.JobState
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1457.JS1457IT._
 import java.lang.System.currentTimeMillis
+import java.util.concurrent.TimeoutException
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -32,16 +34,23 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
   private var stop = false
 
   "JS-1457" in {
-    if (isWindows) pending  // Because of error JS-1462
     writeConfigurationFile(ProcessClassPath("/test-agent"), <process_class max_processes={s"$ParallelTaskCount"} remote_scheduler={s"127.0.0.1:$tcpPort"}/>)
     runJobAndWaitForEnd(JobPath("/test"))   // Smoke test
     val t = currentTimeMillis()
     var count = 0
-    eventBus.on[TaskClosedEvent] { case _ ⇒ count += 1 }
-    for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()
-    sleep(TestDuration)
-    stop = true
-    waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.pending }
+    try
+      intercept[TimeoutException] {
+        eventBus.awaitingEvent2[ErrorLogEvent](TestDuration, _ ⇒ true) {
+          writeConfigurationFile(ProcessClassPath("/test-agent"), <process_class max_processes={s"$ParallelTaskCount"} remote_scheduler={s"127.0.0.1:$tcpPort"}/>)
+          runJobAndWaitForEnd(JobPath("/test"))   // Smoke test
+          eventBus.on[TaskClosedEvent] { case _ ⇒ count += 1 }
+          for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()
+        }
+      }
+    finally {
+      stop = true
+      waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.pending }
+    }
     logger.info(s"$count processes, ${count * 1000 / (currentTimeMillis() - t)} processes/s")
   }
 

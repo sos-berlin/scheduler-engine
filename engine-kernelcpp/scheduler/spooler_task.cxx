@@ -1093,7 +1093,7 @@ void Task::wake_when_longer_than()
 
 bool Task::check_timeout( const Time& now )
 {
-    if( !_timeout.is_eternal()  &&  now > _last_operation_time + _timeout  &&  !_kill_tried ) {
+    if( !_timeout.is_eternal()  &&  now >= _last_operation_time + _timeout  &&  !_kill_tried ) {
         _log->error( message_string( "SCHEDULER-272", _timeout.seconds() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
@@ -1427,8 +1427,14 @@ bool Task::do_something()
                                                                                                : s_running_process
                                            : s_opening );
                                 report_event_code(taskStartedEvent, java_sister());
-                                if (_state == s_running_process && _order) {
-                                    report_event_code(orderStepStartedEvent, _order->java_sister());
+                                if (_state == s_running_process) {
+                                    if (_order) {
+                                        report_event_code(orderStepStartedEvent, _order->java_sister());
+                                    }
+                                    _last_operation_time = now;
+                                    if (!_timeout.is_eternal()) {
+                                        _call_register.call_at<Task_timeout_call>(_last_operation_time + _timeout);
+                                    }
                                 }
                                 loop = true;
                             }
@@ -1466,7 +1472,9 @@ bool Task::do_something()
 
                         case s_running_process:
                             assert( _module_instance->_module->kind() == Module::kind_process );
-                            if( _module_instance->process_has_signaled() ) {
+                            if (!_module_instance->process_has_signaled()) {
+                                check_timeout(now);
+                            } else {
                                 _call_register.cancel<Warn_longer_than_call>();
                                 _file_logger->flush();
                                 _log->info( message_string( "SCHEDULER-915" ) );
@@ -1475,13 +1483,10 @@ bool Task::do_something()
                                 count_step();
                                 set_state_direct( s_ending );
                                 loop = true;
-                                check_timeout( now );
                                 if (!_running_state_reached) {
                                     _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
                                     wake_when_longer_than();
                                     //_next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
-                                    if (!_timeout.is_eternal()) 
-                                        _call_register.call_at<Task_timeout_call>(now + _timeout);
                                 }
                             }
                             break;
@@ -1871,7 +1876,7 @@ bool Task::do_something()
             }
         }  // for
 
-        if( _operation && !had_operation ) {
+        if( _operation && !had_operation && _state != s_running_process) {
             _last_operation_time = now;
             if (!_timeout.is_eternal())
                 _call_register.call_at<Task_timeout_call>(_last_operation_time + _timeout);
