@@ -13,7 +13,7 @@ GCC_HAS_PRECOMPILED_HEADERS := $(shell expr $(GCC_VERSION_MAJOR) '>=' 4 '&' $(GC
 
 HIDDEN_CWARNINGS += -Wall
 CWARNINGS += -Wno-sign-compare
-CCPPWARNINGS += -Wno-deprecated
+#CCPPWARNINGS += -Wno-deprecated
 HIDDEN_CCPPWARNINGS += -Wno-reorder
 HIDDEN_CCPPWARNINGS += -Wno-parentheses
 

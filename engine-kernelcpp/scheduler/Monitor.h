@@ -34,7 +34,7 @@ struct Monitor : file_based<Monitor, Monitor_folder, Monitor_subsystem>, Object
 
     public: xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&);
 
-    File_based::obj_name;
+    using File_based::obj_name;
 };
 
 }}

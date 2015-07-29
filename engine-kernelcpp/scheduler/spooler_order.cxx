@@ -62,7 +62,7 @@ struct Database_order_detector : Async_operation, Abstract_scheduler_object
 
 
     // Scheduler_operation
-    Scheduler_object::obj_name;
+    using Scheduler_object::obj_name;
 
 
     string                      make_union_select_order_sql ( const string& select_sql_begin, const string& select_sql_end );

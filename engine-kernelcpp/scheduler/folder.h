@@ -844,7 +844,7 @@ struct Folder_subsystem : Object,
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
-                     Subsystem::obj_name;
+    using Subsystem::obj_name;
 
 
     // file_based_subsystem

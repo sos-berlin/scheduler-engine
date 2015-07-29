@@ -326,7 +326,7 @@ struct Abstract_jobject : Object
 
 struct Abstract_global_jobject : Abstract_jobject
 {
-                                Abstract_jobject::assign_;
+   using Abstract_jobject::assign_;
 #ifdef Z_HAS_MOVE_CONSTRUCTOR
     void                        assign_                     (Abstract_global_jobject&&);
 #endif

@@ -26,7 +26,7 @@ struct Subsystem : Abstract_scheduler_object, Non_cloneable
                                 Subsystem                   ( Spooler*, IUnknown*, Type_code );
                                 ~Subsystem                  ();
 
-              Scheduler_object::obj_name;
+    using Scheduler_object::obj_name;
 
     virtual void                close                       ()                                      = 0;
     virtual string              name                        () const                                = 0;

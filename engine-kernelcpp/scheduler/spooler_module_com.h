@@ -19,7 +19,7 @@ struct Com_module_instance_base : Module_instance
 
     void                        init                        ();
     IDispatch*                  dispatch                    () const                                { return _idispatch; }
-               Module_instance::add_obj;
+    using Module_instance::add_obj;
     void                        close__end                  ();
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, const Variant& param, const Variant& );
