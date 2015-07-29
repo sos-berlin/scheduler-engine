@@ -1210,9 +1210,13 @@ string get_temp_path()
         {
             tmp = "/tmp/";
             int uid = getuid();
-            struct passwd* p = getpwuid( uid );
-            if( p )  tmp += p->pw_name;
-               else  tmp += as_string(uid);
+            struct passwd pwd;
+            struct passwd* result = NULL;
+            char buf[1000];
+            if (getpwuid_r(uid, &pwd, buf, sizeof buf, &result) == 0 && result) 
+                tmp += result->pw_name;
+            else
+                tmp += as_string(uid);
 
             mkdir( tmp.c_str(), 0777 );       // Fehler ignorieren wir
         }
