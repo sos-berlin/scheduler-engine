@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1463
 
-import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -27,6 +28,7 @@ final class JS1463IT extends FreeSpec with ScalaSchedulerTest {
       runJobAndWaitForEnd(TestJobPath)
     }
     assert(result.duration >= 2.s)
+    assert(result.returnCode == ReturnCode(if (isUnix) -9 else 99))  // -9: SIGKILL
   }
 }
 
