@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -110,8 +110,8 @@ object SchedulerTestUtils {
       val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
       val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
-      val result = for (_ ← closed; s ← startedTime; e ← endedTime)
-                   yield TaskResult(jobPath, taskId, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
+      val result = for (_ ← closed; s ← startedTime; end ← ended; e ← endedTime)
+                   yield TaskResult(jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
       TaskRun(jobPath, taskId, started, ended, closed, result)
     }
   }
@@ -130,7 +130,7 @@ object SchedulerTestUtils {
       result: Future[TaskResult]) {
   }
 
-  final case class TaskResult(jobPath: JobPath, taskId: TaskId, endedInstant: Instant, duration: Duration) {
+  final case class TaskResult(jobPath: JobPath, taskId: TaskId, returnCode: ReturnCode, endedInstant: Instant, duration: Duration) {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
   }
 
