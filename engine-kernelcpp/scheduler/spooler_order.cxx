@@ -2691,6 +2691,15 @@ void Job_chain::complete_nested_job_chains()
     subsystem()->order_id_spaces()->self_check();
 }
 
+
+bool Job_chain::contains_nested_job_chains() const {
+    Z_FOR_EACH_CONST(Node_list, _node_list, n) {
+        if (Nested_job_chain_node::try_cast(*n))
+            return true;
+    }
+    return false;
+}
+
 //---------------------------------------------------------------------------Job_chain::on_activate
 
 bool Job_chain::on_activate()
@@ -3219,23 +3228,29 @@ Job_chain* Job_chain::on_replace_now()
     // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
     // Alle dateibasierten Aufträge entfernen:
     string normalized_job_chain_path = order_subsystem()->normalized_path(path());
+    
 
-    Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
-        Order* o = i->second;
-        if (o->_job_chain && order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
-            remove_order(o);
+    bool is_nesting = contains_nested_job_chains();
+    if (!is_nesting) {
+        Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
+            Order* o = i->second;
+            if (o->_job_chain && order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
+                remove_order(o);
+            }
         }
     }
 
     close();
 
-    // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
-    // Alle dateibasierten Aufträge zum neu laden markieren:
-    Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
-        Order* o = i->second;
-        if (order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
-            assert(!o->_job_chain);
-            o->set_force_file_reread();
+    if (!is_nesting) {
+        // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
+        // Alle dateibasierten Aufträge zum neu laden markieren:
+        Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
+            Order* o = i->second;
+            if (order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
+                assert(!o->_job_chain);
+                o->set_force_file_reread();
+            }
         }
     }
 
