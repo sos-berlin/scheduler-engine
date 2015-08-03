@@ -27,7 +27,7 @@ final class JS1463IT extends FreeSpec with ScalaSchedulerTest {
     {
       runJobAndWaitForEnd(TestJobPath)
     }
-    assert(result.duration >= 2.s)
+    assert(result.duration >= 2.s)  // One second shorter than the timeout, for some test machines (namely gimli)
     assert(result.returnCode == ReturnCode(if (isUnix) -9 else 99))  // -9: SIGKILL
   }
 }
