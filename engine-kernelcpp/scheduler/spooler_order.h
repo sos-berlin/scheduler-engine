@@ -917,6 +917,7 @@ struct Job_chain : Com_job_chain,
     bool                        check_nested_job_chains     ();
     void                        check_job_chain_node        ( job_chain::Node* );
     void                        complete_nested_job_chains  ();
+    bool contains_nested_job_chains() const;
 
 
     job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state, 
