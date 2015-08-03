@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.database
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
@@ -20,9 +19,9 @@ import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
-import javax.persistence.EntityManagerFactory
-import java.time.Instant
 import java.time.Instant.now
+import java.time.{Instant, LocalDateTime, ZoneId}
+import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
@@ -44,8 +43,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
       eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
       scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
-      scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
-      scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
+      scheduler executeXml <start_job job={simpleJobPath.string} at={DaylightSavingTimeString}/>
+      scheduler executeXml <start_job job={simpleJobPath.string} at={StandardTimeInstantString}><params><param name="myJobParameter" value="myValue"/></params></start_job>
       job(simpleJobPath).forceFileReread()
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
@@ -115,11 +114,12 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     assert(e(0).enqueueTime.getTime <= now().toEpochMilli, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be after now")
 
     SafeXML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
-    Instant.ofEpochMilli(e(1).startTime.getTime) shouldEqual asJavaInstant(new org.joda.time.DateTime(2029, 10, 11, 22, 33, 44).toInstant)
+    // Database UTC field is misused for local time
+    Instant.ofEpochMilli(e(1).startTime.getTime) shouldEqual DaylightSavingTimeInstant
 
     SafeXML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
     SafeXML.loadString(e(2).parameterXml) shouldEqual <sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>
-    Instant.ofEpochMilli(e(2).startTime.getTime) shouldEqual asJavaInstant(new org.joda.time.DateTime(2029, 11, 11, 11, 11, 11).toInstant)
+    Instant.ofEpochMilli(e(2).startTime.getTime) shouldEqual StandardTimeInstant
   }
 
   test("TaskEntity is read as expected") {
@@ -134,8 +134,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       assert(!(t isAfter now()), s"<queued_task enqueued=$enqueuedString> should not be after now")
     }
     queuedTaskElems(0).attribute("start_at") shouldBe 'empty
-    queuedTaskElems(1).attribute("start_at").head.text shouldEqual "2029-10-11T20:33:44.000Z"
-    queuedTaskElems(2).attribute("start_at").head.text shouldEqual "2029-11-11T10:11:11.000Z"
+    queuedTaskElems(1).attribute("start_at").head.text shouldEqual DaylightSavingTimeInstant.toString.replace("Z", ".000Z")
+    queuedTaskElems(2).attribute("start_at").head.text shouldEqual StandardTimeInstant.toString.replace("Z", ".000Z")
     (queuedTaskElems(2) \ "params").head shouldEqual <params count="1"><param value="myValue" name="myJobParameter"/></params>
   }
 
@@ -255,4 +255,9 @@ private object EntitiesIT {
   private val orderJobPath = JobPath("/test-order-job")
   private val simpleJobPath = JobPath("/test-simple-job")
   private val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
+  private val LocalZoneId = ZoneId.systemDefault
+  private val DaylightSavingTimeString = "2029-10-11 22:33:44"
+  private val DaylightSavingTimeInstant = LocalDateTime.parse("2029-10-11T22:33:44").atZone(LocalZoneId).toInstant
+  private val StandardTimeInstantString = "2029-11-11 11:11:11"
+  private val StandardTimeInstant = LocalDateTime.parse("2029-11-11T11:11:11").atZone(LocalZoneId).toInstant
 }
