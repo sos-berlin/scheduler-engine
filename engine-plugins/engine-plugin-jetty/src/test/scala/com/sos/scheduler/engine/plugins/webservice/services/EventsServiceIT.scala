@@ -21,7 +21,7 @@ final class EventsServiceIT extends FunSuite with ScalaSchedulerTest with JettyP
     testClass = getClass,
     testPackage = Some(Tests.testPackage))
 
-  test("Read some events") {
+  ignore("Read some events") {
     val testString = s"+++ EventsServiceIT +++"
     val range = 1 to 5
     val thread = new ResponsePrinter(get[Reader]("/jobscheduler/engine/TESTONLY/events"))
