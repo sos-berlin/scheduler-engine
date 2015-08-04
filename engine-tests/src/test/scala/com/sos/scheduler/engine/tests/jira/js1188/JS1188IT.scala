@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1188
 
 import com.google.common.io.Closer
+import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
-import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
@@ -14,14 +13,13 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, TaskState}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
-import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitResults, awaitSuccess, executionContext, job, processClass, runJobAndWaitForEnd, runJobFuture, task}
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1188.JS1188IT._
@@ -37,11 +35,11 @@ import scala.concurrent.Future
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   private lazy val tcpPort :: agentTcpPorts = findRandomFreeTcpPorts(1 + n)
   private lazy val agentRefs = agentTcpPorts map AgentRef ensuring { _.size == n }
-  private lazy val runningAgents = mutable.Map[AgentRef, ExtraScheduler]()
+  private lazy val runningAgents = mutable.Map[AgentRef, Agent]()
   private var waitingTaskClosedFuture: Future[TaskClosedEvent] = null
   private var waitingStopwatch: Stopwatch = null
 
@@ -120,7 +118,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
         testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", List(agentRefs(1)))
         instance[FolderSubsystem].updateFolders()
       }
-      assertResult(List(s"classic:${agentRefs(1).uri}")) {
+      assertResult(List(agentRefs(1).uri)) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       // Job should run now with new process class configuration denoting an accessible agent
@@ -130,7 +128,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
 
   "Replacing configuration file .process_class.xml, removing remote_schedulers" in {
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
-      assertResult(List(s"classic:${agentRefs(1).uri}")) {
+      assertResult(List(s"${agentRefs(1).uri}")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       for (a ← runningAgents.values) {
@@ -170,23 +168,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest {
     task(taskId).state shouldEqual TaskState.waiting_for_process
   }
 
-  private def newAgent(agentRef: AgentRef) = {
-    val logDir = controller.environment.logDirectory / s"agent-${agentRef.port}"
-    makeDirectory(logDir)
-    val args = List(
-      controller.cppBinaries.file(CppBinary.exeFilename).getPath,
-      s"-sos.ini=${controller.environment.sosIniFile}",
-      s"-ini=${controller.environment.iniFile}",
-      s"-id=agent-${agentRef.port}",
-      s"-roles=agent",
-      s"-log-dir=$logDir",
-      s"-log-level=debug9",
-      s"-log=${logDir / "scheduler.log"}",
-      s"-java-classpath=${System.getProperty("java.class.path")}",
-      s"-job-java-classpath=${System.getProperty("java.class.path")}",
-      (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
-    new ExtraScheduler(args = args, httpPort = Some(agentRef.port))
-  }
+  private def newAgent(agentRef: AgentRef) = Agent.forTest(httpPort = agentRef.port)
 }
 
 private object JS1188IT {
@@ -206,7 +188,7 @@ private object JS1188IT {
   private def processClassXml(name: String, agentRefs: Seq[AgentRef]) =
     <process_class name={name}>
       <remote_schedulers>{
-        agentRefs map { o ⇒ <remote_scheduler remote_scheduler={s"classic:${o.uri}"}/> }
+        agentRefs map { o ⇒ <remote_scheduler remote_scheduler={s"${o.uri}"}/> }
       }</remote_schedulers>
     </process_class>
 

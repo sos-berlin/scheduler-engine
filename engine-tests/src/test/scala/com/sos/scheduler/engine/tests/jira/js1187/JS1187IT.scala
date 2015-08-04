@@ -1,16 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1187
 
+import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.system.Files.makeDirectory
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.kernel.job.TaskState
-import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, runJobFuture, task}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -29,15 +26,14 @@ import org.scalatest.junit.JUnitRunner
 final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val Seq(tcpPort, agentHttpPort) = findRandomFreeTcpPorts(2)
-  private lazy val agentUri = s"classic:http://127.0.0.1:$agentHttpPort"
+  private lazy val agentUri = s"http://127.0.0.1:$agentHttpPort"
 
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"))
 
   "With invalid remote_scheduler address, task does not start" in {
-    def ignorable(e: ErrorLogEvent) =
-      (e.message contains "spray.http.IllegalUriException") || e.codeOption() == Some(MessageCode("SCHEDULER-280"))
+    def ignorable(e: ErrorLogEvent) = (e.message contains "spray.http.IllegalUriException") || e.codeOption() == Some(MessageCode("SCHEDULER-280"))
     controller.toleratingErrorLogEvent(ignorable) {  // Z-JAVA-105  Java exception spray.http.IllegalUriException: Invalid port 99999, method=CallObjectMethodA []
       awaitSuccess(runJobFuture(InvalidRemoteJobPath).closed)
     }
@@ -58,13 +54,12 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "With unreachable remote_scheduler, task waits until agent is reachable" in {
-    autoClosing(newExtraScheduler(agentHttpPort)) { agent ⇒
+    autoClosing(Agent.forTest(agentHttpPort)) { agent ⇒
       val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
       val taskRun = runJobFuture(UnreachableRemoteJobPath)
       awaitResult(warningFuture, TestTimeout)
       requireIsWaitingForAgent(taskRun.taskId)
-      agent.start()
-      awaitResult(agent.activatedFuture, TestTimeout)
+      awaitResult(agent.start(), TestTimeout)
       awaitResult(taskRun.result, TestTimeout)
     }
   }
@@ -72,24 +67,6 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   private def requireIsWaitingForAgent(taskId: TaskId, expected: Boolean = true): Unit = {
     (scheduler.executeXml(<show_task id={taskId.string}/>).answer \ "task" \@ "waiting_for_remote_scheduler").toString.toBoolean shouldEqual expected
     task(taskId).state shouldEqual TaskState.waiting_for_process
-  }
-
-  private def newExtraScheduler(httpPort: Int) = {
-    val logDir = controller.environment.logDirectory / s"agent-$httpPort"
-    makeDirectory(logDir)
-    val args = List(
-      controller.cppBinaries.file(CppBinary.exeFilename).getPath,
-      s"-sos.ini=${controller.environment.sosIniFile}",
-      s"-ini=${controller.environment.iniFile}",
-      s"-id=agent-$httpPort",
-      s"-roles=agent",
-      s"-log-dir=$logDir",
-      s"-log-level=debug9",
-      s"-log=${logDir / "scheduler.log"}",
-      s"-java-classpath=${System.getProperty("java.class.path")}",
-      s"-job-java-classpath=${System.getProperty("java.class.path")}",
-      (controller.environment.configDirectory / "agent-scheduler.xml").getPath)
-    new ExtraScheduler(args = args, httpPort = Some(httpPort))
   }
 }
 

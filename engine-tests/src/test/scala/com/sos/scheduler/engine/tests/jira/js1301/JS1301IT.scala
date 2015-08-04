@@ -55,8 +55,8 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job chain process class" in {
-    testEnvironment.fileFromPath(AProcessClassPath).xml = <process_class remote_scheduler={s"classic:http://127.0.0.1:$agentHttpPort"}/>
-    testEnvironment.fileFromPath(BProcessClassPath).xml = <process_class remote_scheduler={s"classic:http://127.0.0.1:$agentHttpPort"}/>
+    testEnvironment.fileFromPath(AProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
+    testEnvironment.fileFromPath(BProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
     instance[FolderSubsystem].updateFolders()
     val orderKey = AJobChainPath orderKey "2"
     runOrder(orderKey).state shouldEqual OrderState("END")
