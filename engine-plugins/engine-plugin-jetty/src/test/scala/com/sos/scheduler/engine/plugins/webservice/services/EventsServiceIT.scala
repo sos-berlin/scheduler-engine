@@ -9,11 +9,13 @@ import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import java.io.{BufferedReader, IOException, Reader}
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
+@Ignore
 @RunWith(classOf[JUnitRunner])
 final class EventsServiceIT extends FunSuite with ScalaSchedulerTest with JettyPluginJerseyTester {
 
