@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
@@ -17,12 +18,13 @@ trait AgentWithSchedulerTest extends HasCloser {
   this: ScalaSchedulerTest ⇒
 
   protected lazy val agent = {
-    val agent = Agent.forTest()
+    val agent = Agent.forTest(agentHttpPort)
     eventBus.on[SchedulerCloseEvent] { case _ ⇒ agent.close() }   // Shutdown the server Agent after the client Engine
     agent
   }
   protected lazy val agentUri = agent.localUri
 
+  protected lazy val agentHttpPort = findRandomFreeTcpPort()
 
   protected override def onSchedulerActivated() = {
     val started = agent.start()

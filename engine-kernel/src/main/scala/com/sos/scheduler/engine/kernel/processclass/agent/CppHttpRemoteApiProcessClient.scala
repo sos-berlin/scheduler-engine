@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.processclass.agent
 
-import com.sos.scheduler.engine.client.agent.{ApiProcessConfiguration, HttpRemoteProcess, HttpRemoteProcessStarter}
+import com.sos.scheduler.engine.base.process.ProcessSignal.SIGTERM
+import com.sos.scheduler.engine.client.agent.{HttpRemoteProcess, HttpRemoteProcessStarter, ApiProcessConfiguration}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -105,7 +106,8 @@ extends AutoCloseable {
           case (agent, httpRemoteProcess) ⇒
             killOnlySignal match {
               case Some(signal) ⇒
-                httpRemoteProcess.killRemoteTask(unixSignal = signal) onFailure {
+                require(signal == 15, "SIGTERM (15) required")
+                httpRemoteProcess.sendSignal(SIGTERM) onFailure {
                   case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
                 }
               case None ⇒

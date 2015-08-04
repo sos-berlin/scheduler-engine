@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.client.agent
 
-import com.sos.scheduler.engine.client.agent.HttpRemoteProcess._
-import com.sos.scheduler.engine.client.command.RemoteSchedulers._
-import com.sos.scheduler.engine.client.command.SchedulerCommandClient
-import com.sos.scheduler.engine.common.scalautil.xmls.StringSource
+import com.sos.scheduler.engine.agent.client.AgentClient
+import com.sos.scheduler.engine.agent.data.commands.{CloseProcess, SendProcessSignal}
+import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
+import com.sos.scheduler.engine.base.process.ProcessSignal
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -13,43 +13,18 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 trait HttpRemoteProcess {
 
-  protected def classicClient: SchedulerCommandClient
+  protected def agentClient: AgentClient
   protected def processDescriptor: ProcessDescriptor
   protected implicit def executionContext: ExecutionContext
 
   def start(): Unit
   def close(): Unit
 
-  final def killRemoteTask(unixSignal: Int): Future[Unit] = {
-    require(unixSignal == 15, "SIGTERM (15) required")
-    val command = <remote_scheduler.remote_task.kill process_id={processDescriptor.agentProcessId.value.toString} signal="SIGTERM"/>
-    classicClient.uncheckedExecute(command) map OkResult.fromXml
-  }
+  final def sendSignal(processSignal: ProcessSignal): Future[Unit] =
+    agentClient.executeCommand(SendProcessSignal(processDescriptor.agentProcessId, processSignal)) map { _: EmptyResponse.type ⇒ () }
 
-  final def closeRemoteTask(kill: Boolean): Future[Unit] = {
-    val command = <remote_scheduler.remote_task.close process_id={processDescriptor.agentProcessId.value.toString} kill={if (kill) true.toString else null}/>
-    classicClient.uncheckedExecute(command) map OkResult.fromXml
-  }
+  final def closeRemoteTask(kill: Boolean): Future[Unit] =
+    agentClient.executeCommand(CloseProcess(processDescriptor.agentProcessId, kill = kill)) map { _: EmptyResponse.type ⇒ () }
 
   override def toString = s"${getClass.getSimpleName}(${processDescriptor.agentProcessId} pid=${processDescriptor.pid})"
-}
-
-object HttpRemoteProcess {
-  private case object OkResult {
-    def fromXml(o: String) =
-      readSchedulerResponse(StringSource(o)) { eventReader ⇒
-        import eventReader._
-        parseElement("ok") {}
-      }
-  }
-
-  final class Standard(
-    protected val classicClient: SchedulerCommandClient,
-    protected val processDescriptor: ProcessDescriptor,
-    protected val executionContext: ExecutionContext)
-  extends HttpRemoteProcess {
-
-    def start() = {}
-    def close() = {}
-  }
 }
