@@ -14,13 +14,14 @@ import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
+import com.sos.scheduler.engine.kernel.time.TimeZones.SchedulerLocalZoneId
 import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
 import java.time.Instant.now
-import java.time.{Instant, LocalDateTime, ZoneId}
+import java.time.{Instant, LocalDateTime}
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -114,7 +115,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     assert(e(0).enqueueTime.getTime <= now().toEpochMilli, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be after now")
 
     SafeXML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
-    // Database UTC field is misused for local time
+    // Database UTC field is used for local time
     Instant.ofEpochMilli(e(1).startTime.getTime) shouldEqual DaylightSavingTimeInstant
 
     SafeXML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
@@ -255,9 +256,8 @@ private object EntitiesIT {
   private val orderJobPath = JobPath("/test-order-job")
   private val simpleJobPath = JobPath("/test-simple-job")
   private val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
-  private val LocalZoneId = ZoneId.systemDefault
   private val DaylightSavingTimeString = "2029-10-11 22:33:44"
-  private val DaylightSavingTimeInstant = LocalDateTime.parse("2029-10-11T22:33:44").atZone(LocalZoneId).toInstant
+  private val DaylightSavingTimeInstant = LocalDateTime.parse("2029-10-11T22:33:44").atZone(SchedulerLocalZoneId).toInstant
   private val StandardTimeInstantString = "2029-11-11 11:11:11"
-  private val StandardTimeInstant = LocalDateTime.parse("2029-11-11T11:11:11").atZone(LocalZoneId).toInstant
+  private val StandardTimeInstant = LocalDateTime.parse("2029-11-11T11:11:11").atZone(SchedulerLocalZoneId).toInstant
 }

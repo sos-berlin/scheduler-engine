@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.time
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import java.time.ZoneId
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
@@ -10,6 +11,7 @@ import org.joda.time.{LocalDateTime, DateTimeZone}
 object TimeZones {
   //FIXME Was tun bei einer Exception, einer unbekannten Zeitzone? Besser nur vorher bekannte, numerierte nehmen
   private val localTimeZone = DateTimeZone.getDefault
+  val SchedulerLocalZoneId = ZoneId.systemDefault
 
   def initialize(): Unit = {}   // Damit localTimeZone gesetzt wird, bevor sich die Default-Zeitzone ändert.
 
