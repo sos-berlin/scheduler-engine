@@ -9,7 +9,3 @@ trait StartProcess extends ProcessCommand {
   type Response = StartProcessResponse
   val controllerAddressOption: Option[String]
 }
-
-object StartProcess {
-  val XmlElementName = "remote_scheduler.start_remote_task"
-}

@@ -18,7 +18,6 @@ extends TerminateOrAbort {
 
 object Terminate {
   val SerialTypeName = "Terminate"
-  val XmlElementName = "agent.terminate"
   val MaxDuration = 31 * 24.h
   implicit val MyJsonFormat = jsonFormat2(apply)
 }

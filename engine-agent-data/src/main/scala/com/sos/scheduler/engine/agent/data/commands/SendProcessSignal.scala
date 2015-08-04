@@ -16,7 +16,9 @@ extends ProcessCommand {
 }
 
 object SendProcessSignal {
-  val XmlElementName = "remote_scheduler.remote_task.kill"
-  private implicit def UnixProcessSignalJsonFormat = ProcessSignal.MyJsonFormat
-  implicit val MyJsonFormat = jsonFormat2(apply)
+  val SerialTypeName = "SendProcessSignal"
+  implicit val MyJsonFormat = {
+    implicit def UnixProcessSignalJsonFormat = ProcessSignal.MyJsonFormat
+    jsonFormat2(apply)
+  }
 }
