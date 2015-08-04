@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
     <script language="shell">
-        ping -n 6 127.0.0.1
+        @echo off
+        ping -n 6 127.0.0.1 >nul
     </script>
 </job>

@@ -2,6 +2,7 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
     <script language="shell">
         :;if false; then :
+        @echo off
         goto WINDOWS
         fi
 
@@ -9,6 +10,6 @@
         exit
 
         :WINDOWS
-        ping -n 6 127.0.0.1
+        ping -n 6 127.0.0.1 >nul
     </script>
 </job>

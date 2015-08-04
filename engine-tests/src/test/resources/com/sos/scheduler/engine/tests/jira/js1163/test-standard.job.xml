@@ -5,6 +5,7 @@
 
     <script language="shell">
         :;if false; then :
+        @echo off
         goto WINDOWS
         fi
 
@@ -27,21 +28,21 @@
         exit 0
 
         :WINDOWS
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
-        ping -n 2 127.0.0.1
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
+        ping -n 2 127.0.0.1 >nul
         echo "FINISHED NORMALLY"
     </script>
 </job>
