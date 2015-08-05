@@ -248,6 +248,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native java.lang.String _web_directory__native(long cppReference);
 
 
+    @Override public java.lang.String installed_licence_keys_string() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = installed_licence_keys_string__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String installed_licence_keys_string__native(long cppReference);
+
+
     @Override public boolean is_freezed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

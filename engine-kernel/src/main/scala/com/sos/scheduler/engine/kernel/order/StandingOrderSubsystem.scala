@@ -16,7 +16,7 @@ final class StandingOrderSubsystem @Inject private(
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   entityManagerFactoryProvider: Provider[EntityManagerFactory],
   orderStoreProvider: Provider[HibernateOrderStore],
-  val agentClientFactory: AgentClientFactory)
+  agentClientFactoryProvider: Provider[AgentClientFactory])
 extends FileBasedSubsystem {
 
   type ThisSubsystem = StandingOrderSubsystem
@@ -24,6 +24,7 @@ extends FileBasedSubsystem {
   type ThisFile_basedC = OrderC
 
   val description = StandingOrderSubsystem
+  def agentClientFactory = agentClientFactoryProvider.get
 
   private[order] lazy val entityManagerFactory = entityManagerFactoryProvider.get
   private[order] lazy val orderStore = orderStoreProvider.get

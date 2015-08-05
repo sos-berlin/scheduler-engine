@@ -43,4 +43,6 @@ final class AgentUris private(agentUri: String) {
 
 object AgentUris {
   def apply(agentUri: String) = new AgentUris(agentUri stripSuffix "/")
+
+  val LicenseKeyHeaderName = "X-JobScheduler-LicenseKey"
 }

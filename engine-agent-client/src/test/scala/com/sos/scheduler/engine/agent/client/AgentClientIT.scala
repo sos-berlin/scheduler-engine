@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.google.common.io.Closer
 import com.google.common.io.Files._
-import com.google.inject.Guice
+import com.google.inject.{Guice, Provides}
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile, RequestFileOrderSourceContent}
@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.touchAndDeleteWithCloser
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.nio.file.Files
 import java.nio.file.Files._
@@ -25,6 +26,7 @@ import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
+import scala.collection.immutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.matching.Regex
@@ -40,6 +42,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
   private lazy val agent = Agent.forTest().closeWithCloser
   private val injector = Guice.createInjector(new ScalaAbstractModule {
     def configure() = bindInstance[ActorSystem] { ActorSystem() }
+    @Provides def provideLicenseKeys = immutable.Iterable(LicenseKeyString("SOS-DEMO-1-D3Q-1AWS-ZZ-ITOT9Q6"))
   })
   private lazy val client = injector.instance[AgentClientFactory].apply(agentUri = agent.localUri)
 

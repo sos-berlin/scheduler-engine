@@ -11,6 +11,7 @@ import akka.actor.ActorSystem
  */
 final class SimpleAgentClient private(protected[client] val agentUri: String) extends AgentClient with AutoCloseable {
 
+  protected val licenseKeys = Nil
   protected val actorSystem = ActorSystem("SimpleAgentClient")
 
   def close() = actorSystem.shutdown()
