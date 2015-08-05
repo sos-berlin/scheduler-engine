@@ -25,12 +25,14 @@ final class JobServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
     get[Array[Byte]]("/jobscheduler/engine/job/configuration?job=/a", Accept = List(TEXT_XML_TYPE)) shouldEqual jobXml
   }
 
-  "Read a job configuration, job named with umlauts, Windows only" in {
-    if (isUnix) pending  // Unix encodes filenames with UTF-8 but JobScheduler decodes then with ISO-8859-1 (see JS-1374)
-    provideUmlautJob()
-    val jobXml = instance[JobSubsystem].job(UmlautJobPath).sourceXmlBytes
-    get[Array[Byte]]("/jobscheduler/engine/job/configuration?job=/test-umlauts-äöüßÄÖÜ", Accept = List(TEXT_XML_TYPE)) shouldEqual jobXml
-  }
+//  "Read a job configuration, job named with umlauts, Windows only" in {
+//    if (isUnix) pending  // Unix encodes filenames with UTF-8 but JobScheduler decodes then with ISO-8859-1 (see JS-1374)
+//    pending // Jenkins fails due to invalid encoded umlauts in test output: Failed to read test report file ...\TEST-com.sos.scheduler.engine.plugins.webservice.services.EventsServiceIT.xml
+//            // org.dom4j.DocumentException: Invalid byte 2 of 3-byte UTF-8 sequence. Nested exception: Invalid byte 2 of 3-byte UTF-8 sequence.
+//    provideUmlautJob()
+//    val jobXml = instance[JobSubsystem].job(UmlautJobPath).sourceXmlBytes
+//    get[Array[Byte]]("/jobscheduler/engine/job/configuration?job=/test-umlauts-äöüßÄÖÜ", Accept = List(TEXT_XML_TYPE)) shouldEqual jobXml
+//  }
 
   "Read a job description" in {
     get[String]("/jobscheduler/engine/job/description?job=/a", Accept = List(TEXT_PLAIN_TYPE)) shouldEqual "TEST-DESCRIPTION mit Ümläüten"
