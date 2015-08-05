@@ -446,6 +446,7 @@ struct Task : Object,
 
     ptr<File_logger>           _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
     private: ptr<Process_class> _process_class;
+    private: bool _has_remote_scheduler;
     Log_level const _stderr_log_level;
 };
 

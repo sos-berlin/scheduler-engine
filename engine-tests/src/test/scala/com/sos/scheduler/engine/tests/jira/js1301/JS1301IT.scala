@@ -30,6 +30,7 @@ import org.scalatest.junit.JUnitRunner
 
 /**
  * JS-1301 &lt;job_chain process_class=""/>.
+ * JS-1450 Job's process class is respected before job chain's process class
  *
  * @author Joacim Zschimmer
  */
@@ -60,8 +61,9 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
     instance[FolderSubsystem].updateFolders()
     val orderKey = AJobChainPath orderKey "2"
     runOrder(orderKey).state shouldEqual OrderState("END")
-    orderLog(orderKey) should include ("SHELL TEST_AGENT=*AGENT*")
-    orderLog(orderKey) should include ("API TEST_AGENT=*AGENT*")
+    orderLog(orderKey) should include ("API TEST_AGENT=/*AGENT*/")
+    orderLog(orderKey) should include ("SHELL TEST_1_AGENT=/*AGENT*/")
+    orderLog(orderKey) should include ("SHELL TEST_2_AGENT=//")
   }
 
   "Deletion of a process class is delayed until all using tasks terminated" in {

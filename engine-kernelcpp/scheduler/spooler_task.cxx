@@ -2122,32 +2122,33 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
             _log->set_order_log( _order->_log );
 
-            Absolute_path process_class_path = order->job_chain()->default_process_class_path();
-            if (process_class_path.empty()) {
-                if (Process_class* p = _job->default_process_class_or_null()) 
-                    process_class_path = p->path();
-            }
-            Process_class* process_class;
-            try { 
-                process_class = _spooler->process_class_subsystem()->process_class(process_class_path);
-            } catch (exception& x) {
-                order->log()->error(x.what());
-                postprocess_order(Order_state_transition::standard_error);
-                assert(!_order);
-                return NULL;
-            }
-            if (process_class != _process_class) {
-                if (_state > s_loading && process_class != _process_class) {
-                    _log->error(Message_string("SCHEDULER-491", _process_class? _process_class->path() : string("none"), process_class_path));
-                    postprocess_order(Order_state_transition::keep);
-                    // Alternative to _job->stop(): postprocess_order(Order_state_transition::standard_error);
+            if (!_has_remote_scheduler) {
+                Absolute_path process_class_path = _job->_default_process_class_path;
+                if (process_class_path.empty()) {
+                    process_class_path = order->job_chain()->default_process_class_path();
+                }
+                Process_class* process_class;
+                try { 
+                    process_class = _spooler->process_class_subsystem()->process_class(process_class_path);
+                } catch (exception& x) {
+                    order->log()->error(x.what());
+                    postprocess_order(Order_state_transition::standard_error);
                     assert(!_order);
-                    _job->stop(true);
                     return NULL;
                 }
-                assert(!_module_instance);
-                _process_class = process_class;
-                add_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
+                if (process_class != _process_class) {
+                    if (_state > s_loading && process_class != _process_class) {
+                        _log->error(Message_string("SCHEDULER-491", _process_class? _process_class->path() : string("none"), process_class_path));
+                        postprocess_order(Order_state_transition::keep);
+                        // Alternative to _job->stop(): postprocess_order(Order_state_transition::standard_error);
+                        assert(!_order);
+                        _job->stop(true);
+                        return NULL;
+                    }
+                    assert(!_module_instance);
+                    _process_class = process_class;
+                    add_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
+                }
             }
             _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         } else {
@@ -2534,6 +2535,7 @@ bool Task::do_kill()
 bool Task::do_load()
 {
     string remote_scheduler = read_remote_scheduler_parameter();
+    _has_remote_scheduler = !remote_scheduler.empty();
     
     if (ptr<Module_instance> module_instance = _job->create_module_instance(_process_class, remote_scheduler, this)) {
         module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
