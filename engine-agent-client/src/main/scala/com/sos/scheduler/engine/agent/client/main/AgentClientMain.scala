@@ -35,18 +35,17 @@ object AgentClientMain {
     }
   }
 
-  private def parseArgs(args: Seq[String]) = {
-    val arguments = CommandLineArguments(args)
-    val agentUri = arguments.namelessValue(0) stripSuffix "/"
-    val operations = arguments.namelessValues.tail map {
-      case url if url startsWith "/" ⇒ Get(url)
-      case "-" ⇒ StdinCommand
-      case command ⇒ StringCommand(command)
+  private def parseArgs(args: Seq[String]) =
+    CommandLineArguments.parse(args) { arguments ⇒
+      val agentUri = arguments.namelessValue(0) stripSuffix "/"
+      val operations = arguments.namelessValues.tail map {
+        case url if url startsWith "/" ⇒ Get(url)
+        case "-" ⇒ StdinCommand
+        case command ⇒ StringCommand(command)
+      }
+      if((operations count { _ == StdinCommand }) > 1) throw new IllegalArgumentException("Stdin ('-') can only be read once")
+      (agentUri, operations)
     }
-    if((operations count { _ == StdinCommand }) > 1) throw new IllegalArgumentException("Stdin ('-') can only be read once")
-    arguments.requireNoMoreArguments()
-    (agentUri, operations)
-  }
 
   private sealed trait Operation
   private case class StringCommand(command: String) extends Operation
