@@ -11,7 +11,7 @@ import spray.json.DefaultJsonProtocol._
  */
 final case class ProcessOverview(
   id: AgentProcessId,
-  tunnelId: Option[TunnelId],
+  tunnelId: TunnelId,
   controllerAddress: String,
   startedAt: Instant)
 

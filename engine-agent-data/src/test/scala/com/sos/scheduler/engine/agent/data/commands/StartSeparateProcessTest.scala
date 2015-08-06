@@ -13,12 +13,10 @@ final class StartSeparateProcessTest extends FreeSpec {
 
   "JSON" in {
     val obj = StartSeparateProcess(
-      controllerAddressOption = Some("CONTROLLER:7"),
       javaOptions = "JAVA-OPTIONS",
       javaClasspath = "JAVA-CLASSPATH")
     val json = """{
       "$TYPE": "StartSeparateProcess",
-      "controllerAddressOption": "CONTROLLER:7",
       "javaOptions": "JAVA-OPTIONS",
       "javaClasspath": "JAVA-CLASSPATH"
     }""".parseJson

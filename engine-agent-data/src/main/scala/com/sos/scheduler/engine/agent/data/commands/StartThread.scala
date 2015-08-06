@@ -5,10 +5,7 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-final case class StartThread(controllerAddressOption: Option[String])
-extends StartProcess
-
-object StartThread {
+object StartThread extends StartProcess {
   val SerialTypeName = "StartThread"
-  implicit val MyJsonFormat = jsonFormat1(apply)
+  implicit val MyJsonFormat = jsonFormat0(() ⇒ StartThread)
 }
