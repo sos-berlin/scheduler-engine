@@ -77,7 +77,9 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     public: 
     bool on_requisite_loaded(File_based* file_based) {
         to_my_process_class(file_based);
-        try_start_watching();
+        if (_is_active) {
+            try_start_watching();
+        }
         return true;
     }
 
@@ -209,6 +211,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     Time _last_continue;
     Duration                   _delay_after_error;
     Duration                   _repeat;
+    bool _is_active;
     bool _is_watching;
     bool                       _expecting_request_order;
     Xc_copy                    _directory_error;
@@ -334,6 +337,7 @@ void Directory_file_order_source::close()
     }
 
     _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ungültig sein
+    _is_active = false;
 }
 
 //-------------------------------------------------------------xml::Element_ptr Node::xml
@@ -508,9 +512,10 @@ void Directory_file_order_source::activate()
     if (Job_node* job_node = Job_node::try_cast(_next_node)) {
         if (job_node->normalized_job_path() == file_order_sink_job_path)  z::throw_xc("SCHEDULER-342", _job_chain->obj_name());
     }
-    try_start_watching();
     set_async_next_gmtime( double_time_max );
     set_async_manager( _spooler->_connection_manager );
+    _is_active = true;
+    try_start_watching();
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
