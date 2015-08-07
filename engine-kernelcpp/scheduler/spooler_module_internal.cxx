@@ -66,7 +66,7 @@ struct Internal_module_instance : Module_instance, Scheduler_object
 
     private: Fill_zero _zero_;
     private: InternalModuleJ const _internalModuleJ;
-    private: Task* _task;
+    private: Task* const _task;
     private: Prefix_log* _log;
     private: ptr<TryJ_operation> _operation;
     private: ptr<Completed_call> const _completed_call;
@@ -199,7 +199,7 @@ struct Internal_module_instance : Module_instance, Scheduler_object
     public: void on_call(const Completed_call& call) {
         if (call.value().get_jobject() == NULL)  z::throw_xc(Z_FUNCTION, "NULL");
         _operation->complete((TryJ)call.value());
-        //_task->do_something();
+        _operation->async_finished_then_call();
     }
 };
 
