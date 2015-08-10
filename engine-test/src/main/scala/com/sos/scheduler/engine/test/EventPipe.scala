@@ -1,17 +1,20 @@
 package com.sos.scheduler.engine.test
 
+import com.google.common.collect.HashMultiset
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
+import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
 import com.sos.scheduler.engine.test.EventPipe._
-import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
+import java.time.Duration
 import java.time.Instant.now
-import java.time.{Duration}
+import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import scala.annotation.tailrec
+import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
 
@@ -22,6 +25,18 @@ extends EventHandlerAnnotated with HasCloser {
 
   closeOnError(closer) {
     eventBus.on[Event] { case e ⇒ queue.add(e) }
+  }
+
+  def nextKeyedEvents[E <: KeyedEvent : ClassTag](orderKeys: Iterable[OrderKey]): immutable.Seq[E] = {
+    val remainingKeys = HashMultiset.create(asJavaIterable(orderKeys))
+    val events = mutable.Buffer[E]()
+    while (!remainingKeys.isEmpty) {
+      val e = nextAny[E]
+      if (remainingKeys.remove(e.key)) {
+        events += e
+      }
+    }
+    events.toVector
   }
 
   def nextAny[E <: Event : ClassTag]: E =
