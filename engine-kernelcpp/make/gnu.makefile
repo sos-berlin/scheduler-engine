@@ -27,6 +27,7 @@ endif
 HIDDEN_CFLAGS += -g
 HIDDEN_CFLAGS += -MD
 HIDDEN_CFLAGS += -fPIC
+HIDDEN_CFLAGS += -fno-omit-frame-pointer
 CFLAGS    += $(CWARNINGS)
 
 ifeq ($(shell expr $(GCC_VERSION_MAJOR) '>=' 4 '&' $(GCC_VERSION_MINOR) '>=' 6),1)
