@@ -360,7 +360,7 @@ struct Standard_job : Job
     Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
     void                        init_start_when_directory_changed( Task* = NULL );
     Time                        next_order_time             () const;
-    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
+    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause, const Process_class*);
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     bool                        try_to_end_task             (Job* for_job, Process_class*);
     void                        kill_queued_task            ( int task_id );
@@ -379,6 +379,14 @@ struct Standard_job : Job
     bool                        try_start_one_task          ();
     public: Process_class* default_process_class() const;
     public: Process_class* default_process_class_or_null() const;
+
+    public: bool has_own_process_class() const {
+        return !_default_process_class_path.empty();
+    }
+
+    public: bool max_tasks_reached() const {
+        return _running_tasks.size() >= _max_tasks;
+    }
 
   private:
     void                        set_log                     ();

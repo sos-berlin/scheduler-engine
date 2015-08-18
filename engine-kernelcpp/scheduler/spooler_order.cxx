@@ -1425,10 +1425,14 @@ void Order_queue_node::withdraw_order_request()
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
-Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
+Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause, const Process_class* required_process_class)
 {
     Order* order = NULL;
-    if (is_ready_for_order_processing()) {
+    if ((!required_process_class ||
+           _job_chain->default_process_class_path().empty() ||
+           _spooler->_process_class_subsystem->normalized_path(_job_chain->default_process_class_path()) == required_process_class->normalized_path()) &&
+        is_ready_for_order_processing()) 
+    {
         Untouched_is_allowed u = _job_chain->untouched_is_allowed();
         order = order_queue()->fetch_and_occupy_order(occupying_task, u, now, cause);
         if (!order && u && _action != act_next_state) {   // act_next_step erst hier prüfen, wegen JS-1122

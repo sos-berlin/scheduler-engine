@@ -156,7 +156,7 @@ struct Task : Object,
 
     enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
     void                        cmd_end                     (End_mode = end_normal, const Duration& timeout = Duration(0));
-    void                        cmd_nice_end                ( Job* for_job = NULL );
+    void                        cmd_nice_end                (Job* for_job);
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
@@ -251,7 +251,11 @@ struct Task : Object,
     const string                log_string                  ()                                      { return log()->as_string(); }
     const File_path             stdout_path                 () const                                { return _module_instance->stdout_path(); }
     const File_path             stderr_path                 () const                                { return _module_instance->stderr_path(); }    
-    
+
+    public: Absolute_path process_class_path() const {
+        return _process_class ? _process_class->path() : Absolute_path("");
+    }
+
     public: Process_class* process_class() const {
         if (!_process_class) z::throw_xc(Z_FUNCTION);
         return _process_class;
