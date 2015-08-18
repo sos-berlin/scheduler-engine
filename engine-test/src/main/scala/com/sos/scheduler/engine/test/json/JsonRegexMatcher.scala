@@ -8,7 +8,7 @@ import spray.json._
  * @author Joacim Zschimmer
  */
 object JsonRegexMatcher {
-  val AnyIsoTimestamp = """\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ""".r
+  val AnyIsoTimestamp = """\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(.\d+)?Z""".r
   case object AnyInt
 
   /** Wirft eine Exception, falls json nicht dem Muster entspricht. */
