@@ -59,5 +59,7 @@ trait SettingsC extends CppProxy {
   @CppField
   def _web_directory: String
 
+  def installed_licence_keys_string: String
+
   def messageTexts: java.util.ArrayList[String]
 }

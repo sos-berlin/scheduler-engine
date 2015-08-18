@@ -289,6 +289,23 @@ static jstring JNICALL _1web_1directory(JNIEnv* jenv, jobject, jlong cppReferenc
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL installed_1licence_1keys_1string(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::installed_licence_keys_string()");
+        return env.jstring_from_string(o_->installed_licence_keys_string());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jboolean JNICALL is_1freezed(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -354,6 +371,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"_use_old_microscheduling_for_jobs__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1jobs },
     { (char*)"_use_old_microscheduling_for_tasks__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1use_1old_1microscheduling_1for_1tasks },
     { (char*)"_web_directory__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1web_1directory },
+    { (char*)"installed_licence_keys_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::installed_1licence_1keys_1string },
     { (char*)"is_freezed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1freezed },
     { (char*)"messageTexts__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::messageTexts },
     { (char*)"set__native", (char*)"(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set__ILjava_lang_String_2 }

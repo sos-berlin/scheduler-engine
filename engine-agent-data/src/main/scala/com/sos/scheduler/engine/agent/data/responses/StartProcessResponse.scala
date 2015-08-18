@@ -9,7 +9,7 @@ import spray.json.DefaultJsonProtocol._
  */
 final case class StartProcessResponse(
   processId: AgentProcessId,
-  tunnelTokenOption: Option[TunnelToken])
+  tunnelToken: TunnelToken)
 extends Response
 
 object StartProcessResponse {

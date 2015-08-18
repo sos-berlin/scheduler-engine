@@ -1,15 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1301
 
-import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
-import com.sos.scheduler.engine.data.filebased.{FileBasedAddedEvent, FileBasedRemovedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.filebased.FileBasedRemovedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -20,6 +15,7 @@ import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1301.JS1301IT._
 import java.nio.file.Files
@@ -30,23 +26,14 @@ import org.scalatest.junit.JUnitRunner
 
 /**
  * JS-1301 &lt;job_chain process_class=""/>.
+ * JS-1450 Job's process class is respected before job chain's process class
  *
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  private lazy val agentHttpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
-  private lazy val agent = {
-    val conf = AgentConfiguration(
-      httpPort = agentHttpPort,
-      httpInterfaceRestriction = Some("127.0.0.1"),
-      environment = Map("TEST_AGENT" → "*AGENT*"))
-    new Agent(conf).closeWithCloser
-  }
-
-  protected override def onSchedulerActivated(): Unit =
-    awaitResult(agent.start(), 10.s)
+  override protected lazy val agentConfiguration = newAgentConfiguration.copy(environment = Map("TEST_AGENT" → "*AGENT*"))
 
   "Order changes to error state when job chain process class is missing" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {
@@ -55,19 +42,19 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job chain process class" in {
-    testEnvironment.fileFromPath(AProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
-    testEnvironment.fileFromPath(BProcessClassPath).xml = <process_class remote_scheduler={s"http://127.0.0.1:$agentHttpPort"}/>
-    instance[FolderSubsystem].updateFolders()
+    writeConfigurationFile(AProcessClassPath, <process_class remote_scheduler={agentUri}/>)
+    writeConfigurationFile(BProcessClassPath, <process_class remote_scheduler={agentUri}/>)
     val orderKey = AJobChainPath orderKey "2"
     runOrder(orderKey).state shouldEqual OrderState("END")
-    orderLog(orderKey) should include ("SHELL TEST_AGENT=*AGENT*")
-    orderLog(orderKey) should include ("API TEST_AGENT=*AGENT*")
+    orderLog(orderKey) should include ("API TEST_AGENT=/*AGENT*/")
+    orderLog(orderKey) should include ("SHELL TEST_1_AGENT=/*AGENT*/")
+    orderLog(orderKey) should include ("SHELL TEST_2_AGENT=//")
   }
 
   "Deletion of a process class is delayed until all using tasks terminated" in {
     val orderKey = AJobChainPath orderKey "DELETE"
     val file = testEnvironment.fileFromPath(AProcessClassPath)
-    val content = file.contentBytes
+    val fileContent = file.xml
     eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](AProcessClassPath) {
       eventBus.awaitingEvent2[TaskEndedEvent](predicate = _.jobPath == JavaJobPath, timeout = 10.s) {
         eventBus.awaitingKeyedEvent[OrderStepStartedEvent](orderKey) {
@@ -83,28 +70,24 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest {
     }
     assert(order(orderKey).state == OrderState("200"))
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-      eventBus.awaitingKeyedEvent[FileBasedAddedEvent](AProcessClassPath) {
-        file.contentBytes = content
-        instance[FolderSubsystem].updateFolders()
-      }
+      writeConfigurationFile(AProcessClassPath, fileContent)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
     }
     .state shouldEqual OrderState("END")
   }
 
-  "Same API task cannot be used by two job chains with different process classes" in {
+  "For a second order requiring a different process class, the running task is terminated" in {
     val aOrderKey = AJobChainPath orderKey "A-API"
     val bOrderKey = BJobChainPath orderKey "B-API"
     runOrder(aOrderKey).state shouldEqual OrderState("END")
-    eventBus.awaitingEvent[TaskEndedEvent](_.jobPath == JavaJobPath) {
-      interceptErrorLogEvents(Set(MessageCode("SCHEDULER-491"))) {
-        eventBus.awaitingKeyedEvent[OrderStepEndedEvent](bOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](bOrderKey) {
+      eventBus.awaitingEvent[TaskStartedEvent](_.jobPath == JavaJobPath) {
+        eventBus.awaitingEvent[TaskEndedEvent](_.jobPath == JavaJobPath) {
           scheduler executeXml OrderCommand(bOrderKey)
         }
       }
-    }
-    assert(job(JavaJobPath).state == JobState.stopped)
-    assert(order(bOrderKey).state == OrderState("100"))
+    } .state shouldBe OrderState("END")
+    assert(job(JavaJobPath).state == JobState.running)
   }
 
   private def runOrder(orderKey: OrderKey): OrderFinishedEvent =

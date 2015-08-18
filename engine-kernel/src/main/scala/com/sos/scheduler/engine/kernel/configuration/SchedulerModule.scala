@@ -1,12 +1,14 @@
 package com.sos.scheduler.engine.kernel.configuration
 
 import akka.actor.ActorSystem
+import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
@@ -33,7 +35,7 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 
@@ -106,6 +108,10 @@ with HasCloser {
   @Provides @Singleton
   private def provideMessageCodeHandler(spoolerC: SpoolerC): MessageCodeHandler =
     MessageCodeHandler.fromCodeAndTextStrings(spoolerC.settings.messageTexts)
+
+  @Provides @Singleton
+  private def licenseKeyStrings(spoolerC: SpoolerC): immutable.Iterable[LicenseKeyString] =
+    Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
 }
 
 object SchedulerModule {

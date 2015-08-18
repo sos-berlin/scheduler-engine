@@ -6,9 +6,11 @@ import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, StartProcessResponse}
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration
 import org.scalactic.Requirements._
+import scala.collection.immutable
 import scala.concurrent.Future
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
@@ -30,12 +32,16 @@ trait AgentClient {
   import actorSystem.dispatcher
 
   protected[client] val agentUri: String
+  protected def licenseKeys: immutable.Iterable[LicenseKeyString]
   implicit protected val actorSystem: ActorSystem
 
   protected lazy val agentUris = AgentUris(agentUri)
+  private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
+    else identity
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
+      addLicenseKeys ~>
       encode(Gzip) ~>
       sendReceive ~>
       decode(Gzip)
@@ -55,6 +61,7 @@ trait AgentClient {
     val timeout = commandDurationToRequestTimeout(command.duration)
     val pipeline =
       addHeader(Accept(`application/json`)) ~>
+        addLicenseKeys ~>
         encode(Gzip) ~>
         sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
         decode(Gzip) ~>

@@ -12,11 +12,8 @@ import spray.json._
 final class StartThreadTest extends FreeSpec {
 
   "JSON" in {
-    val obj = StartThread(controllerAddressOption = Some("CONTROLLER:7"))
-    val json = """{
-      "$TYPE": "StartThread",
-      "controllerAddressOption": "CONTROLLER:7"
-    }""".parseJson
+    val obj = StartThread
+    val json = """{ "$TYPE": "StartThread" }""".parseJson
     assert((obj: Command).toJson == json)   // Command serializer includes $TYPE
     assert(obj == json.convertTo[Command])
   }

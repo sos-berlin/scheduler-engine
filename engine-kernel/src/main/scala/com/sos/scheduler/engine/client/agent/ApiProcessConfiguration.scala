@@ -11,6 +11,6 @@ final case class ApiProcessConfiguration(
   javaClasspath: String) {
 
   def toUniversalAgentCommand =
-    if (hasApi) StartSeparateProcess(controllerAddressOption = None, javaOptions = javaOptions, javaClasspath = javaClasspath)
-    else StartThread(controllerAddressOption = None)
+    if (hasApi) StartSeparateProcess(javaOptions = javaOptions, javaClasspath = javaClasspath)
+    else StartThread
 }

@@ -168,7 +168,7 @@ struct Combined_job_nodes : Object
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_requests     ();
     Time                        next_time                   ();
-    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
+    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause, const Process_class*);
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&);
     void                        connect_with_order_queues   ();
     void                        connect_job_node            ( job_chain::Job_node* );
@@ -470,14 +470,14 @@ void Combined_job_nodes::withdraw_order_requests()
 
 //----------------------------------------------------Combined_job_nodes::fetch_and_occupy_order
 
-Order* Combined_job_nodes::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
+Order* Combined_job_nodes::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause, const Process_class* required_process_class)
 {
     Order* result = NULL;
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
         Job_node* job_node = *it;
-        result = job_node->fetch_and_occupy_order(occupying_task, now, cause);
+        result = job_node->fetch_and_occupy_order(occupying_task, now, cause, required_process_class);
         if( result )  break;
     }
 
@@ -1131,8 +1131,8 @@ Time Standard_job::next_order_time() const
 
 //-------------------------------------------------------------Standard_job::fetch_and_occupy_order
 
-Order* Standard_job::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause) {
-    return _combined_job_nodes->fetch_and_occupy_order(occupying_task, now, cause);
+Order* Standard_job::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause, const Process_class* required_process_class) {
+    return _combined_job_nodes->fetch_and_occupy_order(occupying_task, now, cause, required_process_class);
 }
 
 //---------------------------------------------------------------Standard_job::set_order_controlled
@@ -2990,7 +2990,7 @@ bool Standard_job::try_start_one_task()
 
                 string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
                                                                         : start_cause_name( task->cause() );
-                _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
+                _log->info(message_string("SCHEDULER-930", task->id(), c, task->process_class_path()));
 
                 if( _min_tasks <= not_ending_tasks_count() )  
                     _start_min_tasks = false;
@@ -3657,7 +3657,7 @@ Process_class* Standard_job::default_process_class_or_null() const {
 }
 
 
-Process_class* Standard_job::default_process_class() const { 
+Process_class* Standard_job::default_process_class() const {
     return _spooler->process_class_subsystem()->process_class(_default_process_class_path);
 }
 

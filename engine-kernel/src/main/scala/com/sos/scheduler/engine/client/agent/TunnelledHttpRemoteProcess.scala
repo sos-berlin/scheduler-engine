@@ -23,7 +23,7 @@ extends HttpRemoteProcess {
   private val tcpHttpBridge = new TcpToHttpBridge(
     actorSystem,
     connectTo = new InetSocketAddress("127.0.0.1", schedulerApiTcpPort),
-    tunnelToken = processDescriptor.tunnelTokenOption getOrElse { throw new NoSuchElementException(s"Missing TunnelToken") },
+    tunnelToken = processDescriptor.tunnelToken,
     tunnelClient = tunnelClient)
 
   def start() = tcpHttpBridge.start()

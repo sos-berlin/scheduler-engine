@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.agent.client
 
+import com.sos.scheduler.engine.agent.client.AgentUris._
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import spray.http.Uri
 import spray.http.Uri.Path
@@ -9,7 +10,7 @@ import spray.http.Uri.Path
  *
  * @author Joacim Zschimmer
  */
-final class AgentUris private(agentUri: String) {
+final class AgentUris private(agentUriString: String) {
 
   val command: String =
     uriString(Path("command"))
@@ -34,13 +35,15 @@ final class AgentUris private(agentUri: String) {
   def apply(relativeUri: String): String =
     uriString(Path(relativeUri stripPrefix "/"))
 
-  private def uriString(path: Path) = withPath(path).toString
+  private def uriString(path: Path) = withPath(path).toString()
 
-  def withPath(path: Path) = Uri(agentUri) withPath Path(s"/jobscheduler/agent/${path.toString stripPrefix "/"}")
+  def withPath(path: Path) = Uri(s"$agentUriString/$AgentUriConstantPrefix/${path.toString stripPrefix "/"}")
 
-  override def toString = agentUri
+  override def toString = agentUriString
 }
 
 object AgentUris {
+  private val AgentUriConstantPrefix = "jobscheduler/agent"
+  val LicenseKeyHeaderName = "X-JobScheduler-LicenseKey"
   def apply(agentUri: String) = new AgentUris(agentUri stripSuffix "/")
 }

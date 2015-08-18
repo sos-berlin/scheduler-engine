@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -49,15 +50,14 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       testVariantName - {
         val jobPaths = List(StandardJobPath, StandardMonitorJobPath, ApiJobPath)
         s"(preparation: run and kill tasks)" in {
-          scheduler executeXml testProcessClass(agentAddressOption())
+          deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentAddressOption().orNull}/>)
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val runs = jobPaths map { runJobFuture(_) }
             awaitSuccess(Future.sequence(runs map {_.started}))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
             sleep(1.s)
             killTime = now()
-            for (run ← runs) scheduler executeXml
-                <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true"/>
+            for (run ← runs) scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true"/>
             results = awaitResults(runs map {_.result}) toKeyedMap {_.jobPath}
           }
         }
@@ -97,7 +97,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       // monitorForwardsSignal: Java Agent monitor does not forward signal to shell process!!!
       testVariantName - {
         s"(preparation: run and kill tasks)" in {
-          scheduler executeXml testProcessClass(agentAddressOption())
+          deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentAddressOption().orNull}/>)
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
@@ -156,7 +156,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     }
 
     s"TCP connected agent is not supported" in {
-      scheduler executeXml <process_class replace="true" name="test" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
+      deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={s"127.0.0.1:$tcpPort"}/>)
       interceptSchedulerError(MessageCode("SCHEDULER-468")) {  // "Using this call is not possible in this context [kill timeout] [TCP based agent connection - please connect agent with HTTP]"
         val run = runJobFuture(StandardJobPath)
         awaitSuccess(run.started)
@@ -176,6 +176,7 @@ private object JS1163IT {
   private val IgnoringJobPath = JobPath("/test-ignore")
   private val IgnoringMonitorJobPath = JobPath("/test-ignore-monitor")
   private val ApiJobPath = JobPath("/test-api")
+  private val TestProcessClassPath = ProcessClassPath("/test")
 
   private val KillTimeout = 4.s
   private val MaxKillDuration = 2.s
@@ -184,7 +185,4 @@ private object JS1163IT {
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
-
-  private def testProcessClass(agentAddress: Option[String]) =
-      <process_class replace="true" name="test" remote_scheduler={agentAddress.orNull}/>
 }

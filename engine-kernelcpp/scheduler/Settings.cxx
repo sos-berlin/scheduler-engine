@@ -161,4 +161,8 @@ ArrayListJ Settings::messageTexts() const {
     return result;
 }
 
+string Settings::installed_licence_keys_string() const {
+    return join(" ", sos_static_ptr()->_licence->_installed_keys);
+}
+
 }} //namespace sos::scheduler

@@ -175,6 +175,10 @@ struct Process_class : Process_class_configuration,
 
     void set_dom(const xml::Element_ptr&);
 
+    public: bool max_processes_reached() const {
+        return _process_set.size() >= _max_processes;
+    }
+
     bool is_remote_host() const { 
         return !_remote_scheduler_address.empty() || typed_java_sister().hasMoreAgents(); 
     }

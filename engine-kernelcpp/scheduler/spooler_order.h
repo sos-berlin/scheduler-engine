@@ -718,7 +718,7 @@ struct Order_queue_node : Node
     virtual void                wake_orders                 ();
     bool                        request_order               (const Time& now, const string& cause);
     void                        withdraw_order_request      ();
-    Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
+    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause, const Process_class*);
     bool                        is_ready_for_order_processing ();
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
 

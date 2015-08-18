@@ -1,19 +1,22 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import javax.inject.{Inject, Singleton}
+import scala.collection.immutable
 
 /**
  * @author Joacim Zschimmer
  */
 @Singleton
-final class AgentClientFactory @Inject private[client](implicit actorSystem: ActorSystem) {
+final class AgentClientFactory @Inject private[client](implicit actorSystem: ActorSystem, licenseKeys: immutable.Iterable[LicenseKeyString]) {
 
   def apply(agentUri: String): AgentClient = {
     val pAgentUri = agentUri
     new AgentClient {
-      protected val actorSystem = AgentClientFactory.this.actorSystem
-      protected[client] val agentUri = pAgentUri
+      val agentUri = pAgentUri
+      def licenseKeys = AgentClientFactory.this.licenseKeys
+      val actorSystem = AgentClientFactory.this.actorSystem
     }
   }
 }

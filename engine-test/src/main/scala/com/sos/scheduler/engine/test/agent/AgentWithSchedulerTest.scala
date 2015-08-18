@@ -18,13 +18,15 @@ trait AgentWithSchedulerTest extends HasCloser {
   this: ScalaSchedulerTest ⇒
 
   protected lazy val agent = {
-    val agent = Agent.forTest(agentHttpPort)
+    val agent = new Agent(agentConfiguration)
     eventBus.on[SchedulerCloseEvent] { case _ ⇒ agent.close() }   // Shutdown the server Agent after the client Engine
     agent
   }
   protected lazy val agentUri = agent.localUri
 
-  protected lazy val agentHttpPort = findRandomFreeTcpPort()
+  protected lazy val agentConfiguration = newAgentConfiguration()
+
+  protected def newAgentConfiguration() = Agent.testConfiguration(findRandomFreeTcpPort())
 
   protected override def onSchedulerActivated() = {
     val started = agent.start()
