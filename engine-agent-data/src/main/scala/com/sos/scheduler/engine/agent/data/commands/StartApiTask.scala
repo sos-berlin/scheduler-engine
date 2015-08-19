@@ -5,10 +5,10 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-final case class StartSeparateProcess(javaOptions: String, javaClasspath: String)
-extends StartProcess
+final case class StartApiTask(javaOptions: String, javaClasspath: String)
+extends StartTask
 
-object StartSeparateProcess {
-  val SerialTypeName = "StartSeparateProcess"
+object StartApiTask {
+  val SerialTypeName = "StartApiTask"
   implicit val MyJsonFormat = jsonFormat2(apply)
 }

@@ -49,8 +49,8 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
     assert(output(1) == "---")
     assert(output(2) contains "startedAt: '2")
     assert(output(2) contains "isTerminating: false")
-    assert(output(2) contains "totalProcessCount: 0")
-    assert(output(2) contains "currentProcessCount: 0")
+    assert(output(2) contains "totalTaskCount: 0")
+    assert(output(2) contains "currentTaskCount: 0")
   }
 
   "main with Agent URI only checks wether Agent is responding" in {

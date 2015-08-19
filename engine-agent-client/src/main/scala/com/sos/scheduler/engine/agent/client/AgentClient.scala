@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.commands._
-import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, StartProcessResponse}
+import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -50,8 +50,8 @@ trait AgentClient {
     logger.debug(s"Execute $command")
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
-      case command: StartProcess ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[StartProcessResponse]).apply(Post(agentUris.command, command: Command))
-      case (_: DeleteFile | _: MoveFile | _: SendProcessSignal | _: CloseProcess | _: Terminate | AbortImmediately) ⇒
+      case command: StartTask ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[StartTaskResponse]).apply(Post(agentUris.command, command: Command))
+      case (_: DeleteFile | _: MoveFile | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
         (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] }

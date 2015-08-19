@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.agent.client.AgentClient
-import com.sos.scheduler.engine.agent.data.commands.{CloseProcess, SendProcessSignal}
+import com.sos.scheduler.engine.agent.data.commands.{CloseTask, SendProcessSignal}
 import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,10 +21,10 @@ trait HttpRemoteProcess {
   def close(): Unit
 
   final def sendSignal(processSignal: ProcessSignal): Future[Unit] =
-    agentClient.executeCommand(SendProcessSignal(processDescriptor.agentProcessId, processSignal)) map { _: EmptyResponse.type ⇒ () }
+    agentClient.executeCommand(SendProcessSignal(processDescriptor.agentTaskId, processSignal)) map { _: EmptyResponse.type ⇒ () }
 
   final def closeRemoteTask(kill: Boolean): Future[Unit] =
-    agentClient.executeCommand(CloseProcess(processDescriptor.agentProcessId, kill = kill)) map { _: EmptyResponse.type ⇒ () }
+    agentClient.executeCommand(CloseTask(processDescriptor.agentTaskId, kill = kill)) map { _: EmptyResponse.type ⇒ () }
 
-  override def toString = s"${getClass.getSimpleName}(${processDescriptor.agentProcessId} pid=${processDescriptor.pid})"
+  override def toString = s"${getClass.getSimpleName}(${processDescriptor.agentTaskId} pid=${processDescriptor.pid})"
 }

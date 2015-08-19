@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.agent
 
-import com.sos.scheduler.engine.agent.data.commands.{StartSeparateProcess, StartThread}
+import com.sos.scheduler.engine.agent.data.commands.{StartApiTask, StartNonApiTask}
 
 /**
  * @author Joacim Zschimmer
@@ -11,6 +11,6 @@ final case class ApiProcessConfiguration(
   javaClasspath: String) {
 
   def toUniversalAgentCommand =
-    if (hasApi) StartSeparateProcess(javaOptions = javaOptions, javaClasspath = javaClasspath)
-    else StartThread
+    if (hasApi) StartApiTask(javaOptions = javaOptions, javaClasspath = javaClasspath)
+    else StartNonApiTask
 }

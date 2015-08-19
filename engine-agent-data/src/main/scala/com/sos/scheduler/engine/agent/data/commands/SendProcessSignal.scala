@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.agent.data.AgentProcessId
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import spray.json.DefaultJsonProtocol._
@@ -10,8 +10,8 @@ import spray.json.DefaultJsonProtocol._
  *
  * @author Joacim Zschimmer
  */
-final case class SendProcessSignal(processId: AgentProcessId, signal: ProcessSignal)
-extends ProcessCommand {
+final case class SendProcessSignal(agentTaskId: AgentTaskId, signal: ProcessSignal)
+extends TaskCommand {
   type Response = EmptyResponse.type
 }
 

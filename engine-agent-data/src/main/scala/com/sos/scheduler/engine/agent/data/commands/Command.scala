@@ -22,13 +22,13 @@ object Command {
   implicit object MyJsonFormat extends RootJsonFormat[Command] {
     def write(command: Command) =
       command match {
-        case o: CloseProcess ⇒ o.toJson.asJsObject withTypeField CloseProcess.SerialTypeName
+        case o: CloseTask ⇒ o.toJson.asJsObject withTypeField CloseTask.SerialTypeName
         case o: DeleteFile ⇒ o.toJson.asJsObject withTypeField DeleteFile.SerialTypeName
         case o: MoveFile ⇒ o.toJson.asJsObject withTypeField MoveFile.SerialTypeName
         case o: RequestFileOrderSourceContent ⇒ o.toJson.asJsObject withTypeField RequestFileOrderSourceContent.SerialTypeName
         case o: SendProcessSignal ⇒ o.toJson.asJsObject withTypeField SendProcessSignal.SerialTypeName
-        case o: StartSeparateProcess ⇒ o.toJson.asJsObject withTypeField StartSeparateProcess.SerialTypeName
-        case o @ StartThread ⇒ o.toJson.asJsObject withTypeField StartThread.SerialTypeName
+        case o: StartApiTask ⇒ o.toJson.asJsObject withTypeField StartApiTask.SerialTypeName
+        case o @ StartNonApiTask ⇒ o.toJson.asJsObject withTypeField StartNonApiTask.SerialTypeName
         case o: Terminate ⇒ o.toJson.asJsObject withTypeField Terminate.SerialTypeName
         case AbortImmediately ⇒ JsObject() withTypeField AbortImmediately.SerialTypeName
         case o ⇒ throw new UnsupportedOperationException(s"Class ${o.getClass.getName} is not serializable to JSON")
@@ -36,13 +36,13 @@ object Command {
 
     def read(value: JsValue) =
       splitTypeAndJsObject(value) match {
-        case (CloseProcess.SerialTypeName, o) ⇒ o.convertTo[CloseProcess]
+        case (CloseTask.SerialTypeName, o) ⇒ o.convertTo[CloseTask]
         case (DeleteFile.SerialTypeName, o) ⇒ o.convertTo[DeleteFile]
         case (MoveFile.SerialTypeName, o) ⇒ o.convertTo[MoveFile]
         case (RequestFileOrderSourceContent.SerialTypeName, o) ⇒ o.convertTo[RequestFileOrderSourceContent]
         case (SendProcessSignal.SerialTypeName, o) ⇒ o.convertTo[SendProcessSignal]
-        case (StartSeparateProcess.SerialTypeName, o) ⇒ o.convertTo[StartSeparateProcess]
-        case (StartThread.SerialTypeName, o) ⇒ o.convertTo[StartThread.type]
+        case (StartApiTask.SerialTypeName, o) ⇒ o.convertTo[StartApiTask]
+        case (StartNonApiTask.SerialTypeName, o) ⇒ o.convertTo[StartNonApiTask.type]
         case (Terminate.SerialTypeName, o) ⇒ o.convertTo[Terminate]
         case (AbortImmediately.SerialTypeName, o) ⇒ o.convertTo[AbortImmediately.type]
         case (typeName, _) ⇒ throw new IllegalArgumentException(s"Unknown JSON $$TYPE '$typeName'")
