@@ -45,7 +45,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
     val output = mutable.Buffer[String]()
     autoClosing(new TextAgentClient(agentUri = agent.localUri, o ⇒ output += o)) { client ⇒
       client.executeCommand("""{ $TYPE: Terminate, sigtermProcesses: true, sigkillProcessesAfter: 10 }""")
-      client.get("/overview")
+      client.get("")
     }
     assert(output.size == 3)
     assert(output(0) == "{}")

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.processclass.agent
 
 import com.sos.scheduler.engine.base.process.ProcessSignal.SIGTERM
 import com.sos.scheduler.engine.client.agent.{ApiProcessConfiguration, HttpRemoteProcess, HttpRemoteProcessStarter}
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -25,7 +26,7 @@ extends AutoCloseable {
 
   private object callbacks extends FailableSelector.Callbacks[Agent, HttpRemoteProcess] {
     def apply(agent: Agent): Future[Try[HttpRemoteProcess]] = {
-      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, agentUri = agent.address)
+      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, agentUri = agent.address).withThisStackTrace
       future map Success.apply recover {
         case e: spray.can.Http.ConnectionAttemptFailedException ⇒
           warningCall.call(e)

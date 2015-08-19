@@ -15,33 +15,33 @@ final class AgentUrisTest extends FreeSpec {
 
   "command" in {
     assert(agentUris.command ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/command")
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api/command")
   }
 
   "fileStatus" in {
     assert(agentUris.fileStatus("/FILE X+") ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/fileStatus?file=/FILE+X%2B")
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api/fileStatus?file=/FILE+X%2B")
   }
 
   "tunnelHandler" - {
     "overview" in {
       assert(agentUris.tunnelHandler.overview ==
-        "http://example.com:9999/testPrefix/jobscheduler/agent/tunnels")
+        "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel")
     }
 
-    "items" in {
-      assert(agentUris.tunnelHandler.items ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/tunnels/item")
+    "tunnels" in {
+      assert(agentUris.tunnelHandler.tunnels ==
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel/")
     }
 
-    "item" in {
-      assert(agentUris.tunnelHandler.item(TunnelId("TUNNEL-ID")) ==
-        "http://example.com:9999/testPrefix/jobscheduler/agent/tunnels/item/TUNNEL-ID")
+    "tunnel" in {
+      assert(agentUris.tunnelHandler.tunnel(TunnelId("TUNNEL-ID")) ==
+        "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel/TUNNEL-ID")
     }
   }
 
   "overview" in {
     assert(agentUris.overview ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/overview")
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api")
   }
 }

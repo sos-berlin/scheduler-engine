@@ -12,32 +12,35 @@ import spray.http.Uri.Path
  */
 final class AgentUris private(agentUriString: String) {
 
-  val command: String =
-    uriString(Path("command"))
+  private val prefixedUri = Uri(s"$agentUriString/$AgentUriConstantPrefix")
 
-  def overview: String =
-    uriString(Path("overview"))
+  def overview = uriString(Api)
+
+  val command = uriString(s"$Api/command")
 
   def fileStatus(filePath: String): String =
-    (withPath(Path("fileStatus")) withQuery ("file" → filePath)).toString()
+    (withPath("api/fileStatus") withQuery ("file" → filePath)).toString()
 
   object tunnelHandler {
-    def overview: String =
-      withPath(Path("tunnels")).toString()
+    def overview = uriString(s"$Api/tunnel")
 
-    def items: String =
-      withPath(Path("tunnels") / "item").toString()
+    def tunnels = uriString(s"$Api/tunnel/")
 
-    def item(id: TunnelId): String =
-      withPath(Path("tunnels") / "item" / id.string).toString()
+    def tunnel(id: TunnelId) = uriString(Path(s"$Api/tunnel") / id.string)
   }
 
-  def apply(relativeUri: String): String =
-    uriString(Path(relativeUri stripPrefix "/"))
+  def apply(relativeUri: String) = uriString(Path(stripLeadingSlash(relativeUri)))
 
-  private def uriString(path: Path) = withPath(path).toString()
+  def api(relativeUri: String) = uriString(s"$Api/${stripLeadingSlash(relativeUri)}")
 
-  def withPath(path: Path) = Uri(s"$agentUriString/$AgentUriConstantPrefix/${path.toString stripPrefix "/"}")
+  private def uriString(path: Path): String = uriString(Uri(path = path))
+
+  private def uriString(uri: Uri): String = withPath(uri).toString()
+
+  def withPath(uri: Uri) = {
+    val u = uri.resolvedAgainst(prefixedUri)
+    u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString())}"))
+  }
 
   override def toString = agentUriString
 }
@@ -45,5 +48,12 @@ final class AgentUris private(agentUriString: String) {
 object AgentUris {
   private val AgentUriConstantPrefix = "jobscheduler/agent"
   val LicenseKeyHeaderName = "X-JobScheduler-LicenseKey"
+  private val Api = "api"
+
   def apply(agentUri: String) = new AgentUris(agentUri stripSuffix "/")
+
+  private def stripLeadingSlash(o: String) =
+    o match {
+      case _ ⇒ o stripPrefix "/"
+    }
 }

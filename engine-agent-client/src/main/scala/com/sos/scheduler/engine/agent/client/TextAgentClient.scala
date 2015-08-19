@@ -36,7 +36,7 @@ private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit) 
     doPrint(resultString(pipeline(Post(agentUris.command, forceToJson(command)))))
 
   def get(uri: String): Unit =
-    doPrint(resultString(pipeline(Get(agentUris(uri)))))
+    doPrint(resultString(pipeline(Get(agentUris.api(uri)))))
 
   def requireIsResponding(): Unit = {
     resultString(pipeline(Get(agentUris.overview)))
