@@ -71,7 +71,6 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       autoClosing(new ServerSocket()) { socket ⇒
         socket.bind(new InetSocketAddress("127.0.0.1", 0))
         val deadPort = socket.getLocalPort
-        sleep(1.s)  // Wait a second to get a new file timestamp
         writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={s"http://127.0.0.1:$deadPort"}/>)
         intercept[TimeoutException] {
           implicit val implicitTimeout = ImplicitTimeout(10.s)

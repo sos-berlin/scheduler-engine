@@ -4,21 +4,17 @@ import com.google.common.io.Closer
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.filebased.FileBasedReplacedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, TaskState}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
-import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitResults, awaitSuccess, executionContext, job, processClass, runJobAndWaitForEnd, runJobFuture, task}
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -114,10 +110,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       }
       val taskRun = runJobFuture(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
-      eventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
-        testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", List(agentRefs(1)))
-        instance[FolderSubsystem].updateFolders()
-      }
+      writeConfigurationFile(ReplaceProcessClassPath, processClassXml("test-replace", List(agentRefs(1))))
       assertResult(List(agentRefs(1).uri)) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
@@ -140,10 +133,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         e.codeOption == Some(MessageCode("SCHEDULER-280")) ||
         e.codeOption == Some(MessageCode("Z-JAVA-105")) && (e.message contains classOf[FailableSelector.CancelledException].getName)
       controller.toleratingErrorLogEvent(expectedErrorLogEvent) {
-        eventBus.awaitingKeyedEvent[FileBasedReplacedEvent](ReplaceProcessClassPath) {
-          testEnvironment.fileFromPath(ReplaceProcessClassPath).xml = processClassXml("test-replace", Nil)
-          instance[FolderSubsystem].updateFolders()
-        }
+        writeConfigurationFile(ReplaceProcessClassPath, processClassXml("test-replace", Nil))
         assertResult(Nil) {
           processClass(ReplaceProcessClassPath).agents map { _.address }
         }
