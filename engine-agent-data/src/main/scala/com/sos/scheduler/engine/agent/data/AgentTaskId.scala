@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.agent.data
 import com.sos.scheduler.engine.data.base.IsString
 import org.jetbrains.annotations.TestOnly
 import scala.math.abs
+import scala.util.Random
 
 /**
  * @see C++ Process_id
@@ -53,4 +54,11 @@ object AgentTaskId extends IsString.HasJsonFormat[AgentTaskId] {
     val sign = if (index < 0) -1 else +1
     new AgentTaskId(index * Factor + sign * abs(salt) % Factor)
   }
+
+  /**
+   * Delivers [[AgentTaskId]] with recognizable strictly increasing numbers.
+   * The numbers itself are meaningless.
+   */
+  def newGenerator(start: Int = 1): Iterator[AgentTaskId] =
+    new IncreasingPositiveLongs(start = start, maximum = Int.MaxValue) map { n ⇒ AgentTaskId(index = n, salt = Random.nextLong()) }
 }
