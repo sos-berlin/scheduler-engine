@@ -118,7 +118,8 @@ comp_text[] =
     { licence_fs_demo               , "FS demo"             , ""    },      // 16
     { licence_verfallsdatum_2000    , "Verfallsdatum"       , NULL  },      // 20
     { licence_scheduler_console     , "Job Scheduler Console", ""   },      // 21
-    { licence_scheduler_agent       , "Job Scheduler Agent"  , ""   },      // 22
+    { licence_scheduler_agent       , "Job Scheduler Agent" , ""    },      // 22
+  //{ licence_universal_agent       , "Universal Agent"     , ""    },      // 23
 
   //{ licence_wbrz_logos_to_loga    , "LOGOS to LOGA2001"   , ""    },      // 30
     { licence_kis                   , "KIS"                 , ""    },      // 31

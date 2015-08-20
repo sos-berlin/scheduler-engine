@@ -51,6 +51,7 @@ const int licence_odbc_blob             = base*1 + 11; // 1B  Für Böckmann, Bf
 const int licence_verfallsdatum_2000    = base*2 + 0;  // 20
 const int licence_scheduler_console     = base*2 + 1;  // 21
 const int licence_scheduler_agent       = base*2 + 2;  // 22
+const int licence_universal_agent       = base*2 + 3;  // 23
 
 
 // Lizenzkomponenten-Codes für hostAPI von 30 bis 4Z
