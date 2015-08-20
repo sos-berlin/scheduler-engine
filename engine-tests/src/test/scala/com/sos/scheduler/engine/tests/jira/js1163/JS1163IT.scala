@@ -22,7 +22,10 @@ import org.scalatest.junit.JUnitRunner
 import scala.concurrent.Future
 
 /**
- * Tickets JS-1163, JS-1307.
+ * JS-1163 &lt;kill_task timeout="..."> with SIGTERM before SIGKILL.
+ * <p>
+ * JS-1307 SIGTERM on shell task with monitor is forwarded to shell process.
+ *
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
@@ -105,13 +108,13 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
               IgnoringJobPath, IgnoringMonitorJobPath,
               ApiJobPath)
             val runs = jobPaths map { runJobFuture(_) }
-            awaitSuccess(Future.sequence(runs map {_.started}))
+            awaitSuccess(Future.sequence(runs map { _.started }))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
             sleep(1.s)
             killTime = now()
             for (run ← runs) scheduler executeXml
                 <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getSeconds.toString}/>
-            results = awaitResults(runs map {_.result}) toKeyedMap {_.jobPath}
+            results = awaitResults(runs map { _.result }) toKeyedMap { _.jobPath }
           }
         }
 
