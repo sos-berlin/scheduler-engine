@@ -2,7 +2,9 @@ package com.sos.scheduler.engine.tests.jira.js1393
 
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -16,17 +18,35 @@ import scala.util.matching.Regex
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1393IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1393IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  "Identify output channel in JobScheduler logs" in {
+  "Identify output channel in JobScheduler logs" - {
+    "without Agent" in {
+      writeConfigurationFile(ProcessClassPath("/test"), <process_class/>)
+      testOutput()
+    }
+
+    "with Agent" in {
+      deleteAndWriteConfigurationFile(ProcessClassPath("/test"),
+        <process_class><remote_schedulers><remote_scheduler remote_scheduler={agentUri}/></remote_schedulers></process_class>)
+      testOutput()
+    }
+  }
+
+  private def testOutput(): Unit = {
     val log = runJobAndWaitForEnd(JobPath("/test")).logString
     val emptyEcho = if (isWindows) "\"\"" else ""
     selectStdLines(log, "[stdout]").toSet shouldEqual
       Set(emptyEcho, "out out out out out out out out out out out out out out out out out out out out out out out out out")
     selectStdLines(log, "[stderr]").toSet shouldEqual
       Set(emptyEcho, "err err err err err err err err err err err err err err err err err err err err err err err err err")
+
   }
 
   private def selectStdLines(log: String, channel: String) =
     log split '\n' filter { _ contains channel } map { line ⇒ (line split Regex.quote(channel))(1).trim }
+}
+
+private object JS1393IT {
+  //private val TestProcessClassPath
 }
