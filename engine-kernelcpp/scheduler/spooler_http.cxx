@@ -1753,6 +1753,11 @@ bool Html_chunk_reader::try_fill_chunk()
                 {
                     _chunk += "<span class='log_";
                     append_html_encoded( &_chunk, lcase( _line.substr( left_bracket + 1, right_bracket - left_bracket - 1 ) ) );
+                    const char *p = _line.c_str() + right_bracket + 1;
+                    while (*p && *p == ' ') p++;
+                    if (strncmp(p, "[stderr]", 8) == 0) {
+                        _chunk += " log_stderr";
+                    }
                     _chunk += "'>";
 
                     _in_span++;    // </span> nicht vergessen
