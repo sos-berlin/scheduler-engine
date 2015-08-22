@@ -45,9 +45,9 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
   private lazy val orderSubsystem = instance[OrderSubsystem]
 
   private sealed abstract class AgentMode(override val toString: String, val addressOption: () ⇒ Option[String])
-  private object NoAgent          extends AgentMode("No Agent"               , () ⇒ None)
-  private object JavaAgent        extends AgentMode("Java Agent"             , () ⇒ Some(s"http://127.0.0.1:$agentHttpPort"))
-  private object TcpCppAgent      extends AgentMode("C++ Agent via TCP"      , () ⇒ Some(s"127.0.0.1:$tcpPort"))
+  private object NoAgent          extends AgentMode("No Agent"         , () ⇒ None)
+  private object JavaAgent        extends AgentMode("Universal Agent"  , () ⇒ Some(s"http://127.0.0.1:$agentHttpPort"))
+  private object TcpCppAgent      extends AgentMode("C++ Agent via TCP", () ⇒ Some(s"127.0.0.1:$tcpPort"))
   private val allAgentModes = List(NoAgent, JavaAgent, TcpCppAgent)
 
   private val expectedTaskId = Iterator from 3 map TaskId.apply

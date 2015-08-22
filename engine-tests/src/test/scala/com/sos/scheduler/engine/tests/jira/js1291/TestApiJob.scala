@@ -28,5 +28,5 @@ final class TestApiJob extends sos.spooler.Job_impl {
   }
 
   private def checkUnsupportedMethod(name: String)(body: ⇒ Unit): Unit =
-    intercept[UnsupportedOperationException] { body } .getMessage shouldEqual s"Java Agent does not support method '$name'"
+    intercept[UnsupportedOperationException] { body } .getMessage shouldEqual s"Universal Agent does not support method '$name'"
 }

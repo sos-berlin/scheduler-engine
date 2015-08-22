@@ -49,7 +49,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val settings = List(
       ("Without agent", { () ⇒ None }),
       ("With TCP classic agent", { () ⇒ Some(s"127.0.0.1:$tcpPort")}),
-      ("With Java Agent", { () ⇒ Some(agentUri) }))
+      ("With Universal Agent", { () ⇒ Some(agentUri) }))
     for ((testVariantName, agentAddressOption) ← settings) {
       testVariantName - {
         val jobPaths = List(StandardJobPath, StandardMonitorJobPath, ApiJobPath)
@@ -96,9 +96,9 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private def addUnixTests(): Unit = {
     val settings = List(
       ("Without agent", true, { () ⇒ None }),
-      ("With Java Agent", false, { () ⇒ Some(agentUri) }))
+      ("With Universal Agent", false, { () ⇒ Some(agentUri) }))
     for ((testVariantName, monitorForwardsSignal, agentAddressOption) ← settings) {
-      // monitorForwardsSignal: Java Agent monitor does not forward signal to shell process!!!
+      // monitorForwardsSignal: Universal Agent monitor does not forward signal to shell process!!!
       testVariantName - {
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))

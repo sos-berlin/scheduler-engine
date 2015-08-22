@@ -29,7 +29,7 @@ final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private lazy val processClasses = Map(
     "Local" → <process_class name="test" replace="true"/>,
-    "Java Agent" → <process_class name="test" replace="true" remote_scheduler={agentUri}/>)
+    "Universal Agent" → <process_class name="test" replace="true" remote_scheduler={agentUri}/>)
 
   for ((testName, processClass) ← processClasses) {
     s"stdout and stderr of shell, monitored shell and job jobs - $testName" in {
