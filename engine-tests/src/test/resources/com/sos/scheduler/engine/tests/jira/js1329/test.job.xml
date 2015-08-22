@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9.5/scheduler.xsd"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.10/scheduler.xsd"
      stderr_log_level="error"
+     process_class="test"
 >
     <script language="shell"><![CDATA[
 echo TEST-STDOUT
