@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.ImplicitTimeout
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -15,7 +16,7 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1399.JS1399IT._
 import java.net.{InetSocketAddress, ServerSocket}
 import java.nio.file.Files.exists
-import java.nio.file.{Files, Path}
+import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.TimeoutException
 import org.junit.runner.RunWith
@@ -42,7 +43,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           touch(matchingFile)
         }
       }
-      writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUri}/>)
+      writeConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(agentUri)))
     }
     assert(!exists(matchingFile))
   }
@@ -59,7 +60,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           touch(matchingFile)
         }
       }
-      writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUri}/>)
+      writeConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(agentUri)))
     }
     assert(!exists(matchingFile))
   }
@@ -71,7 +72,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       autoClosing(new ServerSocket()) { socket ⇒
         socket.bind(new InetSocketAddress("127.0.0.1", 0))
         val deadPort = socket.getLocalPort
-        writeConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={s"http://127.0.0.1:$deadPort"}/>)
+        writeConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(s"http://127.0.0.1:$deadPort")))
         intercept[TimeoutException] {
           implicit val implicitTimeout = ImplicitTimeout(10.s)
           eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {

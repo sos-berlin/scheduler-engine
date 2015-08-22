@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1393
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -22,13 +23,12 @@ final class JS1393IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "Identify output channel in JobScheduler logs" - {
     "without Agent" in {
-      writeConfigurationFile(ProcessClassPath("/test"), <process_class/>)
+      writeConfigurationFile(ProcessClassPath("/test"), ProcessClassConfiguration())
       testOutput()
     }
 
     "with Agent" in {
-      deleteAndWriteConfigurationFile(ProcessClassPath("/test"),
-        <process_class><remote_schedulers><remote_scheduler remote_scheduler={agentUri}/></remote_schedulers></process_class>)
+      deleteAndWriteConfigurationFile(ProcessClassPath("/test"), ProcessClassConfiguration(agentUris = List(agentUri)))
       testOutput()
     }
   }

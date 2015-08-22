@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.xmlcommands.RemoveOrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.{ProcessClassConfiguration, RemoveOrderCommand}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -48,7 +48,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
 
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
       "(change ProcessClass)" in {
-        deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUriOption.orNull}/>)
+        deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentUriOption.toList))
       }
 
       "file_order_sink remove" in {

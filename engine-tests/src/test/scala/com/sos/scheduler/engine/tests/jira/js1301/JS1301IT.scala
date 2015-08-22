@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand, ProcessClassConfiguration}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -42,8 +42,8 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "Job chain process class" in {
-    writeConfigurationFile(AProcessClassPath, <process_class remote_scheduler={agentUri}/>)
-    writeConfigurationFile(BProcessClassPath, <process_class remote_scheduler={agentUri}/>)
+    writeConfigurationFile(AProcessClassPath, ProcessClassConfiguration(agentUris = List(agentUri)))
+    writeConfigurationFile(BProcessClassPath, ProcessClassConfiguration(agentUris = List(agentUri)))
     val orderKey = AJobChainPath orderKey "2"
     runOrder(orderKey).state shouldEqual OrderState("END")
     orderLog(orderKey) should include ("API TEST_AGENT=/*AGENT*/")

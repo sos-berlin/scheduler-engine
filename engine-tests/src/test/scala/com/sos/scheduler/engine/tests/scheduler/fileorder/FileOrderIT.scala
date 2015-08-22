@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -56,7 +57,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         // But short period when agentFileExist does not applies, to allow check for file removal
         val repeat = if (withAgent && isDistributed || !notificationIsActive) 1.s else 1.h
         deleteAndWriteConfigurationFile(TestJobChainPath, makeJobChainElem(directory, DeleteJobPath, repeat = repeat, isDistributed = isDistributed))
-        deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentUriOption.orNull}/>)
+        deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentUriOption.toList))
       }
 
       "Some files, one after the other" in {

@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -53,7 +54,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       testVariantName - {
         val jobPaths = List(StandardJobPath, StandardMonitorJobPath, ApiJobPath)
         s"(preparation: run and kill tasks)" in {
-          deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentAddressOption().orNull}/>)
+          deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val runs = jobPaths map { runJobFuture(_) }
             awaitSuccess(Future.sequence(runs map {_.started}))
@@ -100,7 +101,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       // monitorForwardsSignal: Java Agent monitor does not forward signal to shell process!!!
       testVariantName - {
         s"(preparation: run and kill tasks)" in {
-          deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={agentAddressOption().orNull}/>)
+          deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
@@ -159,7 +160,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     }
 
     s"TCP connected agent is not supported" in {
-      deleteAndWriteConfigurationFile(TestProcessClassPath, <process_class remote_scheduler={s"127.0.0.1:$tcpPort"}/>)
+      deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
       interceptSchedulerError(MessageCode("SCHEDULER-468")) {  // "Using this call is not possible in this context [kill timeout] [TCP based agent connection - please connect agent with HTTP]"
         val run = runJobFuture(StandardJobPath)
         awaitSuccess(run.started)

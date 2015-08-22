@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -26,7 +27,7 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
     logCategories = s"$KeepAliveLogCategory")
 
   "Proper termination with long keep-alive duration" in {
-    writeConfigurationFile(ProcessClassPath("/test-agent"), <process_class remote_scheduler={s"127.0.0.1:$tcpPort"}/>)
+    writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
     runJobAndWaitForEnd(JobPath("/test-sleep"))
     val schedulerLog = testEnvironment.schedulerLog.contentString
     assert(schedulerLog contains s"{$KeepAliveLogCategory} Stopped")
