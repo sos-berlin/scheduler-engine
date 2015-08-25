@@ -17,6 +17,8 @@ import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 /**
+ * JS-1421 The &lt;kill_task immediately="yes"> command on a shell task without monitor on classic Agent kills all children of the shell task.
+ *
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])

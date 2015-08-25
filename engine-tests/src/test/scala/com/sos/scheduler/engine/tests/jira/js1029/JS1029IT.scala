@@ -14,6 +14,11 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+/**
+ * JS-1029 Log is filled with SCHEDULER-478 when temporary file for a jobs stdout is removed.
+ *
+ * @author Joacim Zschimmer
+ */
 @RunWith(classOf[JUnitRunner])
 final class JS1029IT extends FunSuite with ScalaSchedulerTest {
 
