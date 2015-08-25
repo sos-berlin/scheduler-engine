@@ -555,6 +555,7 @@ struct Async_tcp_operation : Async_operation {
         s_connecting,
         s_starting,
         s_running,
+        s_signalling,
         s_closing,
         s_closed
     };
@@ -571,6 +572,7 @@ struct Async_tcp_operation : Async_operation {
     }
 
     virtual string async_state_text_() const;
+    void signal_remote_task(int unix_signal);
     void close_remote_task(bool kill = false);
 
 
@@ -641,13 +643,19 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     }
 
     public: bool kill(int unix_signal) {
-        if (unix_signal != Z_SIGKILL) z::throw_xc("SCHEDULER-468", "kill timeout", "TCP based agent connection - please connect agent with HTTP");
-        if (!_is_killed && connection()) {
-            // Async_operation (vorhandene oder neue, besser neue)
-            // mit <kill_task> starten. Nur, wenn noch nicht gestartet
-            // if( !_kill_task_operation )   _kill_task_operation = Z_NEW( Kill_task_operation );
-            // <remote_scheduler.task.close pid=" _remote_pid
+        if (!connection()) 
+            return false;
+        else
+        if (unix_signal != Z_SIGKILL) {
+            if (_async_tcp_operation && _async_tcp_operation->_state == Async_tcp_operation::s_running) {
+                _async_tcp_operation->signal_remote_task(unix_signal);
+            }
+            return true;
+        }
+        else 
+        if (!_is_killed) {
             if (_async_tcp_operation && _async_tcp_operation->_state != Async_tcp_operation::s_closed)
+                if (_async_tcp_operation->_state == Async_tcp_operation::s_signalling) z::throw_xc("SCHEDULER-468", "kill", "SIGTERM is in process - please try again");
                 _async_tcp_operation->close_remote_task(true);
             _is_killed = true;
             return true;
@@ -912,6 +920,7 @@ string Async_tcp_operation::state_name( State state )
         case s_connecting:      result = "connecting";      break;
         case s_starting:        result = "starting";        break;
         case s_running:         result = "running";         break;
+        case s_signalling:      result = "signalling";      break;
         case s_closing:         result = "closing";         break;
         case s_closed:          result = "closed";          break;
         default:                result = "Async_remote_operation-" + as_string( state );
@@ -1012,6 +1021,16 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
             break;
         }
 
+        case Async_tcp_operation::s_signalling: {
+            if( xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document() )  
+            {
+                Z_LOG2( "zschimmer", Z_FUNCTION << " XML response " << dom_document.xml_string() );
+                something_done = true;
+                _async_tcp_operation->_state = Async_tcp_operation::s_running;
+            }
+            break;
+        }
+
         case Async_tcp_operation::s_closing:
         {
             if( xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document() )  
@@ -1033,6 +1052,21 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
 }
 
 //--------------------------------------------------------Async_remote_operation::close_remote_task
+
+void Async_tcp_operation::signal_remote_task(int unix_signal) {
+    if (_state == s_running) {
+        if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() ) {
+            try {
+                assert(_process->_remote_process_id);
+                S xml;
+                xml << "<remote_scheduler.remote_task.kill process_id='" << _process->_remote_process_id << "' signal='SIGTERM'/>";
+                _process->_xml_client_connection->send( xml );
+                _state = s_signalling;
+            }
+            catch( exception& x )  { _process->log()->warn( x.what() ); }
+        }
+    }
+}
 
 void Async_tcp_operation::close_remote_task( bool kill )
 {

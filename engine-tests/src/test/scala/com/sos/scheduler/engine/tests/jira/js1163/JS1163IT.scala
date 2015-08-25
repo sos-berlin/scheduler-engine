@@ -26,6 +26,8 @@ import scala.concurrent.Future
  * JS-1163 &lt;kill_task timeout="..."> with SIGTERM before SIGKILL.
  * <p>
  * JS-1307 SIGTERM on shell task with monitor is forwarded to shell process.
+ * <p>
+ * JS-1420 SIGTERM on shell task without monitor on classic agent is forwarded to shell process
  *
  * @author Joacim Zschimmer
  */
@@ -48,8 +50,8 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "SIGKILL" - {
     val settings = List(
       ("Without agent", { () ⇒ None }),
-      ("With TCP classic agent", { () ⇒ Some(s"127.0.0.1:$tcpPort")}),
-      ("With Universal Agent", { () ⇒ Some(agentUri) }))
+      ("With Universal Agent", { () ⇒ Some(agentUri) }),
+      ("With TCP classic agent", { () ⇒ Some(s"127.0.0.1:$tcpPort")}))
     for ((testVariantName, agentAddressOption) ← settings) {
       testVariantName - {
         val jobPaths = List(StandardJobPath, StandardMonitorJobPath, ApiJobPath)
@@ -96,7 +98,8 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private def addUnixTests(): Unit = {
     val settings = List(
       ("Without agent", true, { () ⇒ None }),
-      ("With Universal Agent", false, { () ⇒ Some(agentUri) }))
+      ("With Universal Agent", false, { () ⇒ Some(agentUri) }),
+      ("With TCP classic agent", true, { () ⇒ Some(s"127.0.0.1:$tcpPort")}))
     for ((testVariantName, monitorForwardsSignal, agentAddressOption) ← settings) {
       // monitorForwardsSignal: Universal Agent monitor does not forward signal to shell process!!!
       testVariantName - {
@@ -156,15 +159,6 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           results(ApiJobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
           results(ApiJobPath).endedInstant should be < killTime + 2.s
         }
-      }
-    }
-
-    s"TCP connected agent is not supported" in {
-      deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
-      interceptSchedulerError(MessageCode("SCHEDULER-468")) {  // "Using this call is not possible in this context [kill timeout] [TCP based agent connection - please connect agent with HTTP]"
-        val run = runJobFuture(StandardJobPath)
-        awaitSuccess(run.started)
-        scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true" timeout={KillTimeout.getSeconds.toString}/>
       }
     }
   }
