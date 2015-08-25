@@ -59,7 +59,7 @@ JNIEXPORT int JNICALL Java_com_sos_scheduler_engine_kernel_CppScheduler_runNativ
     int    argc = 0;
     Env    env  = jenv;
 
-    //sos::sos_static_ptr()->init();
+    sos::sos_static_ptr()->re_init();
 
     try
     {

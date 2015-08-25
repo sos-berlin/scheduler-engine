@@ -210,14 +210,20 @@ void Sos_static::init()
 
 
     init_std_client();
-
-    {
-        Sos_ptr<Sos_licence> licence = SOS_NEW( Sos_licence );
-        _licence = +licence;
-        if( !_dont_check_licence )  licence->check();
-    }
-
+    initialize_licence();
     zschimmer::zschimmer_init();
+}
+
+void Sos_static::re_init() {
+    _profile = "";
+    _profile_source = (Profile_source)0;
+    initialize_licence();
+}
+
+void Sos_static::initialize_licence() {
+    Sos_ptr<Sos_licence> licence = SOS_NEW( Sos_licence );
+    _licence = +licence;
+    _licence->check();
 }
 
 //----------------------------------------------------------------------------Sos_static::close

@@ -141,6 +141,8 @@ struct Sos_static : Sos_static_0
     void                                                remove_ref  ()              { if( --_ref_count == 0 )  close_current_task(); }
     void                                                init        ();
     void                                                close       ();
+    void re_init();
+    void initialize_licence();
 
     void                                                use_version ( const string& version );
     string                                          get_use_version()                       { return _use_version; }
