@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConfiguration}
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -45,9 +45,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
   List(
-    "With TCP C++ Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={s"127.0.0.1:$tcpPort"}/>,
-    "With Universal Agent" → <process_class replace="true" name={TestProcessClassPath.withoutStartingSlash} remote_scheduler={agentUri}/>)
-  .foreach { case (testGroupName, processClassElem) ⇒
+    "With TCP C++ Agent" → ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")),
+    "With Universal Agent" → ProcessClassConfiguration(agentUris = List(agentUri)))
+  .foreach { case (testGroupName, processClassConfig) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[Event]]()
       lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
@@ -55,7 +55,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
       "(prepare process class)" in {
-        scheduler executeXml processClassElem
+        deleteAndWriteConfigurationFile(TestProcessClassPath, processClassConfig)
       }
 
       "Run shell job via order" in {
