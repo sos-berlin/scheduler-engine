@@ -17,8 +17,10 @@ import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.MediaTypes._
-import spray.http.{HttpRequest, HttpResponse, Uri}
+import spray.http.StatusCodes.InternalServerError
+import spray.http._
 import spray.httpx.SprayJsonSupport._
+import spray.httpx.UnsuccessfulResponseException
 import spray.httpx.encoding.Gzip
 import spray.json.JsBoolean
 
@@ -55,7 +57,12 @@ trait AgentClient {
       case (_: DeleteFile | _: MoveFile | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
         (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
     }
-    response map { _.asInstanceOf[command.Response] }
+    response map { _.asInstanceOf[command.Response] } recover {
+      case e: UnsuccessfulResponseException if e.response.status == InternalServerError ⇒
+        import e.response.entity
+        val message = if (entity.data.length < 1024) entity.asString else entity.data.length + " bytes"
+        throw new RuntimeException(s"HTTP-${e.response.status}: $message")
+    }
   }
 
   private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
