@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
+import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration

@@ -8,8 +8,8 @@ import com.google.inject.{Guice, Provides}
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile, RequestFileOrderSourceContent}
-import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._

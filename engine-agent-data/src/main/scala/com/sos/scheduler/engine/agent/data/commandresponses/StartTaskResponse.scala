@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.data.responses
+package com.sos.scheduler.engine.agent.data.commandresponses
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.tunnel.data.TunnelToken

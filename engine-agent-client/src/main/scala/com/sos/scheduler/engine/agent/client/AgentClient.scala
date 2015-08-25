@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.agent.client
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
 import com.sos.scheduler.engine.agent.data.commands._
-import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._

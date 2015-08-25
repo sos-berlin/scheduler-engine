@@ -4,8 +4,8 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.client.AgentClientCommandMarshallingTest._
 import com.sos.scheduler.engine.agent.command.CommandExecutor
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, Response}
 import com.sos.scheduler.engine.agent.data.commands.{AbortImmediately, Command, RequestFileOrderSourceContent, Terminate}
-import com.sos.scheduler.engine.agent.data.responses.{EmptyResponse, FileOrderSourceContent, Response}
 import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._

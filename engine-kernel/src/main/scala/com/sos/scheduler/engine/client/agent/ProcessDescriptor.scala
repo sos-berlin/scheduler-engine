@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.responses.StartTaskResponse
+import com.sos.scheduler.engine.agent.data.commandresponses.StartTaskResponse
 import com.sos.scheduler.engine.tunnel.data.TunnelToken
 
-/** XML response from command &lt;start_remote_task>.
+/**
+ * XML response from command &lt;start_remote_task>.
+ *
  * @author Joacim Zschimmer
  */
 final case class ProcessDescriptor(agentTaskId: AgentTaskId, pid: Int, tunnelToken: TunnelToken)

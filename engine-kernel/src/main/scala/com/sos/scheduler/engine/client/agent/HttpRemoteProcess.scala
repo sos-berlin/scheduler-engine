@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.agent.client.AgentClient
+import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{CloseTask, SendProcessSignal}
-import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import scala.concurrent.{ExecutionContext, Future}
 

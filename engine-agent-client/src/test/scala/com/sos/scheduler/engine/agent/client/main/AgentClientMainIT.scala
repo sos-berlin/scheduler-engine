@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.agent.client.main
 
 import com.sos.scheduler.engine.agent.client.main.AgentClientMainIT._
 import com.sos.scheduler.engine.agent.command.CommandExecutor
+import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{Command, Terminate}
-import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
 import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser

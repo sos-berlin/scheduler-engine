@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.agent.data.responses.StartTaskResponse
+import com.sos.scheduler.engine.agent.data.commandresponses.StartTaskResponse
 
 /**
  * @author Joacim Zschimmer

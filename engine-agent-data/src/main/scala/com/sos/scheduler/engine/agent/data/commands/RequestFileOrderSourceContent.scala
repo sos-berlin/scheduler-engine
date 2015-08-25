@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.agent.data.responses.FileOrderSourceContent
+import com.sos.scheduler.engine.agent.data.commandresponses.FileOrderSourceContent
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import java.time.Duration
 import scala.collection.immutable

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.data.responses
+package com.sos.scheduler.engine.agent.data.commandresponses
 
 import spray.json.DefaultJsonProtocol.jsonFormat0
 

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.data.commands
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.responses.EmptyResponse
+import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import spray.json.DefaultJsonProtocol._
 
