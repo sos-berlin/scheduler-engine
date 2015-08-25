@@ -18,9 +18,9 @@ final class AgentUrisTest extends FreeSpec {
       "http://example.com:9999/testPrefix/jobscheduler/agent/api/command")
   }
 
-  "fileStatus" in {
-    assert(agentUris.fileStatus("/FILE X+") ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/api/fileStatus?file=/FILE+X%2B")
+  "fileExists" in {
+    assert(agentUris.fileExists("/FILE X+") ==
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api/fileExists?file=/FILE+X%2B")
   }
 
   "tunnelHandler" - {

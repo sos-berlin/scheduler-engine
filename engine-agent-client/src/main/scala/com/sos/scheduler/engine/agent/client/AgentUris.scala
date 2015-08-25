@@ -18,8 +18,8 @@ final class AgentUris private(agentUriString: String) {
 
   val command = uriString(s"$Api/command")
 
-  def fileStatus(filePath: String): String =
-    (withPath("api/fileStatus") withQuery ("file" → filePath)).toString()
+  def fileExists(filePath: String): String =
+    (withPath("api/fileExists") withQuery ("file" → filePath)).toString()
 
   object tunnelHandler {
     def overview = uriString(s"$Api/tunnel")

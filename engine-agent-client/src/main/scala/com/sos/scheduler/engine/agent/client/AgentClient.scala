@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, File
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -16,10 +17,10 @@ import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.MediaTypes._
-import spray.http.StatusCodes.{NotFound, OK}
 import spray.http.{HttpRequest, HttpResponse, Uri}
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding.Gzip
+import spray.json.JsBoolean
 
 /**
  * Client for JobScheduler Agent.
@@ -70,13 +71,7 @@ trait AgentClient {
   }
 
   final def fileExists(filePath: String): Future[Boolean] =
-    nonCachingHttpResponsePipeline(Get(Uri(agentUris.fileStatus(filePath)))) map { httpResponse ⇒
-      httpResponse.status match {
-        case OK ⇒ true
-        case NotFound ⇒ false
-        case status ⇒ sys.error(s"HTTP OK or NotFound expected, instead of ${httpResponse.status} ${httpResponse.message}")
-      }
-    }
+    (nonCachingHttpResponsePipeline ~> unmarshal[JsBoolean]).apply(Get(Uri(agentUris.fileExists(filePath)))) map { _.value }
 
   override def toString = s"AgentClient($agentUri)"
 }
