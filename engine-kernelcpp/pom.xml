@@ -16,6 +16,7 @@
 
     <properties>
         <cppConf>Debug Release</cppConf>
+        <cppMake>clean-compile</cppMake>
     </properties>
 
     <build>
@@ -141,7 +142,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase clean-compile "${cpuArchitecture}" ${cppConf}</arguments>
+                                <arguments>make/make-scheduler-phase ${cppMake} "${cpuArchitecture}" ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>
