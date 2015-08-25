@@ -1871,6 +1871,9 @@ bool Task::do_something()
                 }
                 else
                     throw x;    // Fehlerschleife, Scheduler beenden. Sollte nicht passieren.
+                if (const char* p = strstr(x.what(), "LicenseKeyParameterIsMissingException")) {  // JS-1483
+                    _job->set_state_text(string(p) + (_process_class? " (" + _process_class->obj_name() + ")" : ""));
+                }
                 error_count++;
                 something_done = true;
             }
