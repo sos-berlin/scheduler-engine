@@ -917,6 +917,9 @@ void Jdbc_file::describe_columns()
             }
         }
 
+        if (session()->_dbms == dbms_postgresql && precision == INT_MAX) {  // Newer PostgresQL driver returns INT_MAX 
+            precision = display_size = 1024;
+        } else
         if( precision == -999 )  
         {
             if( session()->_dbms == dbms_oracle_thin )  display_size = _max_length;     // Oracle würfelt die display_size von Clobs. Bei z.B. sag.sos kommt 86
