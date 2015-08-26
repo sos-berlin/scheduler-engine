@@ -11,6 +11,9 @@
         :WINDOWS
         echo TEST=TEST-200 >>%SCHEDULER_RETURN_VALUES%
     </script>
+    <monitor>
+        <script language="java:javascript">//</script>
+    </monitor>
     <commands on_exit_code="success">
         <add_order job_chain="test-200">
             <params>
