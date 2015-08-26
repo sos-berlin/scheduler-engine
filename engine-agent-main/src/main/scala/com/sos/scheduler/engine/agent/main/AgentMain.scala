@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.utils.JavaShutdownHook
 import scala.util.control.NonFatal
 
 /**
@@ -31,22 +32,12 @@ object AgentMain {
 
   def run(conf: AgentConfiguration): Unit =
     autoClosing(new Agent(conf)) { agent ⇒
-      def atShutdown() = {
+      def onShutdown(): Unit = {
         agent.executeCommand(Terminate(sigtermProcesses = true, sigkillProcessesAfter = Some(OnJavaShutdownSigkillProcessesAfter)))
         awaitResult(agent.terminated, ShutdownTimeout)
       }
-      onJavaShutdown(atShutdown, name = AgentMain.getClass.getName) {
+      autoClosing(JavaShutdownHook.add(onShutdown, name = AgentMain.getClass.getName)) { _ ⇒
         agent.run()
       }
     }
-
-  private def onJavaShutdown[A](atShutdown: () ⇒ Unit, name: String)(body: ⇒ A): A = {
-    val hook = new Thread {
-      setName(name)
-      override def run() = atShutdown()
-    }
-    Runtime.getRuntime.addShutdownHook(hook)
-    try body
-    finally Runtime.getRuntime.removeShutdownHook(hook)
-  }
 }
