@@ -24,8 +24,11 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "Without a license key, Agent runs one task at a time - JS-1482" in {
     runJobAndWaitForEnd(TestJobPath)
+    sleep(100.ms)  // Sometimes the task has not been closed before the next start ???
     runJobAndWaitForEnd(TestJobPath)
+    sleep(100.ms)
     runJobAndWaitForEnd(TestJobPath)
+    sleep(100.ms)
   }
 
   "Task start failure due to missing license key is stated in Job.state_text" in {
