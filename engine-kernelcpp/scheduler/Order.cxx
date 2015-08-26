@@ -2714,7 +2714,7 @@ void Order::postprocessing(const Order_state_transition& state_transition)
             assert( _job_chain );
 
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
-                set_suspended();
+                set_suspended();  // Like processing_error()
             else
             if (_is_success_state && _outer_job_chain_path == ""  &&  _state == _end_state) {
                 log()->info( message_string( "SCHEDULER-704", _end_state ) );
@@ -2998,6 +2998,11 @@ void Order::restore_initial_settings() {
 
 void Order::processing_error()
 {
+    Job_node* job_node = Job_node::cast(_job_chain_node);
+    if (job_node->is_on_error_suspend()) {
+        set_suspended();  // Like postprocessing()
+    }
+
     Job* last_job = _task? _task->job() : NULL;
 
     _task = NULL;
