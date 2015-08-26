@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd">
+    <script language="shell">
+        :;if false; then :
+        goto WINDOWS
+        fi
+        echo TEST=TEST-200 >>$SCHEDULER_RETURN_VALUES
+        exit
+
+        :WINDOWS
+        echo TEST=TEST-200 >>%SCHEDULER_RETURN_VALUES%
+    </script>
+    <commands on_exit_code="success">
+        <add_order job_chain="test-200">
+            <params>
+                <copy_params from="order"/>
+            </params>
+        </add_order>
+    </commands>
+</job>
