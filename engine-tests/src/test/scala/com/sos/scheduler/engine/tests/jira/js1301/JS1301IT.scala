@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1301
 
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -33,7 +34,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  override protected lazy val agentConfiguration = newAgentConfiguration.copy(environment = Map("TEST_AGENT" → "*AGENT*"))
+  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(environment = Map("TEST_AGENT" → "*AGENT*"))
 
   "Order changes to error state when job chain process class is missing" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {
