@@ -2252,7 +2252,7 @@ void Order::reset()
         if (first_nested_job_chain_node->nested_job_chain() == _job_chain)
             set_state(_job_chain->first_node()->order_state());
         else {
-            move_to_other_nested_job_chain(first_nested_job_chain_node->nested_job_chain_path());   // Muss ein Nested_job_chain_node sein
+            move_to_nested_job_chain(first_nested_job_chain_node->order_state());   // Muss ein Nested_job_chain_node sein
             _outer_job_chain_state = _initial_state;
         }
     } else {
@@ -2482,7 +2482,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
             _outer_job_chain_path = Absolute_path( root_path, job_chain->path() );
             _outer_job_chain_state = _state;
-            job_chain = n->nested_job_chain();
+            job_chain = nested_job_chain(n->order_state());
+            if (!job_chain) z::throw_xc("SCHEDULER-438", n->order_state());
             node = job_chain->first_node();
             _state = node->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
         }
@@ -2815,20 +2816,7 @@ bool Order::handle_end_state_of_nested_job_chain()
             Node*      outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
             State      next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
                                                                      : outer_job_chain_node->error_state();
-
-            Nested_job_chain_node* next_outer_job_chain_node  = Nested_job_chain_node::try_cast( outer_job_chain->node_from_state_or_null( next_outer_job_chain_state ) );
-
-            if( next_outer_job_chain_node  &&  next_outer_job_chain_node->nested_job_chain() )
-            {
-                move_to_other_nested_job_chain(next_outer_job_chain_node->nested_job_chain_path());
-            }
-            else
-            {
-                // Bei <schedule> Auftrag an den Anfang der ersten Jobkette setzen
-                end_state_reached = true;
-            }
-
-            _outer_job_chain_state = next_outer_job_chain_state;
+            end_state_reached = !move_to_nested_job_chain(next_outer_job_chain_state, _is_success_state);
         }
     }
     catch( exception& x ) 
@@ -2844,9 +2832,40 @@ bool Order::handle_end_state_of_nested_job_chain()
 
 //------------------------------------------------------------Order::move_to_other_nested_job_chain
 
-void Order::move_to_other_nested_job_chain(const Absolute_path& nested_job_chain_path) 
+bool Order::move_to_nested_job_chain(const Order::State& outer_state, bool success) {
+    if (Job_chain* n = nested_job_chain(outer_state, success)) {
+        move_to_nested_job_chain(n);
+        return true;
+    } else 
+        return false;
+}
+
+Job_chain* Order::nested_job_chain(const Order::State& outer_state, bool success) {
+    Job_chain* outer_job_chain = order_subsystem()->job_chain(_outer_job_chain_path);
+    _outer_job_chain_state = outer_state;
+    for (int i = 1; i < 100000; i++) {
+        if (Nested_job_chain_node* outer_node = Nested_job_chain_node::try_cast(outer_job_chain->node_from_state_or_null(_outer_job_chain_state))) {
+            if (Job_chain* nested_job_chain = outer_node->nested_job_chain()) {
+                _log->info(message_string("SCHEDULER-862", nested_job_chain->obj_name()));
+                if (Order_queue_node::try_cast(nested_job_chain->referenced_node_from_state(nested_job_chain->first_node()->order_state()))) {
+                    return nested_job_chain;
+                } else {
+                    // Nested job chain is empty or all node have action=next_state (are skipping)
+                    _outer_job_chain_state = success? outer_node->next_state() : outer_node->error_state();
+                }
+            } else {
+                log()->error(S() << Z_FUNCTION << " Missing Job_chain " << outer_node->nested_job_chain_path());
+                return NULL;  // Nested job chain == null ?
+            }
+        } else 
+            return NULL;  // End state reached
+    }
+    log()->error(S() << Z_FUNCTION << " Loop in outer job chain");
+    return NULL;  // Job chain loop?
+}
+
+void Order::move_to_nested_job_chain(Job_chain* next_job_chain)
 {
-    Job_chain* next_job_chain = order_subsystem()->job_chain(nested_job_chain_path);
     _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
 
     close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
@@ -2857,7 +2876,11 @@ void Order::move_to_other_nested_job_chain(const Absolute_path& nested_job_chain
     Job_chain* previous_job_chain = _job_chain;
     string outer_job_chain_path = _outer_job_chain_path;
     _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
-    place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
+    if (next_job_chain->normalized_path() == _job_chain->subsystem()->normalized_path(_job_chain_path)) {
+        set_state(next_job_chain->first_node()->order_state());
+    } else {
+        place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
+    }
     _outer_job_chain_path = Absolute_path( root_path, outer_job_chain_path );  // place_in_job_chain() hat's gelöscht
 
     _log->info( message_string( "SCHEDULER-863", previous_job_chain->obj_name() ) );
