@@ -1,7 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -9,11 +13,14 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
+import com.sos.scheduler.engine.taskserver.task.process.RichProcess
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._
+import java.nio.file.Files
+import java.nio.file.Files.delete
 import java.time.Instant
 import java.time.Instant.now
 import org.junit.runner.RunWith
@@ -36,6 +43,15 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
+  private lazy val testFile = Files.createTempFile("test-", ".tmp")
+  private lazy val killScriptFile = RichProcess.OS.newTemporaryShellFile("TEST") sideEffect {
+    _.contentString = if (isWindows) s"echo KILL-ARGUMENTS=%* >$testFile\n" else "echo $* >$testFile\n"
+  }
+  onClose {
+    delete(testFile)
+    delete(killScriptFile)
+  }
+  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScriptFile = Some(killScriptFile))
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
@@ -162,9 +178,15 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       }
     }
   }
+
+  "Universal Agent kill script called" in {
+    logger.info(testFile.contentString)
+    assert(testFile.contentString contains s"KILL-ARGUMENTS=-kill-agent-task-id=")
+  }
 }
 
 private object JS1163IT {
+  private val logger = Logger(getClass)
   private val TestJobPath = JobPath("/test")
   private val WindowsJobPath = JobPath("/test-windows")
   private val StandardJobPath = JobPath("/test-standard")
