@@ -45,7 +45,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val testFile = Files.createTempFile("test-", ".tmp")
   private lazy val killScriptFile = RichProcess.OS.newTemporaryShellFile("TEST") sideEffect {
-    _.contentString = if (isWindows) s"echo KILL-ARGUMENTS=%* >$testFile\n" else "echo $* >$testFile\n"
+    _.contentString = if (isWindows) s"echo KILL-ARGUMENTS=%* >$testFile\n" else s"echo KILL-ARGUMENTS=$$* >$testFile\n"
   }
   onClose {
     delete(testFile)
