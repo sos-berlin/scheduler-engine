@@ -32,6 +32,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBeforeAndAfterAll {
 
+  private lazy val tcpPorts = findRandomFreeTcpPortIterator()
   private lazy val aAgent = newAgent(1).closeWithCloser
   private lazy val bAgent = newAgent(2).closeWithCloser
   private lazy val processClassAgent = newAgent(3).closeWithCloser
@@ -124,7 +125,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
 //  }
 
   private def newAgent(id: Int): Agent = {
-    val tcpPort = findRandomFreeTcpPort()
+    val tcpPort = tcpPorts.next()
     val args = List(
       controller.cppBinaries.file(CppBinary.exeFilename).getPath,
       s"-sos.ini=${controller.environment.sosIniFile}",
