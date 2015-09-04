@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
+import com.sos.scheduler.engine.common.time.ScalaTime._
+
 final class TestJob extends sos.spooler.Job_impl {
 
   override def spooler_process() = {
-    Thread.sleep(9000)
+    sleep(JS1163IT.UndisturbedDuration)
     false
   }
 }

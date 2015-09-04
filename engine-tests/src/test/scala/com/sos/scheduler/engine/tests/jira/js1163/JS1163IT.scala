@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
 import com.sos.scheduler.engine.common.scalautil.Logger
@@ -9,10 +10,12 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
+import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.Unstop
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ProcessClassConfiguration}
+import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.taskserver.task.process.RichProcess
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -75,12 +78,12 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val runs = jobPaths map { runJobFuture(_) }
-            awaitSuccess(Future.sequence(runs map {_.started}))
+            awaitSuccess(Future.sequence(runs map { _.started }))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
             sleep(1.s)
             killTime = now()
             for (run ← runs) scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true"/>
-            results = awaitResults(runs map {_.result}) toKeyedMap {_.jobPath}
+            results = awaitResults(runs map { _.result }) toKeyedMap { _.jobPath }
           }
         }
 
@@ -89,6 +92,8 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
+            assert(job(jobPath).state == JobState.stopped)
+            scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
       }
@@ -143,6 +148,9 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
+            results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGTERM)
+            assert(job(jobPath).state == JobState.stopped)
+            scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
 
@@ -151,6 +159,9 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).logString should (not include FinishedNormally and include(SigtermTrapped))
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration + TrapDuration
+            results(jobPath).returnCode shouldEqual ReturnCode(7)
+            assert(job(jobPath).state == JobState.stopped)
+            scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
 
@@ -160,11 +171,19 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).endedInstant should be > killTime + KillTimeout - 1.s
             results(jobPath).endedInstant should be < killTime + MaxKillDuration + KillTimeout
             results(jobPath).duration should be < UndisturbedDuration
+            // Why not this ??? results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGKILL)
+            results(jobPath).returnCode.normalized shouldEqual (jobPath match {
+              case IgnoringJobPath if agentAddressOption() == Some(agentUri) ⇒ ReturnCode(1)  // Warum nicht auch SIGKILL ???
+              case IgnoringJobPath ⇒ ReturnCode(SIGKILL)
+              case IgnoringMonitorJobPath ⇒ ReturnCode(1)   // Warum nicht auch SIGKILL ???
+            })
+            assert(job(jobPath).state == JobState.stopped)
+            scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
 
         if (monitorForwardsSignal) {
-          for ((jobPath, expectedSpoolerProcessResult) ← List(StandardMonitorJobPath → false, TrapMonitorJobPath → true/*, IgnoringMonitorJobPath → true ???*/)) {
+          for ((jobPath, expectedSpoolerProcessResult) ← List(StandardMonitorJobPath → false, TrapMonitorJobPath → false/*, IgnoringMonitorJobPath → true ???*/)) {
             s"$jobPath - spooler_process_after was called" in {
               results(jobPath).logString should include(TestMonitor.spoolerProcessAfterString(expectedSpoolerProcessResult))
             }
@@ -185,7 +204,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 }
 
-private object JS1163IT {
+private[js1163] object JS1163IT {
   private val logger = Logger(getClass)
   private val TestJobPath = JobPath("/test")
   private val WindowsJobPath = JobPath("/test-windows")
@@ -201,7 +220,7 @@ private object JS1163IT {
   private val KillTimeout = 4.s
   private val MaxKillDuration = 2.s
   private val TrapDuration = 2.s  // Trap sleeps 2s
-  private val UndisturbedDuration = 15.s
+  private[js1163] val UndisturbedDuration = 15.s
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
