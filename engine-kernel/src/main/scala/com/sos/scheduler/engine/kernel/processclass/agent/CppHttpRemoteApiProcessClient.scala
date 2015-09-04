@@ -107,7 +107,7 @@ extends AutoCloseable {
           case (agent, httpRemoteProcess) ⇒
             killOnlySignal match {
               case Some(signal) ⇒
-                require(signal == 15, "SIGTERM (15) required")
+                require(signal == SIGTERM.value, "SIGTERM (15) required")
                 httpRemoteProcess.sendSignal(SIGTERM) onFailure {
                   case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
                 }
