@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -39,6 +38,8 @@ import scala.concurrent.Future
  * JS-1307 SIGTERM on shell task with monitor is forwarded to shell process.
  * <p>
  * JS-1420 SIGTERM on shell task without monitor on classic agent is forwarded to shell process
+ * <p>
+ * JS-1496 Universal Agent task server forwards SIGTERM to shell process, bypassing monitor
  *
  * @author Joacim Zschimmer
  */
@@ -128,11 +129,10 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private def addUnixTests(): Unit = {
     val settings = List(
-      ("Without agent", true, { () ⇒ None }),
-      ("With Universal Agent", false, { () ⇒ Some(agentUri) }),
-      ("With TCP classic agent", true, { () ⇒ Some(s"127.0.0.1:$tcpPort")}))
-    for ((testVariantName, monitorForwardsSignal, agentAddressOption) ← settings) {
-      // monitorForwardsSignal: Universal Agent monitor does not forward signal to shell process!!!
+      ("Without agent", { () ⇒ None }),
+      ("With Universal Agent", { () ⇒ Some(agentUri) }),
+      ("With TCP classic agent", { () ⇒ Some(s"127.0.0.1:$tcpPort")}))
+    for ((testVariantName, agentAddressOption) ← settings) {
       testVariantName - {
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))
@@ -153,7 +153,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           }
         }
 
-        for (jobPath ← List(StandardJobPath) ++ monitorForwardsSignal.option(StandardMonitorJobPath)) {
+        for (jobPath ← List(StandardJobPath, StandardMonitorJobPath)) {
           s"$jobPath - Without trap, SIGTERM directly aborts process" in {
             results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
             results(jobPath).duration should be < UndisturbedDuration
@@ -164,7 +164,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           }
         }
 
-        for (jobPath ← List(TrapJobPath) ++ monitorForwardsSignal.option(TrapMonitorJobPath)) {
+        for (jobPath ← List(TrapJobPath, TrapMonitorJobPath)) {
           s"$jobPath - With SIGTERM trapped, SIGTERM aborts process after signal was handled" in {
             results(jobPath).logString should (not include FinishedNormally and include(SigtermTrapped))
             results(jobPath).duration should be < UndisturbedDuration
@@ -175,7 +175,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           }
         }
 
-        for (jobPath ← List(IgnoringJobPath) ++ monitorForwardsSignal.option(IgnoringMonitorJobPath)) {
+        for (jobPath ← List(IgnoringJobPath, IgnoringMonitorJobPath)) {
           s"$jobPath - With SIGTERM ignored, timeout take effect" in {
             results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
             results(jobPath).endedInstant should be > killTime + KillTimeout - 1.s
@@ -192,11 +192,9 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           }
         }
 
-        if (monitorForwardsSignal) {
           for ((jobPath, expectedSpoolerProcessResult) ← List(StandardMonitorJobPath → false, TrapMonitorJobPath → false/*, IgnoringMonitorJobPath → true ???*/)) {
-            s"$jobPath - spooler_process_after was called" in {
-              results(jobPath).logString should include(TestMonitor.spoolerProcessAfterString(expectedSpoolerProcessResult))
-            }
+          s"$jobPath - spooler_process_after was called" in {
+            results(jobPath).logString should include(TestMonitor.spoolerProcessAfterString(expectedSpoolerProcessResult))
           }
         }
 
