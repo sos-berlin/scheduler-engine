@@ -2143,7 +2143,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
                 } 
                 if (_process_class != process_class) z::throw_xc(Z_FUNCTION, "Process classes differ", _process_class->obj_name(), process_class->obj_name());
             }
-            _log->info(message_string("SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url(), _process_class ? "Order's " + _process_class->obj_name() : ""));
+            _log->info(message_string("SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url(), _process_class ? ", Order's " + _process_class->obj_name() : ""));
         } else {
             bool order_announced = _job->request_order(now, cause);
             if (order_announced && !_job->has_own_process_class() && _job->max_tasks_reached()) {
