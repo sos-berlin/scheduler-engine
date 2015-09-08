@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -47,8 +48,9 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val testFile = Files.createTempFile("test-", ".tmp")
-  private lazy val killScriptFile = RichProcess.OS.newTemporaryShellFile("TEST") sideEffect {
-    _.contentString = if (isWindows) s"echo KILL-ARGUMENTS=%* >$testFile\n" else s"echo KILL-ARGUMENTS=$$* >$testFile\n"
+  private lazy val killScriptFile = RichProcess.OS.newTemporaryShellFile("TEST") sideEffect { file ⇒ file.contentString =
+    if (isWindows) s"echo KILL-ARGUMENTS=%* >$testFile\n"
+    else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\necho KILL-ARGUMENTS=$$arguments >>$testFile\n"  // echo only if script succeeds
   }
   onClose {
     delete(testFile)
@@ -94,6 +96,14 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
             assert(job(jobPath).state == JobState.stopped)
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
+          }
+        }
+
+        if (agentAddressOption() contains agentUri) {
+          "Kill script called" in {
+            logger.info(testFile.contentString)
+            val lines = testFile.contentString split "\n"
+            assert((lines count { _ contains s"KILL-ARGUMENTS=-kill-agent-task-id=" }) == jobPaths.size)
           }
         }
       }
@@ -196,11 +206,6 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         }
       }
     }
-  }
-
-  "Universal Agent kill script called" in {
-    logger.info(testFile.contentString)
-    assert(testFile.contentString contains s"KILL-ARGUMENTS=-kill-agent-task-id=")
   }
 }
 
