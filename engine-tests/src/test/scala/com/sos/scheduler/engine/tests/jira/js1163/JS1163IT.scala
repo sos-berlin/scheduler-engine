@@ -16,7 +16,7 @@ import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.Unstop
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ProcessClassConfiguration}
 import com.sos.scheduler.engine.kernel.job.JobState
-import com.sos.scheduler.engine.taskserver.task.process.RichProcess
+import com.sos.scheduler.engine.taskserver.task.process.Processes.newTemporaryShellFile
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -49,7 +49,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val testFile = Files.createTempFile("test-", ".tmp")
-  private lazy val killScriptFile = RichProcess.OS.newTemporaryShellFile("TEST") sideEffect { file ⇒ file.contentString =
+  private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { file ⇒ file.contentString =
     if (isWindows) s"echo KILL-ARGUMENTS=%* >>$testFile\n"
     else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\necho KILL-ARGUMENTS=$$arguments >>$testFile\n"  // echo only if script succeeds
   }
