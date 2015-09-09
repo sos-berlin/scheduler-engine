@@ -3021,9 +3021,10 @@ void Order::restore_initial_settings() {
 
 void Order::processing_error()
 {
-    Job_node* job_node = Job_node::cast(_job_chain_node);
-    if (job_node->is_on_error_suspend()) {
-        set_suspended();  // Like postprocessing()
+    if (Job_node* n = Job_node::cast(_job_chain_node)) {
+        if (n->is_on_error_suspend()) {
+            set_suspended();  // Like postprocessing()
+        }
     }
 
     Job* last_job = _task? _task->job() : NULL;

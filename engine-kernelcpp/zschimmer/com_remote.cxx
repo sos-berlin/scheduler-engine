@@ -73,7 +73,8 @@
 #   include <objbase.h>         // Für CoCreateInstanceEx(), nach winsock2.h einziehen, mit _WIN32_DCOM
 #   include <io.h>
 #   include <process.h>
-#else
+#endif
+#if defined Z_UNIX
 #   include <signal.h>
 #   include <sys/resource.h>
 #endif
@@ -1369,6 +1370,16 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
                 }
                 catch( exception& x ) { cerr << "setpriority(" << _priority << ") ==> ERROR " << x.what() << "\n"; }
             }
+
+            ::signal(SIGINT, SIG_DFL);
+            ::signal(SIGTERM, SIG_DFL);
+            ::signal(SIGUSR1, SIG_DFL);
+            sigset_t sigset;
+            sigemptyset(&sigset);
+            sigaddset(&sigset, SIGINT);
+            sigaddset(&sigset, SIGTERM);
+            sigaddset(&sigset, SIGUSR1);
+            pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
 
             if( _has_environment )
             {

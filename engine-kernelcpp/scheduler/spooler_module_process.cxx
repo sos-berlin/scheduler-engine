@@ -615,7 +615,15 @@ bool Process_module_instance::begin__end()
                 catch( exception& x ) { cerr << "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n"; }
             }
 
-            ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
+            ::signal(SIGINT, SIG_DFL);
+            ::signal(SIGTERM, SIG_DFL);
+            ::signal(SIGUSR1, SIG_DFL);
+            sigset_t sigset;
+            sigemptyset(&sigset);
+            sigaddset(&sigset, SIGINT);
+            sigaddset(&sigset, SIGTERM);
+            sigaddset(&sigset, SIGUSR1);
+            pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
 
             if (_stdout_file.opened()) dup2( _stdout_file.file_no(), STDOUT_FILENO );
             if (_stderr_file.opened()) dup2( _stderr_file.file_no(), STDERR_FILENO );

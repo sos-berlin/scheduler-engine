@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.soslicense.LicenseKey
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyChecker
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -35,7 +35,7 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
   override protected def extraAgentModule = new ScalaAbstractModule {
     def configure() = {
       bindInstance[CommandExecutor](new CommandExecutor {
-        def executeCommand(command: Command, licenseKey: Option[LicenseKey]): Future[command.Response] =
+        def executeCommand(command: Command, licenseKey: Option[LicenseKeyChecker]): Future[command.Response] =
           Future {
             (command match {
               case ExpectedTerminate ⇒ EmptyResponse
