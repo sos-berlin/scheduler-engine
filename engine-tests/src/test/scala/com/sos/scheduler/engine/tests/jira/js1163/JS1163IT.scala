@@ -22,8 +22,7 @@ import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._
-import java.nio.file.Files
-import java.nio.file.Files.delete
+import java.nio.file.Files.{createTempDirectory, delete, list}
 import java.time.Instant
 import java.time.Instant.now
 import org.junit.runner.RunWith
@@ -40,6 +39,8 @@ import scala.concurrent.Future
  * JS-1420 SIGTERM on shell task without monitor on classic agent is forwarded to shell process
  * <p>
  * JS-1496 Universal Agent task server forwards SIGTERM to shell process, bypassing monitor
+ * <p>
+ * JS-1468 -agent-task-id and kill script
  *
  * @author Joacim Zschimmer
  */
@@ -48,13 +49,14 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
-  private lazy val testFile = Files.createTempFile("test-", ".tmp")
+  private lazy val killScriptCallsDir = createTempDirectory("kill-script-calls-")  // Contains an empty file for every call of kill script
   private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { file ⇒ file.contentString =
-    if (isWindows) s"echo KILL-ARGUMENTS=%* >>$testFile\n"
-    else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\necho KILL-ARGUMENTS=$$arguments >>$testFile\n"  // echo only if script succeeds
+    if (isWindows) s"""echo >"$killScriptCallsDir/%*"""" + "\n"
+    else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\ntouch $killScriptCallsDir/$$arguments\n"  // echo only if script succeeds
   }
   onClose {
-    delete(testFile)
+    list(killScriptCallsDir).toVector foreach delete
+    delete(killScriptCallsDir)
     delete(killScriptFile)
   }
   override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScriptFile = Some(killScriptFile))
@@ -102,9 +104,14 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
         if (agentAddressOption() contains agentUri) {
           "Kill script called" in {
-            logger.info(testFile.contentString)
-            val lines = testFile.contentString split "\n"
-            assert((lines count { _ contains s"KILL-ARGUMENTS=-kill-agent-task-id=" }) == jobPaths.size)
+            // Each filename in the directory is the argument list of the kill script call.
+            val names = list(killScriptCallsDir).toVector map { _.getFileName.toString }
+            val expectedArg = "-kill-agent-task-id="
+            for (name ← names) {
+              assert(name contains expectedArg)
+              assert(name.length > expectedArg.length)
+            }
+            assert(names.size == jobPaths.size)  // For each kill there is one file with unique AgentTaskId
           }
         }
       }
