@@ -39,6 +39,8 @@ import scala.concurrent.Future
  * JS-1420 SIGTERM on shell task without monitor on classic agent is forwarded to shell process
  * <p>
  * JS-1496 Universal Agent task server forwards SIGTERM to shell process, bypassing monitor
+ * <p>
+ * JS-1468 -agent-task-id and kill script
  *
  * @author Joacim Zschimmer
  */
@@ -49,7 +51,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val killScriptCallsDir = createTempDirectory("kill-script-calls-")  // Contains an empty file for every call of kill script
   private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { file ⇒ file.contentString =
-    if (isWindows) s"""echo >\"$killScriptCallsDir/%*"""" + "\n"
+    if (isWindows) s"""echo >"$killScriptCallsDir/%*"""" + "\n"
     else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\ntouch $killScriptCallsDir/$$arguments\n"  // echo only if script succeeds
   }
   onClose {
