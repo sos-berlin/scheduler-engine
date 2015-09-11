@@ -3311,6 +3311,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _argv = argv;
     _parameter_line = parameter_line;
 
+    if (_is_service) {
+        assign_stdout();
+    }
     _java_subsystem = new_java_subsystem(this);
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
@@ -3340,7 +3343,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     if( _state_cmd != sc_load_config )  load();
     if( !_config_element_to_load )  z::throw_xc( "SCHEDULER-116", _spooler_id );
 
-    assign_stdout();
     //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
     //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
 
@@ -3374,17 +3376,13 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
 
 void Spooler::assign_stdout()
 {
-    #ifdef Z_UNIX
-        if( is_daemon ) {
-            Path stdout_path = "scheduler.out";
-            if( !string_begins_with( _log_directory, "*" ) )  stdout_path = Path( _log_directory, stdout_path );
+    Path stdout_path = "scheduler.out";
+    if( !string_begins_with( _log_directory, "*" ) )  stdout_path = Path( _log_directory, stdout_path );
 
-            File new_stdout ( stdout_path, "w" );
+    File new_stdout ( stdout_path, "w" );
 
-            dup2( new_stdout.file_no(), fileno( stdout ) );
-            dup2( new_stdout.file_no(), fileno( stderr ) );
-        }
-    #endif
+    dup2( new_stdout.file_no(), fileno( stdout ) );
+    dup2( new_stdout.file_no(), fileno( stderr ) );
 }
 
 //--------------------------------------------------------------------------Spooler::backup_logfile
@@ -3735,24 +3733,24 @@ int object_server( int argc, char** argv )
 } //namespace scheduler
 
 //-----------------------------------------------------------------------redirect_stdout_and_stderr
-#ifdef Z_WINDOWS
-
-static void redirect_stdout_and_stderr() 
-{
-    // -cd sollte aufgerufen sein! Sonst landen die Dateien in c:\windwows\system32
-    #ifdef Z_DEBUG  // Erstmal nur Debug, solange -log-dir nicht schon beim Start bekannt ist.
-        if (windows::Handle stdout_file = CreateFile("stdout.log", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
-            SetStdHandle(STD_OUTPUT_HANDLE, stdout_file);
-            stdout_file.take();
-        }
-        if (windows::Handle stderr_file = CreateFile("stderr.log", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
-            SetStdHandle(STD_ERROR_HANDLE, stderr_file);
-            stderr_file.take();
-        }
-    #endif
-}
-
-#endif
+//#ifdef Z_WINDOWS
+//
+//static void redirect_stdout_and_stderr() 
+//{
+//    // -cd sollte aufgerufen sein! Sonst landen die Dateien in c:\windwows\system32
+//    #ifdef Z_DEBUG  // Erstmal nur Debug, solange -log-dir nicht schon beim Start bekannt ist.
+//        if (windows::Handle stdout_file = CreateFile("stdout.log", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
+//            SetStdHandle(STD_OUTPUT_HANDLE, stdout_file);
+//            stdout_file.take();
+//        }
+//        if (windows::Handle stderr_file = CreateFile("stderr.log", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
+//            SetStdHandle(STD_ERROR_HANDLE, stderr_file);
+//            stderr_file.take();
+//        }
+//    #endif
+//}
+//
+//#endif
 //-------------------------------------------------------------------------------------spooler_main
 
 int spooler_main( int argc, char** argv, const string& parameter_line, jobject java_main_context )
@@ -3927,11 +3925,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             }
         }
 
+        if( send_cmd != "" )  is_service = false;
+
         java_options = subst_env(read_profile_string(factory_ini, "java", "options")) + " " + java_options;
         java_classpath = subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath;
         
-        if( send_cmd != "" )  is_service = false;
-
         // scheduler.log
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
         if( !log_filename.empty()  &&  renew_spooler == "" )  
@@ -3944,7 +3942,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         }
         Z_LOG2( "scheduler", "JobScheduler engine " << scheduler::version_string << "\n" );
 
-        Z_WINDOWS_ONLY(if (is_service) redirect_stdout_and_stderr();) 
+        //Z_WINDOWS_ONLY(if (is_service) redirect_stdout_and_stderr();) 
 
         if( is_scheduler_client )
         {
