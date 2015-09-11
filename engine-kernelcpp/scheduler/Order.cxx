@@ -2483,7 +2483,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
             _outer_job_chain_path = Absolute_path( root_path, job_chain->path() );
             _outer_job_chain_state = _state;
             job_chain = nested_job_chain(n->order_state());
-            if (!job_chain) z::throw_xc("SCHEDULER-438", n->order_state());
+            if (!job_chain) 
+                z::throw_xc("SCHEDULER-438", n->order_state());
             node = job_chain->first_node();
             _state = node->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
         }
@@ -2498,7 +2499,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
             }
         }
 
-        if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
+        if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  
+            z::throw_xc( "SCHEDULER-438", _state );
 
         if (suspend) {
             _suspended = true;   
@@ -2892,13 +2894,12 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 {
     // Auftrag wird wegen <schedule> wiederholt
 
-    Absolute_path first_nested_job_chain_path;
+    Order::State outer_state;
 
     if( _outer_job_chain_path != "" )
     {
-        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->active_job_chain( _outer_job_chain_path )->node_from_state( _initial_state ) ) )
-            first_nested_job_chain_path = n->nested_job_chain_path();
-
+        if (Nested_job_chain_node::try_cast(order_subsystem()->active_job_chain(_outer_job_chain_path)->node_from_state(_initial_state)))
+            outer_state = _initial_state;
         remove_from_job_chain( jc_leave_in_job_chain_stack );  
     }
 
@@ -2910,10 +2911,9 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 
     try
     {
-        if( first_nested_job_chain_path != "" )
-        {
+        if (!outer_state.is_empty()) {
             _outer_job_chain_state = _initial_state;
-            Job_chain* nested_job_chain = order_subsystem()->job_chain( first_nested_job_chain_path );
+            Job_chain* nested_job_chain = this->nested_job_chain(outer_state);
             Order::State first_nested_state = nested_job_chain->first_node()->order_state();  // Auftrag bekommt Zustand des ersten Jobs der Jobkette
             set_state( first_nested_state, next_start );
             place_in_job_chain( nested_job_chain, jc_leave_in_job_chain_stack );

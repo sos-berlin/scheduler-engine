@@ -1328,6 +1328,7 @@ bool Order_queue_node::set_action(Action action)
                     if (order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
                         if (o->has_base_file() && !o->is_touched() && !o->_is_in_order_queue) {
                             Z_LOG2("scheduler", "JS-864 After action=process, we try to re-insert the homeless " << o->obj_name() << " into its order queue\n");
+                            o->_is_success_state = true;  // Use next_state() when applying act_next_node
                             Order_queue_node* n = NULL;
                             try { n = Order_queue_node::try_cast(_job_chain->referenced_node_from_state(o->initial_state())); } 
                             catch (exception& x) { Z_LOG2("scheduler", "Ignored: " << x.what() << "\n"); }
@@ -1356,8 +1357,10 @@ bool Order_queue_node::set_action(Action action)
                     Z_FOR_EACH( Order_queue::Queue, _order_queue->_queue, o )
                         if( (*o)->state() == _order_state  &&  !(*o)->task() )  order_list.push_back( *o );
 
-                    Z_FOR_EACH( list<Order*>, order_list, o )
+                    Z_FOR_EACH(list<Order*>, order_list, o) {
+                        (*o)->_is_success_state = true;  // Use next_state() when applying act_next_node
                         (*o)->set_state1( next_state );
+                    }
 
                     if (Job_node* job_node = Job_node::try_cast(next_node)) {
                         // <file_order_source>
