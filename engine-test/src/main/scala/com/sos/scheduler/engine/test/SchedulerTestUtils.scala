@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
@@ -28,7 +29,7 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
 import java.nio.file.Files
-import java.nio.file.Files.{getLastModifiedTime, exists}
+import java.nio.file.Files.{exists, getLastModifiedTime}
 import java.time.Instant.now
 import java.time.{Duration, Instant}
 import java.util.concurrent.TimeoutException
@@ -40,7 +41,6 @@ import scala.language.{higherKinds, implicitConversions}
 import scala.math.max
 import scala.reflect.ClassTag
 import scala.util.Try
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 
 object SchedulerTestUtils {
 
