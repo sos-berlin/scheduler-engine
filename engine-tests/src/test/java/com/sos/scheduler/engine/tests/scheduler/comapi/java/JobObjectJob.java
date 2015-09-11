@@ -50,13 +50,18 @@ public class JobObjectJob extends Job_impl {
         checkNotEmpty(spooler_job.folder_path(), UnwantedMessage.FOLDER_PATH);
         spooler_log.info("include_path=" + spooler_job.include_path());
 
-        if(!SchedulerAPIIT.JobObjectsJobPath().string().equals("/"+spooler_job.name())){
+        if(!SchedulerAPIIT.JobObjectJobPath().string().equals("/"+spooler_job.name())){
             spooler_log.warn(UnwantedMessage.JOB_PATH.toString());
         }
 
         spooler_log.info("process_class name="+spooler_job.process_class().name());
         spooler_log.info("process_class max_processes="+spooler_job.process_class().max_processes());
         spooler_log.info("process_class remote_scheduler="+spooler_job.process_class().remote_scheduler());
+        spooler_log.info("title="+spooler_job.title());
+
+        if (!spooler_job.script_code().isEmpty()){
+            throw new Exception("Expected emtpy script_code for java job");
+        }
 
         Job removeableJob = spooler.job(SchedulerAPIIT.RemoveMeJobPath().string());
         removeableJob.remove();
@@ -67,6 +72,8 @@ public class JobObjectJob extends Job_impl {
         catch (RuntimeException e){
             spooler_log.info("job "+SchedulerAPIIT.RemoveMeJobPath().string()+" has been removed ("+ e +")");
         }
+
+        spooler_job.set_state_text(SchedulerAPIIT.TestStateText());
         return spooler_task.order() != null;
     }
 
