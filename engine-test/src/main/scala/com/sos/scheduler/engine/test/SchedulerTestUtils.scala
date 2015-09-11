@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.filebased.{FileBasedReplacedEvent, FileBasedAddedEvent, FileBasedEvent, TypedPath}
+import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
@@ -25,6 +26,9 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
 import java.lang.System.currentTimeMillis
+import java.nio.file.Files
+import java.nio.file.Files.{exists, getLastModifiedTime}
+import java.time.Instant.now
 import java.util.concurrent.TimeoutException
 import org.joda.time.{Duration, Instant}
 import org.scalatest.Matchers._
@@ -37,12 +41,39 @@ import scala.util.Try
 
 object SchedulerTestUtils {
 
+  private val logger = Logger(getClass)
+
+  /**
+   * Writes the configuration file and awaits JobScheduler's acceptance.
+   */
+  def deleteAndWriteConfigurationFile[A](path: TypedPath, xmlElem: xml.Elem)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
+    if (exists(controller.environment.fileFromPath(path))) {
+      deleteConfigurationFile(path)
+    }
+    writeConfigurationFile(path, xmlElem)
+  }
+
   /**
    * Writes the configuration file and awaits JobScheduler's acceptance.
    */
   def writeConfigurationFile[A](path: TypedPath, xmlElem: xml.Elem)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
+    val file = controller.environment.fileFromPath(path)
+    if (exists(file) && getLastModifiedTime(file).toInstant.getEpochSecond == now().getEpochSecond) {
+      logger.debug(s"Sleeping a second to get a different file time for $file")
+      sleep(1.s)  // Assure different timestamp for configuration file, so JobScheduler can see a change
+    }
     controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
-      controller.environment.fileFromPath(path).xml = xmlElem
+      file.xml = xmlElem
+      instance[FolderSubsystem].updateFolders()
+    }
+  }
+
+  /**
+   * Delete the configuration file and awaits JobScheduler's acceptance.
+   */
+  def deleteConfigurationFile[A](path: TypedPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
+    controller.eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](path) {
+      Files.delete(controller.environment.fileFromPath(path))
       instance[FolderSubsystem].updateFolders()
     }
   }
