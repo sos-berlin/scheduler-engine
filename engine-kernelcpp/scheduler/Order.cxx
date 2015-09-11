@@ -2996,6 +2996,12 @@ void Order::postprocessing2( Job* last_job )
     if (Job* j = job()) 
         j->signal_earlier_order(this);
 
+    if (_job_chain) {
+        if (_job_chain_node && _job_chain_node->action() == Node::act_next_state) { // Set while order has been processed and then kept its state?
+            set_state1(_state);  // Handle action
+        }
+    }
+
     if( finished() )
     {
         try
