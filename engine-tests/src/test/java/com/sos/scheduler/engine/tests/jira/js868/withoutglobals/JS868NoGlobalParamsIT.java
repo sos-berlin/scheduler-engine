@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js868.withoutglobals;
 
 
-import com.sos.scheduler.engine.common.system.OperatingSystem;
+import com.sos.scheduler.engine.common.system.OperatingSystemJava;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.tests.jira.js868.JS868Base;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class JS868NoGlobalParamsIT extends JS868Base {
 
-    private final static String orderName = "test_chain_" + (OperatingSystem.isWindows ? "windows" : "unix");
+    private final static String orderName = "test_chain_" + (OperatingSystemJava.isWindows ? "windows" : "unix");
 
     @Test
 	public void test() throws InterruptedException, IOException {
