@@ -102,6 +102,10 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         return _api_process && !_api_process->is_started();
     }
 
+    public: virtual string remote_scheduler_address() const {
+        return _api_process ? _api_process->remote_scheduler_address() : "";
+    }
+
     Fill_zero                  _zero_;
 
     ptr<object_server::Proxy>   _remote_instance;

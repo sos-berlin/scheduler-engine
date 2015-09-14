@@ -1397,8 +1397,13 @@ bool Task::do_something()
 
                         case s_waiting_for_process: {
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
-                            if( ok )  set_state_direct( s_starting ), something_done = true, loop = true;
-                                else  set_state_direct( s_waiting_for_process );
+                            if (ok) {
+                                set_state_direct(s_starting);
+                                something_done = true;
+                                loop = true;
+                            }
+                            else 
+                                set_state_direct( s_waiting_for_process );
                             break;
                         }
 
@@ -2606,6 +2611,10 @@ void Task::do_end__end()
 Async_operation* Task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
+    if (_order) {
+        string a = _module_instance->remote_scheduler_address();
+        log()->info(Message_string("SCHEDULER-726", a.empty()? "this JobScheduler '" + _spooler->http_url() + "'" : "remote scheduler " + a));
+    }
     Async_operation* result = _module_instance->step__start();
     if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
     return result;

@@ -64,6 +64,10 @@ struct Api_process : virtual Process {
     virtual void close__end() = 0;
     virtual void close_session() = 0;
     virtual void check_exception() {}
+    
+    virtual string remote_scheduler_address() {
+        return "";
+    }
 
     static ptr<Api_process> new_process(Spooler* sp, Prefix_log* log, const Api_process_configuration&);
 };

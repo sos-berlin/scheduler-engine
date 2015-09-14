@@ -281,6 +281,10 @@ struct Module_instance : Object
 
     public: void set_process_class(Process_class*);
 
+    public: virtual string remote_scheduler_address() const {
+        return "";
+    }
+
     Fill_zero                  _zero_;
 
     string                     _job_name;                   // Wird lokalem Objectserver als -job=... übergeben, für die Prozessliste (ps)
@@ -297,8 +301,6 @@ struct Module_instance : Object
     bool                       _initialized;
     bool                       _load_called;
 
-    string                     _remote_scheduler_address;   // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
-    ptr<Process>               _process;                    // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
     ptr<Com_variable_set>      _process_environment;
     bool                       _has_order;
     Object_list                _object_list;
@@ -316,6 +318,8 @@ struct Module_instance : Object
     ptr<Com_log>               _com_log;                    // spooler_log
 
     Module_monitor_instances   _monitor_instances;
+    protected: string _remote_scheduler_address;   // Wird nur von Remote_module_instance_proxy benutzt, sonst Dummy
+    protected: ptr<Process> _process;              // Wird nur von Remote_module_instance_proxy benutzt, sonst Dummy
     private: Process_class* _process_class_or_null;
     private: Fill_end _end_;
 };
