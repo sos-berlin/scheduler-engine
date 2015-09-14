@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.main;
 
-import static com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem;
+import static com.sos.scheduler.engine.common.system.OperatingSystemJava.*;
 
 public enum CppBinary {
-    moduleFilename(operatingSystem.makeModuleFilename("jobscheduler-engine")),  // jobscheduler-engine.dll oder libjobscheduler-engine.so
-    exeFilename(operatingSystem.makeExecutableFilename("scheduler"));           // scheduler.exe oder scheduler
+    moduleFilename(makeModuleFilename("jobscheduler-engine")),  // jobscheduler-engine.dll oder libjobscheduler-engine.so
+    exeFilename(makeExecutableFilename("scheduler"));           // scheduler.exe oder scheduler
 
     private final String filename;
 

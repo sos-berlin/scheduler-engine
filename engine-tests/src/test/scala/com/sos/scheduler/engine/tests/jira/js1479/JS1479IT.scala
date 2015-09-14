@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.tests.jira.js1479
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderState, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.Future
 
@@ -19,15 +20,19 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class JS1479IT extends FreeSpec with ScalaSchedulerTest {
 
-  "copy_params in first and in last job chain node" in {
+  "FAILING: copy_params in first and in last job chain node" in {
     val primaryOrderKey = JobChainPath("/test-a") orderKey "1"
     val eventPipe = controller.newEventPipe()
-    scheduler executeXml OrderCommand(primaryOrderKey, parameters = Map("A" → "TEST-A"))
+    writeConfigurationFile(primaryOrderKey, OrderCommand(primaryOrderKey, parameters = Map("A" → "TEST-A")))
     assert(eventPipe.nextAny[OrderTouchedEvent].orderKey == primaryOrderKey)
     val addedOrderFinishedSeq = List.fill(2) {
       val orderKey = eventPipe.nextAny[OrderTouchedEvent].orderKey
       eventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
     }
-    awaitSuccess(Future.sequence(addedOrderFinishedSeq))
+    val endStates = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.state }
+    intercept[Exception] {
+      endStates shouldEqual List(OrderState("OKAY"), OrderState("OKAY"))
+    }
+    endStates shouldEqual List(OrderState("FAILED"), OrderState("FAILED"))  // Test fails with scheduler.order.keep_order_content_on_reschedule=false
   }
 }

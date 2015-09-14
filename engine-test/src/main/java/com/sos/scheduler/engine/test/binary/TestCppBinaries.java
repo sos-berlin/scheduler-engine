@@ -14,7 +14,7 @@ import java.io.IOException;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.common.system.OperatingSystemJava.isWindows;
 import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 import static com.sos.scheduler.engine.test.util.IDE.isRunningUnderIDE;
 

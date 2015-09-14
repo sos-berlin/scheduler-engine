@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
-     order="true">
-    <script language="java:javascript">
+     order="true"
+>
+    <script language="java:javascript"><![CDATA[
         function spooler_process() {
-            if (spooler_task.order.params.value("A") != "TEST-A") throw new Error("TEST-A expected")
-            var value = spooler_task.order.params.value("TEST")
-            spooler_log.info("TEST=" + value)
-            if (value != "TEST-100") throw new Error("TEST-100 expected")
-            return true
+            var a = spooler_task.order.params.value("A")
+            var testA = spooler_task.order.params.value("TEST-A")
+            spooler_log.info("A=" + a)
+            spooler_log.info("TEST-A=" + testA)
+            return a == "A" && testA == "TEST-100"
         }
-    </script>
+    ]]></script>
 </job>

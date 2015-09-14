@@ -1,87 +1,98 @@
 package com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed
 
 import com.google.common.base.Splitter
-import com.google.common.io.Files.{move, touch}
+import com.google.common.io.Files.touch
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
-import com.sos.scheduler.engine.eventbus.{HotEventHandler, SchedulerEventBus}
+import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
+import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.{Stop, Unstop}
+import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.EventPipe.TimeoutException
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.StartWhenDirectoryChangedIT._
-import java.io.File
+import java.nio.file.Files.{delete, exists, move}
+import java.nio.file.{Path, Paths}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
-final class StartWhenDirectoryChangedIT extends FunSuite with ScalaSchedulerTest {
+final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val directory = new File(controller.environment.directory, "start_when_directory_changed")
-  private lazy val file1 = new File(directory, "X")
-  private lazy val file2 = new File(directory, "XX")
-  private lazy val file_ = new File(directory, "X~")
+  private lazy val directory = controller.environment.subdirectory("start_when_directory_changed")
+  private lazy val file1 = directory / "X"
+  private lazy val file2 = directory / "XX"
+  private lazy val file_ = directory / "X~"
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def onBeforeSchedulerActivation(): Unit = {
-    directory.mkdir()
+  override protected def onBeforeSchedulerActivation() = {
     eventPipe
   }
 
-  override def onSchedulerActivated(): Unit = {
+  override protected def onSchedulerActivated(): Unit = {
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
   }
 
-  test("Filename not matching the pattern") {
+  eventBus.onHotEventSourceEvent[TaskEndedEvent] { case EventSourceEvent(TaskEndedEvent(_, AJobPath, _), task: Task) ⇒
+    val files = (Splitter on ";" split task.parameterValue(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
+    eventBus publishCold TriggerEvent(files)
+  }
+
+  "Filename not matching the pattern" in {
     touch(file_)
     logger debug s"$file_ touched"
-    intercept[TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TriggerEvent](responseTime) { _ => true } }
+    intercept[TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TriggerEvent](ResponseTime) { _ => true } }
   }
 
-  test("Matching filename (1)") {
+  "Matching filename (1)" in {
     move(file_, file1)
     logger debug s"$file1 moved"
-    eventPipe.nextAny[TriggerEvent] should equal (TriggerEvent(Set(file1)))
+    eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file1))
   }
 
-  test("Matching filename (2)") {
+  "Matching filename (2)" in {
     touch(file2)
     logger debug s"$file2 touched"
-    eventPipe.nextAny[TriggerEvent] should equal (TriggerEvent(Set(file1, file2)))
+    eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file1, file2))
   }
 
   if (isWindows) {   // Unter Unix wird Löschen nicht berücksichtigt
-    test("Matching filename deleted") {
-      file1.delete()
+    "Matching filename deleted" in {
+      delete(file1)
       logger debug s"$file1 deleted"
-      eventPipe.nextAny[TriggerEvent] should equal (TriggerEvent(Set(file2)))
+      eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file2))
     }
   }
 
-  @HotEventHandler def handleEvent(e: TaskEndedEvent, task: Task): Unit = {
-    e.jobPath should equal (aJobPath)
-    val files = (Splitter on ";" split task.parameterValue(triggeredFilesName) map { o => new File(o) }).toSet
-    instance[SchedulerEventBus] publishCold TriggerEvent(files)
+  "File watching when job is unstopped" in {
+    scheduler executeXml ModifyJobCommand(AJobPath, cmd=Some(Stop))
+    if (exists(file1)) delete(file1)
+    scheduler executeXml ModifyJobCommand(AJobPath, cmd=Some(Unstop))
+    touch(file1)
+    logger debug s"$file1 touched"
+    eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file1, file2))
   }
 }
 
 
 object StartWhenDirectoryChangedIT {
   private val logger = Logger(getClass)
-  private val responseTime = (if (isWindows) 0.s else 10.s) + 4.s
-  private val aJobPath = JobPath("/a")
-  val triggeredFilesName = "triggeredFiles"
+  private val ResponseTime = (if (isWindows) 0.s else 10.s) + 4.s
+  private val AJobPath = JobPath("/a")
+  private[start_when_directory_changed] val TriggeredFilesName = "triggeredFiles"
 
-  private def jobElem(directory: File, regex: String) =
-    <job name={aJobPath.name}>
+  private def jobElem(directory: Path, regex: String) =
+    <job name={AJobPath.name}>
       <script java_class="com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.AJob"/>
       <start_when_directory_changed directory={directory.toString} regex={regex}/>
     </job>
 
-  private case class TriggerEvent(files: Set[File]) extends Event
+  private case class TriggerEvent(files: Set[Path]) extends Event
 }
