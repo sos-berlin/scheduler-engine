@@ -1755,7 +1755,12 @@ bool Task::do_something()
                                     }
                                     else
                                     if (_order_state_transition != Order_state_transition::keep) {
-                                        postprocess_order(_order_state_transition);       
+                                        bool is_simple_shell_error = _module_instance->_module->kind() == Module::kind_process && _module_instance->_module->_monitors->is_empty() && has_error() && _job->stops_on_task_error();
+                                        if (!is_simple_shell_error) {
+                                            postprocess_order(_order_state_transition);       
+                                        } else {
+                                            // finish() will handle this case
+                                        }
                                     }
                                 }                                                               
 

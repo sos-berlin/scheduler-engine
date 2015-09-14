@@ -11,9 +11,8 @@ object Settings {
         Expected(SuccessState)),
     /*2*/ (Setting(Shell(ExitCode(7))),
         Expected(InitialState, ErrorCode("SCHEDULER-280"), Warning("SCHEDULER-845"), JobIsStopped)),
-        //Agent: Expected(ErrorState, ErrorCode("SCHEDULER-280"), JobIsStopped)),   // FIXME Agent should not behave differently. InitialState is expected
     /*3*/ (Setting(Shell(ExitCode(7)), DontStopOnError),
-        Expected(ErrorState, ErrorCode("SCHEDULER-280"), Warning("SCHEDULER-846", Ignorable))),   // FIXME SCHEDULER-846 not via agent
+        Expected(ErrorState, ErrorCode("SCHEDULER-280"), Warning("SCHEDULER-846", Ignorable))),   // JS-1331: Message SCHEDULER-846 not via agent
 
     /*4*/ (Setting(Shell(ExitCode(0)), SpoolerProcessBefore(Returns(false))),
         Expected(InitialState, Warning("SCHEDULER-845"), ErrorCode("SCHEDULER-226"), JobIsStopped)),

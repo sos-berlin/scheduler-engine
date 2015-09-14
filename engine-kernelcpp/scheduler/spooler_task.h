@@ -220,7 +220,7 @@ struct Task : Object,
     void                        merge_environment           ( const Com_variable_set* e )           { _environment->merge( e ); }
     Com_variable_set*           environment_or_null         () const                                { return _environment; }
 
-    bool                        has_error                   ()                                      { return _error != NULL; }
+    bool                        has_error                   () const                                { return _error != NULL; }
     void                    set_error_xc_only               ( const zschimmer::Xc& );
     void                    set_error_xc_only               ( const Xc& );
     void                    set_error_xc_only_base          ( const Xc& );
