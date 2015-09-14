@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1492
 
+import com.sos.scheduler.engine.common.scalautil.{Logger, AutoClosing}
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
@@ -32,6 +34,7 @@ final class JS1492IT extends FreeSpec with ScalaSchedulerTest {
 
   "JS-1492" in {
     val periodEnd =  now() + 3.s
+    val expectedTaskEnd = now() + 5.s
     writeConfigurationFile(TestJobPath,
       <job>
         <script language="shell">{
@@ -43,16 +46,24 @@ final class JS1492IT extends FreeSpec with ScalaSchedulerTest {
       </job>)
     val run = runJobFuture(TestJobPath)
     sleepUntil(periodEnd + 100.ms)
-    val socket = new Socket("127.0.0.1", tcpPort)
-    val writer = new OutputStreamWriter(socket.getOutputStream, UTF_8)
-    writer.write("<show_state/>")
-    writer.flush()
-    assert(socket.getInputStream.read() == '<')
-    assert(now() < periodEnd + 2.s)
-    awaitSuccess(run.closed)
+    checkTcp()
+    assert(now() < expectedTaskEnd - 1.s)
+    val result = awaitSuccess(run.result)
+    assert(now() > expectedTaskEnd)
+    assert(result.duration >= 5.s)
   }
+
+  private def checkTcp(): Unit =
+    autoClosing(new Socket("127.0.0.1", tcpPort)) { socket ⇒
+      val writer = new OutputStreamWriter(socket.getOutputStream, UTF_8)
+      writer.write("<show_state/>")
+      writer.flush()
+      assert(socket.getInputStream.read() == '<')
+      logger.info("TCP works")
+    }
 }
 
 private object JS1492IT {
+  private val logger = Logger(getClass)
   private val TestJobPath = JobPath("/test")
 }
