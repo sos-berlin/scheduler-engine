@@ -102,29 +102,30 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
       writeConfigurationFile(superOrderKey, <order/>)
     }
-    val visibleOrdersIds = (scheduler executeXml <show_job_chain job_chain={CJobChainPath.string}/>).elem \
-      "answer" \ "job_chain" \ "job_chain_node" \ "order_queue" \ "order" \ "@order" map { o ⇒ OrderId(o.text) }
-    assert(visibleOrdersIds contains superOrderKey.id)
+    requireOrderIsVisible(cOrderKey)
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
+    requireOrderIsVisible(cOrderKey)
     deleteConfigurationFile(superOrderKey)
   }
 
   "Starting and repeating a permanent order when first nested job chain is completely skipping" in {
+    setSkippingNodes(Set())
     val superOrderKey = superOrderKeys.next()
     writeConfigurationFile(superOrderKey, <order><run_time><at at="1999-01-01"/></run_time></order>)
+    requireOrderIsVisible(AJobChainPath orderKey superOrderKey.id)
     setSkippingNodes(AOrderStates ++ BOrderStates)
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
+    requireOrderIsVisible(cOrderKey)
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
-    val visibleOrdersIds = (scheduler executeXml <show_job_chain job_chain={CJobChainPath.string}/>).elem \
-      "answer" \ "job_chain" \ "job_chain_node" \ "order_queue" \ "order" \ "@order" map { o ⇒ OrderId(o.text) }
-    assert(visibleOrdersIds contains superOrderKey.id)
+    requireOrderIsVisible(cOrderKey)
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
+    requireOrderIsVisible(cOrderKey)
     deleteConfigurationFile(superOrderKey)
   }
 
@@ -138,6 +139,12 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     for (state ← AOrderStates) set(AJobChainPath, state)
     for (state ← BOrderStates) set(BJobChainPath, state)
     for (state ← COrderStates) set(CJobChainPath, state)
+  }
+
+  def requireOrderIsVisible(orderKey: OrderKey): Unit = {
+    val visibleOrdersIds = (scheduler executeXml <show_job_chain job_chain={orderKey.jobChainPath.string}/>).elem \
+      "answer" \ "job_chain" \ "job_chain_node" \ "order_queue" \ "order" \ "@order" map { o ⇒ OrderId(o.text) }
+    assert(visibleOrdersIds contains orderKey.id)
   }
 }
 
