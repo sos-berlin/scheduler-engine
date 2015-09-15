@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEv
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -69,7 +70,9 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
   }
 
   "sos.spooler.Job methods" in {
-    val taskLog = runJobAndWaitForEnd(JobObjectsJobPath).logString
+    val taskLog = runJobAndWaitForEnd(JobObjectJobPath).logString
+    val job = instance[JobSubsystem].job(JobObjectJobPath)
+
     for (mes <- JobObjectJob.UnwantedMessage.values) {
       taskLog should not include mes.toString
     }
@@ -77,6 +80,9 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
     taskLog should include(s"process_class name=${TestProcessClassPath.name}")
     taskLog should include(s"process_class remote_scheduler=$agentUri")
     taskLog should include(s"process_class max_processes=$MaxProcesses")
+    taskLog should include(s"title=$JobObjectJobTitle")
+
+    job.stateText should equal(TestStateText)
   }
 
 
@@ -130,8 +136,10 @@ object SchedulerAPIIT {
   val VariableSubstitutionString = "aaaa $"+JobParam.name+" aaaa"
   val TestTextFilename = "logText.txt"
   private val IncludePath = "fooo"
-  val JobObjectsJobPath = JobPath("/job_object")
+  val JobObjectJobPath = JobPath("/job_object")
+  val JobObjectJobTitle = "JobObjectJobTitle"
   val RemoveMeJobPath = JobPath("/remove_me")
+  val TestStateText = "This is a test state text."
   private val TestProcessClassPath = ProcessClassPath("/TEST")
   private val MaxProcesses = 23
 

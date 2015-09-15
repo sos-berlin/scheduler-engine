@@ -687,6 +687,7 @@ void Module_instance::fill_process_environment()
         _process_environment->set_var( "SCHEDULER_JOB_CONFIGURATION_DIRECTORY", 
             _task->job()->has_base_file()? _task->job()->base_file_info()._path.directory() : File_path() );  // Directory for the job configuration file should dynamic configuration from hot folders be used
         _process_environment->set_var( "SCHEDULER_HOST"              , _spooler->_short_hostname );
+        _process_environment->set_var("SCHEDULER_ID", _spooler->id());
         _process_environment->set_var( "SCHEDULER_TCP_PORT"          , _spooler->tcp_port()? as_string( _spooler->tcp_port() ) : "" );
         _process_environment->set_var( "SCHEDULER_UDP_PORT"          , _spooler->udp_port()? as_string( _spooler->udp_port() ) : "" );
 

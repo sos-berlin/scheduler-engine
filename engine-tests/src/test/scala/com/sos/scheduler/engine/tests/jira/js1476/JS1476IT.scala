@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1476
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.NowAt
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -94,6 +95,40 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
+  "Adding and repeating a permanent order when first nested job chain is completely skipping" in {
+    setSkippingNodes(AOrderStates ++ BOrderStates)
+    val superOrderKey = superOrderKeys.next()
+    val cOrderKey = CJobChainPath orderKey superOrderKey.id
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+      writeConfigurationFile(superOrderKey, <order/>)
+    }
+    requireOrderIsVisible(cOrderKey)
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+      scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
+    }
+    requireOrderIsVisible(cOrderKey)
+    deleteConfigurationFile(superOrderKey)
+  }
+
+  "Starting and repeating a permanent order when first nested job chain is completely skipping" in {
+    setSkippingNodes(Set())
+    val superOrderKey = superOrderKeys.next()
+    writeConfigurationFile(superOrderKey, <order><run_time><at at="1999-01-01"/></run_time></order>)
+    requireOrderIsVisible(AJobChainPath orderKey superOrderKey.id)
+    setSkippingNodes(AOrderStates ++ BOrderStates)
+    val cOrderKey = CJobChainPath orderKey superOrderKey.id
+    requireOrderIsVisible(cOrderKey)
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+      scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
+    }
+    requireOrderIsVisible(cOrderKey)
+    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+      scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
+    }
+    requireOrderIsVisible(cOrderKey)
+    deleteConfigurationFile(superOrderKey)
+  }
+
   // "Order.reset" in { see JS631IT }
 
   private def setSkippingNodes(states: Set[OrderState]): Unit = {
@@ -104,6 +139,12 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     for (state ← AOrderStates) set(AJobChainPath, state)
     for (state ← BOrderStates) set(BJobChainPath, state)
     for (state ← COrderStates) set(CJobChainPath, state)
+  }
+
+  def requireOrderIsVisible(orderKey: OrderKey): Unit = {
+    val visibleOrdersIds = (scheduler executeXml <show_job_chain job_chain={orderKey.jobChainPath.string}/>).elem \
+      "answer" \ "job_chain" \ "job_chain_node" \ "order_queue" \ "order" \ "@order" map { o ⇒ OrderId(o.text) }
+    assert(visibleOrdersIds contains orderKey.id)
   }
 }
 

@@ -9,5 +9,10 @@ function spooler_process(){
     spooler_job.set_delay_after_error(3, "00:02:22");
     spooler_job.set_delay_after_error(4, "STOP");
     spooler_job.clear_delay_after_error();
+
+    var someTestString="kjfsdijsfh38";
+    if (spooler_job.script_code.indexOf(someTestString)==-1){
+        throw "teststring not found in script_code"
+    }
     return false;
 }

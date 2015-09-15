@@ -607,7 +607,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     Tcp_remote_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
         Abstract_process(spooler, log, conf),
         Abstract_remote_api_process(spooler, log, conf),
-        _remote_scheduler(Host_and_port(conf._remote_scheduler_address)),
+        _remote_scheduler_address(Host_and_port(conf._remote_scheduler_address)),
         _remote_process_id(0),
         _remote_pid(0),
         _is_killed(false)
@@ -628,7 +628,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
 
     protected: void do_start() {
         prepare_connection();
-        connection()->set_remote_host(_remote_scheduler.host());
+        connection()->set_remote_host(_remote_scheduler_address.host());
         _async_tcp_operation = Z_NEW( Async_tcp_operation( this ) );
         _async_tcp_operation->async_wake();
         _async_tcp_operation->set_async_manager( _spooler->_connection_manager );
@@ -698,9 +698,13 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
 
     public: bool async_remote_start_continue(Async_operation::Continue_flags);
 
+    public: string remote_scheduler_address() {
+        return _remote_scheduler_address.as_string();
+    }
+
     friend struct Async_tcp_operation;
 
-    private: Host_and_port const _remote_scheduler;
+    private: Host_and_port const _remote_scheduler_address;
     private: ptr<Async_tcp_operation> _async_tcp_operation;
     private: ptr<Xml_client_connection> _xml_client_connection;
     private: Process_id _remote_process_id;
@@ -750,7 +754,7 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     public: void on_call(const Start_remote_task_callback& call) {
         assert(&call == +_start_remote_task_callback);
         try {
-            ((TryJ)call.value()).get();   // get() wirft Exception, wenn call.value() ein Failure ist
+            _remote_scheduler = (StringJ)((TryJ)call.value()).get();   // get() wirft Exception, wenn call.value() ein Failure ist
             _is_started = true;
         }
         catch (exception& x) {
@@ -796,12 +800,17 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         }
     }
 
+    public: string remote_scheduler_address() {
+        return _remote_scheduler;
+    }
+
     private: Process_class* const _process_class;
     private: CppHttpRemoteApiProcessClientJ _clientJ;
     private: ptr<Waiting_callback> const _waiting_callback;
     private: ptr<Start_remote_task_callback> const _start_remote_task_callback;
     private: bool _is_started;
     private: Xc_copy _start_exception;
+    private: string _remote_scheduler;
 };
 
 //----------------------------------------------------------------Process_class_subsystem::_methods
@@ -966,7 +975,7 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
     {
         case Async_tcp_operation::s_not_connected:
         {
-            _xml_client_connection = Z_NEW(Xml_client_connection(_spooler, _remote_scheduler));
+            _xml_client_connection = Z_NEW(Xml_client_connection(_spooler, _remote_scheduler_address));
             _xml_client_connection->set_async_parent( _async_tcp_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );

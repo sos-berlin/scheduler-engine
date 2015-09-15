@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.sos.scheduler.engine.common.system.OperatingSystem.cpuArchitecture;
-import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.common.system.OperatingSystemJava.cpuArchitecture;
+import static com.sos.scheduler.engine.common.system.OperatingSystemJava.isWindows;
 import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.debug;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */

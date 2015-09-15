@@ -2106,6 +2106,7 @@ void Standard_job::set_state_cmd(State_cmd state_cmd)
                     if (state_cmd == sc_enable) _enabled = true;         // JS-551
                     check_min_tasks( "job has been unstopped" );
                     set_next_start_time( Time::now() );
+                    init_start_when_directory_changed();
                     try_start_tasks();
                 }
             }

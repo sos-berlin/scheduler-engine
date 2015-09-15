@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
-import com.sos.scheduler.engine.common.system.OperatingSystem;
+import com.sos.scheduler.engine.common.system.OperatingSystemJava;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 public class StressIT extends SchedulerTest implements TaskInfoListener {
 
     private static final Logger logger = LoggerFactory.getLogger(StressIT.class);
-	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
+	private static final String jobName = OperatingSystemJava.isWindows ? "job_windows" : "job_unix";
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";
     private static final String providerUrl = "vm://localhost";
 	private static final int ESTIMATED_TASKS = 100;

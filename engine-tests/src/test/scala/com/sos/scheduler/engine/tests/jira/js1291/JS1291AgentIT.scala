@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConfiguration}
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.Order
@@ -118,6 +119,12 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         finishedOrderParametersPromise.successValue should contain(ChangedVariable.pair)
       }
 
+      "SCHEDULER_ID" in {
+        val id = instance[SchedulerId]
+        assert(id.nonEmpty)
+        assert(shellOutput contains s"""SCHEDULER_ID="$id"""")
+      }
+
       "Shell with monitor has access to stdout_text" in {
         awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString should include ("SPOOLER_PROCESS_AFTER")
       }
@@ -205,6 +212,7 @@ object JS1291AgentIT {
             |echo !$FirstStdoutLine
             |echo !$EnvironmentVariable=%$EnvironmentVariable%
             |echo !PATH="%Path%"
+            |echo !SCHEDULER_ID="%SCHEDULER_ID%"
             |if "%SCHEDULER_RETURN_VALUES%" == "" goto :noReturnValues
             |    echo ${ChangedVariable.name}=${ChangedVariable.value} >> %SCHEDULER_RETURN_VALUES%
             |:noReturnValues
@@ -213,6 +221,7 @@ object JS1291AgentIT {
             |echo !$FirstStdoutLine
             |echo !$EnvironmentVariable=$$$EnvironmentVariable
             |echo !PATH=\\""$$PATH"\\"
+            |echo !SCHEDULER_ID=\\""$$SCHEDULER_ID"\\"
             |[ -n "$$SCHEDULER_RETURN_VALUES" ] && echo ${ChangedVariable.name}=${ChangedVariable.value} >> $$SCHEDULER_RETURN_VALUES
             |""".stripMargin
         ) +
