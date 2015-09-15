@@ -52,7 +52,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  "A third order with a third process class is postponed until a new task can be started" - {
+  "A third order with same process class as the first order is postponed until a new task can be started" - {
     testNonDistributedAndDistributed { (isDistributed, aJobChainPath, bJobChainPath, cJobChainPath) ⇒
       val a1OrderKey = aJobChainPath orderKey "1"
       val a2OrderKey = aJobChainPath orderKey "2"
@@ -72,7 +72,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  "A third order is postponed until a new task can be started" - {
+  "A third order with a third process class is postponed until a new task can be started" - {
     testNonDistributedAndDistributed { (isDistributed, aJobChainPath, bJobChainPath, cJobChainPath) ⇒
       val aOrderKey = aJobChainPath orderKey "1"
       val bOrderKey = bJobChainPath orderKey "1"
