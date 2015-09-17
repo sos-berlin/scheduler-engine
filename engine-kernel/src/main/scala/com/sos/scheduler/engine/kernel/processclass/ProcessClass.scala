@@ -123,6 +123,6 @@ object ProcessClass {
 
   def apiProcessConfiguration(c: Api_process_configurationC) = new ApiProcessConfiguration(
     hasApi = c._has_api,
-    javaOptions = c._java_options,
-    javaClasspath = c._java_classpath)
+    javaOptions = c._java_options.trim,
+    javaClasspath = c._java_classpath.trim)
 }
