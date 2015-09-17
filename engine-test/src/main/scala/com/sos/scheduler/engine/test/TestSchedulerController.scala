@@ -4,8 +4,8 @@ import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.{autoClosing, closeOnError}
+import com.sos.scheduler.engine.common.scalautil.{AutoClosing, HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
@@ -188,6 +188,8 @@ with HasInjector {
 
   /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
   def newEventPipe(): EventPipe = new EventPipe(eventBus, TestTimeout)
+
+  def withEventPipe[A](body: EventPipe ⇒ A) = autoClosing(newEventPipe)(body)
 
   def isStarted =
     delegate.isStarted

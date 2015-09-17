@@ -61,6 +61,8 @@ trait ScalaSchedulerTest
 
   protected def onSchedulerActivated(): Unit = {}
 
+  protected final def withEventPipe[A](body: EventPipe ⇒ A) = controller.withEventPipe(body)
+
   protected final def eventBus: SchedulerEventBus = controller.eventBus
 
   protected implicit def implicitTimeout: ImplicitTimeout = TestSchedulerController.implicits.Timeout
