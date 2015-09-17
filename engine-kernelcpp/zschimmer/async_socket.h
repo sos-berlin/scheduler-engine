@@ -147,6 +147,7 @@ struct Buffered_socket_operation : Socket_operation
     void                        recv_clear                  ()                                      { _recv_data = ""; }
     void                        assert_no_recv_data         ();
     bool                        check_for_eof               ();
+    bool send_keep_alive_space();
 
     int64                       recv_total_byte_count       () const                                { return _recv_total_byte_count; }
     int64                       send_total_byte_count       () const                                { return _send_total_byte_count; }

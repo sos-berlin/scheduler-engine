@@ -605,7 +605,8 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         _remote_scheduler(Host_and_port(conf._remote_scheduler_address)),
         _remote_process_id(0),
         _remote_pid(0),
-        _is_killed(false)
+        _is_killed(false),
+        _keep_alive_duration(spooler->settings()->_classic_agent_keep_alive_duration == 1/*Test*/? 0.01 : spooler->settings()->_classic_agent_keep_alive_duration)
     {}
 
     ~Tcp_remote_api_process() {
@@ -646,6 +647,15 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
             return true;
         } else
             return false;
+    }
+
+    private: void keep_alive() {
+        if (_async_tcp_operation && _async_tcp_operation->_state == Async_tcp_operation::s_running) {
+            bool sent = _xml_client_connection->send_keep_alive_space();  // Send a space which an old Agent will read as a prefix of the next XML command.
+            if (sent) {
+                log()->info(Message_string("SCHEDULER-727"));
+            }
+        }
     }
 
     public: string obj_name() const {
@@ -691,6 +701,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     private: Process_id _remote_process_id;
     private: pid_t _remote_pid;
     private: bool _is_killed;
+    private: Duration const _keep_alive_duration;
 };
 
 
@@ -935,7 +946,7 @@ ptr<Api_process> Api_process::new_process(Spooler* spooler, Prefix_log* log, con
 }
 
 
-bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Continue_flags )
+bool Tcp_remote_api_process::async_remote_start_continue(Async_operation::Continue_flags continue_flags)
 {
     bool something_done = true;     // spooler.cxx ruft async_continue() auf
 
@@ -993,10 +1004,18 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
             _spooler->log()->debug9( message_string( "SCHEDULER-948", connection()->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
             something_done = true;
             _async_tcp_operation->_state = Async_tcp_operation::s_running;
+            _async_tcp_operation->set_async_delay(_keep_alive_duration.as_double());
+            break;
         }
 
         case Async_tcp_operation::s_running:
         {
+            if (!_keep_alive_duration.is_eternal()) {
+                if (continue_flags & Async_operation::cont_next_gmtime_reached) {
+                    keep_alive();
+                    _async_tcp_operation->set_async_delay(_keep_alive_duration.as_double());
+                }
+            }
             break;
         }
 

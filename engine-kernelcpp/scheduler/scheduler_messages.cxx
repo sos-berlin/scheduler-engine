@@ -508,6 +508,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-723", "Cluster member '$1' has been advised for processing of this order" },
     { "SCHEDULER-724", "Error ignored when trying to obtain directory change notifications for $1: $2" },
     { "SCHEDULER-725", "Persistent Order deleted from database" },
+    { "SCHEDULER-727", "Keep-alive package sent to Agent" },
     {}
 };
 } //namespace sos
