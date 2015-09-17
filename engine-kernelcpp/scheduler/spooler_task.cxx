@@ -47,6 +47,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Task, Killing_task_call)
     DEFINE_SIMPLE_CALL(Task, Subprocess_timeout_call)
     DEFINE_SIMPLE_CALL(Task, Kill_timeout_call)
+    DEFINE_SIMPLE_CALL(Task, Process_class_available_call)
 }
 
 using namespace job;
@@ -252,14 +253,16 @@ void Task::close()
             catch( exception& x )  { Z_LOG2( "scheduler", "Task::close() _operation->async_kill() ==> " << x.what() << "\n" ); }
             close_operation();
         }
-
+        if (_process_class) {
+            remove_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
+            _process_class->remove_requestor(this);
+        }
         _order_for_task_end = NULL;
         
         if( _order ) {
             _order->remove_from_job_chain();
             _order->close();  //detach_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
         }
-
         if( _module_instance ) {
             try {
                 do_kill();
@@ -527,9 +530,11 @@ void Task::on_call(const job::Kill_timeout_call&) {
 
 //-------------------------------------------------------------------------------Task::cmd_nice_end
 
-void Task::cmd_nice_end( Job* for_job )
+void Task::cmd_nice_end(Process_class_requestor* for_requestor)
 {
-    _log->info(message_string("SCHEDULER-271", for_job->path(), for_job == _job ? "probably for an order with a different process class" : ""));   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
+    Scheduler_object* obj = dynamic_cast<Scheduler_object*>(for_requestor);
+    if (!obj) z::throw_xc(Z_FUNCTION);
+    _log->info(message_string("SCHEDULER-271", obj->obj_name()));   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
     cmd_end( end_nice );
 }
 
@@ -775,8 +780,11 @@ void Task::set_state_direct( State new_state )
         State old_state = _state;
         _state = new_state;
 
-        if( is_idle()  &&  _job )
-            if (_process_class) _process_class->notify_a_process_is_idle();
+        if( is_idle()  &&  _job ) {
+            if (Process_class_requestor* o = process_class()->waiting_requestor_or_null()) {
+                cmd_nice_end(o);
+            }
+        }
 
         Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) ) {
@@ -975,6 +983,12 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 //    return result;
 //}
 
+
+void Task::notify_a_process_is_available() {
+    Z_LOG2("scheduler", Z_FUNCTION << "\n");
+    _call_register.call<Process_class_available_call>();
+}
+
 //------------------------------------------------------------------------------------Task::on_call
 
 void Task::on_call(const Task_starting_completed_call&) {
@@ -1078,6 +1092,10 @@ void Task::on_call(const job::Task_wait_for_subprocesses_completed_call&) {
 }
 
 void Task::on_call(const job::Try_deleting_files_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Process_class_available_call&) {
     do_something();
 }
 
@@ -1386,24 +1404,36 @@ bool Task::do_something()
 
                     switch( _state ) { // nächster Status
                         case s_loading: {
-                            bool ok = load();
-                            if( ok )  set_state_direct( s_waiting_for_process );
-                                else  set_state_direct( s_release );
-                            
                             something_done = true;
-                            loop = true;
-                            break;
+                            bool ok = load();
+                            if (!ok ) {
+                                set_state_direct(s_release);
+                                loop = true;
+                                break;
+                            }
                         }
 
                         case s_waiting_for_process: {
-                            bool ok = !_module_instance || _module_instance->try_to_get_process();
-                            if (ok) {
+                            if (!_module_instance) z::throw_xc("s_waiting_for_process");
+                            bool ok = _module_instance->try_to_get_process();
+                            if (!ok) {
+                                if (state() != s_waiting_for_process) {
+                                    if (!_module_instance->has_process()) {
+                                        log()->info(Message_string("SCHEDULER-949", _module_instance->process_class()->path()));
+                                        process_class()->enqueue_requestor(this);
+                                        task_subsystem()->try_to_free_process(this, _process_class);     // Beendet eine Task in s_running_waiting_for_order
+                                    } 
+                                    set_state_direct( s_waiting_for_process );
+                                }
+                            } else {
+                                process_class()->remove_requestor(this);
                                 set_state_direct(s_starting);
                                 something_done = true;
                                 loop = true;
                             }
-                            else 
-                                set_state_direct( s_waiting_for_process );
+                            if (_module_instance->has_process()) {
+                                process_class()->remove_requestor(this);
+                            }
                             break;
                         }
 
@@ -1820,10 +1850,6 @@ bool Task::do_something()
                                 Order_state_transition t = error_order_state_transition();   // Falls _order nach Fehler noch da ist
                                 if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
-                                if (_process_class) {
-                                    remove_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
-                                    _process_class = NULL;
-                                }
                                 finish(t);
                                 set_state_direct( s_closed );
                                 something_done = true;

@@ -39,6 +39,7 @@ namespace job {
     struct Try_deleting_files_call;
     struct Killing_task_call;
     struct Kill_timeout_call;
+    struct Process_class_available_call;
 }
 
 //--------------------------------------------------------------------------------------Start_cause
@@ -66,6 +67,7 @@ string                          start_cause_name            ( Start_cause );
 struct Task : Object, 
               Abstract_scheduler_object,
               Dependant,
+              Process_class_requestor,
               javabridge::has_proxy<Task>
 {
     enum State
@@ -156,7 +158,7 @@ struct Task : Object,
 
     enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
     void                        cmd_end                     (End_mode = end_normal, const Duration& timeout = Duration(0));
-    void                        cmd_nice_end                (Job* for_job);
+    void                        cmd_nice_end                (Process_class_requestor*);
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
@@ -198,8 +200,10 @@ struct Task : Object,
     void                        on_call                     (const job::Try_deleting_files_call&);
     void                        on_call                     (const job::Killing_task_call&);
     void                        on_call                     (const job::Kill_timeout_call&);
+    void on_call(const job::Process_class_available_call&);
 
-    Task_subsystem*             thread                      ()                                      { return _thread; }
+    
+    void notify_a_process_is_available();
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
 
@@ -379,7 +383,6 @@ struct Task : Object,
     string                     _obj_name;
 
     Standard_job*              _job;
-    Task_subsystem*            _thread;
     Task_history               _history;
     typed_call_register<Task>  _call_register;
     ptr<Async_operation>       _sync_operation;

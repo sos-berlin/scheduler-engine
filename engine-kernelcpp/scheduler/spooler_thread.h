@@ -46,7 +46,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
     void                        count_task                  ()                                      { InterlockedIncrement( &_task_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
 
-    bool                        try_to_free_process         ( Job*, Process_class*, const Time& now );
+    bool                        try_to_free_process         (Process_class_requestor*, Process_class*);
     void                        end_all_tasks               ( Task::End_mode = Task::end_normal );
 
     // Für andere Threads:

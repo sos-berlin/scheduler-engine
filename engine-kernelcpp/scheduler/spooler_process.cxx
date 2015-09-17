@@ -1263,7 +1263,7 @@ Process_class::Process_class( Scheduler* scheduler, const string& name )
 Process_class::~Process_class()
 {
     Z_DEBUG_ONLY( assert( _process_set.empty() ) );
-    Z_DEBUG_ONLY( assert( _waiting_jobs.empty() ) );
+    Z_DEBUG_ONLY(assert(_requestor_list.empty()));
 
     try
     {
@@ -1367,7 +1367,7 @@ void Process_class::set_max_processes( int max_processes )
 
     _max_processes = max_processes;
 
-    notify_a_process_is_idle();
+    check_then_notify_a_process_is_available();
 }
 
 //-----------------------------------------------------------------------Process_class::add_process
@@ -1377,8 +1377,6 @@ void Process_class::add_process(Process* process)
     _process_set.insert( process );
     _process_set_version++;
 }
-
-//--------------------------------------------------------------------------Spooler::remove_process
 
 void Process_class::remove_process(Process* process)
 {
@@ -1393,11 +1391,7 @@ void Process_class::remove_process(Process* process)
         check_for_replacing_or_removing();
     }
     else
-    if( !_waiting_jobs.empty() )
-    {
-        Job* job = *_waiting_jobs.rbegin();
-        job->notify_a_process_is_idle();
-    }
+        check_then_notify_a_process_is_available();
 }
 
 void Process_class::remove_file_order_source() {
@@ -1465,45 +1459,37 @@ bool Process_class::process_available( Job* for_job )
     if( _process_set.size()      >= _max_processes )  return false;
     if( _spooler->_process_count >= scheduler::max_processes )  return false;
 
-    if( _waiting_jobs.empty() )  return true;
-
     // Warten Jobs auf einen freien Prozess? 
     // Dann liefern wir nur true, wenn dieser Job der erste in der Warteschlange ist.
-    return *_waiting_jobs.rbegin() == for_job;
+    return _requestor_list.empty() || *_requestor_list.rbegin() == for_job;
 }
 
-//---------------------------------------------------------------Process_class::enqueue_waiting_job
-
-void Process_class::enqueue_waiting_job( Job* job )
-{
-    _waiting_jobs.push_back( job );
+void Process_class::enqueue_requestor(Process_class_requestor* requestor) {
+    _requestor_list.push_back(requestor);
 }
 
-//----------------------------------------------------------------Process_class::remove_waiting_job
+void Process_class::remove_requestor(Process_class_requestor* requestor) {
+    _requestor_list.remove(requestor);
+}
 
-void Process_class::remove_waiting_job( Job* waiting_job )
-{
-    _waiting_jobs.remove( waiting_job );
-
-    if( _process_set.size() < _max_processes  &&  !_waiting_jobs.empty() )
-    {
-        Job* job = *_waiting_jobs.rbegin();
-        job->notify_a_process_is_idle();
+void Process_class::check_then_notify_a_process_is_available() {
+    if (Process_class_requestor* o = waiting_requestor_or_null()) {
+        o->notify_a_process_is_available();
     }
 }
 
-//----------------------------------------------------------------------Process_class::need_process
-
-bool Process_class::need_process()
-{ 
-    return !_waiting_jobs.empty(); 
-}
-
-//----------------------------------------------------------Process_class::notity_a_process_is_idle
-
-void Process_class::notify_a_process_is_idle()
+Process_class_requestor* Process_class::waiting_requestor_or_null()
 {
-    if( !_waiting_jobs.empty() )  (*_waiting_jobs.begin())->notify_a_process_is_idle();
+    if (file_based_state() == File_based::s_active && !is_to_be_removed()) {
+        if (!_requestor_list.empty()) {
+            Z_FOR_EACH_CONST(Requestor_list, _requestor_list, i) {
+                Process_class_requestor* requestor = *i;
+                if (dynamic_cast<Task*>(requestor)) return requestor;  // Hanging tasks first!
+            }
+            return *_requestor_list.begin();
+        }
+    }
+    return NULL;
 }
 
 //-----------------------------------------------------------------------Process_class::dom_element
@@ -1520,16 +1506,28 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
         FOR_EACH( Process_set, _process_set, it )  processes_element.appendChild( (*it)->dom_element( document, show_what ) );
     }
 
-    if( !_waiting_jobs.empty() )
-    {
+    if (!_requestor_list.empty()) {
+        xml::Element_ptr waiting_tasks_element = document.createElement("waiting_tasks");
+        result.appendChild( waiting_tasks_element );
+        FOR_EACH(Requestor_list, _requestor_list, i) {
+            if (Task* task = dynamic_cast<Task*>(*i)) {
+                xml::Element_ptr task_element = document.createElement("task");
+                task_element.setAttribute("job", task->job()->path());
+                task_element.setAttribute("task", task->id());
+                waiting_tasks_element.appendChild(task_element);
+            }
+        }
+    }
+
+    if (!_requestor_list.empty()) {
         xml::Element_ptr waiting_jobs_element = document.createElement( "waiting_jobs" );
         result.appendChild( waiting_jobs_element );
-
-        FOR_EACH( Job_list, _waiting_jobs, j )  //waiting_jobs_element.appendChild( (*j)->dom_element( document, show_standard ) );
-        {
-            xml::Element_ptr job_element = document.createElement( "job" );
-            job_element.setAttribute( "job", (*j)->name() );
-            waiting_jobs_element.appendChild( job_element );
+        FOR_EACH(Requestor_list, _requestor_list, i) {  //waiting_jobs_element.appendChild( (*j)->dom_element( document, show_standard ) );
+            if (Job* job = dynamic_cast<Job*>(*i)) {
+                xml::Element_ptr job_element = document.createElement( "job" );
+                job_element.setAttribute( "job", job->name() );
+                waiting_jobs_element.appendChild( job_element );
+            }
         }
     }
 
