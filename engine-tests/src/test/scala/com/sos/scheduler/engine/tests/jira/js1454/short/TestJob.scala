@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js1454
+package com.sos.scheduler.engine.tests.jira.js1454.short
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import org.joda.time.Instant.now
