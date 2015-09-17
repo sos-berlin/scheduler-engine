@@ -34,7 +34,7 @@ struct Xml_client_connection : Async_operation, Abstract_scheduler_object
     bool                        is_send_possible            ();
     void                        send                        ( const string& );
     xml::Document_ptr           fetch_received_dom_document ();                                     // NULL, wenn noch nichts empfangen
-
+    bool send_keep_alive_space();      
 
   protected:
     string                      async_state_text_           () const;

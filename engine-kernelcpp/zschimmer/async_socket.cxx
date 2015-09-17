@@ -695,6 +695,17 @@ bool Buffered_socket_operation::send__continue()
     return something_done;
 }
 
+
+bool Buffered_socket_operation::send_keep_alive_space() {
+    if (_send_data.empty() && _recv_data.empty()) {
+        int len = ::send(_write_socket, " ", 1, 0);
+        int err = len < 0? socket_errno() : 0;
+        Z_LOG2("socket.send", "send(" << _write_socket << ", one keep-alive space) ==> " << len << "  errno=" << err << "\n");
+        return len == 1;
+    } else
+        return false;
+}
+
 //---------------------------------------------------------Buffered_socket_operation::recv_continue
 
 int Buffered_socket_operation::call_recv( char* buffer, int size )

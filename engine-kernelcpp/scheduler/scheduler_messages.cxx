@@ -509,6 +509,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-724", "Error ignored when trying to obtain directory change notifications for $1: $2" },
     { "SCHEDULER-725", "Persistent Order deleted from database" },
     { "SCHEDULER-726", "Task runs on $1" },
+    { "SCHEDULER-727", "Keep-alive package sent to Agent" },
     {}
 };
 } //namespace sos

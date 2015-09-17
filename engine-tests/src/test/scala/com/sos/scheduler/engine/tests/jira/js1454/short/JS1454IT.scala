@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1454.short
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -28,7 +30,11 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
 
   "Busy communcation may suppress keep-alive" in {
     writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
-    runJobAndWaitForEnd(JobPath("/test-busy"))
+    withEventPipe { events ⇒
+      runJobAndWaitForEnd(JobPath("/test-busy"))
+      val keepAliveCount = events.queued[InfoLogEvent] count { _.codeOption contains MessageCode("SCHEDULER-727") }  // scheduler.agent.keep_alive=TEST floods the line with keep-alive spaces
+      assert(keepAliveCount >= 20)
+    }
     val schedulerLog = testEnvironment.schedulerLog.contentString
     // How to test this automatically??? Manual test was successful.
     assert(schedulerLog contains s"{$KeepAliveLogCategory} Stopped")
