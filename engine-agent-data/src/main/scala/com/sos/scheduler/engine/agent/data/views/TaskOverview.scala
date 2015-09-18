@@ -12,7 +12,7 @@ import spray.json.DefaultJsonProtocol._
 final case class TaskOverview(
   id: AgentTaskId,
   tunnelId: TunnelId,
-  controllerAddress: String,
+  masterAddress: String,
   startedAt: Instant)
 
 object TaskOverview {

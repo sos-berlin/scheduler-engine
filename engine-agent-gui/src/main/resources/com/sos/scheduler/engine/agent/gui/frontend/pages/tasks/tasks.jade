@@ -18,5 +18,5 @@
         tr(ng-repeat='task in taskHandler.tasks')
           td.AgentTaskId {{task.id}}
           td.TunnelId {{task.tunnelId}}
-          td.MasterAddress {{task.controllerAddress}}
+          td.MasterAddress {{task.masterAddress}}
           td.StartedAt(ng-bind-html="task.startedAt | instantWithDurationToHtml : now")
