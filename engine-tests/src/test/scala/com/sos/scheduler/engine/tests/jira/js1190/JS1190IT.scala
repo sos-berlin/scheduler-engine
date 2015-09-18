@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1190
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -50,7 +49,7 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
     val orderKey = TestJobchainPath orderKey s"$prefix-EXIT-$exitCode"
     val orderCommand = OrderCommand(orderKey, parameters = Map("EXIT_CODE" → s"$exitCode") ++ parameters)
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"), MessageCode("SCHEDULER-226"))) {
-      AutoClosing.autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      withEventPipe { eventPipe ⇒
         scheduler executeXml orderCommand
         eventPipe.nextKeyed[OrderStepEndedEvent](orderKey).stateTransition shouldEqual expectedTransition
         eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).state shouldEqual expectedState

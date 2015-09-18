@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.database
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
@@ -40,7 +39,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
 
   override def onSchedulerActivated(): Unit = {
-    autoClosing(controller.newEventPipe()) { eventPipe =>
+    withEventPipe { eventPipe ⇒
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
       eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
       scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
@@ -199,7 +198,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   ignore("After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK") {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
-    autoClosing(controller.newEventPipe()) { eventPipe =>
+    withEventPipe { eventPipe ⇒
       instance[OrderSubsystem].jobChain(jobChainPath).forceFileReread()
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](jobChainPath)
@@ -216,7 +215,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   test("After JobChain removal database should contain no record") {
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
-    autoClosing(controller.newEventPipe()) { eventPipe =>
+    withEventPipe { eventPipe ⇒
       instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)

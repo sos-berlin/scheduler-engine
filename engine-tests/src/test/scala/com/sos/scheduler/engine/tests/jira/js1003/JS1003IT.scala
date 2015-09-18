@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1003
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order._
@@ -54,7 +53,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
 
   "Reset repeating non-standing order should repeat immediately" in {
     val orderKey = TestJobChainPath orderKey "Repeating"
-    autoClosing(controller.newEventPipe()) { implicit eventPipe ⇒
+    withEventPipe { implicit eventPipe ⇒
       val runtime = <run_time><period repeat="01:00:00"/></run_time>
       scheduler executeXml OrderCommand(orderKey, xmlChildren = runtime)
       checkBehaviourUntilReset(orderKey)
@@ -63,7 +62,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def resetOrderShouldWait(orderKey: OrderKey, scheduledAt: Option[Instant])(startOrder: ⇒ Unit): Unit = {
-    autoClosing(controller.newEventPipe()) { implicit eventPipe ⇒
+    withEventPipe { implicit eventPipe ⇒
       startOrder
       checkBehaviourUntilReset(orderKey)
       order(orderKey).nextInstantOption shouldEqual scheduledAt

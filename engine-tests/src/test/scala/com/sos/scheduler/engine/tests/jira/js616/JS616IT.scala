@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js616
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -15,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS616IT extends FunSuite with ScalaSchedulerTest {
   test("JS-616 Bug fix: Order Job does not start when having a single start schedule") {
-    autoClosing(controller.newEventPipe()) { eventPipe =>
+    withEventPipe { eventPipe ⇒
       val t = now + 3.s
       scheduler executeXml
         <job name="test-shell">

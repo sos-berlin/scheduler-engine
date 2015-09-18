@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js631
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderState, OrderStateChangedEvent, OrderTouchedEvent}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.order
@@ -22,7 +21,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS631IT extends FreeSpec with ScalaSchedulerTest {
 
   "Without reset" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
       eventPipe.nextKeyed[OrderTouchedEvent](AOrderKey)
       eventPipe.nextKeyed[OrderNestedTouchedEvent](AOrderKey)
@@ -39,7 +38,7 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Reset in second nested job chain with first nested job chain completely skipping (JS-1476)" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       scheduler executeXml <job_chain_node.modify job_chain={BJobChainPath.string} state={B2State.string} action="stop"/>
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
       eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A1State
@@ -57,7 +56,7 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Reset in second nested job chain" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       order(BOrderKey).nextInstantOption shouldEqual None
       order(BOrderKey).state should be(B1State)
       scheduler executeXml <modify_order job_chain={BOrderKey.jobChainPath.string} order={BOrderKey.id.string} action="reset"/> // Was error: SCHEDULER-149  There is no job in job chain "/test-nested-b" for the state "A"
@@ -67,7 +66,7 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Reset in first nested job chain (initial state is in current job chain)" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={A2State.string} action="stop"/>
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
       eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A1State

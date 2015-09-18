@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1081
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -20,7 +19,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1081IT extends FreeSpec with ScalaSchedulerTest {
 
   s"period with begin and absolute_repeat=$AbsoluteRepeat" in {
-    autoClosing(controller.newEventPipe()) { eventPipe =>
+    withEventPipe { eventPipe ⇒
       val instants = absoluteRepeatedInstants(now() + AbsoluteRepeat, AbsoluteRepeat)
       val myOrderElem = orderElem(AOrderKey, begin = instants.head.toDateTime.toLocalTime, absoluteRepeat = AbsoluteRepeat)
       scheduler executeXml myOrderElem

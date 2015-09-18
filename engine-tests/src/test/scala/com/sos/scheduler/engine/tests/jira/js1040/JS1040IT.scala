@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1040
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -49,14 +48,14 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
     def readJobChain(ordersAreRecoverable: Boolean): Unit = {
       if (removeBeforeReread && orderSubsystem.jobChainOption(testJobChainPath).isDefined)
         removeJobChain()
-      autoClosing(controller.newEventPipe()) { eventPipe =>
+      withEventPipe { eventPipe ⇒
         scheduler executeXml jobChainElem(ordersAreRecoverable)
         eventPipe.nextKeyed[FileBasedActivatedEvent](testJobChainPath)
       }
     }
 
     def removeJobChain(): Unit = {
-      autoClosing(controller.newEventPipe()) { eventPipe =>
+      withEventPipe { eventPipe ⇒
         orderSubsystem.removeJobChain(testJobChainPath)
         eventBus.dispatchEvents()
         eventPipe.nextKeyed[FileBasedRemovedEvent](testJobChainPath)

@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -68,7 +67,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
   protected override def onSchedulerActivated() = awaitResult(agent.start(), 10.s)
 
   private def myTest(index: Int, agentMode: AgentMode, setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       deleteAndWriteConfigurationFile(ProcessClassPath("/test"), <process_class remote_scheduler={agentMode.addressOption().orNull}/>)
       val job = jobSubsystem.job(setting.jobPath)
 

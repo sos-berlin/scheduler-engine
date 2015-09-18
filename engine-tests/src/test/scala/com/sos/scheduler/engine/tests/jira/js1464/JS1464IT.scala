@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1464
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
@@ -64,7 +63,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
             addOrder(bOrderKey, 4.s)
           }
         }
-        autoClosing(controller.newEventPipe()) { eventPipe ⇒
+        withEventPipe { eventPipe ⇒
           addOrder(a2OrderKey, 1.s)
           eventPipe.nextKeyed[OrderFinishedEvent](a1OrderKey).state shouldBe EndState
           eventPipe.nextKeyed[OrderTouchedEvent](a2OrderKey)
@@ -84,7 +83,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
             addOrder(bOrderKey, 5.s + (if (isDistributed) DatabaseOrderCheckPeriod else 0.s))
           }
         }
-        autoClosing(controller.newEventPipe()) { eventPipe ⇒
+        withEventPipe { eventPipe ⇒
           addOrder(cOrderKey, 0.s)
           eventPipe.nextKeyed[OrderFinishedEvent](aOrderKey).state shouldBe EndState
           eventPipe.nextWithCondition[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271"))
@@ -108,7 +107,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
     val b1OrderKey = bJobChainPath orderKey "1"
     val a2OrderKey = aJobChainPath orderKey "2"
     val b2OrderKey = bJobChainPath orderKey "2"
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       addOrder(a1OrderKey, 2.s)
       addOrder(b1OrderKey, 2.s)
       eventPipe.nextKeyedEvents[OrderStepStartedEvent](Set(a1OrderKey, b1OrderKey))
