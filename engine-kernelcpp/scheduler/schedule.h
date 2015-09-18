@@ -346,7 +346,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Run_time"; }
 
     // Abstract_scheduler_object 
-    void                        close                       ();
+    virtual void                close                       ();
     string                      obj_name                    () const;
 
 

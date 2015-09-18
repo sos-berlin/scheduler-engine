@@ -431,7 +431,7 @@ struct Order : Com_order,
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
 
-    ptr<Order_schedule_use>    _schedule_use;
+    ptr<Order_schedule_use> const _schedule_use;
     bool                       _schedule_modified;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     bool                       _order_xml_modified;     // Datenbankspalte xml neu schreiben!

@@ -25,13 +25,21 @@ struct Order_schedule_use : Schedule_use
     }
 
     ~Order_schedule_use() {
-        _order->remove_accompanying_dependant(this);
+        close();
     }
 
-    void                        on_schedule_loaded          ()                                      { return _order->on_schedule_loaded(); }
-    void                        on_schedule_modified        ()                                      { return _order->on_schedule_modified(); }
-    bool                        on_schedule_to_be_removed   ()                                      { return _order->on_schedule_to_be_removed(); }
-    string                      name_for_function           () const                                { return _order->string_id(); }
+    void close() {
+        if (_order) {
+            _order->remove_accompanying_dependant(this);
+            _order = NULL;
+        }
+        Schedule_use::close();
+    }
+
+    void                        on_schedule_loaded          ()                                      { if (_order) _order->on_schedule_loaded(); }
+    void                        on_schedule_modified        ()                                      { if (_order) _order->on_schedule_modified(); }
+    bool                        on_schedule_to_be_removed   ()                                      { return !_order || _order->on_schedule_to_be_removed(); }
+    string                      name_for_function           () const                                { return _order? _order->string_id() : "(orphan Schedule)"; }
 
   private:
     Order*                     _order;
@@ -71,7 +79,8 @@ Order::Order( Standing_order_subsystem* subsystem )
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     javabridge::has_proxy<Order>(subsystem->spooler()),
     _typed_java_sister(java_sister()),
-    _zero_(this+1)
+    _zero_(this+1),
+    _schedule_use(Z_NEW(Order_schedule_use(this)))
 {
     _com_log = new Com_log;
     _com_log->set_log( log() );
@@ -79,7 +88,6 @@ Order::Order( Standing_order_subsystem* subsystem )
     _created       = Time::now();
     //_signaled_next_time = Time::never;
 
-    _schedule_use = Z_NEW( Order_schedule_use( this ) );
     _schedule_use->set_scheduler_holidays_usage( schedule::without_scheduler_holidays );  // <config><holidays> nicht übernehmen, eMail von Andreas Liebert 2008-04-21
 }
 
@@ -107,7 +115,7 @@ Order::~Order()
         _replaced_by->set_replacement( false );
     }
 
-    _schedule_use = NULL;
+    if (_schedule_use) _schedule_use->close();
     if( _com_log  )  _com_log->set_log( NULL );
 }
 
