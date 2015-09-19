@@ -28,7 +28,7 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
     mainArguments = List(s"-tcp-port=$tcpPort"),
     logCategories = s"$KeepAliveLogCategory")
 
-  "Busy communcation may suppress keep-alive" in {
+  "Busy communication may suppress keep-alive" in {
     writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
     withEventPipe { events ⇒
       runJobAndWaitForEnd(JobPath("/test-busy"))
