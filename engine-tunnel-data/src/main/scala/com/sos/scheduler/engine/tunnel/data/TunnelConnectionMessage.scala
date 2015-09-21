@@ -18,6 +18,6 @@ final case class TunnelConnectionMessage(tunnelToken: TunnelToken) {
 object TunnelConnectionMessage {
   implicit val MyJsonFormat = jsonFormat1(apply)
 
-  private def toByteString(o: TunnelConnectionMessage) = ByteString.fromString(o.toJson.toString())
+  private def toByteString(o: TunnelConnectionMessage) = ByteString(o.toJson.toString())
 }
 
