@@ -21,7 +21,7 @@ final class AgentUris private(agentUriString: String) {
   def fileExists(filePath: String): String =
     (withPath("api/fileExists") withQuery ("file" → filePath)).toString()
 
-  object tunnelHandler {
+  object tunnelServer {
     def overview = uriString(s"$Api/tunnel")
 
     def tunnels = uriString(s"$Api/tunnel/")

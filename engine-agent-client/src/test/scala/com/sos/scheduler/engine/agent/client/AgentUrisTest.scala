@@ -23,19 +23,19 @@ final class AgentUrisTest extends FreeSpec {
       "http://example.com:9999/testPrefix/jobscheduler/agent/api/fileExists?file=/FILE+X%2B")
   }
 
-  "tunnelHandler" - {
+  "tunnelServer" - {
     "overview" in {
-      assert(agentUris.tunnelHandler.overview ==
+      assert(agentUris.tunnelServer.overview ==
         "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel")
     }
 
     "tunnels" in {
-      assert(agentUris.tunnelHandler.tunnels ==
+      assert(agentUris.tunnelServer.tunnels ==
       "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel/")
     }
 
     "tunnel" in {
-      assert(agentUris.tunnelHandler.tunnel(TunnelId("TUNNEL-ID")) ==
+      assert(agentUris.tunnelServer.tunnel(TunnelId("TUNNEL-ID")) ==
         "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel/TUNNEL-ID")
     }
   }

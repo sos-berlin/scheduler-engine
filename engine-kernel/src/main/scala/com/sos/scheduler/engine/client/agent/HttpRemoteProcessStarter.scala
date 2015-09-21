@@ -25,7 +25,7 @@ final class HttpRemoteProcessStarter @Inject private(
         processDescriptor = ProcessDescriptor.fromStartProcessResponse(response),
         schedulerApiTcpPort = schedulerApiTcpPort,
         tunnelClient = new WebTunnelClient {
-          def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnelHandler.tunnel(id)
+          def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnelServer.tunnel(id)
           def actorSystem = HttpRemoteProcessStarter.this.actorSystem
         })
   }
