@@ -13,8 +13,9 @@ final case class TaskOverview(
   id: AgentTaskId,
   tunnelId: TunnelId,
   masterAddress: String,
-  startedAt: Instant)
+  startedAt: Instant,
+  taskArguments: Map[String, String])
 
 object TaskOverview {
-  implicit val MyJsonFormat = jsonFormat4(apply)
+  implicit val MyJsonFormat = jsonFormat5(apply)
 }
