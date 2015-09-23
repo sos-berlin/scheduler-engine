@@ -97,6 +97,10 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
             assert(job(jobPath).state == JobState.stopped)
+            results(jobPath).returnCode.normalized shouldEqual (jobPath match {
+              case StandardMonitorJobPath | ApiJobPath ⇒ ReturnCode(1)   // Warum nicht auch SIGKILL ???
+              case StandardJobPath ⇒ setting.shellSigkillReturnCode
+            })
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
