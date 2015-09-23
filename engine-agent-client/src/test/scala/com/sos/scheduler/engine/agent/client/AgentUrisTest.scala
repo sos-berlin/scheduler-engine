@@ -25,17 +25,17 @@ final class AgentUrisTest extends FreeSpec {
 
   "tunnelServer" - {
     "overview" in {
-      assert(agentUris.tunnelServer.overview ==
+      assert(agentUris.tunnel.overview ==
         "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel")
     }
 
     "tunnels" in {
-      assert(agentUris.tunnelServer.tunnels ==
+      assert(agentUris.tunnel.tunnels ==
       "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel/")
     }
 
     "tunnel" in {
-      assert(agentUris.tunnelServer.tunnel(TunnelId("TUNNEL-ID")) ==
+      assert(agentUris.tunnel(TunnelId("TUNNEL-ID")) ==
         "http://example.com:9999/testPrefix/jobscheduler/agent/api/tunnel/TUNNEL-ID")
     }
   }

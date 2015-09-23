@@ -21,12 +21,12 @@ final class AgentUris private(agentUriString: String) {
   def fileExists(filePath: String): String =
     (withPath("api/fileExists") withQuery ("file" → filePath)).toString()
 
-  object tunnelServer {
+  object tunnel {
     def overview = uriString(s"$Api/tunnel")
 
     def tunnels = uriString(s"$Api/tunnel/")
 
-    def tunnel(id: TunnelId) = uriString(Path(s"$Api/tunnel") / id.string)
+    def apply(id: TunnelId) = uriString(Path(s"$Api/tunnel") / id.string)
   }
 
   def apply(relativeUri: String) = uriString(Path(stripLeadingSlash(relativeUri)))
