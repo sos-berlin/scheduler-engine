@@ -5,6 +5,7 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
 import com.sos.scheduler.engine.agent.data.commands._
+import com.sos.scheduler.engine.agent.data.views.TaskHandlerView
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
@@ -80,6 +81,13 @@ trait AgentClient {
 
   final def fileExists(filePath: String): Future[Boolean] =
     unmarshallingPipeline[JsBoolean].apply(Get(agentUris.fileExists(filePath))) map { _.value }
+
+  object task {
+    final def overview: Future[TaskHandlerView] = get[TaskHandlerView](_.task.overview)
+  }
+
+  final def get[A: FromResponseUnmarshaller](uri: AgentUris ⇒ String): Future[A] =
+    unmarshallingPipeline[A].apply(Get(uri(agentUris)))
 
   private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
 

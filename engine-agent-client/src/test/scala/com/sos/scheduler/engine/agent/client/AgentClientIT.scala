@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, comman
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile, RequestFileOrderSourceContent}
+import com.sos.scheduler.engine.agent.data.views.TaskHandlerView
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
@@ -138,5 +139,14 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
       delete(file)
       whenReady(client.fileExists(file.toString)) { exists ⇒ assert(!exists) }
     }
+  }
+
+  "get /task" in {
+    val view = awaitResult(client.task.overview, 2.s)
+    assert(view == TaskHandlerView(
+      isTerminating = false,
+      currentTaskCount = 0,
+      totalTaskCount = 0,
+      tasks = Nil))
   }
 }
