@@ -16,7 +16,7 @@ final class AgentClientFactory @Inject private[client](implicit actorSystem: Act
     new AgentClient {
       val agentUri = pAgentUri
       def licenseKeys = AgentClientFactory.this.licenseKeys
-      val actorSystem = AgentClientFactory.this.actorSystem
+      val actorRefFactory = AgentClientFactory.this.actorSystem
     }
   }
 }
