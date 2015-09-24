@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.agent.client
+package com.sos.scheduler.engine.agent.data.web
 
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import org.junit.runner.RunWith

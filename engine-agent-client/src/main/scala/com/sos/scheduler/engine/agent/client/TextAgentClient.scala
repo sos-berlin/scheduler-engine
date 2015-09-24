@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.TextAgentClient._
+import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
 import com.sos.scheduler.engine.common.time.ScalaTime._

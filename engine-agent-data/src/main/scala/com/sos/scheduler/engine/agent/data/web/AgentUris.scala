@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.agent.client
+package com.sos.scheduler.engine.agent.data.web
 
-import com.sos.scheduler.engine.agent.client.AgentUris._
+import com.sos.scheduler.engine.agent.data.web.AgentUris._
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import spray.http.Uri
 import spray.http.Uri.Path
@@ -51,8 +51,8 @@ final class AgentUris private(agentUriString: String) {
 
 object AgentUris {
   private val AgentUriConstantPrefix = "jobscheduler/agent"
-  val LicenseKeyHeaderName = "X-JobScheduler-LicenseKey"
   private val Api = "api"
+  val LicenseKeyHeaderName = "X-JobScheduler-LicenseKey"
 
   def apply(agentUri: String) = new AgentUris(agentUri stripSuffix "/")
 

@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.{AgentClientFactory, AgentUris}
+import com.sos.scheduler.engine.agent.client.AgentClientFactory
+import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.tunnel.client.WebTunnelClient
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import javax.inject.{Inject, Singleton}
