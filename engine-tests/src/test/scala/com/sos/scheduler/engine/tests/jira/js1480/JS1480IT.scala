@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1480.JS1480IT._
+import java.net.InetAddress
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -39,6 +40,7 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     assert(task.arguments.get.language == "java")
     assert(task.arguments.get.javaClassName contains classOf[TestJob].getName)
     assert(task.arguments.get.monitorCount == 0)
+    assert(task.startedByIp contains InetAddress.getByName("127.0.0.1"))
   }
 }
 
