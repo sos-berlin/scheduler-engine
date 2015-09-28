@@ -40,7 +40,7 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     assert(task.arguments.get.language == "java")
     assert(task.arguments.get.javaClassName contains classOf[TestJob].getName)
     assert(task.arguments.get.monitorCount == 0)
-    assert(task.startedByIp contains InetAddress.getByName("127.0.0.1"))
+    assert(task.startedByHttpIp contains InetAddress.getByName("127.0.0.1"))
   }
 }
 

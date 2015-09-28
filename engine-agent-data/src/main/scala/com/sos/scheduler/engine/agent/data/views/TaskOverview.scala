@@ -16,7 +16,7 @@ final case class TaskOverview(
   id: AgentTaskId,
   tunnelId: TunnelId,
   startedAt: Instant,
-  startedByIp: Option[InetAddress],
+  startedByHttpIp: Option[InetAddress],
   arguments: Option[TaskOverview.Arguments])
 
 object TaskOverview {
