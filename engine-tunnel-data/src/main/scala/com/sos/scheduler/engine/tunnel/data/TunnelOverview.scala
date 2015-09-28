@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tunnel.data
 
+import com.sos.scheduler.engine.base.sprayjson.InetAddressJsonSupport._
+import java.net.InetAddress
 import spray.json.DefaultJsonProtocol._
 
 /**
@@ -7,9 +9,10 @@ import spray.json.DefaultJsonProtocol._
  */
 final case class TunnelOverview(
   id: TunnelId,
+  startedByHttpIp: Option[InetAddress],
   remoteTcpAddress: Option[String],
   statistics: TunnelStatistics)
 
 object TunnelOverview {
-  implicit val MyJsonFormat = jsonFormat3(apply)
+  implicit val MyJsonFormat = jsonFormat4(apply)
 }
