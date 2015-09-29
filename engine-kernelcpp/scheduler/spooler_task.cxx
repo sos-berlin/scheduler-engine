@@ -48,6 +48,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Task, Subprocess_timeout_call)
     DEFINE_SIMPLE_CALL(Task, Kill_timeout_call)
     DEFINE_SIMPLE_CALL(Task, Process_class_available_call)
+    DEFINE_SIMPLE_CALL(Task, Task_do_something_call)
 }
 
 using namespace job;
@@ -989,6 +990,13 @@ void Task::notify_a_process_is_available() {
     _call_register.call<Process_class_available_call>();
 }
 
+bool Task::on_requisite_loaded(File_based* file_based) { 
+    if (dynamic_cast<Process_class*>(file_based) && _state == s_waiting_for_process) {
+        _call_register.call<Task_do_something_call>();
+    }
+    return true;
+}
+
 //------------------------------------------------------------------------------------Task::on_call
 
 void Task::on_call(const Task_starting_completed_call&) {
@@ -1096,6 +1104,10 @@ void Task::on_call(const job::Try_deleting_files_call&) {
 }
 
 void Task::on_call(const job::Process_class_available_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Task_do_something_call&) {
     do_something();
 }
 

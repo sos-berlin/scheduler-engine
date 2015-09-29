@@ -40,6 +40,7 @@ namespace job {
     struct Killing_task_call;
     struct Kill_timeout_call;
     struct Process_class_available_call;
+    struct Task_do_something_call;
 }
 
 //--------------------------------------------------------------------------------------Start_cause
@@ -201,7 +202,7 @@ struct Task : Object,
     void                        on_call                     (const job::Killing_task_call&);
     void                        on_call                     (const job::Kill_timeout_call&);
     void on_call(const job::Process_class_available_call&);
-
+    void on_call(const job::Task_do_something_call&);
     
     void notify_a_process_is_available();
     string                      name                        () const                                { return obj_name(); }
@@ -269,12 +270,7 @@ struct Task : Object,
         return _process_class;
     }
 
-    public: bool on_requisite_loaded(File_based* file_based) { 
-        if (dynamic_cast<Process_class*>(file_based) && _state == s_waiting_for_process) {
-            do_something();
-        }
-        return true;
-    }
+    public: bool on_requisite_loaded(File_based* file_based);
 
     public: bool on_requisite_to_be_removed(File_based*) { 
         cmd_end(); 
