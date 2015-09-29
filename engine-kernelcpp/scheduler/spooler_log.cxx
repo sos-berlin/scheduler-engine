@@ -1073,7 +1073,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 
     if( _in_log )
     {
-        Z_LOG2( "scheduler", "Recursive log output: " << line );
+        Z_LOG2("scheduler", "Recursive log output: " << line << "\n");
         return;
     }
 
