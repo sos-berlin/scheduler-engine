@@ -3,9 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>engine-plugins</artifactId>
-  <version>1.9.7-SNAPSHOT</version>
     <packaging>pom</packaging>
-
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
