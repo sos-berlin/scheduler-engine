@@ -21,7 +21,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 /**
- * JS-1457 High seadlock probability when starting multiple processes at one.
+ * JS-1457 High deadlock probability when starting multiple processes at once.
  * JS-1462 CreateProcess fails with MSWIN-00000020 The process cannot access the file because it is being used by another process.
  *
  * @author Joacim Zschimmer
