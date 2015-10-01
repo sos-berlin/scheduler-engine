@@ -1,51 +1,40 @@
 package com.sos.scheduler.engine.tests.jira.js1031
 
-import com.google.common.base.Charsets.UTF_8
-import com.google.common.io.Files
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.test.EventPipe
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import com.sos.scheduler.engine.data.schedule.SchedulePath
+import com.sos.scheduler.engine.test.SchedulerTestUtils.writeConfigurationFile
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1031.JS1031IT._
-import java.io.File
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant.now
 import org.joda.time.format.ISODateTimeFormat
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 /** JS-1031 FIXED: An order with a missing schedule starts immediately after the JobScheduler starts. */
 @RunWith(classOf[JUnitRunner])
-final class JS1031IT extends FunSuite with ScalaSchedulerTest {
+final class JS1031IT extends FreeSpec with ScalaSchedulerTest {
 
-  override protected lazy val testConfiguration = TestConfiguration(
-    testClass = getClass,
-    terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def onBeforeSchedulerActivation(): Unit = {
-    eventPipe
-  }
+  override def onBeforeSchedulerActivation() = eventPipe
 
-  test("Missing test.schedule.xml should prevent order start") {
-    intercept[EventPipe.TimeoutException] {
-      eventPipe.nextKeyed[OrderTouchedEvent](testOrderKey, timeout = 5.s)
-    }
+  "Missing test.schedule.xml should prevent order start" in {
+    assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
     val at = now() + 5.s
-    val scheduleElem =
+    writeConfigurationFile(TestSchedulePath,
       <schedule>
         <at at={ISODateTimeFormat.dateHourMinuteSecond withZone DateTimeZone.getDefault print at}/>
-      </schedule>
-    Files.write(scheduleElem.toString(), new File(controller.environment.liveDirectory, "test.schedule.xml"), UTF_8)
-    instance[FolderSubsystem].updateFolders()
-    //controller.getEventBus.dispatchEvents()   // Nur bis v1.6 nötig
-    eventPipe.nextKeyed[OrderTouchedEvent](testOrderKey)
+      </schedule>)
+    sleep(2.s)
+    assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
+    eventPipe.nextKeyed[OrderTouchedEvent](TestOrderKey, timeout = 5.s)
   }
 }
 
 private object JS1031IT {
-  private val testOrderKey = OrderKey("/test", "1")
+  private val TestOrderKey = OrderKey("/test", "1")
+  private val TestSchedulePath = SchedulePath("/test")
 }
