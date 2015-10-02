@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.agent.data.web
 
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -23,9 +24,26 @@ final class AgentUrisTest extends FreeSpec {
       "http://example.com:9999/testPrefix/jobscheduler/agent/api/fileExists?file=/FILE+X%2B")
   }
 
-  "task.overview" in {
-    assert(agentUris.task.overview ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/api/task")
+  "task" - {
+    "overview" in {
+      assert(agentUris.task.overview ==
+        "http://example.com:9999/testPrefix/jobscheduler/agent/api/task")
+    }
+
+    "tasks" in {
+      assert(agentUris.task.tasks ==
+        "http://example.com:9999/testPrefix/jobscheduler/agent/api/task/")
+    }
+
+    "task" in {
+      assert(agentUris.task.tasks ==
+        "http://example.com:9999/testPrefix/jobscheduler/agent/api/task/")
+    }
+  }
+
+  "task.tasks" in {
+    assert(agentUris.task(AgentTaskId("AGENT/TASK-ID")) ==
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api/task/AGENT%2FTASK-ID")
   }
 
   "tunnel" - {

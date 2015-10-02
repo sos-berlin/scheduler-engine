@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.agent.data.web
 
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.web.AgentUris._
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import spray.http.Uri
@@ -23,6 +24,10 @@ final class AgentUris private(agentUriString: String) {
   
   object task {
     def overview = uriString(s"$Api/task")
+
+    def tasks = uriString(s"$Api/task/")
+
+    def apply(id: AgentTaskId) = uriString(Path(s"$Api/task") / id.string)
   }
 
   object tunnel {

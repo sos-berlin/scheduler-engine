@@ -7,10 +7,12 @@ import com.google.common.io.Files._
 import com.google.inject.{Guice, Provides}
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
+import com.sos.scheduler.engine.agent.client.AgentClientIT._
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile, RequestFileOrderSourceContent}
-import com.sos.scheduler.engine.agent.data.views.TaskHandlerView
+import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
@@ -33,6 +35,8 @@ import scala.collection.immutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.matching.Regex
+import spray.http.StatusCodes.InternalServerError
+import spray.httpx.UnsuccessfulResponseException
 
 /**
  * @author Joacim Zschimmer
@@ -143,10 +147,28 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
 
   "get /task" in {
     val view = awaitResult(client.task.overview, 2.s)
-    assert(view == TaskHandlerView(
+    assert(view == TaskHandlerOverview(
       isTerminating = false,
       currentTaskCount = 0,
-      totalTaskCount = 0,
-      tasks = Nil))
+      totalTaskCount = 0))
   }
+
+  "get /task/ (incomplete)" in {
+    val tasks = awaitResult(client.task.tasks, 2.s)
+    assert(tasks == Nil)
+    pending
+  }
+
+  "get /task/1-123 (incomplete)" in {
+    val e = intercept[UnsuccessfulResponseException] {
+      awaitResult(client.task(TestAgentTaskId), 2.s): TaskOverview
+    }
+    assert(e.response.status == InternalServerError)
+    assert(e.response.entity.asString contains "NoSuchElementException")
+    pending
+  }
+}
+
+object AgentClientIT {
+  private val TestAgentTaskId = AgentTaskId("1-123")
 }

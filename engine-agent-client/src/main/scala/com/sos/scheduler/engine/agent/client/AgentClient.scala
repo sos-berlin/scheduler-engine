@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.agent.client
 import akka.actor.ActorRefFactory
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
 import com.sos.scheduler.engine.agent.data.commands._
-import com.sos.scheduler.engine.agent.data.views.TaskHandlerView
+import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
 import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
@@ -25,6 +26,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.httpx.UnsuccessfulResponseException
 import spray.httpx.encoding.Gzip
 import spray.httpx.unmarshalling._
+import spray.json.DefaultJsonProtocol._
 import spray.json.JsBoolean
 
 /**
@@ -84,7 +86,11 @@ trait AgentClient {
     unmarshallingPipeline[JsBoolean].apply(Get(agentUris.fileExists(filePath))) map { _.value }
 
   object task {
-    final def overview: Future[TaskHandlerView] = get[TaskHandlerView](_.task.overview)
+    final def overview: Future[TaskHandlerOverview] = get[TaskHandlerOverview](_.task.overview)
+
+    final def tasks: Future[immutable.Seq[TaskOverview]] = get[immutable.Seq[TaskOverview]](_.task.tasks)
+
+    final def apply(id: AgentTaskId): Future[TaskOverview] = get[TaskOverview](_.task(id))
   }
 
   final def get[A: FromResponseUnmarshaller](uri: AgentUris ⇒ String): Future[A] =

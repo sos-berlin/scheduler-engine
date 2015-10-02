@@ -1,17 +1,16 @@
 package com.sos.scheduler.engine.agent.data.views
 
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import scala.collection.immutable
-import spray.json.DefaultJsonProtocol._
 
 /**
  * @author Joacim Zschimmer
  */
-final case class TaskHandlerView(
-  isTerminating: Boolean,
-  currentTaskCount: Int,
-  totalTaskCount: Int,
-  tasks: immutable.Seq[TaskOverview])
+trait TaskHandlerView {
 
-object TaskHandlerView {
-  implicit val MyJsonFormat = jsonFormat4(apply)
+  def overview: TaskHandlerOverview
+
+  def taskOverviews: immutable.Seq[TaskOverview]
+
+  def taskOverview(id: AgentTaskId): TaskOverview
 }
