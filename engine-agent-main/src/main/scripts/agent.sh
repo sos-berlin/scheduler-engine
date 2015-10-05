@@ -12,7 +12,4 @@ else
     logbackConfig="com/sos/scheduler/engine/agent/main/logback.xml"
 fi
 
-"$java" -classpath "$jarDir/*" -Dlogback.configurationFile="$logbackConfig" com.sos.scheduler.engine.agent.main.AgentMain "$@" &
-pid=$!
-trap "kill -s SIGTERM $pid && wait" SIGTERM SIGINT  # For Docker
-wait
+exec "$java" -classpath "$jarDir/*" -Dlogback.configurationFile="$logbackConfig" com.sos.scheduler.engine.agent.main.AgentMain "$@"
