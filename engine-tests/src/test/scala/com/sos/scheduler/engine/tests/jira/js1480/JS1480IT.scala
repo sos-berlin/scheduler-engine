@@ -30,7 +30,6 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val agentClient = instance[AgentClientFactory].apply(agentUri)
     val view = awaitSuccess(agentClient.task.overview)
     logger.info(view.toString)
-    assert(!view.isTerminating)
     assert(view.currentTaskCount == 1)
     assert(view.totalTaskCount == 1)
     val tasks = awaitSuccess(agentClient.task.tasks)

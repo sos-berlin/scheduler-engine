@@ -148,7 +148,6 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
   "get /task" in {
     val view = awaitResult(client.task.overview, 2.s)
     assert(view == TaskHandlerOverview(
-      isTerminating = false,
       currentTaskCount = 0,
       totalTaskCount = 0))
   }
