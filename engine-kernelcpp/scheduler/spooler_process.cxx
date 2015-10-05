@@ -398,8 +398,8 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         if (!log_filename().empty())
              parameters.push_back(object_server::Parameter("param", "-log=" + filtered_log_categories_as_string() + " >+" + log_filename()));
         parameters.push_back(object_server::Parameter("program", _spooler->_my_program_filename));
-        if (_spooler->settings()->_classic_agent_keep_alive_timeout < INT_MAX) {
-            parameters.push_back(object_server::Parameter("keep-alive", as_string(_spooler->settings()->_classic_agent_keep_alive_timeout)));
+        if (_spooler->settings()->_classic_agent_keep_alive_duration < INT_MAX) {
+            parameters.push_back(object_server::Parameter("keep-alive", as_string(_spooler->settings()->_classic_agent_keep_alive_duration)));
         }
         return parameters;
     }
@@ -460,9 +460,9 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
 
 struct Thread_api_process : Abstract_api_process {
     struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread {
-        Com_server_thread(object_server::Connection_to_own_server_thread* c, int keep_alive_timeout) : 
+        Com_server_thread(object_server::Connection_to_own_server_thread* c, int keep_alive_duration) : 
             object_server::Connection_to_own_server_thread::Server_thread(c),
-            _keep_alive_timeout(keep_alive_timeout)
+            _keep_alive_duration(keep_alive_duration)
         {
             set_thread_name("scheduler::Thread_api_process::Com_server_thread");
         }
@@ -475,7 +475,7 @@ struct Thread_api_process : Abstract_api_process {
                 _object_server = Z_NEW(Object_server);  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Abstract_process::pid()
                 _object_server->set_stdin_data(_connection->stdin_data());
                 _server = +_object_server;
-                result = run_server(_keep_alive_timeout);
+                result = run_server(_keep_alive_duration);
             } catch (exception& x) {
                 string msg = S() << "ERROR in Com_server_thread: " << x.what() << "\n";
                 Z_LOG2("scheduler", msg);
@@ -487,7 +487,7 @@ struct Thread_api_process : Abstract_api_process {
         }
 
         ptr<Object_server> _object_server;
-        int const _keep_alive_timeout;
+        int const _keep_alive_duration;
     };
 
     Thread_api_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
@@ -499,8 +499,8 @@ struct Thread_api_process : Abstract_api_process {
         Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
         _connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
         fill_connection(_connection);
-        int keep_alive_timeout = _spooler->settings()->_classic_agent_keep_alive_timeout;
-        _com_server_thread = Z_NEW(Com_server_thread(_connection, keep_alive_timeout));
+        int keep_alive_duration = _spooler->settings()->_classic_agent_keep_alive_duration;
+        _com_server_thread = Z_NEW(Com_server_thread(_connection, keep_alive_duration));
         _connection->start_thread(_com_server_thread);
         _spooler->log()->debug9(message_string("SCHEDULER-948", _connection->short_name()));  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
         Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
@@ -575,9 +575,8 @@ struct Async_tcp_operation : Async_operation {
     void signal_remote_task(int unix_signal);
     void close_remote_task(bool kill = false);
 
-
-    State _state;
-    Tcp_remote_api_process* _process;
+    public: State _state;
+    public: Tcp_remote_api_process* _process;
 };
 
 
@@ -610,7 +609,8 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
         _remote_scheduler_address(Host_and_port(conf._remote_scheduler_address)),
         _remote_process_id(0),
         _remote_pid(0),
-        _is_killed(false)
+        _is_killed(false),
+        _keep_alive_duration(spooler->settings()->_classic_agent_keep_alive_duration == 1/*Test*/? 0.01 : spooler->settings()->_classic_agent_keep_alive_duration)
     {}
 
     ~Tcp_remote_api_process() {
@@ -663,6 +663,15 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
             return false;
     }
 
+    private: void keep_alive() {
+        if (_async_tcp_operation && _async_tcp_operation->_state == Async_tcp_operation::s_running) {
+            bool sent = _xml_client_connection->send_keep_alive_space();  // Send a space which an old Agent will read as a prefix of the next XML command.
+            if (sent) {
+                log()->info(Message_string("SCHEDULER-727"));
+            }
+        }
+    }
+
     public: string obj_name() const {
         return "Tcp_remote_api_process " + short_name();
     }
@@ -710,6 +719,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
     private: Process_id _remote_process_id;
     private: pid_t _remote_pid;
     private: bool _is_killed;
+    private: Duration const _keep_alive_duration;
 };
 
 
@@ -965,7 +975,7 @@ ptr<Api_process> Api_process::new_process(Spooler* spooler, Prefix_log* log, con
 }
 
 
-bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Continue_flags )
+bool Tcp_remote_api_process::async_remote_start_continue(Async_operation::Continue_flags continue_flags)
 {
     bool something_done = true;     // spooler.cxx ruft async_continue() auf
 
@@ -1023,10 +1033,18 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
             _spooler->log()->debug9( message_string( "SCHEDULER-948", connection()->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
             something_done = true;
             _async_tcp_operation->_state = Async_tcp_operation::s_running;
+            _async_tcp_operation->set_async_delay(_keep_alive_duration.as_double());
+            break;
         }
 
-        case Async_tcp_operation::s_running:    
+        case Async_tcp_operation::s_running:
         {
+            if (!_keep_alive_duration.is_eternal()) {
+                if (continue_flags & Async_operation::cont_next_gmtime_reached) {
+                    keep_alive();
+                    _async_tcp_operation->set_async_delay(_keep_alive_duration.as_double());
+                }
+            }
             break;
         }
 
@@ -1036,6 +1054,7 @@ bool Tcp_remote_api_process::async_remote_start_continue( Async_operation::Conti
                 Z_LOG2( "zschimmer", Z_FUNCTION << " XML response " << dom_document.xml_string() );
                 something_done = true;
                 _async_tcp_operation->_state = Async_tcp_operation::s_running;
+                _async_tcp_operation->set_async_delay(_keep_alive_duration.as_double());
             }
             break;
         }
@@ -1263,7 +1282,7 @@ Process_class::Process_class( Scheduler* scheduler, const string& name )
 Process_class::~Process_class()
 {
     Z_DEBUG_ONLY( assert( _process_set.empty() ) );
-    Z_DEBUG_ONLY( assert( _waiting_jobs.empty() ) );
+    Z_DEBUG_ONLY(assert(_requestor_list.empty()));
 
     try
     {
@@ -1367,7 +1386,7 @@ void Process_class::set_max_processes( int max_processes )
 
     _max_processes = max_processes;
 
-    notify_a_process_is_idle();
+    check_then_notify_a_process_is_available();
 }
 
 //-----------------------------------------------------------------------Process_class::add_process
@@ -1377,8 +1396,6 @@ void Process_class::add_process(Process* process)
     _process_set.insert( process );
     _process_set_version++;
 }
-
-//--------------------------------------------------------------------------Spooler::remove_process
 
 void Process_class::remove_process(Process* process)
 {
@@ -1393,11 +1410,7 @@ void Process_class::remove_process(Process* process)
         check_for_replacing_or_removing();
     }
     else
-    if( !_waiting_jobs.empty() )
-    {
-        Job* job = *_waiting_jobs.rbegin();
-        job->notify_a_process_is_idle();
-    }
+        check_then_notify_a_process_is_available();
 }
 
 void Process_class::remove_file_order_source() {
@@ -1465,45 +1478,37 @@ bool Process_class::process_available( Job* for_job )
     if( _process_set.size()      >= _max_processes )  return false;
     if( _spooler->_process_count >= scheduler::max_processes )  return false;
 
-    if( _waiting_jobs.empty() )  return true;
-
     // Warten Jobs auf einen freien Prozess? 
     // Dann liefern wir nur true, wenn dieser Job der erste in der Warteschlange ist.
-    return *_waiting_jobs.rbegin() == for_job;
+    return _requestor_list.empty() || *_requestor_list.rbegin() == for_job;
 }
 
-//---------------------------------------------------------------Process_class::enqueue_waiting_job
-
-void Process_class::enqueue_waiting_job( Job* job )
-{
-    _waiting_jobs.push_back( job );
+void Process_class::enqueue_requestor(Process_class_requestor* requestor) {
+    _requestor_list.push_back(requestor);
 }
 
-//----------------------------------------------------------------Process_class::remove_waiting_job
+void Process_class::remove_requestor(Process_class_requestor* requestor) {
+    _requestor_list.remove(requestor);
+}
 
-void Process_class::remove_waiting_job( Job* waiting_job )
-{
-    _waiting_jobs.remove( waiting_job );
-
-    if( _process_set.size() < _max_processes  &&  !_waiting_jobs.empty() )
-    {
-        Job* job = *_waiting_jobs.rbegin();
-        job->notify_a_process_is_idle();
+void Process_class::check_then_notify_a_process_is_available() {
+    if (Process_class_requestor* o = waiting_requestor_or_null()) {
+        o->notify_a_process_is_available();
     }
 }
 
-//----------------------------------------------------------------------Process_class::need_process
-
-bool Process_class::need_process()
-{ 
-    return !_waiting_jobs.empty(); 
-}
-
-//----------------------------------------------------------Process_class::notity_a_process_is_idle
-
-void Process_class::notify_a_process_is_idle()
+Process_class_requestor* Process_class::waiting_requestor_or_null()
 {
-    if( !_waiting_jobs.empty() )  (*_waiting_jobs.begin())->notify_a_process_is_idle();
+    if (file_based_state() == File_based::s_active && !is_to_be_removed()) {
+        if (!_requestor_list.empty()) {
+            Z_FOR_EACH_CONST(Requestor_list, _requestor_list, i) {
+                Process_class_requestor* requestor = *i;
+                if (dynamic_cast<Task*>(requestor)) return requestor;  // Hanging tasks first!
+            }
+            return *_requestor_list.begin();
+        }
+    }
+    return NULL;
 }
 
 //-----------------------------------------------------------------------Process_class::dom_element
@@ -1520,16 +1525,28 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
         FOR_EACH( Process_set, _process_set, it )  processes_element.appendChild( (*it)->dom_element( document, show_what ) );
     }
 
-    if( !_waiting_jobs.empty() )
-    {
+    if (!_requestor_list.empty()) {
+        xml::Element_ptr waiting_tasks_element = document.createElement("waiting_tasks");
+        result.appendChild( waiting_tasks_element );
+        FOR_EACH(Requestor_list, _requestor_list, i) {
+            if (Task* task = dynamic_cast<Task*>(*i)) {
+                xml::Element_ptr task_element = document.createElement("task");
+                task_element.setAttribute("job", task->job()->path());
+                task_element.setAttribute("task", task->id());
+                waiting_tasks_element.appendChild(task_element);
+            }
+        }
+    }
+
+    if (!_requestor_list.empty()) {
         xml::Element_ptr waiting_jobs_element = document.createElement( "waiting_jobs" );
         result.appendChild( waiting_jobs_element );
-
-        FOR_EACH( Job_list, _waiting_jobs, j )  //waiting_jobs_element.appendChild( (*j)->dom_element( document, show_standard ) );
-        {
-            xml::Element_ptr job_element = document.createElement( "job" );
-            job_element.setAttribute( "job", (*j)->name() );
-            waiting_jobs_element.appendChild( job_element );
+        FOR_EACH(Requestor_list, _requestor_list, i) {  //waiting_jobs_element.appendChild( (*j)->dom_element( document, show_standard ) );
+            if (Job* job = dynamic_cast<Job*>(*i)) {
+                xml::Element_ptr job_element = document.createElement( "job" );
+                job_element.setAttribute( "job", job->name() );
+                waiting_jobs_element.appendChild( job_element );
+            }
         }
     }
 

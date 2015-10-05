@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
@@ -34,7 +33,7 @@ final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   for ((testName, processClass) ← processClasses) {
     s"stdout and stderr of shell, monitored shell and job jobs - $testName" in {
       scheduler executeXml processClass
-      autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      withEventPipe { eventPipe ⇒
         val shellRun = runJobFuture(JobPath("/test-shell"))
         val monitoredShellRun = runJobFuture(JobPath("/test-shell-monitor"))
         val javaRun = runJobFuture(JobPath("/test-java"))

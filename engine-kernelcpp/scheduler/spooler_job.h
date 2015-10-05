@@ -19,6 +19,7 @@ struct Standard_job;
 
 struct Job : file_based< Job, Job_folder, Job_subsystem >,
              javabridge::has_proxy<Job>,
+             Process_class_requestor,
              Object
 {
     enum State
@@ -110,7 +111,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     ptr<Task>                   start_task                  (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) { return start_task_(params, environment, at, force, task_name, web_service_name); }
     virtual ptr<Task>           start_task_                 (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) = 0;
     virtual void                enqueue_taskPersistentState (const TaskPersistentStateJ&)           = 0;
-    virtual bool                try_to_end_task             (Job* for_job, Process_class*)          = 0;
+    virtual bool                try_to_end_task             (Process_class_requestor*, Process_class*) = 0;
     
     virtual void                remove_running_task         ( Task* )                               = 0;
     virtual void                stop                        ( bool end_all_tasks )                  = 0;
@@ -135,7 +136,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                set_state_text              ( const string& text )                  = 0;
     virtual string              state_text                  () const                                = 0;
 
-    virtual void                notify_a_process_is_idle    ()                                      = 0;
+    virtual void                notify_a_process_is_available()                                     = 0;
 
     virtual ptr<Com_job>&       com_job                     ()                                      = 0;
 
@@ -338,7 +339,7 @@ struct Standard_job : Job
     void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
     string                      state_text                  () const                                { return _state_text; }
 
-    void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
+    void                        notify_a_process_is_available();
     void                        remove_waiting_job_from_process_list();
     void                        on_locks_available          ();
 
@@ -362,7 +363,7 @@ struct Standard_job : Job
     Time                        next_order_time             () const;
     Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause, const Process_class*);
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
-    bool                        try_to_end_task             (Job* for_job, Process_class*);
+    bool                        try_to_end_task             (Process_class_requestor*, Process_class*);
     void                        kill_queued_task            ( int task_id );
     void                        end_tasks                   ( const string& task_warning );
     ptr<Module_instance>        create_module_instance      (Process_class*, const string& remote_scheduler, Task*);

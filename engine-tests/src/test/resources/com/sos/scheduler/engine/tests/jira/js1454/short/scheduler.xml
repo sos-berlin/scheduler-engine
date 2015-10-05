@@ -4,7 +4,7 @@
 >
     <config>
         <params>
-            <param name="scheduler.agent.keep_alive" value="1"/>
+            <param name="scheduler.agent.keep_alive" value="TEST"/>
         </params>
         <security>
             <allowed_host host="127.0.0.1" level="all"/>

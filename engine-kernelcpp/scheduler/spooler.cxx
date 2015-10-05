@@ -3311,9 +3311,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _argv = argv;
     _parameter_line = parameter_line;
 
-    if (_is_service) {
-        assign_stdout();
-    }
     _java_subsystem = new_java_subsystem(this);
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
@@ -3343,6 +3340,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     if( _state_cmd != sc_load_config )  load();
     if( !_config_element_to_load )  z::throw_xc( "SCHEDULER-116", _spooler_id );
 
+    if (_is_service) {
+        assign_stdout();
+    }
     //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
     //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
 

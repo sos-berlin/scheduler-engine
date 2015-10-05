@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.agent.client.main
 
 import com.sos.scheduler.engine.agent.client.main.AgentClientMainIT._
-import com.sos.scheduler.engine.agent.command.CommandExecutor
+import com.sos.scheduler.engine.agent.command.{CommandExecutor, CommandMeta}
 import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{Command, Terminate}
 import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.soslicense.LicenseKeyChecker
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import org.junit.runner.RunWith
@@ -30,7 +29,7 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
   override protected def extraAgentModule = new ScalaAbstractModule {
     def configure() = {
       bindInstance[CommandExecutor](new CommandExecutor {
-        def executeCommand(command: Command, licenseKey: Option[LicenseKeyChecker]): Future[command.Response] = {
+        def executeCommand(command: Command, meta: CommandMeta): Future[command.Response] = {
           val response = command match {
             case ExpectedTerminate ⇒ EmptyResponse
           }

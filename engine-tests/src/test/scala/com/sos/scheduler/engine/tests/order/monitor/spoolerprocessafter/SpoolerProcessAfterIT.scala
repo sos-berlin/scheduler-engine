@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -14,9 +13,11 @@ import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskId}
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.deleteAndWriteConfigurationFile
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT._
@@ -57,11 +58,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
     testName - {
       for (mode ← allAgentModes) {
         s"$mode" in {
-          def t() = myTest(index, mode, setting, expected, expectedTaskId.next())
-          if (mode != NoAgent && index == 2)  // FIXME JS-1330 exit 7 via agent results in order state ERROR instead of InitialState and JobIsStopped
-            pendingUntilFixed(t())
-          else
-            t()
+          myTest(index, mode, setting, expected, expectedTaskId.next())
         }
       }
     }
@@ -70,9 +67,8 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
   protected override def onSchedulerActivated() = awaitResult(agent.start(), 10.s)
 
   private def myTest(index: Int, agentMode: AgentMode, setting: Setting, expected: Expected, expectedTaskId: TaskId): Unit =
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
-      scheduler executeXml <process_class name="test" remote_scheduler={agentMode.addressOption().orNull} replace="true"/>
-
+    withEventPipe { eventPipe ⇒
+      deleteAndWriteConfigurationFile(ProcessClassPath("/test"), <process_class remote_scheduler={agentMode.addressOption().orNull}/>)
       val job = jobSubsystem.job(setting.jobPath)
 
       try {

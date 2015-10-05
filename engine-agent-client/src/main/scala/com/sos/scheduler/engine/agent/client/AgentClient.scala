@@ -1,10 +1,13 @@
 package com.sos.scheduler.engine.agent.client
 
-import akka.actor.ActorSystem
+import akka.actor.ActorRefFactory
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
+import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
 import com.sos.scheduler.engine.agent.data.commands._
+import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
+import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
@@ -22,6 +25,8 @@ import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.UnsuccessfulResponseException
 import spray.httpx.encoding.Gzip
+import spray.httpx.unmarshalling._
+import spray.json.DefaultJsonProtocol._
 import spray.json.JsBoolean
 
 /**
@@ -32,11 +37,11 @@ import spray.json.JsBoolean
  * @author Joacim Zschimmer
  */
 trait AgentClient {
-  import actorSystem.dispatcher
+  import actorRefFactory.dispatcher
 
   protected[client] val agentUri: String
   protected def licenseKeys: immutable.Iterable[LicenseKeyString]
-  implicit protected val actorSystem: ActorSystem
+  implicit protected val actorRefFactory: ActorRefFactory
 
   protected lazy val agentUris = AgentUris(agentUri)
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
@@ -53,9 +58,9 @@ trait AgentClient {
     logger.debug(s"Execute $command")
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
-      case command: StartTask ⇒ (nonCachingHttpResponsePipeline ~> unmarshal[StartTaskResponse]).apply(Post(agentUris.command, command: Command))
+      case command: StartTask ⇒ unmarshallingPipeline[StartTaskResponse].apply(Post(agentUris.command, command: Command))
       case (_: DeleteFile | _: MoveFile | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
-        (nonCachingHttpResponsePipeline ~> unmarshal[EmptyResponse.type]).apply(Post(agentUris.command, command: Command))
+        unmarshallingPipeline[EmptyResponse.type].apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] } recover {
       case e: UnsuccessfulResponseException if e.response.status == InternalServerError ⇒
@@ -71,14 +76,27 @@ trait AgentClient {
       addHeader(Accept(`application/json`)) ~>
         addLicenseKeys ~>
         encode(Gzip) ~>
-        sendReceive(actorSystem, actorSystem.dispatcher, timeout) ~>
+        sendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
         decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
     pipeline(Post(agentUris.command, command: Command))
   }
 
   final def fileExists(filePath: String): Future[Boolean] =
-    (nonCachingHttpResponsePipeline ~> unmarshal[JsBoolean]).apply(Get(Uri(agentUris.fileExists(filePath)))) map { _.value }
+    unmarshallingPipeline[JsBoolean].apply(Get(agentUris.fileExists(filePath))) map { _.value }
+
+  object task {
+    final def overview: Future[TaskHandlerOverview] = get[TaskHandlerOverview](_.task.overview)
+
+    final def tasks: Future[immutable.Seq[TaskOverview]] = get[immutable.Seq[TaskOverview]](_.task.tasks)
+
+    final def apply(id: AgentTaskId): Future[TaskOverview] = get[TaskOverview](_.task(id))
+  }
+
+  final def get[A: FromResponseUnmarshaller](uri: AgentUris ⇒ String): Future[A] =
+    unmarshallingPipeline[A].apply(Get(uri(agentUris)))
+
+  private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"AgentClient($agentUri)"
 }

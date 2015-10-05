@@ -39,6 +39,8 @@ namespace job {
     struct Try_deleting_files_call;
     struct Killing_task_call;
     struct Kill_timeout_call;
+    struct Process_class_available_call;
+    struct Task_do_something_call;
 }
 
 //--------------------------------------------------------------------------------------Start_cause
@@ -66,6 +68,7 @@ string                          start_cause_name            ( Start_cause );
 struct Task : Object, 
               Abstract_scheduler_object,
               Dependant,
+              Process_class_requestor,
               javabridge::has_proxy<Task>
 {
     enum State
@@ -156,7 +159,7 @@ struct Task : Object,
 
     enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
     void                        cmd_end                     (End_mode = end_normal, const Duration& timeout = Duration(0));
-    void                        cmd_nice_end                (Job* for_job);
+    void                        cmd_nice_end                (Process_class_requestor*);
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
@@ -198,8 +201,10 @@ struct Task : Object,
     void                        on_call                     (const job::Try_deleting_files_call&);
     void                        on_call                     (const job::Killing_task_call&);
     void                        on_call                     (const job::Kill_timeout_call&);
-
-    Task_subsystem*             thread                      ()                                      { return _thread; }
+    void on_call(const job::Process_class_available_call&);
+    void on_call(const job::Task_do_something_call&);
+    
+    void notify_a_process_is_available();
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
 
@@ -220,7 +225,7 @@ struct Task : Object,
     void                        merge_environment           ( const Com_variable_set* e )           { _environment->merge( e ); }
     Com_variable_set*           environment_or_null         () const                                { return _environment; }
 
-    bool                        has_error                   ()                                      { return _error != NULL; }
+    bool                        has_error                   () const                                { return _error != NULL; }
     void                    set_error_xc_only               ( const zschimmer::Xc& );
     void                    set_error_xc_only               ( const Xc& );
     void                    set_error_xc_only_base          ( const Xc& );
@@ -265,12 +270,7 @@ struct Task : Object,
         return _process_class;
     }
 
-    public: bool on_requisite_loaded(File_based* file_based) { 
-        if (dynamic_cast<Process_class*>(file_based) && _state == s_waiting_for_process) {
-            do_something();
-        }
-        return true;
-    }
+    public: bool on_requisite_loaded(File_based* file_based);
 
     public: bool on_requisite_to_be_removed(File_based*) { 
         cmd_end(); 
@@ -379,7 +379,6 @@ struct Task : Object,
     string                     _obj_name;
 
     Standard_job*              _job;
-    Task_subsystem*            _thread;
     Task_history               _history;
     typed_call_register<Task>  _call_register;
     ptr<Async_operation>       _sync_operation;

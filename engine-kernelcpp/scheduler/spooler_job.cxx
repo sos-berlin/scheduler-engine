@@ -2718,7 +2718,7 @@ void Standard_job::withdraw_order_request()
 
 //-----------------------------------------------------------Standard_job::notify_a_process_is_idle
 
-void Standard_job::notify_a_process_is_idle()
+void Standard_job::notify_a_process_is_available()
 {
     _waiting_for_process_try_again = true;
     _call_register.call<Process_available_call>();
@@ -2732,7 +2732,7 @@ void Standard_job::remove_waiting_job_from_process_list()
     {
         _waiting_for_process = false;
         if (Process_class* process_class = default_process_class_or_null()) {
-            process_class->remove_waiting_job( this );
+            process_class->remove_requestor(this);
         }
     }
 
@@ -2749,7 +2749,7 @@ bool Standard_job::on_requisite_loaded( File_based* file_based )
         assert(file_based == default_process_class());
         assert( dynamic_cast<Process_class*>( file_based ) );
         if (_waiting_for_process) {
-            notify_a_process_is_idle();
+            notify_a_process_is_available();
         }
     }
 
@@ -2873,12 +2873,12 @@ ptr<Task> Standard_job::task_to_start()
                             Message_string m ( "SCHEDULER-949", _default_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
                             if( task )  m.insert( 2, task->obj_name() );
                             log()->info( m );
-                            process_class->enqueue_waiting_job( this );
+                            process_class->enqueue_requestor(this);
                             _waiting_for_process = true;
                         }
 
                         _waiting_for_process_try_again = false;
-                        _spooler->task_subsystem()->try_to_free_process( this, process_class, now );     // Beendet eine Task in s_running_waiting_for_order
+                        _spooler->task_subsystem()->try_to_free_process(this, process_class);     // Beendet eine Task in s_running_waiting_for_order
                     }
                 }
                 else
@@ -3595,12 +3595,12 @@ string Standard_job::time_zone_name() const
 
 //--------------------------------------------------------------------Standard_job::try_to_end_task
 
-bool Standard_job::try_to_end_task(Job* for_job, Process_class* process_class) 
+bool Standard_job::try_to_end_task(Process_class_requestor* for_requestor, Process_class* process_class) 
 {
     Z_FOR_EACH(Task_set, _running_tasks, i) {
         Task* task = *i;
         if (task->is_idle() && task->process_class_or_null() == process_class) {
-            task->cmd_nice_end( for_job );
+            task->cmd_nice_end(for_requestor);
             return true;
         }
     }

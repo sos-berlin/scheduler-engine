@@ -128,36 +128,12 @@ bool Task_subsystem::is_ready_for_termination()
 
 //--------------------------------------------------------------Task_subsystem::try_to_free_process
 
-bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_class, const Time& )
+bool Task_subsystem::try_to_free_process(Process_class_requestor* for_requestor, Process_class* process_class)
 {
-/*  Was passiert, wenn ein zweiter Job try_to_free_process() rufen?
-    Der beendet doch keine zweite Task, weil die vom ersten Job beendete findet!
-    Die Task müsste markiert werden. 
-    Aber das wird zu komplizert, wir lassen das erstmal.
-
-    Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it )
-    {
-        Job* job = *it;
-        if( job->_module._process_class == process_class )
-        {
-            FOR_EACH_TASK( it, task )
-            {
-                if( task->job() == job )
-                {
-                    if( task->ending() )
-                    {
-                        if( task->ending_since() + 60 >= now )  return;   // Task beendet sich (seit weniger als eine Minute)
-                        _spooler->log()->warn( task->obj_name() + " beendet sich jetzt schon eine Minute. Wir versuchen eine andere Task zu beenden" );
-                    }
-                }
-            }
-        }
-    }
-*/
     build_prioritized_order_job_array();
     Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it ) {
         Job* job = *it;
-        bool ok = job->try_to_end_task(for_job, process_class);
+        bool ok = job->try_to_end_task(for_requestor, process_class);
         if (ok) break;
     }
 

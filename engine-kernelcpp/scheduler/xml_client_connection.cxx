@@ -250,6 +250,13 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
     return something_done;
 }
 
+bool Xml_client_connection::send_keep_alive_space() {
+    if (_state == s_connected) {
+        return _socket_operation->send_keep_alive_space();
+    } else
+        return false;
+}
+
 //---------------------------------------------------------Xml_client_connection::async_state_text_
 
 string Xml_client_connection::state_name( State state )

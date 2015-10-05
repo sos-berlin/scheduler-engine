@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
@@ -45,7 +44,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
   "Error when adding the new order is logged and ignored" in {
     controller.toleratingErrorCodes(Set(MissingJobchainCode, CommandFailedCode)) {
       eventBus.awaitingKeyedEvent[OrderFinishedEvent](ErrorOrderKey) {
-        autoClosing(controller.newEventPipe()) { eventPipe ⇒
+        withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
           eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(MissingJobchainCode) }
           eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(CommandFailedCode) }

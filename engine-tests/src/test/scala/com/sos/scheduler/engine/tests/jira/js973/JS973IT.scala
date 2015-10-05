@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -70,7 +69,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   }
 
   "An API task ignores scheduer.remote_scheduler" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, expectedResult = "**")
       eventPipe.nextWithTimeoutAndCondition[WarningLogEvent](0.s) { _.codeOption == Some(MessageCode("SCHEDULER-484")) }
       eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
@@ -78,7 +77,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   }
 
 //  s"For an order, the API task running on right remote scheduler is selected" in {
-//    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+//    withEventPipe { eventPipe ⇒
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent)
 //      val aTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent)
@@ -160,7 +159,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   }
 
   private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddressString], expectedResult: String): Unit = {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       scheduler executeXml newOrder(orderKey, remoteScheduler)
       eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey }.result should startWith(expectedResult)
     }

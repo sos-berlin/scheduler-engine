@@ -130,7 +130,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-267", "Error when storing the log in table $1: $2" },
     { "SCHEDULER-268", "Log of task $1 is not readable from database: $2" },
     { "SCHEDULER-269", "Error when closing the job history: $1" },
-    { "SCHEDULER-271", "Task is being terminated in favour of job $1" },
+    { "SCHEDULER-271", "Task is being terminated in favour of $1" },
     { "SCHEDULER-272", "Terminating task after reaching deadline <job timeout=\"$1\">" },
     { "SCHEDULER-273", "Killing subprocess $1" },
     { "SCHEDULER-274", "Error when killing subprocess $1: $2" },
@@ -361,7 +361,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-946", "setback(): order has been set back $1 times, until $2" },
     { "SCHEDULER-947", "setback(): order has been set back $1 times. This is more than $2 - the maximum for this job" },
     { "SCHEDULER-948", "Process $1 started" },
-    { "SCHEDULER-949", "Job will be executed when a process of process class '$1' becomes available" },
+    { "SCHEDULER-949", "Execution is deferred until a process of process class '$1' becomes available" },
     { "SCHEDULER-950", "Scheduler has been registered" },
     { "SCHEDULER-951", "Daylight saving time has begun" },
     { "SCHEDULER-952", "Daylight saving time has ended, now it's standard time" },
@@ -509,6 +509,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-724", "Error ignored when trying to obtain directory change notifications for $1: $2" },
     { "SCHEDULER-725", "Persistent Order deleted from database" },
     { "SCHEDULER-726", "Task runs on $1" },
+    { "SCHEDULER-727", "Keep-alive package sent to Agent" },
     {}
 };
 } //namespace sos

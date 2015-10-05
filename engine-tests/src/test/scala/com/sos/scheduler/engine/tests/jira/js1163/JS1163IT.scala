@@ -4,13 +4,12 @@ import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.scheduler.engine.data.job.{ReturnCode, JobPath}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.Unstop
@@ -55,13 +54,17 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\ntouch $killScriptCallsDir/$$arguments\n"  // echo only if script succeeds
   }
   onClose {
-    list(killScriptCallsDir).toVector foreach delete
+    list(killScriptCallsDir) foreach delete
     delete(killScriptCallsDir)
     delete(killScriptFile)
   }
   override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScriptFile = Some(killScriptFile))
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
+
+  private val universalAgentSetting = new UniversalAgentSetting(agentUri = agentUri)
+  private val classicAgentSetting = new ClassicAgentSetting(tcpPort = tcpPort)
+  private val settings = List(NoAgentSetting, universalAgentSetting, classicAgentSetting)
 
   "kill_task with timeout but without immediately=true is rejected" in {
     val run = runJobFuture(TestJobPath)
@@ -72,15 +75,11 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "SIGKILL" - {
-    val settings = List(
-      ("Without agent", { () ⇒ None }),
-      ("With Universal Agent", { () ⇒ Some(agentUri) }),
-      ("With TCP classic agent", { () ⇒ Some(s"127.0.0.1:$tcpPort")}))
-    for ((testVariantName, agentAddressOption) ← settings) {
-      testVariantName - {
-        val jobPaths = List(StandardJobPath, StandardMonitorJobPath, ApiJobPath)
+    for (setting ← settings) {
+      s"$setting" - {
+        val jobPaths = List(StandardJobPath) //, StandardMonitorJobPath, ApiJobPath)
         s"(preparation: run and kill tasks)" in {
-          deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))
+          deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val runs = jobPaths map { runJobFuture(_) }
             awaitSuccess(Future.sequence(runs map { _.started }))
@@ -98,11 +97,15 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
             assert(job(jobPath).state == JobState.stopped)
+            results(jobPath).returnCode.normalized shouldEqual (jobPath match {
+              case StandardMonitorJobPath | ApiJobPath ⇒ ReturnCode(1)   // Warum nicht auch SIGKILL ???
+              case StandardJobPath ⇒ setting.shellSigkillReturnCode
+            })
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
 
-        if (agentAddressOption() contains agentUri) {
+        if (setting eq universalAgentSetting) {
           "Kill script called" in {
             // Each filename in the directory is the argument list of the kill script call.
             val names = list(killScriptCallsDir).toVector map { _.getFileName.toString }
@@ -135,14 +138,10 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   private def addUnixTests(): Unit = {
-    val settings = List(
-      ("Without agent", { () ⇒ None }),
-      ("With Universal Agent", { () ⇒ Some(agentUri) }),
-      ("With TCP classic agent", { () ⇒ Some(s"127.0.0.1:$tcpPort")}))
-    for ((testVariantName, agentAddressOption) ← settings) {
-      testVariantName - {
+    for (setting ← settings) {
+      s"$setting" - {
         s"(preparation: run and kill tasks)" in {
-          deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = agentAddressOption().toList))
+          deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
@@ -190,7 +189,6 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).duration should be < UndisturbedDuration
             // Why not this ??? results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGKILL)
             results(jobPath).returnCode.normalized shouldEqual (jobPath match {
-              case IgnoringJobPath if agentAddressOption() == Some(agentUri) ⇒ ReturnCode(1)  // Warum nicht auch SIGKILL ???
               case IgnoringJobPath ⇒ ReturnCode(SIGKILL)
               case IgnoringMonitorJobPath ⇒ ReturnCode(1)   // Warum nicht auch SIGKILL ???
             })
@@ -199,13 +197,13 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           }
         }
 
-          for ((jobPath, expectedSpoolerProcessResult) ← List(StandardMonitorJobPath → false, TrapMonitorJobPath → false/*, IgnoringMonitorJobPath → true ???*/)) {
+        for ((jobPath, expectedSpoolerProcessResult) ← List(StandardMonitorJobPath → false, TrapMonitorJobPath → false/*, IgnoringMonitorJobPath → true ???*/)) {
           s"$jobPath - spooler_process_after was called" in {
             results(jobPath).logString should include(TestMonitor.spoolerProcessAfterString(expectedSpoolerProcessResult))
           }
         }
 
-        s"$testVariantName - API job has been directly aborted" in {
+        s"$setting - API job has been directly aborted" in {
           results(ApiJobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
           results(ApiJobPath).endedInstant should be < killTime + 2.s
         }
@@ -215,7 +213,6 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 }
 
 private[js1163] object JS1163IT {
-  private val logger = Logger(getClass)
   private val TestJobPath = JobPath("/test")
   private val WindowsJobPath = JobPath("/test-windows")
   private val StandardJobPath = JobPath("/test-standard")
@@ -234,4 +231,30 @@ private[js1163] object JS1163IT {
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
+
+  private trait Setting {
+    def name: String
+    def agentUriOption: Option[String]
+    final def shellSigkillReturnCode = if (isWindows) windowsTerminateProcessReturnCode else ReturnCode(SIGKILL)
+    def windowsTerminateProcessReturnCode: ReturnCode
+    override final def toString = name
+  }
+
+  private object NoAgentSetting extends Setting {
+    def name = "Without agent"
+    def agentUriOption = None
+    def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
+  }
+
+  private class UniversalAgentSetting(agentUri: String) extends Setting {
+    def name = "With Universal Agent"
+    def agentUriOption = Some(agentUri)
+    def windowsTerminateProcessReturnCode = ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
+  }
+
+  private class ClassicAgentSetting(tcpPort: Int) extends Setting {
+    def name = "With TCP classic agent"
+    def agentUriOption = Some(s"127.0.0.1:$tcpPort")
+    def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
+  }
 }

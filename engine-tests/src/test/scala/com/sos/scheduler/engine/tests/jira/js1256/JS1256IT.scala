@@ -24,7 +24,7 @@ final class JS1256IT extends FreeSpec with ScalaSchedulerTest {
       val bigFile = directory / "JS-1256.tmp"
       onClose { bigFile.delete() }
       allocateFile(bigFile, FileSize)
-      autoClosing(controller.newEventPipe()) { eventPipe ⇒
+      withEventPipe { eventPipe ⇒
         scheduler executeXml JobChainElem(directory)
         eventPipe.nextKeyed[OrderFinishedEvent](TestJobChainPath.orderKey(bigFile.getPath))
         bigFile should not be 'exists

@@ -4,7 +4,6 @@
 
     <artifactId>engine-plugins</artifactId>
     <packaging>pom</packaging>
-
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>

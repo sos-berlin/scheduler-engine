@@ -42,7 +42,7 @@ struct Log
     void                        write                       ( Log_level l, Prefix_log* extra, Prefix_log* order, const char* line )         { write( l, extra, order, line, int_strlen(line) ); }
 
     Fill_zero                  _zero_;
-    Spooler*                   _spooler;
+    Spooler* const             _spooler;
     string                     _directory;
     File_path                  _filename;
     int                        _file;

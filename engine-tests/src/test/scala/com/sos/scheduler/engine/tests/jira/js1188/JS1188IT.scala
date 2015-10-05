@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.jira.js1188
 
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
@@ -62,7 +61,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "With unreachable agents, task waits 2 times agentConnectRetryDelay because no agent is reachable" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       val taskRun = runJobFuture(AgentsJobPath)
       waitingTaskClosedFuture = taskRun.closed
       waitingStopwatch = new Stopwatch
@@ -81,7 +80,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "After starting 2 agents and after process class has waited the third cycle, the waiting task can be finished" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       startAndWaitForAgents(agentRefs(1), agentRefs(3)) // Start 2 out of n agents
       awaitSuccess(waitingTaskClosedFuture) // Waiting task has finally finished
       waitingStopwatch.duration should be > 3*AgentConnectRetryDelay
@@ -95,7 +94,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
       for (_ ← 1 to 2*n + 1) runJobAndWaitForEnd(AgentsJobPath)
       stopwatch.duration should be < TestTimeout
@@ -104,7 +103,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "Replacing configuration file .process_class.xml" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       assertResult(List("http://127.0.0.254:1", "http://127.0.0.253:1")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
@@ -120,7 +119,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "Replacing configuration file .process_class.xml, removing remote_schedulers" in {
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       assertResult(List(s"${agentRefs(1).uri}")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }

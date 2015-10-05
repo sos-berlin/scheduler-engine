@@ -18,6 +18,11 @@ struct Process_class_folder;
 struct Process_class_subsystem;
 
 
+struct Process_class_requestor {
+    virtual void notify_a_process_is_available() = 0;
+};
+
+
 struct Api_process_configuration : javabridge::has_proxy<Api_process_configuration> {
     Api_process_configuration() : _zero_(this + 1) {}
     Fill_zero _zero_;
@@ -168,10 +173,10 @@ struct Process_class : Process_class_configuration,
     Process*                    new_process                 (const Api_process_configuration*, Prefix_log*);
     Process*                    select_process_if_available (const Api_process_configuration*, Prefix_log*);
     bool                        process_available           ( Job* for_job );
-    void                        enqueue_waiting_job         ( Job* );
-    void                        remove_waiting_job          ( Job* );
-    bool                        need_process                ();
-    void                        notify_a_process_is_idle    ();
+    void enqueue_requestor(Process_class_requestor*);
+    void remove_requestor(Process_class_requestor*);
+    Process_class_requestor* waiting_requestor_or_null();
+    void                        check_then_notify_a_process_is_available    ();
 
     typedef stdext::hash_set< ptr<Process> > Process_set;
     Process_set&                process_set                 () { return _process_set; }
@@ -198,8 +203,8 @@ struct Process_class : Process_class_configuration,
 
     Fill_zero                  _zero_;
 
-    typedef list< ptr<Job> >    Job_list;
-    Job_list                   _waiting_jobs;
+    typedef list<Process_class_requestor*> Requestor_list;
+    Requestor_list _requestor_list;
 
     Process_set                _process_set;
     int                        _process_set_version;

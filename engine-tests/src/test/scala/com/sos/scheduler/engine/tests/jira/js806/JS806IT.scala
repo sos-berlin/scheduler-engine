@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js806
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -26,7 +25,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
 
   "Change of order configuration file while order is set back should be effective when order has been reset" in {
     val myOrderKey = SetbackJobChainPath orderKey "A"
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       variableSet("TestJob.setback") = true.toString
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
@@ -44,7 +43,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
   "Change of order configuration file while order is suspended should be effective when order has been reset" in {
     val jobChainPath = SuspendingJobChainPath
     val myOrderKey = jobChainPath orderKey "A"
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
@@ -64,7 +63,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
   "Change of order configuration file while order is running should be effective when order is finished" in {
     val jobChainPath = StoppingJobChainPath
     val myOrderKey = jobChainPath orderKey "A"
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
@@ -81,7 +80,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
   "Change of order configuration file while order is set back should be effective when order is finished" in {
     // Wie vorheriger Test, aber komplizierter mit setback
     val myOrderKey = SetbackJobChainPath orderKey "B"
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       variableSet("TestJob.setback") = true.toString
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)

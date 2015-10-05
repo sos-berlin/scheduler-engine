@@ -39,17 +39,19 @@ extends EventHandlerAnnotated with HasCloser {
     events.toVector
   }
 
-  def nextAny[E <: Event : ClassTag]: E =
-    nextEvent[E](defaultTimeout, EveryEvent)
+  def nextAny[E <: Event : ClassTag]: E = next[E]()
 
   def nextKeyed[E <: KeyedEvent : ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
-    nextEvent[E](timeout, { _.key == key })
+    next[E]({ e: E ⇒ e.key == key }, timeout)
 
   def nextWithCondition[E <: Event : ClassTag](condition: E ⇒ Boolean): E =
-    nextEvent[E](defaultTimeout, condition)
+    next[E](condition, defaultTimeout)
 
   def nextWithTimeoutAndCondition[E <: Event : ClassTag](timeout: Duration)(condition: E ⇒ Boolean): E =
-    nextEvent[E](timeout, condition)
+    next[E](condition, timeout)
+
+  def next[E <: Event : ClassTag](predicate: E ⇒ Boolean = EveryEvent, timeout: Duration = defaultTimeout): E =
+    nextEvent2(timeout, predicate, implicitClass[E])
 
   /**
    * @return All so far queued events of type E.
@@ -60,9 +62,6 @@ extends EventHandlerAnnotated with HasCloser {
     catch { case _: TimeoutException ⇒ }
     result.toList
   }
-
-  private def nextEvent[E <: Event : ClassTag](timeout: Duration, predicate: E ⇒ Boolean): E =
-    nextEvent2(timeout, predicate, implicitClass[E])
 
   private def nextEvent2[E <: Event](timeout: Duration, predicate: E ⇒ Boolean, expectedEventClass: Class[E]): E = {
     val until = now() + timeout

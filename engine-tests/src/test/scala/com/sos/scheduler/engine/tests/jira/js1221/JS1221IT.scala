@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1221
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -49,7 +48,7 @@ final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
 
   private def checkFirstJobChainNodeIsSkipped(file: File)(body: ⇒ Unit): Unit = {
     val orderKey = TestJobChainPath.orderKey(file.getPath)
-    autoClosing(controller.newEventPipe()) { eventPipe ⇒
+    withEventPipe { eventPipe ⇒
       body
       eventPipe.nextAny[TaskStartedEvent].jobPath shouldEqual BJobPath
       eventPipe.nextKeyed[OrderStepStartedEvent](orderKey).state shouldEqual BOrderState

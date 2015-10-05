@@ -234,6 +234,10 @@ struct Module_instance : Object
 
     virtual bool                try_to_get_process          (const Api_process_configuration* = NULL);
     virtual void                detach_process              ();
+    
+    bool has_process() const {
+        return _process != NULL;
+    }
 
     virtual Async_operation*    close__start                ();
     virtual void                close__end                  ();

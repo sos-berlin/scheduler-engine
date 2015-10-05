@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1301.JS1301IT._
-import java.nio.file.Files
+import java.nio.file.Files.delete
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -56,23 +56,21 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val orderKey = AJobChainPath orderKey "DELETE"
     val file = testEnvironment.fileFromPath(AProcessClassPath)
     val fileContent = file.xml
-    eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](AProcessClassPath) {
-      eventBus.awaitingEvent2[TaskEndedEvent](predicate = _.jobPath == JavaJobPath, timeout = 10.s) {
-        eventBus.awaitingKeyedEvent[OrderStepStartedEvent](orderKey) {
-          scheduler executeXml OrderCommand(orderKey, parameters = Map("sleep" → "5"))
-        }
-        scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
-        sleep(2.s)
-        eventBus.awaitingEvent[InfoLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-989"))) { // "Process_class cannot be removed now, it will be done later"
-          Files.delete(file)
-          instance[FolderSubsystem].updateFolders()
-        }
+    withEventPipe { events ⇒
+      scheduler executeXml OrderCommand(orderKey, parameters = Map("sleep" → "5"))
+      events.nextKeyed[OrderStepStartedEvent](orderKey)
+      scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
+      sleep(2.s)
+      eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-989")) { // "Process_class cannot be removed now, it will be done later"
+        delete(file)
+        instance[FolderSubsystem].updateFolders()
       }
-    }
-    assert(order(orderKey).state == OrderState("200"))
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+      events.next[TaskEndedEvent](_.jobPath == JavaJobPath, 10.s)
+      events.nextKeyed[FileBasedRemovedEvent](AProcessClassPath)
+      assert(order(orderKey).state == OrderState("200"))
       writeConfigurationFile(AProcessClassPath, fileContent)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
+      events.nextKeyed[OrderFinishedEvent](orderKey)
     }
     .state shouldEqual OrderState("END")
   }
@@ -81,13 +79,13 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val aOrderKey = AJobChainPath orderKey "A-API"
     val bOrderKey = BJobChainPath orderKey "B-API"
     runOrder(aOrderKey).state shouldEqual OrderState("END")
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](bOrderKey) {
-      eventBus.awaitingEvent[TaskStartedEvent](_.jobPath == JavaJobPath) {
-        eventBus.awaitingEvent[TaskEndedEvent](_.jobPath == JavaJobPath) {
-          scheduler executeXml OrderCommand(bOrderKey)
-        }
-      }
-    } .state shouldBe OrderState("END")
+    withEventPipe { events ⇒
+      scheduler executeXml OrderCommand(bOrderKey)
+      events.next[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271"))   // "Task is being terminated in favour of ..."
+      events.next[TaskEndedEvent](_.jobPath == JavaJobPath)
+      events.next[TaskStartedEvent](_.jobPath == JavaJobPath)
+      events.nextKeyed[OrderFinishedEvent](bOrderKey).state shouldBe OrderState("END")
+    }
     assert(job(JavaJobPath).state == JobState.running)
   }
 

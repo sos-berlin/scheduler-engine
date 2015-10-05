@@ -132,7 +132,7 @@ struct Java_job : Job {
 
     // *** PROCESS CLASS ***
 
-    void notify_a_process_is_idle() {
+    void notify_a_process_is_available() {
         return _cppNewJobJ.onProcessIsIdle();
     }
 
@@ -187,8 +187,8 @@ struct Java_job : Job {
         return _cppNewJobJ.removeRunningTask(task->id());
     }
 
-    bool try_to_end_task(Job* for_job, Process_class* process_class) {
-        return _cppNewJobJ.tryToEndATask();  // TODO process_class should be respected
+    bool try_to_end_task(Process_class_requestor*, Process_class*) {
+        return _cppNewJobJ.tryToEndATask();
     }
 
     void kill_task(int task_id, bool immediately, const Duration& timeout) {
