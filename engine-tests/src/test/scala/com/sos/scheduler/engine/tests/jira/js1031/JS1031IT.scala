@@ -1,15 +1,16 @@
 package com.sos.scheduler.engine.tests.jira.js1031
 
-import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
+import com.sos.scheduler.engine.kernel.time.TimeZones.SchedulerLocalZoneId
 import com.sos.scheduler.engine.test.SchedulerTestUtils.writeConfigurationFile
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1031.JS1031IT._
 import java.time.Instant.now
-import org.joda.time.DateTimeZone
-import org.joda.time.format.ISODateTimeFormat
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+import java.time.temporal.ChronoField.MILLI_OF_SECOND
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -22,13 +23,12 @@ final class JS1031IT extends FreeSpec with ScalaSchedulerTest {
 
   override def onBeforeSchedulerActivation() = eventPipe
 
-  "Missing test.schedule.xml should prevent order start" in {
+  "Missing test.schedule.xml prevents order start" in {
     assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
-    val at = now() + 5.s
-    writeConfigurationFile(TestSchedulePath,
-      <schedule>
-        <at at={ISODateTimeFormat.dateHourMinuteSecond withZone DateTimeZone.getDefault print at}/>
-      </schedule>)
+    val at = now() + 5.s `with` (MILLI_OF_SECOND, 0)
+    val scheduleElem = <schedule><at at={ISO_LOCAL_DATE_TIME withZone SchedulerLocalZoneId format at}/></schedule>
+    logger.info(s"$scheduleElem")
+    writeConfigurationFile(TestSchedulePath, scheduleElem)
     sleep(2.s)
     assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
     eventPipe.nextKeyed[OrderTouchedEvent](TestOrderKey, timeout = 5.s)
@@ -36,6 +36,7 @@ final class JS1031IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS1031IT {
+  private val logger = Logger(getClass)
   private val TestOrderKey = OrderKey("/test", "1")
   private val TestSchedulePath = SchedulePath("/test")
 }
