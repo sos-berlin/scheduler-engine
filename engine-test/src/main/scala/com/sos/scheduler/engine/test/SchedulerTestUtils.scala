@@ -12,9 +12,9 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEve
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.order.{OrderTouchedEvent, OrderState, OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
+import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
@@ -135,6 +135,29 @@ object SchedulerTestUtils {
   final case class TaskResult(jobPath: JobPath, taskId: TaskId, endedInstant: Instant, duration: Duration) {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
   }
+
+  def runOrder(orderKey: OrderKey)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): OrderRunResult =
+    awaitResult(startOrder(orderKey).result, timeout.duration)
+
+  def startOrder(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = startOrder(OrderCommand(orderKey))
+  
+  def startOrder(orderCommand: OrderCommand)(implicit controller: TestSchedulerController): OrderRun = {
+    implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
+    inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
+      val finished = controller.eventBus.keyedEventFuture[OrderFinishedEvent](orderCommand.orderKey)
+      controller.scheduler executeXml orderCommand
+      val touched = controller.eventBus.keyedEventFuture[OrderTouchedEvent](orderCommand.orderKey)
+      val result = for (finishedEvent ← finished) yield OrderRunResult(finishedEvent.state)
+      OrderRun(touched, finished, result)
+    }
+  }
+
+  final case class OrderRun(
+    touched: Future[OrderTouchedEvent],
+    finished: Future[OrderFinishedEvent],
+    result: Future[OrderRunResult])
+
+  final case class OrderRunResult(state: OrderState)
 
   def taskLog(taskId: TaskId)(implicit controller: TestSchedulerController): String =
     ((controller.scheduler executeXml <show_task id={taskId.string} what="log"/>)
