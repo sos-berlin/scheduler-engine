@@ -2532,32 +2532,30 @@ void Spooler::run()
             _connection_manager->get_events( &events );  // JS-471 TCP und UDP-Verbindungen am Anfang der Handles
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
 
-            if( _state != Spooler::s_paused ) {
-                // PROCESS-HANDLES EINSAMMELN
+            // PROCESS-HANDLES EINSAMMELN
     
-#               ifndef Z_WINDOWS
-                    if( !wait_until.is_zero() )
-#               endif 
-                FOR_EACH_FILE_BASED( Process_class, process_class ) {
-                    Z_FOR_EACH( Process_class::Process_set, process_class->process_set(), p ) {
-#                       ifdef Z_WINDOWS
-                            if( object_server::Connection* server = (*p)->connection())
-                                if( server->process_event() && *server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
-#                        else
-                            Time next_time;
-                            next_time.set_utc( (*p)->async_next_gmtime() );
-                            //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
-                            if( next_time < wait_until )
-                            {
-                                wait_until = next_time;
-                                wait_until_object = *p;
-                                if( wait_until.is_zero() )  break;
-                            }
-#                       endif
-                    }
- 
-                    if( wait_until.is_zero() )  break;
+            #ifndef Z_WINDOWS
+                if( !wait_until.is_zero() )
+            #endif 
+            FOR_EACH_FILE_BASED( Process_class, process_class ) {
+                Z_FOR_EACH( Process_class::Process_set, process_class->process_set(), p ) {
+                    #ifdef Z_WINDOWS
+                        if( object_server::Connection* server = (*p)->connection())
+                            if( server->process_event() && *server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
+                    #else
+                        Time next_time;
+                        next_time.set_utc( (*p)->async_next_gmtime() );
+                        //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
+                        if( next_time < wait_until )
+                        {
+                            wait_until = next_time;
+                            wait_until_object = *p;
+                            if( wait_until.is_zero() )  break;
+                        }
+                    #endif
                 }
+ 
+                if( wait_until.is_zero() )  break;
             }
 
             {
@@ -2697,10 +2695,8 @@ bool Spooler::run_continue( const Time& now )
 {
     bool something_done = false;
 
-    if( _state != Spooler::s_paused ) {
-        // PROZESSE FORTSETZEN, durch zentrales _scheduler_event signalisiert
-        something_done |= _process_class_subsystem->async_continue();
-    }
+    // PROZESSE FORTSETZEN, durch zentrales _scheduler_event signalisiert
+    something_done |= _process_class_subsystem->async_continue();
     
     if( something_done )  _last_wait_until = Time(0), _last_resume_at = Time(0);
 
