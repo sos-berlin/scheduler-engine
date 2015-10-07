@@ -106,8 +106,7 @@ object SchedulerTestUtils {
 
   def runJobFuture(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun = {
     implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
-    inSchedulerThread {
-      // Alles im selben Thread, damit wir sicher die Events abonnieren, bevor sie eintreffen. Sonst könnten die ersten nach startJob verlorengehen.
+    inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
       val taskId = startJob(jobPath, variables = variables)
       val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
@@ -126,13 +125,12 @@ object SchedulerTestUtils {
   }
 
   final case class TaskRun(
-      jobPath: JobPath,
-      taskId: TaskId,
-      started: Future[TaskStartedEvent],
-      ended: Future[TaskEndedEvent],
-      closed: Future[TaskClosedEvent],
-      result: Future[TaskResult]) {
-  }
+    jobPath: JobPath,
+    taskId: TaskId,
+    started: Future[TaskStartedEvent],
+    ended: Future[TaskEndedEvent],
+    closed: Future[TaskClosedEvent],
+    result: Future[TaskResult])
 
   final case class TaskResult(jobPath: JobPath, taskId: TaskId, endedInstant: Instant, duration: Duration) {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
