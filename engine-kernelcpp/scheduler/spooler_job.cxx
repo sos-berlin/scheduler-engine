@@ -2966,6 +2966,7 @@ bool Standard_job::try_start_one_task()
 
     if ((_state == s_pending && _max_tasks > 0  || _state == s_running && _running_tasks.size() < _max_tasks)  && 
         (!_waiting_for_process || _waiting_for_process_try_again)  && 
+        _spooler->state() != Spooler::s_paused &&
         _spooler->state() != Spooler::s_stopping_let_run) {
         try {
             if (ptr<Task> task = task_to_start()) {
@@ -3477,7 +3478,7 @@ xml::Element_ptr Standard_job::why_dom_element(const xml::Document_ptr& doc) {
 
     // task_to_start():
 
-    if( _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopping_let_run )
+    if( _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopping_let_run || _spooler->state() == Spooler::s_paused)
         append_obstacle_element(result, "scheduler_state", _spooler->state_name());
 
     if (!_task_queue->_queue.empty()) {     // task_queue_at oder cause_queue

@@ -2109,8 +2109,8 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
 
     if( !_order  
-     && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
-    {
+     && !_end  // Kann beim Aufruf aus Job::do_something() passieren 
+     && _spooler->state() != Spooler::s_paused) {
         if( Order* order = _job->fetch_and_occupy_order(this, now, cause) ) {
             if( order->is_file_order() )  
                 _trigger_files = order->file_path();
