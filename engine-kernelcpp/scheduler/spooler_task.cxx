@@ -2532,7 +2532,7 @@ void Task::do_close__end()
         int exit_code = _module_instance->kind() == Module::kind_process? _module_instance->exit_code() : _exit_code;
         if( exit_code ) {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
-            if( _module_instance->_module->kind() == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
+            if (_module_instance->_module->kind() == Module::kind_process)  
                 set_error( x );
             else  
                 _log->warn( x.what() );
@@ -2543,9 +2543,8 @@ void Task::do_close__end()
         if( int termination_signal = _module_instance->termination_signal() ) {
             z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) + " " + signal_title_from_code( termination_signal ) );
 
-            if( !_job->_ignore_every_signal 
-             && _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
-             && ( _module_instance->_module->kind() != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
+            if (!_job->_ignore_every_signal 
+             && _job->_ignore_signals_set.find(termination_signal) == _job->_ignore_signals_set.end())
             {
                 set_error( x );
             } else {

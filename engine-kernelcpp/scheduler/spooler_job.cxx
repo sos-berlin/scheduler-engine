@@ -965,40 +965,7 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                if( _module->_process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
-
                 _module->set_dom( e );
-                _module->_process_filename     = "";
-                _module->_process_param_raw    = "";
-                _module->_process_log_filename = "";
-            }
-            else
-            if( e.nodeName_is( "process"    ) )
-            {
-                if( _module->set() )  z::throw_xc( "SCHEDULER-234", obj_name() );
-
-                _module->_process_filename     = subst_env( e.     getAttribute( "file"         , _module->_process_filename      ) );
-                _module->_process_param_raw    =            e.     getAttribute( "param"        , _module->_process_param_raw     );
-                _module->_process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module->_process_log_filename  ) );
-                _module->_process_ignore_error = e.bool_getAttribute( "ignore_error" , _module->_process_ignore_error  );
-                _module->_process_ignore_signal= e.bool_getAttribute( "ignore_signal", _module->_process_ignore_signal );
-
-                DOM_FOR_EACH_ELEMENT( e, ee )
-                {
-                    if( ee.nodeName_is( "environment" ) )   // Veraltet
-                    {
-                        DOM_FOR_EACH_ELEMENT( ee, eee )
-                        {
-                            if( eee.nodeName_is( "variable" ) ) 
-                            {
-                                _module->_process_environment->set_var( eee.getAttribute( "name" ), 
-                                                                        subst_env( eee.getAttribute( "value" ), _module->_process_environment ) );
-                            }
-                        }
-                    }
-                }
-
-                _module->set_process();
             }
             else
             if (e.nodeName_is("monitor.use") || e.nodeName_is("monitor"))

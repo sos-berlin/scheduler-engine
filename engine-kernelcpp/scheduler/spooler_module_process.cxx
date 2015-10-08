@@ -121,69 +121,53 @@ bool Process_module_instance::load()
     if( !ok )  return ok;
     _spooler_process_before_called = true;
 
-    if( _module->_process_filename == "" )
-    {
-        string script = _module->read_source_script();
+    string script = _module->read_source_script();
 
-        _shell_file.unlink_later();
+    _shell_file.unlink_later();
 
-#       ifdef Z_WINDOWS
-            // Dateiname muss auf .cmd enden!
+    #ifdef Z_WINDOWS
+        // Dateiname muss auf .cmd enden!
 
-            string prefix = get_temp_path() + "\\" + Z_TEMP_FILE_ID;
-            string random = "";
-            for( int i = 1; i < 10000; i++ )
-            {
-                LARGE_INTEGER t;
-                QueryPerformanceCounter(&t);
-                bool ok = _shell_file.try_open(prefix + "-" + as_hex_string(t.QuadPart) + random + ".cmd", _O_CREAT | _O_EXCL | _O_WRONLY | _O_SHORT_LIVED | _O_NOINHERIT, 0600);
-                if( ok )  break;
-                random = "-" + as_string(rand());
-                if( _shell_file.last_errno() == EEXIST )  continue;
-                _shell_file.check_error( "open" );
-            }
+        string prefix = get_temp_path() + "\\" + Z_TEMP_FILE_ID;
+        string random = "";
+        for( int i = 1; i < 10000; i++ )
+        {
+            LARGE_INTEGER t;
+            QueryPerformanceCounter(&t);
+            bool ok = _shell_file.try_open(prefix + "-" + as_hex_string(t.QuadPart) + random + ".cmd", _O_CREAT | _O_EXCL | _O_WRONLY | _O_SHORT_LIVED | _O_NOINHERIT, 0600);
+            if( ok )  break;
+            random = "-" + as_string(rand());
+            if( _shell_file.last_errno() == EEXIST )  continue;
+            _shell_file.check_error( "open" );
+        }
 
-            if( _module->_encoding_code_page >= 0  &&  script.length() > 0 )
-            {
-                Bstr         script_bstr                = script;
-                BOOL         default_character_was_used = false;
-                vector<char> buffer                     ( 2 * script.length() );
+        if( _module->_encoding_code_page >= 0  &&  script.length() > 0 )
+        {
+            Bstr         script_bstr                = script;
+            BOOL         default_character_was_used = false;
+            vector<char> buffer                     ( 2 * script.length() );
 
-                int cp = _module->_encoding_code_page;
-                int length = WideCharToMultiByte( cp, WC_NO_BEST_FIT_CHARS, script_bstr, script_bstr.length(), &buffer[0], int_cast(buffer.size()), 
-                                                  NULL, cp == CP_UTF8 || cp == CP_UTF7? NULL : &default_character_was_used );
-                if( length <= 0 )  z::throw_mswin( GetLastError(), "WideCharToMultiByte" );
-                assert( length <= buffer.size() );
-                if( default_character_was_used )  z::throw_xc( "SCHEDULER-471", "in <script>" );     // Leider wissen wir nicht, welches Zeichen nicht umgesetzt werden kann.
+            int cp = _module->_encoding_code_page;
+            int length = WideCharToMultiByte( cp, WC_NO_BEST_FIT_CHARS, script_bstr, script_bstr.length(), &buffer[0], int_cast(buffer.size()), 
+                                                NULL, cp == CP_UTF8 || cp == CP_UTF7? NULL : &default_character_was_used );
+            if( length <= 0 )  z::throw_mswin( GetLastError(), "WideCharToMultiByte" );
+            assert( length <= buffer.size() );
+            if( default_character_was_used )  z::throw_xc( "SCHEDULER-471", "in <script>" );     // Leider wissen wir nicht, welches Zeichen nicht umgesetzt werden kann.
                 
-                script.assign( &buffer[0], length );
-            }
-#       else
-            _shell_file.open_temporary( File::open_unlink_later );
-            int ret = fchmod( _shell_file, 0700 );
-            if( ret )  throw_errno( errno, "fchmod", _shell_file.path().c_str() );
+            script.assign( &buffer[0], length );
+        }
+    #else
+        _shell_file.open_temporary( File::open_unlink_later );
+        int ret = fchmod( _shell_file, 0700 );
+        if( ret )  throw_errno( errno, "fchmod", _shell_file.path().c_str() );
 
-            script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das ändert die Zeilennummerierung.
-#       endif
+        script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das ändert die Zeilennummerierung.
+    #endif
 
-        _shell_file.print( script );
-        _shell_file.close();
-    }
+    _shell_file.print( script );
+    _shell_file.close();
 
     return ok;
-}
-
-//-------------------------------------------------------------------Process_module_instance::start
-
-void Process_module_instance::start()
-{
-    Module_instance::start();
-
-    //2008-06-15: _task_paramters an Remote Scheduler übergeben
-    //ptr<Variable_set> vs = _process_environment->clone();
-    //vs->merge( _task_parameters );
-    //_process_param = subst_env( _module->_process_param_raw, vs );
-    _process_param = subst_env( _module->_process_param_raw, _process_environment );
 }
 
 //---------------------------------------------------------------Process_module_instance::name_exists
@@ -213,7 +197,7 @@ Variant Process_module_instance::call( const string& name, const Variant&, const
 
 string Process_module_instance::program_path()
 {
-    return _shell_file.path() != ""? _shell_file.path() :  _module->_process_filename;
+    return _shell_file.path();
 }
 
 //--------------------------------------------------------------Process_module_instance::close__end
@@ -288,32 +272,21 @@ bool Process_module_instance::begin__end()
 
 
     string executable_path = program_path();
-    string command_line = quoted_windows_process_parameter( executable_path );
-    if( !_process_param.empty() )  command_line += " " + _process_param;
+    string command_line = quoted_windows_process_parameter(executable_path);
+    for (int i = 1;; i++) {
+        string nr = as_string(i);
+        Variant vt;
+        HRESULT hr;
 
-    if( _shell_file.path() != "" )
-    {
-        command_line = quoted_windows_process_parameter( _shell_file.path() );
-    }
+        hr = _process_environment->get_Var( Bstr(nr), &vt );
+        if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
 
-    if( _process_environment )
-    {
-        for( int i = 1;; i++ )
-        {
-            string nr = as_string(i);
-            Variant vt;
-            HRESULT hr;
+        if( vt.vt == VT_EMPTY )  break;
 
-            hr = _process_environment->get_Var( Bstr(nr), &vt );
-            if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
+        hr = vt.ChangeType( VT_BSTR );
+        if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr.c_str() );
 
-            if( vt.vt == VT_EMPTY )  break;
-
-            hr = vt.ChangeType( VT_BSTR );
-            if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr.c_str() );
-
-            command_line += " " + quoted_windows_process_parameter( bstr_as_string( vt.bstrVal ) );
-        }
+        command_line += " " + quoted_windows_process_parameter( bstr_as_string( vt.bstrVal ) );
     }
 
     // Environment
@@ -709,69 +682,10 @@ bool Process_module_instance::begin__end()
 vector<string> Process_module_instance::get_string_args()
 {
     vector<string> string_args;
-
-    if( _shell_file.path() != "" )  // <script language="shell">?
-    {
-        string shell_argument = quoted_unix_command_parameter( program_path() );
-
-        //if( _process_param != "" )    // <shell> kennt nicht param=
-        //{
-        //    shell_argument += " " + _process_param;
-        //}
-        //else
-        //{
-        //    if( _process_environment )
-        //    {
-        //        for( int i = 1;; i++ )
-        //        {
-        //            string nr = as_string(i);
-        //            Variant vt;
-        //            HRESULT hr;
-
-        //            hr = _process_environment->get_Var( Bstr(nr), &vt );
-        //            if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
-
-        //            if( vt.vt == VT_EMPTY )  break;
-
-        //            shell_argument += " " + quoted_unix_command_parameter( string_from_variant( vt ) );
-        //        }
-        //    }
-        //}
-
-        string_args.push_back( "/bin/sh" );
-        string_args.push_back( "-c" );
-        string_args.push_back( shell_argument );
-    }
-    else 
-    {
-        if( _process_param != "" )
-        {
-            string_args = posix::argv_from_command_line( _process_param );
-            string_args.insert( string_args.begin(), program_path() );   // argv[0]
-        }
-        else
-        {
-            string_args.push_back( program_path() );   // argv[0]
-
-            if( _process_environment )
-            {
-                for( int i = 1;; i++ )
-                {
-                    string nr = as_string(i);
-                    Variant vt;
-                    HRESULT hr;
-
-                    hr = _process_environment->get_Var( Bstr(nr), &vt );
-                    if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
-
-                    if( vt.vt == VT_EMPTY )  break;
-
-                    string_args.push_back( string_from_variant( vt ) );
-                }
-            }
-        }
-    }
-
+    string shell_argument = quoted_unix_command_parameter( program_path() );
+    string_args.push_back( "/bin/sh" );
+    string_args.push_back( "-c" );
+    string_args.push_back( shell_argument );
     return string_args;
 }
 
@@ -861,9 +775,6 @@ void Process_module_instance::end__end()
     _exit_code = (int)exit_code;
     //transfer_exit_code_to_task();
     _spooler_process_result = _exit_code == 0  &&  _termination_signal == 0;;
-
-    _log.log_file( _module->_process_log_filename );
-
 }
 
 //------------------------------------------------------Process_module_instance::termination_signal

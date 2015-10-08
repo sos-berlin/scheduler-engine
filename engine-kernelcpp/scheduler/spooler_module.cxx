@@ -290,17 +290,6 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
         z::throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
 }
 
-//------------------------------------------------------------------------------Module::set_process
-// <process> hat kein <script>, deshalb dieser Aufruf
-// Besser wäre, <process> durch <script language="shell"> zu ersetzen
-
-void Module::set_process()
-{
-    _language = shell_language_name;
-    //_source.clear();
-    _set = true;
-}
-
 //----------------------------------------------------------------------------------Module::set_dom
 
 void Module::set_dom( const xml::Element_ptr& element )  
@@ -380,7 +369,7 @@ void Module::init()
             if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
         }
         else
-        if( _process_filename != ""  || _language == shell_language_name )
+        if (_language == shell_language_name)
         {
             _kind = kind_process;
         }
@@ -408,7 +397,7 @@ void Module::init()
         case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
-        case kind_process:              if( !has_source_script()  &&  _process_filename.empty() )  z::throw_xc( "SCHEDULER-173" );
+        case kind_process:              if (!has_source_script()) z::throw_xc("SCHEDULER-173");
                                         break;
 
 #       ifdef Z_WINDOWS
@@ -558,11 +547,11 @@ Module_instance::Module_instance( Module* module )
     _spooler(module->_spooler),
     _module(module),
     _log(module?module->_log:NULL),
-    _monitor_instances( &_log, _module->_monitors )
+    _monitor_instances(&_log, _module->_monitors),
+    _process_environment(new Com_variable_set())
 {
     _com_task    = new Com_task;
     _com_log     = new Com_log;
-    _process_environment = new Com_variable_set();
     _process_environment->merge( _module->_process_environment );
     _spooler_exit_called = false;
 }

@@ -459,12 +459,6 @@ AGAIN:
                 if (_task->stderr_log_level() != log_info) 
                     params_array[nr++] = "stderr_log_level=" + as_string(_task->stderr_log_level());
 
-                params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
-                params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;
-                params_array[ nr++ ] = "process.log_filename="  + _module->_process_log_filename;
-                params_array[ nr++ ] = "process.ignore_error="  + as_string( (int)_module->_process_ignore_error );
-                params_array[ nr++ ] = "process.ignore_signal=" + as_string( (int)_module->_process_ignore_signal );
-
                 // prefix is transferred only if it is set in scheduler.xml otherwise the remote side will work with the default
                 // that is because old agents could not work, if process.shell_variable_prefix is set
                 if (_module->_process_shell_variable_prefix_is_configured)
