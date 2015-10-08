@@ -15,7 +15,7 @@ import java.io.OutputStreamWriter
 import java.net.Socket
 import java.nio.charset.StandardCharsets.UTF_8
 import java.time.Instant.now
-import java.time.LocalDateTime
+import java.time.{ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -41,7 +41,7 @@ final class JS1492IT extends FreeSpec with ScalaSchedulerTest {
           if (isWindows) "ping -n 6 127.0.0.1 >nul" else "sleep 5"
         }</script>
         <run_time>
-          <period end={DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.ofInstant(periodEnd, TimeZones.SchedulerLocalZoneId))}/>
+          <period end={DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.ofInstant(periodEnd, instance[ZoneId]))}/>
         </run_time>
       </job>)
     val run = runJobFuture(TestJobPath)

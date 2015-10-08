@@ -31,6 +31,7 @@ import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import java.time.ZoneId
 import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import javax.persistence.EntityManagerFactory
@@ -44,6 +45,11 @@ extends ScalaAbstractModule
 with HasCloser {
 
   private val lazyBoundCppSingletons = mutable.Buffer[Class[_]]()
+  private lazy val _zoneId = {
+    val state = cppProxy.state_name
+    if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
+    ZoneId of cppProxy.time_zone_name
+  }
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
@@ -112,6 +118,9 @@ with HasCloser {
   @Provides @Singleton
   private def licenseKeyStrings(spoolerC: SpoolerC): immutable.Iterable[LicenseKeyString] =
     Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
+
+  @Provides @Singleton
+  private def zoneId: ZoneId = _zoneId
 }
 
 object SchedulerModule {
