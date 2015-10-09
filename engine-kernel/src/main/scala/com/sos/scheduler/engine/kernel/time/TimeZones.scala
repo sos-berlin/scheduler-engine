@@ -1,19 +1,23 @@
 package com.sos.scheduler.engine.kernel.time
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import java.time.ZoneId
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{LocalDateTime, DateTimeZone}
+import org.joda.time.{DateTimeZone, LocalDateTime}
 
 @ForCpp
 object TimeZones {
-  //FIXME Was tun bei einer Exception, einer unbekannten Zeitzone? Besser nur vorher bekannte, numerierte nehmen
   private val localTimeZone = DateTimeZone.getDefault
-  val SchedulerLocalZoneId = ZoneId.systemDefault
+  private val logger = Logger(getClass)
 
-  def initialize(): Unit = {}   // Damit localTimeZone gesetzt wird, bevor sich die Default-Zeitzone ändert.
+  /**
+   * Stores local time zone before someone can change it.
+   */
+  def initialize(): Unit = {
+    logger.debug(s"Our time zone is '$localTimeZone'")
+  }
 
   private val timeZoneFormatter = Map(
     false -> DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ"),

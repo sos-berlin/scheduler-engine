@@ -13,14 +13,13 @@ import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
-import com.sos.scheduler.engine.kernel.time.TimeZones.SchedulerLocalZoneId
 import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
 import java.time.Instant.now
-import java.time.{Instant, LocalDateTime}
+import java.time.{Instant, LocalDateTime, ZoneId}
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -36,7 +35,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   private val testStartTime = Instant.ofEpochSecond(now().getEpochSecond)
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
-
+  private lazy val daylightSavingTimeInstant = LocalDateTime.parse(DaylightSavingTimeString).atZone(instance[ZoneId]).toInstant
+  private lazy val standardTimeInstant = LocalDateTime.parse(StandardTimeInstantString).atZone(instance[ZoneId]).toInstant
 
   override def onSchedulerActivated(): Unit = {
     withEventPipe { eventPipe ⇒
@@ -115,11 +115,11 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
     SafeXML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
     // Database UTC field is used for local time
-    Instant.ofEpochMilli(e(1).startTime.getTime) shouldEqual DaylightSavingTimeInstant
+    Instant.ofEpochMilli(e(1).startTime.getTime) shouldEqual daylightSavingTimeInstant
 
     SafeXML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
     SafeXML.loadString(e(2).parameterXml) shouldEqual <sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>
-    Instant.ofEpochMilli(e(2).startTime.getTime) shouldEqual StandardTimeInstant
+    Instant.ofEpochMilli(e(2).startTime.getTime) shouldEqual standardTimeInstant
   }
 
   test("TaskEntity is read as expected") {
@@ -134,8 +134,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       assert(!(t isAfter now()), s"<queued_task enqueued=$enqueuedString> should not be after now")
     }
     queuedTaskElems(0).attribute("start_at") shouldBe 'empty
-    queuedTaskElems(1).attribute("start_at").head.text shouldEqual DaylightSavingTimeInstant.toString.replace("Z", ".000Z")
-    queuedTaskElems(2).attribute("start_at").head.text shouldEqual StandardTimeInstant.toString.replace("Z", ".000Z")
+    queuedTaskElems(1).attribute("start_at").head.text shouldEqual daylightSavingTimeInstant.toString.replace("Z", ".000Z")
+    queuedTaskElems(2).attribute("start_at").head.text shouldEqual standardTimeInstant.toString.replace("Z", ".000Z")
     (queuedTaskElems(2) \ "params").head shouldEqual <params count="1"><param value="myValue" name="myJobParameter"/></params>
   }
 
@@ -255,8 +255,6 @@ private object EntitiesIT {
   private val orderJobPath = JobPath("/test-order-job")
   private val simpleJobPath = JobPath("/test-simple-job")
   private val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
-  private val DaylightSavingTimeString = "2029-10-11 22:33:44"
-  private val DaylightSavingTimeInstant = LocalDateTime.parse("2029-10-11T22:33:44").atZone(SchedulerLocalZoneId).toInstant
-  private val StandardTimeInstantString = "2029-11-11 11:11:11"
-  private val StandardTimeInstant = LocalDateTime.parse("2029-11-11T11:11:11").atZone(SchedulerLocalZoneId).toInstant
+  private val DaylightSavingTimeString = "2029-10-11T22:33:44"
+  private val StandardTimeInstantString = "2029-11-11T11:11:11"
 }
