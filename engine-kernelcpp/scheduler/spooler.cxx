@@ -3904,8 +3904,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                 if( opt.flag      ( "backup"           ) )  is_backup = opt.set();
                 else
-                if(opt.with_value("configuration-directory")); // JS-462
-                else
+                if (opt.with_value("configuration-directory")) {
+                    string d = opt.value();
+                    if (!d.empty() && !file::File_info(d).is_directory()) z::throw_xc("SCHEDULER-715", d);
+                }
                 if (opt.with_value("java-options")) java_options = opt.value();
                 else
                 if (opt.with_value("java-classpath")) java_classpath = opt.value();
