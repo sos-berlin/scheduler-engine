@@ -66,8 +66,9 @@ with HasCloser {
     provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
-    provideSingleton[ActorSystem] { newActorSystem(closer) }
-    provideSingleton[ExecutionContext] { ExecutionContext.global }
+    val actorSystem = newActorSystem(closer)
+    bindInstance[ActorSystem](actorSystem)
+    provideSingleton[ExecutionContext] { actorSystem.dispatcher }
     bindSubsystems()
     bindInstance(LazyBoundCppSingletons(lazyBoundCppSingletons.toVector))
   }
