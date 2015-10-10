@@ -21,19 +21,14 @@ struct Order_schedule_use : Schedule_use
         Schedule_use(order),
         _order(order) 
     {
-        _order->add_accompanying_dependant(this);
     }
 
     ~Order_schedule_use() {
         close();
     }
 
-    void close() {
-        if (_order) {
-            _order->remove_accompanying_dependant(this);
-            _order = NULL;
-        }
-        Schedule_use::close();
+    void detach_order() {
+        _order = NULL;
     }
 
     void                        on_schedule_loaded          ()                                      { if (_order) _order->on_schedule_loaded(); }
@@ -89,6 +84,7 @@ Order::Order( Standing_order_subsystem* subsystem )
     //_signaled_next_time = Time::never;
 
     _schedule_use->set_scheduler_holidays_usage( schedule::without_scheduler_holidays );  // <config><holidays> nicht übernehmen, eMail von Andreas Liebert 2008-04-21
+    add_accompanying_dependant(_schedule_use);
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -115,7 +111,11 @@ Order::~Order()
         _replaced_by->set_replacement( false );
     }
 
-    if (_schedule_use) _schedule_use->close();
+    if (_schedule_use) {
+        remove_accompanying_dependant(_schedule_use);
+        _schedule_use->detach_order();
+        _schedule_use->close();
+    }
     if( _com_log  )  _com_log->set_log( NULL );
 }
 
@@ -1247,7 +1247,11 @@ void Order::close()
     //if( close_flag == cls_remove_from_job_chain )  remove_from_job_chain();
     //else
     if( _job_chain )  _job_chain->remove_order( this );
-    if( _schedule_use )  _schedule_use->close();
+    if (_schedule_use) {
+        remove_accompanying_dependant(_schedule_use);
+        _schedule_use->detach_order();
+        _schedule_use->close();
+    }
     check_for_replacing_or_removing();
 
     _log->close();
@@ -3296,7 +3300,7 @@ void Order::handle_changed_schedule()
     if (subsystem()->subsystem_state() == subsys_active) {  // JS-576
         _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_any_start )
                                              : Period();
-    
+
         if (!is_touched()) {
             //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
             set_next_start_time();      // Änderung von <run_time> Überschreibt Order.at
