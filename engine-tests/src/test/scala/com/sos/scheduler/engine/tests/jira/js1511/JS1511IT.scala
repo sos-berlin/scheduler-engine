@@ -3,11 +3,15 @@ package com.sos.scheduler.engine.tests.jira.js1511
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1511.JS1511IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
@@ -24,7 +28,9 @@ final class JS1511IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Pause" in {
-    scheduler executeXml <modify_spooler cmd='pause'/>
+    eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-902")) {
+      scheduler executeXml <modify_spooler cmd='pause'/>
+    } .message should include ("state=paused")
     val taskRun = runJobFuture(ShellJobPath)
     val orderRun = startOrder(TestJobChainPath orderKey "2")
     sleep(1.s)
