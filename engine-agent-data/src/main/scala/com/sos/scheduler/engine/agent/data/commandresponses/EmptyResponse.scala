@@ -9,5 +9,5 @@ case object EmptyResponse extends XmlResponse {
 
   def toXmlElem = <ok/>
 
-  implicit def MyJsonFormat = jsonFormat0(() ⇒ EmptyResponse)
+  implicit val MyJsonFormat = jsonFormat0(() ⇒ EmptyResponse)
 }
