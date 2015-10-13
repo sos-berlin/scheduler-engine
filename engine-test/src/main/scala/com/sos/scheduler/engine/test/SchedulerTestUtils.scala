@@ -154,7 +154,7 @@ object SchedulerTestUtils {
       val finished = controller.eventBus.keyedEventFuture[OrderFinishedEvent](orderCommand.orderKey)
       controller.scheduler executeXml orderCommand
       val touched = controller.eventBus.keyedEventFuture[OrderTouchedEvent](orderCommand.orderKey)
-      val result = for (finishedEvent ← finished) yield OrderRunResult(finishedEvent.state)
+      val result = for (finishedEvent ← finished) yield OrderRunResult(orderCommand.orderKey, finishedEvent.state)
       OrderRun(touched, finished, result)
     }
   }
@@ -164,7 +164,9 @@ object SchedulerTestUtils {
     finished: Future[OrderFinishedEvent],
     result: Future[OrderRunResult])
 
-  final case class OrderRunResult(state: OrderState)
+  final case class OrderRunResult(orderKey: OrderKey, state: OrderState) {
+    def logString(implicit controller: TestSchedulerController): String = orderLog(orderKey)
+  }
 
   def taskLog(taskId: TaskId)(implicit controller: TestSchedulerController): String =
     ((controller.scheduler executeXml <show_task id={taskId.string} what="log"/>)

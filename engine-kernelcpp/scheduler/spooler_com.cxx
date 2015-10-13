@@ -4899,6 +4899,7 @@ const Com_method Com_order::_methods[] =
   //{ DISPATCH_METHOD     , 26, "Start_now"                 , (Com_method_ptr)&Com_order::Start_now             , VT_EMPTY      },
     { DISPATCH_PROPERTYPUT, 29, "Ignore_max_orders"         , (Com_method_ptr)&Com_order::put_Ignore_max_orders , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 29, "Ignore_max_orders"         , (Com_method_ptr)&Com_order::get_Ignore_max_orders , VT_BOOL       },
+    { DISPATCH_PROPERTYGET, 30, "History_id"                , (Com_method_ptr)&Com_order::get_History_id        , VT_BSTR       },
     {}
 };
 
@@ -5674,6 +5675,14 @@ STDMETHODIMP Com_order::get_Ignore_max_orders(VARIANT_BOOL* result)
         if (!_order) return E_POINTER;
         *result = _order->is_ignore_max_orders() ? VARIANT_TRUE : VARIANT_FALSE;
         return NOERROR;
+    }
+    catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
+}
+
+STDMETHODIMP Com_order::get_History_id(BSTR* result) {
+    try {
+        if (!_order) return E_POINTER;
+        return String_to_bstr(_order->history_id(), result);
     }
     catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
 }
