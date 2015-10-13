@@ -384,6 +384,10 @@ struct Order : Com_order,
     void on_occupied();
     void on_call(const File_exists_call&);
 
+    string history_id() const {
+        return as_string(_history_id);
+    }
+
   private:
     Time                        first_start_time();
     Time                        next_start_time();
