@@ -383,6 +383,10 @@ struct Order : Com_order,
     void db_start_order_history();
     void on_occupied();
 
+    string history_id() const {
+        return as_string(_history_id);
+    }
+
   private:
     Time                        first_start_time();
     Time                        next_start_time();

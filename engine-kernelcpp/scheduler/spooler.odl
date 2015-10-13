@@ -1179,6 +1179,9 @@ library Spooler
 
         [id(29), propget]
         HRESULT                 Ignore_max_orders       ( [out, retval] VARIANT_BOOL* );
+
+        [id(30), propget]
+        HRESULT                 History_id              ( [out, retval] BSTR* );
     }
 
     [
