@@ -2693,7 +2693,7 @@ Job_chain* Order::job_chain_for_api() const
 
 void Order::postprocessing(const Order_state_transition& state_transition, const Xc* exception)
 {
-    _last_error = state_transition == Order_state_transition::standard_error && exception? exception->what() : "";
+    _last_error = state_transition.is_error() && exception? exception->what() : "";
     _is_success_state = state_transition == Order_state_transition::success;
 
     Job*      last_job          = _task? _task->job() : NULL;

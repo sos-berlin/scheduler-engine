@@ -81,11 +81,11 @@ struct Order_state_transition {
         return !(*this == o);
     }
 
-    public: bool is_success() {
+    public: bool is_success() const {
         return *this == success;
     }
 
-    public: bool is_error() {
+    public: bool is_error() const {
         return *this != success && *this != keep;
     }
 

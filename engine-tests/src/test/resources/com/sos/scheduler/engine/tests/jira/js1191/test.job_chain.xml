@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
-    <job_chain_node state="NO-ERROR-1" job="test"/>
-    <job_chain_node state="ERROR" job="test" error_state="NO-ERROR-2"/>
-    <job_chain_node state="NO-ERROR-2" job="test"/>
-    <job_chain_node state="EXCEPTION" job="test" error_state="NO-ERROR-3"/>
-    <job_chain_node state="NO-ERROR-3" job="test"/>
-    <job_chain_node state="LAST" job="test"/>
+    <job_chain_node state="NO-ERROR-1" job="test-api"/>
+    <job_chain_node state="NO-ERROR-2" job="test-api"/>
+    <job_chain_node state="SHELL" job="test-shell" error_state="NO-ERROR-3"/>
+    <job_chain_node state="NO-ERROR-3" job="test-api"/>
+    <job_chain_node state="LOG-ERROR-TRUE" job="test-api"/>
+    <job_chain_node state="LOG-ERROR-FALSE" job="test-api" error_state="NO-ERROR-4"/>
+    <job_chain_node state="NO-ERROR-4" job="test-api"/>
+    <job_chain_node state="EXCEPTION" job="test-api" error_state="NO-ERROR-5"/>
+    <job_chain_node state="NO-ERROR-5" job="test-api"/>
+    <job_chain_node state="LAST" job="test-api"/>
     <job_chain_node.end state="END"/>
 </job_chain>
