@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.agent.client
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.TextAgentClient._
 import com.sos.scheduler.engine.agent.data.web.AgentUris
+import com.sos.scheduler.engine.common.ClassLoaders._
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -25,7 +26,7 @@ import spray.json.{JsValue, JsonParser}
 private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit) extends AutoCloseable {
 
   private val agentUris = AgentUris(agentUri)
-  private implicit val actorSystem = ActorSystem("AgentClient", ConfigFactory.load(ConfigurationResource.path))
+  private implicit val actorSystem = ActorSystem("AgentClient", ConfigFactory.load(currentClassLoader, ConfigurationResource.path))
   import actorSystem.dispatcher
   private val pipeline = addHeader(Accept(`text/plain`)) ~> addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
       encode(Gzip) ~> sendReceive ~> decode(Gzip) ~> unmarshal[String]

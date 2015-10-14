@@ -3,8 +3,10 @@ package com.sos.scheduler.engine.plugins.newwebservice
 import akka.actor.{ActorSystem, Props}
 import akka.util.Switch
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.ClassLoaders._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.newwebservice.SprayServletContextInitializer._
 import com.typesafe.config.ConfigFactory
 import javax.servlet.{ServletContextEvent, ServletContextListener}
@@ -22,7 +24,7 @@ class SprayServletContextInitializer(injector: Injector) extends ServletContextL
   def contextInitialized(servletContextEvent: ServletContextEvent): Unit =
     started switchOn {
       logger.debug("Starting Spray ...")
-      val config = ConfigFactory.load(ReferenceConfResourcePath)
+      val config = ConfigFactory.load(currentClassLoader, ReferenceConfResource.path)
       val settings = ConnectorSettings(config)
       val actor = actorSystem actorOf Props { injector.getInstance(classOf[WebServiceActor]) }
       val servletContext = servletContextEvent.getServletContext
@@ -38,6 +40,6 @@ class SprayServletContextInitializer(injector: Injector) extends ServletContextL
 }
 
 object SprayServletContextInitializer {
-  private val ReferenceConfResourcePath = "com/sos/scheduler/engine/plugins/newwebservice/configuration/reference.conf"
+  private val ReferenceConfResource = JavaResource("com/sos/scheduler/engine/plugins/newwebservice/configuration/reference.conf")
   private val logger = Logger(getClass)
 }
