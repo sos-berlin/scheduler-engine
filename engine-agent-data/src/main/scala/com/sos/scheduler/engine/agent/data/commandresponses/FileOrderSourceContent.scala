@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commandresponses
 
+import java.time.Instant
 import scala.collection.immutable
 import spray.json.DefaultJsonProtocol._
 
@@ -12,7 +13,9 @@ extends Response {
 }
 
 object FileOrderSourceContent {
-  final case class Entry(path: String, lastModifiedTime: Long)
+  final case class Entry(path: String, lastModifiedTime: Long) {
+    override def toString = s"Entry($path,${Instant.ofEpochMilli(lastModifiedTime)})"
+  }
 
   object Entry {
     implicit val MyJsonFormat = jsonFormat2(apply)
