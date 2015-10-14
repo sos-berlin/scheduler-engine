@@ -138,6 +138,7 @@ struct Time
     Time                        time_of_day                 () const                        { return Time((*this - midnight()).as_double()); }
     Time                        midnight                    () const                        { return Time(day_nr() * 24*60*60); }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
+    static Time of_day_nr(int n) { return Time::of_time_t(n * 24*60*60); }
     int                         month_nr                    () const;
     time_t                      as_time_t                   () const                        { return (time_t)( as_double    () + 0.0001 ); }
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }

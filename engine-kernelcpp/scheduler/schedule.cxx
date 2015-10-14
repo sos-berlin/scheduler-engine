@@ -929,7 +929,7 @@ void Schedule::disconnect_covering_schedules()
 
 //----------------------------------------------------------------------Schedule::next_local_period
 
-Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
+Period Schedule::next_local_period(Schedule_use* use_or_null, const Time& tim, With_single_start single_start, const Time& before)
 { 
     Period result;
     Time   interval_begin = Time(0);      // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
@@ -961,7 +961,7 @@ Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_sin
                 interval_end   = covering_schedule->_inlay->_covered_schedule_end;
                 assert( t >= interval_begin  &&  t < interval_end );
 
-                Period period = covering_schedule->_inlay->next_local_period( use, t, single_start, before );
+                Period period = covering_schedule->_inlay->next_local_period(use_or_null, t, single_start, before);
                 if( period._begin < interval_end )  
                 {
                     result = period;
@@ -983,7 +983,7 @@ Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_sin
         if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
         {
             assert( !covering_schedule_at( t ) );
-            Period period = _inlay->next_local_period( use, t, single_start, before );       // Unser Standard-Schedule
+            Period period = _inlay->next_local_period(use_or_null, t, single_start, before);       // Unser Standard-Schedule
             if( period.begin() < interval_end )  
             {
                 result = period;
@@ -1365,7 +1365,7 @@ bool Schedule::Inlay::is_filled() const
 
 //---------------------------------------------------------------Schedule::Inlay::next_local_period
 
-Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
+Period Schedule::Inlay::next_local_period(Schedule_use* use_or_null, const Time& beginning_time, With_single_start single_start, const Time& before)
 {
     // Wenn mehrere Jahre vorausgesehen werden sollen (s. foresee_years), könnte der Algorithmus vielleicht beschleunigt werden.
     // single_start könnte geprüft werden: <run_time> ohne single_start usw. muss dann nicht durchsucht werden.
@@ -1389,14 +1389,11 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
 
         for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + Duration::day)     
         {
-            if( _holidays.is_included( t ) )  
-            {
+            Time after_holidays = t = _holidays.downtime_end(t);
+            if (after_holidays != t || _holidays.contains_holiday(t.day_nr())) {
                 result = next_period_of_same_day( t, single_start | wss_when_holiday_ignore_holiday );     // Nur when_holiday="ignore_holiday"
-            }
-            else
-            {
-                if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
-                {
+            } else {
+                if (use_or_null && _start_time_function != ""  &&  single_start & (wss_next_any_start | wss_next_single_start)) {
                     if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  !is_no_function_warning_logged )
                     {
                         log()->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
@@ -1407,7 +1404,7 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
                     {
                         try
                         {
-                            last_function_result = min( result, call_function( use, t ) );
+                            last_function_result = min(result, call_function(use_or_null, t));
                             result = last_function_result;
                         }
                         catch( exception& x )
@@ -1417,8 +1414,8 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
                         }
                     }
                 }
-            
 
+                t = after_holidays;
                 result = min( result, next_period_of_same_day( t, single_start ) );
 
 
@@ -1426,7 +1423,7 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
                 Duration foresee_duration = Duration(foresee_years*24*60*60);
 
                 for (Duration before = -Duration::day;
-                     before >= -foresee_duration  &&  _holidays.is_included(t + before); 
+                     before >= -foresee_duration  &&  _holidays.contains_holiday((t + before).day_nr()); 
                      before -= Duration::day)
                 {
                     Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
@@ -1437,7 +1434,7 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
                 // Morgen ist Feiertag? Periode mit when_holiday="previous_non_holiday" suchen
 
                 for (Duration after = Duration::day;
-                     after <= foresee_duration  &&  !(t + after).is_never()  &&  _holidays.is_included(t + after); 
+                     after <= foresee_duration  &&  !(t + after).is_never()  &&  _holidays.contains_holiday((t + after).day_nr()); 
                      after += Duration::day)
                 {
                     Period p = next_period_of_same_day(t + after, single_start | wss_when_holiday_previous_non_holiday);
@@ -2113,6 +2110,12 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
     {
         DOM_FOR_EACH_ELEMENT( e, e2 )
         {
+            if( e2.nodeName_is( "run_time" ) )
+            {
+                _inverted_schedule = Z_NEW(Schedule(_spooler->schedule_subsystem(), without_scheduler_holidays));
+                _inverted_schedule->set_dom(e2);
+            }
+            else
             if( e2.nodeName_is( "weekdays" ) )
             {
                 DOM_FOR_EACH_ELEMENT( e2, e3 )
@@ -2170,11 +2173,17 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
         z::throw_xc( "SCHEDULER-319", e.nodeName(), Z_FUNCTION );
 }
 
-//----------------------------------------------------------------------------Holidays::is_included
+Time Holidays::downtime_end(const Time& t) const {
+    if (!_inverted_schedule) 
+        return t;
+    else {
+        Period period = _inverted_schedule->next_local_period((Schedule_use*)NULL, t, wss_next_period, Time::never);
+        return period.begin() <= t? period.end() : t;
+    }
+}
 
-bool Holidays::is_included( const Time& t )
+bool Holidays::contains_holiday(int day) const
 { 
-    int day = t.day_nr();
     return _day_set.find(day) != _day_set.end()  ||  _weekdays[weekday_of_day_number(day)];
 }
 

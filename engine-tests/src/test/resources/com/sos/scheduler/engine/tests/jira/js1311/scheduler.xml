@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <config>
+        <holidays>
+            <run_time>
+                <period begin="13:44:00" end="13:44:30"/>
+            </run_time>
+        </holidays>
+    </config>
+</spooler>

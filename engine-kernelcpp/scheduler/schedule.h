@@ -254,18 +254,32 @@ struct Month : Object
 
 struct Holidays
 {
-                                Holidays                    ( Spooler* spooler )                    : _spooler(spooler) {}
+    public: Holidays(Spooler* spooler) : 
+        _zero_(this + 1), 
+        _spooler(spooler) 
+    {}
 
-    void                        clear                       ()                                      { _day_set.clear(); }
-    bool                        is_filled                   () const                                { return !_day_set.empty(); }
-    void                        set_dom                     ( File_based* source_file_based, const xml::Element_ptr&, int include_nesting = 0 );
-    void                        include_day                 (int o)                                 { _day_set.insert(o); }
-    bool                        is_included                 ( const Time& );
+    public: void clear() { 
+        _day_set.clear(); 
+    }
 
+    public: void set_dom(File_based* source_file_based, const xml::Element_ptr&, int include_nesting = 0);
+    
+    private: void include_day(int o) { 
+        _day_set.insert(o); 
+    }
+
+    public: Time downtime_end(const Time&) const;
+
+    public: bool contains_holiday(int day_nr) const;
+
+private:
+    Fill_zero _zero_;
     Spooler*                   _spooler;
     typedef stdext::hash_set<int> Set;
     Set                        _day_set;
     std::bitset<7>             _weekdays;
+    ptr<Schedule>              _inverted_schedule;
 };
 
 //--------------------------------------------------------------------------------------------Date

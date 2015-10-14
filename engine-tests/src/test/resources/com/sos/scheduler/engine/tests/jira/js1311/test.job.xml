@@ -1,0 +1,6 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <script language="shell">exit 0</script>
+    <run_time>
+        <period repeat="2"/>
+    </run_time>
+</job>
