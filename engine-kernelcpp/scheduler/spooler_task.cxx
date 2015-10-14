@@ -2220,7 +2220,7 @@ void Task::postprocess_order(const Order_state_transition& state_transition, boo
         
         if (!_order->job_chain_path().empty())
             report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()), _order->java_sister());
-        _order->postprocessing( state_transition );
+        _order->postprocessing(state_transition, _error);
         
         if( due_to_exception && !_order->setback_called() ) 
             _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );

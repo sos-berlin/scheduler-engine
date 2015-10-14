@@ -304,6 +304,10 @@ struct Order : Com_order,
     Time                        next_time               ();
     void                        set_next_start_time     ();
     void                    set_task_error              ( const Xc& x )                             { _task_error = x; }
+    
+    const string& last_error() const {
+        return _last_error;
+    }
 
     // Auftrag in einer Jobkette:
     enum Job_chain_stack_option { jc_remove_from_job_chain_stack, jc_leave_in_job_chain_stack };
@@ -317,7 +321,7 @@ struct Order : Com_order,
     void                        tip_next_node_for_new_distributed_order_state();
     void                        move_to_node            ( job_chain::Node* );
 
-    void                        postprocessing          (const Order_state_transition&);                    // Verarbeitung nach spooler_process()
+    void                        postprocessing          (const Order_state_transition&, const Xc*);                    // Verarbeitung nach spooler_process()
     void                        processing_error        ();
     void                        handle_end_state        ();
     bool                        handle_end_state_of_nested_job_chain();
@@ -411,6 +415,7 @@ struct Order : Com_order,
     State                      _state;
     bool                       _its_me_removing;
 
+    string                     _last_error;
     bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
     State                      _end_state;
 

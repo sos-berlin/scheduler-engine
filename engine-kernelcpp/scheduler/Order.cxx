@@ -359,6 +359,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
 void Order::touch(Task* task)
 { 
     if (!_is_touched) {
+        _last_error = "";
         _is_touched = true; 
         if (_http_operation) {
             _http_operation->on_first_order_processing(task);
@@ -1469,6 +1470,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string setback          = element.getAttribute( "setback" );
     _setback_count          = element.int_getAttribute( "setback_count", _setback_count );
     _history_id             = element.int_getAttribute( "history_id"   , _history_id );
+    _last_error = element.getAttribute("last_error");
 
     if( element.bool_getAttribute( "replacement" ) )  set_replacement( true );
     _replaced_order_occupator = element.getAttribute( "replaced_order_occupator" );
@@ -1607,6 +1609,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     xml::Element_ptr result = dom_document.createElement( "order" );
 
     if( _history_id )  result.setAttribute( "history_id", _history_id );
+    result.setAttribute_optional("last_error", _last_error);
 
     fill_file_based_dom_element( result, show_what );
 
@@ -2276,6 +2279,7 @@ void Order::reset()
 
     assert_no_task( Z_FUNCTION );
 
+    _last_error = "";
     set_suspended( false );
     clear_setback();
     if (Nested_job_chain_node* first_nested_job_chain_node = Nested_job_chain_node::cast(
@@ -2687,11 +2691,9 @@ Job_chain* Order::job_chain_for_api() const
 
 //----------------------------------------------------------------------------Order::postprocessing
 
-void Order::postprocessing(const Order_state_transition& state_transition)
+void Order::postprocessing(const Order_state_transition& state_transition, const Xc* exception)
 {
-    //if (!job_chain_path().empty()) {
-    //    report_event(CppEventFactoryJ::newOrderStepEndedEvent(job_chain_path(), string_id(), state_transition), java_sister());
-    //}
+    _last_error = state_transition == Order_state_transition::standard_error && exception? exception->what() : "";
     _is_success_state = state_transition == Order_state_transition::success;
 
     Job*      last_job          = _task? _task->job() : NULL;
@@ -3014,6 +3016,7 @@ void Order::check_for_replacing_or_removing_with_distributed(When_to_act when_to
 //----------------------------------------------------------------Order::prepare_for_next_roundtrip
 
 void Order::prepare_for_next_roundtrip() {
+    _last_error = "";
     if (is_in_folder()) {
         if (!_spooler->settings()->_keep_order_content_on_reschedule) {
             restore_initial_settings();

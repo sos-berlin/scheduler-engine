@@ -1182,6 +1182,9 @@ library Spooler
 
         [id(30), propget]
         HRESULT                 History_id              ( [out, retval] BSTR* );
+
+        [id(31), propget]
+        HRESULT                 Last_error              ( [out, retval] BSTR* );
     }
 
     [
