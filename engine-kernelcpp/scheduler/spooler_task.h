@@ -217,7 +217,6 @@ struct Task : Object,
 
     bool                        running_state_reached       () const                                { return _running_state_reached; }
     Time                        last_process_start_time     ()                                      { return _last_process_start_time; }
-    Time                        ending_since                ()                                      { return _ending_since; }
 
     void                        merge_params                ( const Com_variable_set* p )           { _params->merge( p ); }
     ptr<Com_variable_set>       params                      ()                                      { return _params; }
@@ -401,7 +400,6 @@ struct Task : Object,
     bool                       _force_start;                // Auch um _start_at starten, wenn gerade keine <run_time>-Periode vorliegt
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten. 
     Time                       _running_since;
-    Time                       _ending_since;
     Time                       _last_process_start_time;
     Time                       _last_operation_time;
     Time                       _next_spooler_process;

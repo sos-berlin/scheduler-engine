@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1492
 
-import com.sos.scheduler.engine.common.scalautil.{Logger, AutoClosing}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.time.TimeZones
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -15,8 +15,8 @@ import java.io.OutputStreamWriter
 import java.net.Socket
 import java.nio.charset.StandardCharsets.UTF_8
 import java.time.Instant.now
-import java.time.{ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -44,13 +44,13 @@ final class JS1492IT extends FreeSpec with ScalaSchedulerTest {
           <period end={DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.ofInstant(periodEnd, instance[ZoneId]))}/>
         </run_time>
       </job>)
-    val run = runJobFuture(TestJobPath)
+    val run = startOrder(JobChainPath("/test") orderKey "1")
     sleepUntil(periodEnd + 100.ms)
     checkTcp()
     assert(now() < expectedTaskEnd - 1.s)
-    val result = awaitSuccess(run.result)
+    awaitSuccess(run.result)
     assert(now() > expectedTaskEnd)
-    assert(result.duration >= 5.s)
+    assert(now() < expectedTaskEnd + 3.s)
   }
 
   private def checkTcp(): Unit =
