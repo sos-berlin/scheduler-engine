@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1492
 
-import com.sos.scheduler.engine.common.scalautil.{Logger, AutoClosing}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -15,8 +14,8 @@ import java.io.OutputStreamWriter
 import java.net.Socket
 import java.nio.charset.StandardCharsets.UTF_8
 import java.time.Instant.now
-import java.time.{ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
