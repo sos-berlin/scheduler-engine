@@ -22,12 +22,12 @@ import java.time.Instant.now
 import java.time.{Instant, LocalDateTime, ZoneId}
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
+final class EntitiesIT extends FreeSpec with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
@@ -38,7 +38,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   private lazy val daylightSavingTimeInstant = LocalDateTime.parse(DaylightSavingTimeString).atZone(instance[ZoneId]).toInstant
   private lazy val standardTimeInstant = LocalDateTime.parse(StandardTimeInstantString).atZone(instance[ZoneId]).toInstant
 
-  override def onSchedulerActivated(): Unit = {
+  override def onSchedulerActivated() =
     withEventPipe { eventPipe ⇒
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
       eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
@@ -52,17 +52,16 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
     }
-  }
 
   private def simpleJob = instance[JobSubsystem].job(simpleJobPath)
 
   private def entityManager = instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
-  test("TaskHistoryEntity") {
+  "TaskHistoryEntity" in {
     taskHistoryEntities should have size 2
   }
 
-  test("First TaskHistoryEntity is from Scheduler start") {
+  "First TaskHistoryEntity is from Scheduler start" in {
     taskHistoryEntities(0) match { case e =>
       e should have (
         'id (firstTaskHistoryEntityId),
@@ -80,7 +79,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  test("Second TaskHistoryEntity is from "+orderJobPath) {
+  s"Second TaskHistoryEntity is from $orderJobPath" in {
     taskHistoryEntities(1) match { case e =>
       e should have (
         'id (firstTaskHistoryEntityId + 1),
@@ -97,7 +96,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  test("TaskEntity is written as expected") {
+  "TaskEntity is written as expected" in {
     val e = fetchTaskEntities(simpleJobPath)
     e should have size 3
 
@@ -122,7 +121,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     Instant.ofEpochMilli(e(2).startTime.getTime) shouldEqual standardTimeInstant
   }
 
-  test("TaskEntity is read as expected") {
+  "TaskEntity is read as expected" in {
     val queuedTasksElem = (scheduler executeXml <show_job job={simpleJobPath.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
     (queuedTasksElem \ "@length").text.toInt shouldEqual 3
     val queuedTaskElems = queuedTasksElem \ "queued_task"
@@ -139,7 +138,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     (queuedTaskElems(2) \ "params").head shouldEqual <params count="1"><param value="myValue" name="myJobParameter"/></params>
   }
 
-  test("JobEntity is from "+orderJobPath) {
+  s"JobEntity is from $orderJobPath" in {
     tryFetchJobEntity(orderJobPath) shouldBe None
 
     stopJobAndWait(orderJobPath)
@@ -154,12 +153,12 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  test("Job.tryFetchAverageStepDuration()") {
+  "Job.tryFetchAverageStepDuration()" in {
     val duration = job(simpleJobPath).tryFetchAverageStepDuration().get
     duration.toMillis should (be >= 0L and be <= 10*1000L)
   }
 
-  test("JobChainEntity") {
+  "JobChainEntity" in {
     tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
 
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
@@ -174,7 +173,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
   }
 
-  test("JobChainNodeEntity") {
+  "JobChainNodeEntity" in {
     fetchJobChainNodeEntities(jobChainPath) shouldBe 'empty
 
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="next_state"/>
@@ -195,7 +194,29 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  ignore("After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK") {
+  "OrderHistoryEntity" in {
+    val entities = entityManager.fetchSeq[OrderHistoryEntity]("select e from OrderHistoryEntity e")
+    assert(entities.size == 1)
+    entities(0) should have ('jobChainPath ("test-job-chain"), 'orderId ("ORDER-1"), 'state ("<END_STATE>"), 'title(""), 'schedulerId ("test"))
+    assert(entities(0).startTime != null)
+  }
+
+  "OrderStepEntity" in {
+    val entities = entityManager.fetchSeq[OrderStepEntity]("select e from OrderStepEntity e order by e.orderHistoryId, e.step")
+    assert(entities.size == 3)
+    entities(0) should have ('orderHistoryId (2), 'step (1), 'taskId (3), 'state ("100"), 'errorCode (null), 'errorText (null))
+    assert(!entities(0).isError)
+    assert(entities(0).startTime != null)
+    entities(1) should have ('orderHistoryId (2), 'step (2), 'taskId (3), 'state ("200"), 'errorCode (null), 'errorText (null))
+    assert(!entities(1).isError)
+    assert(entities(1).startTime != null)
+    entities(2) should have ('orderHistoryId (2), 'step (3), 'taskId (3), 'state ("300"), 'errorCode (null), 'errorText (null))
+    assert(!entities(2).isError)
+    assert(entities(2).startTime != null)
+  }
+
+  "After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK" in {
+    pending
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
     withEventPipe { eventPipe ⇒
@@ -212,7 +233,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  test("After JobChain removal database should contain no record") {
+  "After JobChain removal database should contain no record" in {
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     withEventPipe { eventPipe ⇒
