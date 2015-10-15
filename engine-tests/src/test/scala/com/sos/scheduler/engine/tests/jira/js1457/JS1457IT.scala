@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1457.JS1457IT._
 import java.lang.System.currentTimeMillis
 import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -32,19 +33,19 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-tcp-port=$tcpPort", "-log-level=info"))
-  private var stop = false
+  @volatile private var stop = false
 
-  "JS-1457" in {
+  "Fixed: High deadlock probability when starting multiple processes, CreateProcess fails with MSWIN-00000020" in {
     writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
     runJobAndWaitForEnd(JobPath("/test"))   // Smoke test
     val t = currentTimeMillis()
-    var count = 0
+    val count = new AtomicInteger
     try
       intercept[TimeoutException] {
         eventBus.awaitingEvent2[ErrorLogEvent](TestDuration, _ ⇒ true) {
           writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
           runJobAndWaitForEnd(JobPath("/test"))   // Smoke test
-          eventBus.on[TaskClosedEvent] { case _ ⇒ count += 1 }
+          eventBus.on[TaskClosedEvent] { case _ ⇒ count.incrementAndGet() }
           for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()
         }
       }
@@ -52,7 +53,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
       stop = true
       waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.pending }
     }
-    logger.info(s"$count processes, ${count * 1000 / (currentTimeMillis() - t)} processes/s")
+    logger.info(s"$count processes, ${count.get * 1000 / (currentTimeMillis() - t)} processes/s")
   }
 
   private def startJobAgainAndAgain(): Unit = runJobFuture(TestJobPath).result onSuccess { case _ ⇒ if (!stop) startJobAgainAndAgain() }
