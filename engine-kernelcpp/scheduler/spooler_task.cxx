@@ -1328,16 +1328,16 @@ bool Task::do_something()
         // Periode endet?
         if( !_operation ) {
             something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running prüfen?
-
-            if( _state == s_running
-             || _state == s_running_process
-             || _state == s_running_delayed
-             || _state == s_running_waiting_for_order )
-            {
-                bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
-                if( !let_run ) {
-                    _log->info( message_string( "SCHEDULER-278" ) );   // "Laufzeitperiode ist abgelaufen, Task wird beendet"
-                    cmd_end();
+            if (!_end) {
+                if( _state == s_running
+                 || _state == s_running_delayed
+                 || _state == s_running_waiting_for_order )
+                {
+                    bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
+                    if( !let_run ) {
+                        _log->info( message_string( "SCHEDULER-278" ) );   // "Laufzeitperiode ist abgelaufen, Task wird beendet"
+                        cmd_end();
+                    }
                 }
             }
         }
