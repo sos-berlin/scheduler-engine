@@ -493,7 +493,6 @@ void Task::cmd_end(End_mode end_mode, const Duration& timeout)
     if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
     if( _end != end_kill_immediately )  _end = end_mode;
-    if( !_ending_since )  _ending_since = Time::now();
 
     if (end_mode == end_kill_immediately) {
         if (!timeout.is_zero()) {
@@ -1609,8 +1608,6 @@ bool Task::do_something()
 
                         case s_ending: {
                             if( !_operation ) {
-                                if( !_ending_since )  
-                                    _ending_since = now;   // Wird auch von cmd_end() gesetzt
                                 if( has_error()  ||  _log->highest_level() >= log_error )  
                                     _history.start();
                                 if( _begin_called ) {
