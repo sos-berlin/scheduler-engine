@@ -1,15 +1,18 @@
 package com.sos.scheduler.engine.tests.jira.js1464
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, _}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.DatabaseOrderCheckPeriod
 import com.sos.scheduler.engine.kernel.settings.CppSettingName.useOldMicroschedulingForJobs
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.EventPipe
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1464.JS1464IT._
@@ -123,6 +126,15 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
       eventPipe.nextKeyedEvents[OrderStepStartedEvent](Set(a2OrderKey, b2OrderKey)) map { _.state } shouldEqual List(OrderState("100"), OrderState("100"))
       eventPipe.nextKeyedEvents[OrderFinishedEvent](Set(a2OrderKey, b2OrderKey))
     }
+  }
+
+  "Handling multiple tasks in a limited process class (JS-1516)" in {
+    val aJobPath = JobPath("/js1516/test-a")
+    val bJobPath = JobPath("/js1516/test-b")
+    val futures = inSchedulerThread {
+      for (jobPath ← List(aJobPath, bJobPath, aJobPath, bJobPath)) yield runJobFuture(jobPath).result
+    }
+    awaitResults(futures)
   }
 
   private def addOrder(orderKey: OrderKey, sleep: Duration): Unit = {

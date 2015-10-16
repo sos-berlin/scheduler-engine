@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderId, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderStepEndedEvent, OrderStepStartedEvent, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.test.SchedulerTestUtils.awaitSuccess
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -23,8 +22,6 @@ import scala.concurrent.Promise
  */
 @RunWith(classOf[JUnitRunner])
 final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
-
-  private implicit lazy val schedulerThreadCallQueue = instance[SchedulerThreadCallQueue]
 
   "JS-1198 limited inner jobchains" in {
     val expectedMaxima = Map(
