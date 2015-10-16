@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.eventbus.{SchedulerEventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.Scheduler
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.test._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest._
@@ -28,6 +29,8 @@ trait ScalaSchedulerTest
 
   protected implicit lazy final val controller: TestSchedulerController =
     TestSchedulerController(testConfiguration, testEnvironment).closeWithCloser
+
+  protected implicit lazy final val schedulerThreadCallQueue = instance[SchedulerThreadCallQueue]
 
   override protected final def beforeAll(): Unit = {
     if (testNames.isEmpty) {
