@@ -1480,7 +1480,7 @@ bool Process_class::process_available( Job* for_job )
 
     // Warten Jobs auf einen freien Prozess? 
     // Dann liefern wir nur true, wenn dieser Job der erste in der Warteschlange ist.
-    return _requestor_list.empty() || *_requestor_list.rbegin() == for_job;
+    return _requestor_list.empty() || *_requestor_list.begin() == for_job;
 }
 
 void Process_class::enqueue_requestor(Process_class_requestor* requestor) {
