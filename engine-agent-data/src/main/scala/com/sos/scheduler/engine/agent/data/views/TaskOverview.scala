@@ -14,6 +14,7 @@ import spray.json.DefaultJsonProtocol._
  */
 final case class TaskOverview(
   id: AgentTaskId,
+  pid: Option[Long] = None,
   tunnelId: TunnelId,
   startedAt: Instant,
   startedByHttpIp: Option[InetAddress],
@@ -21,7 +22,7 @@ final case class TaskOverview(
 
 object TaskOverview {
   implicit val ArgumentsJsonFormat = jsonFormat5(Arguments)
-  implicit val MyJsonFormat = jsonFormat5(apply)
+  implicit val MyJsonFormat = jsonFormat6(apply)
 
   final case class Arguments(
     taskId: TaskId,
