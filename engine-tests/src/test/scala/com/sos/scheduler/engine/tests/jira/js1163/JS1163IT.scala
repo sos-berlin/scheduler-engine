@@ -8,8 +8,8 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.job.{ReturnCode, JobPath}
+import com.sos.scheduler.engine.common.utils.{Exceptions, JavaResource}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.Unstop
@@ -66,6 +66,12 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private val classicAgentSetting = new ClassicAgentSetting(tcpPort = tcpPort)
   private val settings = List(NoAgentSetting, universalAgentSetting, classicAgentSetting)
 
+  "Universal Agent unregisters task after normal termination" in {
+    requireNoTasksAreRegistered()
+    awaitResults(for (jobPath ← List(JobPath("/test-short"), JobPath("/test-short-api"))) yield runJobFuture(jobPath).closed)
+    requireNoTasksAreRegistered()
+  }
+
   "kill_task with timeout but without immediately=true is rejected" in {
     val run = runJobFuture(TestJobPath)
     interceptSchedulerError(MessageCode("SCHEDULER-467")) {
@@ -77,7 +83,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "SIGKILL" - {
     for (setting ← settings) {
       s"$setting" - {
-        val jobPaths = List(StandardJobPath) //, StandardMonitorJobPath, ApiJobPath)
+        val jobPaths = List(StandardJobPath, StandardMonitorJobPath, ApiJobPath)
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
@@ -208,6 +214,18 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           results(ApiJobPath).endedInstant should be < killTime + 2.s
         }
       }
+    }
+  }
+
+  "Agent has unregistered all tasks" in {
+    requireNoTasksAreRegistered()
+  }
+
+  private def requireNoTasksAreRegistered(): Unit = {
+    // C++ code does not await result of CloseTask. So we may wait a little.
+    Exceptions.repeatUntilNoException(2.s, 50.ms) {
+      val tasks = awaitSuccess(agentClient.task.tasks)
+      assert(tasks.isEmpty)
     }
   }
 }
