@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.tunnel.client.WebTunnelClient
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
+import spray.http.Uri
 
 /**
  * @author Joacim Zschimmer
@@ -26,6 +27,7 @@ final class HttpRemoteProcessStarter @Inject private(
         processDescriptor = ProcessDescriptor.fromStartProcessResponse(response),
         schedulerApiTcpPort = schedulerApiTcpPort,
         tunnelClient = new WebTunnelClient {
+          val uri = Uri(agentUri)
           def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnel(id)
           def actorSystem = HttpRemoteProcessStarter.this.actorSystem
         })
