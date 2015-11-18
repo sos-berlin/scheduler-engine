@@ -13,7 +13,7 @@ final class HibernateTaskStore @Inject()(
     protected val schedulerId: SchedulerId,
     protected val clusterMemberId: ClusterMemberId,
     protected val entityManagerFactory: EntityManagerFactory)
-extends AbstractHibernateStore[TaskPersistentState, TaskId, TaskEntity]
+extends AbstractHibernateStore[TaskPersistentState, TaskEntity]
 with TaskEntityConverter {
 
   private val queryString = "select t from TaskEntity t"+

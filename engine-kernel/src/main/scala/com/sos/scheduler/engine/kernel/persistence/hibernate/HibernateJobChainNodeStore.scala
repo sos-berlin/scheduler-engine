@@ -11,7 +11,7 @@ import scala.collection.JavaConversions._
 final class HibernateJobChainNodeStore @Inject()(
     protected val schedulerId: SchedulerId,
     protected val clusterMemberId: ClusterMemberId)
-extends AbstractHibernateStore[JobChainNodePersistentState, JobChainNodePersistentStateKey, JobChainNodeEntity]
+extends AbstractHibernateStore[JobChainNodePersistentState, JobChainNodeEntity]
 with JobChainNodeEntityConverter {
 
   def fetchAll(jobChainPath: JobChainPath)(implicit em: EntityManager) =

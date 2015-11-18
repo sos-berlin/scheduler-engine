@@ -11,7 +11,7 @@ import javax.persistence.{EntityManager, EntityManagerFactory}
  */
 @Singleton
 final class HibernateVariableStore @Inject private(protected val entityManagerFactory: EntityManagerFactory)
-extends AbstractHibernateStore[VariablePersistentState, String, VariableEntity]
+extends AbstractHibernateStore[VariablePersistentState, VariableEntity]
 with VariableEntityConverter {
 
   def nextTaskId(implicit em: EntityManager) = TaskId(fetch(VariableEntity.JobIdName).int)
