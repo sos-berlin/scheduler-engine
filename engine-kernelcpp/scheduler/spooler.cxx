@@ -1644,6 +1644,8 @@ void Spooler::read_command_line_arguments()
             else
             if (opt.with_value("roles")) { _settings->set(setting_roles, opt.value()); }
             else
+            if (opt.flag("pause-after-failure")) { _settings->set(setting_pause_after_failure, as_string(opt.set())); }
+            else
                 throw_sos_option_error( opt );
         }
 
@@ -2110,6 +2112,12 @@ void Spooler::activate()
 
     set_state( s_running );
     _java_subsystem->on_scheduler_activated();
+
+    if (settings()->_pause_after_failure) {
+        if (_db->last_scheduler_run_failed()) {
+            set_state(s_paused);
+        }
+    }
 }
 
 //-----------------------------------------------------------------Spooler::execute_config_commands

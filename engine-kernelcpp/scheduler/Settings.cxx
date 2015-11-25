@@ -133,6 +133,10 @@ void Settings::set(int number, const string& value) {
             _web_directory = value;
             break;
         }
+        case setting_pause_after_failure: {
+            _pause_after_failure = as_bool(value);
+            break;
+        }
 
         default:
             z::throw_xc("UNKNOWN_SETTING", number);

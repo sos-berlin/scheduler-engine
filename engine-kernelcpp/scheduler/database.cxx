@@ -1603,10 +1603,24 @@ void Database::spooler_start()
 {
     if( _db.opened() )
     {
+        {
+            Read_transaction ta (this); 
+            Any_file sel = ta.open_result_set(
+                "select %limit(1) `START_TIME`, `END_TIME` from " + _job_history_tablename + 
+                " where `SPOOLER_ID`=" + sql::quoted(_spooler->id_for_db()) + " and `JOB_NAME`='(Spooler)'" + 
+                " order by `ID` desc",
+                Z_FUNCTION);
+            if (!sel.eof()) {
+                Record record = sel.get_record();
+                _last_scheduler_run_failed = record.null("END_TIME");
+                Z_LOG2("scheduler", "Last run: " << record.as_string("START_TIME") << " until " << record.as_string("END_TIME") << (_last_scheduler_run_failed? "- HAS NOT PROPERLY TERMINATED (failed?)" : "") << "\n");
+            }
+        }
+
         _id = get_task_id("Scheduler");     // Der Spooler-Satz hat auch eine Id
 
-        Transaction ta ( this );
         {
+            Transaction ta ( this );
             sql::Insert_stmt insert ( ta.database_descriptor(), _job_history_tablename );
         
             insert[ "id"                ] = _id;
