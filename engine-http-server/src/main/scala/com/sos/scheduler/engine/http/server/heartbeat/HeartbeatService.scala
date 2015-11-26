@@ -38,7 +38,6 @@ final class HeartbeatService {
       }
     }
     headerValueByName(`X-JobScheduler-Heartbeat-Start`.name) { case `X-JobScheduler-Heartbeat-Start`.Value(timing) ⇒
-      logger.info(s"X-JobScheduler-Heartbeat-Start")
       requestUri { uri ⇒
         val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeatTimeout)(actorRefFactory.dispatcher)
         startHeartbeatPeriod(pendingOperation, timing)

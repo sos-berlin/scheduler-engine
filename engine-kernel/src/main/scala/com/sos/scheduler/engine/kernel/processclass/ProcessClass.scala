@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -121,8 +122,10 @@ object ProcessClass {
     }
   }
 
-  def apiProcessConfiguration(c: Api_process_configurationC) = new ApiProcessConfiguration(
-    hasApi = c._has_api,
-    javaOptions = c._java_options.trim,
-    javaClasspath = c._java_classpath.trim)
+  private def apiProcessConfiguration(c: Api_process_configurationC) = {
+    new ApiProcessConfiguration(
+      hasApi = c._has_api,
+      javaOptions = c._java_options.trim,
+      javaClasspath = c._java_classpath.trim)
+  }
 }

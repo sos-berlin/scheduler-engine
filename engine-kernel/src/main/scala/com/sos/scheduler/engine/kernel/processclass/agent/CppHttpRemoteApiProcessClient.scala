@@ -26,7 +26,7 @@ extends AutoCloseable {
 
   private object callbacks extends FailableSelector.Callbacks[Agent, HttpRemoteProcess] {
     def apply(agent: Agent): Future[Try[HttpRemoteProcess]] = {
-      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, agentUri = agent.address).withThisStackTrace
+      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, agentUri = agent.address, agent.httpHeartbeatTiming).withThisStackTrace
       future map Success.apply recover {
         case e: spray.can.Http.ConnectionAttemptFailedException ⇒
           warningCall.call(e)

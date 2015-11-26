@@ -2,8 +2,11 @@ package com.sos.scheduler.engine.kernel.processclass
 
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.processclass.agent.Agent
 import java.net.URI
+import java.time.Duration
 import org.w3c.dom
 import scala.collection.immutable
 
@@ -22,20 +25,24 @@ private[processclass] case class Configuration(agentOption: Option[Agent], moreA
 }
 
 private[processclass] object Configuration {
-  def parse(element: dom.Element) =
+  def parse(element: dom.Element): Configuration =
     ScalaXMLEventReader.parseDocument(domElementToStaxSource(element)) { eventReader ⇒
       import eventReader._
       parseElement("process_class") {
         case class Agents(agents: immutable.IndexedSeq[Agent])
         val nextId: () ⇒ Int = (Iterator from 0).next
-        val attributeAgentOption = attributeMap.get("remote_scheduler") filter { _.nonEmpty } map { o ⇒ Agent(nextId(), o) }
+        val attributeAgentOption = attributeMap.get("remote_scheduler") filter { _.nonEmpty } map { o ⇒ Agent(nextId(), o, httpHeartbeatTiming = None) }
         attributeMap.ignoreUnread()
         val children = forEachStartElement {
           case "remote_schedulers" ⇒ parseElement() {
             val children = forEachStartElement {
               case "remote_scheduler" ⇒ parseElement() {
                 val uri = new URI(attributeMap("remote_scheduler")) // Should be an URI
-                Agent(nextId(), uri.toString)
+                val httpHeartbeatTimingOption =
+                  for (period ← attributeMap.get("http_heartbeat_period") map { o ⇒ Duration ofSeconds o.toInt };
+                       timeout = attributeMap.get("http_heartbeat_timeout") map { o ⇒ Duration ofSeconds o.toInt } getOrElse 2 * period)
+                  yield HttpHeartbeatTiming(period = period, timeout = timeout)
+                Agent(nextId(), uri.toString, httpHeartbeatTimingOption)
               }
               case _ ⇒ ()
             }
