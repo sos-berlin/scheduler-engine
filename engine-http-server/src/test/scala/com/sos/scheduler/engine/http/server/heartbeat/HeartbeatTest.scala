@@ -69,7 +69,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "HttpRequestTimeoutException" in {
-    val times = HttpHeartbeatTiming(period = 300.ms, timeout = 300.ms)
+    val times = HttpHeartbeatTiming(period = 300.ms, timeout = 600.ms)
     val heartbeatRequestor = new HeartbeatRequestor(times)
     val request = Data(200.ms.toString)
     val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive(actorSystem, actorSystem.dispatcher, 100.ms.toFiniteDuration), Post(s"$baseUri/test", request))
@@ -153,14 +153,9 @@ object HeartbeatTest {
         post {
           heartbeatService.continueHeartbeat ~
           entity(as[Data]) { data ⇒
-            val resultFuture = operation(data)
-            heartbeatService.startHeartbeat(
-              resultFuture,
-              onHeartbeatTimeout = {
-                case t: HeartbeatTimeout ⇒
-                  logger.warn(s"No client heartbeat: $t")
-                  timedOutRequests += data
-              })
+            heartbeatService.startHeartbeat(onHeartbeatTimeout = Some(onHeartbeatTimeout(data))) {
+              timeout: Option[Duration] ⇒ operation(data)
+            }
           }
         }
       }
@@ -168,6 +163,11 @@ object HeartbeatTest {
     private def operation(data: Data) = Future {
       sleep(Duration parse data.string)
       data.toResponse
+    }
+
+    private def onHeartbeatTimeout(data: Data)(timeout: HeartbeatTimeout): Unit = {
+      logger.warn(s"No client heartbeat: $timeout")
+      timedOutRequests += data
     }
   }
 }

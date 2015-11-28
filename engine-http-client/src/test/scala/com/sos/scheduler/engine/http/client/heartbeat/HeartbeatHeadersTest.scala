@@ -6,14 +6,18 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import spray.http.HttpHeader
-import spray.http.HttpHeaders.`Cache-Control`
+import spray.http.{StatusCodes, HttpHeader}
+import spray.http.HttpHeaders.{RawHeader, `Cache-Control`}
+import spray.http.StatusCodes.{BadRequest, InternalServerError}
+import spray.httpx.marshalling.BasicMarshallers._
+import spray.routing.Directives._
+import spray.testkit.ScalatestRouteTest
 
 /**
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class HeartbeatHeadersTest extends FreeSpec {
+final class HeartbeatHeadersTest extends FreeSpec with ScalatestRouteTest {
 
   "X-JobScheduler-Heartbeat-Start" in {
     val name = "X-JobScheduler-Heartbeat-Start"
@@ -24,6 +28,17 @@ final class HeartbeatHeadersTest extends FreeSpec {
 
     val `X-JobScheduler-Heartbeat-Start`.Value(times) = value
     assert(times == HttpHeartbeatTiming(period = 12300.ms, timeout = 30.s))
+  }
+
+  "X-JobScheduler-Heartbeat-Start, bad syntax" in {
+    val route = headerValueByName(`X-JobScheduler-Heartbeat-Start`.name) { case `X-JobScheduler-Heartbeat-Start`.Value(timing) ⇒ complete("OKAY") }
+    Post("/").withHeaders(RawHeader("X-JobScheduler-Heartbeat-Start", "PT1S PT1S")) ~> route ~> check {
+      pendingUntilFixed {
+        assert(status == BadRequest)
+        assert(entity.asString contains "Bad header X-JobScheduler-Heartbeat-Start")
+      }
+      assert(status == InternalServerError)
+    }
   }
 
   "X-JobScheduler-Heartbeat-Continue" in {
