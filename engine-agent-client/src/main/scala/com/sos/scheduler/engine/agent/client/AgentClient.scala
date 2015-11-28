@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import java.time.Duration
 import org.scalactic.Requirements._
 import scala.collection.immutable
@@ -102,6 +103,8 @@ trait AgentClient {
 }
 
 object AgentClient {
+  intelliJuseImports(StringJsonFormat)  // for import spray.json.DefaultJsonProtocol._
+
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
   private val logger = Logger(getClass)
