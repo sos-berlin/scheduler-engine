@@ -61,7 +61,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Route = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
-    alarmClock.delay(timing.period) {
+    alarmClock.delay(timing.period, name = pendingOperation.uri.toString) {
       val heartbeatId = HeartbeatId.generate()
       pendingOperations.insert(heartbeatId, pendingOperation)
       _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
@@ -69,7 +69,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
       val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = `X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
       if (heartbeatResponded) {
         for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-          alarmClock.delay(timing.timeout) {
+          alarmClock.delay(timing.timeout, name = pendingOperation.uri.toString) {
             for (o ← pendingOperations.remove(heartbeatId)) {
               logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
               onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
