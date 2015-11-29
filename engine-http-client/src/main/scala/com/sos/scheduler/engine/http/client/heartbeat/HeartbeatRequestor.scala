@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import java.time.Duration
+import org.jetbrains.annotations.TestOnly
 import scala.concurrent.{Future, blocking}
 import spray.client.pipelining._
 import spray.http.StatusCodes.Accepted
@@ -14,7 +15,9 @@ import spray.http.{HttpEntity, HttpRequest, HttpResponse}
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatRequestor(timing: HttpHeartbeatTiming, delayHeartbeat: Duration = 0.s) {
+final class HeartbeatRequestor @TestOnly private[http](timing: HttpHeartbeatTiming, testWithHeartbeatDelay: Duration) {
+  def this(timing: HttpHeartbeatTiming) = this(timing, testWithHeartbeatDelay = 0.s)
+
   private var _heartbeatCount = 0
 
   def heartbeatCount = _heartbeatCount
@@ -27,7 +30,7 @@ final class HeartbeatRequestor(timing: HttpHeartbeatTiming, delayHeartbeat: Dura
     val emptyRequest = request withEntity HttpEntity.Empty
 
     def handleResponse(httpResponse: HttpResponse)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
-      if (!delayHeartbeat.isZero) blocking { sleep(delayHeartbeat) }
+      if (!testWithHeartbeatDelay.isZero) blocking { sleep(testWithHeartbeatDelay) }
       heartbeatIdOption(httpResponse) match {
         case Some(heartbeatId) ⇒
           _heartbeatCount += 1

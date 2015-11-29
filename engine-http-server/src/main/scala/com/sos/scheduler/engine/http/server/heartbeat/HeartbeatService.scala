@@ -4,11 +4,13 @@ import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashMap}
 import com.sos.scheduler.engine.common.sprayutils.Marshalling.marshalToHttpResponse
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatService._
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
+import javax.inject.Inject
 import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
 import scala.concurrent._
@@ -21,7 +23,7 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatService {
+final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
 
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]()
   private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
@@ -59,8 +61,7 @@ final class HeartbeatService {
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Route = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
-    Future {
-      blocking { sleep(timing.period) }
+    alarmClock.delay(timing.period) {
       val heartbeatId = HeartbeatId.generate()
       pendingOperations.insert(heartbeatId, pendingOperation)
       _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
@@ -68,10 +69,11 @@ final class HeartbeatService {
       val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = `X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
       if (heartbeatResponded) {
         for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-          blocking { sleep(timing.timeout) }
-          for (o ← pendingOperations.remove(heartbeatId)) {
-            logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
-            onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
+          alarmClock.delay(timing.timeout) {
+            for (o ← pendingOperations.remove(heartbeatId)) {
+              logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
+              onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
+            }
           }
         }
       } else {

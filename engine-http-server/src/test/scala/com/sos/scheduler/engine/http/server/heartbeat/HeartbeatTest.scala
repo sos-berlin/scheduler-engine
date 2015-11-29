@@ -7,6 +7,7 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.common.utils.Exceptions.repeatUntilNoException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor.HttpRequestTimeoutException
@@ -38,13 +39,15 @@ import spray.routing.{HttpServiceActor, Route}
 final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
 
   private implicit val askTimeout = AskTimeout
-  private lazy val heartbeatService = new HeartbeatService
   private implicit lazy val actorSystem = ActorSystem("TEST")
-  private implicit val dataJsonFormat = Data.jsonFormat
   import actorSystem.dispatcher
+  private val alarmClock = new AlarmClock(10.ms)
+  private lazy val heartbeatService = new HeartbeatService(alarmClock)
+  private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer(heartbeatService)
 
   override protected def afterAll() = {
+    alarmClock.close()
     actorSystem.shutdown()
     super.afterAll()
   }
@@ -56,7 +59,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   "onHeartbeatTimeout is called when client has timed out" in {
     val timing = HttpHeartbeatTiming(100.ms, 200.ms)
     val duration = timing.period + timing.period / 2
-    val heartbeatRequestor = new HeartbeatRequestor(timing, delayHeartbeat = timing.timeout + 1.s)
+    val heartbeatRequestor = new HeartbeatRequestor(timing, testWithHeartbeatDelay = timing.timeout + 1.s)
     val request = Data(duration.toString)
     val responseFuture = heartbeatRequestor.apply(sendReceive, Post(s"$baseUri/test", request))
     val response = awaitResult(responseFuture, 10.s)
@@ -92,7 +95,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
       (50 * times.period, 0.s, o ⇒ assert(o >= 5)),
       (50 * times.period, randomDuration(2 * times.period), o ⇒ assert(o >= 3))))
     s"operation = ${duration.pretty}, own delay = ${delay.pretty}" in {
-      val heartbeatRequestor = new HeartbeatRequestor(times, delayHeartbeat = delay)
+      val heartbeatRequestor = new HeartbeatRequestor(times, testWithHeartbeatDelay = delay)
       val request = Data(duration.toString)
       val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
       val response = awaitResult(responseFuture, 10.s)
