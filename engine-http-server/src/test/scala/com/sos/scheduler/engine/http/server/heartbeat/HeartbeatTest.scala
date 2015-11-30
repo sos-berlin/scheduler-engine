@@ -53,7 +53,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "Requests with heartbeat" - {
-    addHeartbeatTests(HttpHeartbeatTiming(period = 20.ms, timeout = 100.ms))
+    addHeartbeatTests(HttpHeartbeatTiming(period = 50.ms, timeout = 150.ms))
   }
 
   "onHeartbeatTimeout is called when client has timed out" in {
