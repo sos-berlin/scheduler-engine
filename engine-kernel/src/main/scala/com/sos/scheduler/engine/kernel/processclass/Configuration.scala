@@ -39,8 +39,8 @@ private[processclass] object Configuration {
               case "remote_scheduler" ⇒ parseElement() {
                 val uri = new URI(attributeMap("remote_scheduler")) // Should be an URI
                 val httpHeartbeatTimingOption =
-                  for (period ← attributeMap.get("http_heartbeat_period") map { o ⇒ Duration ofSeconds o.toInt };
-                       timeout = attributeMap.get("http_heartbeat_timeout") map { o ⇒ Duration ofSeconds o.toInt } getOrElse 2 * period)
+                  for (timeout ← attributeMap.get("http_heartbeat_timeout") map { o ⇒ Duration ofSeconds o.toInt };
+                       period = attributeMap.get("http_heartbeat_period") map { o ⇒ Duration ofSeconds o.toInt } getOrElse timeout / 2)
                   yield HttpHeartbeatTiming(period = period, timeout = timeout)
                 Agent(nextId(), uri.toString, httpHeartbeatTimingOption)
               }
