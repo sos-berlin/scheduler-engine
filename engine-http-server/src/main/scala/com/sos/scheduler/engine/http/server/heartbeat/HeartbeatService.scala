@@ -29,7 +29,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
   private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
 
   def startHeartbeat[A](
-    onHeartbeat: () ⇒ Unit = () ⇒ {},
+    onHeartbeat: Duration ⇒ Unit = _ ⇒ {},
     @Deprecated @TestOnly onHeartbeatTimeout: Option[OnHeartbeatTimeout] = None)
     (operation: Option[Duration] ⇒ Future[A])
     (implicit marshaller: Marshaller[A], actorRefFactory: ActorRefFactory): Route =
@@ -51,7 +51,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
         pendingOperations.remove(heartbeatId) match {
           case None ⇒ complete(BadRequest, "Unknown heartbeat ID (HTTP request is too late?)")
           case Some(o) ⇒
-            o.onHeartbeat()
+            o.onHeartbeat(times.timeout)
             startHeartbeatPeriod(o, times)
         }
       } ~
@@ -94,7 +94,7 @@ object HeartbeatService {
   private final class PendingOperation(
     val uri: Uri,
     responseFuture: Future[HttpResponse],
-    val onHeartbeat: () ⇒ Unit,
+    val onHeartbeat: Duration ⇒ Unit,
     val onHeartbeatTimeout: Option[OnHeartbeatTimeout])
     (implicit ec: ExecutionContext)
   {
