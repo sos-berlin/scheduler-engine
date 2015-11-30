@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.http.client.heartbeat
 import akka.actor.ActorRefFactory
 import akka.pattern.AskTimeoutException
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatHeaders._
+import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import java.time.Duration
 import org.jetbrains.annotations.TestOnly
@@ -53,7 +53,7 @@ object HeartbeatRequestor {
 
   private def heartbeatIdOption(httpResponse: HttpResponse): Option[HeartbeatId] =
     if (httpResponse.status == Accepted && httpResponse.entity.isEmpty)
-      httpResponse.headers collectFirst { case `X-JobScheduler-Heartbeat`(id) ⇒ id }
+      httpResponse.headers collectFirst { case HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(id) ⇒ id }
     else
       None
 

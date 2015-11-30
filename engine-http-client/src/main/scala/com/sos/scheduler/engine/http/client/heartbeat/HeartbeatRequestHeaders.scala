@@ -1,14 +1,12 @@
 package com.sos.scheduler.engine.http.client.heartbeat
 
-import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.http.client.common.{OwnHttpHeader, OwnHttpHeaderCompanion}
 import java.time.Duration
-import spray.http.HttpHeader
 
 /**
   * @author Joacim Zschimmer
   */
-object HeartbeatHeaders {
+object HeartbeatRequestHeaders {
 
   private val DurationRegex = "[0-9.A-Za-z]+".r
   private val TimesRegex = s"($DurationRegex) +($DurationRegex)".r
@@ -27,7 +25,7 @@ object HeartbeatHeaders {
     }
   }
 
-  final case class `X-JobScheduler-Heartbeat-Continue`(heartbeatId: HeartbeatId, timing: HttpHeartbeatTiming) extends OwnHttpHeader {
+ final case class `X-JobScheduler-Heartbeat-Continue`(heartbeatId: HeartbeatId, timing: HttpHeartbeatTiming) extends OwnHttpHeader {
     def companion = `X-JobScheduler-Heartbeat-Continue`
     def value = s"${heartbeatId.string} ${timing.period} ${timing.timeout}"
   }
@@ -40,21 +38,5 @@ object HeartbeatHeaders {
           case ValueRegex(heartbeatId, timing) ⇒ Some(HeartbeatId(heartbeatId), parseTimes(timing))
         }
       }
-  }
-
-  final case class `X-JobScheduler-Heartbeat`(heartbeatId: HeartbeatId) extends OwnHttpHeader {
-    def companion = `X-JobScheduler-Heartbeat`
-    def value = s"${heartbeatId.string}"
-  }
-  object `X-JobScheduler-Heartbeat` extends OwnHttpHeaderCompanion {
-    def unapply(h: HttpHeader): Option[HeartbeatId] =
-      h.name.toLowerCase == lowercaseName option {
-        val Value(id) = h.value
-        id
-      }
-
-    object Value {
-      def unapply(value: String): Some[HeartbeatId] = Some(HeartbeatId(value))
-    }
   }
 }

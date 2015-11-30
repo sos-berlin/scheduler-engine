@@ -5,8 +5,8 @@ import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashMap
 import com.sos.scheduler.engine.common.sprayutils.Marshalling.marshalToHttpResponse
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.alarm.AlarmClock
-import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatHeaders._
-import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HttpHeartbeatTiming}
+import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
+import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatResponseHeaders, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatService._
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
@@ -66,7 +66,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
       pendingOperations.insert(heartbeatId, pendingOperation)
       _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
       val oldPromise = pendingOperation.renewPromise()
-      val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = `X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
+      val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
       if (heartbeatResponded) {
         for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
           alarmClock.delay(timing.timeout, name = pendingOperation.uri.toString) {
