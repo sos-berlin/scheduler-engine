@@ -27,10 +27,12 @@ for arg in "$@"; do
     esac
 done
 
+
+bin=$(cd "$(dirname "$0")"; pwd)
 if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
-    SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.."; pwd)
+    SCHEDULER_AGENT_HOME=$(cd "$bin/.."; pwd)
 fi
-. "$SCHEDULER_AGENT_HOME/bin/set-context.sh"
+. "$bin/set-context.sh"
 
 if [ -f "$SCHEDULER_AGENT_WORK/etc/logback.xml" ]; then :
     logbackConfig="file:$SCHEDULER_AGENT_WORK/etc/logback.xml"
