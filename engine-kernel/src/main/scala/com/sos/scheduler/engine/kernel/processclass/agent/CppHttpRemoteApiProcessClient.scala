@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.processclass.agent.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.kernel.processclass.common.{FailableCollection, FailableSelector}
 import java.time.Duration
-import javax.inject.{Inject, Provider}
+import javax.inject.{Singleton, Inject, Provider}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -134,6 +134,7 @@ object CppHttpRemoteApiProcessClient {
 
   private val logger = Logger(getClass)
 
+  @Singleton
   final class Factory @Inject private(httpRemoteProcessStarter: Provider[HttpRemoteProcessStarter], callQueue: SchedulerThreadCallQueue) {
     def apply(apiProcessConfiguration: ApiProcessConfiguration, schedulerApiTcpPort: Int, warningCall: CppCall, resultCall: CppCall) =
       new CppHttpRemoteApiProcessClient(
