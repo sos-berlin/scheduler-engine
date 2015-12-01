@@ -2,10 +2,12 @@ package com.sos.scheduler.engine.http.client.heartbeat
 
 import akka.actor.ActorRefFactory
 import akka.pattern.AskTimeoutException
+import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import java.time.Duration
+import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.concurrent.{Future, blocking}
 import spray.client.pipelining._
@@ -15,12 +17,11 @@ import spray.http.{HttpEntity, HttpRequest, HttpResponse}
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatRequestor @TestOnly private[http](timing: HttpHeartbeatTiming, testWithHeartbeatDelay: Duration) {
-  def this(timing: HttpHeartbeatTiming) = this(timing, testWithHeartbeatDelay = 0.s)
+final class HeartbeatRequestor @Inject private[http](timing: HttpHeartbeatTiming, testWithHeartbeatDelay: Duration = 0.s) {
 
   private var _heartbeatCount = 0
 
-  def heartbeatCount = _heartbeatCount
+  def close() = {}
 
   def apply(sendReceive: SendReceive, httpRequest: HttpRequest)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] =
     apply(firstRequestTransformer = identity, sendReceive, httpRequest)
@@ -46,10 +47,20 @@ final class HeartbeatRequestor @TestOnly private[http](timing: HttpHeartbeatTimi
     val myRequest = request withHeaders heartbeatHeader :: request.headers
     (firstRequestTransformer ~> sendReceive).apply(myRequest) recover transformException flatMap handleResponse
   }
+
+  @TestOnly
+  def heartbeatCount = _heartbeatCount
 }
 
 object HeartbeatRequestor {
-  def apply(timing: HttpHeartbeatTiming) = new HeartbeatRequestor(timing)
+  @ImplementedBy(classOf[StandardFactory])
+  trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
+
+  @Singleton
+  final class StandardFactory @Inject private extends Factory {
+    def apply(timing: HttpHeartbeatTiming): HeartbeatRequestor =
+      new HeartbeatRequestor(timing)
+  }
 
   private def heartbeatIdOption(httpResponse: HttpResponse): Option[HeartbeatId] =
     if (httpResponse.status == Accepted && httpResponse.entity.isEmpty)

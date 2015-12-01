@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.AgentClient
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.tunnel.client.{TcpToHttpBridge, WebTunnelClient}
 import java.net.InetSocketAddress
 
@@ -10,23 +12,22 @@ import java.net.InetSocketAddress
  *
  * @author Joacim Zschimmer
  */
-private[agent] final class TunnelledHttpRemoteProcess(
-  actorSystem: ActorSystem,
-  protected val agentClient: AgentClient,
-  protected val processDescriptor: ProcessDescriptor,
-  schedulerApiTcpPort: Int,
-  tunnelClient: WebTunnelClient)
-extends HttpRemoteProcess {
+private[agent] trait TunnelledHttpRemoteProcess extends HasCloser with HttpRemoteProcess{
+
+  protected def actorSystem: ActorSystem
+  protected def agentClient: AgentClient
+  protected def processDescriptor: ProcessDescriptor
+  protected def schedulerApiTcpPort: Int
+  protected val tunnelClient: WebTunnelClient
 
   protected def executionContext = actorSystem.dispatcher
 
-  private val tcpHttpBridge = new TcpToHttpBridge(
+  private lazy val tcpHttpBridge = new TcpToHttpBridge(
     actorSystem,
     connectTo = new InetSocketAddress("127.0.0.1", schedulerApiTcpPort),
     tunnelToken = processDescriptor.tunnelToken,
     tunnelClient = tunnelClient)
+  .closeWithCloser
 
   def start() = tcpHttpBridge.start()
-
-  def close() = tcpHttpBridge.close()
 }

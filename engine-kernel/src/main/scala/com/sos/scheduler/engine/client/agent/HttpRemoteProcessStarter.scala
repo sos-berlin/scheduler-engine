@@ -3,12 +3,12 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.agent.data.web.AgentUris
-import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.tunnel.client.WebTunnelClient
-import com.sos.scheduler.engine.tunnel.data.TunnelId
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import spray.http.Uri
 
 /**
  * @author Joacim Zschimmer
@@ -16,7 +16,9 @@ import spray.http.Uri
 @Singleton
 final class HttpRemoteProcessStarter @Inject private(
   agentClientFactory: AgentClientFactory,
-  actorSystem: ActorSystem) {
+  newHeartbeatRequestor: HeartbeatRequestor.Factory,
+  actorSystem: ActorSystem)
+extends HasCloser {
 
   import actorSystem.dispatcher
 
@@ -24,19 +26,22 @@ final class HttpRemoteProcessStarter @Inject private(
     schedulerApiTcpPort: Int,
     configuration: ApiProcessConfiguration,
     agentUri: String,
-    httpHeartbeatTiming: Option[HttpHeartbeatTiming]): Future[HttpRemoteProcess]
-  =
+    httpHeartbeatTiming: Option[HttpHeartbeatTiming]): Future[HttpRemoteProcess] =
+  {
+    val port = schedulerApiTcpPort
     agentClientFactory.apply(agentUri).executeCommand(configuration.toUniversalAgentCommand) map { response ⇒
-      new TunnelledHttpRemoteProcess(
-        actorSystem,
-        agentClient = agentClientFactory.apply(agentUri),
-        processDescriptor = ProcessDescriptor.fromStartProcessResponse(response),
-        schedulerApiTcpPort = schedulerApiTcpPort,
-        tunnelClient = new WebTunnelClient {
-          val uri = Uri(agentUri)
-          def tunnelUri(id: TunnelId) = AgentUris(agentUri).tunnel(id)
+      new TunnelledHttpRemoteProcess {
+        def actorSystem = HttpRemoteProcessStarter.this.actorSystem
+        val agentClient = agentClientFactory.apply(agentUri)
+        val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
+        def schedulerApiTcpPort = port
+        val tunnelClient = new WebTunnelClient {
+          def tunnelToken = processDescriptor.tunnelToken
+          def tunnelUri = AgentUris(agentUri).tunnel(tunnelToken.id)
+          val heartbeatRequestorOption = httpHeartbeatTiming map newHeartbeatRequestor
           def actorSystem = HttpRemoteProcessStarter.this.actorSystem
-          def heartbeatTimingOption = httpHeartbeatTiming
-        })
+        }.closeWithCloser
+      }
+    }
   }
 }
