@@ -28,24 +28,23 @@ final class HeartbeatRequestor @Inject private[http](timing: HttpHeartbeatTiming
 
   def apply(firstRequestTransformer: RequestTransformer, sendReceive: SendReceive, request: HttpRequest)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
     import actorRefFactory.dispatcher
-    val emptyRequest = request withEntity HttpEntity.Empty
-
-    def handleResponse(httpResponse: HttpResponse)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
-      if (!testWithHeartbeatDelay.isZero) blocking { sleep(testWithHeartbeatDelay) }
-      heartbeatIdOption(httpResponse) match {
-        case Some(heartbeatId) ⇒
-          _heartbeatCount += 1
-          val heartbeatHeader = `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-          val heartbeatRequest = emptyRequest withHeaders heartbeatHeader
-          sendReceive.apply(heartbeatRequest) recover transformException flatMap handleResponse
-        case None ⇒
-          Future.successful(httpResponse)
-      }
-    }
-
     val heartbeatHeader = `X-JobScheduler-Heartbeat-Start`(timing)
     val myRequest = request withHeaders heartbeatHeader :: request.headers
-    (firstRequestTransformer ~> sendReceive).apply(myRequest) recover transformException flatMap handleResponse
+    (firstRequestTransformer ~> sendReceive).apply(myRequest) recover transformException flatMap handleResponse(request withEntity HttpEntity.Empty)
+  }
+
+  private def handleResponse(emptyRequest: HttpRequest)(httpResponse: HttpResponse)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
+    import actorRefFactory.dispatcher
+    if (!testWithHeartbeatDelay.isZero) blocking { sleep(testWithHeartbeatDelay) }
+    heartbeatIdOption(httpResponse) match {
+      case Some(heartbeatId) ⇒
+        _heartbeatCount += 1
+        val heartbeatHeader = `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
+        val heartbeatRequest = emptyRequest withHeaders heartbeatHeader
+        sendReceive.apply(heartbeatRequest) recover transformException flatMap handleResponse(emptyRequest)
+      case None ⇒
+        Future.successful(httpResponse)
+    }
   }
 
   @TestOnly
