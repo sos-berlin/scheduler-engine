@@ -34,6 +34,7 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "Task start failure due to missing license key is stated in Job.state_text" in {
     // Test does not work with external license keys as in ~/sos.ini or /etc/sos.ini
     val firstRun = runJobFuture(SleepJobPath)
+    awaitSuccess(firstRun.started)
     controller.toleratingErrorCodes(_ ⇒ true) {
       runJobFuture(TestJobPath)
       waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.stopped }
