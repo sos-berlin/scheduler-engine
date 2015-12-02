@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.http.client.heartbeat
 
 import akka.actor.ActorRefFactory
-import akka.pattern.AskTimeoutException
 import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
@@ -12,7 +12,7 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
-import scala.concurrent.{Future, blocking}
+import scala.concurrent.{Future, Promise, blocking}
 import scala.util.{Failure, Success}
 import spray.client.pipelining._
 import spray.http.StatusCodes.{Accepted, OK}
@@ -20,6 +20,8 @@ import spray.http.{HttpEntity, HttpRequest, HttpResponse}
 
 /**
   * @author Joacim Zschimmer
+  *
+  * @see http://kamon.io/teamblog/2014/11/02/understanding-spray-client-timeout-settings/
   */
 final class HeartbeatRequestor private[http](
   timing: HttpHeartbeatTiming,
@@ -48,13 +50,13 @@ extends AutoCloseable {
     * @return the response for the initial request
     */
   private def apply(firstRequestTransformer: RequestTransformer, mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
-    val heartbeatHeader = `X-JobScheduler-Heartbeat-Start`(timing)
-    val myRequest = request withHeaders heartbeatHeader :: request.headers
     val emptyRequest = request withEntity HttpEntity.Empty
     val nr = requestCounter.incrementAndGet()
-    val responseFuture = (firstRequestTransformer ~> mySendReceive).apply(myRequest) recover transformException flatMap handleResponse(mySendReceive, emptyRequest)
-    responseFuture onSuccess { case _ ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest) }
-    responseFuture
+    sendWithTimeout(
+      firstRequestTransformer ~> mySendReceive,
+      request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers)
+    .flatMap(handleResponse(mySendReceive, emptyRequest))
+    .sideEffect { _ onSuccess { case _ ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest) }}
   }
 
   private def handleResponse(mySendReceive: SendReceive, emptyRequest: HttpRequest)(httpResponse: HttpResponse): Future[HttpResponse] = {
@@ -63,7 +65,7 @@ extends AutoCloseable {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-        mySendReceive.apply(heartbeatRequest) recover transformException flatMap handleResponse(mySendReceive, emptyRequest)
+        sendWithTimeout(mySendReceive, heartbeatRequest) flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
     }
@@ -92,6 +94,17 @@ extends AutoCloseable {
     }
   }
 
+  private def sendWithTimeout(mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] =
+    withTimeout(mySendReceive(request), name = request.uri.toString)
+
+  private def withTimeout(responseFuture: Future[HttpResponse], name: String): Future[HttpResponse] = {
+    val promise = Promise[HttpResponse]()
+    val t = debug.clientTimeout getOrElse timing.timeout
+    alarmClock.delay(t, s"$name timeout") { promise tryFailure new HttpRequestTimeoutException(t) }
+    responseFuture onComplete promise.tryComplete
+    promise.future
+  }
+
   @TestOnly
   def serverHeartbeatCount = _serverHeartbeatCount
 
@@ -118,14 +131,10 @@ object HeartbeatRequestor {
     else
       None
 
-  private def transformException[A]: PartialFunction[Throwable, A] = {
-    case t: AskTimeoutException ⇒ throw new HttpRequestTimeoutException(t)
-  }
-
-  final class HttpRequestTimeoutException(cause: Throwable = null)
-  extends RuntimeException("HTTP request timed out", cause)
+  final class HttpRequestTimeoutException(timeout: Duration) extends RuntimeException(s"HTTP request timed out due to http-heartbeat-timeout=${timeout.pretty}")
 
   @Singleton final class Debug @Inject() () {
+    var clientTimeout: Option[Duration] = None
     var suppressed = false
   }
 }
