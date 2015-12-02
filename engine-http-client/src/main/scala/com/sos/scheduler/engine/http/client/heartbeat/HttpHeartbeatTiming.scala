@@ -9,7 +9,7 @@ import java.time.Duration
 final case class HttpHeartbeatTiming(period: Duration, timeout: Duration) {
   require(period < timeout, "HTTP heartbeat period must be shorter than the timeout")
 
-  override def toString = s"HttpHeartbeatTiming(${period.pretty}, timeout ${timeout.pretty})"
+  override def toString = s"HttpHeartbeatTiming(timeout ${timeout.pretty}, beat ${period.pretty})"
 }
 
 object HttpHeartbeatTiming {
