@@ -6,7 +6,7 @@ import java.util.UUID
   * @author Joacim Zschimmer
   */
 final case class HeartbeatId(string: String) {
-  require(!(string contains ' '), s"Invalid HeartbeatId: $string")
+  require(string.isEmpty || !(string contains ' '), s"Invalid HeartbeatId: '$string'")
 }
 
 object HeartbeatId {
