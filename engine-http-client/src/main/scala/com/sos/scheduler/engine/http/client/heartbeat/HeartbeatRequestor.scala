@@ -21,9 +21,10 @@ import spray.http.{HttpEntity, HttpRequest, HttpResponse}
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatRequestor @Inject private[http](
+final class HeartbeatRequestor private[http](
   timing: HttpHeartbeatTiming,
-  testWithHeartbeatDelay: Duration = 0.s)(
+  testWithHeartbeatDelay: Duration = 0.s,
+  debug: Debug = new Debug)(
   implicit alarmClock: AlarmClock,
   actorRefFactory: ActorRefFactory)
 extends AutoCloseable {
@@ -61,8 +62,7 @@ extends AutoCloseable {
     heartbeatIdOption(httpResponse) match {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
-        val heartbeatHeader = `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-        val heartbeatRequest = emptyRequest withHeaders heartbeatHeader
+        val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
         mySendReceive.apply(heartbeatRequest) recover transformException flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
@@ -72,19 +72,21 @@ extends AutoCloseable {
   private def doClientHeartbeat(nr: Int, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
     alarmClock.delay(timing.period, name = s"${emptyRequest.uri} client-side heartbeat") {
       if (nr == requestCounter.get) {  // No HTTP request active and not closed? Then we send a client-side heartbeat to notify the server
-        val heartbeatHeader = `X-JobScheduler-Heartbeat`(timing)
-        val heartbeatRequest = emptyRequest withHeaders heartbeatHeader
-        val responseFuture = mySendReceive(heartbeatRequest)
-        _clientHeartbeatCount += 1
-        responseFuture map {
-          case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
-          case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
-          case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
-        } onComplete {
-          case Success(()) ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest)
-          case Failure(t) ⇒
-            logger.error(s"$t")
-            clientHeartbeatThrowable = t
+        val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
+        if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
+        else {
+          val responseFuture = mySendReceive(heartbeatRequest)
+          _clientHeartbeatCount += 1
+          responseFuture map {
+            case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
+            case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
+            case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+          } onComplete {
+            case Success(()) ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest)
+            case Failure(t) ⇒
+              logger.error(s"$t")
+              clientHeartbeatThrowable = t
+          }
         }
       }
     }
@@ -106,9 +108,8 @@ object HeartbeatRequestor {
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
 
   @Singleton
-  final class StandardFactory @Inject private(implicit alarmClock: AlarmClock, actorRefFactory: ActorRefFactory) extends Factory {
-    def apply(timing: HttpHeartbeatTiming): HeartbeatRequestor =
-      new HeartbeatRequestor(timing)
+  final class StandardFactory @Inject private(implicit alarmClock: AlarmClock, actorRefFactory: ActorRefFactory, debug: Debug) extends Factory {
+    def apply(timing: HttpHeartbeatTiming): HeartbeatRequestor = new HeartbeatRequestor(timing, debug = debug)
   }
 
   private def heartbeatIdOption(httpResponse: HttpResponse): Option[HeartbeatId] =
@@ -123,4 +124,8 @@ object HeartbeatRequestor {
 
   final class HttpRequestTimeoutException(cause: Throwable = null)
   extends RuntimeException("HTTP request timed out", cause)
+
+  @Singleton final class Debug @Inject() () {
+    var suppressed = false
+  }
 }

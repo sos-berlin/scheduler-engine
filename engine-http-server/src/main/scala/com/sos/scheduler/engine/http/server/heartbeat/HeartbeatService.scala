@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatRes
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatService._
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
 import scala.concurrent._
@@ -23,7 +23,7 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
+final class HeartbeatService @Inject() (alarmClock: AlarmClock, debug: Debug = new Debug) {
 
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]()
   private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
@@ -62,22 +62,25 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
     alarmClock.delay(timing.period, name = s"${pendingOperation.uri} heartbeat period") {
-      val heartbeatId = HeartbeatId.generate()
-      pendingOperations.insert(heartbeatId, pendingOperation)
-      _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
-      val oldPromise = pendingOperation.renewPromise()
-      val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
-      if (heartbeatResponded) {
-        for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-          alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
-            for (o ← pendingOperations.remove(heartbeatId)) {
-              logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
-              onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
+      if (debug.suppressed) logger.debug("suppressed")
+      else {
+        val heartbeatId = HeartbeatId.generate()
+        pendingOperations.insert(heartbeatId, pendingOperation)
+        _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
+        val oldPromise = pendingOperation.renewPromise()
+        val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
+        if (heartbeatResponded) {
+          for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
+            alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
+              for (o ← pendingOperations.remove(heartbeatId)) {
+                logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
+                onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
+              }
             }
           }
+        } else {
+          pendingOperations -= heartbeatId
         }
-      } else {
-        pendingOperations -= heartbeatId
       }
     }
     onSuccess(pendingOperation.currentFuture) { response ⇒ complete(response) }
@@ -115,4 +118,8 @@ object HeartbeatService {
   }
 
   type OnHeartbeatTimeout = HeartbeatTimeout ⇒ Unit
+
+  @Singleton final class Debug @Inject() () {
+    var suppressed: Boolean = false
+  }
 }
