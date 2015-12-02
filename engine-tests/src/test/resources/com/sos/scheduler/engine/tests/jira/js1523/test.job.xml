@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     process_class="/test-agent"
+>
+    <script language="java:javascript"><![CDATA[
+var stepped = false
+
+function spooler_process() {
+    if (!stepped) {
+        stepped = true
+        spooler_task.delay_spooler_process = 1*spooler_task.params.value("delay")
+        return true
+    } else
+        return false
+}
+    ]]></script>
+</job>

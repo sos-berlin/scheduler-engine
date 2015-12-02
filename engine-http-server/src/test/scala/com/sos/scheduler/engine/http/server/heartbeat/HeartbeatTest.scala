@@ -4,14 +4,16 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.io.{IO, Tcp}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.{AutoClosing, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.common.utils.Exceptions.repeatUntilNoException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor.HttpRequestTimeoutException
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatRequestor, HttpHeartbeatTiming}
+import com.sos.scheduler.engine.http.server.heartbeat.ClientSideHeartbeatService.clientSideHeartbeat
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatTest._
 import java.time.Duration
 import org.junit.runner.RunWith
@@ -31,7 +33,6 @@ import spray.httpx.unmarshalling._
 import spray.json.DefaultJsonProtocol._
 import spray.routing.{HttpServiceActor, Route}
 
-
 /**
   * @author Joacim Zschimmer
   */
@@ -41,7 +42,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   private implicit val askTimeout = AskTimeout
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
-  private val alarmClock = new AlarmClock(1.ms, idleTimeout = Some(1.s))
+  private implicit val alarmClock = new AlarmClock(1.ms, idleTimeout = Some(1.s))
   private lazy val heartbeatService = new HeartbeatService(alarmClock)
   private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer(heartbeatService)
@@ -59,25 +60,49 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   "onHeartbeatTimeout is called when client has timed out" in {
     val timing = HttpHeartbeatTiming(100.ms, 200.ms)
     val duration = timing.period + timing.period / 2
-    val heartbeatRequestor = new HeartbeatRequestor(timing, testWithHeartbeatDelay = timing.timeout + 1.s)
-    val request = Data(duration.toString)
-    val responseFuture = heartbeatRequestor.apply(sendReceive, Post(s"$baseUri/test", request))
-    val response = awaitResult(responseFuture, 10.s)
-    assert(response.status == BadRequest)
-    assert(response.entity.asString == "Unknown heartbeat ID (HTTP request is too late?)")
-    assert(heartbeatRequestor.heartbeatCount == 1)
+    autoClosing(new HeartbeatRequestor(timing, testWithHeartbeatDelay = timing.timeout + 1.s)) { heartbeatRequestor ⇒
+      val request = Data(duration.toString)
+      val responseFuture = heartbeatRequestor.apply(sendReceive, Post(s"$baseUri/test", request))
+      val response = awaitResult(responseFuture, 10.s)
+      assert(response.status == BadRequest)
+      assert(response.entity.asString == "Unknown HeartbeatId (HTTP request is too late?)")
+      assert(heartbeatRequestor.serverHeartbeatCount == 1)
+      assert(heartbeatRequestor.clientHeartbeatCount == 0)
+      val timedOutRequests = Await.result((webService ? "GET-TIMEOUTS").mapTo[immutable.Seq[String]], AskTimeout.duration)
+      assert(timedOutRequests == List(request))
+    }
     assertServerIsClean()
-    val timedOutRequests = Await.result((webService ? "GET-TIMEOUTS").mapTo[immutable.Seq[String]], AskTimeout.duration)
-    assert(timedOutRequests == List(request))
+  }
+
+  "Client-side heartbeat" in {
+    val timing = HttpHeartbeatTiming(100.ms, 200.ms)
+    val duration = timing.period + timing.period / 2
+    val heartbeatRequestor = new HeartbeatRequestor(timing)
+    val request = Data(duration.toString)
+    val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
+    val response = awaitResult(responseFuture, 10.s)
+    assert((response.status, response.as[Data].right.get) == (OK, request.toResponse))
+    assert(heartbeatRequestor.serverHeartbeatCount == 1)
+    assert(heartbeatRequestor.clientHeartbeatCount == 0)
+    sleep(duration)
+    assert(heartbeatRequestor.clientHeartbeatCount == 1)
+    sleep(duration)
+    assert(Set(2, 3)(heartbeatRequestor.clientHeartbeatCount))
+    heartbeatRequestor.close()  // Stop sending client-side heartbeats
+    sleep(3 * duration)
+    assert(Set(2, 3)(heartbeatRequestor.clientHeartbeatCount))
+    assertServerIsClean()
   }
 
   "HttpRequestTimeoutException" in {
     val times = HttpHeartbeatTiming(period = 300.ms, timeout = 600.ms)
-    val heartbeatRequestor = new HeartbeatRequestor(times)
-    val request = Data(200.ms.toString)
-    val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive(actorSystem, actorSystem.dispatcher, 100.ms.toFiniteDuration), Post(s"$baseUri/test", request))
-    intercept[HttpRequestTimeoutException] { awaitResult(responseFuture, 1.s) }
-    assert(heartbeatRequestor.heartbeatCount == 0)
+    autoClosing(new HeartbeatRequestor(times)) { heartbeatRequestor ⇒
+      val request = Data(200.ms.toString)
+      val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive(actorSystem, actorSystem.dispatcher, 100.ms.toFiniteDuration), Post(s"$baseUri/test", request))
+      intercept[HttpRequestTimeoutException] { awaitResult(responseFuture, 1.s) }
+      assert(heartbeatRequestor.serverHeartbeatCount == 0)
+      assert(heartbeatRequestor.clientHeartbeatCount == 0)
+    }
     assertServerIsClean()
   }
 
@@ -95,12 +120,14 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
       (50 * times.period, 0.s, o ⇒ assert(o >= 5)),
       (50 * times.period, randomDuration(2 * times.period), o ⇒ assert(o >= 3))))
     s"operation = ${duration.pretty}, own delay = ${delay.pretty}" in {
-      val heartbeatRequestor = new HeartbeatRequestor(times, testWithHeartbeatDelay = delay)
-      val request = Data(duration.toString)
-      val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
-      val response = awaitResult(responseFuture, 10.s)
-      assert((response.status, response.as[Data].right.get) == (OK, request.toResponse))
-      heartbeatCountPredicate(heartbeatRequestor.heartbeatCount)
+      autoClosing(new HeartbeatRequestor(times, testWithHeartbeatDelay = delay)) { heartbeatRequestor ⇒
+        val request = Data(duration.toString)
+        val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
+        val response = awaitResult(responseFuture, 10.s)
+        assert((response.status, response.as[Data].right.get) == (OK, request.toResponse))
+        heartbeatCountPredicate(heartbeatRequestor.serverHeartbeatCount)
+        assert(heartbeatRequestor.clientHeartbeatCount == 0)
+      }
       assertServerIsClean(highestCurrentOperationsMaximum)
     }
   }
@@ -154,22 +181,26 @@ object HeartbeatTest {
     private def route: Route =
       path("test") {
         post {
+          clientSideHeartbeat {
+            timeout ⇒ logger.info(s"Client-side heartbeat ${timeout.pretty}")
+          } ~
           heartbeatService.continueHeartbeat ~
           entity(as[Data]) { data ⇒
             heartbeatService.startHeartbeat(onHeartbeatTimeout = Some(onHeartbeatTimeout(data))) {
-              timeout: Option[Duration] ⇒ operation(data)
+              timeout ⇒ operation(timeout, data)
             }
           }
         }
       }
 
-    private def operation(data: Data) = Future {
+    private def operation(timeout: Option[Duration], data: Data) = Future {
+      logger.info(s"operation timeout=$timeout $data")
       sleep(Duration parse data.string)
       data.toResponse
     }
 
     private def onHeartbeatTimeout(data: Data)(timeout: HeartbeatTimeout): Unit = {
-      logger.warn(s"No client heartbeat: $timeout")
+      logger.info(s"$timeout")
       timedOutRequests += data
     }
   }

@@ -3,60 +3,110 @@ package com.sos.scheduler.engine.http.client.heartbeat
 import akka.actor.ActorRefFactory
 import akka.pattern.AskTimeoutException
 import com.google.inject.ImplementedBy
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.concurrent.{Future, blocking}
+import scala.util.{Failure, Success}
 import spray.client.pipelining._
-import spray.http.StatusCodes.Accepted
+import spray.http.StatusCodes.{Accepted, OK}
 import spray.http.{HttpEntity, HttpRequest, HttpResponse}
 
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatRequestor @Inject private[http](timing: HttpHeartbeatTiming, testWithHeartbeatDelay: Duration = 0.s) {
+final class HeartbeatRequestor @Inject private[http](
+  timing: HttpHeartbeatTiming,
+  testWithHeartbeatDelay: Duration = 0.s)(
+  implicit alarmClock: AlarmClock,
+  actorRefFactory: ActorRefFactory)
+extends AutoCloseable {
 
-  private var _heartbeatCount = 0
+  import actorRefFactory.dispatcher
 
-  def close() = {}
+  private var _serverHeartbeatCount = 0
+  private var _clientHeartbeatCount = 0
+  private val requestCounter = new AtomicInteger
+  private var clientHeartbeatThrowable: Throwable = null  // How to inform C++ JobScheduler about an error ???
 
-  def apply(sendReceive: SendReceive, httpRequest: HttpRequest)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] =
-    apply(firstRequestTransformer = identity, sendReceive, httpRequest)
+  def close() = requestCounter.incrementAndGet()  // Interrupt heartbeat chain
 
-  def apply(firstRequestTransformer: RequestTransformer, sendReceive: SendReceive, request: HttpRequest)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
-    import actorRefFactory.dispatcher
+  def apply(mySendReceive: SendReceive, httpRequest: HttpRequest): Future[HttpResponse] =
+    apply(firstRequestTransformer = identity, mySendReceive, httpRequest)
+
+  /**
+    * @param firstRequestTransformer only used for the initial request, not used for heartbeat acknowledges
+    * @param mySendReceive used for initial request and for heartbeat acknowledges
+    * @param request the initial request. Without payload it is used for heartbeat
+    * @return the response for the initial request
+    */
+  private def apply(firstRequestTransformer: RequestTransformer, mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
     val heartbeatHeader = `X-JobScheduler-Heartbeat-Start`(timing)
     val myRequest = request withHeaders heartbeatHeader :: request.headers
-    (firstRequestTransformer ~> sendReceive).apply(myRequest) recover transformException flatMap handleResponse(request withEntity HttpEntity.Empty)
+    val emptyRequest = request withEntity HttpEntity.Empty
+    val nr = requestCounter.incrementAndGet()
+    val responseFuture = (firstRequestTransformer ~> mySendReceive).apply(myRequest) recover transformException flatMap handleResponse(mySendReceive, emptyRequest)
+    responseFuture onSuccess { case _ ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest) }
+    responseFuture
   }
 
-  private def handleResponse(emptyRequest: HttpRequest)(httpResponse: HttpResponse)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
-    import actorRefFactory.dispatcher
+  private def handleResponse(mySendReceive: SendReceive, emptyRequest: HttpRequest)(httpResponse: HttpResponse): Future[HttpResponse] = {
     if (!testWithHeartbeatDelay.isZero) blocking { sleep(testWithHeartbeatDelay) }
     heartbeatIdOption(httpResponse) match {
       case Some(heartbeatId) ⇒
-        _heartbeatCount += 1
+        _serverHeartbeatCount += 1
         val heartbeatHeader = `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
         val heartbeatRequest = emptyRequest withHeaders heartbeatHeader
-        sendReceive.apply(heartbeatRequest) recover transformException flatMap handleResponse(emptyRequest)
+        mySendReceive.apply(heartbeatRequest) recover transformException flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
     }
   }
 
+  private def doClientHeartbeat(nr: Int, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
+    alarmClock.delay(timing.period, name = s"${emptyRequest.uri} client-side heartbeat") {
+      if (nr == requestCounter.get) {  // No HTTP request active and not closed? Then we send a client-side heartbeat to notify the server
+        val heartbeatHeader = `X-JobScheduler-Heartbeat`(timing)
+        val heartbeatRequest = emptyRequest withHeaders heartbeatHeader
+        val responseFuture = mySendReceive(heartbeatRequest)
+        _clientHeartbeatCount += 1
+        responseFuture map {
+          case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
+          case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
+          case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+        } onComplete {
+          case Success(()) ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest)
+          case Failure(t) ⇒
+            logger.error(s"$t")
+            clientHeartbeatThrowable = t
+        }
+      }
+    }
+  }
+
   @TestOnly
-  def heartbeatCount = _heartbeatCount
+  def serverHeartbeatCount = _serverHeartbeatCount
+
+  @TestOnly
+  def clientHeartbeatCount = _clientHeartbeatCount
+
+  override def toString = Option(clientHeartbeatThrowable) mkString ("HeartbeatRequestor(", "", ")")
 }
 
 object HeartbeatRequestor {
+  private val logger = Logger(getClass)
+
   @ImplementedBy(classOf[StandardFactory])
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
 
   @Singleton
-  final class StandardFactory @Inject private extends Factory {
+  final class StandardFactory @Inject private(implicit alarmClock: AlarmClock, actorRefFactory: ActorRefFactory) extends Factory {
     def apply(timing: HttpHeartbeatTiming): HeartbeatRequestor =
       new HeartbeatRequestor(timing)
   }

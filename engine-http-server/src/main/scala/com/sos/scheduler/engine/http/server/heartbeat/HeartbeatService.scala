@@ -14,7 +14,7 @@ import javax.inject.Inject
 import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
 import scala.concurrent._
-import spray.http.StatusCodes.{Accepted, BadRequest}
+import spray.http.StatusCodes.{Accepted, BadRequest, OK}
 import spray.http._
 import spray.httpx.marshalling._
 import spray.routing.Directives._
@@ -49,19 +49,19 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
     headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
       requestEntityEmpty {
         pendingOperations.remove(heartbeatId) match {
-          case None ⇒ complete(BadRequest, "Unknown heartbeat ID (HTTP request is too late?)")
-          case Some(o) ⇒
-            o.onHeartbeat(times.timeout)
-            startHeartbeatPeriod(o, times)
+          case None ⇒ complete(BadRequest, "Unknown HeartbeatId (HTTP request is too late?)")
+          case Some(pendingOperation) ⇒
+            pendingOperation.onHeartbeat(times.timeout)
+            startHeartbeatPeriod(pendingOperation, times)
         }
       } ~
-        complete(BadRequest, "Heartbeat with entity?")
+        complete(BadRequest, "Heartbeat with payload?")
     }
 
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Route = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
-    alarmClock.delay(timing.period, name = pendingOperation.uri.toString) {
+    alarmClock.delay(timing.period, name = s"${pendingOperation.uri} heartbeat period") {
       val heartbeatId = HeartbeatId.generate()
       pendingOperations.insert(heartbeatId, pendingOperation)
       _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
@@ -69,7 +69,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock) {
       val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
       if (heartbeatResponded) {
         for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-          alarmClock.delay(timing.timeout, name = pendingOperation.uri.toString) {
+          alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
             for (o ← pendingOperations.remove(heartbeatId)) {
               logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
               onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))

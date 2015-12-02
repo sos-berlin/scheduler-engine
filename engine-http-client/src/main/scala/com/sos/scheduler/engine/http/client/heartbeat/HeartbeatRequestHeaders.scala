@@ -39,4 +39,14 @@ object HeartbeatRequestHeaders {
         }
       }
   }
+
+ final case class `X-JobScheduler-Heartbeat`(timing: HttpHeartbeatTiming) extends OwnHttpHeader {
+    def companion = `X-JobScheduler-Heartbeat`
+    def value = s"${timing.period} ${timing.timeout}"
+  }
+  object `X-JobScheduler-Heartbeat` extends OwnHttpHeaderCompanion {
+    object Value {
+      def unapply(value: String): Some[HttpHeartbeatTiming] = Some(parseTimes(value))
+    }
+  }
 }

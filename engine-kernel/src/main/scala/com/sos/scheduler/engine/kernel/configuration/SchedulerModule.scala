@@ -1,14 +1,17 @@
 package com.sos.scheduler.engine.kernel.configuration
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
@@ -53,6 +56,7 @@ with HasCloser {
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
+    provideSingleton[AlarmClock] { new AlarmClock(100.ms).closeWithCloser }
     bindInstance(cppProxy)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
@@ -66,7 +70,9 @@ with HasCloser {
     provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
-    provideSingleton[ActorSystem] { newActorSystem(closer) }
+    val actorSystem = newActorSystem(closer)
+    provideSingleton[ActorSystem] { actorSystem }
+    provideSingleton[ActorRefFactory] { actorSystem }
     provideSingleton[ExecutionContext] { ExecutionContext.global }
     bindSubsystems()
     bindInstance(LazyBoundCppSingletons(lazyBoundCppSingletons.toVector))
