@@ -70,9 +70,6 @@ with HasCloser {
     provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
-    val actorSystem = newActorSystem(closer)
-    provideSingleton[ActorSystem] { actorSystem }
-    provideSingleton[ActorRefFactory] { actorSystem }
     provideSingleton[ExecutionContext] { ExecutionContext.global }
     bindSubsystems()
     bindInstance(LazyBoundCppSingletons(lazyBoundCppSingletons.toVector))
@@ -127,6 +124,12 @@ with HasCloser {
 
   @Provides @Singleton
   private def zoneId: ZoneId = _zoneId
+
+  @Provides @Singleton
+  private def actorSystem: ActorSystem = newActorSystem(closer)
+
+  @Provides @Singleton
+  private def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
 }
 
 object SchedulerModule {
