@@ -19,7 +19,7 @@ import scala.concurrent.{Future, Promise, blocking}
 import scala.util.{Failure, Success}
 import spray.client.pipelining._
 import spray.http.StatusCodes.{Accepted, OK}
-import spray.http.{HttpEntity, HttpRequest, HttpResponse}
+import spray.http.{HttpHeader, HttpEntity, HttpRequest, HttpResponse}
 
 /**
   * @author Joacim Zschimmer
@@ -171,6 +171,23 @@ object HeartbeatRequestor {
       httpResponse.headers collectFirst { case HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(id) ⇒ id }
     else
       None
+
+  private trait TimedRequest {
+    def request: HttpRequest
+    def timing: HttpHeartbeatTiming
+    protected def header: HttpHeader
+    def requestWithHeaders = request withHeaders header :: request.headers
+  }
+
+  private case class ATimedRequest(request: HttpRequest, heartbeatId: HeartbeatId, timing: HttpHeartbeatTiming) extends TimedRequest {
+    def header = `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
+    // Der wird sowieso sofort beantwortet
+  }
+
+  private case class BTimedRequest(request: HttpRequest, timing: HttpHeartbeatTiming) extends TimedRequest {
+    def header = `X-JobScheduler-Heartbeat`(timing)
+    // Wollen wir die gleiche Anfrage (RequestID) mit anderem Header schicken?
+  }
 
   final class HttpRequestTimeoutException(timeout: Duration) extends RuntimeException(s"HTTP request timed out due to http-heartbeat-timeout=${timeout.pretty}")
 
