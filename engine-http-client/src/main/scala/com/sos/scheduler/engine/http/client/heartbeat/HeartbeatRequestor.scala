@@ -36,6 +36,9 @@ extends AutoCloseable {
 
   import actorRefFactory.dispatcher
 
+  private val requestTimeout = debug.clientTimeout getOrElse timing.timeout
+  private val requestRetryAfter = timing.period * HeartbeatPeriodRetryFactor
+  private val requestLifetime = requestTimeout * LifetimeFactor
   private var _serverHeartbeatCount = 0
   private var _clientHeartbeatCount = 0
   private val requestCounter = new AtomicInteger
@@ -55,7 +58,7 @@ extends AutoCloseable {
   private def apply(firstRequestTransformer: RequestTransformer, mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
     val emptyRequest = request withEntity HttpEntity.Empty
     val nr = requestCounter.incrementAndGet()
-    sendWithTimeout(
+    sendAndRetry(
       firstRequestTransformer ~> mySendReceive,
       request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers)
     .flatMap(handleResponse(mySendReceive, emptyRequest))
@@ -68,7 +71,7 @@ extends AutoCloseable {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-        sendWithTimeout(mySendReceive, heartbeatRequest) flatMap handleResponse(mySendReceive, emptyRequest)
+        sendAndRetry(mySendReceive, heartbeatRequest) flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
     }
@@ -80,7 +83,7 @@ extends AutoCloseable {
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
         else {
-          val responseFuture = sendWithTimeout(mySendReceive, heartbeatRequest)  // Send with idempotence.RequestId, but server ignores this ID
+          val responseFuture = sendAndRetry(mySendReceive, heartbeatRequest)  // Send with idempotence.RequestId, but server ignores this ID
           _clientHeartbeatCount += 1
           responseFuture map {
             case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
@@ -97,25 +100,27 @@ extends AutoCloseable {
     }
   }
 
-  private def sendWithTimeout(mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
+  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
     val requestId = RequestId.generate()
-    val timeout = debug.clientTimeout getOrElse timing.timeout
-    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, lifetime = timeout * LifetimeFactor) :: request.headers
-    val retryAfter = timing.period * HeartbeatPeriodRetryFactor
-    val timeoutAt = now + timeout
+    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, lifetime = requestLifetime) :: request.headers
+    sendAndRetry(mySendReceive, myRequest, requestId)
+  }
+
+  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestId: RequestId): Future[HttpResponse] = {
+    val timeoutAt = now + requestTimeout
     val promise = Promise[HttpResponse]()
     def cycle(): Unit = {
-      promise tryCompleteWith mySendReceive(myRequest)
+      promise tryCompleteWith mySendReceive(request)
       val sentAt = now
-      val t = sentAt + retryAfter min timeoutAt
-      alarmClock.at(t, s"${myRequest.uri} retry timeout") {
+      val t = sentAt + requestRetryAfter min timeoutAt
+      alarmClock.at(t, s"${request.uri} retry timeout") {
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
-            logger.warn(s"After no response, HTTP request of $sentAt is being repeated: ${myRequest.method} ${myRequest.uri} $requestId")
+            logger.warn(s"After no response, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId")
             cycle()
           }
           else
-            promise tryFailure new HttpRequestTimeoutException(timeout)
+            promise tryFailure new HttpRequestTimeoutException(requestTimeout)
         }
       }
     }
