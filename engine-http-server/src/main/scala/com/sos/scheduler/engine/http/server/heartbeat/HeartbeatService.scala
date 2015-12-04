@@ -27,7 +27,7 @@ import spray.routing.{ExceptionHandler, Route}
   */
 final class HeartbeatService @Inject() (alarmClock: AlarmClock, idempotence: Idempotence, debug: Debug = new Debug) {
 
-  private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]()
+  private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]
   private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
 
   def startHeartbeat[A](
@@ -54,47 +54,53 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock, idempotence: Ide
       continueHeartbeat
 
   def continueHeartbeat(implicit actorRefFactory: ActorRefFactory): Route =
-      headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
-        handleExceptions(ExceptionHandler { case t: UnknownHeartbeatIdException ⇒ complete(BadRequest, s"Unknown or expired $heartbeatId" )}) {
-          requestEntityEmpty {
-            idempotence {
-              pendingOperations.remove(heartbeatId) match {
-                case None ⇒ throw new UnknownHeartbeatIdException  // Catched
-                case Some(pendingOperation) ⇒
-                  pendingOperation.onHeartbeat(times.timeout)
-                  startHeartbeatPeriod(pendingOperation, times)
-              }
-            }
+    headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
+      handleExceptions(ExceptionHandler { case t: UnknownHeartbeatIdException ⇒ complete(BadRequest, s"Unknown or expired $heartbeatId" )}) {
+        requestEntityEmpty {
+          idempotence {
+            val pendingOperation = pendingOperations.remove(heartbeatId) getOrElse { throw new UnknownHeartbeatIdException } // Catched above
+            pendingOperation.onHeartbeat(times.timeout)
+            startHeartbeatPeriod(pendingOperation, times)
           }
-        } ~
-          complete(BadRequest, "Heartbeat with payload?")
-      }
+        }
+      } ~
+        complete(BadRequest, "Heartbeat with payload?")
+    }
 
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
     alarmClock.delay(timing.period, name = s"${pendingOperation.uri} heartbeat period") {
-      if (debug.suppressed) logger.debug("suppressed")
-      else {
-        val heartbeatId = HeartbeatId.generate()
-        pendingOperations.insert(heartbeatId, pendingOperation)
-        _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
-        val oldPromise = pendingOperation.renewPromise()
-        val heartbeatResponded = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
-        if (heartbeatResponded) {
-          for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-            alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
-              for (o ← pendingOperations.remove(heartbeatId)) {
-                logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
-                onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
-              }
-            }
+      if (debug.suppressed)
+        logger.debug("suppressed")
+      else
+        respondWithHeartbeat()
+    }
+
+    def respondWithHeartbeat(): Unit = {
+      val heartbeatId = HeartbeatId.generate()
+      pendingOperations.insert(heartbeatId, pendingOperation)
+      _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
+      val oldPromise = pendingOperation.renewPromise()
+      val respondedWithHeartbeat = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
+      if (respondedWithHeartbeat) {
+        startHeartbeatTimeout(heartbeatId)
+      } else {
+        pendingOperations -= heartbeatId
+      }
+    }
+
+    def startHeartbeatTimeout(heartbeatId: HeartbeatId): Unit = {
+      for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
+        alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
+          for (o ← pendingOperations.remove(heartbeatId)) {
+            logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
+            onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
           }
-        } else {
-          pendingOperations -= heartbeatId
         }
       }
     }
+
     pendingOperation.currentFuture
   }
 

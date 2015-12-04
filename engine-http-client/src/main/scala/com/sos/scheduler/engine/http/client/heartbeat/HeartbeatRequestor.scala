@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.http.client.heartbeat
 import akka.actor.ActorRefFactory
 import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils.SwitchOnAtomicBoolean
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.alarm.AlarmClock
@@ -110,34 +111,30 @@ extends AutoCloseable {
     val timeoutAt = now + requestTimeout
     val promise = Promise[HttpResponse]()
     def cycle(): Unit = {
-      val retried = new AtomicBoolean
       val responseFuture = mySendReceive(request)
       val sentAt = now
-      responseFuture onComplete {
-        case Success(o) ⇒ promise success o
-        case Failure(t) if now < timeoutAt ⇒
-          logger.warn(s"${request.method} ${request.uri} $t")
-          alarmClock.delay(1.s) {
-            if (now < timeoutAt) {
-              if (retried.compareAndSet(false, true)) {
-                logger.warn(s"After error, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId $t")
-                cycle()
-              }
-            }
-          }
-        case Failure(t) ⇒ promise tryFailure t
-      }
-      alarmClock.at(sentAt + requestRetryAfter min timeoutAt, s"${request.uri} retry timeout") {
+      val retried = new AtomicBoolean
+      def retry(text: String): Unit = {
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
-            if (retried.compareAndSet(false, true)) {
-              logger.warn(s"After no response, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId")
+            retried.switchOn {
+              logger.warn(s"$text, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId")
               cycle()
             }
           }
-          else
-            promise tryFailure new HttpRequestTimeoutException(requestTimeout)
+          else promise tryFailure new HttpRequestTimeoutException(requestTimeout)
         }
+      }
+      responseFuture onComplete {
+        case Failure(t) if now < timeoutAt ⇒
+          logger.warn(s"${request.method} ${request.uri} $t")
+          alarmClock.delay(DelayAfterError) {
+            retry("After error")
+          }
+        case o ⇒ promise tryComplete o
+      }
+      alarmClock.at(sentAt + requestRetryAfter min timeoutAt, s"${request.uri} retry timeout") {
+        retry("After no response")
       }
     }
     cycle()
@@ -157,6 +154,7 @@ object HeartbeatRequestor {
   private val logger = Logger(getClass)
   private val HeartbeatPeriodRetryFactor = BigDecimal("1.2")
   private val LifetimeFactor = BigDecimal("1.5")
+  private val DelayAfterError = 1.s
 
   @ImplementedBy(classOf[StandardFactory])
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
