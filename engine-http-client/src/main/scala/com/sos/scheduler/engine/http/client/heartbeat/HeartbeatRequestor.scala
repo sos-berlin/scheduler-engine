@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-Job
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
 import java.time.Duration
 import java.time.Instant.now
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.concurrent.{Future, Promise, blocking}
@@ -110,14 +110,30 @@ extends AutoCloseable {
     val timeoutAt = now + requestTimeout
     val promise = Promise[HttpResponse]()
     def cycle(): Unit = {
-      promise tryCompleteWith mySendReceive(request)
+      val retried = new AtomicBoolean
+      val responseFuture = mySendReceive(request)
       val sentAt = now
-      val t = sentAt + requestRetryAfter min timeoutAt
-      alarmClock.at(t, s"${request.uri} retry timeout") {
+      responseFuture onComplete {
+        case Success(o) ⇒ promise success o
+        case Failure(t) if now < timeoutAt ⇒
+          logger.warn(s"${request.method} ${request.uri} $t")
+          alarmClock.delay(1.s) {
+            if (now < timeoutAt) {
+              if (retried.compareAndSet(false, true)) {
+                logger.warn(s"After error, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId $t")
+                cycle()
+              }
+            }
+          }
+        case Failure(t) ⇒ promise tryFailure t
+      }
+      alarmClock.at(sentAt + requestRetryAfter min timeoutAt, s"${request.uri} retry timeout") {
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
-            logger.warn(s"After no response, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId")
-            cycle()
+            if (retried.compareAndSet(false, true)) {
+              logger.warn(s"After no response, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId")
+              cycle()
+            }
           }
           else
             promise tryFailure new HttpRequestTimeoutException(requestTimeout)
