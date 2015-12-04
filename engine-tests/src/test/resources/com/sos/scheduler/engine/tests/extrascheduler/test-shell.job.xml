@@ -11,6 +11,6 @@ sleep 5
 exit
 
 :WINDOWS
-ping -n 6 127.0.0.1 >null
+ping -n 6 127.0.0.1 >nul
     ]]></script>
 </job>
