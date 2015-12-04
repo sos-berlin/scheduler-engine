@@ -1,0 +1,27 @@
+package com.sos.scheduler.engine.http.client.idempotence
+
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.http.client.common.{OwnHttpHeader, OwnHttpHeaderCompanion}
+import java.time.Duration
+
+/**
+  * @author Joacim Zschimmer
+  */
+object IdempotentHeaders {
+
+  final case class `X-JobScheduler-Request-ID`(id: RequestId, lifetime: Duration) extends OwnHttpHeader {
+    def companion = `X-JobScheduler-Request-ID`
+    def value = s"${id.string} $lifetime"
+  }
+
+  object `X-JobScheduler-Request-ID` extends OwnHttpHeaderCompanion {
+    private val ValueRegex = s"(${RequestId.Regex}) ($Iso8601DurationRegex)".r
+
+    object Value {
+      def unapply(value: String): Option[(RequestId, Duration)] =
+        value match {
+          case ValueRegex(id, duration) ⇒ Some(RequestId(id), Duration.parse(duration))
+        }
+      }
+  }
+}
