@@ -29,18 +29,22 @@ extends HasCloser {
     httpHeartbeatTiming: Option[HttpHeartbeatTiming]): Future[HttpRemoteProcess] =
   {
     val port = schedulerApiTcpPort
+    val timing = httpHeartbeatTiming
     agentClientFactory.apply(agentUri).executeCommand(configuration.toUniversalAgentCommand) map { response ⇒
+      val processDescriptor_ = ProcessDescriptor.fromStartProcessResponse(response)
+      val tunnelClient_ = new WebTunnelClient {
+        def tunnelToken = processDescriptor_.tunnelToken
+        def tunnelUri = AgentUris(agentUri).tunnel(tunnelToken.id)
+        def heartbeatTimingOption = timing
+        val heartbeatRequestorOption = timing map newHeartbeatRequestor
+        def actorSystem = HttpRemoteProcessStarter.this.actorSystem
+      }.closeWithCloser
       new TunnelledHttpRemoteProcess {
         def actorSystem = HttpRemoteProcessStarter.this.actorSystem
         val agentClient = agentClientFactory.apply(agentUri)
-        val processDescriptor = ProcessDescriptor.fromStartProcessResponse(response)
+        val processDescriptor = processDescriptor_
         def schedulerApiTcpPort = port
-        val tunnelClient = new WebTunnelClient {
-          def tunnelToken = processDescriptor.tunnelToken
-          def tunnelUri = AgentUris(agentUri).tunnel(tunnelToken.id)
-          val heartbeatRequestorOption = httpHeartbeatTiming map newHeartbeatRequestor
-          def actorSystem = HttpRemoteProcessStarter.this.actorSystem
-        }.closeWithCloser
+        val tunnelClient = tunnelClient_
       }
     }
   }

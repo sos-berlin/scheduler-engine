@@ -13,8 +13,8 @@ import com.sos.scheduler.engine.common.utils.Exceptions.repeatUntilNoException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor.HttpRequestTimeoutException
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatRequestor, HttpHeartbeatTiming}
-import com.sos.scheduler.engine.http.server.heartbeat.ClientSideHeartbeatService.clientSideHeartbeat
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatTest._
+import com.sos.scheduler.engine.http.server.idempotence.Idempotence
 import java.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -42,7 +42,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   private implicit val askTimeout = AskTimeout
   private implicit lazy val actorSystem = ActorSystem("TEST")
   private implicit val alarmClock = new AlarmClock(1.ms, idleTimeout = Some(1.s))
-  private lazy val heartbeatService = new HeartbeatService(alarmClock)
+  private lazy val heartbeatService = new HeartbeatService(alarmClock, new Idempotence(alarmClock))
   private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer(heartbeatService)
 
@@ -76,7 +76,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
       val responseFuture = heartbeatRequestor.apply(sendReceive, Post(s"$baseUri/test", request))
       val response = awaitResult(responseFuture, 10.s)
       assert(response.status == BadRequest)
-      assert(response.entity.asString == "Unknown HeartbeatId (HTTP request is too late?)")
+      assert(response.entity.asString startsWith "Unknown or expired HeartbeatId")
       assert(heartbeatRequestor.serverHeartbeatCount == 1)
       assert(heartbeatRequestor.clientHeartbeatCount == 0)
       val timedOutRequests = Await.result((webService ? "GET-TIMEOUTS").mapTo[immutable.Seq[String]], AskTimeout.duration)
@@ -175,7 +175,7 @@ object HeartbeatTest {
     (Uri(s"http://127.0.0.1:$port"), webService)
   }
 
-  final class WebActor(heartbeatService: HeartbeatService) extends HttpServiceActor {
+  private class WebActor(heartbeatService: HeartbeatService) extends HttpServiceActor {
     private val logger = Logger(getClass)
     private implicit val executionContext: ExecutionContext = context.system.dispatcher
     private val timedOutRequests = mutable.Buffer[Data]()
@@ -194,10 +194,9 @@ object HeartbeatTest {
     private def route: Route =
       path("test") {
         post {
-          clientSideHeartbeat {
+          heartbeatService.continueHeartbeat {
             timeout ⇒ logger.info(s"Client-side heartbeat ${timeout.pretty}")
           } ~
-          heartbeatService.continueHeartbeat ~
           entity(as[Data]) { data ⇒
             heartbeatService.startHeartbeat(onHeartbeatTimeout = Some(onHeartbeatTimeout(data))) {
               timeout ⇒ operation(timeout, data)

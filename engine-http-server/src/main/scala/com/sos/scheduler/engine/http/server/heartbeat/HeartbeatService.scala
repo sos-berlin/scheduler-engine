@@ -7,23 +7,25 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatResponseHeaders, HttpHeartbeatTiming}
+import com.sos.scheduler.engine.http.server.heartbeat.ClientSideHeartbeatService._
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatService._
+import com.sos.scheduler.engine.http.server.idempotence.Idempotence
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
 import scala.concurrent._
-import spray.http.StatusCodes.{Accepted, BadRequest, OK}
+import spray.http.StatusCodes.{Accepted, BadRequest}
 import spray.http._
 import spray.httpx.marshalling._
 import spray.routing.Directives._
-import spray.routing.Route
+import spray.routing.{ExceptionHandler, Route}
 
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatService @Inject() (alarmClock: AlarmClock, debug: Debug = new Debug) {
+final class HeartbeatService @Inject() (alarmClock: AlarmClock, idempotence: Idempotence, debug: Debug = new Debug) {
 
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]()
   private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
@@ -37,28 +39,38 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock, debug: Debug = n
     import actorRefFactory.dispatcher
     headerValueByName(`X-JobScheduler-Heartbeat-Start`.name) { case `X-JobScheduler-Heartbeat-Start`.Value(timing) ⇒
       requestUri { uri ⇒
-        val responseFuture = operation(Some(timing.timeout)) map marshalToHttpResponse
-        val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeat, onHeartbeatTimeout)(actorRefFactory.dispatcher)
-        startHeartbeatPeriod(pendingOperation, timing)
+        idempotence {
+          val responseFuture = operation(Some(timing.timeout)) map marshalToHttpResponse
+          val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeat, onHeartbeatTimeout)(actorRefFactory.dispatcher)
+          startHeartbeatPeriod(pendingOperation, timing)
+        }
       }
     } ~
       onSuccess(operation(None)) { response ⇒ complete(response) }
   }
 
-  def continueHeartbeat(implicit actorRefFactory: ActorRefFactory): Route =
-    headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
-      requestEntityEmpty {
-        pendingOperations.remove(heartbeatId) match {
-          case None ⇒ complete(BadRequest, "Unknown HeartbeatId (HTTP request is too late?)")
-          case Some(pendingOperation) ⇒
-            pendingOperation.onHeartbeat(times.timeout)
-            startHeartbeatPeriod(pendingOperation, times)
-        }
-      } ~
-        complete(BadRequest, "Heartbeat with payload?")
-    }
+  def continueHeartbeat(onClientHeartbeat: Duration ⇒ Unit)(implicit actorRefFactory: ActorRefFactory): Route =
+    clientSideHeartbeat(onClientHeartbeat) ~
+      continueHeartbeat
 
-  private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Route = {
+  def continueHeartbeat(implicit actorRefFactory: ActorRefFactory): Route =
+      headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
+        handleExceptions(ExceptionHandler { case t: UnknownHeartbeatIdException ⇒ complete(BadRequest, s"Unknown or expired $heartbeatId" )}) {
+          requestEntityEmpty {
+            idempotence {
+              pendingOperations.remove(heartbeatId) match {
+                case None ⇒ throw new UnknownHeartbeatIdException  // Catched
+                case Some(pendingOperation) ⇒
+                  pendingOperation.onHeartbeat(times.timeout)
+                  startHeartbeatPeriod(pendingOperation, times)
+              }
+            }
+          }
+        } ~
+          complete(BadRequest, "Heartbeat with payload?")
+      }
+
+  private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
     alarmClock.delay(timing.period, name = s"${pendingOperation.uri} heartbeat period") {
@@ -83,7 +95,7 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock, debug: Debug = n
         }
       }
     }
-    onSuccess(pendingOperation.currentFuture) { response ⇒ complete(response) }
+    pendingOperation.currentFuture
   }
 
   private[heartbeat] def pendingHeartbeatIds: immutable.Set[HeartbeatId] = pendingOperations.keys.toSet
@@ -118,6 +130,8 @@ object HeartbeatService {
   }
 
   type OnHeartbeatTimeout = HeartbeatTimeout ⇒ Unit
+
+  private class UnknownHeartbeatIdException extends RuntimeException
 
   @Singleton final class Debug @Inject() () {
     var suppressed: Boolean = false
