@@ -20,7 +20,7 @@ import scala.concurrent.{Future, Promise, blocking}
 import scala.util.{Failure, Success}
 import spray.client.pipelining._
 import spray.http.StatusCodes.{Accepted, OK}
-import spray.http.{HttpHeader, HttpEntity, HttpRequest, HttpResponse}
+import spray.http.{HttpEntity, HttpRequest, HttpResponse}
 
 /**
   * @author Joacim Zschimmer
@@ -107,39 +107,41 @@ extends AutoCloseable {
   }
 
   private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestId: RequestId): Future[HttpResponse] = {
-    val timeoutAt = now + requestTimeout
+    val firstSentAt = now
+    val timeoutAt = firstSentAt + requestTimeout
     val promise = Promise[HttpResponse]()
-    def cycle(nr: Int, serverDelay: Duration): Unit = {
+
+    def cycle(retryNr: Int, serverDelay: Duration): Unit = {
       val responseFuture = mySendReceive(request)
-      val sentAt = now
       val retried = new AtomicBoolean
-      def retry(text: String): Unit = {
+
+      def retry(text: String): Unit =
         if (!promise.isCompleted) {
-          if (now < timeoutAt) {
+          if (now < timeoutAt)
             retried.switchOn {
-              logger.warn(s"$text, HTTP request of $sentAt is being repeated ($nr): ${request.method} ${request.uri} $requestId")
-              cycle(nr + 1, 0.s)
+              logger.warn(s"$text, HTTP request of $firstSentAt is being repeated (${retryNr+1}): ${request.method} ${request.uri} $requestId")
+              if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has succeeded, (${retryNr+1}): ${request.method} ${request.uri} $requestId") }
+              cycle(retryNr + 1, serverDelay = 0.s)
             }
-          }
           else promise tryFailure new HttpRequestTimeoutException(requestTimeout)
         }
-      }
       responseFuture onComplete {
         case Failure(t) if now < timeoutAt ⇒
-          logger.warn(s"${request.method} ${request.uri} $t")
-          alarmClock.delay(DelayAfterError) {
+          val msg = s"${request.method} ${request.uri} $t"
+          logger.warn(msg)
+          alarmClock.delay(DelayAfterError, msg) {
             retry("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      val delayUntil = sentAt + serverDelay + RetryTimeout
-      if (delayUntil < timeoutAt) {
-        alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
-          retry(s"After ${RetryTimeout.pretty} of no response")
-        }
+      val lastSent = now
+      val delayUntil = lastSent + serverDelay + RetryTimeout min timeoutAt
+      alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
+        retry(s"After ${(now - lastSent).pretty} of no response")
       }
     }
-    cycle(1, timing.period)
+
+    cycle(retryNr = 0, serverDelay = timing.period)
     promise.future
   }
 
@@ -171,23 +173,6 @@ object HeartbeatRequestor {
       httpResponse.headers collectFirst { case HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(id) ⇒ id }
     else
       None
-
-  private trait TimedRequest {
-    def request: HttpRequest
-    def timing: HttpHeartbeatTiming
-    protected def header: HttpHeader
-    def requestWithHeaders = request withHeaders header :: request.headers
-  }
-
-  private case class ATimedRequest(request: HttpRequest, heartbeatId: HeartbeatId, timing: HttpHeartbeatTiming) extends TimedRequest {
-    def header = `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-    // Der wird sowieso sofort beantwortet
-  }
-
-  private case class BTimedRequest(request: HttpRequest, timing: HttpHeartbeatTiming) extends TimedRequest {
-    def header = `X-JobScheduler-Heartbeat`(timing)
-    // Wollen wir die gleiche Anfrage (RequestID) mit anderem Header schicken?
-  }
 
   final class HttpRequestTimeoutException(timeout: Duration) extends RuntimeException(s"HTTP request timed out due to http-heartbeat-timeout=${timeout.pretty}")
 
