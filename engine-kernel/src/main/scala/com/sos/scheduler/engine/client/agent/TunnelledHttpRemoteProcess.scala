@@ -12,7 +12,7 @@ import java.net.InetSocketAddress
  *
  * @author Joacim Zschimmer
  */
-private[agent] trait TunnelledHttpRemoteProcess extends HasCloser with HttpRemoteProcess{
+private[agent] trait TunnelledHttpRemoteProcess extends HasCloser with HttpRemoteProcess {
 
   protected def actorSystem: ActorSystem
   protected def agentClient: AgentClient
