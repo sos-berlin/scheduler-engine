@@ -40,5 +40,7 @@ else
     logbackConfig="com/sos/scheduler/engine/agent/main/logback.xml"
 fi
 
-echo "$java" "${javaOptions[@]}" -classpath "$jarDir/*" -Dlogback.configurationFile="$logbackConfig" com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}"
-exec "$java" "${javaOptions[@]}" -classpath "$jarDir/*" -Dlogback.configurationFile="$logbackConfig" com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}"
+logbackArg="-Dlogback.configurationFile=$logbackConfig"
+agentOptions=("-job-java-options=$logbackArg" "${agentOptions[@]}")
+echo "$java" "${javaOptions[@]}" -classpath "$jarDir/*" $logbackArg com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}"
+exec "$java" "${javaOptions[@]}" -classpath "$jarDir/*" $logbackArg com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}"
