@@ -38,7 +38,6 @@ extends AutoCloseable {
   import actorRefFactory.dispatcher
 
   private val requestTimeout = debug.clientTimeout getOrElse timing.timeout
-  private val requestRetryAfter = timing.period * HeartbeatPeriodRetryFactor
   private val requestLifetime = requestTimeout * LifetimeFactor
   private var _serverHeartbeatCount = 0
   private var _clientHeartbeatCount = 0
@@ -110,7 +109,7 @@ extends AutoCloseable {
   private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestId: RequestId): Future[HttpResponse] = {
     val timeoutAt = now + requestTimeout
     val promise = Promise[HttpResponse]()
-    def cycle(): Unit = {
+    def cycle(nr: Int, serverDelay: Duration): Unit = {
       val responseFuture = mySendReceive(request)
       val sentAt = now
       val retried = new AtomicBoolean
@@ -118,8 +117,8 @@ extends AutoCloseable {
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
             retried.switchOn {
-              logger.warn(s"$text, HTTP request of $sentAt is being repeated: ${request.method} ${request.uri} $requestId")
-              cycle()
+              logger.warn(s"$text, HTTP request of $sentAt is being repeated ($nr): ${request.method} ${request.uri} $requestId")
+              cycle(nr + 1, 0.s)
             }
           }
           else promise tryFailure new HttpRequestTimeoutException(requestTimeout)
@@ -133,11 +132,14 @@ extends AutoCloseable {
           }
         case o ⇒ promise tryComplete o
       }
-      alarmClock.at(sentAt + requestRetryAfter min timeoutAt, s"${request.uri} retry timeout") {
-        retry("After no response")
+      val delayUntil = sentAt + serverDelay + RetryTimeout
+      if (delayUntil < timeoutAt) {
+        alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
+          retry(s"After ${RetryTimeout.pretty} of no response")
+        }
       }
     }
-    cycle()
+    cycle(1, timing.period)
     promise.future
   }
 
@@ -152,8 +154,8 @@ extends AutoCloseable {
 
 object HeartbeatRequestor {
   private val logger = Logger(getClass)
-  private val HeartbeatPeriodRetryFactor = BigDecimal("1.2")
-  private val LifetimeFactor = BigDecimal("1.5")
+  private val LifetimeFactor = 2  //BigDecimal("1.5")
+  private val RetryTimeout = 1.s
   private val DelayAfterError = 1.s
 
   @ImplementedBy(classOf[StandardFactory])
