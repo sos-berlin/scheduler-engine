@@ -60,7 +60,8 @@ extends AutoCloseable {
     val sentAt = now
     sendAndRetry(
       firstRequestTransformer ~> mySendReceive,
-      request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers)
+      request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers,
+      requestDuration = timing.period)
     .flatMap(handleResponse(mySendReceive, emptyRequest))
     .sideEffect { _ onSuccess { case _ ⇒ doClientHeartbeat(sentAt, nr, mySendReceive, emptyRequest) }}
   }
@@ -71,7 +72,7 @@ extends AutoCloseable {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-        sendAndRetry(mySendReceive, heartbeatRequest) flatMap handleResponse(mySendReceive, emptyRequest)
+        sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = timing.period) flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
     }
@@ -84,7 +85,7 @@ extends AutoCloseable {
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
         else {
           val sentAt = now
-          val responseFuture = sendAndRetry(mySendReceive, heartbeatRequest)  // Send with idempotence.RequestId, but server ignores this ID
+          val responseFuture = sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = 0.s)  // Send with idempotence.RequestId, but server ignores this ID
           _clientHeartbeatCount += 1
           responseFuture map {
             case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
@@ -101,18 +102,18 @@ extends AutoCloseable {
     }
   }
 
-  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
+  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestDuration: Duration): Future[HttpResponse] = {
     val requestId = RequestId.generate()
     val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, lifetime = requestLifetime) :: request.headers
-    sendAndRetry(mySendReceive, myRequest, requestId)
+    sendAndRetry(mySendReceive, myRequest, requestId, requestDuration)
   }
 
-  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestId: RequestId): Future[HttpResponse] = {
+  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestId: RequestId, requestDuration: Duration): Future[HttpResponse] = {
     val firstSentAt = now
     val timeoutAt = firstSentAt + requestTimeout
     val promise = Promise[HttpResponse]()
 
-    def cycle(retryNr: Int, serverDelay: Duration): Unit = {
+    def cycle(retryNr: Int, retriedRequestDuration: Duration): Unit = {
       val failedPromise = Promise[String]()
       logger.debug(s"${request.method} ${request.uri} $requestId")
       mySendReceive(request) onComplete {
@@ -125,7 +126,7 @@ extends AutoCloseable {
         case o ⇒ promise tryComplete o
       }
       if (now < timeoutAt) {
-        val delayUntil = now + serverDelay + RetryTimeout min timeoutAt
+        val delayUntil = now + retriedRequestDuration + RetryTimeout min timeoutAt
         alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
           failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
         }
@@ -135,14 +136,14 @@ extends AutoCloseable {
           if (now < timeoutAt) {
             logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated #${retryNr+1}: ${request.method} ${request.uri} $requestId")
             if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has finally succeeded: ${request.method} ${request.uri} $requestId") }
-            cycle(retryNr + 1, serverDelay = 0.s)
+            cycle(retryNr + 1, retriedRequestDuration = 0.s)
           } else
             promise tryFailure new HttpRequestTimeoutException(requestTimeout)
         }
       }
     }
 
-    cycle(retryNr = 0, serverDelay = timing.period)
+    cycle(retryNr = 0, retriedRequestDuration = requestDuration)
     promise.future
   }
 
