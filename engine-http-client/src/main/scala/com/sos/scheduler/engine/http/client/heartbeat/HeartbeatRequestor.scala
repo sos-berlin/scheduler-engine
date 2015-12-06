@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
-import java.time.Duration
+import java.time.{Instant, Duration}
 import java.time.Instant.now
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.{Inject, Singleton}
@@ -57,11 +57,12 @@ extends AutoCloseable {
   private def apply(firstRequestTransformer: RequestTransformer, mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
     val emptyRequest = request withEntity HttpEntity.Empty
     val nr = requestCounter.incrementAndGet()
+    val sentAt = now
     sendAndRetry(
       firstRequestTransformer ~> mySendReceive,
       request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers)
     .flatMap(handleResponse(mySendReceive, emptyRequest))
-    .sideEffect { _ onSuccess { case _ ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest) }}
+    .sideEffect { _ onSuccess { case _ ⇒ doClientHeartbeat(sentAt, nr, mySendReceive, emptyRequest) }}
   }
 
   private def handleResponse(mySendReceive: SendReceive, emptyRequest: HttpRequest)(httpResponse: HttpResponse): Future[HttpResponse] = {
@@ -76,12 +77,13 @@ extends AutoCloseable {
     }
   }
 
-  private def doClientHeartbeat(nr: Int, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
-    alarmClock.delay(timing.period, name = s"${emptyRequest.uri} client-side heartbeat") {
+  private def doClientHeartbeat(lastRequestSentAt: Instant, nr: Int, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
+    alarmClock.at(lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay, name = s"${emptyRequest.uri} client-side heartbeat") {
       if (nr == requestCounter.get) {  // No HTTP request active and not closed? Then we send a client-side heartbeat to notify the server
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
         else {
+          val sentAt = now
           val responseFuture = sendAndRetry(mySendReceive, heartbeatRequest)  // Send with idempotence.RequestId, but server ignores this ID
           _clientHeartbeatCount += 1
           responseFuture map {
@@ -89,7 +91,7 @@ extends AutoCloseable {
             case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
             case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
           } onComplete {
-            case Success(()) ⇒ doClientHeartbeat(nr, mySendReceive, emptyRequest)
+            case Success(()) ⇒ doClientHeartbeat(sentAt, nr, mySendReceive, emptyRequest)
             case Failure(t) ⇒
               logger.error(s"$t")
               clientHeartbeatThrowable = t
@@ -122,15 +124,17 @@ extends AutoCloseable {
           }
         case o ⇒ promise tryComplete o
       }
-      val delayUntil = now + serverDelay + RetryTimeout min timeoutAt
-      alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
-        failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
+      if (now < timeoutAt) {
+        val delayUntil = now + serverDelay + RetryTimeout min timeoutAt
+        alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
+          failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
+        }
       }
       failedPromise.future onSuccess { case startOfMessage ⇒
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
-            logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated (${retryNr+1}): ${request.method} ${request.uri} $requestId")
-            if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has succeeded, (${retryNr+1}): ${request.method} ${request.uri} $requestId") }
+            logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated #${retryNr+1}: ${request.method} ${request.uri} $requestId")
+            if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has finally succeeded: ${request.method} ${request.uri} $requestId") }
             cycle(retryNr + 1, serverDelay = 0.s)
           } else
             promise tryFailure new HttpRequestTimeoutException(requestTimeout)
@@ -153,6 +157,7 @@ extends AutoCloseable {
 
 object HeartbeatRequestor {
   private val logger = Logger(getClass)
+  private val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
   private val LifetimeFactor = 2  //BigDecimal("1.5")
   private val RetryTimeout = 1.s
   private val DelayAfterError = 1.s
