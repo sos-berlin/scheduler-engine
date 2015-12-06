@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.http.client.heartbeat
 import akka.actor.ActorRefFactory
 import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.SwitchOnAtomicBoolean
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.alarm.AlarmClock
@@ -13,7 +12,7 @@ import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-Job
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
 import java.time.Duration
 import java.time.Instant.now
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.concurrent.{Future, Promise, blocking}
@@ -112,32 +111,30 @@ extends AutoCloseable {
     val promise = Promise[HttpResponse]()
 
     def cycle(retryNr: Int, serverDelay: Duration): Unit = {
-      val responseFuture = mySendReceive(request)
-      val retried = new AtomicBoolean
-
-      def retry(text: String): Unit =
-        if (!promise.isCompleted) {
-          if (now < timeoutAt)
-            retried.switchOn {
-              logger.warn(s"$text, HTTP request of $firstSentAt is being repeated (${retryNr+1}): ${request.method} ${request.uri} $requestId")
-              if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has succeeded, (${retryNr+1}): ${request.method} ${request.uri} $requestId") }
-              cycle(retryNr + 1, serverDelay = 0.s)
-            }
-          else promise tryFailure new HttpRequestTimeoutException(requestTimeout)
-        }
-      responseFuture onComplete {
+      val failedPromise = Promise[String]()
+      logger.debug(s"${request.method} ${request.uri} $requestId")
+      mySendReceive(request) onComplete {
         case Failure(t) if now < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          alarmClock.delay(DelayAfterError, msg) {
-            retry("After error")
+          alarmClock.at(now + DelayAfterError min timeoutAt, msg) {
+            failedPromise.trySuccess("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      val lastSent = now
-      val delayUntil = lastSent + serverDelay + RetryTimeout min timeoutAt
+      val delayUntil = now + serverDelay + RetryTimeout min timeoutAt
       alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
-        retry(s"After ${(now - lastSent).pretty} of no response")
+        failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
+      }
+      failedPromise.future onSuccess { case startOfMessage ⇒
+        if (!promise.isCompleted) {
+          if (now < timeoutAt) {
+            logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated (${retryNr+1}): ${request.method} ${request.uri} $requestId")
+            if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has succeeded, (${retryNr+1}): ${request.method} ${request.uri} $requestId") }
+            cycle(retryNr + 1, serverDelay = 0.s)
+          } else
+            promise tryFailure new HttpRequestTimeoutException(requestTimeout)
+        }
       }
     }
 

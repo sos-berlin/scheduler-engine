@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.time.alarm.AlarmClock
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
 import com.sos.scheduler.engine.http.server.idempotence.Idempotence._
-import java.time.Duration
+import java.time.{Duration, Instant}
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
@@ -43,20 +43,22 @@ final class Idempotence @Inject() (alarmClock: AlarmClock) {
     }
   }
 
-  def apply(id: RequestId, lifetime: Duration, uri: Uri)(body: ⇒ Future[HttpResponse])(implicit ec: ExecutionContext): Future[HttpResponse] = {
-    val promise = Promise[HttpResponse]()
-    val newOperation = Operation(uri, promise.future)
+  private def apply(id: RequestId, lifetime: Duration, uri: Uri)(body: ⇒ Future[HttpResponse])(implicit ec: ExecutionContext): Future[HttpResponse] = {
+    val newPromise = Promise[HttpResponse]()
+    val newOperation = Operation(uri, newPromise.future)
     operations.delegate.putIfAbsent(id, newOperation) match {
       case null ⇒
-        val future = body // Execute only if request is new body
-        future onComplete promise.complete
-        alarmClock.delay(lifetime) {operations -= id}
-        newOperation.responseFuture
-      case Operation(`uri`, knownFuture) ⇒
-        logger.debug(s"Duplicate HTTP request received for " + (if (knownFuture.isCompleted) "completed" else "outstanding") + s" operation $uri $id")
-        knownFuture
-      case knownOperation ⇒
-        Future.successful(HttpResponse(BadRequest, s"Duplicate HTTP request does not match URI"))
+        logger.debug(s"New $uri $id")
+        body onComplete newPromise.complete
+        alarmClock.delay(lifetime, s"$uri $id lifetime") { operations -= id }
+        newOperation.future
+      case knownOperation: Operation ⇒
+        if (uri != knownOperation.uri)
+          Future.successful(HttpResponse(BadRequest, s"Duplicate HTTP request does not match URI"))
+        else {
+          logger.debug(s"Duplicate HTTP request received for " + (if (knownOperation.future.isCompleted) "completed" else "outstanding") + s" operation $uri $id ${knownOperation.instant}")
+          knownOperation.future
+        }
     }
   }
 
@@ -66,5 +68,8 @@ final class Idempotence @Inject() (alarmClock: AlarmClock) {
 
 object Idempotence {
   private val logger = Logger(getClass)
-  private final case class Operation(uri: Uri, responseFuture: Future[HttpResponse])
+
+  private final case class Operation(uri: Uri, future: Future[HttpResponse]) {
+    val instant = Instant.now
+  }
 }
