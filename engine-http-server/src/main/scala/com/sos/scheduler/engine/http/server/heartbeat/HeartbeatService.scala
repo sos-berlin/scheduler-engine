@@ -25,12 +25,13 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatService @Inject() (alarmClock: AlarmClock, idempotence: Idempotence, debug: Debug = new Debug) {
+final class HeartbeatService @Inject() (debug: Debug = new Debug)(implicit alarmClock: AlarmClock) {
 
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]
   private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
 
   def startHeartbeat[A](
+    idempotence: Idempotence,
     onHeartbeat: Duration ⇒ Unit = _ ⇒ {},
     @Deprecated @TestOnly onHeartbeatTimeout: Option[OnHeartbeatTimeout] = None)
     (operation: Option[Duration] ⇒ Future[A])
@@ -49,11 +50,11 @@ final class HeartbeatService @Inject() (alarmClock: AlarmClock, idempotence: Ide
       onSuccess(operation(None)) { response ⇒ complete(response) }
   }
 
-  def continueHeartbeat(onClientHeartbeat: Duration ⇒ Unit)(implicit actorRefFactory: ActorRefFactory): Route =
+  def continueHeartbeat(idempotence: Idempotence, onClientHeartbeat: Duration ⇒ Unit)(implicit actorRefFactory: ActorRefFactory): Route =
     clientSideHeartbeat(onClientHeartbeat) ~
-      continueHeartbeat
+      continueHeartbeat(idempotence)
 
-  def continueHeartbeat(implicit actorRefFactory: ActorRefFactory): Route =
+  def continueHeartbeat(idempotence: Idempotence)(implicit actorRefFactory: ActorRefFactory): Route =
     headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
       handleExceptions(ExceptionHandler { case t: UnknownHeartbeatIdException ⇒ complete(BadRequest, s"Unknown or expired $heartbeatId" )}) {
         requestEntityEmpty {

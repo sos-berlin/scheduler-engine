@@ -37,7 +37,8 @@ import spray.routing.HttpServiceActor
 final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFutures {
   private implicit val askTimeout: Timeout = AskTimeout
   private implicit val dataJsonFormat = DataJsonFormat
-  private lazy val idempotence = new Idempotence(new AlarmClock(1.ms, idleTimeout = Some(1.s)))
+  private val newRequestId = new RequestId.Generator
+  private lazy val idempotence = new Idempotence()(new AlarmClock(1.ms, idleTimeout = Some(1.s)))
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
   private lazy val (baseUri, webService) = startWebServer(idempotence)
@@ -56,7 +57,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
   }
 
   "With RequestId, idempotent" in {
-    val id = RequestId.generate()
+    val id = newRequestId()
     val operations = for (i ← 1 to 3) yield {
       sleep(10.ms)
       sendReceive.apply(Post(s"$baseUri/test", Data(100.ms, s"$i")) withHeaders List(`X-JobScheduler-Request-ID`(id, 200.ms)))
@@ -66,7 +67,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
   }
 
   "With late duplicate RequestId after first response" in {
-    val id = RequestId.generate()
+    val id = newRequestId()
     val lifetime = 500.ms
     val operations = for (i ← 1 to 3) yield {
       sleep(100.ms)
@@ -82,8 +83,8 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
     val n = 10000
     for (index ← 1 to 3) {
       s"Brut force test with $n equal simultaneous requests ($index)" in {
-        val id = RequestId.generate()
-        val request = Post(s"$baseUri/test/$index", Data(100.ms, "BRUTFORCE")) withHeaders List(`X-JobScheduler-Request-ID`(id, lifetime = 60.s))
+        val id = newRequestId()
+        val request = Post(s"$baseUri/test/$index", Data(100.ms, "BRUTFORCE")) withHeaders List(`X-JobScheduler-Request-ID`(id, timeout = 60.s))
         val operations = for (_ ← 1 to n) yield sendReceive.apply(request)
         val responses = Await.result(Future.sequence(operations), AskTimeout.duration)
         try assert((responses map { _.entity.as[Data] }).toSet == Set(Right(Data(100.ms, s"${5 + index}: BRUTFORCE RESPONSE"))))

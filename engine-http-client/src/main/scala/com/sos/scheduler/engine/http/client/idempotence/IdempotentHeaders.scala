@@ -9,18 +9,18 @@ import java.time.Duration
   */
 object IdempotentHeaders {
 
-  final case class `X-JobScheduler-Request-ID`(id: RequestId, lifetime: Duration) extends OwnHttpHeader {
+  final case class `X-JobScheduler-Request-ID`(id: RequestId, timeout: Duration) extends OwnHttpHeader {
     def companion = `X-JobScheduler-Request-ID`
-    def value = s"${id.string} $lifetime"
+    def value = s"${id.number} $timeout"
   }
 
   object `X-JobScheduler-Request-ID` extends OwnHttpHeaderCompanion {
-    private val ValueRegex = s"(${RequestId.Regex}) ($Iso8601DurationRegex)".r
+    private val ValueRegex = s"(\\d+) ($Iso8601DurationRegex)".r
 
     object Value {
       def unapply(value: String): Option[(RequestId, Duration)] =
         value match {
-          case ValueRegex(id, duration) ⇒ Some(RequestId(id), Duration.parse(duration))
+          case ValueRegex(id, duration) ⇒ Some(RequestId.fromString(id), Duration.parse(duration))
         }
       }
   }

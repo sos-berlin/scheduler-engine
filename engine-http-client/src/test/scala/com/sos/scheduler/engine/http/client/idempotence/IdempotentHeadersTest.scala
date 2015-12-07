@@ -13,11 +13,11 @@ import org.scalatest.junit.JUnitRunner
 final class IdempotentHeadersTest extends FreeSpec {
 
   "X-JobScheduler-Request-ID" in {
-    val requestIdString = "012356789abcdef-ABCDEF"
-    val requestId = RequestId(requestIdString)
+    val requestIdNumber = 123567890123456789L
+    val requestId = RequestId(requestIdNumber)
     val name = "X-JobScheduler-Request-ID"
 
-    val value = s"$requestIdString PT7S"
+    val value = s"$requestIdNumber PT7S"
     val headerLine = s"$name: $value"
     val header = `X-JobScheduler-Request-ID`(requestId, 7.s)
     assert(header.toString == headerLine)

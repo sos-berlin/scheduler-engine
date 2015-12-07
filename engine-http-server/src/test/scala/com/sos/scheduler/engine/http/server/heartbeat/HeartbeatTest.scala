@@ -41,10 +41,11 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
 
   private implicit val askTimeout = AskTimeout
   private implicit lazy val actorSystem = ActorSystem("TEST")
-  private implicit val alarmClock = new AlarmClock(1.ms, idleTimeout = Some(1.s))
-  private lazy val heartbeatService = new HeartbeatService(alarmClock, new Idempotence(alarmClock))
+  private implicit val alarmClock = new AlarmClock(1.ms, idleTimeout = Some(10.s))
+  private lazy val heartbeatService = new HeartbeatService
   private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer(heartbeatService)
+  private val idempotenceScopes = Iterator from 1
 
   import actorSystem.dispatcher
 
@@ -52,7 +53,8 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
     super.beforeAll()
     // Warm-up
     autoClosing(new HeartbeatRequestor(HttpHeartbeatTiming(period = 50.ms, timeout = 150.ms), testWithHeartbeatDelay = 1.ms)) { heartbeatRequestor ⇒
-      Await.ready(heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", Data(100.ms.toString))), 10.seconds)
+      val uri = s"$baseUri/test/" + idempotenceScopes.next()
+      Await.ready(heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(uri, Data(100.ms.toString))), 10.seconds)
     }
     assertServerIsClean(999)
   }
@@ -72,8 +74,9 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
     val timing = HttpHeartbeatTiming(100.ms, 500.ms)
     val duration = 150.ms
     autoClosing(new HeartbeatRequestor(timing, testWithHeartbeatDelay = timing.timeout + 1.s)) { heartbeatRequestor ⇒
+      val uri = s"$baseUri/test/" + idempotenceScopes.next()
       val request = Data(duration.toString)
-      val responseFuture = heartbeatRequestor.apply(sendReceive, Post(s"$baseUri/test", request))
+      val responseFuture = heartbeatRequestor.apply(sendReceive, Post(uri, request))
       val response = awaitResult(responseFuture, 10.s)
       assert(response.status == BadRequest)
       assert(response.entity.asString startsWith "Unknown or expired HeartbeatId")
@@ -89,19 +92,20 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
     val timing = HttpHeartbeatTiming(period = 100.ms, timeout = 1000.ms)
     val duration = timing.period + timing.period / 2
     val heartbeatRequestor = new HeartbeatRequestor(timing)
+    val uri = s"$baseUri/test/" + idempotenceScopes.next()
     val request = Data(duration.toString)
-    val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
+    val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(uri, request))
     val response = awaitResult(responseFuture, 10.s)
     assert((response.status, response.as[Data]) == (OK, Right(request.toResponse)))
     assert(heartbeatRequestor.serverHeartbeatCount == 1)
     assert(heartbeatRequestor.clientHeartbeatCount == 0)
-    sleep(duration)
+    sleep(duration max HeartbeatRequestor.ClientHeartbeatMinimumDelay * 1.5 )
     assert(heartbeatRequestor.clientHeartbeatCount == 1)
-    sleep(duration)
-    assert(Set(2, 3)(heartbeatRequestor.clientHeartbeatCount))
+    sleep(duration max HeartbeatRequestor.ClientHeartbeatMinimumDelay * 1.5 )
+    assert(Set(2, 3) contains heartbeatRequestor.clientHeartbeatCount)
     heartbeatRequestor.close()  // Stop sending client-side heartbeats
     sleep(3 * duration)
-    assert(Set(2, 3)(heartbeatRequestor.clientHeartbeatCount))
+    assert(Set(2, 3) contains heartbeatRequestor.clientHeartbeatCount)
     assertServerIsClean()
   }
 
@@ -110,8 +114,9 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
     val debug = new HeartbeatRequestor.Debug
     debug.clientTimeout = Some(100.ms)
     autoClosing(new HeartbeatRequestor(times, debug = debug)) { heartbeatRequestor ⇒
+      val uri = s"$baseUri/test/" + idempotenceScopes.next()
       val request = Data(200.ms.toString)
-      val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
+      val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(uri, request))
       intercept[HttpRequestTimeoutException] { awaitResult(responseFuture, 1.s) }
       assert(heartbeatRequestor.serverHeartbeatCount == 0)
       assert(heartbeatRequestor.clientHeartbeatCount == 0)
@@ -134,10 +139,14 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
       (50 * times.period, randomDuration(2 * times.period), o ⇒ assert(o >= 3))))
     s"operation = ${duration.pretty}, own delay = ${delay.pretty}" in {
       autoClosing(new HeartbeatRequestor(times, testWithHeartbeatDelay = delay)) { heartbeatRequestor ⇒
+        val uri = s"$baseUri/test/" + idempotenceScopes.next()
         val request = Data(duration.toString)
-        val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test", request))
+        val responseFuture = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(uri, request))
         val response = awaitResult(responseFuture, 10.s)
-        assert((response.status, response.as[Data]) == (OK, Right(request.toResponse)))
+        withClue(response.entity.asString) {
+          assert(response.status == OK)
+        }
+        assert(response.as[Data] == Right(request.toResponse))
         heartbeatCountPredicate(heartbeatRequestor.serverHeartbeatCount)
         assert(heartbeatRequestor.clientHeartbeatCount == 0)
       }
@@ -165,7 +174,7 @@ object HeartbeatTest {
   }
 
 
-  private def startWebServer(heartbeatService: HeartbeatService)(implicit actorSystem: ActorSystem): (Uri, ActorRef) = {
+  private def startWebServer(heartbeatService: HeartbeatService)(implicit actorSystem: ActorSystem, alarmClock: AlarmClock): (Uri, ActorRef) = {
     val port = findRandomFreeTcpPort()
     val webService = actorSystem.actorOf(Props { new WebActor(heartbeatService) })
     Await.result(IO(Http) ? Http.Bind(webService, interface = "127.0.0.1", port = port), AskTimeout.duration) match {
@@ -175,10 +184,11 @@ object HeartbeatTest {
     (Uri(s"http://127.0.0.1:$port"), webService)
   }
 
-  private class WebActor(heartbeatService: HeartbeatService) extends HttpServiceActor {
+  private class WebActor(heartbeatService: HeartbeatService)(implicit alarmClock: AlarmClock) extends HttpServiceActor {
     private val logger = Logger(getClass)
     private implicit val executionContext: ExecutionContext = context.system.dispatcher
     private val timedOutRequests = mutable.Buffer[Data]()
+    private val idToIdempotence = mutable.Map[String, Idempotence]()
 
     def receive = myReceive orElse runRoute(route)
 
@@ -192,15 +202,15 @@ object HeartbeatTest {
     }
 
     private def route: Route =
-      path("test") {
+      (pathPrefix("test") & path(Segment)) { id: String ⇒
         post {
-          heartbeatService.continueHeartbeat {
-            timeout ⇒ logger.info(s"Client-side heartbeat ${timeout.pretty}")
-          } ~
-          entity(as[Data]) { data ⇒
-            heartbeatService.startHeartbeat(onHeartbeatTimeout = Some(onHeartbeatTimeout(data))) {
-              timeout ⇒ operation(timeout, data)
-            }
+          val idempotence = idToIdempotence.getOrElseUpdate(id, new Idempotence)
+          heartbeatService.continueHeartbeat(idempotence, timeout ⇒ logger.info(s"Client-side heartbeat ${timeout.pretty}")) ~
+            entity(as[Data]) { data ⇒
+            heartbeatService.startHeartbeat(idempotence,
+              onHeartbeatTimeout = Some(onHeartbeatTimeout(data))) {
+                timeout ⇒ operation(timeout, data)
+              }
           }
         }
       }

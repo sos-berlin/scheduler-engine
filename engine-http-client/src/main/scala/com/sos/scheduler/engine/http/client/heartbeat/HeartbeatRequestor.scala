@@ -37,9 +37,9 @@ extends AutoCloseable {
   import actorRefFactory.dispatcher
 
   private val requestTimeout = debug.clientTimeout getOrElse timing.timeout
-  private val requestLifetime = requestTimeout * LifetimeFactor
   private var _serverHeartbeatCount = 0
   private var _clientHeartbeatCount = 0
+  private val newRequestId = new RequestId.Generator
   private val requestCounter = new AtomicInteger
   private var clientHeartbeatThrowable: Throwable = null  // How to inform C++ JobScheduler about an error ???
 
@@ -84,13 +84,21 @@ extends AutoCloseable {
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
         else {
-          val sentAt = now
-          val responseFuture = sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = 0.s)  // Send with idempotence.RequestId, but server ignores this ID
           _clientHeartbeatCount += 1
-          responseFuture map {
-            case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
-            case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
-            case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+          val sentAt = now
+          val promise = Promise[Either[Unit, HttpResponse]]()
+          mySendReceive(heartbeatRequest) onComplete {
+            case Success(o) ⇒ promise trySuccess Right(o)
+            case Failure(t) ⇒ promise tryFailure t
+          }
+          alarmClock.delay(RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
+            promise success Left(())
+          }
+          promise.future map {
+            case Left(()) ⇒ // timeout
+            case Right(HttpResponse(OK, HttpEntity.Empty, _, _)) ⇒
+            case Right(HttpResponse(OK, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
+            case Right(HttpResponse(status, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
           } onComplete {
             case Success(()) ⇒ doClientHeartbeat(sentAt, nr, mySendReceive, emptyRequest)
             case Failure(t) ⇒
@@ -103,8 +111,8 @@ extends AutoCloseable {
   }
 
   private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestDuration: Duration): Future[HttpResponse] = {
-    val requestId = RequestId.generate()
-    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, lifetime = requestLifetime) :: request.headers
+    val requestId = newRequestId()
+    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, requestTimeout) :: request.headers
     sendAndRetry(mySendReceive, myRequest, requestId, requestDuration)
   }
 
@@ -158,8 +166,7 @@ extends AutoCloseable {
 
 object HeartbeatRequestor {
   private val logger = Logger(getClass)
-  private val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
-  private val LifetimeFactor = 2  //BigDecimal("1.5")
+  private[http] val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
   private val RetryTimeout = 1.s
   private val DelayAfterError = 1.s
 
