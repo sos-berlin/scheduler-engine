@@ -6,9 +6,10 @@ import java.lang.Math.addExact
 /**
   * @author Joacim Zschimmer
   */
-final case class RequestId(number: Long) {
+final case class RequestId(number: Long) extends Ordered[RequestId] {
   def succ = RequestId(addExact(number, 1))
   def pred = RequestId(addExact(number, -1))
+  def compare(o: RequestId) = number compare o.number
 }
 
 object RequestId {

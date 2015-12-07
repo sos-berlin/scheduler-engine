@@ -65,8 +65,14 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
         } else
           Future.successful(HttpResponse(BadRequest, s"Duplicate HTTP request does not match URI"))
       } else {
-        val msg = s"Expected new ${eatRequestId.expectedId} (possibly)" + (if (known == null) "" else s" or known ${known.id})") + " instead of $id"
-        logger.error(s"$uri $msg")
+        var msg: String = null
+        if (id < eatRequestId.expectedId) {
+          msg = s"HTTP request with expired $id is rejected"
+          logger.debug(msg)
+        } else {
+          msg = s"HTTP request with unexpected $id"
+          logger.warn(s"$msg, expected now is ${eatRequestId.expectedId}")
+        }
         Future.successful(HttpResponse(BadRequest, msg))
       }
     }

@@ -10,6 +10,21 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class RequestIdTest extends FreeSpec {
 
+  "succ" in {
+    assert(RequestId(1).succ == RequestId(2))
+  }
+
+  "pred" in {
+    assert(RequestId(2).pred == RequestId(1))
+  }
+
+  "compare" in {
+    assert((RequestId(1) compare RequestId(2)) < 0)
+    assert((RequestId(1) compare RequestId(1)) == 0)
+    assert((RequestId(2) compare RequestId(1)) > 0)
+    assert(RequestId(1) < RequestId(2))
+  }
+
   "Generator" in {
     val newRequestId = new RequestId.Generator
     assert(newRequestId() == RequestId(1))
