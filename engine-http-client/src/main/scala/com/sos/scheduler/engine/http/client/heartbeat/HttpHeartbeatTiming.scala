@@ -13,5 +13,5 @@ final case class HttpHeartbeatTiming(period: Duration, timeout: Duration) {
 }
 
 object HttpHeartbeatTiming {
-  val Default = HttpHeartbeatTiming(period = 10.s, timeout = 15.s)
+  val Default = HttpHeartbeatTiming(period = 10.s, timeout = 60.s)
 }
