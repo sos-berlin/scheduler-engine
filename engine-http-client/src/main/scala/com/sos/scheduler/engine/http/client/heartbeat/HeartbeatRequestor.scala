@@ -10,11 +10,12 @@ import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
-import java.time.{Instant, Duration}
 import java.time.Instant.now
+import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
+import scala.concurrent.Future.firstCompletedOf
 import scala.concurrent.{Future, Promise, blocking}
 import scala.util.{Failure, Success}
 import spray.client.pipelining._
@@ -125,21 +126,22 @@ extends AutoCloseable {
     def cycle(retryNr: Int, retriedRequestDuration: Duration): Unit = {
       val failedPromise = Promise[String]()
       //logger.debug(s"${request.method} ${request.uri} $requestId")
-      mySendReceive(request) onComplete {
-        case Failure(t) if now < timeoutAt ⇒
+      val response = mySendReceive(request)
+      response onComplete {
+        case Failure(t) if now + DelayAfterError < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          alarmClock.at(now + DelayAfterError min timeoutAt, cancelWhenCompleted = promise.future, msg) {
+          alarmClock.at(now + DelayAfterError, cancelWhenCompleted = promise.future, msg) {
             failedPromise.trySuccess("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      //if (now < timeoutAt) {
-        val delayUntil = now + retriedRequestDuration + RetryTimeout min timeoutAt
-        alarmClock.at(delayUntil, cancelWhenCompleted = promise.future, s"${request.uri} retry timeout") {
-          failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
-        }
-      //}
+      alarmClock.at(now + retriedRequestDuration + RetryTimeout min timeoutAt,
+        cancelWhenCompleted = firstCompletedOf(List(promise.future, response)),
+        s"${request.uri} retry timeout")
+      {
+        failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
+      }
       failedPromise.future onSuccess { case startOfMessage ⇒
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
