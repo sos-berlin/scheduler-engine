@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.http.server.idempotence
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.alarm.AlarmClock
+import com.sos.scheduler.engine.common.time.alarm.{Alarm, AlarmClock}
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
 import com.sos.scheduler.engine.http.server.idempotence.Idempotence._
@@ -46,10 +46,13 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
     val newPromise = Promise[HttpResponse]()
     val newOperation = Operation(id, uri, newPromise.future)
     if (eatRequestId(id)) {
-      pendingOperation.set(newOperation)
+      pendingOperation.getAndSet(newOperation) match {
+        case null ⇒
+        case oldOperation ⇒ for (alarm ← Option(oldOperation.lifetimeAlarm.get)) alarmClock.cancel(alarm)
+      }
       logger.trace(s"New $uri $id")
       body onComplete newPromise.complete
-      alarmClock.delay(lifetime, s"$uri $id lifetime") {
+      newOperation.lifetimeAlarm set alarmClock.delay(lifetime, s"$uri $id lifetime") {
         pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
       }
       newOperation.future
@@ -77,6 +80,7 @@ object Idempotence {
   private val logger = Logger(getClass)
 
   private final case class Operation(id: RequestId, uri: Uri, future: Future[HttpResponse]) {
+    val lifetimeAlarm = new AtomicReference[Alarm[_]]
     val instant = Instant.now
   }
 }

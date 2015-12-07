@@ -71,9 +71,9 @@ final class HeartbeatService @Inject() (debug: Debug = new Debug)(implicit alarm
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = Instant.now()
-    alarmClock.delay(timing.period, name = s"${pendingOperation.uri} heartbeat period") {
+    alarmClock.delay(timing.period, cancelWhenCompleted = pendingOperation.responseFuture, name = s"${pendingOperation.uri} heartbeat period") {
       if (debug.suppressed)
-        logger.debug("suppressed")
+        logger.debug("Heartbeat suppressed")
       else
         respondWithHeartbeat()
     }
@@ -115,7 +115,7 @@ object HeartbeatService {
 
   private final class PendingOperation(
     val uri: Uri,
-    responseFuture: Future[HttpResponse],
+    val responseFuture: Future[HttpResponse],
     val onHeartbeat: Duration ⇒ Unit,
     val onHeartbeatTimeout: Option[OnHeartbeatTimeout])
     (implicit ec: ExecutionContext)

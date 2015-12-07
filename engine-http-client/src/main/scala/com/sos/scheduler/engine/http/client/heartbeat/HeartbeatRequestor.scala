@@ -87,11 +87,12 @@ extends AutoCloseable {
           _clientHeartbeatCount += 1
           val sentAt = now
           val promise = Promise[Either[Unit, HttpResponse]]()
-          mySendReceive(heartbeatRequest) onComplete {
+          val responded = mySendReceive(heartbeatRequest)
+          responded onComplete {
             case Success(o) ⇒ promise trySuccess Right(o)
             case Failure(t) ⇒ promise tryFailure t
           }
-          alarmClock.delay(RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
+          alarmClock.delay(RetryTimeout, cancelWhenCompleted = responded, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
             promise success Left(())
           }
           promise.future map {
@@ -128,17 +129,17 @@ extends AutoCloseable {
         case Failure(t) if now < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          alarmClock.at(now + DelayAfterError min timeoutAt, msg) {
+          alarmClock.at(now + DelayAfterError min timeoutAt, cancelWhenCompleted = promise.future, msg) {
             failedPromise.trySuccess("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      if (now < timeoutAt) {
+      //if (now < timeoutAt) {
         val delayUntil = now + retriedRequestDuration + RetryTimeout min timeoutAt
-        alarmClock.at(delayUntil, s"${request.uri} retry timeout") {
+        alarmClock.at(delayUntil, cancelWhenCompleted = promise.future, s"${request.uri} retry timeout") {
           failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
         }
-      }
+      //}
       failedPromise.future onSuccess { case startOfMessage ⇒
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
