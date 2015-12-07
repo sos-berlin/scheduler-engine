@@ -112,7 +112,7 @@ extends AutoCloseable {
 
   private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestDuration: Duration): Future[HttpResponse] = {
     val requestId = newRequestId()
-    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, requestTimeout) :: request.headers
+    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, requestTimeout * LifetimeFactor) :: request.headers
     sendAndRetry(mySendReceive, myRequest, requestId, requestDuration)
   }
 
@@ -169,6 +169,7 @@ object HeartbeatRequestor {
   private[http] val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
   private val RetryTimeout = 1.s
   private val DelayAfterError = 1.s
+  private val LifetimeFactor = 2
 
   @ImplementedBy(classOf[StandardFactory])
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)

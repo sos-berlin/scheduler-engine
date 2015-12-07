@@ -9,9 +9,9 @@ import java.time.Duration
   */
 object IdempotentHeaders {
 
-  final case class `X-JobScheduler-Request-ID`(id: RequestId, timeout: Duration) extends OwnHttpHeader {
+  final case class `X-JobScheduler-Request-ID`(id: RequestId, lifetime: Duration) extends OwnHttpHeader {
     def companion = `X-JobScheduler-Request-ID`
-    def value = s"${id.number} $timeout"
+    def value = s"${id.number} $lifetime"
   }
 
   object `X-JobScheduler-Request-ID` extends OwnHttpHeaderCompanion {

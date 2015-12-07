@@ -84,7 +84,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
     for (index ← 1 to 3) {
       s"Brut force test with $n equal simultaneous requests ($index)" in {
         val id = newRequestId()
-        val request = Post(s"$baseUri/test/$index", Data(100.ms, "BRUTFORCE")) withHeaders List(`X-JobScheduler-Request-ID`(id, timeout = 60.s))
+        val request = Post(s"$baseUri/test/$index", Data(100.ms, "BRUTFORCE")) withHeaders List(`X-JobScheduler-Request-ID`(id, lifetime = 60.s))
         val operations = for (_ ← 1 to n) yield sendReceive.apply(request)
         val responses = Await.result(Future.sequence(operations), AskTimeout.duration)
         try assert((responses map { _.entity.as[Data] }).toSet == Set(Right(Data(100.ms, s"${5 + index}: BRUTFORCE RESPONSE"))))
