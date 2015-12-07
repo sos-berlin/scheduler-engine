@@ -163,7 +163,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
       awaitResult(client.task(TestAgentTaskId), 2.s): TaskOverview
     }
     assert(e.response.status == InternalServerError)
-    assert(e.response.entity.asString contains "NoSuchElementException")
+    assert(e.response.entity.asString contains "UnknownTaskException")
     pending
   }
 }
