@@ -95,7 +95,7 @@ final class HeartbeatService @Inject() (debug: Debug = new Debug)(implicit alarm
       for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
         alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
           for (o ← pendingOperations.remove(heartbeatId)) {
-            logger.debug(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
+            logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
             onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
           }
         }

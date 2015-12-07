@@ -60,7 +60,7 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
       val known = pendingOperation.get
       if (known != null && known.id == id) {
         if (uri == known.uri) {
-          logger.debug(s"Duplicate HTTP request received for " + (if (known.future.isCompleted) "completed" else "outstanding") + s" operation $uri $id ${known.instant}")
+          logger.info(s"Duplicate HTTP request received for " + (if (known.future.isCompleted) "completed" else "outstanding") + s" operation $uri $id ${known.instant}")
           known.future
         } else
           Future.successful(HttpResponse(BadRequest, s"Duplicate HTTP request does not match URI"))
@@ -68,7 +68,7 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
         var msg: String = null
         if (id < eatRequestId.expectedId) {
           msg = s"HTTP request with expired $id is rejected"
-          logger.debug(msg)
+          logger.info(msg)
         } else {
           msg = s"HTTP request with unexpected $id"
           logger.warn(s"$msg, expected now is ${eatRequestId.expectedId}")

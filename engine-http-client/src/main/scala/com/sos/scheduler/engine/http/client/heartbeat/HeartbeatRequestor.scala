@@ -124,7 +124,7 @@ extends AutoCloseable {
 
     def cycle(retryNr: Int, retriedRequestDuration: Duration): Unit = {
       val failedPromise = Promise[String]()
-      logger.debug(s"${request.method} ${request.uri} $requestId")
+      //logger.debug(s"${request.method} ${request.uri} $requestId")
       mySendReceive(request) onComplete {
         case Failure(t) if now < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
