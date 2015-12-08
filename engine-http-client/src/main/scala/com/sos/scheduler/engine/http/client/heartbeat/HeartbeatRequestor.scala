@@ -5,14 +5,14 @@ import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.alarm.AlarmClock
+import com.sos.scheduler.engine.common.time.alarm.{Alarm, AlarmClock}
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
 import java.time.Instant.now
 import java.time.{Duration, Instant}
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.concurrent.Future.firstCompletedOf
@@ -41,10 +41,8 @@ extends AutoCloseable {
   private var _serverHeartbeatCount = 0
   private var _clientHeartbeatCount = 0
   private val newRequestId = new RequestId.Generator
-  private val requestCounter = new AtomicInteger
-  private var clientHeartbeatThrowable: Throwable = null  // How to inform C++ JobScheduler about an error ???
 
-  def close() = requestCounter.incrementAndGet()  // Interrupt heartbeat chain
+  def close() = clientHeartbeat.cancel()  // Interrupt client heartbeat chain
 
   def apply(mySendReceive: SendReceive, httpRequest: HttpRequest): Future[HttpResponse] =
     apply(firstRequestTransformer = identity, mySendReceive, httpRequest)
@@ -56,15 +54,15 @@ extends AutoCloseable {
     * @return the response for the initial request
     */
   private def apply(firstRequestTransformer: RequestTransformer, mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
+    clientHeartbeat.cancel()
     val emptyRequest = request withEntity HttpEntity.Empty
-    val nr = requestCounter.incrementAndGet()
     val sentAt = now
     sendAndRetry(
       firstRequestTransformer ~> mySendReceive,
       request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers,
       requestDuration = timing.period)
     .flatMap(handleResponse(mySendReceive, emptyRequest))
-    .sideEffect { _ onSuccess { case _ ⇒ doClientHeartbeat(sentAt, nr, mySendReceive, emptyRequest) }}
+    .sideEffect { _ onSuccess { case _ ⇒ clientHeartbeat(sentAt, mySendReceive, emptyRequest) }}
   }
 
   private def handleResponse(mySendReceive: SendReceive, emptyRequest: HttpRequest)(httpResponse: HttpResponse): Future[HttpResponse] = {
@@ -79,9 +77,19 @@ extends AutoCloseable {
     }
   }
 
-  private def doClientHeartbeat(lastRequestSentAt: Instant, nr: Int, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
-    alarmClock.at(lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay, name = s"${emptyRequest.uri} client-side heartbeat") {
-      if (nr == requestCounter.get) {  // No HTTP request active and not closed? Then we send a client-side heartbeat to notify the server
+  private object clientHeartbeat {
+    private val currentClientTimeout = new AtomicReference[Alarm[Unit]]
+    var throwableOption: Option[Throwable] = None // How to inform C++ JobScheduler about an error ???
+
+    def cancel(): Unit =
+      for (o ← Option(currentClientTimeout.get)) {
+        alarmClock.cancel(o)
+        currentClientTimeout.compareAndSet(o, null)
+      }
+
+    def apply(lastRequestSentAt: Instant, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
+      val timeoutAt = lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay
+      currentClientTimeout set alarmClock.at(timeoutAt, name = s"${emptyRequest.uri} client-side heartbeat") {
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
         else {
@@ -89,12 +97,9 @@ extends AutoCloseable {
           val sentAt = now
           val promise = Promise[Either[Unit, HttpResponse]]()
           val responded = mySendReceive(heartbeatRequest)
-          responded onComplete {
-            case Success(o) ⇒ promise trySuccess Right(o)
-            case Failure(t) ⇒ promise tryFailure t
-          }
+          responded map Right.apply onComplete promise.tryComplete
           alarmClock.delay(RetryTimeout, cancelWhenCompleted = responded, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
-            promise success Left(())
+            promise trySuccess Left(())
           }
           promise.future map {
             case Left(()) ⇒ // timeout
@@ -102,13 +107,16 @@ extends AutoCloseable {
             case Right(HttpResponse(OK, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
             case Right(HttpResponse(status, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
           } onComplete {
-            case Success(()) ⇒ doClientHeartbeat(sentAt, nr, mySendReceive, emptyRequest)
-            case Failure(t) ⇒
-              logger.error(s"$t")
-              clientHeartbeatThrowable = t
+            case Success(()) ⇒ apply(sentAt, mySendReceive, emptyRequest)
+            case Failure(t) ⇒ onClientHeartbeatTimeout(t)
           }
         }
       }
+    }
+
+    def onClientHeartbeatTimeout(throwable: Throwable): Unit =  {
+      logger.error(s"$throwable")
+      throwableOption = Some(throwable)
     }
   }
 
@@ -164,7 +172,7 @@ extends AutoCloseable {
   @TestOnly
   def clientHeartbeatCount = _clientHeartbeatCount
 
-  override def toString = Option(clientHeartbeatThrowable) mkString ("HeartbeatRequestor(", "", ")")
+  override def toString = clientHeartbeat.throwableOption mkString ("HeartbeatRequestor(", "", ")")
 }
 
 object HeartbeatRequestor {
