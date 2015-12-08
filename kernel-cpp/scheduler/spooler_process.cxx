@@ -1323,25 +1323,25 @@ void Process_class::remove_process(Process* process)
 
 //-----------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process(const Api_process_configuration* c, Prefix_log* log)
+Process* Process_class::new_process(const Api_process_configuration& conf, Prefix_log* log)
 {
     assert_is_active();
     ptr<Process> process;
-    if (!c) {
-        ptr<Dummy_process> p = Z_NEW(Dummy_process(_spooler, log, Api_process_configuration()));
+    if (conf._is_shell_dummy) {
+        ptr<Dummy_process> p = Z_NEW(Dummy_process(_spooler, log, conf));
         process = +p;
     } else {
-        Api_process_configuration conf = *c;
-        conf._remote_scheduler_address = c->_remote_scheduler_address.empty()? _remote_scheduler_address : c->_remote_scheduler_address;
-        if (is_http_or_multiple(conf._remote_scheduler_address)) {
-            ptr<Http_remote_api_process> p = Z_NEW(Http_remote_api_process(this, log, conf));
+        Api_process_configuration my_conf = conf;
+        my_conf._remote_scheduler_address = my_conf._remote_scheduler_address.empty()? _remote_scheduler_address : my_conf._remote_scheduler_address;
+        if (is_http_or_multiple(my_conf._remote_scheduler_address)) {
+            ptr<Http_remote_api_process> p = Z_NEW(Http_remote_api_process(this, log, my_conf));
             process = +p;
         } else 
-        if (!conf._remote_scheduler_address.empty()) {       
-            ptr<Tcp_remote_api_process> p = Z_NEW(Tcp_remote_api_process(spooler(), log, conf));
+        if (!my_conf._remote_scheduler_address.empty()) {
+            ptr<Tcp_remote_api_process> p = Z_NEW(Tcp_remote_api_process(spooler(), log, my_conf));
             process = +p;
         } else {
-            ptr<Api_process> p = Api_process::new_process(_spooler, log, conf);
+            ptr<Api_process> p = Api_process::new_process(_spooler, log, my_conf);
             process = +p;
         }
     }
@@ -1357,7 +1357,7 @@ bool Process_class::is_http_or_multiple(const string& remote_scheduler_address) 
 
 //-------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available(const Api_process_configuration* api_process_configuration, Prefix_log* log)
+Process* Process_class::select_process_if_available(const Api_process_configuration& api_process_configuration, Prefix_log* log)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&
