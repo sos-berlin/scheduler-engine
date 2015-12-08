@@ -50,7 +50,7 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
         case null ⇒
         case oldOperation ⇒ for (alarm ← Option(oldOperation.lifetimeAlarm.get)) alarmClock.cancel(alarm)
       }
-      logger.trace(s"New $uri $id")
+      logger.trace(s"$uri new $id")
       body onComplete newPromise.complete
       newOperation.lifetimeAlarm set alarmClock.delay(lifetime, s"$uri $id lifetime") {
         pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
@@ -60,18 +60,19 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
       val known = pendingOperation.get
       if (known != null && known.id == id) {
         if (uri == known.uri) {
-          logger.info(s"Duplicate HTTP request received for " + (if (known.future.isCompleted) "completed" else "outstanding") + s" operation $uri $id ${known.instant}")
+          logger.debug(s"$uri Duplicate HTTP request for " + (if (known.future.isCompleted) "completed" else "outstanding") + s" $id of ${known.instant}")
           known.future
         } else
           Future.successful(HttpResponse(BadRequest, s"Duplicate HTTP request does not match URI"))
       } else {
+        val expectedId = eatRequestId.expectedId  // Maybe changed since
         var msg: String = null
-        if (id < eatRequestId.expectedId) {
-          msg = s"HTTP request with expired $id is rejected"
-          logger.info(msg)
+        if (id < expectedId) {
+          msg = s"HTTP request with expired (duplicate) $id is ignored"
+          logger.debug(s"$uri $msg, now expecting $expectedId")
         } else {
           msg = s"HTTP request with unexpected $id"
-          logger.warn(s"$msg, expected now is ${eatRequestId.expectedId}")
+          logger.warn(s"$uri $msg, now expecting $expectedId")
         }
         Future.successful(HttpResponse(BadRequest, msg))
       }
