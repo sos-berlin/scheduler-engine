@@ -78,7 +78,7 @@ extends AutoCloseable {
   }
 
   private object clientHeartbeat {
-    private val currentClientTimeout = new AtomicReference[Timer]
+    private val currentClientTimeout = new AtomicReference[Timer[Unit]]
     var throwableOption: Option[Throwable] = None // How to inform C++ JobScheduler about an error ???
 
     def cancelTimeout(): Unit =
@@ -90,24 +90,25 @@ extends AutoCloseable {
     def apply(lastRequestSentAt: Instant, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
       val timeoutAt = lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay
       currentClientTimeout set
-        timerService.at(timeoutAt, s"${emptyRequest.uri} client-side heartbeat").then_ {
+        timerService.at(timeoutAt, s"${emptyRequest.uri} client-side heartbeat").onElapsed {
           val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
           if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
           else {
             _clientHeartbeatCount += 1
             val sentAt = now
-            val promise = Promise[Either[Unit, HttpResponse]]()
-            val responded = mySendReceive(heartbeatRequest)
-            responded map Right.apply onComplete promise.tryComplete
-            timerService.delay(RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout")
-              .cancelWhenCompleted(responded) then_ {
-                promise trySuccess Left(())
-              }
+            val promise = Promise[HttpResponse]()
+            mySendReceive(heartbeatRequest) onComplete promise.tryComplete
+            timerService.delay(
+              RetryTimeout,
+              s"${heartbeatRequest.uri} client heartbeat retry timeout",
+              cancelWhenCompleted = promise.future,
+              promise = promise)
             promise.future map {
-              case Left(()) ⇒ // timeout
-              case Right(HttpResponse(OK, HttpEntity.Empty, _, _)) ⇒
-              case Right(HttpResponse(OK, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
-              case Right(HttpResponse(status, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+              case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
+              case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
+              case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+            } recover {
+              case _: Timer.ElapsedException ⇒
             } onComplete {
               case Success(()) ⇒ apply(sentAt, mySendReceive, emptyRequest)
               case Failure(t) ⇒ onClientHeartbeatTimeout(t)
@@ -141,14 +142,16 @@ extends AutoCloseable {
         case Failure(t) if now + DelayAfterError < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          timerService.at(now + DelayAfterError, msg).cancelWhenCompleted(promise.future) then_ {
+          timerService.at(now + DelayAfterError, msg, cancelWhenCompleted = promise.future) onElapsed {
             failedPromise.trySuccess("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      timerService.at(now + retriedRequestDuration + RetryTimeout min timeoutAt, s"${request.uri} retry timeout")
-        .cancelWhenCompleted(firstCompletedOf(List(promise.future, response)))
-        .then_ {
+      timerService.at(
+        now + retriedRequestDuration + RetryTimeout min timeoutAt,
+        s"${request.uri} retry timeout",
+        cancelWhenCompleted = firstCompletedOf(List(promise.future, response)))
+        .onElapsed {
           failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
         }
       failedPromise.future onSuccess { case startOfMessage ⇒

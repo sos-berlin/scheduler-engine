@@ -53,7 +53,7 @@ final class Idempotence(implicit timerService: TimerService) {
       logger.trace(s"$uri new $id")
       body onComplete newPromise.complete
       newOperation.lifetimeTimer set
-        timerService.delay(lifetime, s"$uri $id lifetime").then_ {
+        timerService.delay(lifetime, s"$uri $id lifetime").onElapsed {
           pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
         }
       newOperation.future
@@ -88,7 +88,7 @@ object Idempotence {
   private val logger = Logger(getClass)
 
   private final case class Operation(id: RequestId, uri: Uri, future: Future[HttpResponse]) {
-    val lifetimeTimer = new AtomicReference[Timer]
+    val lifetimeTimer = new AtomicReference[Timer[Unit]]
     val instant = Instant.now
   }
 }

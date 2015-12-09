@@ -13,7 +13,6 @@ import com.sos.scheduler.engine.http.server.idempotence.Idempotence
 import java.time.Instant.now
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
 import scala.collection.immutable
 import scala.concurrent._
@@ -78,9 +77,11 @@ final class HeartbeatService(implicit timerService: TimerService) {
       logger.debug("Heartbeat suppressed")
     else {
       unsafeCount += 1
-      timerService.delay(timing.period, s"${pendingOperation.uri} heartbeat period")
-        .cancelWhenCompleted(pendingOperation.responseFuture)
-        .then_ {
+      timerService.delay(
+        timing.period,
+        s"${pendingOperation.uri} heartbeat period",
+        cancelWhenCompleted = pendingOperation.responseFuture)
+        .onElapsed {
           respondWithHeartbeat()
         }
     }
@@ -100,7 +101,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
 
     def startHeartbeatTimeout(heartbeatId: HeartbeatId): Unit = {
       for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-        timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") then_ {
+        timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") onElapsed {
           for (o ← pendingOperations.remove(heartbeatId)) {
             logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
             onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
