@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1523
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
