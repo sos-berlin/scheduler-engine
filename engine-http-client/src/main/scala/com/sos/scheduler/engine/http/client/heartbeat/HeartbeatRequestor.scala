@@ -5,6 +5,7 @@ import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.timer.TimerService._
 import com.sos.scheduler.engine.common.time.timer.{Timer, TimerService}
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
@@ -96,14 +97,7 @@ extends AutoCloseable {
           else {
             _clientHeartbeatCount += 1
             val sentAt = now
-            val promise = Promise[HttpResponse]()
-            mySendReceive(heartbeatRequest) onComplete promise.tryComplete
-            timerService.delay(
-              RetryTimeout,
-              s"${heartbeatRequest.uri} client heartbeat retry timeout",
-              cancelWhenCompleted = promise.future,
-              promise = promise)
-            promise.future map {
+            mySendReceive(heartbeatRequest).timeoutAfter(RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout") map {
               case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
               case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
               case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
