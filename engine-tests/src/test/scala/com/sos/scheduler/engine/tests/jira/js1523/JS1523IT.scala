@@ -52,14 +52,13 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "With responds to server-side heartbeats being suppressed, task connection gets lost" in {
-    val debug = agent.injector.instance[HeartbeatService.Debug]
     try {
-      debug.suppressed = true
+      HeartbeatService.staticSupressed = true
       testLostTask {
         runJobAndWaitForEnd(SleepJobPath)
       }
     }
-    finally debug.suppressed = false
+    finally HeartbeatService.staticSupressed = false
   }
 
   s"With client-side being suppressed, task connection gets lost" in {

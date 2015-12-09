@@ -42,7 +42,7 @@ extends AutoCloseable {
   private var _clientHeartbeatCount = 0
   private val newRequestId = new RequestId.Generator
 
-  def close() = clientHeartbeat.cancel()  // Interrupt client heartbeat chain
+  def close() = clientHeartbeat.cancelTimeout()  // Interrupt client heartbeat chain
 
   def apply(mySendReceive: SendReceive, httpRequest: HttpRequest): Future[HttpResponse] =
     apply(firstRequestTransformer = identity, mySendReceive, httpRequest)
@@ -54,7 +54,7 @@ extends AutoCloseable {
     * @return the response for the initial request
     */
   private def apply(firstRequestTransformer: RequestTransformer, mySendReceive: SendReceive, request: HttpRequest): Future[HttpResponse] = {
-    clientHeartbeat.cancel()
+    clientHeartbeat.cancelTimeout()
     val emptyRequest = request withEntity HttpEntity.Empty
     val sentAt = now
     sendAndRetry(
@@ -78,10 +78,10 @@ extends AutoCloseable {
   }
 
   private object clientHeartbeat {
-    private val currentClientTimeout = new AtomicReference[Timer[Unit]]
+    private val currentClientTimeout = new AtomicReference[Timer]
     var throwableOption: Option[Throwable] = None // How to inform C++ JobScheduler about an error ???
 
-    def cancel(): Unit =
+    def cancelTimeout(): Unit =
       for (o ← Option(currentClientTimeout.get)) {
         timerService.cancel(o)
         currentClientTimeout.compareAndSet(o, null)
@@ -89,29 +89,31 @@ extends AutoCloseable {
 
     def apply(lastRequestSentAt: Instant, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
       val timeoutAt = lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay
-      currentClientTimeout set timerService.at(timeoutAt, name = s"${emptyRequest.uri} client-side heartbeat") {
-        val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
-        if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
-        else {
-          _clientHeartbeatCount += 1
-          val sentAt = now
-          val promise = Promise[Either[Unit, HttpResponse]]()
-          val responded = mySendReceive(heartbeatRequest)
-          responded map Right.apply onComplete promise.tryComplete
-          timerService.delay(RetryTimeout, cancelWhenCompleted = responded, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
-            promise trySuccess Left(())
-          }
-          promise.future map {
-            case Left(()) ⇒ // timeout
-            case Right(HttpResponse(OK, HttpEntity.Empty, _, _)) ⇒
-            case Right(HttpResponse(OK, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
-            case Right(HttpResponse(status, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
-          } onComplete {
-            case Success(()) ⇒ apply(sentAt, mySendReceive, emptyRequest)
-            case Failure(t) ⇒ onClientHeartbeatTimeout(t)
+      currentClientTimeout set
+        timerService.at(timeoutAt, s"${emptyRequest.uri} client-side heartbeat").then_ {
+          val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
+          if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
+          else {
+            _clientHeartbeatCount += 1
+            val sentAt = now
+            val promise = Promise[Either[Unit, HttpResponse]]()
+            val responded = mySendReceive(heartbeatRequest)
+            responded map Right.apply onComplete promise.tryComplete
+            timerService.delay(RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout")
+              .cancelWhenCompleted(responded) then_ {
+                promise trySuccess Left(())
+              }
+            promise.future map {
+              case Left(()) ⇒ // timeout
+              case Right(HttpResponse(OK, HttpEntity.Empty, _, _)) ⇒
+              case Right(HttpResponse(OK, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
+              case Right(HttpResponse(status, entity, _, _)) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+            } onComplete {
+              case Success(()) ⇒ apply(sentAt, mySendReceive, emptyRequest)
+              case Failure(t) ⇒ onClientHeartbeatTimeout(t)
+            }
           }
         }
-      }
     }
 
     def onClientHeartbeatTimeout(throwable: Throwable): Unit =  {
@@ -139,17 +141,16 @@ extends AutoCloseable {
         case Failure(t) if now + DelayAfterError < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          timerService.at(now + DelayAfterError, cancelWhenCompleted = promise.future, msg) {
+          timerService.at(now + DelayAfterError, msg).cancelWhenCompleted(promise.future) then_ {
             failedPromise.trySuccess("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      timerService.at(now + retriedRequestDuration + RetryTimeout min timeoutAt,
-        cancelWhenCompleted = firstCompletedOf(List(promise.future, response)),
-        s"${request.uri} retry timeout")
-      {
-        failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
-      }
+      timerService.at(now + retriedRequestDuration + RetryTimeout min timeoutAt, s"${request.uri} retry timeout")
+        .cancelWhenCompleted(firstCompletedOf(List(promise.future, response)))
+        .then_ {
+          failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
+        }
       failedPromise.future onSuccess { case startOfMessage ⇒
         if (!promise.isCompleted) {
           if (now < timeoutAt) {

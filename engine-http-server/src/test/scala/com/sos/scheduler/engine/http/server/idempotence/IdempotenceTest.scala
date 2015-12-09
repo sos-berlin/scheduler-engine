@@ -37,10 +37,10 @@ import spray.routing.HttpServiceActor
 final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFutures {
   private implicit val askTimeout: Timeout = AskTimeout
   private implicit val dataJsonFormat = DataJsonFormat
-  private val newRequestId = new RequestId.Generator
-  private lazy val idempotence = new Idempotence()(new TimerService(1.ms, idleTimeout = Some(1.s)))
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
+  private val newRequestId = new RequestId.Generator
+  private lazy val idempotence = new Idempotence()(new TimerService(1.ms, idleTimeout = Some(1.s)))
   private lazy val (baseUri, webService) = startWebServer(idempotence)
 
 

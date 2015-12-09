@@ -26,7 +26,7 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatService(debug: Debug = new Debug)(implicit timerService: TimerService) {
+final class HeartbeatService(implicit timerService: TimerService) {
 
   private val idempotence = new Idempotence
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]
@@ -74,12 +74,15 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit timerService: Ti
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = now
-    unsafeCount += 1
-    timerService.delay(timing.period, cancelWhenCompleted = pendingOperation.responseFuture, name = s"${pendingOperation.uri} heartbeat period") {
-      if (debug.suppressed)
-        logger.debug("Heartbeat suppressed")
-      else
-        respondWithHeartbeat()
+    if (staticSupressed)
+      logger.debug("Heartbeat suppressed")
+    else {
+      unsafeCount += 1
+      timerService.delay(timing.period, s"${pendingOperation.uri} heartbeat period")
+        .cancelWhenCompleted(pendingOperation.responseFuture)
+        .then_ {
+          respondWithHeartbeat()
+        }
     }
 
     def respondWithHeartbeat(): Unit = {
@@ -97,7 +100,7 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit timerService: Ti
 
     def startHeartbeatTimeout(heartbeatId: HeartbeatId): Unit = {
       for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-        timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
+        timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") then_ {
           for (o ← pendingOperations.remove(heartbeatId)) {
             logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
             onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
@@ -122,6 +125,7 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit timerService: Ti
 
 object HeartbeatService {
   private val logger = Logger(getClass)
+  @TestOnly var staticSupressed: Boolean = false
 
   private final class PendingOperation(
     val uri: Uri,
@@ -161,8 +165,4 @@ object HeartbeatService {
   type OnHeartbeatTimeout = HeartbeatTimeout ⇒ Unit
 
   private class UnknownHeartbeatIdException extends RuntimeException
-
-  @Singleton final class Debug @Inject() () {
-    var suppressed: Boolean = false
-  }
 }

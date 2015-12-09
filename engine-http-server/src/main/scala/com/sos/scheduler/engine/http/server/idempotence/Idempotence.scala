@@ -52,9 +52,10 @@ final class Idempotence(implicit timerService: TimerService) {
       }
       logger.trace(s"$uri new $id")
       body onComplete newPromise.complete
-      newOperation.lifetimeTimer set timerService.delay(lifetime, s"$uri $id lifetime") {
-        pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
-      }
+      newOperation.lifetimeTimer set
+        timerService.delay(lifetime, s"$uri $id lifetime").then_ {
+          pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
+        }
       newOperation.future
     } else {
       val known = pendingOperation.get
@@ -87,7 +88,7 @@ object Idempotence {
   private val logger = Logger(getClass)
 
   private final case class Operation(id: RequestId, uri: Uri, future: Future[HttpResponse]) {
-    val lifetimeTimer = new AtomicReference[Timer[_]]
+    val lifetimeTimer = new AtomicReference[Timer]
     val instant = Instant.now
   }
 }

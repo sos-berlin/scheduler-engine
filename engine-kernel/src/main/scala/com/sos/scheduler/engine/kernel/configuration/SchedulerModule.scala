@@ -56,7 +56,6 @@ with HasCloser {
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
-    provideSingleton[TimerService] { new TimerService(100.ms).closeWithCloser }
     bindInstance(cppProxy)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
@@ -130,6 +129,9 @@ with HasCloser {
 
   @Provides @Singleton
   private def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
+
+  @Provides @Singleton
+  private def timerService(implicit executionContext: ExecutionContext): TimerService = { new TimerService(100.ms).closeWithCloser }
 }
 
 object SchedulerModule {
