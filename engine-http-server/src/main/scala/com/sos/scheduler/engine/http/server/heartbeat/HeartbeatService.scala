@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatRes
 import com.sos.scheduler.engine.http.server.heartbeat.ClientSideHeartbeatService._
 import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatService._
 import com.sos.scheduler.engine.http.server.idempotence.Idempotence
+import java.time.Instant.now
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.{Inject, Singleton}
@@ -29,7 +30,9 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
 
   private val idempotence = new Idempotence
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]
-  private var _pendingOperationsMaximum = 0  // Possibly not really thread-safe
+  private var unsafeStartCount = 0
+  private var unsafeCount = 0
+  private var unsafePendingOperationsMaximum = 0
 
   def startHeartbeat[A](
     onHeartbeat: Duration ⇒ Unit = _ ⇒ {},
@@ -41,6 +44,7 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
     headerValueByName(`X-JobScheduler-Heartbeat-Start`.name) { case `X-JobScheduler-Heartbeat-Start`.Value(timing) ⇒
       requestUri { uri ⇒
         idempotence {
+          unsafeStartCount += 1
           val responseFuture = operation(Some(timing.timeout)) map marshalToHttpResponse
           val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeat, onHeartbeatTimeout)(actorRefFactory.dispatcher)
           startHeartbeatPeriod(pendingOperation, timing)
@@ -69,7 +73,8 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
 
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
     import actorRefFactory.dispatcher
-    val lastHeartbeatReceivedAt = Instant.now()
+    val lastHeartbeatReceivedAt = now
+    unsafeCount += 1
     alarmClock.delay(timing.period, cancelWhenCompleted = pendingOperation.responseFuture, name = s"${pendingOperation.uri} heartbeat period") {
       if (debug.suppressed)
         logger.debug("Heartbeat suppressed")
@@ -80,7 +85,7 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
     def respondWithHeartbeat(): Unit = {
       val heartbeatId = HeartbeatId.generate()
       pendingOperations.insert(heartbeatId, pendingOperation)
-      _pendingOperationsMaximum = _pendingOperationsMaximum max pendingOperations.size
+      unsafePendingOperationsMaximum = unsafePendingOperationsMaximum max pendingOperations.size
       val oldPromise = pendingOperation.renewPromise()
       val respondedWithHeartbeat = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
       if (respondedWithHeartbeat) {
@@ -104,9 +109,15 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
     pendingOperation.currentFuture
   }
 
+  def overview = HeartbeatView(
+    startCount = unsafeStartCount,
+    count = unsafeCount,
+    concurrentMaximum = unsafePendingOperationsMaximum,
+    pendingOperations.toMap map { case (id, pendingOperation) ⇒ id → pendingOperation.toView })
+
   private[heartbeat] def pendingHeartbeatIds: immutable.Set[HeartbeatId] = pendingOperations.keys.toSet
 
-  private[heartbeat] def pendingOperationsMaximum: Int = _pendingOperationsMaximum
+  private[heartbeat] def pendingOperationsMaximum: Int = unsafePendingOperationsMaximum
 }
 
 object HeartbeatService {
@@ -120,6 +131,9 @@ object HeartbeatService {
     (implicit ec: ExecutionContext)
   {
     private val currentPromiseRef = new AtomicReference(Promise[HttpResponse]())
+    private val startedAt = now
+    private var lastAt: Option[Instant] = None
+    private var heartbeatCount = 0
 
     responseFuture onComplete { responseTry ⇒
       val completed = currentPromiseRef.get.tryComplete(responseTry)
@@ -128,9 +142,18 @@ object HeartbeatService {
       }
     }
 
-    def renewPromise(): Promise[HttpResponse] = currentPromiseRef getAndSet Promise()
+    def renewPromise(): Promise[HttpResponse] = {
+      heartbeatCount += 1
+      lastAt = Some(now)
+      currentPromiseRef getAndSet Promise()
+    }
 
     def currentFuture = currentPromiseRef.get.future
+
+    def toView = HeartbeatView.PendingOperation(
+      startedAt = PendingOperation.this.startedAt,
+      lastAt = PendingOperation.this.lastAt,
+      count = heartbeatCount)
 
     override def toString = s"PendingOperation($uri)"
   }
