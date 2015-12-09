@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.Marshalling.marshalToHttpResponse
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.alarm.AlarmClock
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
@@ -38,7 +38,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
   private implicit val askTimeout: Timeout = AskTimeout
   private implicit val dataJsonFormat = DataJsonFormat
   private val newRequestId = new RequestId.Generator
-  private lazy val idempotence = new Idempotence()(new AlarmClock(1.ms, idleTimeout = Some(1.s)))
+  private lazy val idempotence = new Idempotence()(new TimerService(1.ms, idleTimeout = Some(1.s)))
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
   private lazy val (baseUri, webService) = startWebServer(idempotence)

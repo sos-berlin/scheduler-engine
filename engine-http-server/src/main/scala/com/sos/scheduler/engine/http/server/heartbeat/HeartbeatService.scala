@@ -4,7 +4,7 @@ import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashMap}
 import com.sos.scheduler.engine.common.sprayutils.Marshalling.marshalToHttpResponse
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.alarm.AlarmClock
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatResponseHeaders, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.http.server.heartbeat.ClientSideHeartbeatService._
@@ -26,7 +26,7 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: AlarmClock) {
+final class HeartbeatService(debug: Debug = new Debug)(implicit timerService: TimerService) {
 
   private val idempotence = new Idempotence
   private val pendingOperations = new ScalaConcurrentHashMap[HeartbeatId, PendingOperation]
@@ -75,7 +75,7 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
     import actorRefFactory.dispatcher
     val lastHeartbeatReceivedAt = now
     unsafeCount += 1
-    alarmClock.delay(timing.period, cancelWhenCompleted = pendingOperation.responseFuture, name = s"${pendingOperation.uri} heartbeat period") {
+    timerService.delay(timing.period, cancelWhenCompleted = pendingOperation.responseFuture, name = s"${pendingOperation.uri} heartbeat period") {
       if (debug.suppressed)
         logger.debug("Heartbeat suppressed")
       else
@@ -97,7 +97,7 @@ final class HeartbeatService(debug: Debug = new Debug)(implicit alarmClock: Alar
 
     def startHeartbeatTimeout(heartbeatId: HeartbeatId): Unit = {
       for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-        alarmClock.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
+        timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") {
           for (o ← pendingOperations.remove(heartbeatId)) {
             logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
             onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))

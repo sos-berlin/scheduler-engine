@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.alarm.AlarmClock
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.common.utils.Exceptions.repeatUntilNoException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor.HttpRequestTimeoutException
@@ -40,7 +40,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
 
   private implicit val askTimeout = AskTimeout
   private implicit lazy val actorSystem = ActorSystem("TEST")
-  private implicit val alarmClock = new AlarmClock(1.ms, idleTimeout = Some(10.s))
+  private implicit val timerService = new TimerService(1.ms, idleTimeout = Some(10.s))
   private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer()
   private val idempotenceScopes = Iterator from 1
@@ -58,7 +58,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   override protected def afterAll() = {
-    alarmClock.close()
+    timerService.close()
     actorSystem.shutdown()
     super.afterAll()
   }
@@ -176,7 +176,7 @@ object HeartbeatTest {
   }
 
 
-  private def startWebServer()(implicit actorSystem: ActorSystem, alarmClock: AlarmClock): (Uri, ActorRef) = {
+  private def startWebServer()(implicit actorSystem: ActorSystem, timerService: TimerService): (Uri, ActorRef) = {
     val port = findRandomFreeTcpPort()
     val webService = actorSystem.actorOf(Props { new WebActor })
     Await.result(IO(Http) ? Http.Bind(webService, interface = "127.0.0.1", port = port), AskTimeout.duration) match {
@@ -186,7 +186,7 @@ object HeartbeatTest {
     (Uri(s"http://127.0.0.1:$port"), webService)
   }
 
-  private class WebActor(implicit alarmClock: AlarmClock) extends HttpServiceActor {
+  private class WebActor(implicit timerService: TimerService) extends HttpServiceActor {
     private val logger = Logger(getClass)
     private implicit val executionContext: ExecutionContext = context.system.dispatcher
     private val timedOutRequests = mutable.Buffer[Data]()

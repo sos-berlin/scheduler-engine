@@ -5,7 +5,7 @@ import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.alarm.{Alarm, AlarmClock}
+import com.sos.scheduler.engine.common.time.timer.{Timer, TimerService}
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
@@ -31,7 +31,7 @@ final class HeartbeatRequestor private[http](
   timing: HttpHeartbeatTiming,
   testWithHeartbeatDelay: Duration = 0.s,
   debug: Debug = new Debug)(
-  implicit alarmClock: AlarmClock,
+  implicit timerService: TimerService,
   actorRefFactory: ActorRefFactory)
 extends AutoCloseable {
 
@@ -78,18 +78,18 @@ extends AutoCloseable {
   }
 
   private object clientHeartbeat {
-    private val currentClientTimeout = new AtomicReference[Alarm[Unit]]
+    private val currentClientTimeout = new AtomicReference[Timer[Unit]]
     var throwableOption: Option[Throwable] = None // How to inform C++ JobScheduler about an error ???
 
     def cancel(): Unit =
       for (o ← Option(currentClientTimeout.get)) {
-        alarmClock.cancel(o)
+        timerService.cancel(o)
         currentClientTimeout.compareAndSet(o, null)
       }
 
     def apply(lastRequestSentAt: Instant, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
       val timeoutAt = lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay
-      currentClientTimeout set alarmClock.at(timeoutAt, name = s"${emptyRequest.uri} client-side heartbeat") {
+      currentClientTimeout set timerService.at(timeoutAt, name = s"${emptyRequest.uri} client-side heartbeat") {
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
         else {
@@ -98,7 +98,7 @@ extends AutoCloseable {
           val promise = Promise[Either[Unit, HttpResponse]]()
           val responded = mySendReceive(heartbeatRequest)
           responded map Right.apply onComplete promise.tryComplete
-          alarmClock.delay(RetryTimeout, cancelWhenCompleted = responded, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
+          timerService.delay(RetryTimeout, cancelWhenCompleted = responded, s"${heartbeatRequest.uri} client heartbeat retry timeout") {
             promise trySuccess Left(())
           }
           promise.future map {
@@ -139,12 +139,12 @@ extends AutoCloseable {
         case Failure(t) if now + DelayAfterError < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          alarmClock.at(now + DelayAfterError, cancelWhenCompleted = promise.future, msg) {
+          timerService.at(now + DelayAfterError, cancelWhenCompleted = promise.future, msg) {
             failedPromise.trySuccess("After error")
           }
         case o ⇒ promise tryComplete o
       }
-      alarmClock.at(now + retriedRequestDuration + RetryTimeout min timeoutAt,
+      timerService.at(now + retriedRequestDuration + RetryTimeout min timeoutAt,
         cancelWhenCompleted = firstCompletedOf(List(promise.future, response)),
         s"${request.uri} retry timeout")
       {
@@ -186,7 +186,7 @@ object HeartbeatRequestor {
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
 
   @Singleton
-  final class StandardFactory @Inject private(implicit alarmClock: AlarmClock, actorRefFactory: ActorRefFactory, debug: Debug) extends Factory {
+  final class StandardFactory @Inject private(implicit timerService: TimerService, actorRefFactory: ActorRefFactory, debug: Debug) extends Factory {
     def apply(timing: HttpHeartbeatTiming): HeartbeatRequestor = new HeartbeatRequestor(timing, debug = debug)
   }
 

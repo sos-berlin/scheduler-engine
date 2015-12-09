@@ -41,8 +41,8 @@ final class TunnelViewTest extends FreeSpec {
         "startedByHttpIp": "127.1.2.3",
         "remoteTcpAddress": "REMOTE-ADDRESS",
         "heartbeat": {
-          "startCount": 1,
-          "count": 1,
+          "startCount": 3,
+          "count": 9,
           "concurrentMaximum": 1,
           "pendingOperations": {
             "HEARTBEAT-1": {

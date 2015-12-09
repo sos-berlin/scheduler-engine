@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.http.server.idempotence
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.alarm.{Alarm, AlarmClock}
+import com.sos.scheduler.engine.common.time.timer.{Timer, TimerService}
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
 import com.sos.scheduler.engine.http.client.idempotence.RequestId
 import com.sos.scheduler.engine.http.server.idempotence.Idempotence._
@@ -18,7 +18,7 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-final class Idempotence(implicit alarmClock: AlarmClock) {
+final class Idempotence(implicit timerService: TimerService) {
 
   private val eatRequestId = new RequestId.Eater
   private val pendingOperation = new AtomicReference[Operation]
@@ -48,11 +48,11 @@ final class Idempotence(implicit alarmClock: AlarmClock) {
     if (eatRequestId(id)) {
       pendingOperation.getAndSet(newOperation) match {
         case null ⇒
-        case oldOperation ⇒ for (alarm ← Option(oldOperation.lifetimeAlarm.get)) alarmClock.cancel(alarm)
+        case oldOperation ⇒ for (timer ← Option(oldOperation.lifetimeTimer.get)) timerService.cancel(timer)
       }
       logger.trace(s"$uri new $id")
       body onComplete newPromise.complete
-      newOperation.lifetimeAlarm set alarmClock.delay(lifetime, s"$uri $id lifetime") {
+      newOperation.lifetimeTimer set timerService.delay(lifetime, s"$uri $id lifetime") {
         pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
       }
       newOperation.future
@@ -87,7 +87,7 @@ object Idempotence {
   private val logger = Logger(getClass)
 
   private final case class Operation(id: RequestId, uri: Uri, future: Future[HttpResponse]) {
-    val lifetimeAlarm = new AtomicReference[Alarm[_]]
+    val lifetimeTimer = new AtomicReference[Timer[_]]
     val instant = Instant.now
   }
 }

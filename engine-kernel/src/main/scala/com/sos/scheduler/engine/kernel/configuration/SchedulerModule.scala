@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.alarm.AlarmClock
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
@@ -56,7 +56,7 @@ with HasCloser {
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
-    provideSingleton[AlarmClock] { new AlarmClock(100.ms).closeWithCloser }
+    provideSingleton[TimerService] { new TimerService(100.ms).closeWithCloser }
     bindInstance(cppProxy)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
