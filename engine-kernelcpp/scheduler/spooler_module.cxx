@@ -781,7 +781,14 @@ bool Module_instance::load()
 bool Module_instance::try_to_get_process(const Api_process_configuration* c)
 {
     if (!_process) {
-        _process = process_class()->select_process_if_available(c, _task? _task->log() : NULL);
+        Api_process_configuration conf;
+        if (!c) {
+            conf._is_shell_dummy = true;
+            conf._job_name = _job_name;
+            conf._task_id = _task_id;
+            c = &conf;
+        }
+        _process = process_class()->select_process_if_available(*c, _task? _task->log() : NULL);
         // _process wird nur von Remote_module_instance_proxy benutzt. 
         // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
     }
