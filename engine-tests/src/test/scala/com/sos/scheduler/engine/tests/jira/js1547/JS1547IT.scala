@@ -25,7 +25,7 @@ final class JS1547IT extends FreeSpec with ScalaSchedulerTest {
     println(answer)
     val processes = answer \ "state" \ "folder" \ "process_classes" \ "process_class" \ "processes" \ "process"
     for ((jobPath, taskId) ← runs map { o ⇒ o.jobPath → o.taskId }) scheduler executeXml <kill_task job={jobPath.string} id={taskId.string}/>
-    assert((processes flatMap { _.attribute("job") map { _.toString }}) == List("test-shell", "test-api"))
+    assert((processes flatMap { _.attribute("job") map { _.toString }}).toSet == Set("test-shell", "test-api"))
     assert((processes flatMap { _.attribute("task_id") map { o ⇒ TaskId(o.toString.toInt) }}).toSet == (runs map { _.taskId }).toSet)
   }
 }
