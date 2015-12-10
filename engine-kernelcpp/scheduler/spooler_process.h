@@ -33,6 +33,7 @@ struct Api_process_configuration : javabridge::has_proxy<Api_process_configurati
     ptr<Login> _login;
     string _java_options;
     string _java_classpath;
+    bool _is_shell_dummy;
 };
 
 
@@ -155,8 +156,8 @@ struct Process_class : Process_class_configuration,
     void                        add_process                 (Process*);
     void                        remove_process              (Process*);
 
-    Process*                    new_process                 (const Api_process_configuration*, Prefix_log*);
-    Process*                    select_process_if_available (const Api_process_configuration*, Prefix_log*);
+    Process*                    new_process                 (const Api_process_configuration&, Prefix_log*);
+    Process*                    select_process_if_available (const Api_process_configuration&, Prefix_log*);
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );
