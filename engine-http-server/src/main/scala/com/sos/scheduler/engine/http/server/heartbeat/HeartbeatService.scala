@@ -93,22 +93,19 @@ final class HeartbeatService(implicit timerService: TimerService) {
       val oldPromise = pendingOperation.renewPromise()
       val respondedWithHeartbeat = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
       if (respondedWithHeartbeat) {
-        startHeartbeatTimeout(heartbeatId)
+        pendingOperation.onHeartbeatTimeoutOption foreach startHeartbeatTimeout(heartbeatId)
       } else {
         pendingOperations -= heartbeatId
       }
     }
 
-    def startHeartbeatTimeout(heartbeatId: HeartbeatId): Unit = {
-      for (onHeartbeatTimeout ← pendingOperation.onHeartbeatTimeout) {
-        timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") onElapsed {
-          for (o ← pendingOperations.remove(heartbeatId)) {
-            logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
-            onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
-          }
+    def startHeartbeatTimeout(heartbeatId: HeartbeatId)(onHeartbeatTimeout: OnHeartbeatTimeout): Unit =
+      timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") onElapsed {
+        for (o ← pendingOperations.remove(heartbeatId)) {
+          logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
+          onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
         }
       }
-    }
 
     pendingOperation.currentFuture
   }
@@ -132,7 +129,7 @@ object HeartbeatService {
     val uri: Uri,
     val responseFuture: Future[HttpResponse],
     val onHeartbeat: Duration ⇒ Unit,
-    val onHeartbeatTimeout: Option[OnHeartbeatTimeout])
+    val onHeartbeatTimeoutOption: Option[OnHeartbeatTimeout])
     (implicit ec: ExecutionContext)
   {
     private val currentPromiseRef = new AtomicReference(Promise[HttpResponse]())
