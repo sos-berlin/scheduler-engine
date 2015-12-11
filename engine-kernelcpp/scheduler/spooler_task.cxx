@@ -1440,7 +1440,7 @@ bool Task::do_something()
                                 process_class()->remove_requestor(this);
                                 set_state_direct(s_starting);
                                 something_done = true;
-                                loop = true;
+                                // Opportunity for Job to log SCHEDULER-930 with process_class, so do not: loop = true;
                             }
                             if (_module_instance->has_process()) {
                                 process_class()->remove_requestor(this);
