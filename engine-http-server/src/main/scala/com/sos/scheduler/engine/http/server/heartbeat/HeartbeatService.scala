@@ -33,9 +33,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
   private var unsafeCount = 0
   private var unsafePendingOperationsMaximum = 0
 
-  def startHeartbeat[A](
-    onHeartbeat: Duration ⇒ Unit = _ ⇒ {},
-    @Deprecated @TestOnly onHeartbeatTimeout: Option[OnHeartbeatTimeout] = None)
+  def startHeartbeat[A](onHeartbeat: Duration ⇒ Unit = _ ⇒ {})
     (operation: Option[Duration] ⇒ Future[A])
     (implicit marshaller: Marshaller[A], actorRefFactory: ActorRefFactory): Route =
   {
@@ -45,7 +43,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
         idempotence {
           unsafeStartCount += 1
           val responseFuture = operation(Some(timing.timeout)) map marshalToHttpResponse
-          val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeat, onHeartbeatTimeout)(actorRefFactory.dispatcher)
+          val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeat)(actorRefFactory.dispatcher)
           startHeartbeatPeriod(pendingOperation, timing)
         }
       }
@@ -71,11 +69,10 @@ final class HeartbeatService(implicit timerService: TimerService) {
     }
 
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {
-    import actorRefFactory.dispatcher
-    val lastHeartbeatReceivedAt = now
     if (staticSupressed)
       logger.debug("Heartbeat suppressed")
     else {
+      import actorRefFactory.dispatcher
       unsafeCount += 1
       timerService.delay(
         timing.period,
@@ -92,20 +89,10 @@ final class HeartbeatService(implicit timerService: TimerService) {
       unsafePendingOperationsMaximum = unsafePendingOperationsMaximum max pendingOperations.size
       val oldPromise = pendingOperation.renewPromise()
       val respondedWithHeartbeat = oldPromise trySuccess HttpResponse(Accepted, headers = HeartbeatResponseHeaders.`X-JobScheduler-Heartbeat`(heartbeatId) :: Nil)
-      if (respondedWithHeartbeat) {
-        pendingOperation.onHeartbeatTimeoutOption foreach startHeartbeatTimeout(heartbeatId)
-      } else {
+      if (!respondedWithHeartbeat) {
         pendingOperations -= heartbeatId
       }
     }
-
-    def startHeartbeatTimeout(heartbeatId: HeartbeatId)(onHeartbeatTimeout: OnHeartbeatTimeout): Unit =
-      timerService.delay(timing.timeout, name = s"${pendingOperation.uri} heartbeat timeout") onElapsed {
-        for (o ← pendingOperations.remove(heartbeatId)) {
-          logger.warn(s"No heartbeat after ${timing.period.pretty} for $pendingOperation")
-          onHeartbeatTimeout(HeartbeatTimeout(heartbeatId, since = lastHeartbeatReceivedAt, timing, name = pendingOperation.uri.toString))
-        }
-      }
 
     pendingOperation.currentFuture
   }
@@ -128,8 +115,7 @@ object HeartbeatService {
   private final class PendingOperation(
     val uri: Uri,
     val responseFuture: Future[HttpResponse],
-    val onHeartbeat: Duration ⇒ Unit,
-    val onHeartbeatTimeoutOption: Option[OnHeartbeatTimeout])
+    val onHeartbeat: Duration ⇒ Unit)
     (implicit ec: ExecutionContext)
   {
     private val currentPromiseRef = new AtomicReference(Promise[HttpResponse]())
@@ -159,8 +145,6 @@ object HeartbeatService {
 
     override def toString = s"PendingOperation($uri)"
   }
-
-  type OnHeartbeatTimeout = HeartbeatTimeout ⇒ Unit
 
   private class UnknownHeartbeatIdException extends RuntimeException
 }

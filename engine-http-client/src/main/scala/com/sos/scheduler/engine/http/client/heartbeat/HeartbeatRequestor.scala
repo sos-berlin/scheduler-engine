@@ -26,12 +26,9 @@ import spray.http.{HttpEntity, HttpRequest, HttpResponse}
   *
   * @see http://kamon.io/teamblog/2014/11/02/understanding-spray-client-timeout-settings/
   */
-final class HeartbeatRequestor private[http](
-  timing: HttpHeartbeatTiming,
-  testWithHeartbeatDelay: Duration = 0.s,
+final class HeartbeatRequestor private[http](timing: HttpHeartbeatTiming,
   debug: Debug = new Debug)(
-  implicit timerService: TimerService,
-  actorRefFactory: ActorRefFactory)
+  implicit timerService: TimerService, actorRefFactory: ActorRefFactory)
 extends AutoCloseable {
 
   import actorRefFactory.dispatcher
@@ -64,7 +61,7 @@ extends AutoCloseable {
   }
 
   private def handleResponse(mySendReceive: SendReceive, emptyRequest: HttpRequest)(httpResponse: HttpResponse): Future[HttpResponse] = {
-    if (!testWithHeartbeatDelay.isZero) blocking { sleep(testWithHeartbeatDelay) }
+    if (!debug.heartbeatDelay.isZero) blocking { sleep(debug.heartbeatDelay) }
     heartbeatIdOption(httpResponse) match {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
@@ -113,6 +110,7 @@ extends AutoCloseable {
       throwableOption = Some(throwable)
     }
   }
+
   @TestOnly
   def serverHeartbeatCount = _serverHeartbeatCount
 
@@ -143,6 +141,7 @@ object HeartbeatRequestor {
   final class HttpRequestTimeoutException(timeout: Duration) extends RuntimeException(s"HTTP request timed out due to http-heartbeat-timeout=${timeout.pretty}")
 
   @Singleton final class Debug @Inject() () {
+    var heartbeatDelay: Duration = 0.s
     var clientTimeout: Option[Duration] = None
     var suppressed = false
   }
