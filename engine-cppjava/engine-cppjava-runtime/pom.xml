@@ -11,7 +11,22 @@
     
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    <description>Schnittstellen und Klassen gemeinsam für Generator und Generiertes</description>
+
+    <description>Common classes for C++/Java generator and its generated classes</description>
+    <url>https://www.sos-berlin.com/</url>
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), Version 2.0</name>
+            <url>http://www.gnu.org/licenses/gpl-2.0-standalone.html</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Joacim Zschimmer</name>
+            <organization>SOS Berlin</organization>
+            <organizationUrl>https://www.sos-berlin.com/</organizationUrl>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
