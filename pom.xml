@@ -77,7 +77,7 @@
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
         <test.forkCount>1</test.forkCount>
         <test.logback.configurationFile />
-        <enginedoc.version>${project.version}</enginedoc.version>
+        <enginedoc.version>1.9.7</enginedoc.version>
         <argLine />
         <LC_ALL>C</LC_ALL>    <!-- Neutral Locale for H2Database -->
     </properties>
