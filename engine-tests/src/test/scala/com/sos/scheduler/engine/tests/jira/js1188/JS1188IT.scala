@@ -98,7 +98,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
       val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
-      val taskAgentNames = for (r ← results; m ← AgentNameRegex.findFirstMatchIn(r.logString)) yield m.group(1)
+      val taskAgentNames = results flatMap taskResultToAgentName
       assert(taskAgentNames == List.fill(2*n + 1) { agentRefs(1).name })  // B B B B B B B B B
       stopwatch.duration should be < TestTimeout
       //Not reliable (all tasks can start on first Agent): eventPipe.queued[WarningLogEvent] map { _.codeOption } shouldEqual List(Some(InaccessibleAgentMessageCode))  // Agent 2 is still unreachable
@@ -110,7 +110,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
       val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
-      val taskAgentNames = for (r ← results; m ← AgentNameRegex.findFirstMatchIn(r.logString)) yield m.group(1)
+      val taskAgentNames = results flatMap taskResultToAgentName
       def alternatingAgentNames = (Iterator continually { List(agentRefs(1).name, agentRefs(3).name) }).flatten
       assert(taskAgentNames == (alternatingAgentNames drop 0 take 2*n + 1).toList ||  // B D B D B D B D B or
              taskAgentNames == (alternatingAgentNames drop 1 take 2*n + 1).toList)    // D B D B D B D B D
@@ -177,6 +177,9 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private def newAgent(agentRef: AgentRef) =
     new Agent(AgentConfiguration.forTest(httpPort = agentRef.port)
       .copy(environment = List("TEST_AGENT_NAME" → s"${agentRef.name}")))
+
+  private def taskResultToAgentName(taskResult: TaskResult): Option[String] =
+    for (m ← AgentNameRegex.findFirstMatchIn(taskResult.logString)) yield m.group(1)
 }
 
 private object JS1188IT {
