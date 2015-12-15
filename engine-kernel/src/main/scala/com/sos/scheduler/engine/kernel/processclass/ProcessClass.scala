@@ -14,7 +14,6 @@ import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.processclass.ProcessClass._
 import com.sos.scheduler.engine.kernel.processclass.agent.{Agent, CppHttpRemoteApiProcessClient}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollection
-import com.sos.scheduler.engine.kernel.processclass.common.selection.RoundRobin
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -60,7 +59,7 @@ extends FileBased {
     _config = c
     _failableAgents = null
     if (_config.agents.nonEmpty) {
-      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy, RoundRobin)
+      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy, c.selectionMethod)
       for (c ← clients) {
         c.changeFailableAgents(_failableAgents)
       }

@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.kernel.job.{JobState, TaskState}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
@@ -52,7 +53,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "(prepare process class)" in {
-    scheduler executeXml processClassXml(AgentsProcessClassPath.name, agentRefs)
+    writeConfigurationFile(AgentsProcessClassPath, ProcessClassConfiguration(agentUris = agentRefs map { _.uri }))
   }
 
   "Job-API process_class.remote_scheduler can be changed only with (old) non-HTTP agents" in {
@@ -93,16 +94,28 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     }
   }
 
-  "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time" in {
+  "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time, FixedPriority" in {
+    withEventPipe { eventPipe ⇒
+      val stopwatch = new Stopwatch
+      val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
+      val taskAgentNames = for (r ← results; m ← AgentNameRegex.findFirstMatchIn(r.logString)) yield m.group(1)
+      assert(taskAgentNames == List.fill(2*n + 1) { agentRefs(1).name })  // B B B B B B B B B
+      stopwatch.duration should be < TestTimeout
+      //Not reliable (all tasks can start on first Agent): eventPipe.queued[WarningLogEvent] map { _.codeOption } shouldEqual List(Some(InaccessibleAgentMessageCode))  // Agent 2 is still unreachable
+    }
+  }
+
+  "RoundRobin" in {
+    writeConfigurationFile(AgentsProcessClassPath, ProcessClassConfiguration(agentUris = agentRefs map { _.uri }, select = Some("next")))
     withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
       val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
       val taskAgentNames = for (r ← results; m ← AgentNameRegex.findFirstMatchIn(r.logString)) yield m.group(1)
       def alternatingAgentNames = (Iterator continually { List(agentRefs(1).name, agentRefs(3).name) }).flatten
-      assert(taskAgentNames == alternatingAgentNames.slice(0, 2*n + 1).toList ||  // B D B D B D B D B or
-             taskAgentNames == alternatingAgentNames.slice(1, 2*n + 2).toList)    // D B D B D B D B D
+      assert(taskAgentNames == (alternatingAgentNames drop 0 take 2*n + 1).toList ||  // B D B D B D B D B or
+             taskAgentNames == (alternatingAgentNames drop 1 take 2*n + 1).toList)    // D B D B D B D B D
       stopwatch.duration should be < TestTimeout
-      //Not reliable (all tasks can start on first Agent): eventPipe.queued[WarningLogEvent] map { _.codeOption } shouldEqual List(Some(InaccessibleAgentMessageCode))  // Agent 2 is still unreachable
+      eventPipe.queued[WarningLogEvent] map { _.codeOption } should contain (Some(InaccessibleAgentMessageCode))  // First Agent is still unreachable
     }
   }
 
@@ -113,7 +126,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       }
       val taskRun = runJobFuture(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
-      writeConfigurationFile(ReplaceProcessClassPath, processClassXml("test-replace", List(agentRefs(1))))
+      writeConfigurationFile(ReplaceProcessClassPath, ProcessClassConfiguration(agentUris = List(agentRefs(1).uri)))
       assertResult(List(agentRefs(1).uri)) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
@@ -136,7 +149,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         e.codeOption == Some(MessageCode("SCHEDULER-280")) ||
         e.codeOption == Some(MessageCode("Z-JAVA-105")) && (e.message contains classOf[FailableSelector.CancelledException].getName)
       controller.toleratingErrorLogEvent(expectedErrorLogEvent) {
-        writeConfigurationFile(ReplaceProcessClassPath, processClassXml("test-replace", Nil))
+        writeConfigurationFile(ReplaceProcessClassPath, ProcessClassConfiguration())
         assertResult(Nil) {
           processClass(ReplaceProcessClassPath).agents map { _.address }
         }
@@ -181,13 +194,6 @@ private object JS1188IT {
     def uri = s"http://127.0.0.1:$port"
     def testOutput = s"TEST_AGENT_NAME=/$name/"
   }
-
-  private def processClassXml(name: String, agentRefs: Seq[AgentRef]) =
-    <process_class name={name}>
-      <remote_schedulers>{
-        agentRefs map { o ⇒ <remote_scheduler remote_scheduler={s"${o.uri}"}/> }
-      }</remote_schedulers>
-    </process_class>
 
   private def ignoreExtraWaitingForAgentMessageCode(expected: TraversableOnce[Option[MessageCode]])(seq: TraversableOnce[Option[MessageCode]]) =
     ignoreExtraEntries[Option[MessageCode]](expected, ignore = Some(WaitingForAgentMessageCode))(seq)
