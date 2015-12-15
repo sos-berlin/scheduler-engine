@@ -3,6 +3,15 @@
     process_class="agents"
 >
     <script language="shell">
-        exit 0
+:;if false; then
+@echo off
+goto WINDOWS
+:;fi
+
+echo TEST_AGENT_NAME=/$TEST_AGENT_NAME/
+exit
+
+:WINDOWS
+echo TEST_AGENT_NAME=/%TEST_AGENT_NAME%/
     </script>
 </job>

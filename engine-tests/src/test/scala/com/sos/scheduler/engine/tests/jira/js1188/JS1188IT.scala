@@ -2,11 +2,12 @@ package com.sos.scheduler.engine.tests.jira.js1188
 
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.agent.Agent
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -24,7 +25,6 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.Vector.fill
 import scala.collection.mutable
-import scala.concurrent.Future
 
 /**
  * @author Joacim Zschimmer
@@ -33,9 +33,9 @@ import scala.concurrent.Future
 final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   private lazy val tcpPort :: agentTcpPorts = findRandomFreeTcpPorts(1 + n)
-  private lazy val agentRefs = agentTcpPorts map AgentRef ensuring { _.size == n }
+  private lazy val agentRefs = (0 until n).toList zip agentTcpPorts map { case (i, port) ⇒ AgentRef(('A' + i).toChar.toString, port) } ensuring { _.size == n }
   private lazy val runningAgents = mutable.Map[AgentRef, Agent]()
-  private var waitingTaskClosedFuture: Future[TaskClosedEvent] = null
+  private var waitingTaskRun: TaskRun = null
   private var waitingStopwatch: Stopwatch = null
 
   protected override lazy val testConfiguration = TestConfiguration(
@@ -62,13 +62,12 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "With unreachable agents, task waits 2 times agentConnectRetryDelay because no agent is reachable" in {
     withEventPipe { eventPipe ⇒
-      val taskRun = runJobFuture(AgentsJobPath)
-      waitingTaskClosedFuture = taskRun.closed
+      waitingTaskRun = runJobFuture(AgentsJobPath)
       waitingStopwatch = new Stopwatch
       sleep(1.s)
-      requireTaskIsWaitingForAgent(taskRun.taskId)
+      requireTaskIsWaitingForAgent(waitingTaskRun.taskId)
       sleep((2.5 * AgentConnectRetryDelay.toMillis).toLong)
-      requireTaskIsWaitingForAgent(taskRun.taskId)
+      requireTaskIsWaitingForAgent(waitingTaskRun.taskId)
       val expectedWarnings = fill(3)(fill(n)(InaccessibleAgentMessageCode) :+ WaitingForAgentMessageCode).flatten map Some.apply
       assertResult(expectedWarnings) {
         val codeOptions = eventPipe.queued[WarningLogEvent].toVector map { _.codeOption }
@@ -82,7 +81,8 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "After starting 2 agents and after process class has waited the third cycle, the waiting task can be finished" in {
     withEventPipe { eventPipe ⇒
       startAndWaitForAgents(agentRefs(1), agentRefs(3)) // Start 2 out of n agents
-      awaitSuccess(waitingTaskClosedFuture) // Waiting task has finally finished
+      awaitSuccess(waitingTaskRun.closed) // Waiting task has finally finished
+      assert(waitingTaskRun.logString contains agentRefs(1).testOutput)
       waitingStopwatch.duration should be > 3*AgentConnectRetryDelay
       //Not on a busy computer: waitingStopwatch.duration should be < 4*AgentConnectRetryDelay
       // Agent 0 is still unreachable
@@ -96,7 +96,11 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time" in {
     withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
-      for (_ ← 1 to 2*n + 1) runJobAndWaitForEnd(AgentsJobPath)
+      val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
+      val taskAgentNames = for (r ← results; m ← AgentNameRegex.findFirstMatchIn(r.logString)) yield m.group(1)
+      def alternatingAgentNames = (Iterator continually { List(agentRefs(1).name, agentRefs(3).name) }).flatten
+      assert(taskAgentNames == alternatingAgentNames.slice(0, 2*n + 1).toList ||  // B D B D B D B D B or
+             taskAgentNames == alternatingAgentNames.slice(1, 2*n + 2).toList)    // D B D B D B D B D
       stopwatch.duration should be < TestTimeout
       //Not reliable (all tasks can start on first Agent): eventPipe.queued[WarningLogEvent] map { _.codeOption } shouldEqual List(Some(InaccessibleAgentMessageCode))  // Agent 2 is still unreachable
     }
@@ -157,7 +161,9 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     task(taskId).state shouldEqual TaskState.waiting_for_process
   }
 
-  private def newAgent(agentRef: AgentRef) = Agent.forTest(httpPort = agentRef.port)
+  private def newAgent(agentRef: AgentRef) =
+    new Agent(AgentConfiguration.forTest(httpPort = agentRef.port)
+      .copy(environment = List("TEST_AGENT_NAME" → s"${agentRef.name}")))
 }
 
 private object JS1188IT {
@@ -169,9 +175,11 @@ private object JS1188IT {
   private val ReplaceTestJobPath = JobPath("/test-a")
   private val InaccessibleAgentMessageCode = MessageCode("SCHEDULER-488")
   private val WaitingForAgentMessageCode = MessageCode("SCHEDULER-489")
+  private val AgentNameRegex = "TEST_AGENT_NAME=/(.*)/".r
 
-  private case class AgentRef(port: Int) {
+  private case class AgentRef(name: String, port: Int) {
     def uri = s"http://127.0.0.1:$port"
+    def testOutput = s"TEST_AGENT_NAME=/$name/"
   }
 
   private def processClassXml(name: String, agentRefs: Seq[AgentRef]) =

@@ -8,13 +8,13 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.processclass.ProcessClass._
 import com.sos.scheduler.engine.kernel.processclass.agent.{Agent, CppHttpRemoteApiProcessClient}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollection
+import com.sos.scheduler.engine.kernel.processclass.common.selection.RoundRobin
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import java.time.Duration
 import org.scalactic.Requirements._
@@ -60,7 +60,7 @@ extends FileBased {
     _config = c
     _failableAgents = null
     if (_config.agents.nonEmpty) {
-      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy)
+      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy, RoundRobin)
       for (c ← clients) {
         c.changeFailableAgents(_failableAgents)
       }

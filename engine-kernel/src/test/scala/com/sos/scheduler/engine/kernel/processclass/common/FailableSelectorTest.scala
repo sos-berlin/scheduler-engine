@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.processclass.common
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelectorTest._
+import com.sos.scheduler.engine.kernel.processclass.common.selection.RoundRobin
 import java.time.Instant
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
@@ -20,7 +21,7 @@ import scala.util.{Failure, Success}
 final class FailableSelectorTest extends FreeSpec {
 
   private var _now = Instant.ofEpochSecond(10 * 24 * 3600)   // Some instant
-  private val failables = new FailableCollection[Failable](Failables, () ⇒ TestDelay) {
+  private val failables = new FailableCollection[Failable](Failables, () ⇒ TestDelay, RoundRobin) {
     override def now = _now
   }
   private val callQueue = new StandardCallQueue {
