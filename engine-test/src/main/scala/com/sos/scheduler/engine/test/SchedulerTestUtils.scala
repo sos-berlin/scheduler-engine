@@ -138,6 +138,9 @@ object SchedulerTestUtils {
     ended: Future[TaskEndedEvent],
     closed: Future[TaskClosedEvent],
     result: Future[TaskResult])
+  {
+    def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
+  }
 
   final case class TaskResult(jobPath: JobPath, taskId: TaskId, returnCode: ReturnCode, endedInstant: Instant, duration: Duration) {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
