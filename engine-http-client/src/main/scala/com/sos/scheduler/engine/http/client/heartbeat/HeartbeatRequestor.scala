@@ -9,15 +9,13 @@ import com.sos.scheduler.engine.common.time.timer.TimerService._
 import com.sos.scheduler.engine.common.time.timer.{Timer, TimerService}
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
-import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
-import com.sos.scheduler.engine.http.client.idempotence.RequestId
+import com.sos.scheduler.engine.http.client.idempotence.IdempotentRequestor
 import java.time.Instant.now
 import java.time.{Duration, Instant}
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly
-import scala.concurrent.Future.firstCompletedOf
-import scala.concurrent.{Future, Promise, blocking}
+import scala.concurrent.{Future, blocking}
 import scala.util.{Failure, Success}
 import spray.client.pipelining._
 import spray.http.StatusCodes.{Accepted, OK}
@@ -38,10 +36,9 @@ extends AutoCloseable {
 
   import actorRefFactory.dispatcher
 
-  private val requestTimeout = debug.clientTimeout getOrElse timing.timeout
+  private val idemprotentRequestor = new IdempotentRequestor(requestTimeout = debug.clientTimeout getOrElse timing.timeout)
   private var _serverHeartbeatCount = 0
   private var _clientHeartbeatCount = 0
-  private val newRequestId = new RequestId.Generator
 
   def close() = clientHeartbeat.cancelTimeout()  // Interrupt client heartbeat chain
 
@@ -58,7 +55,7 @@ extends AutoCloseable {
     clientHeartbeat.cancelTimeout()
     val emptyRequest = request withEntity HttpEntity.Empty
     val sentAt = now
-    sendAndRetry(
+    idemprotentRequestor.sendAndRetry(
       firstRequestTransformer ~> mySendReceive,
       request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers,
       requestDuration = timing.period)
@@ -72,7 +69,7 @@ extends AutoCloseable {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
-        sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = timing.period) flatMap handleResponse(mySendReceive, emptyRequest)
+        idemprotentRequestor.sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = timing.period) flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
     }
@@ -97,7 +94,7 @@ extends AutoCloseable {
           else {
             _clientHeartbeatCount += 1
             val sentAt = now
-            mySendReceive(heartbeatRequest).timeoutAfter(RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout") map {
+            mySendReceive(heartbeatRequest).timeoutAfter(IdempotentRequestor.RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout") map {
               case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
               case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
               case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
@@ -116,54 +113,6 @@ extends AutoCloseable {
       throwableOption = Some(throwable)
     }
   }
-
-  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestDuration: Duration): Future[HttpResponse] = {
-    val requestId = newRequestId()
-    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, requestTimeout * LifetimeFactor) :: request.headers
-    sendAndRetry(mySendReceive, myRequest, requestId, requestDuration)
-  }
-
-  private def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestId: RequestId, requestDuration: Duration): Future[HttpResponse] = {
-    val firstSentAt = now
-    val timeoutAt = firstSentAt + requestTimeout
-    val promise = Promise[HttpResponse]()
-
-    def cycle(retryNr: Int, retriedRequestDuration: Duration): Unit = {
-      val failedPromise = Promise[String]()
-      //logger.debug(s"${request.method} ${request.uri} $requestId")
-      val response = mySendReceive(request)
-      response onComplete {
-        case Failure(t) if now + DelayAfterError < timeoutAt ⇒
-          val msg = s"${request.method} ${request.uri} $t"
-          logger.warn(msg)
-          timerService.at(now + DelayAfterError, msg, cancelWhenCompleted = promise.future) onElapsed {
-            failedPromise.trySuccess("After error")
-          }
-        case o ⇒ promise tryComplete o
-      }
-      timerService.at(
-        now + retriedRequestDuration + RetryTimeout min timeoutAt,
-        s"${request.uri} retry timeout",
-        cancelWhenCompleted = firstCompletedOf(List(promise.future, response)))
-        .onElapsed {
-          failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
-        }
-      failedPromise.future onSuccess { case startOfMessage ⇒
-        if (!promise.isCompleted) {
-          if (now < timeoutAt) {
-            logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated #${retryNr+1}: ${request.method} ${request.uri} $requestId")
-            if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has finally succeeded: ${request.method} ${request.uri} $requestId") }
-            cycle(retryNr + 1, retriedRequestDuration = 0.s)
-          } else
-            promise tryFailure new HttpRequestTimeoutException(requestTimeout)
-        }
-      }
-    }
-
-    cycle(retryNr = 0, retriedRequestDuration = requestDuration)
-    promise.future
-  }
-
   @TestOnly
   def serverHeartbeatCount = _serverHeartbeatCount
 
@@ -176,9 +125,6 @@ extends AutoCloseable {
 object HeartbeatRequestor {
   private val logger = Logger(getClass)
   private[http] val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
-  private val RetryTimeout = 1.s
-  private val DelayAfterError = 1.s
-  private val LifetimeFactor = 2
 
   @ImplementedBy(classOf[StandardFactory])
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
