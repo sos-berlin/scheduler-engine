@@ -18,14 +18,14 @@ import java.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 import scala.concurrent._
 import scala.concurrent.duration.DurationInt
 import spray.can.Http
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes._
-import spray.http.StatusCodes.{BadRequest, OK}
+import spray.http.StatusCodes.OK
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
@@ -41,7 +41,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   private implicit val askTimeout = AskTimeout
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
-  private implicit val timerService = new TimerService(1.ms, idleTimeout = Some(10.s))
+  private implicit val timerService = new TimerService(idleTimeout = Some(10.s))
   private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer()
   private val idempotenceScopes = Iterator from 1

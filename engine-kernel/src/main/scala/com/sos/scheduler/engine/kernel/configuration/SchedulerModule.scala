@@ -10,7 +10,6 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAu
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
@@ -131,7 +130,7 @@ with HasCloser {
   private def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
 
   @Provides @Singleton
-  private def timerService(implicit executionContext: ExecutionContext): TimerService = { new TimerService(100.ms).closeWithCloser }
+  private def timerService(implicit executionContext: ExecutionContext): TimerService = { new TimerService().closeWithCloser }
 }
 
 object SchedulerModule {

@@ -40,7 +40,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
   private val newRequestId = new RequestId.Generator
-  private lazy val idempotence = new Idempotence()(new TimerService(1.ms, idleTimeout = Some(1.s)))
+  private lazy val idempotence = new Idempotence()(new TimerService(idleTimeout = Some(1.s)))
   private lazy val (baseUri, webService) = startWebServer(idempotence)
 
 
