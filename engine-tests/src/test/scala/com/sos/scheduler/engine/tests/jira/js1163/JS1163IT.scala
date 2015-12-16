@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
@@ -60,7 +61,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     delete(killScriptCallsDir)
     delete(killScriptFile)
   }
-  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScriptFile = Some(killScriptFile))
+  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScript = Some(ProcessKillScript(killScriptFile)))
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
