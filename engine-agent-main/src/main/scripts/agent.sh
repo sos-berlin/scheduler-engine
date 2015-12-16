@@ -1,8 +1,9 @@
-#! /bin/bash
-set -e
+#! /bin/bash -E
 
 declare -a javaOptions
 declare -a agentOptions
+logDirectory=
+httpPort=
 
 for arg in "$@"; do
     case $arg in
@@ -20,6 +21,16 @@ for arg in "$@"; do
             javaOptions=("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=$port")
             shift
             ;;
+        -http-port=*)
+            httpPort="${arg#-http-port=}"
+            agentOptions+=("$arg")
+            shift
+            ;;
+        -log-directory=*)
+            logDirectory="${arg#-log-directory=}"
+            agentOptions+=("$arg")
+            shift
+            ;;
         *)
             agentOptions+=("$arg")
             shift
@@ -34,6 +45,12 @@ if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
 fi
 . "$bin/set-context.sh"
 
+if [ -n "$httpPort$logDirectory" ]; then :
+    crashKillScript="$logDirectory/kill_tasks_after_crash_$httpPort.sh"
+else
+    crashKillScript=
+fi
+
 if [ -f "$SCHEDULER_AGENT_WORK/etc/logback.xml" ]; then :
     logbackConfig="file:$SCHEDULER_AGENT_WORK/etc/logback.xml"
 else
@@ -42,5 +59,22 @@ fi
 
 logbackArg="-Dlogback.configurationFile=$logbackConfig"
 agentOptions=("-job-java-options=$logbackArg" "${agentOptions[@]}")
-echo "$java" "${javaOptions[@]}" -classpath "$jarDir/*" $logbackArg com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}"
-exec "$java" "${javaOptions[@]}" -classpath "$jarDir/*" $logbackArg com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}"
+executeAgent=("$java" "${javaOptions[@]}" -classpath "$jarDir/*" "$logbackArg" com.sos.scheduler.engine.agent.main.AgentMain "${agentOptions[@]}")
+echo "${executeAgent[@]}"
+if [ -n "$crashKillScript" ]; then :
+    rm -f "$crashKillScript"
+    set +E
+    "${executeAgent[@]}"
+    returnCode=$?
+    if [ -f "$crashKillScript" ]; then :
+        ps fux
+        echo Executing crash kill script $crashKillScript:
+        cat $crashKillScript
+        (. "$crashKillScript" || true)
+        ps fux
+    fi
+    set -E
+    exit $returnCode
+else
+    exec "${executeAgent[@]}"
+fi
