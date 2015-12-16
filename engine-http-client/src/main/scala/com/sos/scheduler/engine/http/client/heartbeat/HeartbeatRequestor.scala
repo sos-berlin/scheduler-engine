@@ -123,7 +123,7 @@ extends AutoCloseable {
 object HeartbeatRequestor {
   private val logger = Logger(getClass)
   private[http] val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
-  private[http] val ClientHeartbeatRoundTo = 1.s
+  private val ClientHeartbeatRoundTo = 1.s
 
   @ImplementedBy(classOf[StandardFactory])
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
