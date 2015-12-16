@@ -83,7 +83,7 @@ extends AutoCloseable {
       }
 
     def apply(lastRequestSentAt: Instant, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
-      val timeoutAt = lastRequestSentAt + timing.period max now + ClientHeartbeatMinimumDelay
+      val timeoutAt = lastRequestSentAt + timing.period roundDownTo ClientHeartbeatRoundTo max now + ClientHeartbeatMinimumDelay
       val timer = timerService.at(timeoutAt, s"${emptyRequest.uri} client-side heartbeat") onElapsed {
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
         if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
@@ -123,6 +123,7 @@ extends AutoCloseable {
 object HeartbeatRequestor {
   private val logger = Logger(getClass)
   private[http] val ClientHeartbeatMinimumDelay = 1.s  // Client-side heartbeat is sent after this delay after last response without new regular request
+  private[http] val ClientHeartbeatRoundTo = 1.s
 
   @ImplementedBy(classOf[StandardFactory])
   trait Factory extends (HttpHeartbeatTiming ⇒ HeartbeatRequestor)
