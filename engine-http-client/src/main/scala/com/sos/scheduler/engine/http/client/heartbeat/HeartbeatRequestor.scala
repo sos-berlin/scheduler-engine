@@ -52,10 +52,8 @@ extends AutoCloseable {
     clientHeartbeat.cancelTimeout()
     val emptyRequest = request withEntity HttpEntity.Empty
     val sentAt = now
-    idemprotentRequestor.sendAndRetry(
-      firstRequestTransformer ~> mySendReceive,
-      request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers,
-      requestDuration = timing.period)
+    val myRequest = request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers
+    idemprotentRequestor.sendAndRetry(firstRequestTransformer ~> mySendReceive, myRequest, requestDuration = timing.period)
     .flatMap(handleResponse(mySendReceive, emptyRequest))
     .sideEffect { _ onSuccess { case _ ⇒ clientHeartbeat(sentAt, mySendReceive, emptyRequest) }}
   }
@@ -65,7 +63,7 @@ extends AutoCloseable {
     heartbeatIdOption(httpResponse) match {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
-        val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing)
+        val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing) :: emptyRequest.headers
         idemprotentRequestor.sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = timing.period) flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
@@ -105,7 +103,7 @@ extends AutoCloseable {
       currentClientTimeout.set(timer)
     }
 
-    def onClientHeartbeatTimeout(throwable: Throwable): Unit =  {
+    def onClientHeartbeatTimeout(throwable: Throwable): Unit = {
       logger.error(s"$throwable")
       throwableOption = Some(throwable)
     }
