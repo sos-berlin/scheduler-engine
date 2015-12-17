@@ -130,7 +130,7 @@ with HasCloser {
   private def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
 
   @Provides @Singleton
-  private def timerService(implicit executionContext: ExecutionContext): TimerService = { new TimerService().closeWithCloser }
+  private def timerService(implicit executionContext: ExecutionContext): TimerService = { TimerService().closeWithCloser }
 }
 
 object SchedulerModule {
