@@ -66,12 +66,14 @@ if [ -n "$crashKillScript" ]; then :
     set +E
     "${executeAgent[@]}"
     returnCode=$?
-    if [ -f "$crashKillScript" ]; then :
+    if [ -s "$crashKillScript" ]; then :
         ps fux
         echo Executing crash kill script $crashKillScript:
         cat $crashKillScript
         (. "$crashKillScript" || true)
         ps fux
+    else
+       echo "No tasks running ($crashKillScript is empty)"
     fi
     set -E
     exit $returnCode
