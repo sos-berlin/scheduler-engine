@@ -30,10 +30,10 @@ final class Idempotence(implicit timerService: TimerService) {
     */
   def apply(body: ⇒ Future[HttpResponse])(implicit actorRefFactory: ActorRefFactory): Route = {
     import actorRefFactory.dispatcher
-    headerValueByName(`X-JobScheduler-Request-ID`.name) { case `X-JobScheduler-Request-ID`.Value(id, lifetime) ⇒
+    headerValueByName(`X-JobScheduler-Request-ID`.name) { case `X-JobScheduler-Request-ID`.Value(id, lifetimeOption) ⇒
       requestUri { uri ⇒
         complete {
-          apply(id, lifetime, uri)(body)
+          apply(id, lifetimeOption, uri)(body)
         }
       }
     } ~ {
@@ -42,7 +42,7 @@ final class Idempotence(implicit timerService: TimerService) {
     }
   }
 
-  private def apply(id: RequestId, lifetime: Duration, uri: Uri)(body: ⇒ Future[HttpResponse])(implicit ec: ExecutionContext): Future[HttpResponse] = {
+  private def apply(id: RequestId, lifetimeOption: Option[Duration], uri: Uri)(body: ⇒ Future[HttpResponse])(implicit ec: ExecutionContext): Future[HttpResponse] = {
     val newPromise = Promise[HttpResponse]()
     val newOperation = Operation(id, uri, newPromise.future)
     if (eatRequestId(id)) {
@@ -52,10 +52,12 @@ final class Idempotence(implicit timerService: TimerService) {
       }
       logger.trace(s"$uri new $id")
       body onComplete newPromise.complete
-      newOperation.lifetimeTimer set
-        timerService.delay(lifetime, s"$uri $id lifetime").onElapsed {
-          pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
-        }
+      for (lifetime ← lifetimeOption) {
+        newOperation.lifetimeTimer set
+          timerService.delay(lifetime, s"$uri $id lifetime").onElapsed {
+            pendingOperation.compareAndSet(newOperation, null)  // Release memory of maybe big HttpResponse
+          }
+      }
       newOperation.future
     } else {
       val known = pendingOperation.get

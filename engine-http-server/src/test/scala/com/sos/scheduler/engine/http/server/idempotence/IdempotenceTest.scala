@@ -40,7 +40,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
   private val newRequestId = new RequestId.Generator
-  private lazy val idempotence = new Idempotence()(new TimerService(idleTimeout = Some(1.s)))
+  private lazy val idempotence = new Idempotence()(TimerService(idleTimeout = Some(1.s)))
   private lazy val (baseUri, webService) = startWebServer(idempotence)
 
 
@@ -60,21 +60,22 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
     val id = newRequestId()
     val operations = for (i ← 1 to 3) yield {
       sleep(10.ms)
-      sendReceive.apply(Post(s"$baseUri/test", Data(100.ms, s"$i")) withHeaders List(`X-JobScheduler-Request-ID`(id, 200.ms)))
+      sendReceive.apply(Post(s"$baseUri/test", Data(100.ms, s"$i")) withHeaders List(`X-JobScheduler-Request-ID`(id)))
     }
     val responses = Await.result(Future.sequence(operations), AskTimeout.duration)
     assert((responses map { _.entity.as[Data] }).toSet == Set(Right(Data(100.ms, "4: 1 RESPONSE"))))
   }
 
-  "With late duplicate RequestId after first response" in {
+  "With late duplicate RequestId after first response, and lifetime" in {
     val id = newRequestId()
     val lifetime = 500.ms
     val operations = for (i ← 1 to 3) yield {
       sleep(100.ms)
-      sendReceive.apply(Post(s"$baseUri/test", Data(0.s, s"$i")) withHeaders List(`X-JobScheduler-Request-ID`(id, lifetime)))
+      sendReceive.apply(Post(s"$baseUri/test", Data(0.s, s"$i")) withHeaders List(`X-JobScheduler-Request-ID`(id, Some(lifetime))))
     }
     val responses = Await.result(Future.sequence(operations), AskTimeout.duration)
     assert((responses map { _.entity.as[Data] }).toSet == Set(Right(Data(0.s, s"5: 1 RESPONSE"))))
+    assert(idempotence.pendingRequestIds == Some(id))
     sleep(lifetime + 200.ms)
     assert(idempotence.pendingRequestIds.isEmpty)
   }
@@ -84,7 +85,7 @@ final class IdempotenceTest extends FreeSpec with BeforeAndAfterAll with ScalaFu
     for (index ← 1 to 3) {
       s"Brut force test with $n equal simultaneous requests ($index)" in {
         val id = newRequestId()
-        val request = Post(s"$baseUri/test/$index", Data(100.ms, "BRUTFORCE")) withHeaders List(`X-JobScheduler-Request-ID`(id, lifetime = 60.s))
+        val request = Post(s"$baseUri/test/$index", Data(100.ms, "BRUTFORCE")) withHeaders List(`X-JobScheduler-Request-ID`(id))
         val operations = for (_ ← 1 to n) yield sendReceive.apply(request)
         val responses = Await.result(Future.sequence(operations), AskTimeout.duration)
         try assert((responses map { _.entity.as[Data] }).toSet == Set(Right(Data(100.ms, s"${5 + index}: BRUTFORCE RESPONSE"))))

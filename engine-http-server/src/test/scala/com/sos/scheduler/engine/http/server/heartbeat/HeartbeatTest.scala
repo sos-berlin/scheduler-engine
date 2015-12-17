@@ -41,7 +41,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   private implicit val askTimeout = AskTimeout
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
-  private implicit val timerService = new TimerService(idleTimeout = Some(10.s))
+  private implicit val timerService = TimerService(idleTimeout = Some(10.s))
   private implicit val dataJsonFormat = Data.jsonFormat
   private lazy val (baseUri, webService) = startWebServer()
   private val idempotenceScopes = Iterator from 1

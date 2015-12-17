@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestor._
 import com.sos.scheduler.engine.http.client.idempotence.IdempotentHeaders.`X-JobScheduler-Request-ID`
-import com.sos.scheduler.engine.http.client.idempotence.IdempotentRequestor.{DelayAfterError, LifetimeFactor, RetryTimeout, logger}
+import com.sos.scheduler.engine.http.client.idempotence.IdempotentRequestor._
 import java.time.Duration
 import java.time.Instant._
 import scala.concurrent.Future._
@@ -22,7 +22,7 @@ final class IdempotentRequestor(requestTimeout: Duration)(implicit ec: Execution
 
   def sendAndRetry(mySendReceive: SendReceive, request: HttpRequest, requestDuration: Duration): Future[HttpResponse] = {
     val requestId = newRequestId()
-    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId, requestTimeout * LifetimeFactor) :: request.headers
+    val myRequest = request withHeaders `X-JobScheduler-Request-ID`(requestId) :: request.headers
     sendAndRetry(mySendReceive, myRequest, requestId, requestDuration)
   }
 
@@ -71,6 +71,5 @@ final class IdempotentRequestor(requestTimeout: Duration)(implicit ec: Execution
 object IdempotentRequestor {
   val RetryTimeout = 1.s
   private val DelayAfterError = 1.s
-  private val LifetimeFactor = 2
   private val logger = Logger(getClass)
 }

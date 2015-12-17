@@ -12,17 +12,28 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class IdempotentHeadersTest extends FreeSpec {
 
-  "X-JobScheduler-Request-ID" in {
-    val requestIdNumber = 123567890123456789L
-    val requestId = RequestId(requestIdNumber)
-    val name = "X-JobScheduler-Request-ID"
+  private val requestIdNumber = 123567890123456789L
+  private val requestId = RequestId(requestIdNumber)
 
+  "X-JobScheduler-Request-ID" in {
+    val name = "X-JobScheduler-Request-ID"
     val value = s"$requestIdNumber PT7S"
     val headerLine = s"$name: $value"
-    val header = `X-JobScheduler-Request-ID`(requestId, 7.s)
+    val header = `X-JobScheduler-Request-ID`(requestId, Some(7.s))
     assert(header.toString == headerLine)
 
     val `X-JobScheduler-Request-ID`.Value(requestId_, duration) = value
-    assert(requestId_ == requestId && duration == 7.s)
+    assert(requestId_ == requestId && duration == Some(7.s))
+  }
+
+  "X-JobScheduler-Request-ID without lifetime" in {
+    val name = "X-JobScheduler-Request-ID"
+    val value = s"$requestIdNumber PT277777H46M39S"
+    val headerLine = s"$name: $value"
+    val header = `X-JobScheduler-Request-ID`(requestId)
+    assert(header.toString == headerLine)
+
+    val `X-JobScheduler-Request-ID`.Value(requestId_, duration) = value
+    assert(requestId_ == requestId && duration == None)
   }
 }
