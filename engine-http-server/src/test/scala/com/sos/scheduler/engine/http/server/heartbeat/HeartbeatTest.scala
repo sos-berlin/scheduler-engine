@@ -39,13 +39,12 @@ import spray.routing.{HttpServiceActor, Route}
 final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
 
   private implicit val askTimeout = AskTimeout
+  private implicit val dataJsonFormat = Data.jsonFormat
+  private val idempotenceScopes = Iterator from 1
   private implicit lazy val actorSystem = ActorSystem("TEST")
   import actorSystem.dispatcher
-  private implicit val timerService = TimerService(idleTimeout = Some(10.s))
-  private implicit val dataJsonFormat = Data.jsonFormat
+  private implicit lazy val timerService = TimerService(idleTimeout = Some(10.s))
   private lazy val (baseUri, webService) = startWebServer()
-  private val idempotenceScopes = Iterator from 1
-
 
   override protected def beforeAll() = {
     super.beforeAll()
@@ -116,13 +115,14 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
     }
   }
 
-  private def addHeartbeatTests(times: HttpHeartbeatTiming, highestCurrentOperationsMaximum: Int = 2) {
+  private def addHeartbeatTests(times: HttpHeartbeatTiming, highestCurrentOperationsMaximum: Int = 2): Unit = {
     for ((duration, delay, heartbeatCountPredicate) ← List[(Duration, Duration, Int ⇒ Unit)](
       (0.s, 0.s, o ⇒ assert(o == 0)),
       (times.period + times.period * 3/4, 2 * times.period, o ⇒ assert(o == 1)),
       (50 * times.period, 0.s, o ⇒ assert(o >= 5)),
       (50 * times.period, randomDuration(2 * times.period), o ⇒ assert(o >= 3))))
     s"operation = ${duration.pretty}, own delay = ${delay.pretty}" in {
+      WebActor.getHeartbeatCount(webService)  // Clear data
       val debug = new HeartbeatRequestor.Debug
       debug.heartbeatDelay = delay
       autoClosing(new HeartbeatRequestor(times, debug)) { heartbeatRequestor ⇒
