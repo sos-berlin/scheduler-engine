@@ -63,12 +63,12 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "Requests with heartbeat" - {
-    addHeartbeatTests(HttpHeartbeatTiming(period = 50.ms, timeout = 1000.ms))
+    addHeartbeatTests(HttpHeartbeatTiming(period = 50.ms, timeout = 5000.ms))
   }
 
   "Client-side heartbeat" in {
     WebActor.getHeartbeatCount(webService)  // Clear data ???
-    val timing = HttpHeartbeatTiming(period = 100.ms, timeout = 1000.ms)
+    val timing = HttpHeartbeatTiming(period = 100.ms, timeout = 5000.ms)
     val duration = timing.period + timing.period / 2
       autoClosing(new HeartbeatRequestor(timing)) { heartbeatRequestor ⇒
       val runId = idempotenceScopes.next()
@@ -92,7 +92,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "HttpRequestTimeoutException" in {
-    val times = HttpHeartbeatTiming(period = 300.ms, timeout = 1000.ms)
+    val times = HttpHeartbeatTiming(period = 300.ms, timeout = 5000.ms)
     val debug = new HeartbeatRequestor.Debug
     debug.clientTimeout = Some(100.ms)
     autoClosing(new HeartbeatRequestor(times, debug = debug)) { heartbeatRequestor ⇒
