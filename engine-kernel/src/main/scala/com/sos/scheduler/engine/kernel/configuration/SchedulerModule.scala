@@ -1,14 +1,16 @@
 package com.sos.scheduler.engine.kernel.configuration
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
@@ -66,9 +68,6 @@ with HasCloser {
     provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
-    val actorSystem = newActorSystem(closer)
-    bindInstance[ActorSystem](actorSystem)
-    provideSingleton[ExecutionContext] { actorSystem.dispatcher }
     bindSubsystems()
     bindInstance(LazyBoundCppSingletons(lazyBoundCppSingletons.toVector))
   }
@@ -122,6 +121,18 @@ with HasCloser {
 
   @Provides @Singleton
   private def zoneId: ZoneId = _zoneId
+
+  @Provides @Singleton
+  private def actorSystem: ActorSystem = newActorSystem(closer)
+
+  @Provides @Singleton
+  private def executionContext(actorSystem: ActorSystem): ExecutionContext = actorSystem.dispatcher
+
+  @Provides @Singleton
+  private def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
+
+  @Provides @Singleton
+  private def timerService(implicit executionContext: ExecutionContext): TimerService = { TimerService().closeWithCloser }
 }
 
 object SchedulerModule {

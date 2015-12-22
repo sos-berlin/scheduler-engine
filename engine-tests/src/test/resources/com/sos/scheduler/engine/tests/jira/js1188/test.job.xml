@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
     process_class="agents"
 >
     <script language="shell">
-        exit 0
+:;if false; then
+@echo off
+goto WINDOWS
+:;fi
+
+echo TEST_AGENT_NAME=/$TEST_AGENT_NAME/
+exit
+
+:WINDOWS
+echo TEST_AGENT_NAME=/%TEST_AGENT_NAME%/
     </script>
 </job>

@@ -59,7 +59,7 @@ extends FileBased {
     _config = c
     _failableAgents = null
     if (_config.agents.nonEmpty) {
-      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy)
+      _failableAgents = new FailableCollection(_config.agents, agentConnectRetryDelayLazy, c.selectionMethod)
       for (c ← clients) {
         c.changeFailableAgents(_failableAgents)
       }
@@ -121,8 +121,10 @@ object ProcessClass {
     }
   }
 
-  def apiProcessConfiguration(c: Api_process_configurationC) = new ApiProcessConfiguration(
-    hasApi = c._has_api,
-    javaOptions = c._java_options.trim,
-    javaClasspath = c._java_classpath.trim)
+  private def apiProcessConfiguration(c: Api_process_configurationC) = {
+    new ApiProcessConfiguration(
+      hasApi = c._has_api,
+      javaOptions = c._java_options.trim,
+      javaClasspath = c._java_classpath.trim)
+  }
 }

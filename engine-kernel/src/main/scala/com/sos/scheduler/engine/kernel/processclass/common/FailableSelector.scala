@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.processclass.common
 import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
 import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.functionWithToString
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -35,7 +36,7 @@ class FailableSelector[Failable, Result](
       }
       val t = functionToFutureTimedCall[Unit](now + delay, functionWithToString(toString) {
         selected = Some(failable)
-        catchInFuture { callbacks.apply(failable) } onComplete {
+        catchInFuture { callbacks.apply(failable).withThisStackTrace } onComplete {
           case Success(Success(result)) ⇒
             failables.clearFailure(failable)
             promise.success(failable → result)
@@ -55,7 +56,7 @@ class FailableSelector[Failable, Result](
       })
       callQueue.add(t)
       timedCall = t
-      t.future onFailure {
+      t.future.withThisStackTrace onFailure {
         case throwable: TimedCall.CancelledException ⇒ promise.tryFailure(new CancelledException)
         case throwable ⇒ promise.tryFailure(throwable)
       }

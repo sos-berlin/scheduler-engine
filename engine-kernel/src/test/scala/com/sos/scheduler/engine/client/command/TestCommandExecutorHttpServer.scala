@@ -5,7 +5,7 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer._
 import com.sos.scheduler.engine.common.sprayutils.XmlString
 import java.net.URI
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
@@ -48,6 +48,7 @@ extends SimpleRoutingApp {
 object TestCommandExecutorHttpServer {
   private val Interface = "127.0.0.1"
 
+  @Singleton
   final class Factory @Inject private(actorSystem: ActorSystem) {
     def apply(port: Int, executor: String ⇒ String) = new TestCommandExecutorHttpServer(port, executor)(actorSystem)
   }

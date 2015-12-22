@@ -47,6 +47,8 @@ enum Setting_name {
     settings_remote_scheduler_connect_retry_delay = 15,
 
     setting_web_directory = 16,   // For JettyPlugin
+
+    setting_pause_after_failure = 17
 };
 
 
@@ -104,6 +106,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     int _remote_scheduler_connect_retry_delay;
     string                     _web_directory;    // For JettyPlugin
     int                        _classic_agent_keep_alive_duration;
+    bool _pause_after_failure;
 };
 
 }} //namespace sos::scheduler

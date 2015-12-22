@@ -43,6 +43,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
+            <artifactId>engine-http-server</artifactId>  <!-- HeartbeatView is here -->
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>

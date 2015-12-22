@@ -14,7 +14,7 @@ final class HibernateJobStore @Inject()(
     protected val schedulerId: SchedulerId,
     protected val clusterMemberId: ClusterMemberId,
     protected val entityManagerFactory: EntityManagerFactory)
-extends AbstractHibernateStore[JobPersistentState, JobPath, JobEntity]
+extends AbstractHibernateStore[JobPersistentState, JobEntity]
 with JobEntityConverter {
 
   def tryFetchAverageStepDuration(jobPath: JobPath)(implicit em: EntityManager): Option[Duration] = {

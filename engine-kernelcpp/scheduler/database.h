@@ -91,7 +91,10 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
     void                        require_database        () const;
-
+    
+    bool last_scheduler_run_failed() const {
+        return _last_scheduler_run_failed;
+    }
 
     Fill_zero                  _zero_;
     
@@ -139,6 +142,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
     Transaction*               _transaction;
     time_t                     _reopen_time;
     bool                       _is_reopening_database_after_error; // Rekursionsschutz; true: database.cxx wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
+    bool _last_scheduler_run_failed;
 
   public:
     static const int            seconds_before_reopen;

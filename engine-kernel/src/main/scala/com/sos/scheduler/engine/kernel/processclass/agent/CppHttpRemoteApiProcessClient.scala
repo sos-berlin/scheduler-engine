@@ -5,11 +5,12 @@ import com.sos.scheduler.engine.client.agent.{ApiProcessConfiguration, HttpRemot
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.processclass.agent.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.kernel.processclass.common.{FailableCollection, FailableSelector}
 import java.time.Duration
-import javax.inject.{Inject, Provider}
+import javax.inject.{Singleton, Inject, Provider}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -26,7 +27,12 @@ extends AutoCloseable {
 
   private object callbacks extends FailableSelector.Callbacks[Agent, HttpRemoteProcess] {
     def apply(agent: Agent): Future[Try[HttpRemoteProcess]] = {
-      val future = starter.startRemoteTask(schedulerApiTcpPort, apiProcessConfiguration, agentUri = agent.address).withThisStackTrace
+      val future = starter.startRemoteTask(
+        schedulerApiTcpPort,
+        apiProcessConfiguration,
+        agentUri = agent.address,
+        Some(agent.httpHeartbeatTiming getOrElse HttpHeartbeatTiming.Default))
+      .withThisStackTrace
       future map Success.apply recover {
         case e: spray.can.Http.ConnectionAttemptFailedException ⇒
           warningCall.call(e)
@@ -134,6 +140,7 @@ object CppHttpRemoteApiProcessClient {
 
   private val logger = Logger(getClass)
 
+  @Singleton
   final class Factory @Inject private(httpRemoteProcessStarter: Provider[HttpRemoteProcessStarter], callQueue: SchedulerThreadCallQueue) {
     def apply(apiProcessConfiguration: ApiProcessConfiguration, schedulerApiTcpPort: Int, warningCall: CppCall, resultCall: CppCall) =
       new CppHttpRemoteApiProcessClient(

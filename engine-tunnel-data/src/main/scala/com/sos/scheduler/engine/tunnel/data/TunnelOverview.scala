@@ -10,9 +10,8 @@ import spray.json.DefaultJsonProtocol._
 final case class TunnelOverview(
   id: TunnelId,
   startedByHttpIp: Option[InetAddress],
-  remoteTcpAddress: Option[String],
-  statistics: TunnelStatistics)
+  remoteTcpAddress: Option[String])
 
 object TunnelOverview {
-  implicit val MyJsonFormat = jsonFormat4(apply)
+  implicit val MyJsonFormat = jsonFormat3(apply)
 }

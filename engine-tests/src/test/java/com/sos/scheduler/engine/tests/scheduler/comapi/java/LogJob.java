@@ -111,7 +111,7 @@ public final class LogJob extends Job_impl {
         spooler_log.info(testString);
         String last = spooler_log.last("info");
         if (!testString.equals(last)) {
-            throw new RuntimeException("spooler_log.last returns unexpected result");
+            throw new RuntimeException("spooler_log.last returns unexpected result '" + last + "', expected was: " + testString);
         }
         spooler_log.set_level(spooler_log.level());
         spooler_log.set_mail_on_error(spooler_log.mail_on_error());

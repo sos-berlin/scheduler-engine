@@ -36,7 +36,7 @@ extends HasCloser {
   val databaseDirectory = directory
   private var isPrepared = false
 
-  private[test] def prepare(): Unit = {
+  def prepare(): Unit = {
     if (!isPrepared) {
       prepareTemporaryConfigurationDirectory()
       isPrepared = true

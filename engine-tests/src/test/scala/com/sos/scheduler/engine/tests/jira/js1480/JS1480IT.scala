@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1480
 
 import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants
@@ -35,6 +36,7 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val tasks = awaitSuccess(agentClient.task.tasks)
     assert(tasks.size == view.currentTaskCount)
     val task = tasks(0)
+    assert(task.pid.isDefined == isUnix)   // Not official, depends on JVM
     assert(task.arguments.get.taskId == TaskId(SchedulerConstants.taskIdOffset))
     assert(task.arguments.get.jobName == TestJobPath.name)
     assert(task.arguments.get.language == "java")

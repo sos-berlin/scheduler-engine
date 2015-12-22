@@ -2959,12 +2959,11 @@ bool Standard_job::try_start_one_task()
 
                 string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
                                                                         : start_cause_name( task->cause() );
-                _log->info(message_string("SCHEDULER-930", task->id(), c, task->process_class_path()));
-
                 if( _min_tasks <= not_ending_tasks_count() )  
                     _start_min_tasks = false;
 
                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
+                _log->info(message_string("SCHEDULER-930", task->id(), c, task->process_class_path()));   // Task::do_load() has set process_class_path
 
                 task_started = true;
                 _wake_when_in_period = false;

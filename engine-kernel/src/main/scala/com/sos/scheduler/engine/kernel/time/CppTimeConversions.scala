@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.time
 
-import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.eternalCppMillis
-import java.time.Instant
+import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.{eternalCppMillis, neverCppMillis}
+import java.time.{Duration, Instant}
 
 object CppTimeConversions {
 
@@ -12,4 +12,7 @@ object CppTimeConversions {
 
   def zeroCppMillisToNoneInstant(millis: Long): Option[Instant] =
     Some(millis) filter { _ != 0 } map Instant.ofEpochMilli
+
+  def neverCppMillisToNoneDuration(millis: Long): Option[Duration] =
+    Some(millis) filter { _ != neverCppMillis } map Duration.ofMillis
 }

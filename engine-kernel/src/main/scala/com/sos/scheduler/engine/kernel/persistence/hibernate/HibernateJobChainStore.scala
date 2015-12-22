@@ -11,5 +11,5 @@ final class HibernateJobChainStore @Inject()(
     protected val schedulerId: SchedulerId,
     protected val clusterMemberId: ClusterMemberId,
     protected val entityManagerFactory: EntityManagerFactory)
-extends AbstractHibernateStore[JobChainPersistentState, JobChainPath, JobChainEntity]
+extends AbstractHibernateStore[JobChainPersistentState, JobChainEntity]
 with JobChainEntityConverter

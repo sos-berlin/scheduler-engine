@@ -9,5 +9,5 @@ import javax.persistence.EntityManagerFactory
 final class HibernateOrderStore @Inject private(
    protected val schedulerId: SchedulerId,
    protected val entityManagerFactory: EntityManagerFactory)
-extends AbstractHibernateStore[OrderPersistentState, OrderKey, OrderEntity]
+extends AbstractHibernateStore[OrderPersistentState, OrderEntity]
 with OrderEntityConverter
