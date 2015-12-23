@@ -22,7 +22,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCloser with AgentTest {
 
-  override def afterAll(): Unit = {
+  override def afterAll() = {
     onClose { super.afterAll() }
     close()
   }
@@ -61,7 +61,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
       client.requireIsResponding()
     }
     assert(output == List("JobScheduler Agent is responding"))
-    autoClosing(new TextAgentClient(agentUri = s"http:127.0.0.1:${findRandomFreeTcpPort()}", _ ⇒ Unit)) { client ⇒
+    autoClosing(new TextAgentClient(agentUri = s"http://127.0.0.1:${findRandomFreeTcpPort()}", _ ⇒ Unit)) { client ⇒
       intercept[Exception] { client.requireIsResponding() }
     }
   }
