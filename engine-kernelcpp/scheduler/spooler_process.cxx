@@ -1488,7 +1488,13 @@ void Process_class::enqueue_requestor(Process_class_requestor* requestor) {
 }
 
 void Process_class::remove_requestor(Process_class_requestor* requestor) {
-    _requestor_list.remove(requestor);
+    if (!_requestor_list.empty()) {
+        Process_class_requestor* head = *_requestor_list.begin();
+        _requestor_list.remove(requestor);
+        if (!_requestor_list.empty() && head != *_requestor_list.begin()) {
+            check_then_notify_a_process_is_available();
+        }
+    }
 }
 
 void Process_class::check_then_notify_a_process_is_available() {

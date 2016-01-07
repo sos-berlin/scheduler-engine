@@ -20,6 +20,7 @@ struct Process_class_subsystem;
 
 struct Process_class_requestor {
     virtual void notify_a_process_is_available() = 0;
+    virtual string obj_name() const = 0;
 };
 
 
