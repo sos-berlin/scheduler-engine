@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.http.server.heartbeat
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashMap}
 import com.sos.scheduler.engine.common.sprayutils.Marshalling.marshalToHttpResponse
-import com.sos.scheduler.engine.common.time.timer.TimerService
+import com.sos.scheduler.engine.common.time.timer.{Timer, TimerService}
 import com.sos.scheduler.engine.http.client.heartbeat.HeartbeatRequestHeaders._
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatId, HeartbeatResponseHeaders, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.http.server.heartbeat.ClientSideHeartbeatService._
@@ -31,6 +31,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
   private var unsafeStartCount = 0
   private var unsafeCount = 0
   private var unsafePendingOperationsMaximum = 0
+  private var currentHeartbeatTimer: Timer[Unit] = null
 
   def startHeartbeat[A](onHeartbeat: Duration ⇒ Unit = _ ⇒ {})
     (operation: Option[Duration] ⇒ Future[A])
@@ -43,7 +44,11 @@ final class HeartbeatService(implicit timerService: TimerService) {
           unsafeStartCount += 1
           val responseFuture = operation(Some(timing.timeout)) map marshalToHttpResponse
           val pendingOperation = new PendingOperation(uri, responseFuture, onHeartbeat)(actorRefFactory.dispatcher)
-          startHeartbeatPeriod(pendingOperation, timing)
+          val r = startHeartbeatPeriod(pendingOperation, timing)
+          responseFuture onComplete { _ ⇒
+            Option(currentHeartbeatTimer) foreach timerService.cancel
+          }
+          r
         }
       }
     } ~
@@ -73,10 +78,9 @@ final class HeartbeatService(implicit timerService: TimerService) {
     else {
       import actorRefFactory.dispatcher
       unsafeCount += 1
-      val timer = timerService.delay(timing.period, s"${pendingOperation.uri} heartbeat period") onElapsed {
+      currentHeartbeatTimer = timerService.delay(timing.period, s"${pendingOperation.uri} heartbeat period") onElapsed {
         respondWithHeartbeat()
       }
-      pendingOperation.responseFuture onComplete { _ ⇒ timerService.cancel(timer) }    // FIXME MEMORY LEAK
     }
 
     def respondWithHeartbeat(): Unit = {
