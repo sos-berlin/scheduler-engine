@@ -39,18 +39,17 @@ final class IdempotentRequestor(requestTimeout: Duration)(implicit ec: Execution
         case Failure(t) if now + DelayAfterError < timeoutAt ⇒
           val msg = s"${request.method} ${request.uri} $t"
           logger.warn(msg)
-          timerService.delay(DelayAfterError, msg, cancelWhenCompleted = promise.future) onElapsed {
+          val timer = timerService.delay(DelayAfterError, msg) onElapsed {
             failedPromise.trySuccess("After error")
           }
+          promise.future onComplete { _ ⇒ timerService.cancel(timer) }
         case o ⇒ promise tryComplete o
       }
-      timerService.at(
-        now + retriedRequestDuration + RetryTimeout min timeoutAt,
-        s"${request.uri} retry timeout",
-        cancelWhenCompleted = firstCompletedOf(List(promise.future, response)))
-        .onElapsed {
-          failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
-        }
+      val at = now + retriedRequestDuration + RetryTimeout min timeoutAt
+      val timer = timerService.at(at, s"${request.uri} retry timeout") onElapsed {
+        failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
+      }
+      firstCompletedOf(List(promise.future, response)) onComplete { _ ⇒ timerService.cancel(timer) }
       failedPromise.future onSuccess { case startOfMessage ⇒
         if (!promise.isCompleted) {
           if (now < timeoutAt) {

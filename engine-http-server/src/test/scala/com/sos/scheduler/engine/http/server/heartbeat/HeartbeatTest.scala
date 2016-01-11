@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.common.utils.Exceptions.repeatUntilNoException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
@@ -70,7 +71,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
     WebActor.getHeartbeatCount(webService)  // Clear data ???
     val timing = HttpHeartbeatTiming(period = 100.ms, timeout = 5000.ms)
     val duration = timing.period + timing.period / 2
-      autoClosing(new HeartbeatRequestor(timing)) { heartbeatRequestor ⇒
+    autoClosing(new HeartbeatRequestor(timing)) { heartbeatRequestor ⇒
       val runId = idempotenceScopes.next()
       val uri = s"$baseUri/test/" + runId
       val request = Data(duration.toString)
@@ -85,6 +86,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
       sleep(duration max HeartbeatRequestor.ClientHeartbeatMinimumDelay * 1.5 )
       assert(Set(2, 3) contains heartbeatRequestor.clientHeartbeatCount)
       heartbeatRequestor.close()  // Stop sending client-side heartbeats
+      requireTimerServiceIsEmpty()
       sleep(3 * duration)
       assert(Set(2, 3) contains heartbeatRequestor.clientHeartbeatCount)
       assertServerIsClean(runId)
@@ -106,6 +108,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
       assert(heartbeatRequestor.clientHeartbeatCount == 0)
       assertServerIsClean(runId)
     }
+    requireTimerServiceIsEmpty()
   }
 
   if (false) "Endurance" - {
@@ -140,6 +143,7 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
         assert(heartbeatRequestor.clientHeartbeatCount == 0)
         assertServerIsClean(runId, highestCurrentOperationsMaximum)
       }
+      requireTimerServiceIsEmpty()
     }
   }
 
@@ -149,6 +153,11 @@ final class HeartbeatTest extends FreeSpec with BeforeAndAfterAll {
         Await.result((webService ? ("GET" → s"$runId")).mapTo[(Int, Set[HeartbeatId])], AskTimeout.duration)
       assert (currentOperationsMaximum <= highestCurrentOperationsMaximum && currentHeartbeatIds.isEmpty)
     }
+  }
+
+  private def requireTimerServiceIsEmpty(): Unit = {
+    waitForCondition(1.s, 10.ms) { timerService.overview.count == 0 }  // Heartbeat timeout is asynchronously cancelled
+    assert(timerService.overview.count == 0)
   }
 }
 
