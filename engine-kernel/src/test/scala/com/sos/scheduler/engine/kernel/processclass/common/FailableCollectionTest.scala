@@ -30,7 +30,6 @@ final class FailableCollectionTest extends FreeSpec {
         new FailableCollection(List(A(1), A(1)), () ⇒ 100.ms, FixedPriority)
       }
     }
-
   }
 
   "Fixed priority" - {
@@ -103,6 +102,14 @@ final class FailableCollectionTest extends FreeSpec {
         0.s → A(0),
         0.s → A(0),
         0.s → A(0))
+    }
+
+    "First fails again" in {
+      failureCollection.setFailure(A(0), new Exception)
+      check(
+        0.s → A(1),
+        0.s → A(1),
+        0.s → A(1))
     }
   }
 
