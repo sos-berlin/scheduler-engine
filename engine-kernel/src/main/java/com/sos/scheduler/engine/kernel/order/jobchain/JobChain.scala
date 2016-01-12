@@ -157,12 +157,16 @@ object JobChain {
     }
   }
 
-  /** All predecessors (transitive closure) of from graph described by edges. */
+  /** All transitive predecessors of a graph described by edges. */
   private[jobchain] def allPredecessors[A](edges: Iterable[(A, A)], from: A) = {
+    val nodeToPredecessors: Map[A, Iterable[A]] = (
+      edges groupBy { _._2 }
+      mapValues { edges ⇒ (edges map { _._1 }).toVector }
+      withDefaultValue Nil)
     @tailrec
     def f(intermediateResult: Set[A]): Set[A] = {
-      val step = for (i ← intermediateResult; (a, b) ← edges if b == i) yield a
-      val result = intermediateResult ++ step
+      val preds = for (node ← intermediateResult; pred ← nodeToPredecessors(node)) yield pred
+      val result = intermediateResult ++ preds
       if (result.size > intermediateResult.size) f(result) else result
     }
     f(Set(from)) - from
