@@ -18,6 +18,7 @@ struct JobChain__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _cppSkippedStates__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _deletePersistentState____method;
     ::zschimmer::javabridge::Method const _loadPersistentState____method;
+    ::zschimmer::javabridge::Method const _onNextStateActionChanged____method;
     ::zschimmer::javabridge::Method const _persistState____method;
 
     static const ::zschimmer::javabridge::class_factory< JobChain__class > class_factory;
@@ -30,6 +31,7 @@ JobChain__class::JobChain__class(const string& class_name) :
     ,_cppSkippedStates__Ljava_lang_String_2__method(this, "cppSkippedStates", "(Ljava/lang/String;)Ljava/util/ArrayList;")
     ,_deletePersistentState____method(this, "deletePersistentState", "()V")
     ,_loadPersistentState____method(this, "loadPersistentState", "()V")
+    ,_onNextStateActionChanged____method(this, "onNextStateActionChanged", "()V")
     ,_persistState____method(this, "persistState", "()V"){}
 
 JobChain__class::~JobChain__class() {}
@@ -69,6 +71,12 @@ void JobChain::loadPersistentState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     JobChain__class* cls = _class.get();
     cls->_loadPersistentState____method.call(get_jobject(), parameter_list);
+}
+
+void JobChain::onNextStateActionChanged() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    JobChain__class* cls = _class.get();
+    cls->_onNextStateActionChanged____method.call(get_jobject(), parameter_list);
 }
 
 void JobChain::persistState() const {
