@@ -26,7 +26,6 @@ import java.nio.file.Files
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
 import java.time.{Duration, Instant}
-import java.util.concurrent.TimeUnit.MILLISECONDS
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
