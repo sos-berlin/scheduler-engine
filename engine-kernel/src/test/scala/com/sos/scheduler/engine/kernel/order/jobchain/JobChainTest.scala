@@ -28,7 +28,7 @@ final class JobChainTest extends FreeSpec {
   }
 
   "allPredecessors performance (no test)" in {
-    for (n ← List(1, 10, 100, 200, 300, 400, 500, 1000, 2000)) {
+    for (n ← List(1, 10, 100, 200, 300, 400, 500, 1000)) {
       val edges = for (i ← 1 until n) yield (i, i + 1)
       allPredecessors(edges, n)  // Warm-up
       val stopwatch = new Stopwatch

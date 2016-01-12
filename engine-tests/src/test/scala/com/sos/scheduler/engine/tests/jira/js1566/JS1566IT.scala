@@ -47,7 +47,7 @@ final class JS1566IT extends FreeSpec with ScalaSchedulerTest {
 private object JS1566IT {
   private val logger = Logger(getClass)
   private val SkipCount = 5
-  private val NodeCount = 4000   // Performance impact is about O(n²) or O(n³)
+  private val NodeCount = 1000   // Performance impact is about O(n²) or O(n³)
   private val NodeNames = 1 to NodeCount
   private val BigJobChainPath = JobChainPath("/big")
   private val LittleJobChainPath = JobChainPath("/test-little")
