@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     order="true"
+     idle_timeout="99999999"
+>
+    <script  language="java:javascript">
+
+        function spooler_process() {
+            return true
+        }
+
+    </script>
+</job>
