@@ -1147,12 +1147,16 @@ bool Node::set_action(Action action)
 {
     if( _action != action )
     {
+        bool next_state_changed = _action == act_next_state || action == act_next_state;
         Z_LOG2("scheduler", obj_name() << " set_action " << string_from_action(action) << "\n");
         _action = action;
 
         if( _job_chain->state() >= Job_chain::s_active )
         {
             _job_chain->check_job_chain_node( this );
+        }
+        if (next_state_changed) {
+            _job_chain->typed_java_sister().onNextStateActionChanged();
         }
         return true;
     }

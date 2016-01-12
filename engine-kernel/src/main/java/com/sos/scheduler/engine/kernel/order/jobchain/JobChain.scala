@@ -21,7 +21,7 @@ import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 @ForCpp
 final class JobChain(
@@ -32,6 +32,25 @@ extends FileBased
 with UnmodifiableJobChain {
 
   type Path = JobChainPath
+
+  private object cppPredecessors {
+    private var _edgeSet: Set[(OrderState, OrderState)] = null
+    private val predecessorsMap = mutable.Map[String, java.util.ArrayList[String]]() withDefault { orderStateString ⇒
+      if (_edgeSet == null) {
+        _edgeSet = (nodeMap.values filter { _.action == nextState } map { o ⇒ o.orderState → o.nextState }).toSet
+      }
+      val result = new java.util.ArrayList[String]
+      result.addAll(allPredecessors(_edgeSet, OrderState(orderStateString)) map { _.string } )
+      result
+    }
+
+    def apply(orderStateString: String) = predecessorsMap(orderStateString)
+
+    def invalidate(): Unit = {
+      predecessorsMap.clear()
+      _edgeSet = null
+    }
+  }
 
   def stringToPath(o: String) =
     JobChainPath(o)
@@ -78,18 +97,12 @@ with UnmodifiableJobChain {
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
 
+  @ForCpp
+  private def onNextStateActionChanged(): Unit = cppPredecessors.invalidate()
+
   /** All OrderState, which are skipped to given orderStateString */
   @ForCpp
-  private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = {
-    val result = new java.util.ArrayList[String]
-    result.addAll(allPredecessorStates(OrderState(orderStateString)) map { _.string } )
-    result
-  }
-
-  private def allPredecessorStates(orderState: OrderState): Set[OrderState] = {
-    val edgeSet = (nodeMap.values filter { _.action == nextState } map { o ⇒ o.orderState → o.nextState }).toSet
-    allPredecessors(edgeSet, orderState)
-  }
+  private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
   override def details = {
     val d = super.details
@@ -147,7 +160,6 @@ with UnmodifiableJobChain {
     cppProxy.remove()
   }
 }
-
 
 object JobChain {
   final class Type extends SisterType[JobChain, Job_chainC] {
