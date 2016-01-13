@@ -46,7 +46,7 @@ final class IdempotentRequestor(requestTimeout: Duration)(implicit ec: Execution
         case o ⇒ promise tryComplete o
       }
       val at = now + retriedRequestDuration + RetryTimeout min timeoutAt
-      val timer = timerService.at(at, s"${request.uri} retry timeout") onElapsed {
+      val timer = timerService.at(at, s"${request.uri} idempotent retry") onElapsed {
         failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
       }
       firstCompletedOf(List(promise.future, response)) onComplete { _ ⇒ timerService.cancel(timer) }

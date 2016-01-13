@@ -33,11 +33,17 @@ extends AutoCloseable {
 
   import actorRefFactory.dispatcher
 
-  private val idemprotentRequestor = new IdempotentRequestor(requestTimeout = debug.clientTimeout getOrElse timing.timeout)
+  private val idempotentRequestor = new IdempotentRequestor(requestTimeout = debug.clientTimeout getOrElse timing.timeout)
   private var _serverHeartbeatCount = 0
   private var _clientHeartbeatCount = 0
+  @volatile
+  private var closed = false
 
-  def close() = clientHeartbeat.cancelTimeout()  // Interrupt client heartbeat chain
+  def close() = {
+    // Interrupt client heartbeat chain
+    closed = true
+    clientHeartbeat.cancelTimeout()
+  }
 
   def apply(mySendReceive: SendReceive, httpRequest: HttpRequest): Future[HttpResponse] =
     apply(firstRequestTransformer = identity, mySendReceive, httpRequest)
@@ -53,7 +59,7 @@ extends AutoCloseable {
     val emptyRequest = request withEntity HttpEntity.Empty
     val sentAt = now
     val myRequest = request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers
-    idemprotentRequestor.sendAndRetry(firstRequestTransformer ~> mySendReceive, myRequest, requestDuration = timing.period)
+    idempotentRequestor.sendAndRetry(firstRequestTransformer ~> mySendReceive, myRequest, requestDuration = timing.period)
       .flatMap(handleResponse(mySendReceive, emptyRequest))
       .sideEffect { _ onSuccess { case _ ⇒ clientHeartbeat(sentAt, mySendReceive, emptyRequest) }}
   }
@@ -64,7 +70,7 @@ extends AutoCloseable {
       case Some(heartbeatId) ⇒
         _serverHeartbeatCount += 1
         val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat-Continue`(heartbeatId, timing) :: emptyRequest.headers
-        idemprotentRequestor.sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = timing.period) flatMap handleResponse(mySendReceive, emptyRequest)
+        idempotentRequestor.sendAndRetry(mySendReceive, heartbeatRequest, requestDuration = timing.period) flatMap handleResponse(mySendReceive, emptyRequest)
       case None ⇒
         Future.successful(httpResponse)
     }
@@ -81,26 +87,30 @@ extends AutoCloseable {
       }
 
     def apply(lastRequestSentAt: Instant, mySendReceive: SendReceive, emptyRequest: HttpRequest): Unit = {
-      val timeoutAt = lastRequestSentAt + timing.period roundDownTo ClientHeartbeatRoundTo max now + ClientHeartbeatMinimumDelay
-      val timer = timerService.at(timeoutAt, s"${emptyRequest.uri} client-side heartbeat") onElapsed {
-        val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
-        if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
-        else {
-          _clientHeartbeatCount += 1
-          val sentAt = now
-          mySendReceive(heartbeatRequest).timeoutAfter(IdempotentRequestor.RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry timeout") map {
-            case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
-            case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
-            case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
-          } recover {
-            case _: Timer.ElapsedException ⇒
-          } onComplete {
-            case Success(()) ⇒ apply(sentAt, mySendReceive, emptyRequest)
-            case Failure(t) ⇒ onClientHeartbeatTimeout(t)
+      if (!closed) {
+        val timeoutAt = lastRequestSentAt + timing.period roundDownTo ClientHeartbeatRoundTo max now + ClientHeartbeatMinimumDelay
+        val timer = timerService.at(timeoutAt, s"${emptyRequest.uri} client-side heartbeat") onElapsed {
+          if (!closed) {
+            val heartbeatRequest = emptyRequest withHeaders `X-JobScheduler-Heartbeat`(timing)
+            if (debug.suppressed) logger.debug(s"suppressed $heartbeatRequest")
+            else {
+              _clientHeartbeatCount += 1
+              val sentAt = now
+              mySendReceive(heartbeatRequest).timeoutAfter(IdempotentRequestor.RetryTimeout, s"${heartbeatRequest.uri} client heartbeat retry") map {
+                case HttpResponse(OK, HttpEntity.Empty, _, _) ⇒
+                case HttpResponse(OK, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat payload: $entity")
+                case HttpResponse(status, entity, _, _) ⇒ sys.error(s"Unexpected heartbeat response: $status" + (if (status.isFailure) s": ${entity.asString take 500}" else ""))
+              } recover {
+                case _: Timer.ElapsedException ⇒
+              } onComplete {
+                case Success(()) ⇒ apply(sentAt, mySendReceive, emptyRequest)
+                case Failure(t) ⇒ onClientHeartbeatTimeout(t)
+              }
+            }
           }
         }
+        currentClientTimeout.set(timer)
       }
-      currentClientTimeout.set(timer)
     }
 
     def onClientHeartbeatTimeout(throwable: Throwable): Unit = {

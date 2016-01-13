@@ -79,6 +79,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
       import actorRefFactory.dispatcher
       unsafeCount += 1
       currentHeartbeatTimer = timerService.delay(timing.period, s"${pendingOperation.uri} heartbeat period") onElapsed {
+        // May needless elapse after operation has been finished and next startHeartbeat has not been called
         respondWithHeartbeat()
       }
     }
