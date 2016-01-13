@@ -367,6 +367,7 @@ struct Task : Object,
     void                        set_enqueued_state          ();
     void                        set_state_direct            ( State );
     string                      read_remote_scheduler_parameter();
+    string message_726() const;
 
  protected:
     Fill_zero                  _zero_;
