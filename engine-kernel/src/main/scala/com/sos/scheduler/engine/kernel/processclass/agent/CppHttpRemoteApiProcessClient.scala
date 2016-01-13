@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass.agent
 
+import akka.pattern.AskTimeoutException
 import com.sos.scheduler.engine.base.process.ProcessSignal.SIGTERM
 import com.sos.scheduler.engine.client.agent.{ApiProcessConfiguration, HttpRemoteProcess, HttpRemoteProcessStarter}
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
@@ -34,7 +35,7 @@ extends AutoCloseable {
         Some(agent.httpHeartbeatTiming getOrElse HttpHeartbeatTiming.Default))
       .withThisStackTrace
       future map Success.apply recover {
-        case e: spray.can.Http.ConnectionAttemptFailedException ⇒
+        case e @ (_: spray.can.Http.ConnectionException | _: AskTimeoutException) ⇒
           warningCall.call(e)
           Failure(e)
       }
