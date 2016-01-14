@@ -26,21 +26,25 @@ final class JS1566IT extends FreeSpec with ScalaSchedulerTest {
     times += s"warm-up" → measureTime {
       runOrder(LittleJobChainPath orderKey "1")
     }
-    times += s"task, little job chain" → measureTime {
-      runOrder(LittleJobChainPath orderKey "1")
+    for (_ ← 1 to 3) {
+      times += s"order runs through little job chain" → measureTime {
+        runOrder(LittleJobChainPath orderKey "1")
+      }
     }
-    times += s"job chain, $NodeCount nodes" → measureTime {
+    times += s"adding job chain with $NodeCount nodes" → measureTime {
       deleteAndWriteConfigurationFile(BigJobChainPath, makeJobChain(NodeNames))
     }
-    times += s"task, little job chain" → measureTime {
-      runOrder(LittleJobChainPath orderKey "1")
+    for (_ ← 1 to 3) {
+      times += s"order runs through little job chain" → measureTime {
+        runOrder(LittleJobChainPath orderKey "1")
+      }
     }
     times += s"skip first $SkipCount nodes" → measureTime {
       for (i ← NodeNames take SkipCount) {
         scheduler executeXml <job_chain_node.modify job_chain={BigJobChainPath.string} state={s"$i"} action="next_state"/>
       }
     }
-    for ((caption, duration) ← times) logger.info(f"$caption%-25s ${duration.pretty}")
+    for ((caption, duration) ← times) logger.info(f"$caption%-40s ${duration.pretty}")
   }
 }
 
