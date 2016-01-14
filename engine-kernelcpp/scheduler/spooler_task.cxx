@@ -1438,6 +1438,7 @@ bool Task::do_something()
                                 }
                             } else {
                                 process_class()->remove_requestor(this);
+                                log()->info(message_726());
                                 set_state_direct(s_starting);
                                 something_done = true;
                                 // Opportunity for Job to log SCHEDULER-930 with process_class, so do not: loop = true;
@@ -2650,13 +2651,17 @@ void Task::do_end__end()
 Async_operation* Task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-    if (_order) {
-        string a = _module_instance->remote_scheduler_address();
-        log()->info(Message_string("SCHEDULER-726", a.empty()? "this JobScheduler '" + _spooler->http_url() + "'" : "remote scheduler " + a));
+    if (_order && _step_count >= 1) {
+        _order->log()->info(message_726());
     }
     Async_operation* result = _module_instance->step__start();
     if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
     return result;
+}
+
+string Task::message_726() const {
+        string a = _module_instance->remote_scheduler_address();
+    return Message_string("SCHEDULER-726", a.empty()? "this JobScheduler '" + _spooler->http_url() + "'" : "remote scheduler " + a);
 }
 
 //-------------------------------------------------------------------------------Task::do_step__end

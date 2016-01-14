@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain.allPredecessors
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainTest._
 import org.junit.runner.RunWith
@@ -23,9 +26,31 @@ final class JobChainTest extends FreeSpec {
        }
      }
   }
+
+  "allPredecessors performance (no test)" in {
+    for (n ← List(1, 10, 100, 200, 300, 400, 500, 1000)) {
+      val edges = for (i ← 1 until n) yield (i, i + 1)
+      allPredecessors(edges, n)  // Warm-up
+      val stopwatch = new Stopwatch
+      val predecessors = allPredecessors(edges, n)
+      logger.info(s"$n: $stopwatch")
+      assert(predecessors.size == n - 1)
+    }
+  }
+
+  "allPredecessors OrderState performance (no test)" in {
+    val n = 1000
+    val edges = 1 until n map { i ⇒ OrderState(s"$i") → OrderState(s"${i + 1}") }
+    allPredecessors(edges, OrderState(s"$n"))  // Warm-up
+    val stopwatch = new Stopwatch
+    val predecessors = allPredecessors(edges, OrderState(s"$n"))
+    logger.info(s"$n $stopwatch")
+    assert(predecessors.size == n - 1)
+  }
 }
 
 private object JobChainTest {
+  private val logger = Logger(getClass)
   private val Edges = List(1 → 2, 2 → 3, 3 → 4,  7 → 8, 8 → 9)
   private val TestData = List(
     T(0, 1, Set()),

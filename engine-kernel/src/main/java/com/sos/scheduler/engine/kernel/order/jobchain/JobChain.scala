@@ -24,7 +24,7 @@ import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 @ForCpp
 final class JobChain(
@@ -35,6 +35,25 @@ extends FileBased
 with UnmodifiableJobChain {
 
   type Path = JobChainPath
+
+  private object cppPredecessors {
+    private var _edgeSet: Set[(OrderState, OrderState)] = null
+    private val predecessorsMap = mutable.Map[String, java.util.ArrayList[String]]() withDefault { orderStateString ⇒
+      if (_edgeSet == null) {
+        _edgeSet = (nodeMap.values filter { _.action == nextState } map { o ⇒ o.orderState → o.nextState }).toSet
+      }
+      val result = new java.util.ArrayList[String]
+      result.addAll(allPredecessors(_edgeSet, OrderState(orderStateString)) map { _.string } )
+      result
+    }
+
+    def apply(orderStateString: String) = predecessorsMap(orderStateString)
+
+    def invalidate(): Unit = {
+      predecessorsMap.clear()
+      _edgeSet = null
+    }
+  }
 
   def stringToPath(o: String) =
     JobChainPath(o)
@@ -81,18 +100,12 @@ with UnmodifiableJobChain {
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
 
+  @ForCpp
+  private def onNextStateActionChanged(): Unit = cppPredecessors.invalidate()
+
   /** All OrderState, which are skipped to given orderStateString */
   @ForCpp
-  private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = {
-    val result = new java.util.ArrayList[String]
-    result.addAll(allPredecessorStates(OrderState(orderStateString)) map { _.string } )
-    result
-  }
-
-  private def allPredecessorStates(orderState: OrderState): Set[OrderState] = {
-    val edgeSet = (nodeMap.values filter { _.action == nextState } map { o ⇒ o.orderState → o.nextState }).toSet
-    allPredecessors(edgeSet, orderState)
-  }
+  private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
   override def details = {
     val d = super.details
@@ -157,7 +170,6 @@ with UnmodifiableJobChain {
   def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
 }
 
-
 object JobChain {
   final class Type extends SisterType[JobChain, Job_chainC] {
     def sister(proxy: Job_chainC, context: Sister) = {
@@ -166,12 +178,16 @@ object JobChain {
     }
   }
 
-  /** All predecessors (transitive closure) of from graph described by edges. */
+  /** All transitive predecessors of a graph described by edges. */
   private[jobchain] def allPredecessors[A](edges: Iterable[(A, A)], from: A) = {
+    val nodeToPredecessors: Map[A, Iterable[A]] = (
+      edges groupBy { _._2 }
+      mapValues { edges ⇒ (edges map { _._1 }).toVector }
+      withDefaultValue Nil)
     @tailrec
     def f(intermediateResult: Set[A]): Set[A] = {
-      val step = for (i ← intermediateResult; (a, b) ← edges if b == i) yield a
-      val result = intermediateResult ++ step
+      val preds = for (node ← intermediateResult; pred ← nodeToPredecessors(node)) yield pred
+      val result = intermediateResult ++ preds
       if (result.size > intermediateResult.size) f(result) else result
     }
     f(Set(from)) - from

@@ -879,6 +879,10 @@ struct Job_chain : Com_job_chain,
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Com_job_chain::Release(); }
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job_chain>::java_sister(); }
+    
+    const JobChainJ& typed_java_sister() const { 
+        return _typed_java_sister; 
+    }
 
     // Abstract_scheduler_object:
     string                      obj_name                    () const                                { return "Job_chain " + path(); }
