@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass
 
+import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
@@ -7,6 +8,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
@@ -123,6 +125,7 @@ object ProcessClass {
 
   private def apiProcessConfiguration(c: Api_process_configurationC) = {
     new ApiProcessConfiguration(
+      meta = StartTask.Meta(JobPath(c._job_path), TaskId(c._task_id)),
       hasApi = c._has_api,
       javaOptions = c._java_options.trim,
       javaClasspath = c._java_classpath.trim)

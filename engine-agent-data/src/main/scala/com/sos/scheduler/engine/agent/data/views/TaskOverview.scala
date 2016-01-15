@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.data.views
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
+import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.base.sprayjson.InetAddressJsonSupport._
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits.InstantJsonFormat
 import com.sos.scheduler.engine.data.job.TaskId
@@ -18,14 +19,17 @@ final case class TaskOverview(
   tunnelId: TunnelId,
   startedAt: Instant,
   startedByHttpIp: Option[InetAddress],
+  startMeta: StartTask.Meta,
   arguments: Option[TaskOverview.Arguments])
 
 object TaskOverview {
   implicit val ArgumentsJsonFormat = jsonFormat5(Arguments)
-  implicit val MyJsonFormat = jsonFormat6(apply)
+  implicit val MyJsonFormat = jsonFormat7(apply)
 
   final case class Arguments(
+    @deprecated("Use StartTast.Meta", "1.10.3")
     taskId: TaskId,
+    @deprecated("Use StartTast.Meta", "1.10.3")
     jobName: String,
     language: String,
     javaClassName: Option[String],

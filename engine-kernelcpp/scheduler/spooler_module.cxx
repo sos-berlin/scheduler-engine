@@ -784,6 +784,7 @@ bool Module_instance::try_to_get_process(const Api_process_configuration* c)
         Api_process_configuration conf;
         if (!c) {
             conf._is_shell_dummy = true;
+            conf._job_path = _task->job()->path();
             conf._job_name = _job_name;
             conf._task_id = _task_id;
             c = &conf;

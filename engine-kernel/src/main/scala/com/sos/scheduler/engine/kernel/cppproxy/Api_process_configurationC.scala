@@ -16,7 +16,7 @@ trait Api_process_configurationC extends CppProxy {
   def _remote_scheduler_address: String
 
   @CppField
-  def _job_name: String
+  def _job_path: String
 
   @CppField
   def _task_id: Int
