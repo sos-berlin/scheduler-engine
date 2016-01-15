@@ -58,14 +58,13 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            
-            <!--plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                    <!- - Wird im Artefakt jar zusammengefasst, das freigegeben wird - ->
                 </configuration>
-            </plugin-->
+            </plugin>
         </plugins>
     </build>
 
