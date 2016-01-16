@@ -176,7 +176,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private def newAgent(agentRef: AgentRef) =
     new Agent(AgentConfiguration.forTest(httpPort = agentRef.port)
-      .copy(environment = List("TEST_AGENT_NAME" → s"${agentRef.name}")))
+      .copy(environment = Map("TEST_AGENT_NAME" → s"${agentRef.name}")))
 
   private def taskResultToAgentName(taskResult: TaskResult): Option[String] =
     for (m ← AgentNameRegex.findFirstMatchIn(taskResult.logString)) yield m.group(1)
