@@ -90,10 +90,10 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC {
     private static native java.lang.String _java_options__native(long cppReference);
 
 
-    @Override public java.lang.String _job_name() {
+    @Override public java.lang.String _job_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = _job_name__native(cppReference());
+            java.lang.String result = _job_path__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
@@ -103,7 +103,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC {
         }
     }
 
-    private static native java.lang.String _job_name__native(long cppReference);
+    private static native java.lang.String _job_path__native(long cppReference);
 
 
     @Override public boolean _log_stdout_and_stderr() {

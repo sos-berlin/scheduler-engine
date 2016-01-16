@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <script language="shell">
+        :;if false; then :
+        @echo off
+        goto WINDOWS
+        fi
+
+        echo /SEEN_NODE_PARAM=$SCHEDULER_PARAM_NODE_PARAM/
+        exit 0
+
+        :WINDOWS
+        echo /SEEN_NODE_PARAM=%SCHEDULER_PARAM_NODE_PARAM%/
+    </script>
+</job>

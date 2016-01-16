@@ -42,8 +42,8 @@ final class AgentUrisTest extends FreeSpec {
   }
 
   "task.tasks" in {
-    assert(agentUris.task(AgentTaskId("AGENT/TASK-ID")) ==
-      "http://example.com:9999/testPrefix/jobscheduler/agent/api/task/AGENT%2FTASK-ID")
+    assert(agentUris.task(AgentTaskId("TASK-ID")) ==
+      "http://example.com:9999/testPrefix/jobscheduler/agent/api/task/TASK-ID")
   }
 
   "tunnel" - {

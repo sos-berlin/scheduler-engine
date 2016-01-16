@@ -351,6 +351,7 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
         process_configuration._priority = _module->_priority;
         process_configuration._login = _module->_login;
         process_configuration._has_api = _module->has_api();
+        process_configuration._job_path = _task->job()->path();
         process_configuration._job_name = _job_name;
         process_configuration._task_id = _task_id;
 

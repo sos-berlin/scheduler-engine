@@ -20,7 +20,10 @@ final class AgentTaskIdTest extends FreeSpec {
     assert(AgentTaskId("123-789").string == "123-789")
     assert(AgentTaskId("-123-789").string == "-123-789")
     assert(AgentTaskId("123000000789").string == "123000000789")
+    AgentTaskId("allowed-characters-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz-012356789_.")
     intercept[IllegalArgumentException] { AgentTaskId("") }
+    intercept[IllegalArgumentException] { AgentTaskId("with space") }
+    intercept[IllegalArgumentException] { AgentTaskId("with-$variable") }
   }
 
   "AgentTaskIdGenerator" in {

@@ -29,6 +29,7 @@ struct Api_process_configuration : javabridge::has_proxy<Api_process_configurati
     Fill_zero _zero_;
     Host_and_port _controller_address;
     string _remote_scheduler_address;
+    string _job_path;
     string _job_name;
     int _task_id;
     bool _has_api;

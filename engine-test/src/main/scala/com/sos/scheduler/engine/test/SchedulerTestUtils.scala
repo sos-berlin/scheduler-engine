@@ -149,8 +149,11 @@ object SchedulerTestUtils {
   def runOrder(orderKey: OrderKey)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): OrderRunResult =
     awaitResult(startOrder(orderKey).result, timeout.duration)
 
+  def runOrder(orderCommand: OrderCommand)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): OrderRunResult =
+    awaitResult(startOrder(orderCommand).result, timeout.duration)
+
   def startOrder(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = startOrder(OrderCommand(orderKey))
-  
+
   def startOrder(orderCommand: OrderCommand)(implicit controller: TestSchedulerController): OrderRun = {
     implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
     inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.

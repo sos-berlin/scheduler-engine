@@ -28,7 +28,7 @@ object Command {
         case o: RequestFileOrderSourceContent ⇒ o.toJson.asJsObject withTypeField RequestFileOrderSourceContent.SerialTypeName
         case o: SendProcessSignal ⇒ o.toJson.asJsObject withTypeField SendProcessSignal.SerialTypeName
         case o: StartApiTask ⇒ o.toJson.asJsObject withTypeField StartApiTask.SerialTypeName
-        case o @ StartNonApiTask ⇒ o.toJson.asJsObject withTypeField StartNonApiTask.SerialTypeName
+        case o: StartNonApiTask ⇒ o.toJson.asJsObject withTypeField StartNonApiTask.SerialTypeName
         case o: Terminate ⇒ o.toJson.asJsObject withTypeField Terminate.SerialTypeName
         case AbortImmediately ⇒ JsObject() withTypeField AbortImmediately.SerialTypeName
         case o ⇒ throw new UnsupportedOperationException(s"Class ${o.getClass.getName} is not serializable to JSON")
@@ -42,7 +42,7 @@ object Command {
         case (RequestFileOrderSourceContent.SerialTypeName, o) ⇒ o.convertTo[RequestFileOrderSourceContent]
         case (SendProcessSignal.SerialTypeName, o) ⇒ o.convertTo[SendProcessSignal]
         case (StartApiTask.SerialTypeName, o) ⇒ o.convertTo[StartApiTask]
-        case (StartNonApiTask.SerialTypeName, o) ⇒ o.convertTo[StartNonApiTask.type]
+        case (StartNonApiTask.SerialTypeName, o) ⇒ o.convertTo[StartNonApiTask]
         case (Terminate.SerialTypeName, o) ⇒ o.convertTo[Terminate]
         case (AbortImmediately.SerialTypeName, o) ⇒ o.convertTo[AbortImmediately.type]
         case (typeName, _) ⇒ throw new IllegalArgumentException(s"Unknown JSON $$TYPE '$typeName'")

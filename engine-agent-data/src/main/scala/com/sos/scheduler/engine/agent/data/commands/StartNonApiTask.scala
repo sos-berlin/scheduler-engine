@@ -5,7 +5,10 @@ import spray.json.DefaultJsonProtocol._
 /**
  * @author Joacim Zschimmer
  */
-case object StartNonApiTask extends StartTask {
+final case class StartNonApiTask(meta: Option[StartTask.Meta])
+extends StartTask
+
+object StartNonApiTask {
   val SerialTypeName = "StartNonApiTask"
-  implicit val MyJsonFormat = jsonFormat0(() ⇒ StartNonApiTask)
+  implicit val MyJsonFormat = jsonFormat1(apply)
 }
