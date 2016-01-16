@@ -489,16 +489,16 @@ Time Task::calculated_start_time( const Time& now )
 
 //------------------------------------------------------------------------------------Task::cmd_end
 
-void Task::cmd_end(End_mode end_mode, const Duration& timeout)
+void Task::cmd_end(Task_end_mode end_mode, const Duration& timeout)
 {
-    assert( end_mode != end_none );
+    assert( end_mode != task_end_none );
 
     //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-    if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
+    if( end_mode == task_end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
-    if( _end != end_kill_immediately )  _end = end_mode;
+    if( _end != task_end_kill_immediately )  _end = end_mode;
 
-    if (end_mode == end_kill_immediately) {
+    if (end_mode == task_end_kill_immediately) {
         if (!timeout.is_zero()) {
             if (_module_instance) {
                 _module_instance->kill(Z_SIGTERM);
@@ -535,7 +535,7 @@ void Task::cmd_nice_end(Process_class_requestor* for_requestor)
     Scheduler_object* obj = dynamic_cast<Scheduler_object*>(for_requestor);
     if (!obj) z::throw_xc(Z_FUNCTION);
     _log->info(message_string("SCHEDULER-271", obj->obj_name()));   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
-    cmd_end( end_nice );
+    cmd_end( task_end_nice );
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
@@ -1396,7 +1396,7 @@ bool Task::do_something()
                         }
 
                         if( _state < s_ending  &&  _end ) {     // Task beenden?
-                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 ) {  // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
+                            if( _end == task_end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 ) {  // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
                                 if( !_scheduler_815_logged ) {
                                     _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
                                     _scheduler_815_logged = true;
@@ -1629,7 +1629,7 @@ bool Task::do_something()
                             if( now >= _idle_timeout_at ) {
                                 if( _job->_force_idle_timeout  ||  _job->above_min_tasks() ) {
                                     _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
-                                    _end = end_normal;
+                                    _end = task_end_normal;
                                     loop = true;
                                 } else {
                                     _idle_timeout_at = now + _job->_idle_timeout;
@@ -1899,7 +1899,7 @@ bool Task::do_something()
                 catch( exception& x ) { _log->error( "detach_order_after_error: " + string(x.what()) ); }
 
                 if( error_count == 0  &&  _state < s_ending ) {
-                    _end = end_normal;
+                    _end = task_end_normal;
                     loop = true;
                 }
                 else
@@ -2322,7 +2322,7 @@ void Task::finish(const Order_state_transition& error_order_state_transition)
     if( _web_service )
         _web_service->forward_task( *this );
 
-    _job->on_task_finished( this );
+    _job->on_task_finished(this, _end);
 
     {
         // eMail versenden

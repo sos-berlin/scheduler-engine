@@ -604,7 +604,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
             }
 
             Z_FOR_EACH(Task_set, _spooler->_task_subsystem->_task_set, t ) {
-                (*t)->cmd_end( Task::end_kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
+                (*t)->cmd_end(task_end_kill_immediately);      // Wirkt erst beim nächsten Task::do_something()
             }
 
             //_spooler->kill_all_processes();           Es reicht, wenn die Tasks gekillt werden. Die killen dann ihre abhängigigen Prozesse.
@@ -3199,7 +3199,7 @@ void Spooler::kill_all_processes( Kill_all_processs_option option )
 {
     if( option == kill_task_subsystem  &&  _task_subsystem )  
     {
-        _task_subsystem->end_all_tasks( Task::end_kill_immediately );
+        _task_subsystem->end_all_tasks(task_end_kill_immediately);
 
         // Auf "ps -ef" warten, bevor Spooler::kill_all_processes() ausgeführt wird. Dann kann ps den Prozess und seine Nachfahren zeigen
         sleep( 0.5 );  

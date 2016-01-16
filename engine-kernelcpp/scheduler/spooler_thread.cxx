@@ -142,7 +142,7 @@ bool Task_subsystem::try_to_free_process(Process_class_requestor* for_requestor,
 
 //-------------------------------------------------------------------Task_subsystem::kill_all_tasks
 
-void Task_subsystem::end_all_tasks( Task::End_mode end_mode )
+void Task_subsystem::end_all_tasks(Task_end_mode end_mode)
 {
     FOR_EACH_TASK( it, task )
     {

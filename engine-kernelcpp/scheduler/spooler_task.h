@@ -157,8 +157,7 @@ struct Task : Object,
 
     int                         id                          () const                                { return _id; }
 
-    enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
-    void                        cmd_end                     (End_mode = end_normal, const Duration& timeout = Duration(0));
+    void                        cmd_end                     (Task_end_mode = task_end_normal, const Duration& timeout = Duration(0));
     void                        cmd_nice_end                (Process_class_requestor*);
 
     void                        close                       ();
@@ -392,7 +391,7 @@ struct Task : Object,
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _begin_called;
-    End_mode                   _end;
+    Task_end_mode              _end;
     bool                       _scheduler_815_logged;
     bool                       _closed;
     int                        _delayed_after_error_task_id;
