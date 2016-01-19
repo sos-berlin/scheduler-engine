@@ -510,6 +510,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-725", "Persistent Order deleted from database" },
     { "SCHEDULER-726", "Task runs on $1" },
     { "SCHEDULER-727", "Keep-alive package sent to Agent" },
+    { "SCHEDULER-728", "Terminating task after <kill_task> command" },
     {}
 };
 } //namespace sos

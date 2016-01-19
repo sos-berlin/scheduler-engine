@@ -283,6 +283,10 @@ struct Task : Object,
         return _stderr_log_level;
     }
 
+    void set_killed_immediately_by_command() {
+        _killed_immediately_by_command = true;
+    }
+
   protected:
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;
@@ -414,6 +418,7 @@ struct Task : Object,
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
+    bool _killed_immediately_by_command;
     bool                       _module_instance_async_error;    // SCHEDULER-202
     bool                       _is_in_database;             // Datensatz für diese Task ist in der Datenbank
     bool                       _running_state_reached;      // Zustand s_running... erreicht

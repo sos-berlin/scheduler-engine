@@ -3590,6 +3590,7 @@ void Standard_job::kill_task(int id, bool immediately, const Duration& timeout)
 {
     Z_FOR_EACH( Task_set, _running_tasks, t ) {
         if( (*t)->_id == id ) { 
+            if (immediately) (*t)->set_killed_immediately_by_command();
             (*t)->cmd_end(immediately? task_end_kill_immediately : task_end_normal, timeout);       // Ruft kill_queued_task()
             return;
         }

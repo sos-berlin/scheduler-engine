@@ -571,11 +571,24 @@ void Task::set_error_xc_only( const Xc& x )
 
 void Task::set_error_xc_only_base( const Xc& x )
 {
-    _error = x;
-    if( _job )  
-        _job->set_error_xc_only( x );
-    if( _order )  
-        _order->set_task_error( x );
+    Xc_copy xx = x;
+    if (_killed_immediately_by_command) {
+        if (_error && strcmp(_error->code(), "SCHEDULER-728")) return;
+        xx = Xc("SCHEDULER-728");
+    }
+    bool timed_out = _error && strcmp(_error->code(), "SCHEDULER-272") == 0;
+    if (!timed_out) {
+        const char* scheduler272 = strstr(xx->what(), "SCHEDULER-272 ");
+        if (strcmp(xx->code(), "SCHEDULER-140") == 0 && scheduler272) {
+            xx->set_code("SCHEDULER-272");  // Remove SCHEDULER-140
+            xx->set_what(scheduler272);
+        }
+        _error = *xx;
+        if (_job) 
+            _job->set_error_xc_only(*xx);
+        if( _order )  
+            _order->set_task_error(*xx);
+    }
 
     _exit_code = 1;
 }
