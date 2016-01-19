@@ -90,7 +90,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          controller.suppressingTerminateOnError {
+          controller.toleratingErrorCodes(_ ⇒ true) {
             val runs = jobPaths map { runJobFuture(_) }
             awaitSuccess(Future.sequence(runs map { _.started }))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
@@ -156,7 +156,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          controller.suppressingTerminateOnError {
+          controller.toleratingErrorLogEvent(_ ⇒ true) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
               TrapJobPath, TrapMonitorJobPath,
