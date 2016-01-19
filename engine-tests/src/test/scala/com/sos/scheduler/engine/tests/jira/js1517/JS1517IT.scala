@@ -22,12 +22,12 @@ final class JS1517IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
   List(
-    "Without Agent" → ProcessClassConfiguration(agentUris = List("")),
-    "With Universal Agent" → ProcessClassConfiguration(agentUris = List(agentUri)),
-    "With TCP C++ Agent" → ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
-  .foreach { case (testGroupName, processClassConfig) ⇒
+    "Without Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List("")) },
+    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri)) },
+    "With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")) })
+  .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
     testGroupName in {
-      deleteAndWriteConfigurationFile(ProcessClassPath("/test"), processClassConfig)
+      deleteAndWriteConfigurationFile(ProcessClassPath("/test"), lazyProcessClassConfig())
       val result = runJobAndWaitForEnd(JobPath("/test"), Map("a" → "test"))
       assert(result.logString contains "TEST_VARIABLE_A=test")
     }

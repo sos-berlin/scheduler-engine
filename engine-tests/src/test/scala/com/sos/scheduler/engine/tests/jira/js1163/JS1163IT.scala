@@ -65,8 +65,8 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
-  private val universalAgentSetting = new UniversalAgentSetting(agentUri = agentUri)
-  private val classicAgentSetting = new ClassicAgentSetting(tcpPort = tcpPort)
+  private val universalAgentSetting = new UniversalAgentSetting(agentUri = () ⇒ agentUri)
+  private val classicAgentSetting = new ClassicAgentSetting(tcpPort = () ⇒ tcpPort)
   private val settings = List(NoAgentSetting, universalAgentSetting, classicAgentSetting)
 
   "Universal Agent unregisters task after normal termination" in {
@@ -277,15 +277,15 @@ private[js1163] object JS1163IT {
     def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
   }
 
-  private class UniversalAgentSetting(agentUri: String) extends Setting {
+  private class UniversalAgentSetting(agentUri: () ⇒ String) extends Setting {
     def name = "With Universal Agent"
-    def agentUriOption = Some(agentUri)
+    def agentUriOption = Some(agentUri())
     def windowsTerminateProcessReturnCode = ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
   }
 
-  private class ClassicAgentSetting(tcpPort: Int) extends Setting {
+  private class ClassicAgentSetting(tcpPort: () ⇒ Int) extends Setting {
     def name = "With TCP classic agent"
-    def agentUriOption = Some(s"127.0.0.1:$tcpPort")
+    def agentUriOption = Some(s"127.0.0.1:${tcpPort()}")
     def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
   }
 }

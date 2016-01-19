@@ -46,9 +46,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
   List(
-    "With TCP C++ Agent" → ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")),
-    "With Universal Agent" → ProcessClassConfiguration(agentUris = List(agentUri)))
-  .foreach { case (testGroupName, processClassConfig) ⇒
+    "With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")) },
+    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri)) })
+  .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[Event]]()
       lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
@@ -56,7 +56,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
       "(prepare process class)" in {
-        deleteAndWriteConfigurationFile(TestProcessClassPath, processClassConfig)
+        deleteAndWriteConfigurationFile(TestProcessClassPath, lazyProcessClassConfig())
       }
 
       "Run shell job via order" in {

@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
+import com.sos.scheduler.engine.eventbus.EventSubscription
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 
@@ -20,7 +21,8 @@ trait AgentWithSchedulerTest extends HasCloser {
 
   protected final lazy val agent = {
     val agent = new Agent(agentConfiguration)
-    eventBus.on[SchedulerCloseEvent] { case _ ⇒ agent.close() }   // Shutdown the server Agent after the client Engine
+    eventBus register EventSubscription[SchedulerCloseEvent] { _ ⇒ agent.close() }   // Shutdown the server Agent after the client Engine
+    // Never unregistered, Scheduler closes anyway
     agent
   }
   protected final lazy val agentUri = agent.localUri
