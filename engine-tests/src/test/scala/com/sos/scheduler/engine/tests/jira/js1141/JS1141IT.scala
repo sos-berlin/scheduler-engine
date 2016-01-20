@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
+import com.sos.scheduler.engine.test.SchedulerTestUtils.runJob
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1141.JS1141IT._
 import java.time.Instant.now
@@ -17,6 +17,7 @@ import org.scalatest.junit.JUnitRunner
 
 /**
  * JS-1141 BUG: When having an include parameter file with modification date before 30 of march and creation date after 30 of march JobScheduler does not start any more.
+ *
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
@@ -49,7 +50,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "At start, included file is from other day light saving time period" in {
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
   }
 
   "Job is older than include" in {
@@ -58,7 +59,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
       Thread.sleep(2500)
       instance[FolderSubsystem].updateFolders()
     }
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
   }
 
   "Job is newer than include" in {
@@ -67,7 +68,7 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
       Thread.sleep(2500)
       instance[FolderSubsystem].updateFolders()
     }
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
   }
 
   private def modifyIncludes(sign: Int): Unit = {

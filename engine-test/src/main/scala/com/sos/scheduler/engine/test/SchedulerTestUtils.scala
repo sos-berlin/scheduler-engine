@@ -101,34 +101,31 @@ object SchedulerTestUtils {
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
     instance[ProcessClassSubsystem].processClass(path)
 
-  def runJobAndWaitForEnd(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult = {
-    val run = runJobFuture(jobPath, variables)
+  def runJob(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult =
+    runJob(StartJobCommand(jobPath, variables))
+
+  def runJob(startJobCommand: StartJobCommand)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult = {
+    val run = startJob(startJobCommand)
     awaitResult(run.result, timeout.duration)
   }
 
-  def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskResult = {
-    val run = runJobFuture(jobPath)
-    awaitResult(run.result, timeout)
-  }
+  def startJob(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun =
+    startJob(StartJobCommand(jobPath, variables))
 
-  def runJobFuture(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskRun = {
+  def startJob(startJobCommand: StartJobCommand)(implicit controller: TestSchedulerController): TaskRun = {
     implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
     inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
-      val taskId = startJob(jobPath, variables = variables)
+      val commandResult = controller.scheduler executeXml startJobCommand
+      val taskId = TaskId((commandResult.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
       val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
       val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
       val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
       val result = for (_ ← closed; s ← startedTime; end ← ended; e ← endedTime)
-                   yield TaskResult(jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
-      TaskRun(jobPath, taskId, started, ended, closed, result)
+                   yield TaskResult(startJobCommand.jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
+      TaskRun(startJobCommand.jobPath, taskId, started, ended, closed, result)
     }
-  }
-
-  def startJob(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController): TaskId = {
-    val response = controller.scheduler executeXml StartJobCommand(jobPath, variables = variables)
-    TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
   }
 
   final case class TaskRun(

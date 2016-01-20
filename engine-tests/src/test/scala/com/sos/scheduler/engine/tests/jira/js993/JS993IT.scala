@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js993
 import com.sos.scheduler.engine.common.system.Bitness._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{interceptErrorLogEvent, runJobAndWaitForEnd}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{interceptErrorLogEvent, runJob}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -18,9 +18,9 @@ final class JS993IT extends FreeSpec with ScalaSchedulerTest {
       bitness match {
         case Bits64 ⇒
           interceptErrorLogEvent(MessageCode("COM-80020009")) {
-            runJobAndWaitForEnd(jobPath)
+            runJob(jobPath)
           }
-        case Bits32 ⇒ runJobAndWaitForEnd(jobPath)
+        case Bits32 ⇒ runJob(jobPath)
       }
     }
   }

@@ -18,7 +18,7 @@ final class JS1547IT extends FreeSpec with ScalaSchedulerTest {
 
 
   "show_state shows process in process class" in {
-    val runs = for (j ← List(JobPath("/test-shell"), JobPath("/test-api"))) yield runJobFuture(j)
+    val runs = for (j ← List(JobPath("/test-shell"), JobPath("/test-api"))) yield startJob(j)
     for (run ← runs) awaitSuccess(run.started)
     val answer = (scheduler executeXml <show_state subsystems='process_class' what='folders'/>).answer
     assert(runs forall { o ⇒ ! o.ended.isCompleted })

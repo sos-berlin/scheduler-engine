@@ -23,7 +23,7 @@ final class RemoteSchedulerStressIT extends FreeSpec with ScalaSchedulerTest {
     val initialThreadCount = Thread.activeCount
     scheduler executeXml <process_class name="remote" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
     for (i <- 1 to n) {
-      runJobAndWaitForEnd(testJobPath)
+      runJob(testJobPath)
       withClue(s"Thread count should be nearly constant after job run $i:") {
         Thread.activeCount should be (initialThreadCount +- 20)
       }

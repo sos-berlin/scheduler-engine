@@ -25,13 +25,13 @@ final class JS1161IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job with three live_include in own scheduler" in {
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
     testEnvironment.taskLogFileString(TestJobPath).replaceAll("[\r\n]", " ") should
       fullyMatch regex ".*LOCAL-START.*ONE.*MIDDLE.*TWO.*THREE.*LOCAL-END.*".r
   }
 
   "Job with three live_include in remote scheduler" in {
-    runJobAndWaitForEnd(RemoteJobPath)
+    runJob(RemoteJobPath)
     testEnvironment.taskLogFileString(RemoteJobPath).replaceAll("[\r\n]", " ") should
       fullyMatch regex ".*REMOTE-START.*ONE.*MIDDLE.*TWO.*THREE.*REMOTE-END.*".r
   }

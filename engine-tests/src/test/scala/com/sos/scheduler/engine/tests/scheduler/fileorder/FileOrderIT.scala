@@ -146,7 +146,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
     }
 
     "Ordinary job is still startable" in {
-      runJobAndWaitForEnd(JobPath("/test-ordinary"))
+      runJob(JobPath("/test-ordinary"))
     }
   }
 

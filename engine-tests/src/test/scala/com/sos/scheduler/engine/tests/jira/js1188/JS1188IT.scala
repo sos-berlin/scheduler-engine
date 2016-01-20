@@ -57,13 +57,13 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "Job-API process_class.remote_scheduler can be changed only with (old) non-HTTP agents" in {
-    runJobAndWaitForEnd(JobPath("/test-api"))
+    runJob(JobPath("/test-api"))
     job(JobPath("/test-api")).state should not equal JobState.stopped
   }
 
   "With unreachable agents, task waits 2 times agentConnectRetryDelay because no agent is reachable" in {
     withEventPipe { eventPipe ⇒
-      waitingTaskRun = runJobFuture(AgentsJobPath)
+      waitingTaskRun = startJob(AgentsJobPath)
       waitingStopwatch = new Stopwatch
       sleep(1.s)
       requireTaskIsWaitingForAgent(waitingTaskRun.taskId)
@@ -97,7 +97,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time, FixedPriority" in {
     withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
-      val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
+      val results = for (_ ← 1 to 2*n + 1) yield runJob(AgentsJobPath)
       val taskAgentNames = results flatMap taskResultToAgentName
       assert(taskAgentNames == List.fill(2*n + 1) { agentRefs(1).name })  // B B B B B B B B B
       stopwatch.duration should be < TestTimeout
@@ -109,7 +109,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     writeConfigurationFile(AgentsProcessClassPath, ProcessClassConfiguration(agentUris = agentRefs map { _.uri }, select = Some("next")))
     withEventPipe { eventPipe ⇒
       val stopwatch = new Stopwatch
-      val results = for (_ ← 1 to 2*n + 1) yield runJobAndWaitForEnd(AgentsJobPath)
+      val results = for (_ ← 1 to 2*n + 1) yield runJob(AgentsJobPath)
       val taskAgentNames = results flatMap taskResultToAgentName
       def alternatingAgentNames = (Iterator continually { List(agentRefs(1).name, agentRefs(3).name) }).flatten
       assert(taskAgentNames == (alternatingAgentNames drop 0 take 2*n + 1).toList ||  // B D B D B D B D B or
@@ -124,7 +124,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       assertResult(List("http://127.0.0.254:1", "http://127.0.0.253:1")) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
-      val taskRun = runJobFuture(ReplaceTestJobPath)
+      val taskRun = startJob(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
       writeConfigurationFile(ReplaceProcessClassPath, ProcessClassConfiguration(agentUris = List(agentRefs(1).uri)))
       assertResult(List(agentRefs(1).uri)) {
@@ -143,7 +143,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       for (a ← runningAgents.values) {
         a.close()
       }
-      val taskRun = runJobFuture(ReplaceTestJobPath)
+      val taskRun = startJob(ReplaceTestJobPath)
       eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
       def expectedErrorLogEvent(e: ErrorLogEvent) =
         e.codeOption == Some(MessageCode("SCHEDULER-280")) ||

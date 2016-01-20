@@ -16,6 +16,6 @@ import org.scalatest.junit.JUnitRunner
 final class JS1370IT extends FreeSpec with ScalaSchedulerTest {
 
   "JS1370IT" in {
-    runJobAndWaitForEnd(JobPath("/test"))
+    runJob(JobPath("/test"))
   }
 }

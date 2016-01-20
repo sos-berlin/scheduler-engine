@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.job.TaskState
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, runJobFuture, task}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, startJob, task}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1187.JS1187IT._
@@ -20,6 +20,7 @@ import org.scalatest.junit.JUnitRunner
 
 /**
  * JS-1187 Job waits until agent is available.
+ *
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
@@ -35,7 +36,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   "With invalid remote_scheduler address, task does not start" in {
     def ignorable(e: ErrorLogEvent) = (e.message contains "spray.http.IllegalUriException") || e.codeOption() == Some(MessageCode("SCHEDULER-280"))
     controller.toleratingErrorLogEvent(ignorable) {  // Z-JAVA-105  Java exception spray.http.IllegalUriException: Invalid port 99999, method=CallObjectMethodA []
-      awaitSuccess(runJobFuture(InvalidRemoteJobPath).closed)
+      awaitSuccess(startJob(InvalidRemoteJobPath).closed)
     }
     job(InvalidRemoteJobPath).isPermanentlyStopped shouldBe true
   }
@@ -46,7 +47,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
   "With unreachable remote_scheduler, the waiting task can be killed" in {
     val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
-    val taskRun = runJobFuture(UnreachableRemoteJobPath)
+    val taskRun = startJob(UnreachableRemoteJobPath)
     awaitResult(warningFuture, TestTimeout)
     requireIsWaitingForAgent(taskRun.taskId)
     scheduler executeXml <kill_task job={UnreachableRemoteJobPath.string} id={taskRun.taskId.string}/>
@@ -56,7 +57,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   "With unreachable remote_scheduler, task waits until agent is reachable" in {
     autoClosing(Agent.forTest(agentHttpPort)) { agent ⇒
       val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
-      val taskRun = runJobFuture(UnreachableRemoteJobPath)
+      val taskRun = startJob(UnreachableRemoteJobPath)
       awaitResult(warningFuture, TestTimeout)
       requireIsWaitingForAgent(taskRun.taskId)
       awaitResult(agent.start(), TestTimeout)

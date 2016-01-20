@@ -54,7 +54,7 @@ final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   private def checkTasks(): Unit = {
     val eventPipe = controller.newEventPipe()
     for (i <- 1 to 2)
-      runJobAndWaitForEnd(testJobPath)
+      runJob(testJobPath)
     eventPipe.close()
   }
 }

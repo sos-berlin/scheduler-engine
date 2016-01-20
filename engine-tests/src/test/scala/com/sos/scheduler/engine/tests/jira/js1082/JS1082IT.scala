@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.t
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.taskIdOffset
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity
-import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
+import com.sos.scheduler.engine.test.SchedulerTestUtils.runJob
 import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1082.JS1082IT._
@@ -21,13 +21,13 @@ import org.scalatest.junit.JUnitRunner
 final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
 
   "While waiting for reconnect with database, JobScheduler should reject command start-job" in {
-    runJobAndWaitForEnd(testJobPath).taskId shouldEqual TaskId(taskIdOffset)
+    runJob(testJobPath).taskId shouldEqual TaskId(taskIdOffset)
     withDatabaseError {
       interceptDatabaseError {
-        runJobAndWaitForEnd(testJobPath)
+        runJob(testJobPath)
       }
     }
-    runJobAndWaitForEnd(testJobPath).taskId shouldEqual TaskId(taskIdOffset + 1)
+    runJob(testJobPath).taskId shouldEqual TaskId(taskIdOffset + 1)
     autoClosing(instance[EntityManagerFactory].createEntityManager()) { entityManager ⇒
       val taskHistoryEntities = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
       taskHistoryEntities map { o ⇒ o.id -> o.jobPath } shouldEqual List(

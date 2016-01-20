@@ -34,9 +34,9 @@ final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     s"stdout and stderr of shell, monitored shell and job jobs - $testName" in {
       scheduler executeXml lazyProcessClass()
       withEventPipe { eventPipe ⇒
-        val shellRun = runJobFuture(JobPath("/test-shell"))
-        val monitoredShellRun = runJobFuture(JobPath("/test-shell-monitor"))
-        val javaRun = runJobFuture(JobPath("/test-java"))
+        val shellRun = startJob(JobPath("/test-shell"))
+        val monitoredShellRun = startJob(JobPath("/test-shell-monitor"))
+        val javaRun = startJob(JobPath("/test-java"))
         val firstPollAfter = now() + 14.s + StdoutPollingInterval
 
         awaitSuccess(shellRun.started)

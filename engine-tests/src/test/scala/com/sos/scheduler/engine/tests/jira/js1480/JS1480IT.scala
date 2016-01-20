@@ -26,7 +26,7 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "Agent web services" in {
     eventBus.awaitingEvent[InfoLogEvent](_.message contains TestJob.LogLine) {
-      runJobFuture(TestJobPath)
+      startJob(TestJobPath)
     }
     val agentClient = instance[AgentClientFactory].apply(agentUri)
     val view = awaitSuccess(agentClient.task.overview)

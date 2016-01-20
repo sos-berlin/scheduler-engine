@@ -28,7 +28,7 @@ final class JS1517IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
     testGroupName in {
       deleteAndWriteConfigurationFile(ProcessClassPath("/test"), lazyProcessClassConfig())
-      val result = runJobAndWaitForEnd(JobPath("/test"), Map("a" → "test"))
+      val result = runJob(JobPath("/test"), Map("a" → "test"))
       assert(result.logString contains "TEST_VARIABLE_A=test")
     }
   }

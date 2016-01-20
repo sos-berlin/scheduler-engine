@@ -166,7 +166,7 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentWith
             val jobName = List(language, agentMode) ++ withMonitor.option("monitor") filter { _.nonEmpty } mkString ("test-", "-", "")
             jobName in {
               val taskResult = controller.toleratingErrorCodes(toleratedErrorCodes) {
-                runJobAndWaitForEnd(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ methodReturns)
+                runJob(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ methodReturns)
               }
               assert(calls(taskResult.logString) == expectedCalls)
             }
@@ -180,7 +180,7 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentWith
       for (agentMode ← List("", "agent")) {
         val jobName = List("test-shell", agentMode, "monitor") filter { _.nonEmpty } mkString "-"
         s"$jobName exits with $exitCode" in {
-          def run() = runJobAndWaitForEnd(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ List("EXIT" → exitCode.toString))
+          def run() = runJob(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ List("EXIT" → exitCode.toString))
           val taskResult =
             exitCode match {
               case 1 ⇒ interceptErrorLogEvent(MessageCode("SCHEDULER-280")) { run() } .result

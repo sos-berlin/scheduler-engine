@@ -34,7 +34,7 @@ final class JS1393IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   private def testOutput(): Unit = {
-    val log = runJobAndWaitForEnd(JobPath("/test")).logString
+    val log = runJob(JobPath("/test")).logString
     val emptyEcho = if (isWindows) "\"\"" else ""
     selectStdLines(log, "[stdout]").toSet shouldEqual
       Set(emptyEcho, "out out out out out out out out out out out out out out out out out out out out out out out out out")

@@ -23,7 +23,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1511IT extends FreeSpec with ScalaSchedulerTest {
 
   "No pause" in {
-    runJobAndWaitForEnd(ShellJobPath)
+    runJob(ShellJobPath)
     runOrder(TestJobChainPath orderKey "1")
   }
 
@@ -31,7 +31,7 @@ final class JS1511IT extends FreeSpec with ScalaSchedulerTest {
     eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-902")) {
       scheduler executeXml <modify_spooler cmd='pause'/>
     } .message should include ("state=paused")
-    val taskRun = runJobFuture(ShellJobPath)
+    val taskRun = startJob(ShellJobPath)
     val orderRun = startOrder(TestJobChainPath orderKey "2")
     sleep(1.s)
     assert(!taskRun.started.isCompleted)
@@ -43,7 +43,7 @@ final class JS1511IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "No pause again" in {
-    runJobAndWaitForEnd(ShellJobPath)
+    runJob(ShellJobPath)
     runOrder(TestJobChainPath orderKey "1")
   }
 }

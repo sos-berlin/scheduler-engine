@@ -132,7 +132,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
     val aJobPath = JobPath("/js1516/test-a")
     val bJobPath = JobPath("/js1516/test-b")
     val futures = inSchedulerThread {
-      for (jobPath ← List(aJobPath, bJobPath, aJobPath, bJobPath)) yield runJobFuture(jobPath).result
+      for (jobPath ← List(aJobPath, bJobPath, aJobPath, bJobPath)) yield startJob(jobPath).result
     }
     awaitResults(futures)
   }

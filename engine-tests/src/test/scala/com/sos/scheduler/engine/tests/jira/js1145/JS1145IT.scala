@@ -36,13 +36,13 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Named monitor with overridden ordering" in {
-    runJob(JobPath("/subfolder/test-ordering-named-monitor")) shouldEqual List(
+    runJobReturnLogLines(JobPath("/subfolder/test-ordering-named-monitor")) shouldEqual List(
       TestCMonitor.PreStepString, TestBMonitor.PreStepString, TestAMonitor.PreStepString,
       TestAMonitor.PostStepString, TestBMonitor.PostStepString, TestCMonitor.PostStepString)
   }
 
   "Anonymous monitor" in {
-    runJob(JobPath("/subfolder/test-anonymous-monitor")) shouldEqual List(
+    runJobReturnLogLines(JobPath("/subfolder/test-anonymous-monitor")) shouldEqual List(
       TestAMonitor.PreStepString, TestBMonitor.PreStepString, TestCMonitor.PreStepString,
       TestCMonitor.PostStepString, TestBMonitor.PostStepString, TestAMonitor.PostStepString)
   }
@@ -67,7 +67,7 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Deleting a monitor stopps dependant job and ends its tasks" in {
-    val run = runJobFuture(NamedMonitorJobPath, variables = Map(TestJob.DelayName → "30"))
+    val run = startJob(NamedMonitorJobPath, variables = Map(TestJob.DelayName → "30"))
     awaitSuccess(run.started)
     sleep(2.s)
     assert(run.ended.isCompleted)
@@ -92,7 +92,7 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
     assert(job(JavascriptMonitorJobPath).fileBasedState == FileBasedState.active)
     assert(job(JavascriptMonitorJobPath).state == JobState.pending)
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-399"), MessageCode("SCHEDULER-280"))) {
-      runJobAndWaitForEnd(JavascriptMonitorJobPath).logString should include ("SCHEDULER-399")
+      runJob(JavascriptMonitorJobPath).logString should include ("SCHEDULER-399")
     }
   }
 
@@ -108,13 +108,13 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
     // Just to prove that <script live_file="..."> does not inhibit a job start, if the requisite is missing.
     // So, we do not implement this for <script> in <monitor>, too.
     val jobPath = JobPath("/subfolder/test-include")
-    runJob(jobPath) shouldEqual List("TEST-INCLUDE.JS")
+    runJobReturnLogLines(jobPath) shouldEqual List("TEST-INCLUDE.JS")
     val file = testEnvironment.configDirectory / "subfolder/test-include.js"
     val renamedFile = new File(s"$file~")
     Files.move(file, renamedFile)
     updateFolders()
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-399"))) {
-      runJobAndWaitForEnd(jobPath).logString should include ("SCHEDULER-399")
+      runJob(jobPath).logString should include ("SCHEDULER-399")
     }
   }
 
@@ -123,17 +123,17 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def runNamedMonitorJob(): Unit = {
-    runJob(NamedMonitorJobPath) shouldEqual List(
+    runJobReturnLogLines(NamedMonitorJobPath) shouldEqual List(
       TestAMonitor.PreStepString, TestCMonitor.PreStepString, TestBMonitor.PreStepString,
       TestBMonitor.PostStepString, TestCMonitor.PostStepString, TestAMonitor.PostStepString)
   }
 
   private def runNamedJavascriptMonitorJob(): Unit = {
-    runJob(JavascriptMonitorJobPath) shouldEqual List("JAVASCRIPT PRE-STEP", "JAVASCRIPT POST-STEP")
+    runJobReturnLogLines(JavascriptMonitorJobPath) shouldEqual List("JAVASCRIPT PRE-STEP", "JAVASCRIPT POST-STEP")
   }
 
-  private def runJob(jobPath: JobPath): immutable.Seq[String] =
-    runJobAndWaitForEnd(jobPath).logString.split("\r?\n").toVector collect { case LogMarkerRegex(o) ⇒ o }
+  private def runJobReturnLogLines(jobPath: JobPath): immutable.Seq[String] =
+    runJob(jobPath).logString.split("\r?\n").toVector collect { case LogMarkerRegex(o) ⇒ o }
 }
 
 private[js1145] object JS1145IT {

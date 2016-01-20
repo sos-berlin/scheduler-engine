@@ -21,7 +21,7 @@ final class JS1260IT extends FreeSpec with ScalaSchedulerTest {
 
   "JS1260IT" in {
     controller.toleratingErrorCodes(Set(ErrorCode)) {
-      runJobAndWaitForEnd(TestJobPath)
+      runJob(TestJobPath)
     }
     val firstPart = schedulerLog.contentString
     firstPart should include (UnwantedString)  // Here it's okay

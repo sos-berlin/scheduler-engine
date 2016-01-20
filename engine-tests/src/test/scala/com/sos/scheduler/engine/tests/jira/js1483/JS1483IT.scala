@@ -23,20 +23,20 @@ import org.scalatest.junit.JUnitRunner
 final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   "Without a license key, Agent runs one task at a time - JS-1482" in {
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
     sleep(100.ms)  // Sometimes the task has not been closed before the next start ???
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
     sleep(100.ms)
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
     sleep(100.ms)
   }
 
   "Task start failure due to missing license key is stated in Job.state_text" in {
     // Test does not work with external license keys as in ~/sos.ini or /etc/sos.ini
-    val firstRun = runJobFuture(SleepJobPath)
+    val firstRun = startJob(SleepJobPath)
     awaitSuccess(firstRun.started)
     controller.toleratingErrorCodes(_ ⇒ true) {
-      runJobFuture(TestJobPath)
+      startJob(TestJobPath)
       waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.stopped }
       assert(job(TestJobPath).stateText startsWith classOf[LicenseKeyParameterIsMissingException].getSimpleName)
       assert(job(TestJobPath).stateText contains "No license key provided by master to execute jobs in parallel")
