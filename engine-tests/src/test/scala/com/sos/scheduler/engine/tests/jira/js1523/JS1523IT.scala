@@ -44,8 +44,8 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "Server-side and client-side heartbeats keep the tasks alive" in {
-    val serverSide = runJobFuture(SleepJobPath)
-    val clientSide = runJobFuture(DelaySpoolerProcessJobPath, Map("delay" → delay.getSeconds.toString))
+    val serverSide = startJob(SleepJobPath)
+    val clientSide = startJob(DelaySpoolerProcessJobPath, Map("delay" → delay.getSeconds.toString))
     awaitSuccess(serverSide.result).returnCode shouldEqual ReturnCode.Success
     awaitSuccess(clientSide.result).returnCode shouldEqual ReturnCode.Success
   }
@@ -54,7 +54,7 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     try {
       HeartbeatService.staticSupressed = true
       testLostTask {
-        runJobAndWaitForEnd(SleepJobPath)
+        runJob(SleepJobPath)
       }
     }
     finally HeartbeatService.staticSupressed = false
@@ -67,7 +67,7 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     try {
       debug.suppressed = true
       testLostTask {
-        runJobAndWaitForEnd(DelaySpoolerProcessJobPath, Map("delay" → delay.getSeconds.toString))
+        runJob(DelaySpoolerProcessJobPath, Map("delay" → delay.getSeconds.toString))
       }
     }
     finally debug.suppressed = false
@@ -79,7 +79,7 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       debug.clientTimeout = Some(1.s)
       val t = now
       testLostTask {
-        runJobAndWaitForEnd(SleepJobPath)
+        runJob(SleepJobPath)
       }
       val duration = now - t
       assert(duration >= debug.clientTimeout.get && duration < SleepJobDuration)

@@ -25,7 +25,7 @@ final class JS1463IT extends FreeSpec with ScalaSchedulerTest {
       MessageCode("SCHEDULER-280"),   // Process terminated with exit code 99 (0x63)
       MessageCode("SCHEDULER-279")))  // Unix: Process terminated with signal 9 (SIGKILL Kill, unblockable)
     {
-      runJobAndWaitForEnd(TestJobPath)
+      runJob(TestJobPath)
     }
     assert(result.duration >= 2.s)  // One second shorter than the timeout, for some test machines (namely gimli)
     assert(result.returnCode == ReturnCode(if (isUnix) -9 else 99))  // -9: SIGKILL

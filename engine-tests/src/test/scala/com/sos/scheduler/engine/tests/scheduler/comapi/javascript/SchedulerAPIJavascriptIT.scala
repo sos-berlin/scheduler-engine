@@ -37,7 +37,7 @@ final class SchedulerAPIJavascriptIT extends FreeSpec with ScalaSchedulerTest wi
   "javascript job" - {
     for ((name, jobPath) ← List("Without Agent" → JavascriptJobPath, "With Agent" -> JavascriptJobPath.asAgent)) {
       name in {
-        val run = runJobFuture(jobPath)
+        val run = startJob(jobPath)
         val taskResult: TaskResult = awaitSuccess(run.result)
         taskResult.logString should include("Hello world")
       }
@@ -47,7 +47,7 @@ final class SchedulerAPIJavascriptIT extends FreeSpec with ScalaSchedulerTest wi
   "shell job with javascript monitor" - {
     for ((name, jobPath) ← List("Without Agent" → JavascriptMonitorJobPath, "With Agent" -> JavascriptMonitorJobPath.asAgent)) {
       name in {
-        val run = runJobFuture(jobPath)
+        val run = startJob(jobPath)
         val taskResult: TaskResult = awaitSuccess(run.result)
         taskResult.logString should include("Hello world")
         taskResult.logString should include("##this is spooler_task_before##")

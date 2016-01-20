@@ -26,7 +26,7 @@ final class JS1177IT extends FreeSpec with ClusterTest  {
 
   "Command show_history shows job starts of all cluster members" in {
     awaitSuccess(otherScheduler.postCommand(StartJobCommand(TestJobPath)))
-    runJobAndWaitForEnd(TestJobPath)
+    runJob(TestJobPath)
     val showHistoryContainsBothJobStarts =
       waitForCondition(TestTimeout, 500.ms) {
         val ports = showHistoryMemberTcpPorts()

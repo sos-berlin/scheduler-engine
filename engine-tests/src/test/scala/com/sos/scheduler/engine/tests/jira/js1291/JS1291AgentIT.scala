@@ -46,9 +46,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
   List(
-    "With TCP C++ Agent" → ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")),
-    "With Universal Agent" → ProcessClassConfiguration(agentUris = List(agentUri)))
-  .foreach { case (testGroupName, processClassConfig) ⇒
+    "With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")) },
+    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri)) })
+  .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[Event]]()
       lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
@@ -56,7 +56,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
       "(prepare process class)" in {
-        deleteAndWriteConfigurationFile(TestProcessClassPath, processClassConfig)
+        deleteAndWriteConfigurationFile(TestProcessClassPath, lazyProcessClassConfig())
       }
 
       "Run shell job via order" in {
@@ -126,13 +126,13 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       }
 
       "Shell with monitor has access to stdout_text" in {
-        awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString should include ("SPOOLER_PROCESS_AFTER")
+        awaitSuccess(startJob(JobPath("/no-crash")).result).logString should include ("SPOOLER_PROCESS_AFTER")
       }
 
       "Shell with monitor - handling unexpected process termination of monitor" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
         toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
-          val run = runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString))
+          val run = startJob(JobPath("/crash"), variables = Map(SignalName → file.toString))
           file.append("x")
           awaitSuccess(run.result).logString should include ("SCHEDULER-202")
         }
@@ -141,15 +141,15 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
         toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
-          val noCrash = runJobFuture(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
-          awaitSuccess(runJobFuture(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include ("SCHEDULER-202")
+          val noCrash = startJob(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
+          awaitSuccess(startJob(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include ("SCHEDULER-202")
           awaitSuccess(noCrash.result).logString should include ("SPOOLER_PROCESS_AFTER")
         }
       }
 
       "Task log contains stdout and stderr of a shell script with monitor" in {
         toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
-          val logString = awaitSuccess(runJobFuture(JobPath("/no-crash")).result).logString
+          val logString = awaitSuccess(startJob(JobPath("/no-crash")).result).logString
           logString should include ("SPOOLER_PROCESS_AFTER")
           logString should include ("TEXT FOR STDOUT")
           logString should include ("TEXT FOR STDERR")
@@ -159,14 +159,14 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       "Exception in Monitor" in {
         toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
         //toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
-          runJobAndWaitForEnd(JobPath("/throwing-monitor"))
+          runJob(JobPath("/throwing-monitor"))
         }
       }
     }
   }
 
   "Universal Agent sos.spooler API characteristics" in {
-    runJobAndWaitForEnd(JobPath("/test-api"))
+    runJob(JobPath("/test-api"))
   }
 }
 

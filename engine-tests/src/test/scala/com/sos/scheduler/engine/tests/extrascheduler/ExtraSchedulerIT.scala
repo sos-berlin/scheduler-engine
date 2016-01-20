@@ -37,7 +37,8 @@ final class ExtraSchedulerIT extends FreeSpec with ProvidesTestDirectory {
     withCloser { implicit closer ⇒
       val testEnvironment = TestEnvironment(TestConfiguration(testClass), testDirectory).closeWithCloser
       testEnvironment.prepare()
-      val actorSystem = Akkas.newActorSystem("TEST")
+      val actorSystem = Akkas.newActorSystem(getClass.getSimpleName)
+      closer.onClose { actorSystem.shutdown() }
       import actorSystem.dispatcher
       val injector = Guice.createInjector(new ScalaAbstractModule {
         def configure() = bindInstance[ActorSystem](actorSystem)

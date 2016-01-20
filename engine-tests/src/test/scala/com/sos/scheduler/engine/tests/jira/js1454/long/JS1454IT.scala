@@ -28,7 +28,7 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
 
   "Proper termination with long keep-alive duration" in {
     writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
-    runJobAndWaitForEnd(JobPath("/test-sleep"))
+    runJob(JobPath("/test-sleep"))
     val schedulerLog = testEnvironment.schedulerLog.contentString
     assert(schedulerLog contains s"{$KeepAliveLogCategory} Stopped")
   }

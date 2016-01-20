@@ -48,7 +48,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job script with include" in {
-    runJobAndWaitForEnd(TextIncludeJobPath)
+    runJob(TextIncludeJobPath)
   }
 
   "XML Schema check" in {

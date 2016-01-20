@@ -65,18 +65,18 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
-  private val universalAgentSetting = new UniversalAgentSetting(agentUri = agentUri)
-  private val classicAgentSetting = new ClassicAgentSetting(tcpPort = tcpPort)
+  private val universalAgentSetting = new UniversalAgentSetting(agentUri = () ⇒ agentUri)
+  private val classicAgentSetting = new ClassicAgentSetting(tcpPort = () ⇒ tcpPort)
   private val settings = List(NoAgentSetting, universalAgentSetting, classicAgentSetting)
 
   "Universal Agent unregisters task after normal termination" in {
     requireNoTasksAreRegistered()
-    awaitResults(for (jobPath ← List(JobPath("/test-short"), JobPath("/test-short-api"))) yield runJobFuture(jobPath).closed)
+    awaitResults(for (jobPath ← List(JobPath("/test-short"), JobPath("/test-short-api"))) yield startJob(jobPath).closed)
     requireNoTasksAreRegistered()
   }
 
   "kill_task with timeout but without immediately=true is rejected" in {
-    val run = runJobFuture(TestJobPath)
+    val run = startJob(TestJobPath)
     interceptSchedulerError(MessageCode("SCHEDULER-467")) {
       awaitSuccess(run.started)
       scheduler executeXml <kill_task job={TestJobPath.string} id={run.taskId.string} timeout="3"/>
@@ -91,7 +91,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
           controller.toleratingErrorCodes(_ ⇒ true) {
-            val runs = jobPaths map { runJobFuture(_) }
+            val runs = jobPaths map { startJob(_) }
             awaitSuccess(Future.sequence(runs map { _.started }))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
             sleep(1.s)
@@ -142,7 +142,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private def addWindowsTests(): Unit = {
     "kill_task with timeout on Windows is rejected" in {
-      val run = runJobFuture(WindowsJobPath)
+      val run = startJob(WindowsJobPath)
       interceptSchedulerError(MessageCode("SCHEDULER-490")) {
         awaitSuccess(run.started)
         scheduler executeXml <kill_task job={WindowsJobPath.string} id={run.taskId.string} immediately="true" timeout="3"/>
@@ -162,7 +162,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
               TrapJobPath, TrapMonitorJobPath,
               IgnoringJobPath, IgnoringMonitorJobPath,
               ApiJobPath)
-            val runs = jobPaths map { runJobFuture(_) }
+            val runs = jobPaths map { startJob(_) }
             awaitSuccess(Future.sequence(runs map { _.started }))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
             sleep(1.s)
@@ -277,15 +277,15 @@ private[js1163] object JS1163IT {
     def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
   }
 
-  private class UniversalAgentSetting(agentUri: String) extends Setting {
+  private class UniversalAgentSetting(agentUri: () ⇒ String) extends Setting {
     def name = "With Universal Agent"
-    def agentUriOption = Some(agentUri)
+    def agentUriOption = Some(agentUri())
     def windowsTerminateProcessReturnCode = ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
   }
 
-  private class ClassicAgentSetting(tcpPort: Int) extends Setting {
+  private class ClassicAgentSetting(tcpPort: () ⇒ Int) extends Setting {
     def name = "With TCP classic agent"
-    def agentUriOption = Some(s"127.0.0.1:$tcpPort")
+    def agentUriOption = Some(s"127.0.0.1:${tcpPort()}")
     def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
   }
 }

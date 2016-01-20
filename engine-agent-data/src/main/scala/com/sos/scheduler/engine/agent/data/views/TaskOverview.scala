@@ -27,9 +27,9 @@ object TaskOverview {
   implicit val MyJsonFormat = jsonFormat7(apply)
 
   final case class Arguments(
-    @deprecated("Use StartTast.Meta", "1.10.3")
+    @deprecated("Use StartTask.Meta", "1.10.3")
     taskId: TaskId,
-    @deprecated("Use StartTast.Meta", "1.10.3")
+    @deprecated("Use StartTask.Meta", "1.10.3")
     jobName: String,
     language: String,
     javaClassName: Option[String],

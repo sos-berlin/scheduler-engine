@@ -38,7 +38,7 @@ final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private def testOutput(): Unit = {
     eventBus.awaitingEvent[InfoLogEvent](_.message contains "TEST-STDOUT") {
       eventBus.awaitingEvent[ErrorLogEvent](_.message contains "TEST-STDERR") {
-        runJobAndWaitForEnd(JobPath("/test"))
+        runJob(JobPath("/test"))
       } .message should not include "[stderr]"
     } .message should not include "[stdout]"
   }

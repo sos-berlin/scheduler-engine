@@ -15,7 +15,7 @@ private[configuration] object AkkaProvider {
   private val ConfigurationResourcePath = "com/sos/scheduler/engine/kernel/configuration/akka.conf"
 
   private[configuration] def newActorSystem(closer: Closer): ActorSystem = {
-    val actorSystem = ActorSystem("JobScheduler-Engine", ConfigFactory.load(currentClassLoader, ConfigurationResourcePath))
+    val actorSystem = ActorSystem("Engine", ConfigFactory.load(currentClassLoader, ConfigurationResourcePath))
     closer.onClose {
       actorSystem.shutdown()
       actorSystem.awaitTermination(30.seconds)

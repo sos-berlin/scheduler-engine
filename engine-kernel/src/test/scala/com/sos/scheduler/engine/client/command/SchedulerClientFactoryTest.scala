@@ -29,7 +29,7 @@ final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
   private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val injector = Guice.createInjector(new AbstractModule {
     override def configure(): Unit = {
-      bind(classOf[ActorSystem]) toInstance ActorSystem("HttpSchedulerCommandClientTest", AkkaConfig)
+      bind(classOf[ActorSystem]) toInstance ActorSystem("SchedulerClientFactoryTest", AkkaConfig)
       bind(classOf[ExecutionContext]) toInstance ExecutionContext.global
     }
   })

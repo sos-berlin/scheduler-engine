@@ -28,7 +28,7 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "spooler.log.start_new_file should keep log category {scheduler}" in {
-    runJobAndWaitForEnd(JobPath("/start_new_file"))
+    runJob(JobPath("/start_new_file"))
     scheduler executeXml <params/>  // Logs the command
     withClue("New file should not contain previous lines:") {
       assert(!(schedulerLogAsString contains testCommand))
@@ -38,7 +38,7 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
 
   // For manual testing. To be fast, remove sleep(1) from log.cxx.
   //"Call start_new_files multiple times" in {
-  //  runJobAndWaitForEnd(JobPath("/start_new_file_stress"))
+  //  runJob(JobPath("/start_new_file_stress"))
   //}
 
   private def checkSchedulerLog(): Unit = {

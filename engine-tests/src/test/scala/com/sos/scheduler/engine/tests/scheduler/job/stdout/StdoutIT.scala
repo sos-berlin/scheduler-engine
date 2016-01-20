@@ -27,16 +27,16 @@ final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     mainArguments = List(s"-tcp-port=$tcpPort"))
 
   private lazy val processClasses = Map(
-    "Local" → <process_class name="test" replace="true"/>,
-    "Universal Agent" → <process_class name="test" replace="true" remote_scheduler={agentUri}/>)
+    "Local" → { () ⇒ <process_class name="test" replace="true"/> },
+    "Universal Agent" → { () ⇒ <process_class name="test" replace="true" remote_scheduler={agentUri}/> })
 
-  for ((testName, processClass) ← processClasses) {
+  for ((testName, lazyProcessClass) ← processClasses) {
     s"stdout and stderr of shell, monitored shell and job jobs - $testName" in {
-      scheduler executeXml processClass
+      scheduler executeXml lazyProcessClass()
       withEventPipe { eventPipe ⇒
-        val shellRun = runJobFuture(JobPath("/test-shell"))
-        val monitoredShellRun = runJobFuture(JobPath("/test-shell-monitor"))
-        val javaRun = runJobFuture(JobPath("/test-java"))
+        val shellRun = startJob(JobPath("/test-shell"))
+        val monitoredShellRun = startJob(JobPath("/test-shell-monitor"))
+        val javaRun = startJob(JobPath("/test-java"))
         val firstPollAfter = now() + 14.s + StdoutPollingInterval
 
         awaitSuccess(shellRun.started)

@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{runJobAndWaitForEnd, writeConfigurationFile}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{runJob, writeConfigurationFile}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1039.JS1039TaskStdoutIT._
@@ -34,7 +34,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
   private lazy val jobResults: Map[JobPath, JobResult] = {
     (JobSettings map { _.jobPath } map { jobPath =>
       for (o <- StdOutErrList) schedulerVariables(o) = ""
-      runJobAndWaitForEnd(jobPath)
+      runJob(jobPath)
       jobPath -> JobResult(
         taskLog = controller.environment.taskLogFileString(jobPath),
         variableMap = schedulerVariables.toMap)

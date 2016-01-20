@@ -31,7 +31,7 @@ final class JS1529IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   for ((name, config) ← processClassConfigurations) s"Job.state_text $name" in {
     deleteAndWriteConfigurationFile(ProcessClassPath("/test"), ProcessClassConfiguration())
-    runJobAndWaitForEnd(TestJobPath, Map("A" → name))
+    runJob(TestJobPath, Map("A" → name))
     val expected = s"JOB STATE TEXT $name"
     assert(job(TestJobPath).stateText == expected)
     val answer = (scheduler executeXml <show_job job={TestJobPath.string}/>).answer

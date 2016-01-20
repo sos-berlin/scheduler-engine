@@ -20,7 +20,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1435IT extends FreeSpec with ScalaSchedulerTest {
 
   "JS-1435IT" in {
-    runJobAndWaitForEnd(JobPath("/test"))
+    runJob(JobPath("/test"))
     val orderKey = JobChainPath("/test") orderKey "1"
     val event = eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
       val e = eventBus.awaitingKeyedEvent[OrderStateChangedEvent](orderKey) {

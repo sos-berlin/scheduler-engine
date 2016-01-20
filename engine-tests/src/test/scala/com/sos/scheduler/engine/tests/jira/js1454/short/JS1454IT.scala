@@ -31,7 +31,7 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
   "Busy communication may suppress keep-alive" in {
     writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
     withEventPipe { events ⇒
-      runJobAndWaitForEnd(JobPath("/test-busy"))
+      runJob(JobPath("/test-busy"))
       val keepaliveCount = events.queued[InfoLogEvent] count { _.codeOption contains MessageCode("SCHEDULER-727") }  // scheduler.agent.keep_alive=TEST floods the line with keep-alive spaces
       assert(keepaliveCount >= 20)
     }
@@ -41,7 +41,7 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Keep-alives when there is no communcation" in {
-    runJobAndWaitForEnd(JobPath("/test-sleep"))
+    runJob(JobPath("/test-sleep"))
     val schedulerLog = testEnvironment.schedulerLog.contentString
     assert(schedulerLog contains s"{$KeepAliveLogCategory} Received")
     assert(schedulerLog contains s"{$KeepAliveLogCategory} Stopped")

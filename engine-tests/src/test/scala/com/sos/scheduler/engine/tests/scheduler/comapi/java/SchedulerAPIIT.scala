@@ -56,7 +56,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
   "sos.spooler.Log methods" - {
     for ((name, jobPath) ← List("Without Agent" → LogJobPath, "With Agent" -> LogJobPath.asAgent)) {
       name in {
-        val taskResult: TaskResult = runJobAndWaitForEnd(jobPath)
+        val taskResult: TaskResult = runJob(jobPath)
         for (level <- LogJob.LogMessages.keySet()) {
           taskResult.logString should include regex s"(?i)\\[$level\\]\\s+" + LogJob.LogMessages.get(level)
         }
@@ -70,7 +70,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
   }
 
   "sos.spooler.Job methods" in {
-    val taskLog = runJobAndWaitForEnd(JobObjectJobPath).logString
+    val taskLog = runJob(JobObjectJobPath).logString
     val job = instance[JobSubsystem].job(JobObjectJobPath)
 
     for (mes <- JobObjectJob.UnwantedMessage.values) {

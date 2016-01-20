@@ -37,14 +37,14 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
 
   "Fixed: High deadlock probability when starting multiple processes, CreateProcess fails with MSWIN-00000020" in {
     writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
-    runJobAndWaitForEnd(JobPath("/test"))   // Smoke test
+    runJob(JobPath("/test"))   // Smoke test
     val t = currentTimeMillis()
     val count = new AtomicInteger
     try
       intercept[TimeoutException] {
         eventBus.awaitingEvent2[ErrorLogEvent](TestDuration, _ ⇒ true) {
           writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
-          runJobAndWaitForEnd(JobPath("/test"))   // Smoke test
+          runJob(JobPath("/test"))   // Smoke test
           eventBus.on[TaskClosedEvent] { case _ ⇒ count.incrementAndGet() }
           for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()
         }
@@ -56,7 +56,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
     logger.info(s"$count processes, ${count.get * 1000 / (currentTimeMillis() - t)} processes/s")
   }
 
-  private def startJobAgainAndAgain(): Unit = runJobFuture(TestJobPath).result onSuccess { case _ ⇒ if (!stop) startJobAgainAndAgain() }
+  private def startJobAgainAndAgain(): Unit = startJob(TestJobPath).result onSuccess { case _ ⇒ if (!stop) startJobAgainAndAgain() }
 }
 
 private object JS1457IT {
