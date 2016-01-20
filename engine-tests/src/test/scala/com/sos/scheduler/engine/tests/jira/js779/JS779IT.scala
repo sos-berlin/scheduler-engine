@@ -21,7 +21,7 @@ final class JS779IT extends FreeSpec with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(testClass, ignoreError = { _ ⇒ true })
 
   "kill" in {
-    val run = runJobFuture(JobPath("/test"))
+    val run = startJob(JobPath("/test"))
     run.started await 10.s
     scheduler executeXml <kill_task job={run.jobPath.string} id={run.taskId.string} immediately="true"/>
     run.result await 10.s
@@ -29,7 +29,7 @@ final class JS779IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "timeout" in {
-    val run = runJobFuture(JobPath("/test-timeout"))
+    val run = startJob(JobPath("/test-timeout"))
     run.result await 10.s
     checkFor(run, "SCHEDULER-272") // "Terminating task after reaching deadline"
   }
