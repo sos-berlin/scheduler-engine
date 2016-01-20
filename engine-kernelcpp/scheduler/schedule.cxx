@@ -2140,7 +2140,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 
                 try
                 {
-                    string xml_bytes = include_command.read_content_bytes();
+                    string xml_bytes = include_command.register_include_and_read_content_bytes(source_file_based);
                     Z_LOG2( "scheduler", Z_FUNCTION << "  " << xml_bytes << "\n" );
 
                     xml::Document_ptr doc = xml::Document_ptr::from_xml_bytes(xml_bytes);
