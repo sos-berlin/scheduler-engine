@@ -52,6 +52,8 @@ trait FileBasedSubsystem extends Subsystem {
   final def count =
     paths.size
 
+  final def contains(path: Path) = visiblePaths contains path
+
   final def paths: Seq[Path] =
     mutablePathSet.synchronized {
       mutablePathSet.toImmutableSeq
