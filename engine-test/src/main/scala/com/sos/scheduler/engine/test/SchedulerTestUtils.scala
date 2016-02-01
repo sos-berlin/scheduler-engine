@@ -96,6 +96,8 @@ object SchedulerTestUtils {
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
     instance[ProcessClassSubsystem].processClass(path)
 
+  def runJob(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout) = runJobAndWaitForEnd(jobPath)  // v1.10
+
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult =
     runJobAndWaitForEnd(jobPath, timeout.duration)
 
@@ -140,7 +142,7 @@ object SchedulerTestUtils {
     awaitResult(startOrder(orderKey).result, timeout.duration)
 
   def startOrder(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = startOrder(OrderCommand(orderKey))
-  
+
   def startOrder(orderCommand: OrderCommand)(implicit controller: TestSchedulerController): OrderRun = {
     implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
     inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
