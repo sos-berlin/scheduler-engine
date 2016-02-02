@@ -103,23 +103,23 @@ Element_ptr Document_ptr::createElement( const string& tagName ) const
 
 //---------------------------------------------------------------------Document_ptr::createTextNode
 
-Text_ptr Document_ptr::createTextNode( const string& data ) const
+Text_ptr Document_ptr::createTextNode(const string& text) const
 { 
-    return Text_ptr(_documentJ.createTextNode(data));
+    return Text_ptr(_documentJ.createTextNode(XmlUtilsJ::sanitize(text)));
 }
 
 //----------------------------------------------------------------------Document_ptr::createComment
 
-Comment_ptr Document_ptr::createComment( const string& data ) const            
+Comment_ptr Document_ptr::createComment(const string& text) const            
 { 
-    return Comment_ptr(_documentJ.createComment(data));
+    return Comment_ptr(_documentJ.createComment(XmlUtilsJ::sanitize(text)));
 }
 
 //-----------------------------------------------------------------Document_ptr::createCDATASection
 
-CDATASection_ptr Document_ptr::createCDATASection( const string& data ) const            
+CDATASection_ptr Document_ptr::createCDATASection(const string& text) const            
 { 
-    return CDATASection_ptr(_documentJ.createCDATASection(data));
+    return CDATASection_ptr(_documentJ.createCDATASection(XmlUtilsJ::sanitize(text)));
 }
 
 //--------------------------------------------------------Document_ptr::createProcessingInstruction
@@ -428,7 +428,7 @@ Simple_node_ptr Node_list::get( int i ) const
 
 void Element_ptr::setAttribute( const string& name, const char* value ) const   
 { 
-    _elementJ.setAttribute(name, value);
+    _elementJ.setAttribute(name, XmlUtilsJ::sanitize(value));
 }
 
 //------------------------------------------------------------------------Element_ptr::getAttribute
