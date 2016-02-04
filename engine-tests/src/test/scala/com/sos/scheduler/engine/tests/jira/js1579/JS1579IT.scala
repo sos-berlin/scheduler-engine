@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1579
 
 import akka.util.ByteString
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.test.SchedulerTestUtils.runJob
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1579.JS1579IT._
@@ -20,7 +22,7 @@ import org.scalatest.junit.JUnitRunner
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1579IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1579IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
@@ -37,8 +39,11 @@ final class JS1579IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "In XML text containing stdout job output, disallowed XML characters are suppressed" in {
-    val result = runJob(JobPath("/test"))
-    assert(result.logString contains "INVALID-->�����������������������������<--INVALID")
+    val jobPaths = List(JobPath("/test"), JobPath("/test-agent"))
+    (for (j ← jobPaths) yield
+      for (result ← startJob(j).result) yield
+        assert(result.logString contains "INVALID-->�����������������������������<--INVALID")
+    ) await TestTimeout
   }
 }
 
