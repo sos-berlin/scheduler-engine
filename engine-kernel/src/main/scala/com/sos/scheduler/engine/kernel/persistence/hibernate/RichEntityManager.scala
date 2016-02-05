@@ -19,19 +19,19 @@ class RichEntityManager(val delegate: EntityManager) extends AnyVal {
   def findOption[E](key: AnyRef, clas: Class[E]): Option[E] =
     Option(delegate.find(clas, key))
 
-  def fetchOption[E <: AnyRef : ClassTag](queryString: String, arguments: Iterable[(String, AnyRef)] = Nil): Option[E] =
+  def fetchOption[E <: AnyRef : ClassTag](queryString: String, arguments: Iterable[(String, Any)] = Nil): Option[E] =
     fetchClassOption[E](queryString, implicitClass[E], arguments)
 
-  def fetchClassOption[E <: AnyRef](queryString: String, clas: Class[E], arguments: Iterable[(String, AnyRef)] = Nil): Option[E] = {
+  def fetchClassOption[E <: AnyRef](queryString: String, clas: Class[E], arguments: Iterable[(String, Any)] = Nil): Option[E] = {
     val i = fetchClassSeq(queryString, clas, arguments).iterator
     if (i.hasNext) Some(i.next()) ensuring { _ ⇒ !i.hasNext }
     else None
   }
 
-  def fetchSeq[A <: AnyRef : ClassTag](queryString: String, arguments: Iterable[(String, AnyRef)] = Nil): immutable.Seq[A] =
+  def fetchSeq[A <: AnyRef : ClassTag](queryString: String, arguments: Iterable[(String, Any)] = Nil): immutable.Seq[A] =
     fetchClassSeq[A](queryString, implicitClass[A], arguments)
 
-  def fetchClassSeq[A <: AnyRef](queryString: String, clas: Class[A], arguments: Iterable[(String, AnyRef)]): immutable.Seq[A] = {
+  def fetchClassSeq[A <: AnyRef](queryString: String, clas: Class[A], arguments: Iterable[(String, Any)]): immutable.Seq[A] = {
     val q = delegate.createQuery(queryString, clas)
     for ((name, value) <- arguments) q.setParameter(name, value)
     q.getResultList.toImmutableSeq

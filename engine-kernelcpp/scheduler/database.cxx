@@ -698,6 +698,7 @@ void Database::create_tables_when_needed()
                                 "`parameters`"        " clob"             << null << ","
                                 "`log`"               " blob"             << null << ","
                                 "`pid`"               " integer"          << null << ","
+                                "`agent_url`"         " varchar(100)"     << null << ","
                                 + join( "", create_extra ) 
                                 + "primary key( `id` )" );
 
@@ -722,6 +723,7 @@ void Database::create_tables_when_needed()
 
                 //Jira JS-???  Setup der SOS legt exit_code nicht an.   if( added )
                 add_column( &ta, _job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
+                add_column(&ta, _job_history_tablename, "AGENT_URL", S() << "add `AGENT_URL` varchar(100)" << null);
             }
 
         }
@@ -2057,6 +2059,9 @@ void Task_history::write( bool start )
                         
                         if( int pid = _task->pid() )
                         insert[ "pid"               ] = pid;
+                        if (_task->remote_scheduler_address() != "") {
+                            insert["agent_url"] = _task->remote_scheduler_address();
+                        }
 
                         ta.execute( insert, Z_FUNCTION );
 

@@ -268,6 +268,10 @@ struct Task : Object,
         return _process_class;
     }
 
+    public: string remote_scheduler_address() const {
+        return _module_instance ? _module_instance->remote_scheduler_address() : "";
+    }
+
     public: bool on_requisite_loaded(File_based* file_based);
 
     public: bool on_requisite_to_be_removed(File_based*) { 

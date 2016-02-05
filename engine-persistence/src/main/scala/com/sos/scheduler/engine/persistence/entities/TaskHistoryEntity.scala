@@ -66,6 +66,9 @@ import javax.persistence._
   @Column(name=""""PID"""") @Nullable
   var processId: java.lang.Integer = _
 
+  @Column(name=""""AGENT_URL"""") @Nullable
+  var agentUrl: String = _
+
 //  @Column(name=""""LOG"""") @Nullable
 //  var compressedLog: Array[Byte]
 }

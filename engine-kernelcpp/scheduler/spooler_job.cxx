@@ -726,6 +726,11 @@ bool Standard_job::on_load() // Transaction* ta )
     _spooler->settings()->require_role(Settings::role_scheduler, obj_name());
     // Nach Fehler nicht wiederholbar.
 
+    if (_module->kind() == Module::kind_process) {
+        Z_LOG2("scheduler", "Suppressing min_tasks for " << obj_name() << "\n");
+        _min_tasks = 0;
+    }
+
     bool result = false;
 
     if( _state < s_loaded )
