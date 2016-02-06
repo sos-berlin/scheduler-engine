@@ -11,9 +11,10 @@ import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import java.nio.file.Files
+import java.nio.file.Files.{delete, exists}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
@@ -36,8 +37,9 @@ final class JS1421IT extends FreeSpec with ScalaSchedulerTest {
       writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
       val signalFile = testEnvironment.directory / "SIGNALFILE"
       val run = startJob(jobPath, variables = Map("SIGNALFILE" → signalFile.toString))
-      waitForCondition(TestTimeout, 100.ms) { Files.exists(signalFile) }
+      waitForCondition(TestTimeout, 100.ms) { exists(signalFile) } shouldBe true
       sleep(1.s)  // Time to let shell process fall asleep
+      delete(signalFile)
       controller.toleratingErrorCodes(Set(
         MessageCode("SCHEDULER-280"),
         MessageCode("SCHEDULER-202"),
