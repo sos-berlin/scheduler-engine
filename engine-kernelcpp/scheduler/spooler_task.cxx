@@ -1894,11 +1894,12 @@ bool Task::do_something()
 
                     if( _operation ) {
                         loop |= _operation->async_finished();   // Falls Sync_operation
-                    } else {
+                    } else 
+                    if (_state != s_running_process) {
                         set_enqueued_state();   // Wegen _operation verzögerten Zustand setzen
 
                         if( (!ok || has_error() || _killed) && _state < s_ending )  
-                             set_state_direct( s_ending ), loop = true;
+                                set_state_direct( s_ending ), loop = true;
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
