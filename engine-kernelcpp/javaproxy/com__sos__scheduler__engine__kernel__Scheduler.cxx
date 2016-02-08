@@ -31,6 +31,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onActivated____method;
     ::zschimmer::javabridge::Method const _onClose____method;
+    ::zschimmer::javabridge::Method const _onDatabaseOpened____method;
     ::zschimmer::javabridge::Method const _onEnteringSleepState____method;
     ::zschimmer::javabridge::Method const _onLoad____method;
     ::zschimmer::javabridge::Method const _sendCommandAndReplyToStout__Ljava_lang_String_2_3B__method;
@@ -57,6 +58,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_onActivate____method(this, "onActivate", "()V")
     ,_onActivated____method(this, "onActivated", "()V")
     ,_onClose____method(this, "onClose", "()V")
+    ,_onDatabaseOpened____method(this, "onDatabaseOpened", "()V")
     ,_onEnteringSleepState____method(this, "onEnteringSleepState", "()J")
     ,_onLoad____method(this, "onLoad", "()V")
     ,_sendCommandAndReplyToStout__Ljava_lang_String_2_3B__method(this, "sendCommandAndReplyToStout", "(Ljava/lang/String;[B)V")
@@ -171,6 +173,12 @@ void Scheduler::onClose() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onClose____method.call(get_jobject(), parameter_list);
+}
+
+void Scheduler::onDatabaseOpened() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    cls->_onDatabaseOpened____method.call(get_jobject(), parameter_list);
 }
 
 jlong Scheduler::onEnteringSleepState() const {
