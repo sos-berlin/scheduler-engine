@@ -2072,8 +2072,10 @@ void Spooler::start()
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
 
-    if (_spooler->settings()->has_role_scheduler())
+    if (_spooler->settings()->has_role_scheduler()) {
         _db->open();
+        schedulerJ().onDatabaseOpened();
+    }
     
     assert( !_cluster || _cluster->my_member_id() != "" );
     _db->spooler_start();

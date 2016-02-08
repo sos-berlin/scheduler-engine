@@ -46,7 +46,7 @@ final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerContr
 extends ScalaAbstractModule
 with HasCloser {
 
-  private val lazyBoundCppSingletons = mutable.Buffer[Class[_]]()
+  private val lateBoundCppSingletons = mutable.Buffer[Class[_]]()
   private lazy val _zoneId = {
     val state = cppProxy.state_name
     if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
@@ -70,7 +70,7 @@ with HasCloser {
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
     provideSingleton[ExecutionContext] { ExecutionContext.global }
     bindSubsystems()
-    bindInstance(LazyBoundCppSingletons(lazyBoundCppSingletons.toVector))
+    bindInstance(LateBoundCppSingletons(lateBoundCppSingletons.toVector))
   }
 
   private def bindSubsystems(): Unit = {
@@ -85,7 +85,7 @@ with HasCloser {
   }
 
   private def provideCppSingleton[A <: AnyRef : ClassTag](provider: ⇒ A) = {
-    lazyBoundCppSingletons += implicitClass[A]
+    lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
 
@@ -137,5 +137,5 @@ object SchedulerModule {
   private def commandHandlers(objects: Iterable[AnyRef]): Iterable[CommandHandler] =
     (objects collect { case o: HasCommandHandlers => o.commandHandlers: Iterable[CommandHandler] }).flatten
 
-  final case class LazyBoundCppSingletons(interfaces: Vector[Class[_]])
+  final case class LateBoundCppSingletons(interfaces: Vector[Class[_]])
 }
