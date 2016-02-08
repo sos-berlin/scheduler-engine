@@ -125,6 +125,8 @@ with HasCloser {
     controllerBridge.onSchedulerStarted(this)
   }
 
+  @ForCpp private def onDatabaseOpened(): Unit = databaseSubsystem.onOpened()
+
   @ForCpp private def onActivate(): Unit = {
     initializeCppDependencySingletons()
     pluginSubsystem.activate()
