@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.google.common.base.MoreObjects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
+import com.google.inject.Stage.DEVELOPMENT
 import com.sos.scheduler.engine.client.command.HttpSchedulerCommandClient
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
@@ -25,7 +26,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSch
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
-import com.sos.scheduler.engine.kernel.configuration.SchedulerModule.LazyBoundCppSingletons
+import com.sos.scheduler.engine.kernel.configuration.SchedulerModule.LateBoundCppSingletons
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
@@ -131,7 +132,7 @@ with HasCloser {
 
   private def initializeCppDependencySingletons(): Unit = {
     // Eagerly call all C++ providers now to avoid later deadlock (Scheduler lock and DI lock)
-    for (o ← injector.instance[LazyBoundCppSingletons].interfaces) injector.getInstance(o)
+    for (o ← injector.instance[LateBoundCppSingletons].interfaces) injector.getInstance(o)
   }
 
   @ForCpp private def onActivated(): Unit = {
@@ -276,7 +277,7 @@ object Scheduler {
   @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
     controllerBridge.cppSettings.setSettingsInCpp(cppProxy.modifiable_settings)
-    createInjector(Seq(
+    createInjector(DEVELOPMENT, List(   // Must be DEVELOPMENT for some singletons needs the started C++ Scheduler.
       new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),
       PluginModule(configurationXml)))
   }
