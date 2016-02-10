@@ -858,6 +858,17 @@
             	<artifactId>scalaz-core_${scala.binaryVersion}</artifactId>
             	<version>7.1.4</version>
             </dependency>
+            <dependency>
+            	<groupId>org.apache.shiro</groupId>
+            	<artifactId>shiro-core</artifactId>
+            	<version>1.2.4</version>
+            </dependency>
+            <dependency>
+                <!-- Shiro needs it -->
+            	<groupId>commons-logging</groupId>
+            	<artifactId>commons-logging</artifactId>
+            	<version>1.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

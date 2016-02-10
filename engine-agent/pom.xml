@@ -198,5 +198,14 @@
             <artifactId>annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+        	<groupId>org.apache.shiro</groupId>
+        	<artifactId>shiro-core</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Shiro needs it -->
+        	<groupId>commons-logging</groupId>
+        	<artifactId>commons-logging</artifactId>
+        </dependency>
     </dependencies>
 </project>
