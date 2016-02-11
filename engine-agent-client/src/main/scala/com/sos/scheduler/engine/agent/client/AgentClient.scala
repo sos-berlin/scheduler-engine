@@ -50,6 +50,7 @@ trait AgentClient {
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
+      addCredentials(BasicHttpCredentials("access-token", "STANDARD-ACCESS-TOKEN")) ~>
       addLicenseKeys ~>
       encode(Gzip) ~>
       sendReceive ~>

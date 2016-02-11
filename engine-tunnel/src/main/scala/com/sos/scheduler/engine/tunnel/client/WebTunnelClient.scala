@@ -14,7 +14,7 @@ import spray.client.pipelining._
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.OK
-import spray.http.{HttpRequest, HttpResponse, Uri}
+import spray.http.{BasicHttpCredentials, HttpRequest, HttpResponse, Uri}
 import spray.httpx.encoding.Gzip
 
 /**
@@ -31,6 +31,7 @@ extends AutoCloseable {
   private val veryLongTimeout = Akkas.maximumTimeout(actorSystem.settings)
 
   private lazy val pipelineTrunk: HttpRequest ⇒ Future[HttpResponse] =
+    addCredentials(BasicHttpCredentials("access-token", "STANDARD-ACCESS-TOKEN")) ~>
     addHeader(Accept(`application/octet-stream`)) ~>
     encode(Gzip) ~>
     sendReceive(actorSystem, actorSystem.dispatcher, veryLongTimeout) ~>
