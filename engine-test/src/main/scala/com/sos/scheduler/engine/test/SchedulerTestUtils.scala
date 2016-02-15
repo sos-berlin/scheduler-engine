@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.filebased._
@@ -12,7 +13,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskEndedEve
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderTouchedEvent, OrderState, OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -143,21 +144,25 @@ object SchedulerTestUtils {
 
   def startOrder(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = startOrder(OrderCommand(orderKey))
 
-  def startOrder(orderCommand: OrderCommand)(implicit controller: TestSchedulerController): OrderRun = {
-    implicit val callQueue = controller.instance[SchedulerThreadCallQueue]
-    inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
-      val finished = controller.eventBus.keyedEventFuture[OrderFinishedEvent](orderCommand.orderKey)
+  def startOrder(orderCommand: OrderCommand)(implicit controller: TestSchedulerController): OrderRun =
+    OrderRun(orderCommand.orderKey) sideEffect { _ ⇒
       controller.scheduler executeXml orderCommand
-      val touched = controller.eventBus.keyedEventFuture[OrderTouchedEvent](orderCommand.orderKey)
-      val result = for (finishedEvent ← finished) yield OrderRunResult(orderCommand.orderKey, finishedEvent.state)
-      OrderRun(touched, finished, result)
     }
-  }
 
   final case class OrderRun(
+    orderKey: OrderKey,
     touched: Future[OrderTouchedEvent],
     finished: Future[OrderFinishedEvent],
     result: Future[OrderRunResult])
+
+  object OrderRun {
+    def apply(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = {
+      val finished = controller.eventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
+      val touched = controller.eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
+      val result = for (finishedEvent ← finished) yield OrderRunResult(orderKey, finishedEvent.state)
+      OrderRun(orderKey, touched, finished, result)
+    }
+  }
 
   final case class OrderRunResult(orderKey: OrderKey, state: OrderState) {
     def logString(implicit controller: TestSchedulerController): String = orderLog(orderKey)
