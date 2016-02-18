@@ -3,7 +3,9 @@ package com.sos.scheduler.engine.tests.jira.js1103
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderEvent, OrderFinishedEvent, OrderId, OrderKey, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -16,8 +18,6 @@ import java.nio.file.Path
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
 
 /**
   * @author Joacim Zschimmer
@@ -62,7 +62,7 @@ final class JS1103IT extends FreeSpec with ScalaSchedulerTest {
         val extraOrderKeys = for (o ← ordinaryOrderKeys; i ← ExtraIndices) yield o.copy(id = OrderId(s"${o.id}-$i-extra"))
         ordinaryOrderRuns ++ (extraOrderKeys map OrderRun.apply)
       }
-      Await.result(Future.sequence(allOrderRuns map { _.finished }), 30.seconds)
+      allOrderRuns map { _.finished } await 30.s
       assert(ordinaryCounter.maximum == MaxOrders)
       assert(totalCounter.maximum > MaxOrders)
     }
