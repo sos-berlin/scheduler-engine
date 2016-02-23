@@ -3122,12 +3122,14 @@ void Order::set_suspended( bool suspended )
             if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain();
             else
             if( _is_in_order_queue )  order_queue()->reinsert_order( this );
-
-            if( _suspended )  {
-                _log->info( message_string( "SCHEDULER-991" ) );
-            } else {
-                _log->info( message_string( "SCHEDULER-992", _setback ) );
-            }
+        } 
+        if (is_distributed() && !_suspended) {
+            _setback = Time(0);  // JS-1598 suspend := false clears setback, to let a cluster continue the order immediately
+        }
+        if( _suspended )  {
+            _log->info( message_string( "SCHEDULER-991" ) );
+        } else {
+            _log->info( message_string( "SCHEDULER-992", _setback ) );
         }
 
         handle_changed_processable_state();
