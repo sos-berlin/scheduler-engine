@@ -56,7 +56,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
     logger.info(s"$count processes, ${count.get * 1000 / (currentTimeMillis() - t)} processes/s")
   }
 
-  private def startJobAgainAndAgain(): Unit = startJob(TestJobPath).result onSuccess { case _ ⇒ if (!stop) startJobAgainAndAgain() }
+  private def startJobAgainAndAgain(): Unit = for (_ ← startJob(TestJobPath).result if !stop) startJobAgainAndAgain()
 }
 
 private object JS1457IT {

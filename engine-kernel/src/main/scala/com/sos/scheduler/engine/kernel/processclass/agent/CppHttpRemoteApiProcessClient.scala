@@ -59,7 +59,7 @@ extends AutoCloseable {
 
   def changeFailableAgents(failableAgents: FailableAgents): Unit = {
     val a = agentSelector
-    agentSelector.future onFailure { case t ⇒
+    agentSelector.future.failed foreach { t ⇒
       logger.debug(s"$t")
       agentSelector = startNewAgentSelector(failableAgents)
     }
@@ -110,23 +110,19 @@ extends AutoCloseable {
       case null ⇒ false
       case _ ⇒
         agentSelector.cancel()
-        agentSelector.future onSuccess {
-          case (agent, httpRemoteProcess) ⇒
-            killOnlySignal match {
-              case Some(signal) ⇒
-                require(signal == SIGTERM.value, "SIGTERM (15) required")
-                httpRemoteProcess.sendSignal(SIGTERM) onFailure {
-                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
-                }
-              case None ⇒
-                val closed = httpRemoteProcess.closeRemoteTask(kill = kill)
-                closed onFailure {
-                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be closed: $t", t)
-                }
-                closed onComplete { _ ⇒ httpRemoteProcess.close() }
-                remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
-            }
-            // C++ will keine Bestätigung
+        agentSelector.future foreach { case (_, httpRemoteProcess) ⇒
+          killOnlySignal match {
+            case Some(signal) ⇒
+              require(signal == SIGTERM.value, "SIGTERM (15) required")
+              val whenSignalled = httpRemoteProcess.sendSignal(SIGTERM)
+              for (t ← whenSignalled.failed) logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
+            case None ⇒
+              val whenClosed = httpRemoteProcess.closeRemoteTask(kill = kill)
+              for (t ← whenClosed.failed) logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be closed: $t", t)
+              whenClosed onComplete { _ ⇒ httpRemoteProcess.close() }
+              remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
+          }
+          // C++ will keine Bestätigung
         }
         true
     }
