@@ -31,4 +31,14 @@ final case class JavaScriptModuleLanguage(languageName: String) extends ModuleLa
   def string = languageName
 }
 
+sealed trait DotnetModuleLanguage extends ModuleLanguage
+
+case object DotnetClassModuleLanguage extends ModuleLanguage {
+  def string = ".Net"
+}
+
+case object PowershellModuleLanguage extends DotnetModuleLanguage {
+  def string = "PowerShell"
+}
+
 final case class OtherModuleLanguage(string: String) extends ModuleLanguage
