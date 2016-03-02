@@ -137,6 +137,10 @@ struct Module : Object
     string                     _java_options;               // Gehört eigentlich nach Job
     string                     _java_class_path;            // JS-540
 
+    // .Net
+    string _dotnet_class_name;
+    string _dll;
+
     // Shell script
     ptr<Com_variable_set>      _process_environment;
     string                     _process_shell_variable_prefix;

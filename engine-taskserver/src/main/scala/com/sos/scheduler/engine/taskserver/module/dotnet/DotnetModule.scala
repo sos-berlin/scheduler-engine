@@ -8,14 +8,14 @@ import com.sos.scheduler.engine.taskserver.module.javamodule.{ApiModule, JavaMod
 /**
   * @author Joacim Zschimmer
   */
-final case class DotnetModule(val moduleLanguage: ModuleLanguage, dotnetRef: DotnetModuleReference)
+final case class DotnetModule(val moduleLanguage: ModuleLanguage, dotnetModuleReference: DotnetModuleReference)
 extends ApiModule {
 
   def newJobInstance(namedInvocables: NamedInvocables) =
-    factory.newJobInstance(namedInvocablesToTaskContext(namedInvocables), dotnetRef)
+    factory.newJobInstance(namedInvocablesToTaskContext(namedInvocables), dotnetModuleReference)
 
   def newMonitorInstance(namedInvocables: NamedInvocables) =
-    factory.newMonitorInstance(namedInvocablesToTaskContext(namedInvocables), dotnetRef)
+    factory.newMonitorInstance(namedInvocablesToTaskContext(namedInvocables), dotnetModuleReference)
 }
 
 private object DotnetModule {

@@ -2,10 +2,13 @@ package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.scheduler.engine.jobapi.dotnet.DotnetModuleReference
 import com.sos.scheduler.engine.minicom.types.VariantArray
+import com.sos.scheduler.engine.taskserver.module.dotnet.DotnetModule
 import com.sos.scheduler.engine.taskserver.module.javamodule.StandardJavaModule
 import com.sos.scheduler.engine.taskserver.module.shell.ShellModule
-import com.sos.scheduler.engine.taskserver.module.{ModuleLanguage, Script}
+import com.sos.scheduler.engine.taskserver.module.{DotnetClassModuleLanguage, ModuleLanguage, Script}
+import java.nio.file.Paths
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -37,6 +40,14 @@ final class TaskArgumentsTest extends FreeSpec {
     assert(taskArguments("language=java", "java_class=com.example.Test").moduleArguments.javaClassNameOption == Some("com.example.Test"))
   }
 
+  "dotnetClassNameOption" in {
+    assert(taskArguments("language=.Net", "dotnet_class=com.example.Test").moduleArguments.dotnetClassNameOption == Some("com.example.Test"))
+  }
+
+  "dllOption" in {
+    assert(taskArguments("language=.Net", "dll=c:\\my\\test.dll").moduleArguments.dllOption == Some(Paths.get("c:\\my\\test.dll")))
+  }
+
   "hasOrder" in {
     assert(taskArguments("has_order=1").hasOrder)
   }
@@ -60,14 +71,18 @@ final class TaskArgumentsTest extends FreeSpec {
       "monitor.language=java",
       "monitor.java_class=com.example.B",
       "monitor.script=",
-      "monitor.language=java",
-      "monitor.java_class=com.example.C",
+      "monitor.language=.Net",
+      "monitor.dll=c:\\my\\test.dll",
+      "monitor.dotnet_class=com.example.C",
       "monitor.script=")))
     assert(a.monitors.size == 3)
     assert(a.monitors(0).name == "")
     assert(a.monitors(0).ordering == 1)
+    assert(a.monitors(0).module == new StandardJavaModule("com.example.B"))
     assert(a.monitors(1).name == "")
     assert(a.monitors(1).ordering == 1)
+    assert(a.monitors(1).module == new DotnetModule(DotnetClassModuleLanguage,
+      DotnetModuleReference.DotnetClass(Paths.get("c:\\my\\test.dll"), "com.example.C")))
     assert(a.monitors(2).name == "MONITOR-NAME")
     assert(a.monitors(2).ordering == 7)
   }

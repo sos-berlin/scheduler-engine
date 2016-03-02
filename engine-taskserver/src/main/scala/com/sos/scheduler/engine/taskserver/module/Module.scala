@@ -17,7 +17,7 @@ object Module {
     import moduleArguments._
     moduleArguments.language match {
       case ShellModuleLanguage ⇒
-        for (name ← moduleArguments.javaClassNameOption) throw new IllegalArgumentException(s"Language '$language' conflicts with parameter javaClass='$name'")
+        for (name ← javaClassNameOption) throw new IllegalArgumentException(s"Language '$language' conflicts with parameter javaClass='$name'")
         new ShellModule(script)
 
       case JavaModuleLanguage ⇒
@@ -31,7 +31,9 @@ object Module {
         new DotnetModule(language, DotnetModuleReference.Powershell(script = script.string))
 
       case DotnetClassModuleLanguage ⇒
-        new DotnetModule(language, DotnetModuleReference.DotnetClass(dll = ???, className = ???))
+        new DotnetModule(language, DotnetModuleReference.DotnetClass(
+          dll = dllOption getOrElse { throw new IllegalArgumentException("Missing key for DLL") },
+          className = dotnetClassNameOption getOrElse { throw new IllegalArgumentException("Missing key dotnet_class_name") }))
 
       case _ ⇒ throw new IllegalArgumentException(s"Unsupported language $language")
     }

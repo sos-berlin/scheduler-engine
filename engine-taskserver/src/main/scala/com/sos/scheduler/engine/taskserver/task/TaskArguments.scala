@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.minicom.types.{VariantArray, variant}
 import com.sos.scheduler.engine.taskserver.module._
 import com.sos.scheduler.engine.taskserver.task.TaskArguments._
+import java.nio.file.Paths
 import scala.collection.{immutable, mutable}
 import scala.util.Sorting.stableSort
 
@@ -53,7 +54,9 @@ object TaskArguments {
     val LanguageKey = "language"
     val ScriptKey = "script"
     val JavaClassKey = "java_class"
-    val KeySet = Set(JavaClassKey, LanguageKey, ScriptKey)
+    val DotnetClassKey = "dotnet_class"
+    val DllKey = "dll"
+    val KeySet = Set(LanguageKey, ScriptKey, JavaClassKey, DotnetClassKey, DllKey)
   }
   private object monitor {
     val NameKey = "name"
@@ -113,13 +116,14 @@ object TaskArguments {
   private def extractModuleArguments(args: Iterable[(String, String)]) = {
     val argMap = args.toMap
     val javaClassNameOption = argMap.get(module.JavaClassKey) filter { _.nonEmpty }
-    val scriptString = argMap.getOrElse(module.ScriptKey, "")
     ModuleArguments(
       language = ModuleLanguage(argMap(module.LanguageKey)),
       javaClassNameOption = javaClassNameOption,
-      script = javaClassNameOption match {
-        case None if scriptString.nonEmpty ⇒ Script.parseXmlString(argMap(module.ScriptKey))
-        case _ ⇒ new Script("")
+      dotnetClassNameOption = argMap.get(module.DotnetClassKey) filter { _.nonEmpty },
+      dllOption = argMap.get(module.DllKey) filter { _.nonEmpty } map { o ⇒ Paths.get(o) },
+      script = argMap.getOrElse(module.ScriptKey, "") match {
+        case "" ⇒ new Script("")
+        case string ⇒ Script.parseXmlString(string)
       })
   }
 }
