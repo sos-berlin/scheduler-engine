@@ -24,13 +24,17 @@ final class TaskArgumentsTest extends FreeSpec {
     assert(taskArguments("task_id=123").taskId == TaskId(123))
   }
 
-  "moduleLanguage" in {
-    assert(taskArguments("language=shell").moduleLanguage == ModuleLanguage("shell"))
+  "language" in {
+    assert(taskArguments("language=shell").moduleArguments.language == ModuleLanguage("shell"))
   }
 
   "script" in {
-    assert(taskArguments("script=" + <source><source_part linenr="1">PART-A
-</source_part><source_part linenr="2">PART-B</source_part></source>).script == Script("PART-A\nPART-B"))
+    assert(taskArguments("language=shell", "script=" + <source><source_part linenr="1">PART-A
+</source_part><source_part linenr="2">PART-B</source_part></source>).moduleArguments.script == Script("PART-A\nPART-B"))
+  }
+
+  "javaClassNameOption" in {
+    assert(taskArguments("language=java", "java_class=com.example.Test").moduleArguments.javaClassNameOption == Some("com.example.Test"))
   }
 
   "hasOrder" in {
@@ -41,12 +45,8 @@ final class TaskArgumentsTest extends FreeSpec {
     assert(taskArguments("environment=" + <sos.spooler.variable_set><variable name="A" value="a"/></sos.spooler.variable_set>).environment == Map("A" → "a"))
   }
 
-  "javaClassNameOption" in {
-    assert(taskArguments("java_class=com.example.Test").javaClassNameOption == Some("com.example.Test"))
-  }
-
   "stderr_log_level" in {
-    assert(taskArguments(Nil).stderrLogLevel contains SchedulerLogLevel.info)
+    assert(taskArguments().stderrLogLevel contains SchedulerLogLevel.info)
     assert(taskArguments("stderr_log_level=2").stderrLogLevel contains SchedulerLogLevel.error)
   }
 
@@ -88,7 +88,5 @@ final class TaskArgumentsTest extends FreeSpec {
     assert(a.module == StandardJavaModule("com.example.Job"))
   }
 
-  private def taskArguments(argument: String): TaskArguments = taskArguments(Vector(argument))
-
-  private def taskArguments(arguments: Iterable[String]) = TaskArguments(VariantArray(arguments.toIndexedSeq))
+  private def taskArguments(arguments: String*) = TaskArguments(VariantArray(arguments.toIndexedSeq))
 }

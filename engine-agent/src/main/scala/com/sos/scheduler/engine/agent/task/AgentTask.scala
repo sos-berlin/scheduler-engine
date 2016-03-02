@@ -64,8 +64,8 @@ with HasKey {
         TaskOverview.Arguments(
           taskId = a.taskId,
           jobName = a.jobName,
-          language = a.moduleLanguage.string,
-          javaClassName = a.javaClassNameOption,
+          language = a.moduleArguments.language.string,
+          javaClassName = a.moduleArguments.javaClassNameOption,
           monitorCount = a.monitors.size)
     })
 

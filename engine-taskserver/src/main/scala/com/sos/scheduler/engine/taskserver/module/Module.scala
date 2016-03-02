@@ -13,25 +13,27 @@ trait Module {
 }
 
 object Module {
-  def apply(moduleLanguage: ModuleLanguage, script: Script, javaClassNameOption: Option[String]): Module =
-    moduleLanguage match {
+  def apply(moduleArguments: ModuleArguments): Module = {
+    import moduleArguments._
+    moduleArguments.language match {
       case ShellModuleLanguage ⇒
-        for (name ← javaClassNameOption) throw new IllegalArgumentException(s"Language '$moduleLanguage' conflicts with parameter javaClass='$name'")
+        for (name ← moduleArguments.javaClassNameOption) throw new IllegalArgumentException(s"Language '$language' conflicts with parameter javaClass='$name'")
         new ShellModule(script)
 
       case JavaModuleLanguage ⇒
-        val className = javaClassNameOption getOrElse { throw new NoSuchElementException(s"Language '$moduleLanguage' requires a class name") }
+        val className = javaClassNameOption getOrElse { throw new NoSuchElementException(s"Language '$language' requires a class name") }
         StandardJavaModule(className)
 
-      case JavaScriptModuleLanguage(language) ⇒
-        new JavaScriptModule(language, script)
+      case JavaScriptModuleLanguage(lang) ⇒
+        new JavaScriptModule(lang, script)
 
       case PowershellModuleLanguage ⇒
-        new DotnetModule(moduleLanguage, DotnetModuleReference.Powershell(script = script.string))
+        new DotnetModule(language, DotnetModuleReference.Powershell(script = script.string))
 
       case DotnetClassModuleLanguage ⇒
-        new DotnetModule(moduleLanguage, DotnetModuleReference.DotnetClass(dll = ???, className = ???))
+        new DotnetModule(language, DotnetModuleReference.DotnetClass(dll = ???, className = ???))
 
-      case _ ⇒ throw new IllegalArgumentException(s"Unsupported language $moduleLanguage")
+      case _ ⇒ throw new IllegalArgumentException(s"Unsupported language $language")
     }
+  }
 }
