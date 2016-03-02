@@ -5,8 +5,8 @@ import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.data.jobapi.JavaJobSignatures.{SpoolerExitSignature, SpoolerOnErrorSignature, SpoolerOnSuccessSignature, SpoolerOpenSignature}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.taskserver.module.javamodule.JavaModule
-import com.sos.scheduler.engine.taskserver.task.JavaProcessTask._
+import com.sos.scheduler.engine.taskserver.module.javamodule.ApiModule
+import com.sos.scheduler.engine.taskserver.task.ApiProcessTask._
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -17,7 +17,7 @@ import scala.util.control.NonFatal
  *
  * @author Joacim Zschimmer
  */
-private[task] final class JavaProcessTask(module: JavaModule, protected val commonArguments: CommonArguments)
+private[task] final class ApiProcessTask(module: ApiModule, protected val commonArguments: CommonArguments)
 extends Task with HasCloser {
 
   import commonArguments.{jobName, monitors, namedInvocables, stdFiles}
@@ -48,10 +48,9 @@ extends Task with HasCloser {
       methodIsCalled += methodWithSignature
       val NameAndSignature(name, "", _) = methodWithSignature
       try instance.getClass.getMethod(name).invoke(instance)
-      finally
-        if (methodWithSignature == SpoolerExitSignature) {
-          afterSpoolerExit()
-        }
+      finally if (methodWithSignature == SpoolerExitSignature) {
+        afterSpoolerExit()
+      }
     }
 
   private def afterSpoolerExit(): Unit =
@@ -92,7 +91,7 @@ extends Task with HasCloser {
   def pidOption = None
 }
 
-private object JavaProcessTask {
+private object ApiProcessTask {
   private val NameAndSignature = """(.*)\((.*)\)(.+)""".r
   private val StandardJavaErrorCode = MessageCode("Z-JAVA-105")
 }

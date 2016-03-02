@@ -161,7 +161,7 @@ private object ShellProcessTaskTest {
 
   private trait TestModule extends JavaModule {
     def moduleLanguage = JavaModuleLanguage
-    def newJobInstance() = throw new NotImplementedError
+    protected def newJobInstance() = throw new NotImplementedError
   }
 
   private class TestMonitor(name: String, setting: Setting) extends sos.spooler.Monitor_impl {

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.taskserver.module.NamedInvocables
-import com.sos.scheduler.engine.taskserver.module.javamodule.JavaModule
+import com.sos.scheduler.engine.taskserver.module.javamodule.ApiModule
 import scala.collection.immutable
 import scala.util.control.NonFatal
 
@@ -13,7 +13,7 @@ final class MonitorProcessor(monitors: immutable.Seq[Monitor], namedInvocables: 
 extends HasCloser {
 
   private val classInstances = (for (monitor ← monitors) yield monitor.module match {
-    case module: JavaModule ⇒ module.newMonitorInstance(namedInvocables)
+    case module: ApiModule ⇒ module.newMonitorInstance(namedInvocables)
     case module ⇒ throw new IllegalArgumentException(s"Unsupported language '${module.moduleLanguage}' for a monitor ($module)")
   }).toVector
 

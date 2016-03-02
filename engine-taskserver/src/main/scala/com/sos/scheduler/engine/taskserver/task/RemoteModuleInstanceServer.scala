@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.minicom.idispatch.{Invocable, InvocableFactory}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IID, VariantArray}
 import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
 import com.sos.scheduler.engine.taskserver.module.NamedInvocables
-import com.sos.scheduler.engine.taskserver.module.javamodule.JavaModule
+import com.sos.scheduler.engine.taskserver.module.javamodule.ApiModule
 import com.sos.scheduler.engine.taskserver.module.shell.ShellModule
 import com.sos.scheduler.engine.taskserver.task.process.Processes.Pid
 import java.util.UUID
@@ -70,8 +70,8 @@ extends HasCloser with Invocable {
           killScriptOption = taskStartArguments.killScriptOption,
           synchronizedStartProcess,
           taskServerMainTerminatedOption = taskServerMainTerminatedOption)
-      case module: JavaModule ⇒
-        new JavaProcessTask(module, commonArguments)
+      case module: ApiModule ⇒
+        new ApiProcessTask(module, commonArguments)
     }
     closer.registerAutoCloseable(task)
     taskOnce := task

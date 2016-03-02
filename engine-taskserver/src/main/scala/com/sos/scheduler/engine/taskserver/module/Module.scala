@@ -11,7 +11,7 @@ trait Module {
 }
 
 object Module {
-  def apply(moduleLanguage: ModuleLanguage, script: Script, javaClassNameOption: Option[String]) =
+  def apply(moduleLanguage: ModuleLanguage, script: Script, javaClassNameOption: Option[String]): Module =
     moduleLanguage match {
       case ShellModuleLanguage ⇒
         for (name ← javaClassNameOption) throw new IllegalArgumentException(s"language '$moduleLanguage' conflicts with parameter javaClass='$name'")

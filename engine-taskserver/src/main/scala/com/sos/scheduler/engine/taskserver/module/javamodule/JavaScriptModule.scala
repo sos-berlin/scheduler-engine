@@ -10,7 +10,7 @@ final case class JavaScriptModule(language: String, script: Script) extends Java
 
   def moduleLanguage = JavaModuleLanguage
 
-  def newJobInstance() = new ScriptAdapterJob(language, script.string)
+  protected def newJobInstance() = new ScriptAdapterJob(language, script.string)
 
-  def newMonitorInstance() = new ScriptAdapterMonitor(language, script.string)
+  protected def newMonitorInstance() = new ScriptAdapterMonitor(language, script.string)
 }
