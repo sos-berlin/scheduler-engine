@@ -106,7 +106,7 @@ extends HasCloser {
 
 object TestEnvironment {
   val TestSchedulerId = new SchedulerId("test")
-  private val JobJavaOptions = "-Xms5m -Xmx10m"
+  private val JobJavaOptions = "-Xms10m -Xmx20m"
   val ConfigSubdirectoryName = "config"
 
   def apply(testConfiguration: TestConfiguration, directory: File) =
