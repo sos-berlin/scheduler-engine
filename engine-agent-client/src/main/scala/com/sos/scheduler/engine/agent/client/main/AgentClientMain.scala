@@ -14,24 +14,29 @@ object AgentClientMain {
   private val logger = Logger(getClass)
 
   def main(args: Array[String]): Unit =
-    try run(args, println)
+    try {
+      val rc = run(args, println)
+      System.exit(rc)
+    }
     catch { case NonFatal(t) ⇒
       println(s"ERROR: $t")
       logger.error(t.toString, t)
       System.exit(1)
     }
 
-  private[client] def run(args: Seq[String], print: String ⇒ Unit): Unit = {
+  private[client] def run(args: Seq[String], print: String ⇒ Unit): Int = {
     val (agentUri, operations) = parseArgs(args)
     autoClosing(new TextAgentClient(agentUri, print)) { client ⇒
       if (operations.isEmpty)
-        client.requireIsResponding()
-      else
+        if (client.checkIsResponding()) 0 else 1
+      else {
         operations foreach {
           case StringCommand(command) ⇒ client.executeCommand(command)
           case StdinCommand ⇒ client.executeCommand(io.Source.stdin.mkString)
           case Get(uri) ⇒ client.get(uri)
         }
+        0
+      }
     }
   }
 

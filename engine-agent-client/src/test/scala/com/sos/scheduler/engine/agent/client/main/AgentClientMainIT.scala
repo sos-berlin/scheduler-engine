@@ -21,7 +21,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCloser with AgentTest {
 
-  override def afterAll(): Unit = {
+  override def afterAll() = {
     onClose { super.afterAll() }
     close()
   }
@@ -52,11 +52,21 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
     assert(output(2) contains "currentTaskCount: 0")
   }
 
-  "main with Agent URI only checks wether Agent is responding" in {
+  "main with Agent URI only checks wether Agent is responding (it is)" in {
     val output = mutable.Buffer[String]()
-    AgentClientMain.run(List(agent.localUri), o ⇒ output += o)
+    assertResult(0) {
+      AgentClientMain.run(List(agent.localUri), o ⇒ output += o)
+    }
     assert(output == List("JobScheduler Agent is responding"))
-    intercept[Exception] { AgentClientMain.run(List(s"http://127.0.0.1:${findRandomFreeTcpPort()}"), _ ⇒ ()) }
+  }
+
+  "main with Agent URI only checks wether Agent is responding (it is not)" in {
+    val port = findRandomFreeTcpPort()
+    val output = mutable.Buffer[String]()
+    assertResult(1) {
+      AgentClientMain.run(List(s"http://127.0.0.1:$port"), { o ⇒ output += o })
+    }
+    assert(output == List(s"JobScheduler Agent is not responding: Connection attempt to 127.0.0.1:$port failed"))
   }
 }
 

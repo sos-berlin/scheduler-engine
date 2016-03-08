@@ -40,6 +40,18 @@ private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit) 
   def get(uri: String): Unit =
     doPrint(resultString(pipeline(Get(agentUris.api(uri)))))
 
+  def checkIsResponding(): Boolean = {
+    try {
+      requireIsResponding()
+      true
+    }
+    catch {
+      case t: spray.can.Http.ConnectionAttemptFailedException ⇒
+        print(s"JobScheduler Agent is not responding: ${t.getMessage}")
+        false
+    }
+  }
+
   def requireIsResponding(): Unit = {
     resultString(pipeline(Get(agentUris.overview)))
     print("JobScheduler Agent is responding")
