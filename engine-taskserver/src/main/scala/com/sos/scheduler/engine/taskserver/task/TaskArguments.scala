@@ -25,7 +25,6 @@ final class TaskArguments private(arguments: List[(String, String)]) {
     case None ⇒ false
   }
   lazy val moduleArguments = extractModuleArguments(arguments)
-  lazy val module = Module(moduleArguments)
   lazy val jobName: String = apply(JobKey)
   lazy val shellVariablePrefix: String = get(ShellVariablePrefixKey) getOrElse DefaultShellVariablePrefix
   lazy val stderrLogLevel: SchedulerLogLevel = get(StderrLogLevelKey) map { o ⇒ SchedulerLogLevel.ofCpp(o.toInt) } getOrElse SchedulerLogLevel.info
@@ -33,7 +32,7 @@ final class TaskArguments private(arguments: List[(String, String)]) {
   lazy val monitors: immutable.Seq[Monitor] = {
     val unordered =
       for (m ← splitMonitorArguments(arguments collect { case (k, v) if k startsWith MonitorPrefix ⇒ (k stripPrefix MonitorPrefix) → v }))
-      yield Monitor(Module(m.moduleArguments), name = m.name, ordering = m.ordering)
+      yield Monitor(m.moduleArguments, name = m.name, ordering = m.ordering)
     stableSort(unordered, { o: Monitor ⇒ o.ordering }).toVector
   }
 
@@ -110,7 +109,7 @@ object TaskArguments {
   private class MonitorArguments(argMap: Map[String, String]) {
     def name = argMap.getOrElse(monitor.NameKey, "")
     val ordering = argMap.getConverted(monitor.OrderingKey) { _.toInt } getOrElse Monitor.DefaultOrdering
-    lazy val moduleArguments = extractModuleArguments(argMap)
+    val moduleArguments = extractModuleArguments(argMap)
   }
 
   private def extractModuleArguments(args: Iterable[(String, String)]) = {

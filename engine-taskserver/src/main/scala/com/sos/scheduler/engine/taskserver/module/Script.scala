@@ -9,6 +9,8 @@ import com.sos.scheduler.engine.data.base.IsString
 final case class Script(string: String) extends IsString
 
 object Script {
+  val Empty = new Script("")
+
   def parseXmlString(xmlString: String): Script =
     ScalaXMLEventReader.parseString(xmlString) { eventReader ⇒
       import eventReader._

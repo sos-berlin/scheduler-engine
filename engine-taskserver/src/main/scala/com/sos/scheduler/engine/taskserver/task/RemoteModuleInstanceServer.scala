@@ -11,9 +11,9 @@ import com.sos.scheduler.engine.minicom.idispatch.annotation.invocable
 import com.sos.scheduler.engine.minicom.idispatch.{Invocable, InvocableFactory}
 import com.sos.scheduler.engine.minicom.types.{CLSID, IID, VariantArray}
 import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
-import com.sos.scheduler.engine.taskserver.module.NamedInvocables
 import com.sos.scheduler.engine.taskserver.module.javamodule.ApiModule
 import com.sos.scheduler.engine.taskserver.module.shell.ShellModule
+import com.sos.scheduler.engine.taskserver.module.{ModuleFactory, NamedInvocables}
 import com.sos.scheduler.engine.taskserver.task.process.Processes.Pid
 import java.util.UUID
 import javax.inject.Inject
@@ -25,6 +25,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * @see Com_remote_module_instance_server, spooler_module_remote_server.cxx
  */
 final class RemoteModuleInstanceServer @Inject private(
+  moduleFactory: ModuleFactory,
   taskStartArguments: TaskStartArguments,
   synchronizedStartProcess: RichProcessStartSynchronizer,
   taskServerMainTerminatedOption: Option[Future[Unit]])
@@ -60,9 +61,9 @@ extends HasCloser with Invocable {
       taskArguments.monitors,
       hasOrder = taskArguments.hasOrder,
       stdFiles)
-    val task = taskArguments.module match {
+    val task = moduleFactory(taskArguments.moduleArguments) match {
       case module: ShellModule ⇒
-        new ShellProcessTask(module, commonArguments,
+        new ShellProcessTask(moduleFactory, module, commonArguments,
           environment = taskStartArguments.environment ++ taskArguments.environment,
           variablePrefix = taskArguments.shellVariablePrefix,
           logDirectory = taskStartArguments.logDirectory,
@@ -71,7 +72,7 @@ extends HasCloser with Invocable {
           synchronizedStartProcess,
           taskServerMainTerminatedOption = taskServerMainTerminatedOption)
       case module: ApiModule ⇒
-        new ApiProcessTask(module, commonArguments)
+        new ApiProcessTask(moduleFactory, module, commonArguments)
     }
     closer.registerAutoCloseable(task)
     taskOnce := task
