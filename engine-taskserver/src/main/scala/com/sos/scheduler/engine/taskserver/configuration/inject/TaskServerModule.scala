@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.taskserver.configuration.inject
 
 import com.google.inject.Provides
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.sos.scheduler.engine.jobapi.dotnet.Jni4netModuleInstanceFactory
 import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleInstanceFactory
 import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
 import javax.inject.Singleton
@@ -20,7 +21,11 @@ extends ScalaAbstractModule {
   }
 
   @Provides @Singleton
-  def dotnetModuleInstanceFactory: DotnetModuleInstanceFactory = DotnetModuleInstanceFactory.Unsupported
+  def dotnetModuleInstanceFactory: DotnetModuleInstanceFactory =
+    taskStartArguments.dotnetDllDirectory match {
+      case Some(dllPath) ⇒ new Jni4netModuleInstanceFactory(dllPath)
+      case None ⇒ DotnetModuleInstanceFactory.Unsupported
+    }
 
   /** If task server runs in an own process, the Future of its termination. */
   @Provides @Singleton
