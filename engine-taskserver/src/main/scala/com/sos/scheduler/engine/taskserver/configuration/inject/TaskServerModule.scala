@@ -2,7 +2,9 @@ package com.sos.scheduler.engine.taskserver.configuration.inject
 
 import com.google.inject.Provides
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleInstanceFactory
 import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
+import javax.inject.Singleton
 import scala.concurrent.Future
 
 /**
@@ -17,6 +19,10 @@ extends ScalaAbstractModule {
     bindInstance[TaskStartArguments](taskStartArguments)
   }
 
+  @Provides @Singleton
+  def dotnetModuleInstanceFactory: DotnetModuleInstanceFactory = DotnetModuleInstanceFactory.Unsupported
+
   /** If task server runs in an own process, the Future of its termination. */
-  @Provides def unitFutureOption: Option[Future[Unit]] = taskServerMainTerminated
+  @Provides @Singleton
+  def unitFutureOption: Option[Future[Unit]] = taskServerMainTerminated
 }

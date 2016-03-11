@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.module.dotnet
 
-import com.sos.scheduler.engine.jobapi.dotnet.{DotnetModuleInstanceFactory, DotnetModuleReference, TaskContext}
+import com.sos.scheduler.engine.jobapi.dotnet.api.{DotnetModuleInstanceFactory, TaskContext}
+import com.sos.scheduler.engine.taskserver.module.ModuleArguments.DotnetModuleArguments
 import com.sos.scheduler.engine.taskserver.module._
 import com.sos.scheduler.engine.taskserver.module.dotnet.DotnetModule._
 import com.sos.scheduler.engine.taskserver.module.javamodule.{ApiModule, JavaModule}
@@ -8,18 +9,19 @@ import com.sos.scheduler.engine.taskserver.module.javamodule.{ApiModule, JavaMod
 /**
   * @author Joacim Zschimmer
   */
-final case class DotnetModule(val moduleLanguage: ModuleLanguage, dotnetModuleReference: DotnetModuleReference)
+final class DotnetModule private[dotnet](val arguments: DotnetModuleArguments, factory: DotnetModuleInstanceFactory)
 extends ApiModule {
 
+  import arguments.dotnetModuleReference
+
   def newJobInstance(namedInvocables: NamedInvocables) =
-    factory.newJobInstance(namedInvocablesToTaskContext(namedInvocables), dotnetModuleReference)
+    factory.newInstance(classOf[sos.spooler.Job_impl], namedInvocablesToTaskContext(namedInvocables), dotnetModuleReference)
 
   def newMonitorInstance(namedInvocables: NamedInvocables) =
-    factory.newMonitorInstance(namedInvocablesToTaskContext(namedInvocables), dotnetModuleReference)
+    factory.newInstance(classOf[sos.spooler.Monitor_impl], namedInvocablesToTaskContext(namedInvocables), dotnetModuleReference)
 }
 
 private object DotnetModule {
-  private val factory: DotnetModuleInstanceFactory = ???
 
   private def namedInvocablesToTaskContext(namedInvocables: NamedInvocables) = TaskContext(
     JavaModule.spooler_log(namedInvocables),

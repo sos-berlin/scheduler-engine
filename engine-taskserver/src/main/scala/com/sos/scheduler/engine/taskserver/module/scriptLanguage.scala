@@ -26,7 +26,7 @@ object ModuleLanguage {
   private def complexlyNamedToModuleLanguage(language: String) =
     language match {
       case _ if JavaScriptingEnginePrefixes exists language.startsWith ⇒ new JavaScriptModuleLanguage(language)
-      case _ ⇒ OtherModuleLanguage(language)
+      case _ ⇒ throw new IllegalArgumentException(s"Unknown language='$language'")
     }
 }
 
@@ -44,12 +44,10 @@ final case class JavaScriptModuleLanguage(languageName: String) extends ModuleLa
 
 sealed trait DotnetModuleLanguage extends ModuleLanguage
 
-case object DotnetClassModuleLanguage extends ModuleLanguage {
-  val string = ".Net"
+case object DotnetClassModuleLanguage extends DotnetModuleLanguage {
+  val string = "dotnet"
 }
 
 case object PowershellModuleLanguage extends DotnetModuleLanguage {
   val string = "PowerShell"
 }
-
-final case class OtherModuleLanguage(string: String) extends ModuleLanguage

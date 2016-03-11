@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.jobapi.dotnet
+package com.sos.scheduler.engine.jobapi.dotnet.api
 
 /**
   * @author Joacim Zschimmer
