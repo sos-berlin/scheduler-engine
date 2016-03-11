@@ -10,11 +10,11 @@ import sos.spooler.Monitor_impl;
 /**
  * @author Joacim Zschimmer
  */
-public final class StandardDotnetModuleInstanceFactory implements DotnetModuleInstanceFactory {
-    private final Path dllDirectory;
+public final class Jni4netModuleInstanceFactory implements DotnetModuleInstanceFactory {
+    private final Path jni4netDirectory;
 
-    public StandardDotnetModuleInstanceFactory(Path dllDirectory) {
-        this.dllDirectory = dllDirectory;
+    public Jni4netModuleInstanceFactory(Path dllDirectory) {
+        this.jni4netDirectory = dllDirectory;
         // TODO Hier jni4net usw. initialisieren
     }
 
