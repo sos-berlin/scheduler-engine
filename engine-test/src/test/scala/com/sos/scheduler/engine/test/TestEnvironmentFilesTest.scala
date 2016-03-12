@@ -1,10 +1,8 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.utils.JavaResource
-import java.nio.file.Files
-import java.nio.file.Files.createTempDirectory
+import java.nio.file.Files.{createTempDirectory, delete}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -22,10 +20,10 @@ final class TestEnvironmentFilesTest extends FreeSpec {
     TestEnvironmentFiles.copy(packageResource, dir)
     val subfile = dir / "subdirectory/test2.xml"
     assert(subfile.exists)
-    val files = Files.list(dir).toImmutableSeq
-    assert(files.toSet == (Set("test.xml", "subdirectory", "scheduler.xml", "factory.ini", "sos.ini") map dir./))
-    Files.delete(subfile)
-    files foreach Files.delete
-    Files.delete(dir)
+    val files = dir.pathSet
+    assert(files == (Set("test.xml", "subdirectory", "scheduler.xml", "factory.ini", "sos.ini") map dir./))
+    delete(subfile)
+    files foreach delete
+    delete(dir)
   }
 }
