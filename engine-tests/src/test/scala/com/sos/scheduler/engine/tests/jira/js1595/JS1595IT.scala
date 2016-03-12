@@ -20,7 +20,6 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   "PowerShell" in {
-    pending
     check(JobChainPath("/test-powershell"))
   }
 

@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.jobapi.dotnet.dlls
 
 import com.sos.scheduler.engine.common.utils.JavaResource
-import java.nio.file.{CopyOption, Path}
-import scala.collection.immutable
+import java.nio.file.Path
 
 /**
   * @author Joacim Zschimmer
   */
 object DotnetDlls {
   private val DllsResourcePath = JavaResource("com/sos/scheduler/engine/jobapi/dotnet/dlls")
-  private val DllNames = List("jni4net.dll")
+  private[dotnet] val DllNames = Set("readme.txt")  // FIXME Replace with DLL names
 
-  def provideDlls(directory: Path, copyOptions: CopyOption*): immutable.Seq[Path] =
-    DllsResourcePath.copyToFiles(DllNames, directory, copyOptions: _*)
+  def provideDlls(directory: Path): Set[Path] =
+    DllsResourcePath.copyToFiles(DllNames, directory).toSet
 }

@@ -13,6 +13,8 @@ final class DotnetEnvironment(baseTemporaryDirectory: Path) extends HasCloser {
   private val dlls = DotnetDlls.provideDlls(directory)
 
   onClose {
-    (dlls :+ directory) foreach deleteIfExists
+    (dlls + directory) foreach deleteIfExists
   }
+
+  override def toString = s"DotnetEnvironment $directory"
 }
