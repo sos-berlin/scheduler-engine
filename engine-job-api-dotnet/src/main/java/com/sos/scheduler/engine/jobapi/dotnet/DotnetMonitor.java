@@ -17,6 +17,7 @@ public final class DotnetMonitor extends sos.spooler.Monitor_impl {
         this.dotnetObject = dotnetObject;
     }
 
+    @Override
     public boolean spooler_task_before() throws Exception {
         //return dotnetObject.spooler_task_before();
         throw new NotImplementedError();
