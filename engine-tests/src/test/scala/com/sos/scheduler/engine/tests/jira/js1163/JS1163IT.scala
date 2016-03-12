@@ -57,7 +57,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\ntouch $killScriptCallsDir/$$arguments\n"  // echo only if script succeeds
   }
   onClose {
-    list(killScriptCallsDir) foreach delete
+    killScriptCallsDir.pathSet foreach delete
     delete(killScriptCallsDir)
     delete(killScriptFile)
   }
@@ -121,7 +121,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         if (setting eq universalAgentSetting) {
           "Kill script has been called" in {
             // Each filename in the directory is the argument list of the kill script call.
-            val names = list(killScriptCallsDir).toVector map { _.getFileName.toString }
+            val names = killScriptCallsDir.pathSet map { _.getFileName.toString }
             val expectedArg = "-kill-agent-task-id="
             for (name ← names) {
               assert(name contains expectedArg)
