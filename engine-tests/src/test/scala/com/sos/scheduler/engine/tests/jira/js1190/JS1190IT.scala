@@ -67,17 +67,15 @@ private object JS1190IT {
     100 → OrderState("ERROR"))
 
   private val MonitorExitCodeToState = List[((Boolean, Int, Boolean), (OrderStateTransition, OrderState))](
-    (true, 0, true) → (SuccessOrderStateTransition, OrderState("STATE-0")),
-    (true, 1, false) → (ErrorOrderStateTransition(ReturnCode(1)), OrderState("STATE-1")),
-    (true, 99, false) → (ErrorOrderStateTransition(ReturnCode(99)), OrderState("STATE-99")),
-    (true, 100, false) → (ErrorOrderStateTransition(ReturnCode(100)), OrderState("ERROR")),
-
-    (true, 0, false) → (ErrorOrderStateTransition.Standard, OrderState("STATE-1")),
-    (true, 1, true) → (SuccessOrderStateTransition, OrderState("STATE-0")),
-    (true, 99, true) → (SuccessOrderStateTransition, OrderState("STATE-0")),
-    (true, 100, true) → (SuccessOrderStateTransition, OrderState("STATE-0")),
-
-    (false, 0, true) → (ErrorOrderStateTransition.Standard, OrderState("STATE-1")))
+    ((true, 0, true), (SuccessOrderStateTransition, OrderState("STATE-0"))),
+    ((true, 1, false), (ErrorOrderStateTransition(ReturnCode(1)), OrderState("STATE-1"))),
+    ((true, 99, false), (ErrorOrderStateTransition(ReturnCode(99)), OrderState("STATE-99"))),
+    ((true, 100, false), (ErrorOrderStateTransition(ReturnCode(100)), OrderState("ERROR"))),
+    ((true, 0, false), (ErrorOrderStateTransition.Standard, OrderState("STATE-1"))),
+    ((true, 1, true), (SuccessOrderStateTransition, OrderState("STATE-0"))),
+    ((true, 99, true), (SuccessOrderStateTransition, OrderState("STATE-0"))),
+    ((true, 100, true), (SuccessOrderStateTransition, OrderState("STATE-0"))),
+    ((false, 0, true), (ErrorOrderStateTransition.Standard, OrderState("STATE-1"))))
 
   private val TestJobPath = JobPath("/test-a")
   private val JobScriptElem =
