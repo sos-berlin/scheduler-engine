@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleReference
 import com.sos.scheduler.engine.minicom.types.VariantArray
 import com.sos.scheduler.engine.taskserver.module.ModuleArguments.{DotnetModuleArguments, JavaModuleArguments, ShellModuleArguments}
-import com.sos.scheduler.engine.taskserver.module.{PowershellModuleLanguage, DotnetClassModuleLanguage, Script}
+import com.sos.scheduler.engine.taskserver.module.{DotnetClassModuleLanguage, PowershellModuleLanguage, Script}
 import java.nio.file.Paths
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -73,9 +73,10 @@ final class TaskArgumentsTest extends FreeSpec {
       "monitor.java_class=com.example.B",
       "monitor.script=",
       "monitor.language=dotNet",
-      "monitor.dll=c:\\my\\test.dll",
+      "monitor.dll=test.dll",
       "monitor.dotnet_class=com.example.C",
-      "monitor.script=")))
+      "monitor.script=")),
+      dllDirectory = Paths.get("/test-dlls"))
     assert(a.monitors.size == 3)
     assert(a.monitors(0).name == "")
     assert(a.monitors(0).ordering == 1)
@@ -84,7 +85,7 @@ final class TaskArgumentsTest extends FreeSpec {
     assert(a.monitors(1).ordering == 1)
     assert(a.monitors(1).moduleArguments == DotnetModuleArguments(
       DotnetClassModuleLanguage,
-      DotnetModuleReference.DotnetClass(Paths.get("c:\\my\\test.dll"), className = "com.example.C")))
+      DotnetModuleReference.DotnetClass(Paths.get("/test-dlls/test.dll"), className = "com.example.C")))
     assert(a.monitors(2).name == "MONITOR-NAME")
     assert(a.monitors(2).ordering == 7)
   }

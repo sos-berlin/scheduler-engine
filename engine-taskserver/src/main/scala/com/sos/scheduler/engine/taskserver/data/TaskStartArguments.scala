@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.taskserver.data
 import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.agent.data.{AgentTaskId, ProcessKillScript}
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.EmptyPath
 import com.sos.scheduler.engine.common.sprayutils.SprayJson.implicits._
 import com.sos.scheduler.engine.common.system.FileUtils._
 import com.sos.scheduler.engine.common.utils.TcpUtils.parseTcpPort
@@ -10,7 +11,7 @@ import com.sos.scheduler.engine.taskserver.data.TaskStartArguments.toInetSocketA
 import com.sos.scheduler.engine.taskserver.task.process.StdoutStderr.StdoutStderrType
 import com.sos.scheduler.engine.tunnel.data.{TunnelId, TunnelToken}
 import java.net.InetSocketAddress
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
 import java.time.Duration
 import spray.json.DefaultJsonProtocol._
 
@@ -26,6 +27,7 @@ final case class TaskStartArguments(
   directory: Path,
   logDirectory: Path,
   dotnetDllDirectory: Option[Path] = None,
+  dllDirectory: Path,
   stdFileMap: Map[StdoutStderrType, Path] = Map(),
   logStdoutAndStderr: Boolean = false,
   killScriptOption: Option[ProcessKillScript] = None,
@@ -41,7 +43,7 @@ object TaskStartArguments {
 
   def forTest(
     tcpPort: Int = 999999999,
-    directory: Path = Paths.get(""),
+    directory: Path = EmptyPath,
     stdFileMap: Map[StdoutStderrType, Path] = Map())
   = new TaskStartArguments(
       masterAddress = s"127.0.0.1:$tcpPort",
@@ -49,6 +51,7 @@ object TaskStartArguments {
       tunnelToken = TunnelToken(TunnelId("TEST-TUNNEL"), TunnelToken.Secret("TUNNEL-SECRET")),
       directory = directory,
       logDirectory = temporaryDirectory,
+      dllDirectory = EmptyPath,
       stdFileMap = stdFileMap,
       agentTaskId = AgentTaskId("1-1"),
       rpcKeepaliveDurationOption = None)
@@ -58,5 +61,5 @@ object TaskStartArguments {
       case HostPortRegex(host, port) ⇒ new InetSocketAddress(host, parseTcpPort(port))
     }
 
-  implicit val MyJsonFormat = jsonFormat12(apply)
+  implicit val MyJsonFormat = jsonFormat13(apply)
 }

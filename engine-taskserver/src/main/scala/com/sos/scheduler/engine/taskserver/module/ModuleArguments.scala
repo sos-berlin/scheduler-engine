@@ -19,9 +19,11 @@ object ModuleArguments {
     javaClassNameOption: Option[String],
     dllOption: Option[Path],
     dotnetClassNameOption: Option[String],
-    script: Script): ModuleArguments =
+    script: Script,
+    dllDirectory: Path): ModuleArguments =
   {
-    def requireUnused[A](name: String, option: Option[A]) = for (o ← option) throw new IllegalArgumentException(s"language='$language' conflicts with parameter $name='$o'")
+    def requireUnused[A](name: String, option: Option[A]) =
+      for (o ← option) throw new IllegalArgumentException(s"language='$language' conflicts with parameter $name='$o'")
 
     language match {
       case ShellModuleLanguage ⇒
@@ -50,7 +52,11 @@ object ModuleArguments {
 
       case lang @ DotnetClassModuleLanguage ⇒
         requireUnused("java_class", javaClassNameOption)
-        DotnetModuleArguments(lang, DotnetModuleReference.DotnetClass(dll = dllOption.get, className = dotnetClassNameOption.get))
+        val dll = dllOption getOrElse { throw new IllegalArgumentException(s"language='$language' requires a Java class name") }
+        val className = dotnetClassNameOption getOrElse { throw new IllegalArgumentException(s"language='$language' requires a .Net class name") }
+        DotnetModuleArguments(lang, DotnetModuleReference.DotnetClass(
+          dll = dllDirectory resolve dll,
+          className = className))
     }
   }
 

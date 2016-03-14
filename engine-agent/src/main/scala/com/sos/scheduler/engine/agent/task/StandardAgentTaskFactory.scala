@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.agent.data.commands.{StartApiTask, StartNonApiTa
 import com.sos.scheduler.engine.agent.task.StandardAgentTaskFactory._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.EmptyPath
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.minicom.remoting.calls.CallCall
@@ -69,6 +70,7 @@ extends AgentTaskFactory {
       directory = agentConfiguration.directory,
       logDirectory = agentConfiguration.logDirectory,
       dotnetDllDirectory = agentConfiguration.dotnetDllDirectory,
+      dllDirectory = agentConfiguration.dllDirectory,
       environment = agentConfiguration.environment,
       killScriptOption = agentConfiguration.killScript,
       rpcKeepaliveDurationOption = agentConfiguration.rpcKeepaliveDuration)
@@ -100,7 +102,7 @@ private object StandardAgentTaskFactory {
     def onRequest(msg: ByteString) =
       messageIsCall(msg) option deserializeCall(msg) match {
         case Some(CallCall(_, "construct", args)) ⇒
-          promise.success(TaskArguments(args(0).asInstanceOf[VariantArray]))
+          promise.success(TaskArguments(args(0).asInstanceOf[VariantArray], dllDirectory = EmptyPath))
           StopListening
         case _ ⇒ this
       }

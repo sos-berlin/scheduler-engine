@@ -42,7 +42,7 @@ extends HasCloser with Invocable {
 
   @invocable
   def construct(arguments: VariantArray): Unit = {
-    taskArguments = TaskArguments(arguments)
+    taskArguments = TaskArguments(arguments, dllDirectory = taskStartArguments.dllDirectory)
     logger.info(s"${taskStartArguments.agentTaskId} is Master's task ${taskArguments.jobName}:${taskArguments.taskId}")
   }
 

@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.agent.configuration.AgentConfiguration._
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.agent.web.common.ExternalWebService
 import com.sos.scheduler.engine.common.commandline.CommandLineArguments
+import com.sos.scheduler.engine.common.scalautil.FileUtils.EmptyPath
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
@@ -32,6 +33,7 @@ final case class AgentConfiguration(
   directory: Path = Paths.get(sys.props("user.dir")).toAbsolutePath,
   logDirectory: Path = temporaryDirectory,
   dotnetDllDirectory: Option[Path] = None,
+  dllDirectory: Path = EmptyPath,
   environment: Map[String, String] = Map(),
   externalWebServiceClasses: immutable.Seq[Class[_ <: ExternalWebService]] = Nil,
   jobJavaOptions: immutable.Seq[String] = Nil,
@@ -60,6 +62,7 @@ object AgentConfiguration {
         httpInterfaceRestriction = a.getString("-ip-address="),
         uriPathPrefix = a.getString("-uri-prefix=") getOrElse "",
         logDirectory = a.asConvertedOption("-log-directory=") { o ⇒ Paths.get(o).toAbsolutePath } getOrElse temporaryDirectory,
+        dllDirectory = a.asConvertedOption("-dll-directory=") { o ⇒ Paths.get(o).toAbsolutePath } getOrElse EmptyPath,
         rpcKeepaliveDuration = a.asConvertedOption("-rpc-keepalive=")(parseDuration),
         jobJavaOptions = a.getString("-job-java-options=").toList)
       r.copy(killScript = a.getString("-kill-script=") match {
