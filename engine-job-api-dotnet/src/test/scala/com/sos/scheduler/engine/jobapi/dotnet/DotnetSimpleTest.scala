@@ -21,7 +21,7 @@ final class DotnetSimpleTest extends FreeSpec {
     val dotnetDir =
       autoClosing(new DotnetEnvironment(temporaryDirectory)) { env ⇒
         autoClosing(new Jni4netModuleInstanceFactory(env.directory)) { factory: DotnetModuleInstanceFactory ⇒
-          val List(spoolerLog, spoolerTask, order, params) = List.fill(4) { mock[sos.spooler.Invoker] }
+          val spoolerLog, spoolerTask, order, params = mock[sos.spooler.Invoker]
           when(spoolerTask.call("<order", Array())).thenReturn(order, null)
           when(order.call("<params", Array())).thenReturn(params, null)
           when(params.call("<value", Array("TEST"))).thenReturn("HELLO", null)
