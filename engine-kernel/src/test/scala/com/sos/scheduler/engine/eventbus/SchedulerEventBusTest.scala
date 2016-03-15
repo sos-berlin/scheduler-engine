@@ -21,14 +21,14 @@ final class SchedulerEventBusTest extends FreeSpec {
       var a = 0
       withCloser { implicit closer ⇒
         eventBus.on[A] {
-          case e: A1 ⇒ a += 1
+          case e: Ax ⇒ a += 1
         }
-        eventBus.publish(A1())
+        eventBus.publish(Ax())
         assertResult(0)(a)
         eventBus.dispatchEvents()
         assertResult(1)(a)
 
-        eventBus.publish(A2())
+        eventBus.publish(Ay())
         eventBus.dispatchEvents()
         assertResult(1)(a)
 
@@ -37,7 +37,7 @@ final class SchedulerEventBusTest extends FreeSpec {
         assertResult(1)(a)
       }
       // on[] is unsubscribed now
-      eventBus.publish(A1())
+      eventBus.publish(Ax())
       eventBus.dispatchEvents()
       assertResult(1)(a)
     }
@@ -47,19 +47,19 @@ final class SchedulerEventBusTest extends FreeSpec {
       var a = 0
       withCloser { implicit closer ⇒
         eventBus.onHot[A] {
-          case e: A1 ⇒ a += 1
+          case e: Ax ⇒ a += 1
         }
-        eventBus.publish(A1())
+        eventBus.publish(Ax())
         assertResult(1)(a)
 
-        eventBus.publish(A2())
+        eventBus.publish(Ay())
         assertResult(1)(a)
 
         eventBus.publish(B())
         assertResult(1)(a)
       }
       // on[] is unsubscribed now
-      eventBus.publish(A1())
+      eventBus.publish(Ax())
       eventBus.dispatchEvents()
       assertResult(1)(a)
     }
@@ -70,12 +70,12 @@ final class SchedulerEventBusTest extends FreeSpec {
       var source: EventSource = null
       withCloser { implicit closer ⇒
         eventBus.onHotEventSourceEvent[A] {
-          case EventSourceEvent(e: A1, s) ⇒
+          case EventSourceEvent(e: Ax, s) ⇒
             a += 1
             source = s
         }
         val src = new EventSource {}
-        eventBus.publish(A1(), src)
+        eventBus.publish(Ax(), src)
         assertResult(1)(a)
         source should be theSameInstanceAs src
       }
@@ -85,7 +85,7 @@ final class SchedulerEventBusTest extends FreeSpec {
 
 private object SchedulerEventBusTest {
   private trait A extends Event
-  private case class A1() extends A
-  private case class A2() extends A
+  private case class Ax() extends A
+  private case class Ay() extends A
   private case class B() extends Event
 }

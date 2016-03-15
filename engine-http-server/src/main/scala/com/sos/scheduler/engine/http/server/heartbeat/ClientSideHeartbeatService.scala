@@ -17,6 +17,6 @@ object ClientSideHeartbeatService {
         body(times.timeout)
         complete(HttpResponse(OK))
       } ~
-        complete(BadRequest, "Heartbeat with payload?")
+        complete((BadRequest, "Heartbeat with payload?"))
     }
 }

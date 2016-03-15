@@ -26,7 +26,7 @@ object IdempotentHeaders {
               case EternalLifetime ⇒ None
               case o ⇒ Some(o)
             }
-            Some(RequestId.fromString(id), lifetimeOption)
+            Some((RequestId.fromString(id), lifetimeOption))
         }
       }
   }
