@@ -26,7 +26,7 @@ public class CommandBuilder {
 		StringBuilder result = new StringBuilder().append(commandPrefix);
 		if (params.size() > 0 ) {
 			result.append("<params>");
-            TreeMap<String,String> treeMap = new TreeMap(params); // sortierte Keys
+            TreeMap<String,String> treeMap = new TreeMap<>(params); // sortierte Keys
             for (Map.Entry<String,String> entry : treeMap.entrySet()) {
 				result.append("<param name='" + entry.getKey() + "' value='" + entry.getValue() + "' />");
 			}
