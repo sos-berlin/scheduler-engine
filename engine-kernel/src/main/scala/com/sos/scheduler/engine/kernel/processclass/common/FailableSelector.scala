@@ -46,10 +46,10 @@ class FailableSelector[Failable, Result](
           case Success(Failure(throwable)) ⇒ // Tolerated failure
             failables.setFailure(failable, throwable)
             loopUntilConnected()
-          case x@Failure(_: TimedCall.CancelledException) ⇒
-            logger.debug(s"$x")
+          case f @ Failure(_: TimedCall.CancelledException) ⇒
+            logger.debug(s"$f")
             promise.failure(new CancelledException)
-          case x@Failure(throwable) ⇒ // Failure lets abort FailableSelector
+          case Failure(throwable) ⇒ // Failure lets abort FailableSelector
             failables.setFailure(failable, throwable)
             promise.failure(throwable)
         }
