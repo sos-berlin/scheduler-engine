@@ -16,12 +16,13 @@ import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
+import com.sos.scheduler.engine.eventbus.EventSubscription
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
-import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
@@ -37,7 +38,7 @@ import java.util.concurrent.TimeoutException
 import javax.persistence.EntityManagerFactory
 import org.scalatest.Matchers._
 import scala.collection.generic.CanBuildFrom
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.language.{higherKinds, implicitConversions}
 import scala.math.max
 import scala.reflect.ClassTag
@@ -165,14 +166,25 @@ object SchedulerTestUtils {
 
   object OrderRun {
     def apply(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = {
-      val finished = controller.eventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
-      val touched = controller.eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
-      val result = for (finishedEvent ← finished) yield OrderRunResult(orderKey, finishedEvent.state)
-      OrderRun(orderKey, touched, finished, result)
+      import controller.eventBus
+      val whenTouched = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
+      val whenFinished: Future[(OrderFinishedEvent, Map[String, String])] = {
+        val promise = Promise[(OrderFinishedEvent, Map[String, String])]()
+        lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinishedEvent] {
+          case (event: OrderFinishedEvent, order: UnmodifiableOrder) if event.orderKey == orderKey ⇒
+            eventBus.unregisterHot(subscription)
+            promise.success((event, order.parameters.toMap))
+        }
+        eventBus.registerHot(subscription)
+        promise.future
+      }
+      val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.state, variables)
+      val whenFinishedEvent = whenFinished map { _._1 }
+      OrderRun(orderKey, whenTouched, whenFinishedEvent, result)
     }
   }
 
-  final case class OrderRunResult(orderKey: OrderKey, state: OrderState) {
+  final case class OrderRunResult(orderKey: OrderKey, state: OrderState, variables: Map[String, String]) {
     def logString(implicit controller: TestSchedulerController): String = orderLog(orderKey)
   }
 

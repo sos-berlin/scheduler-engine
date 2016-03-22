@@ -28,4 +28,17 @@ object EventSubscription {
       f(unwrappedEvent.asInstanceOf[E])
     }
   }
+
+  def withSource[E <: Event: ClassTag](f: PartialFunction[(E, EventSource), Unit]): EventSubscription =
+    new EventSourceEventSubscription[E](implicitClass[E], f)
+
+  private class EventSourceEventSubscription[E <: Event](clas: Class[E], f: PartialFunction[(E, EventSource), Unit]) extends EventSubscription {
+    def eventClass = clas
+
+    def handleEvent(e: Event) = e match {
+      case EventSourceEvent(e: E @unchecked, source) if eventClass isAssignableFrom e.getClass ⇒
+        f.applyOrElse((e, source), identity[(E, EventSource)])
+      case _ ⇒
+    }
+  }
 }
