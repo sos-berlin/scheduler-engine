@@ -417,9 +417,8 @@ vector<string> Vm::filenames()
         if (jre.exists()) {
             home = jre;   // JAVA_HOME denotes a JDK, not a JRE
         }
-        z::throw_xc("JAVA_HOME not supported");
-        //result.push_back(home + SERVER_JVM_RELATIVE_PATH);
-        //result.push_back(home + CLIENT_JVM_RELATIVE_PATH);
+        result.push_back(home + SERVER_JVM_RELATIVE_PATH);
+        result.push_back(home + CLIENT_JVM_RELATIVE_PATH);
     }
     else
     if (!_filename.empty()) {
