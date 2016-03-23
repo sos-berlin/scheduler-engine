@@ -11,6 +11,7 @@ import java.time.{Instant, Period}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
+import com.sos.scheduler.engine.common.time.ScalaTime._
 
 /**
   * @author Joacim Zschimmer
@@ -28,12 +29,12 @@ private[js1387] object JS1387IT {
   private val DistributedJobChainPath = JobChainPath("/test-distributed")
 
   private val TimedOrders = {
-    val base = now truncatedTo SECONDS plus Period.ofDays(1)
+    val t = now truncatedTo SECONDS plus Period.ofDays(1)
     Vector(
-      AtTimedOrder     (NonDistributedJobChainPath orderKey "at-non-distributed"     , base),
-      RuntimeTimedOrder(NonDistributedJobChainPath orderKey "runtime-non-distributed", base plusSeconds 1),
-      AtTimedOrder     (DistributedJobChainPath    orderKey "at-distributed"         , base plusSeconds 2),
-      RuntimeTimedOrder(DistributedJobChainPath    orderKey "runtime-non-distributed", base plusSeconds 3))
+      AtTimedOrder     (NonDistributedJobChainPath orderKey "at-non-distributed"     , t),
+      RuntimeTimedOrder(NonDistributedJobChainPath orderKey "runtime-non-distributed", t + 1.s),
+      AtTimedOrder     (DistributedJobChainPath    orderKey "at-distributed"         , t + 2.s),
+      RuntimeTimedOrder(DistributedJobChainPath    orderKey "runtime-non-distributed", t + 3.s))
   }
 
   abstract class MyTests extends FreeSpec with ScalaSchedulerTest {
