@@ -99,6 +99,10 @@ struct Simple_node_ptr
     void                        assert_type                 ( NodeType );
     void                        throw_node_type             ( NodeType ) const;
 
+    bool is_same_as(const Simple_node_ptr& o) const {
+        return javabridge::Env()->IsSameObject(_nodeJ.get_jobject(), o._nodeJ.get_jobject()) != 0;
+    }
+
     string                      nodeName                    () const;
 
     bool                        nodeName_is                 ( const char* name ) const;
