@@ -1800,11 +1800,10 @@ void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_
 xml::Element_ptr Order::append_calendar_dom_element_for_setback(  const xml::Element_ptr& element, Show_calendar_options* options )
 {
     xml::Element_ptr setback_element;
-    if( is_processable()  &&  !_setback.is_never() && _setback_count > 0 )
-    {
+    if (is_processable() && !_setback.is_never()) {
        if (_setback >= options->_from && _setback < options->_before) {
          setback_element = new_calendar_dom_element( element.ownerDocument(), _setback );
-         setback_element.setAttribute( "setback", "true" );
+         if (_setback_count) setback_element.setAttribute("setback", "true");
          element.appendChild( setback_element );
        }
     }
@@ -1824,7 +1823,7 @@ void Order::set_attributes_and_remove_duplicates(
         if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
         {
             if( setback_element  &&                                           // Duplikat?
-                e != setback_element  && 
+                !e.is_same_as(setback_element) && 
                 e.nodeName_is( setback_element.nodeName() )  &&  
                 e.getAttribute( "at" ) == setback_element.getAttribute( "at" ) )
             {
