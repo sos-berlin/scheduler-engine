@@ -62,7 +62,7 @@ final class JS1103IT extends FreeSpec with ScalaSchedulerTest {
         val extraOrderKeys = for (o ← ordinaryOrderKeys; i ← ExtraIndices) yield o.copy(id = OrderId(s"${o.id}-$i-extra"))
         ordinaryOrderRuns ++ (extraOrderKeys map OrderRun.apply)
       }
-      allOrderRuns map { _.finished } await 30.s
+      allOrderRuns map { _.finished } await 60.s
       assert(ordinaryCounter.maximum == MaxOrders)
       assert(totalCounter.maximum > MaxOrders)
     }
