@@ -13,7 +13,7 @@ object NewWebServiceConfigurationParser {
     ScalaXMLEventReader.parseString(xml)(parseEvents)
 
   def parse(source: Source): NewWebServicePluginConfiguration = {
-    ScalaXMLEventReader.parse(source)(parseEvents)
+    ScalaXMLEventReader.parseDocument(source)(parseEvents)
   }
 
   private def parseEvents(eventReader: ScalaXMLEventReader): NewWebServicePluginConfiguration = {

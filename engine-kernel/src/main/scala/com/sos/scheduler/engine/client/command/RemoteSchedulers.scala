@@ -19,19 +19,17 @@ object RemoteSchedulers {
     if (answers.size > 1) sys.error(s"More than one (${answers.size}) XML response")
     answers.head
   }
-  
+
   def readSchedulerResponses[A](source: Source)(read: ScalaXMLEventReader ⇒ A): immutable.Seq[A] = {
     try {
-      val result = ScalaXMLEventReader.parse(source) { eventReader ⇒
+      val result = ScalaXMLEventReader.parseDocument(source) { eventReader ⇒
         import eventReader._
-        parseDocument {
-          parseElement("spooler") {
-            parseElement("answer") {
-              attributeMap.ignoreUnread()  // Attribut "time"
-              forEachStartElement[A] {
-                case "ERROR" ⇒ throw errorElementToException(eventReader)
-                case _ ⇒ read(eventReader)
-              }
+        parseElement("spooler") {
+          parseElement("answer") {
+            attributeMap.ignoreUnread()  // Attribut "time"
+            forEachStartElement[A] {
+              case "ERROR" ⇒ throw errorElementToException(eventReader)
+              case _ ⇒ read(eventReader)
             }
           }
         }
