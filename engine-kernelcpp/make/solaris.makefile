@@ -4,7 +4,7 @@
 
 include $(PROD_DIR)/make/gnu.makefile
 
-CFLAGS += -O2
+#CFLAGS += -O2
 #CFLAGS += -O0
 CFLAGS += -fPIC
 
