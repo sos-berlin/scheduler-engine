@@ -30,7 +30,7 @@
 #ifdef Z_WINDOWS
     #define SERVER_JVM_RELATIVE_PATH "\\bin\\server\\jvm.dll"
     #define CLIENT_JVM_RELATIVE_PATH "\\bin\\client\\jvm.dll"
-#elif defined __sparc_v9__
+#elif defined __sparc_v9__ or defined Z_SOLARIS
     #define SERVER_JVM_RELATIVE_PATH "/lib/sparcv9/server/libjvm.so"
     #define CLIENT_JVM_RELATIVE_PATH "/lib/sparcv9/client/libjvm.so"
 #elif defined Z_LINUX
