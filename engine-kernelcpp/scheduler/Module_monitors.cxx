@@ -139,7 +139,7 @@ Module_monitors::Monitor_reference* Module_monitors::monitor_reference_or_null(c
 }
 
 
-Has_log* Module_monitors::log() { 
+Has_log* Module_monitors::log() const { 
     return _main_module->_log.base_log();
 }
 

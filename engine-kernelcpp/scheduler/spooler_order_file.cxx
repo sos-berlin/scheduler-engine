@@ -182,7 +182,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     }
 
     public: 
-    Prefix_log* log() { return Directory_file_order_source_interface::log(); }
+    Prefix_log* log() const { return Directory_file_order_source_interface::log(); }
 
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );

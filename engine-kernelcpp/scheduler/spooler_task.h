@@ -280,7 +280,7 @@ struct Task : Object,
         return true;
     }
 
-    public: Prefix_log* log() {
+    public: Prefix_log* log() const {
         return _log;
     }
     
