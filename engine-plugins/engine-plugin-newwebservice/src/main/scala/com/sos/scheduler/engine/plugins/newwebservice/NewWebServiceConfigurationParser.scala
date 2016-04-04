@@ -22,7 +22,7 @@ object NewWebServiceConfigurationParser {
     import eventReader._
 
     parseElement("plugin.config") {
-      builder.testMode = attributeMap.getConverted("test") { _.toBoolean } getOrElse false
+      builder.testMode = attributeMap.as[Boolean]("test", default = false)
     }
     builder.build()
   }

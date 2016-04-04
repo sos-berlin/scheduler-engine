@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.client.command
 
+import com.sos.scheduler.engine.common.convert.Converters
+import com.sos.scheduler.engine.common.convert.Converters.To
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -44,7 +46,7 @@ object RemoteSchedulers {
     import eventReader._
     val (code, text) = parseElement("ERROR") {
       attributeMap.ignoreUnread()
-      (attributeMap.getConverted("code")(MessageCode.apply), attributeMap.get("text"))
+      (attributeMap.optionAs("code")(To(MessageCode)), attributeMap.get("text"))
     }
     throw new XmlResponseException(
       code = code getOrElse MessageCode("UNKNOWN"),
