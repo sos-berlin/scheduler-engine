@@ -1,4 +1,5 @@
-#! /bin/bash -E
+#! /bin/bash
+set -e
 
 declare -a javaOptions
 declare -a agentOptions

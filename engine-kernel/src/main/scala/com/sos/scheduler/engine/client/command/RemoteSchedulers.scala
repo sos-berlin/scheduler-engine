@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.client.command
 
+import com.sos.scheduler.engine.common.convert.Converters
+import com.sos.scheduler.engine.common.convert.Converters.To
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -19,19 +21,17 @@ object RemoteSchedulers {
     if (answers.size > 1) sys.error(s"More than one (${answers.size}) XML response")
     answers.head
   }
-  
+
   def readSchedulerResponses[A](source: Source)(read: ScalaXMLEventReader ⇒ A): immutable.Seq[A] = {
     try {
-      val result = ScalaXMLEventReader.parse(source) { eventReader ⇒
+      val result = ScalaXMLEventReader.parseDocument(source) { eventReader ⇒
         import eventReader._
-        parseDocument {
-          parseElement("spooler") {
-            parseElement("answer") {
-              attributeMap.ignoreUnread()  // Attribut "time"
-              forEachStartElement[A] {
-                case "ERROR" ⇒ throw errorElementToException(eventReader)
-                case _ ⇒ read(eventReader)
-              }
+        parseElement("spooler") {
+          parseElement("answer") {
+            attributeMap.ignoreUnread()  // Attribut "time"
+            forEachStartElement[A] {
+              case "ERROR" ⇒ throw errorElementToException(eventReader)
+              case _ ⇒ read(eventReader)
             }
           }
         }
@@ -46,7 +46,7 @@ object RemoteSchedulers {
     import eventReader._
     val (code, text) = parseElement("ERROR") {
       attributeMap.ignoreUnread()
-      (attributeMap.getConverted("code")(MessageCode.apply), attributeMap.get("text"))
+      (attributeMap.optionAs("code")(To(MessageCode)), attributeMap.get("text"))
     }
     throw new XmlResponseException(
       code = code getOrElse MessageCode("UNKNOWN"),

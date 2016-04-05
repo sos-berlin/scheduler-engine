@@ -42,8 +42,8 @@ object AgentClientMain {
 
   private def parseArgs(args: Seq[String]) =
     CommandLineArguments.parse(args) { arguments ⇒
-      val agentUri = arguments.namelessValue(0) stripSuffix "/"
-      val operations = arguments.namelessValues.tail map {
+      val agentUri = arguments.keylessValue(0) stripSuffix "/"
+      val operations = arguments.keylessValues.tail map {
         case url if url startsWith "/" ⇒ Get(url)
         case "-" ⇒ StdinCommand
         case command ⇒ StringCommand(command)

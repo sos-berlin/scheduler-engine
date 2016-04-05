@@ -209,8 +209,8 @@ ptr<Module_instance> Internal_module::create_instance_impl(Process_class*, const
     return +result;
 }
 
-ptr<Module> new_internal_module(Spooler* spooler, Prefix_log* log, const string& name) {
-    ptr<Internal_module> result = Z_NEW(Internal_module(spooler, log, name));
+ptr<Module> new_internal_module(Spooler* spooler, const string& name) {
+    ptr<Internal_module> result = Z_NEW(Internal_module(spooler, (Prefix_log*)NULL, name));
     return +result;
 }
 

@@ -182,7 +182,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     }
 
     public: 
-    Prefix_log* log() { return Directory_file_order_source_interface::log(); }
+    Prefix_log* log() const { return Directory_file_order_source_interface::log(); }
 
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );
@@ -247,7 +247,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
 
 struct File_order_sink_job : Internal_job {
     File_order_sink_job(Scheduler* scheduler) :
-        Internal_job(scheduler, file_order_sink_job_path.without_slash(), new_internal_module(scheduler, log(), "FileOrderSink"))
+        Internal_job(scheduler, file_order_sink_job_path.without_slash(), new_internal_module(scheduler, "FileOrderSink"))
     {
         set_idle_timeout(Duration(0));
     }
