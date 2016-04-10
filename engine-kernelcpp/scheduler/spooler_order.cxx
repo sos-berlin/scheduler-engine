@@ -931,7 +931,7 @@ Order_source::Order_source( Job_chain* job_chain, Scheduler_object::Type_code t 
 
 //--------------------------------------------------------------------------------Order_source::log
     
-Prefix_log* Order_source::log()
+Prefix_log* Order_source::log() const
 { 
     assert( _job_chain );
     return _job_chain->log(); 

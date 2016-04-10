@@ -497,7 +497,7 @@ struct Order_source : Abstract_scheduler_object, Event_operation
 
 
     // Abstract_scheduler_object:
-    Prefix_log*                 log                     ();
+    Prefix_log*                 log                     () const;
 
 
     virtual void                close                   ()                                          = 0;
@@ -761,7 +761,7 @@ struct Job_node : Order_queue_node,
     // Dependant
     bool                        on_requisite_loaded         ( folder::File_based* found_job );
     string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
-    Prefix_log*                 log                         ()                                      { return Order_queue_node::log(); }
+    Prefix_log*                 log                         () const                                { return Order_queue_node::log(); }
 
     string                      job_path                    () const                                { return _job_path; }
     string                      normalized_job_path         () const;

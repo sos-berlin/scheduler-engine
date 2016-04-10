@@ -23,7 +23,7 @@ final class JS1081IT extends FreeSpec with ScalaSchedulerTest {
       val instants = absoluteRepeatedInstants(now() + AbsoluteRepeat, AbsoluteRepeat)
       val myOrderElem = orderElem(AOrderKey, begin = instants.head.toDateTime.toLocalTime, absoluteRepeat = AbsoluteRepeat)
       scheduler executeXml myOrderElem
-      for (i <- 0 to 2) {
+      for (i ← 0 to 2) {
         withClue(s"Instant $i, $myOrderElem") {
           assert(order(AOrderKey).nextInstantOption contains asJavaInstant(instants(i)))
           eventPipe.nextKeyed[OrderFinishedEvent](AOrderKey)
@@ -40,7 +40,7 @@ private object JS1081IT {
   private val hhmmssFormatter = DateTimeFormat forPattern "HH:mm:ss"
 
   private def absoluteRepeatedInstants(start: Instant, absoluteRepeat: Duration): Stream[Instant] =
-    Stream from 0 map { i => new Instant(((start.toDateTime + 999.ms) withMillisOfSecond 0) + i * absoluteRepeat ) }
+    Stream from 0 map { i ⇒ new Instant(((start.toDateTime + 999.ms) withMillisOfSecond 0) + i * absoluteRepeat ) }
 
   private def orderElem(orderKey: OrderKey, begin: LocalTime, absoluteRepeat: Duration) =
     <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>

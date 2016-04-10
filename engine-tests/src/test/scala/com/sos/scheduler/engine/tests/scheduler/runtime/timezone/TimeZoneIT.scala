@@ -8,28 +8,28 @@ import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone, LocalTime}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class TimeZoneIT extends FunSuite with ScalaSchedulerTest {
+final class TimeZoneIT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val now = new DateTime
-  private lazy val calendarEntryMap: Map[SchedulerObjectId, CalendarEntry] = (fetchCalendarEntries() map { e => e.obj -> e }).toMap
+  private lazy val calendarEntryMap: Map[SchedulerObjectId, CalendarEntry] = (fetchCalendarEntries() map { e ⇒ e.obj → e }).toMap
 
-  // Die Tests können während einer Sommerzeitverschiebung fehlschlagen.
-  expectedTimes foreach { e =>
+  // Tests may fail during sommer time switch
+  for (e ← expectedTimes) {
     val expected = e.nextDateTime(now)
-    test(e.obj +" should have the start time "+ expected) {
+    s"${e.obj} should have the start time $expected" in {
       val t = calendarEntryMap(e.obj)
-      if (t.at.getMillis != expected.getMillis)  fail("<show_calendar> returns "+t)
+      if (t.at.getMillis != expected.getMillis)  fail(s"<show_calendar> returns $t")
     }
   }
 
   private def fetchCalendarEntries() = {
     val tomorrow = now plusDays 1
     val calendar = scheduler executeXml <show_calendar what="jobs orders" from={dateTimeToXml(now)} before={dateTimeToXml(tomorrow)}/>
-    calendar.elem \ "answer" \ "calendar" \ "at" map { node => CalendarEntry(node.asInstanceOf[xml.Elem]) }
+    calendar.elem \ "answer" \ "calendar" \ "at" map { node ⇒ CalendarEntry(node.asInstanceOf[xml.Elem]) }
   }
 }
 
@@ -56,8 +56,8 @@ private object TimeZoneIT {
     def apply(atElem: xml.Elem) = {
       def atDateTime = DateTime.parse(atElem.attribute("at").get.text)
       atElem.attribute("job") match {
-        case Some(a) => new CalendarEntry(JobPath(a.text), atDateTime, atElem)
-        case None => new CalendarEntry(OrderKey(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
+        case Some(a) ⇒ new CalendarEntry(JobPath(a.text), atDateTime, atElem)
+        case None ⇒ new CalendarEntry(OrderKey(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
       }
     }
   }

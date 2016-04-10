@@ -314,7 +314,7 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP                Start_new_file              ();
     
-    Prefix_log*                 log                         ()                                      { return _log; }
+    Prefix_log*                 log                         () const                                { return _log; }
 
   private:
     Fill_zero                  _zero_;

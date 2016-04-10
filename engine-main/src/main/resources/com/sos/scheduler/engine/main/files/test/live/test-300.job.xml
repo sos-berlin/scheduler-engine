@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/master/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
+     order="true">
+    <script language="java:javascript"><![CDATA[
+        function spooler_process() {
+            var FileOutputStream = Java.type("java.io.FileOutputStream");
+            new FileOutputStream("test-300.touched").close();
+            spooler.terminate();
+            return true;
+        }
+    ]]></script>
+</job>

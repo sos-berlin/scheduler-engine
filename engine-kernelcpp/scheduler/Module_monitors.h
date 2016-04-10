@@ -107,7 +107,7 @@ struct Module_monitors : Dependant, Object
 
     private: Spooler* spooler() const;
 
-    public: Has_log* log();
+    public: Has_log* log() const;
 
     public: string obj_name() const {
         return "Module_monitors";
