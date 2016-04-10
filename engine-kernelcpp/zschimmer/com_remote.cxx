@@ -193,15 +193,6 @@ static void set_linger( SOCKET socket )
     setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 }
 
-//---------------------------------------------------------------------------------set_non_blocking
-
-static void set_non_blocking( SOCKET socket )
-{
-    unsigned long on = 1;
-    int ret = ioctlsocket( socket, FIONBIO, &on );
-    if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
-}
-
 //--------------------------------------------onnection_reset_exception::Connection_reset_exception
 
 Connection_reset_exception::Connection_reset_exception( const string& code ) 
@@ -381,7 +372,7 @@ void Connection::connect_server__end()
     _my_operation = NULL;
     operation->async_check_error( Z_FUNCTION );
 
-    if( _is_async )  set_non_blocking( _socket );
+    if (_is_async) set_socket_non_blocking(_socket);
 }
 
 //-------------------------------------------------Connection::Connect_operation::Connect_operation
@@ -502,7 +493,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                     _connection->_peer._host = _connection->_remote_host;    // Hostnamen übernehmen
 
                     set_socket_not_inheritable( _connection->_socket );
-                    set_non_blocking( _connection->_socket );
+                    set_socket_non_blocking( _connection->_socket );
                     _connection->close_socket( &_connection->_listen_socket );
                     _connection->_manager->set_fd( Socket_manager::except_fd, _connection->_socket );
                     if( _connection->_event )  _connection->set_event( _connection->_event );
@@ -784,8 +775,8 @@ double Connection::async_next_gmtime()
 
 void Connection::set_async()
 {
-    if( _listen_socket != SOCKET_ERROR )  set_non_blocking( _listen_socket );
-    if( _socket        != SOCKET_ERROR )  set_non_blocking( _socket );
+    if( _listen_socket != SOCKET_ERROR )  set_socket_non_blocking( _listen_socket );
+    if( _socket        != SOCKET_ERROR )  set_socket_non_blocking( _socket );
 
     _is_async = true;
 }
@@ -1016,30 +1007,32 @@ void Connection::check_connection_error()
 {
     if( !_last_errno )
     {
-        char buffer [1];
+        #if !defined Z_SOLARIS  // Solaris blocks on recv here
+            char buffer [1];
 
-#       ifdef Z_WINDOWS
-            int read = recv( _socket, buffer, 0, MSG_NOSIGNAL );
-            int err = read == -1? socket_errno() : 0;
-            bool broken = read == -1  &&  err != Z_EWOULDBLOCK;   // Linux meldet read==0 und errno==0, wenn Prozess abgebrochen ist.
-#        else
-            int read = recv( _socket, buffer, 1, MSG_NOSIGNAL | MSG_PEEK );    //?? Meldet keinen Fehler, wenn Verbindung abgebrochen ist.
-            int err = read == -1? socket_errno() : 0;
-            bool broken = read == -1  &&  err != Z_EWOULDBLOCK  ||  read == 0;
-#       endif
+            #ifdef Z_WINDOWS
+                int read = recv( _socket, buffer, 0, MSG_NOSIGNAL );
+                int err = read == -1? socket_errno() : 0;
+                bool broken = read == -1  &&  err != Z_EWOULDBLOCK;   // Linux meldet read==0 und errno==0, wenn Prozess abgebrochen ist.
+            #else
+                int read = recv( _socket, buffer, 1, MSG_NOSIGNAL | MSG_PEEK );    //?? Meldet keinen Fehler, wenn Verbindung abgebrochen ist.
+                int err = read == -1? socket_errno() : 0;
+                bool broken = read == -1  &&  err != Z_EWOULDBLOCK  ||  read == 0;
+            #endif
 
-        Z_LOG2( "socket.recv", "pid=" << pid() << " recv(" << _socket << ",0) => " << read << "   errno=" << err << " " << z_strerror(err) << "\n" );
+            Z_LOG2( "socket.recv", "pid=" << pid() << " recv(" << _socket << ",0) => " << read << "   errno=" << err << " " << z_strerror(err) << "\n" );
 
 
-        if( broken )
-        {
-            _new_error = true;
-            _last_errno = err;
-            _broken = 0;
-            _manager->clear_fd( Socket_manager::except_fd, _socket );
+            if( broken )
+            {
+                _new_error = true;
+                _last_errno = err;
+                _broken = 0;
+                _manager->clear_fd( Socket_manager::except_fd, _socket );
 
-            Z_LOG( "\npid=" << pid() << " *** CONNECTION ERROR *** errno=" << _last_errno << "\n\n" );
-        }
+                Z_LOG( "\npid=" << pid() << " *** CONNECTION ERROR *** errno=" << _last_errno << "\n\n" );
+            }
+        #endif
 
 
         if( process_terminated() )  _process_lost = true, _new_error = true;
