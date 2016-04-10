@@ -21,7 +21,7 @@ configurations="$3 $4"
 os=$(if [ `uname` == "AIX" -o `uname` == "SunOS" -o `uname` == "Solaris" ]; then echo linux; else echo `uname -o`; fi)
 [ "$os" == 'Cygwin' ] && os="windows"
 [ "$os" == 'GNU/Linux' ] && os="linux"
-echo Build for operating system $os
+#echo Build for operating system $os
 
 inWindows=$(if [ "$os" == "windows" ]; then echo 1; else echo ""; fi)
 vcbuild=""
