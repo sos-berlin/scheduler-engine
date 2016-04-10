@@ -256,7 +256,7 @@ struct Sos_optional_date_time_type : Field_type
     virtual void                construct               ( Byte* p ) const               { new ( p ) Sos_optional_date_time; }
     virtual void                destruct                ( Byte* ) const;
 #   if defined SYSTEM_ALIGNED
-    virtual int                 alignment               () const                        { return sizeof (int); }
+    virtual int                 alignment               () const                        { return sizeof (int64); }
 #   endif
 
     virtual Bool                nullable                () const                        { return true; }
