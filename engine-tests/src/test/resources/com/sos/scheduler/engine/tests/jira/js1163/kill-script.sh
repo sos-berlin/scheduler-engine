@@ -19,7 +19,7 @@ done
 
 ps=$(mktemp)
 ps -efww >$ps
-count=$(grep --count --fixed-strings -- " -agent-task-id=$agentTaskId" <$ps || true)
+count=$(grep --count --fixed-strings -- " -agent-task-id=$agentTaskId" <$ps || kill $$)
 rm $ps
 [ $count -eq 1 ] || {
     echo Exactly one processes with -agent-task-id=$agentTaskId is expected, not: $count
