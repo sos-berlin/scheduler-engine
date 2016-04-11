@@ -18,9 +18,9 @@ cpuArchitecture="$2"
 configurations="$3 $4"
 [ -n "$3" ] || fail "Missing third command argument: Debug or Release"
 
-os=$(if [ `uname` == "AIX" -o `uname` == "SunOS" -o `uname` == "Solaris" ]; then echo linux; else echo `uname -o`; fi)
+os=$(if [ `uname` == "AIX" -o `uname` == "SunOS" -o `uname` == "Solaris" ]; then echo unix; else echo `uname -o`; fi)
 [ "$os" == 'Cygwin' ] && os="windows"
-[ "$os" == 'GNU/Linux' ] && os="linux"
+[ "$os" == 'GNU/Linux' ] && os="unix"
 echo Build for operating system $os
 
 inWindows=$(if [ "$os" == "windows" ]; then echo 1; else echo ""; fi)
@@ -103,9 +103,9 @@ function msbuild() {
     done
 }
 
-#---------------------------------------------------------------------------------------------Linux
+#----------------------------------------------------------------------------------------------Unix
 
-function cmd_linux_clean() {
+function cmd_unix_clean() {
     rm -f */*.h.gch */*.h.d
     rm -fr */{Debug,Release} */*/{Debug,Release} */*/{Debug,Release} */*/*/{Debug,Release}
     rm -fr `find .  -name "*.class"  -o -name "*.o"  -o -name "lib*.a"  -o -name "*.d"  -print`
@@ -115,7 +115,7 @@ function cmd_linux_clean() {
     fi
 }
 
-function cmd_linux_compile() {(
+function cmd_unix_compile() {(
     export O_DIR=Release
     export BIN_DIR="`pwd`/$cpuArchitecture/$O_DIR"
     if [ ! -d "$BIN_DIR" ]; then mkdir -p "$BIN_DIR"; fi
