@@ -90,7 +90,14 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   def testLostTask(body: ⇒ TaskResult): TaskResult = {
     var result: TaskResult = null
     autoClosing(controller.newEventPipe()) { events ⇒
-      controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+      val expectedErrorCodes = Set(
+        MessageCode("SCHEDULER-202"),
+        MessageCode("SCHEDULER-280"),
+        MessageCode("ERRNO-32"),
+        MessageCode("ERRNO-131"),  // Solaris
+        MessageCode("Z-REMOTE-101"),
+        MessageCode("WINSOCK-10053"))
+      controller.toleratingErrorCodes(expectedErrorCodes) {
         result = body
         result.returnCode shouldEqual ReturnCode.StandardFailure
       }
