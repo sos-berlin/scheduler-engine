@@ -1007,32 +1007,30 @@ void Connection::check_connection_error()
 {
     if( !_last_errno )
     {
-        #if !defined Z_SOLARIS  // Solaris blocks on recv here
-            char buffer [1];
+        char buffer [1];
 
-            #ifdef Z_WINDOWS
-                int read = recv( _socket, buffer, 0, MSG_NOSIGNAL );
-                int err = read == -1? socket_errno() : 0;
-                bool broken = read == -1  &&  err != Z_EWOULDBLOCK;   // Linux meldet read==0 und errno==0, wenn Prozess abgebrochen ist.
-            #else
-                int read = recv( _socket, buffer, 1, MSG_NOSIGNAL | MSG_PEEK );    //?? Meldet keinen Fehler, wenn Verbindung abgebrochen ist.
-                int err = read == -1? socket_errno() : 0;
-                bool broken = read == -1  &&  err != Z_EWOULDBLOCK  ||  read == 0;
-            #endif
+#       ifdef Z_WINDOWS
+            int read = recv( _socket, buffer, 0, MSG_NOSIGNAL );
+            int err = read == -1? socket_errno() : 0;
+            bool broken = read == -1  &&  err != Z_EWOULDBLOCK;   // Linux meldet read==0 und errno==0, wenn Prozess abgebrochen ist.
+#        else
+            int read = recv( _socket, buffer, 1, MSG_NOSIGNAL | MSG_PEEK );    //?? Meldet keinen Fehler, wenn Verbindung abgebrochen ist.
+            int err = read == -1? socket_errno() : 0;
+            bool broken = read == -1  &&  err != Z_EWOULDBLOCK  ||  read == 0;
+#       endif
 
-            Z_LOG2( "socket.recv", "pid=" << pid() << " recv(" << _socket << ",0) => " << read << "   errno=" << err << " " << z_strerror(err) << "\n" );
+        Z_LOG2( "socket.recv", "pid=" << pid() << " recv(" << _socket << ",0) => " << read << "   errno=" << err << " " << z_strerror(err) << "\n" );
 
 
-            if( broken )
-            {
-                _new_error = true;
-                _last_errno = err;
-                _broken = 0;
-                _manager->clear_fd( Socket_manager::except_fd, _socket );
+        if( broken )
+        {
+            _new_error = true;
+            _last_errno = err;
+            _broken = 0;
+            _manager->clear_fd( Socket_manager::except_fd, _socket );
 
-                Z_LOG( "\npid=" << pid() << " *** CONNECTION ERROR *** errno=" << _last_errno << "\n\n" );
-            }
-        #endif
+            Z_LOG( "\npid=" << pid() << " *** CONNECTION ERROR *** errno=" << _last_errno << "\n\n" );
+        }
 
 
         if( process_terminated() )  _process_lost = true, _new_error = true;
