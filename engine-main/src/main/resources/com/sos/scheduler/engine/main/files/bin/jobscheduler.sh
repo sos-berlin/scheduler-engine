@@ -29,8 +29,8 @@ for arg in "$@"; do
 done
 
 if [ -z "$SCHEDULER_HOME" ]; then :
-    bin=$(cd "$(dirname "$0")"; pwd)
-    SCHEDULER_HOME=$(cd "$bin/.."; pwd)
+    bin=$(cd "$(dirname "$0")" && pwd)
+    SCHEDULER_HOME=$(cd "$bin"/.. && pwd || kill $$)
 else
     bin="$SCHEDULER_HOME"/bin
 fi
