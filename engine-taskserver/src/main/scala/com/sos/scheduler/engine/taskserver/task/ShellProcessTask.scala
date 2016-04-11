@@ -93,6 +93,7 @@ extends HasCloser with Task {
       richProcessOnce := richProcess
       deleteFilesWhenProcessClosed(List(orderParamsFile))
       concurrentStdoutStderrWell.start()
+      Thread.sleep(1000)
       true
     }
   }
