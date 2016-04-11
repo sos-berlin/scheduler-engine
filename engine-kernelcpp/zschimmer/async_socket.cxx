@@ -205,6 +205,7 @@ bool Socket_operation::accept( SOCKET listen_socket )
     }
 
     set_socket_not_inheritable( _read_socket );
+    set_socket_non_blocking(_read_socket);
 
     _peer_host_and_port = peer_addr;
     _write_socket = _read_socket;
@@ -227,22 +228,13 @@ void Socket_operation::set_socket_event_name( const string& state_name)
     _socket_event.set_name( s );
 }
 
-//---------------------------------------------------------------------Socket_operation::call_ioctl
-
-void Socket_operation::call_ioctl( int what, unsigned long value )
+void Socket_operation::set_non_blocking()
 {
-    if( _read_socket != SOCKET_ERROR )
-    {
-        Z_LOG2( "socket", "ioctl(" << _read_socket << "," << what << "," << value << ")\n" );
-        int ret = ioctlsocket( _read_socket, what, &value );
-        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl()", _peer_host_and_port);
+    if (_read_socket != SOCKET_ERROR) {
+        set_socket_non_blocking(_read_socket);
     }
-
-    if( _write_socket != SOCKET_ERROR  &&  _read_socket != _write_socket )
-    {
-        Z_LOG2( "socket", "ioctl(" << _read_socket << "," << what << "," << value << ")\n" );
-        int ret = ioctlsocket( _write_socket, what, &value );
-        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl()", _peer_host_and_port);
+    if (_write_socket != SOCKET_ERROR  &&  _read_socket != _write_socket) {
+        set_socket_non_blocking(_write_socket);
     }
 }
 
@@ -525,7 +517,7 @@ void Buffered_socket_operation::connect__start( const Host_and_port& host_and_po
     set_socket_not_inheritable( _read_socket );
   //set_socket_not_inheritable( _write_socket );
 
-    if( !_blocking )  call_ioctl( FIONBIO, 1 );   // Non blocking
+    if (!_blocking) set_non_blocking();
 
 
     struct sockaddr_in  peer_addr;
@@ -565,8 +557,8 @@ void Buffered_socket_operation::connect__start( const Host_and_port& host_and_po
 
     // Diese Stelle scheint nur unter HP-UX und AIX durchlaufen zu werden:
 
+    set_socket_non_blocking(_write_socket);
     Z_LOG2( "socket.connect", "connect(" << _write_socket << ',' << host_and_port << ") connected!  (" << Z_FUNCTION << ")\n" );
-
     socket_expect_signals( sig_read | sig_write | sig_except );
     set_socket_event_name( "connected" );
     set_state( s_ready );
@@ -606,7 +598,7 @@ bool Buffered_socket_operation::connect__continue()
 
 
     Z_LOG2( "socket.connect", "connect(" << _write_socket << ',' << _peer_host_and_port << "): connected!\n" );
-
+    if (!_blocking) set_non_blocking();
     socket_expect_signals( sig_read | sig_write | sig_except ); // Siehe auch connect__start() (könnte zusammengefasst werden)
 
     set_socket_event_name( "connected" );
