@@ -13,12 +13,6 @@ mkdir "$dir"
 cd "$dir"
 tar xzf "$engineMainDir"/target/engine-main-bin.tar.gz
 
-export SCHEDULER_DATA="$dir"/data
-mkdir "$SCHEDULER_DATA"
-mkdir "$SCHEDULER_DATA"/logs
-cp -r "$dir"/engine/config "$SCHEDULER_DATA"/
-cp -r "$dir"/engine/test/live "$SCHEDULER_DATA"/config/
-
 engine/bin/jobscheduler.sh -cmd='<order job_chain="/test" id="TEST"/>' &
 enginePid=$!
 (

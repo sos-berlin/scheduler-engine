@@ -38,13 +38,18 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.build.outputDirectory}/com/sos/scheduler/engine/main/files/config</directory>
-            <outputDirectory>engine/config</outputDirectory>
+            <directory>${project.build.outputDirectory}/com/sos/scheduler/engine/main/files/data/config</directory>
+            <outputDirectory>engine/data/config</outputDirectory>
             <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.build.outputDirectory}/com/sos/scheduler/engine/main/files/test/live</directory>
-            <outputDirectory>engine/test/live</outputDirectory>
+            <directory>${project.build.outputDirectory}/com/sos/scheduler/engine/main/files/data/config/live</directory>
+            <outputDirectory>engine/data/config/live</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.outputDirectory}/com/sos/scheduler/engine/main/files/data/logs</directory>
+            <outputDirectory>engine/data/logs</outputDirectory>
             <fileMode>0644</fileMode>
         </fileSet>
     </fileSets>
