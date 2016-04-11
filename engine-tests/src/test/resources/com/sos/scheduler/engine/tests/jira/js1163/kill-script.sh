@@ -18,7 +18,7 @@ done
 [ -n "$agentTaskId" ] || { echo Missing argument -kill-agent-task-id=; exit 102; }
 
 ps=$(mktemp)
-ps -ef >$ps
+ps -efww >$ps
 count=$(grep --count --fixed-strings -- " -agent-task-id=$agentTaskId" <$ps || true)
 rm $ps
 [ $count -eq 1 ] || {
