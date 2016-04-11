@@ -27,7 +27,6 @@ public final class LogJob extends Job_impl {
             for (int i = 2; i <= 9; i++) {
                 add("debug" + i);
             }
-
         }
 
         private void add(String logLevel){
@@ -66,7 +65,7 @@ public final class LogJob extends Job_impl {
                 printLogMessage(level);
             }
         }
-        else{
+        else {
             printLogMessage(logLevel);
         }
         return spooler_task.order() != null;
@@ -104,14 +103,17 @@ public final class LogJob extends Job_impl {
     }
 
     private void testOtherLogFunctions() {
-        if (Strings.isNullOrEmpty(spooler_log.filename())){
+        if (Strings.isNullOrEmpty(spooler_log.filename()))
             throw new RuntimeException("spooler_log.filename() is empty");
-        }
-        String testString = "034uffr348";
-        spooler_log.info(testString);
-        String last = spooler_log.last("info");
-        if (!testString.equals(last)) {
-            throw new RuntimeException("spooler_log.last returns unexpected result '" + last + "', expected was: " + testString);
+        String testString = "SPOOLER_LOG.LAST TEST STRING";
+        while (true) {
+            spooler_log.info(testString);
+            String last = spooler_log.last("info");
+            if (!last.contains("[stdout]")) {   // Maybe some slf4j logging output
+                if (!testString.equals(last))
+                    throw new RuntimeException("spooler_log.last returns unexpected result '" + last + "', expected was: " + testString);
+                break;
+            }
         }
         spooler_log.set_level(spooler_log.level());
         spooler_log.set_mail_on_error(spooler_log.mail_on_error());
