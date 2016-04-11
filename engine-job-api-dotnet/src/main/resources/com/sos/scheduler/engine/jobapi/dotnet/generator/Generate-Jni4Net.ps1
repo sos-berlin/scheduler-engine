@@ -49,21 +49,25 @@ param(
 # ----------------------------------------------------------------------
 # Globals
 # ----------------------------------------------------------------------
-$Global:FrameworkDirectory  = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
-$Global:JDKDirectory        = "C:\Program Files\Java\jdk1.8.0_31"
+$Global:FrameworkDirectory      = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
+$Global:JDKDirectory            = "C:\Program Files\Java\jdk1.8.0_31"
 # ----------------------------------------------------------------------
 # Environment
 # ----------------------------------------------------------------------
-$env:APP_SCRIPT  = $MyInvocation.MyCommand.Name
-$env:APP_PATH    = Split-Path $MyInvocation.MyCommand.Path
+$env:APP_SCRIPT                 = $MyInvocation.MyCommand.Name
+$env:APP_PATH                   = Split-Path $MyInvocation.MyCommand.Path
 # ----------------------------------------------------------------------
 # Script
 # ----------------------------------------------------------------------
-$Script:ProxyAssemblyBasename   = "com.sos-berlin.jobscheduler.dotnet.job-api.proxy"
+$Script:ProxyAssemblyBasename   = "com.sos-berlin.jobscheduler.dotnet.job-api.proxy" # This name is constant and can't be changed - the name defines the assembly name and is referenced by the another .dll files.
+$Script:AdapterAssemblyBasename = "com.sos-berlin.jobscheduler.dotnet.adapter"       # 
+$Script:ProxyGenDirectoryName   = "proxygen" 
 $Script:Jni4NetDlls             = @("jni4net.n-0.8.8.0.dll","jni4net.n.w32.v40-0.8.8.0.dll", "jni4net.n.w64.v40-0.8.8.0.dll")
+$Script:Jni4NetReferenceDll     = Join-Path $Script:ProxyGenDirectoryName "jni4net.n-0.8.8.0.dll"
 $Script:JDKBinDirectory         = Join-Path $Global:JDKDirectory "bin"
 $Script:TempDirectory           = $null
 $Script:InputApiJar             = $null
+$Script:InputApiJarVersion      = $null
 $Script:TempApiJar              = $null
 $Script:OutDirProxyDll          = $null
 $Script:OutDirProxyJar          = $null
@@ -101,9 +105,12 @@ function RemoveTempDirectory(){
 }
 function CreateNewApiJarForProxy($jobApiJar){
     $Script:InputApiJar = Get-Item $jobApiJar
+    
+    SetApiJarVersion
+    
     Set-Location $Script:TempDirectory
     
-    [Array]$arguments = "xvf",$jobApiJar
+    [Array]$arguments   = "xvf",$jobApiJar
     ExecuteCommand "jar" $arguments;
     
     Remove-Item "com" -Recurse -Force
@@ -117,19 +124,19 @@ function CreateNewApiJarForProxy($jobApiJar){
     
     Remove-Item "sos" -Recurse -Force
     
-    $Script:TempApiJar = Get-Item $name
+    $Script:TempApiJar  = Get-Item $name
 }
 
 function GenerateProxy(){
     Set-Location $env:APP_PATH
     
-    $build = Join-Path $Script:TempDirectory.Fullname "build"
-    $command = "proxygen\proxygen.exe" 
-    [Array]$arguments = """$Script:TempApiJar""","-wd","""$build"""
+    $build              = Join-Path $Script:TempDirectory.Fullname "build"
+    $command            = Join-Path $Script:ProxyGenDirectoryName "proxygen.exe" 
+    [Array]$arguments   = """$Script:TempApiJar""","-wd","""$build"""
     ExecuteCommand $command $arguments;
     
     Set-Location $build
-    $buildCommand = Join-Path $build "build.cmd"
+    $buildCommand       = Join-Path $build "build.cmd"
     ExecuteCommand $buildCommand $null;
         
     CopyGeneratedProxyFiles $build
@@ -138,52 +145,88 @@ function GenerateProxy(){
 function CopyGeneratedProxyFiles([string] $dir){
     Set-Location $env:APP_PATH
     
-    $dllName = $Script:TempApiJar.Basename+".j4n.dll"
-    $jarName = $Script:TempApiJar.Basename+".j4n.jar"
+    $generatedTempDllName   = $Script:TempApiJar.Basename+".j4n.dll"
+    $generatedTempJarName   = $Script:TempApiJar.Basename+".j4n.jar"
         
-    $Script:ProxyDll = Join-Path $dir $dllName
-    $Script:ProxyJar = Join-Path $dir $jarName
+    $Script:ProxyDll    = Join-Path $dir $generatedTempDllName
+    $Script:ProxyJar    = Join-Path $dir $generatedTempJarName
     
-    $targetDllName  = $Script:InputApiJar.Basename+".j4n.dll"
-    $targetJarName  = $Script:InputApiJar.Basename+".j4n.jar"
     
-    $targetDll      = Join-Path $Script:OutDirProxyDll $targetDllName
-    $targetJar      = Join-Path $Script:OutDirProxyJar $targetJarName
+    $targetDllName      = RemoveInputApiJarVersion $Script:InputApiJar.Basename
+    $targetDllName     += ".j4n"
+    $targetDllName      = AddInputApiJarVersion $targetDllName "dll"
+    
+    $targetJarName      = RemoveInputApiJarVersion $Script:InputApiJar.Basename
+    $targetJarName     += ".j4n"
+    $targetJarName      = AddInputApiJarVersion $targetJarName "jar"
+    
+    $targetDll          = Join-Path $Script:OutDirProxyDll $targetDllName
+    $targetJar          = Join-Path $Script:OutDirProxyJar $targetJarName
     
     if(Test-Path($targetDll)){
-        del $targetDll
+        Remove-Item $targetDll
     }
     if(Test-Path($targetJar)){
-        del $targetJar
+        Remove-Item $targetJar
     }
-    
-    
+        
     Copy-Item $Script:ProxyDll $targetDll
     Copy-Item $Script:ProxyJar $targetJar
 }
 
+function SetApiJarVersion(){
+    $arr = $Script:InputApiJar.Basename.Split("-")
+    $vers = $arr[$arr.length-1];
+    if ($vers.Replace(".","") -match "^[\d\.]+$"){
+       $Script:InputApiJarVersion = $vers
+    }
+}
+
 function GenerateJobSchedulerAdapterDll($proxyDll){
-    $adapterName    = "com.sos-berlin.jobscheduler.dotnet.adapter.dll"
+    $adapterName    = $Script:AdapterAssemblyBasename+".dll"
     $adapter        = Join-Path $Script:OutDirProxyDll $adapterName
     $powershellRef  = [PsObject].Assembly.Location
-    $jni4netRef     = "proxygen\jni4net.n-0.8.8.0.dll"
     
     if(Test-Path($adapter)){
-        del $adapter
+        Remove-Item $adapter
     }
     
-    $command = "csc" 
-    [Array]$arguments = "/nologo","/warn:0","/t:library","/out:$adapter","/recurse:""$Script:DotnetAdapterSourceDir\*.cs""","/reference:$powershellRef;$jni4netRef;""$Script:ProxyDll"""
+    $command            = "csc" 
+    [Array]$arguments   = "/nologo","/warn:0","/t:library","/out:$adapter","/recurse:""$Script:DotnetAdapterSourceDir\*.cs""","/reference:$powershellRef;$Script:Jni4NetReferenceDll;""$Script:ProxyDll"""
     ExecuteCommand $command $arguments
+    
+    if(![string]::IsNullOrEmpty($Script:InputApiJarVersion)) {   
+        $adapterName    = AddInputApiJarVersion $Script:AdapterAssemblyBasename "dll"
+        $adapterNewPath = Join-Path $Script:OutDirProxyDll $adapterName
+        Move-Item $adapter $adapterNewPath
+    }    
+}
+
+function AddInputApiJarVersion([string] $basename,[string] $extension){
+    if([string]::IsNullOrEmpty($Script:InputApiJarVersion)) {
+        return $basename+"."+$extension
+    }
+    else{
+        return $basename+"-"+$Script:InputApiJarVersion+"."+$extension
+    }
+}
+
+function RemoveInputApiJarVersion([string] $basename){
+    if([string]::IsNullOrEmpty($Script:InputApiJarVersion)) {
+        return $basename
+    }
+    else{
+        return $basename.Replace("-"+$Script:InputApiJarVersion,"")
+    }
 }
 
 function CopyJni4NetDlls(){
     $Script:Jni4NetDlls |foreach {
         $oldDll = Join-Path $Script:OutDirProxyDll $_
         if(Test-Path($oldDll)){
-            del $oldDll;
+            Remove-Item $oldDll;
         }
-        $dll = Join-Path "proxygen" $_
+        $dll = Join-Path $Script:ProxyGenDirectoryName $_
         Copy-Item $dll $Script:OutDirProxyDll
     }
 }
