@@ -16,8 +16,9 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
- * @author Joacim Zschimmer
- */
+  * JS-1329, JS-1615: &lt;job stderr_log_level="error">.
+  * @author Joacim Zschimmer
+  */
 @RunWith(classOf[JUnitRunner])
 final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
