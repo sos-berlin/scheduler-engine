@@ -575,7 +575,9 @@ void Task::set_error_xc_only_base( const Xc& x )
     if( _order )  
         _order->set_task_error( x );
 
-    _exit_code = 1;
+    if (_exit_code == 0) {
+        _exit_code = 1;
+    }
 }
 
 //-------------------------------------------------------------------------------Task::set_error_xc
