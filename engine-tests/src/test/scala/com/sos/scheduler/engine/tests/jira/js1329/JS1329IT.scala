@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1329
 
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, InfoLogEvent}
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -23,23 +24,33 @@ final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     errorLogEventIsTolerated = _.message contains "TEST-STDERR")
 
-  "stderr may be logged with log level error" - {
-    "without Agent" in {
-      writeConfigurationFile(ProcessClassPath("/test"), ProcessClassConfiguration())
-      testOutput()
-    }
+  private val processClassSetting = List(
+    "Without Agent" → (() ⇒ ProcessClassConfiguration()),
+    "With Agent" → (() ⇒ ProcessClassConfiguration(agentUris = List(agentUri))))
+  private val jobSetting = List(
+    JobPath("/test-exit-0") → ReturnCode(1),       // stderr output changes ReturnCode(0) to ReturnCode(1)
+    JobPath("/test-delay-exit-0") → ReturnCode(1), // stderr output changes ReturnCode(0) to ReturnCode(1)
+    JobPath("/test-exit-77") → ReturnCode(77),
+    JobPath("/test-delay-exit-77") → ReturnCode(77))
 
-    "with Agent" in {
-      deleteAndWriteConfigurationFile(ProcessClassPath("/test"), ProcessClassConfiguration(agentUris = List(agentUri)))
-      testOutput()
+  for ((groupName, processClass) ← processClassSetting;
+       (jobPath, expectedReturnCode) ← jobSetting) {
+    s"$groupName, $jobPath, expecting $expectedReturnCode" in {
+      writeConfigurationFile(ProcessClassPath("/test"), processClass())
+      val result = testOutput(jobPath)
+      assert(result.returnCode == expectedReturnCode)
     }
   }
 
-  private def testOutput(): Unit = {
+  private def testOutput(jobPath: JobPath): TaskResult = {
+    var result: TaskResult = null
     eventBus.awaitingEvent[InfoLogEvent](_.message contains "TEST-STDOUT") {
       eventBus.awaitingEvent[ErrorLogEvent](_.message contains "TEST-STDERR") {
-        runJob(JobPath("/test"))
+        result = controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
+          runJob(jobPath)
+        }
       } .message should not include "[stderr]"
     } .message should not include "[stdout]"
+    result
   }
 }
