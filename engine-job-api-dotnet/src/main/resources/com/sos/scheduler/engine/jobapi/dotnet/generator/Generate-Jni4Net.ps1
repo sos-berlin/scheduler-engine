@@ -1,13 +1,14 @@
 # .SYNOPSIS
-#     Generate proxy files, JobScheduler adapter dll and copy this and the jni4net dlls to the given locations
+#     Generate .NET and Java proxy files, JobScheduler .NET adapter dll and copy this and the jni4net .NET dlls to the given locations
 # .DESCRIPTION
 #     the Script execute
 #     - create a working temp folder in the user TEMP directory 
+#     - extract version (if exists) from "InputJobApiJar"
 #     - generate two proxy files to the given locations and use "InputJobApiJar" basename as the proxy basename
-#       1 - .jn4.dll
-#       2 - .jn4.jar
-#     - generate the JobScheduler adapter .dll (com.sos-berlin.jobscheduler.dotnet.adapter.dll)
-#     - copied jni4net .dll files from the "proxygen" directory to the DLL location
+#       1 - .jn4-<version>.dll
+#       2 - .jn4-<version>.jar
+#     - generate the JobScheduler .NET adapter .dll (com.sos-berlin.jobscheduler.dotnet.adapter-<version>.dll)
+#     - copied jni4net .NET dll files from the "proxygen" directory to the DLL location
 #     - remove the working temp folder in the user TEMP directory
 #
 # .PARAMETER InputJobApiJar
@@ -15,25 +16,31 @@
 # .PARAMETER DotnetJobSchedulerAdapterSourceDirectory
 #     Path to the .cs files from the .NET JobScheduler adapter implementation
 # .PARAMETER OutputDirectoryProxyDll
-#     Output directory for the generated proxy .dll file
+#     Output directory for the generated proxy .NET dll files
 # .PARAMETER OutputDirectoryProxyJar
-#     Boollean: Output directory for the generated proxy .jar file
-#     By empty value - OutputDirectoryProxyDll will be used 
+#     Output directory for the generated proxy Java jar file
+#     Default(empty) - OutputDirectoryProxyDll will be used 
 # .EXAMPLE
 #     .\Generate-Jni4Net.ps1 "C:\Temp\com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.jar" "C:\Temp\adapter_cs" "C:\Temp\proxy"
-#          1) copied the generated 
-#               com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.j4n.dll
-#               com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.j4n.jar
-#          2) copied the existing jni4net dll files from the "proxygen" location 
+#          1) copied the generated .NET and Java proxy 
+#               com.sos-berlin.jobscheduler.engine.engine-job-api.j4n-1.10.3.dll
+#               com.sos-berlin.jobscheduler.engine.engine-job-api.j4n-1.10.3.jar
+#          2) copied the generated .NET adapter
+#               com.sos-berlin.jobscheduler.dotnet.adapter-1.10.3.dll
+#          3) copied the existing jni4net .NET dll files from the "proxygen" location 
 #          to the "C:\Temp\proxy" location
 #     .\Generate-Jni4Net.ps1 "C:\Temp\com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.jar" "C:\Temp\adapter_cs" "C:\Temp\proxy_dll" "C:\Temp\proxy_jar"
-#          1) copied the generated 
-#               com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.j4n.dll
-#          2) copied the existing jni4net dll files from the "proxygen" location 
-#          to the "C:\Temp\proxy_dll" location
-#          3) copied the generated 
-#               com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.j4n.jar
-#          to the "C:\Temp\proxy_jar" location
+#          1) copied the generated .NET proxy 
+#               com.sos-berlin.jobscheduler.engine.engine-job-api.j4n-1.10.3.dll
+#             to the "C:\Temp\proxy_dll" location
+#          2) copied the generated Java proxy
+#               com.sos-berlin.jobscheduler.engine.engine-job-api.j4n-1.10.3.jar
+#             to the "C:\Temp\proxy_jar" location
+#          3) copied the generated .NET adapter
+#               com.sos-berlin.jobscheduler.dotnet.adapter-1.10.3.dll
+#             to the "C:\Temp\proxy_dll" location
+#          4) copied the existing jni4net .NET dll files from the "proxygen" location 
+#             to the "C:\Temp\proxy_dll" location
 # ----------------------------------------------------------------------
 # Command Line Arguments
 # ----------------------------------------------------------------------
