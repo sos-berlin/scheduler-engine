@@ -105,11 +105,14 @@ function Init([string] $outDirProxyDll,[string] $outDirProxyJar,[string] $dotnet
 function CreateTempDirectory(){
     $tempDirName            = "dotnet-proxy-"+[System.Guid]::NewGuid().ToString();
     $tempDirPath            = Join-Path $env:Temp $tempDirName
-    $Script:TempDirectory   = New-Item -Type Directory -Path $tempDirPath
+    $Script:TempDirectory   = New-Item -Type Directory -Path $tempDirPath -ea Stop
 }
 function RemoveTempDirectory(){
     Set-Location $env:APP_PATH
-    Remove-Item -path $Script:TempDirectory.Fullname -Recurse -Force -ea Stop
+    
+    if(Test-Path($Script:TempDirectory.Fullname)){
+        Remove-Item -path $Script:TempDirectory.Fullname -Recurse -Force -ea Stop
+    }
 }
 function CreateNewApiJarForProxy($jobApiJar){
     $Script:InputApiJar = Get-Item $jobApiJar
@@ -158,8 +161,7 @@ function CopyGeneratedProxyFiles([string] $dir){
         
     $Script:ProxyDll    = Join-Path $dir $generatedTempDllName
     $Script:ProxyJar    = Join-Path $dir $generatedTempJarName
-    
-    
+        
     $targetDllName      = RemoveInputApiJarVersion $Script:InputApiJar.Basename
     $targetDllName     += ".j4n"
     $targetDllName      = AddInputApiJarVersion $targetDllName "dll"
