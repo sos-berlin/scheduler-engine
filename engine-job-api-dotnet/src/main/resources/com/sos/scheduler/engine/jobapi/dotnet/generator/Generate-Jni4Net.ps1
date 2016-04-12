@@ -65,6 +65,7 @@ $Script:ProxyGenDirectoryName   = "proxygen"
 $Script:Jni4NetDlls             = @("jni4net.n-0.8.8.0.dll","jni4net.n.w32.v40-0.8.8.0.dll", "jni4net.n.w64.v40-0.8.8.0.dll")
 $Script:Jni4NetReferenceDll     = Join-Path $Script:ProxyGenDirectoryName "jni4net.n-0.8.8.0.dll"
 $Script:JDKBinDirectory         = Join-Path $Global:JDKDirectory "bin"
+$Script:ErrorExitCode           = 99
 $Script:TempDirectory           = $null
 $Script:InputApiJar             = $null
 $Script:InputApiJarVersion      = $null
@@ -97,11 +98,11 @@ function Init([string] $outDirProxyDll,[string] $outDirProxyJar,[string] $dotnet
 function CreateTempDirectory(){
     $tempDirName            = "dotnet-proxy-"+[System.Guid]::NewGuid().ToString();
     $tempDirPath            = Join-Path $env:Temp $tempDirName
-    $Script:TempDirectory   = New-Item -type directory -path $tempDirPath
+    $Script:TempDirectory   = New-Item -Type Directory -Path $tempDirPath
 }
 function RemoveTempDirectory(){
     Set-Location $env:APP_PATH
-    Remove-Item -path $Script:TempDirectory.Fullname -Recurse -Force
+    Remove-Item -path $Script:TempDirectory.Fullname -Recurse -Force -ea Stop
 }
 function CreateNewApiJarForProxy($jobApiJar){
     $Script:InputApiJar = Get-Item $jobApiJar
@@ -113,16 +114,16 @@ function CreateNewApiJarForProxy($jobApiJar){
     [Array]$arguments   = "xvf",$jobApiJar
     ExecuteCommand "jar" $arguments;
     
-    Remove-Item "com" -Recurse -Force
-    Remove-Item "META-INF" -Recurse -Force
-    Remove-Item "sos\spooler\jobs" -Recurse -Force
-    Remove-Item "sos\spooler\Spooler_program.class" -Force
+    Remove-Item "com" -Recurse -Force -ea Stop
+    Remove-Item "META-INF" -Recurse -Force -ea Stop
+    Remove-Item "sos\spooler\jobs" -Recurse -Force -ea Stop
+    Remove-Item "sos\spooler\Spooler_program.class" -Force -ea Stop
     
     $name = $Script:ProxyAssemblyBasename+".jar"
     [Array]$arguments = "cvf",$name,"sos\spooler"
     ExecuteCommand "jar" $arguments;
     
-    Remove-Item "sos" -Recurse -Force
+    Remove-Item "sos" -Recurse -Force -ea Stop
     
     $Script:TempApiJar  = Get-Item $name
 }
@@ -164,14 +165,14 @@ function CopyGeneratedProxyFiles([string] $dir){
     $targetJar          = Join-Path $Script:OutDirProxyJar $targetJarName
     
     if(Test-Path($targetDll)){
-        Remove-Item $targetDll
+        Remove-Item $targetDll -ea Stop
     }
     if(Test-Path($targetJar)){
-        Remove-Item $targetJar
+        Remove-Item $targetJar -ea Stop
     }
         
-    Copy-Item $Script:ProxyDll $targetDll
-    Copy-Item $Script:ProxyJar $targetJar
+    Copy-Item $Script:ProxyDll $targetDll -ea Stop
+    Copy-Item $Script:ProxyJar $targetJar -ea Stop
 }
 
 function SetApiJarVersion(){
@@ -188,7 +189,7 @@ function GenerateJobSchedulerAdapterDll($proxyDll){
     $powershellRef  = [PsObject].Assembly.Location
     
     if(Test-Path($adapter)){
-        Remove-Item $adapter
+        Remove-Item $adapter -ea Stop
     }
     
     $command            = "csc" 
@@ -198,7 +199,7 @@ function GenerateJobSchedulerAdapterDll($proxyDll){
     if(![string]::IsNullOrEmpty($Script:InputApiJarVersion)) {   
         $adapterName    = AddInputApiJarVersion $Script:AdapterAssemblyBasename "dll"
         $adapterNewPath = Join-Path $Script:OutDirProxyDll $adapterName
-        Move-Item $adapter $adapterNewPath
+        Move-Item $adapter $adapterNewPath -ea Stop
     }    
 }
 
@@ -224,36 +225,51 @@ function CopyJni4NetDlls(){
     $Script:Jni4NetDlls |foreach {
         $oldDll = Join-Path $Script:OutDirProxyDll $_
         if(Test-Path($oldDll)){
-            Remove-Item $oldDll;
+            Remove-Item $oldDll -ea Stop
         }
         $dll = Join-Path $Script:ProxyGenDirectoryName $_
-        Copy-Item $dll $Script:OutDirProxyDll
+        Copy-Item $dll $Script:OutDirProxyDll -ea Stop
     }
 }
 
 function ExecuteCommand([string] $command, [Array]$arguments){
-    if($arguments -ne $null){
-        $process = Start-Process $command -NoNewWindow -ArgumentList $arguments -Wait -PassThru 
+    try{
+        if($arguments -ne $null){
+            $process = Start-Process $command -NoNewWindow -ArgumentList $arguments -Wait -PassThru 
+        }
+        else{
+            $process = Start-Process $command -NoNewWindow -Wait -PassThru 
+        }
+        [Int32]$exitCode = $process.exitCode
+        if($exitCode -eq 0)
+        {
+        }
+        else
+        {
+            throw "exit code $exitCode"
+        }
     }
-    else{
-        $process = Start-Process $command -NoNewWindow -Wait -PassThru 
+    catch{
+        throw "Command $command ends with error $($_.Exception.ToString())"
     }
-	[Int32]$exitCode = $process.exitCode
-	if($exitCode -eq 0)
-	{
-    }
-	else
-	{
-	}
 }
 
 # ----------------------------------------------------------------------
 # Main
 # ----------------------------------------------------------------------
-Init $OutputDirectoryProxyDll $OutputDirectoryProxyJar $DotnetJobSchedulerAdapterSourceDirectory
-CreateTempDirectory
-CreateNewApiJarForProxy $InputJobApiJar
-GenerateProxy
-GenerateJobSchedulerAdapterDll
-CopyJni4NetDlls
-RemoveTempDirectory 
+try{
+    Init $OutputDirectoryProxyDll $OutputDirectoryProxyJar $DotnetJobSchedulerAdapterSourceDirectory
+    CreateTempDirectory
+    CreateNewApiJarForProxy $InputJobApiJar
+    GenerateProxy
+    GenerateJobSchedulerAdapterDll
+    CopyJni4NetDlls
+}
+catch{
+    Write-Error "Error occurred: $($_.Exception.ToString())"
+    exit $Script:ErrorExitCode
+}
+finally{
+    RemoveTempDirectory
+}
+    
