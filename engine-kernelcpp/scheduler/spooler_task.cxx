@@ -542,8 +542,6 @@ void Task::cmd_nice_end(Process_class_requestor* for_requestor)
 
 void Task::set_error_xc_only( const zschimmer::Xc& x )
 {
-    string code = x.code();
-    
     if( x.name() == com::object_server::Connection_reset_exception::exception_name  ||  x.code() == "SCHEDULER-202") {
         if( !_is_connection_reset_error ) { // Bisheriger _error ist kein Connection_reset_error?
             _non_connection_reset_error = _error;  // Bisherigen Fehler (evtl. NULL) merken, falls Verbindungsverlust wegen ignore_signals=".." ignoriert wird
@@ -577,7 +575,9 @@ void Task::set_error_xc_only_base( const Xc& x )
     if( _order )  
         _order->set_task_error( x );
 
-    _exit_code = 1;
+    if (_exit_code == 0) {
+        _exit_code = 1;
+    }
 }
 
 //-------------------------------------------------------------------------------Task::set_error_xc
@@ -1884,7 +1884,7 @@ bool Task::do_something()
                     } else {
                         set_enqueued_state();   // Wegen _operation verzögerten Zustand setzen
 
-                        if( (!ok || has_error() || _killed) && _state < s_ending )  
+                        if( (!ok || has_error() || _killed) && _state < s_ending && _state != s_running_process)  
                              set_state_direct( s_ending ), loop = true;
                     }
                 }
@@ -2061,8 +2061,11 @@ string Task::remote_process_step__end()
         xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/" "process.result" );
 
         _module_instance->set_spooler_process_result( process_result_element.bool_getAttribute( "spooler_process_result" ) );
-        _exit_code = process_result_element.int_getAttribute( "exit_code", 0 );   // JS-563
-        _module_instance->set_exit_code( _exit_code );
+        int exit_code = process_result_element.int_getAttribute( "exit_code", 0 );   // JS-563
+        if (exit_code) {  // Only exit_code != 0 overrides a previously set exit_code (for example, an error log line)
+            _exit_code = exit_code;
+            _module_instance->set_exit_code( _exit_code );
+        }
         _module_instance->set_termination_signal( process_result_element.int_getAttribute( "signal"   , 0 ) );
 
         set_state_texts_from_stdout( process_result_element.getAttribute( "state_text" ) );
