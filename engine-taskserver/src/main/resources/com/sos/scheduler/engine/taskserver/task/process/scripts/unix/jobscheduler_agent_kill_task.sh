@@ -22,14 +22,18 @@ killtree() {
     done
 }
 
+psTreeSolaris() {
+    ps -ef -o pid,ppid
+}
+
+psTree() {
+    ps ax -o "pid= ppid="
+}
+
 if [ "$(uname)" = "SunOS" ]; then
-    psTree() {
-        ps -ef -o pid,ppid
-    }
+    psTree=psTreeSolaris
 else
-    psTree() {
-        ps ax -o "pid= ppid="
-    }
+    psTree=psTree
 fi
 
 stoptree() {
@@ -37,7 +41,7 @@ stoptree() {
     PIDS_TREE="${_pid} ${PIDS_TREE}"
     date "+%Y-%m-%d %T,%3N %z [info]  stopping pid ${_pid}..." >> "${KILL_TASK_LOG_FILE}"
     kill -STOP ${_pid} # needed to stop quickly forking parent from producing children between child killing and parent killing
-    for _child in `psTree | egrep " ${_pid}$" | awk '{print $1}'`; do
+    for _child in `$psTree | egrep " ${_pid}$" | awk '{print $1}'`; do
         stoptree "${_child}"
     done
 }
@@ -73,7 +77,7 @@ fi
 
 KILL_TASK_PID=`ps ww | grep " -agent-task-id=${KILL_TASK_ID}" | grep -v "grep" | awk '{ print $1 }'`
 
-#[ ! -z "$KILL_TASK_PID" ] || KILL_TASK_PID="$PID"
+[ ! -z "$KILL_TASK_PID" ] || KILL_TASK_PID="$PID"
 
 if [ -z "${KILL_TASK_PID}" ]
 then
