@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.tests.jira.js1163
 
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
+import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
+import com.sos.scheduler.engine.common.system.OperatingSystem.{isSolaris, isWindows}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.Exceptions.ignoreException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -52,9 +53,10 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val killScriptCallsDir = createTempDirectory("kill-script-calls-")  // Contains an empty file for every call of kill script
-  private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { file ⇒ file.contentString =
+  private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { _.contentString =
     if (isWindows) s"""echo >"$killScriptCallsDir/%*"""" + "\n"
-    else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String concat s"\ntouch $killScriptCallsDir/$$arguments\n"  // echo only if script succeeds
+    else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String +
+      s"""touch "$killScriptCallsDir/$$arguments"""" + "\n"
   }
   onClose {
     list(killScriptCallsDir) foreach delete
@@ -110,10 +112,10 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             val normalizedReturnCode = results(jobPath).returnCode.normalized
             if (setting == universalAgentSetting && jobPath == StandardJobPath)
               ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
-                assert(normalizedReturnCode == setting.shellSigkillReturnCode)
+                assert(normalizedReturnCode == setting.returnCode(SIGKILL))
               }
             else
-              normalizedReturnCode shouldEqual (if (jobPath == StandardJobPath) setting.shellSigkillReturnCode else ReturnCode(1))   // Warum nicht auch SIGKILL ???
+              normalizedReturnCode shouldEqual (if (jobPath == StandardJobPath) setting.returnCode(SIGKILL) else ReturnCode(1))   // Warum nicht auch SIGKILL ???
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
@@ -178,7 +180,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
-            results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGTERM)
+            results(jobPath).returnCode.normalized shouldEqual setting.returnCode(SIGTERM)
             assert(job(jobPath).state == JobState.stopped)
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
@@ -204,11 +206,11 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             val normalizedReturnCode = results(jobPath).returnCode
             if (setting == universalAgentSetting && jobPath == IgnoringJobPath)
               ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
-                assert(normalizedReturnCode == setting.shellSigkillReturnCode)
+                assert(normalizedReturnCode == setting.returnCode(SIGKILL))
               }
             else
               // Why not this ??? results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGKILL)
-              results(jobPath).returnCode.normalized shouldEqual (if (jobPath == IgnoringJobPath) ReturnCode(SIGKILL) else ReturnCode(1))   // Warum nicht auch SIGKILL ???
+              results(jobPath).returnCode.normalized shouldEqual (if (jobPath == IgnoringJobPath) setting.returnCode(SIGKILL) else ReturnCode(1))   // Warum nicht auch SIGKILL ???
             assert(job(jobPath).state == JobState.stopped)
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
@@ -266,26 +268,41 @@ private[js1163] object JS1163IT {
   private trait Setting {
     def name: String
     def agentUriOption: Option[String]
-    final def shellSigkillReturnCode = if (isWindows) windowsTerminateProcessReturnCode else ReturnCode(SIGKILL)
-    def windowsTerminateProcessReturnCode: ReturnCode
+    def returnCode(signal: ProcessSignal): ReturnCode
     override final def toString = name
   }
 
-  private object NoAgentSetting extends Setting {
+  private trait CppReturnCode {
+    def returnCode(signal: ProcessSignal): ReturnCode =
+      if (isWindows) {
+        require(signal == SIGKILL)
+        ReturnCode(99)  // C++ code terminates a Windows process with 99
+      }
+      else
+        ReturnCode(signal)
+  }
+
+  private object NoAgentSetting extends Setting with CppReturnCode {
     def name = "Without agent"
     def agentUriOption = None
-    def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
   }
 
   private class UniversalAgentSetting(agentUri: () ⇒ String) extends Setting {
     def name = "With Universal Agent"
     def agentUriOption = Some(agentUri())
-    def windowsTerminateProcessReturnCode = ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
+    def returnCode(signal: ProcessSignal): ReturnCode =
+      if (isWindows) {
+        require(signal == SIGTERM)
+        ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
+      }
+      else if (isSolaris)
+        ReturnCode(signal.value)  // SIGKILL -> 9, SIGTERM -> 15
+      else
+        ReturnCode(signal)  // SIGKILL -> 137, SIGTERM -> 143
   }
 
-  private class ClassicAgentSetting(tcpPort: () ⇒ Int) extends Setting {
+  private class ClassicAgentSetting(tcpPort: () ⇒ Int) extends Setting with CppReturnCode {
     def name = "With TCP classic agent"
     def agentUriOption = Some(s"127.0.0.1:${tcpPort()}")
-    def windowsTerminateProcessReturnCode = ReturnCode(99)  // C++ code terminates a Windows process with 99
   }
 }
