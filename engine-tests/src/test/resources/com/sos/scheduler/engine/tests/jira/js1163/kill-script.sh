@@ -10,7 +10,7 @@ for arg in "$@"; do
             shift
             ;;
         *)
-            echo Unknown option: $arg
+            echo "Unknown option: $arg"
             exit 101
         ;;
     esac
@@ -18,16 +18,14 @@ done
 [ -n "$agentTaskId" ] || { echo Missing argument -kill-agent-task-id=; exit 102; }
 
 ps=$(mktemp)
-ps -efww >$ps
+ps -ef >$ps
 count=$(grep --count --fixed-strings -- " -agent-task-id=$agentTaskId" <$ps || kill $$)
 rm $ps
 [ $count -eq 1 ] || {
-    echo Exactly one processes with -agent-task-id=$agentTaskId is expected, not: $count
+    echo "Exactly one process with -agent-task-id=$agentTaskId is expected, not: $count"
     if [ $count -eq 0 ]; then
         exit 100
     else
         exit $count
     fi
 }
-
-# echo KILL-ARGUMENTS=$arguments
