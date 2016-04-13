@@ -13,7 +13,7 @@ mkdir "$dir"
 cd "$dir"
 tar xzf "$engineMainDir"/target/engine-main-bin.tar.gz
 
-engine/bin/jobscheduler.sh -cmd='<order job_chain="/test" id="TEST"/>' &
+engine/bin/jobscheduler.sh -tcp-port= -cmd='<order job_chain="/test" id="TEST"/>' &
 enginePid=$!
 (
     i=0
