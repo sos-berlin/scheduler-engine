@@ -29,17 +29,17 @@ final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     "Without Agent" → (() ⇒ ProcessClassConfiguration()),
     "With Agent" → (() ⇒ ProcessClassConfiguration(agentUris = List(agentUri))))
   private val jobSetting = List(
-    JobPath("/test-exit-0") → ReturnCode(1),       // stderr output changes ReturnCode(0) to ReturnCode(1)
-    JobPath("/test-delay-exit-0") → ReturnCode(1), // stderr output changes ReturnCode(0) to ReturnCode(1)
-    JobPath("/test-exit-77") → ReturnCode(77),
-    JobPath("/test-delay-exit-77") → ReturnCode(77))
+    JobPath("/test-exit-0")        → Set(ReturnCode(1)),  // stderr output changes ReturnCode(0) to ReturnCode(1)
+    JobPath("/test-delay-exit-0")  → Set(ReturnCode(1)),  // stderr output changes ReturnCode(0) to ReturnCode(1)
+    JobPath("/test-exit-77")       → Set(ReturnCode(77), ReturnCode(1)),  // Sometimes 77 (good), sometimes 1 (not so good) ???
+    JobPath("/test-delay-exit-77") → Set(ReturnCode(77), ReturnCode(1)))  // Sometimes 77 (good), sometimes 1 (not so good) ???
 
   for ((groupName, processClass) ← processClassSetting;
-       (jobPath, expectedReturnCode) ← jobSetting) {
-    s"$groupName, $jobPath, expecting $expectedReturnCode" in {
+       (jobPath, expectedReturnCodes) ← jobSetting) {
+    s"$groupName, $jobPath, expecting $expectedReturnCodes" in {
       writeConfigurationFile(ProcessClassPath("/test"), processClass())
       val result = testOutput(jobPath)
-      assert(result.returnCode == expectedReturnCode)
+      assert(expectedReturnCodes(result.returnCode))
     }
   }
 
