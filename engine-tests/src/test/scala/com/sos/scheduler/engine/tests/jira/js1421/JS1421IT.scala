@@ -47,7 +47,7 @@ final class JS1421IT extends FreeSpec with ScalaSchedulerTest {
         MessageCode("WINSOCK-10054")))
       {
         scheduler executeXml <kill_task job={jobPath.string} id={run.taskId.string} immediately="true"/>
-        awaitSuccess(run.result)(10.s)
+        awaitSuccess(run.result)(20.s)
       }
     }
   }
