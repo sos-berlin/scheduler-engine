@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.persistence.entities
 
 import com.google.common.base.Strings
 import com.google.common.base.Strings.emptyToNull
-import com.sos.scheduler.engine.base.generic.IsString
 import com.sos.scheduler.engine.base.generic.IsString.stringOrNull
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderPersistentState, OrderState}
