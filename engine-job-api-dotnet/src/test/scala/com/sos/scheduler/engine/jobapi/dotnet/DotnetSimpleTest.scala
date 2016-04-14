@@ -21,20 +21,22 @@ final class DotnetSimpleTest extends FreeSpec {
     val dotnetDir =
       autoClosing(new DotnetEnvironment(temporaryDirectory)) { env ⇒
         autoClosing(new Jni4netModuleInstanceFactory(env.directory)) { factory: DotnetModuleInstanceFactory ⇒
-          val spoolerLog, spoolerTask, order, params = mock[sos.spooler.Invoker]
-          when(spoolerTask.call("<order", Array())).thenReturn(order, null)
-          when(order.call("<params", Array())).thenReturn(params, null)
-          when(params.call("<value", Array("TEST"))).thenReturn("HELLO", null)
+          val spoolerLogInvoker, spoolerTaskInvoker, orderInvoker, paramsInvoker = mock[sos.spooler.Invoker]
+          val order = new sos.spooler.Order(orderInvoker)
+          val variableSet = new sos.spooler.Variable_set(paramsInvoker)
+          when(spoolerTaskInvoker.call("<order", Array())).thenReturn(order, null)
+          when(orderInvoker.call("<params", Array())).thenReturn(variableSet, null)
+          when(paramsInvoker.call("<value", Array("TEST"))).thenReturn("HELLO", null)
           val job = factory.newInstance(
             classOf[sos.spooler.Job_impl],
             TaskContext(
-              new sos.spooler.Log(spoolerLog),
-              new sos.spooler.Task(spoolerTask),
+              new sos.spooler.Log(spoolerLogInvoker),
+              new sos.spooler.Task(spoolerTaskInvoker),
               new sos.spooler.Job(null/*not used*/),
               new sos.spooler.Spooler(null/*not used*/)),
             DotnetModuleReference.Powershell(PowershellScript))
           job.spooler_process()
-          verify(spoolerLog).call("log", Array(0: Integer, "HELLO"))
+          verify(spoolerLogInvoker).call("log", Array(0: Integer, "HELLO"))
         }
         env.directory
       }
