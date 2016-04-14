@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data
 
-import com.sos.scheduler.engine.data.base.IsString
+import com.sos.scheduler.engine.base.generic.IsString
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import java.nio.file.{Path, Paths}
 import scala.collection.immutable

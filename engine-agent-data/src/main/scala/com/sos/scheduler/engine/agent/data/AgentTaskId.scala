@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.data
 
 import com.sos.scheduler.engine.agent.data
-import com.sos.scheduler.engine.data.base.IsString
+import com.sos.scheduler.engine.base.generic.IsString
 import scala.math.abs
 import scala.util.Random
 
