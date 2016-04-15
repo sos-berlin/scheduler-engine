@@ -55,7 +55,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val killScriptCallsDir = createTempDirectory("kill-script-calls-")  // Contains an empty file for every call of kill script
   private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { _.contentString =
-    if (isWindows) s"""echo >"$killScriptCallsDir/%*"""" + "\n"
+    if (isWindows) "@echo off\n" + s"""echo >"$killScriptCallsDir/%*"""" + "\n"
     else JavaResource("com/sos/scheduler/engine/tests/jira/js1163/kill-script.sh").asUTF8String +
       s"""touch "$killScriptCallsDir/$$arguments"""" + "\n"
   }
