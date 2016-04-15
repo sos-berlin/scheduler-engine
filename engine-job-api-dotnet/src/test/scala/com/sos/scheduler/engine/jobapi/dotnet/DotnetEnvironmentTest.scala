@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.jobapi.dotnet
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.jobapi.dotnet.DotnetEnvironmentTest._
 import java.nio.file.Files.{createTempDirectory, delete}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -16,9 +18,15 @@ final class DotnetEnvironmentTest extends FreeSpec {
     val baseDir = createTempDirectory("DotnetEnvironmentTest-")  // Double nesting of directories to get a clear test
     val dotnetEnvironment = new DotnetEnvironment(baseDir)
     assert(baseDir.pathSet == Set(dotnetEnvironment.directory))
-    assert(dotnetEnvironment.directory.pathSet == (dlls.DotnetDlls.DllNames map dotnetEnvironment.directory.resolve))
+    for (o ← dotnetEnvironment.directory.pathSet) logger.info(s"$o")
+    assert(dotnetEnvironment.directory.pathSet ==
+      (dlls.DotnetDlls.DllsResourcePaths map { o ⇒ dotnetEnvironment.directory resolve o.simpleName }))
     dotnetEnvironment.close()
     assert(baseDir.pathSet == Set())
     delete(baseDir)
   }
+}
+
+private object DotnetEnvironmentTest {
+  private val logger = Logger(getClass)
 }
