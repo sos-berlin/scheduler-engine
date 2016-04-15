@@ -373,7 +373,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
         if( !ok )  return false;        // Z_EWOULDBLOCK
 
         //_read_socket.set_linger( true, 0 );
-        call_ioctl( FIONBIO, 1 );
+        set_non_blocking();
 
         set_buffer_size();
 
@@ -840,8 +840,7 @@ void Communication::bind()
                 ret = bind_socket( _udp_socket._read_socket, &sa, "UDP" );
                 if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "udp-bind ", as_string(_spooler->udp_port()).c_str() );
 
-                ret = ioctlsocket( _udp_socket._read_socket, FIONBIO, &on );
-                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
+                set_socket_non_blocking(_udp_socket._read_socket);
 
                 _udp_port = _spooler->udp_port();
                 _rebound = true;
@@ -891,8 +890,7 @@ void Communication::bind()
                 ret = listen( _listen_socket._read_socket, 5 );
                 if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "listen" );
 
-                ret = ioctlsocket( _listen_socket._read_socket, FIONBIO, &on );
-                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
+                set_socket_non_blocking(_listen_socket._read_socket);
 
                 _tcp_port = _spooler->tcp_port();
                 _rebound = true;
@@ -919,7 +917,7 @@ void Communication::bind()
             new_connection->_write_socket = STDOUT_FILENO;
             new_connection->_socket_send_buffer_size = 1024;
 
-            new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht möglich
+            new_connection->set_non_blocking(); // In Windows nicht möglich
             new_connection->add_to_socket_manager( _spooler->_connection_manager );
             new_connection->socket_expect_signals( Socket_operation::sig_read );
 

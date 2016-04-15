@@ -178,9 +178,16 @@ struct Collectable_const_area
     static unsigned int         base_size               ()      { return sizeof (Collectable_const_area); }
     Byte*                       buffer                  ()      { return (Byte*)this + sizeof (Collectable_const_area); }
 
-    int                        _size;                           // von buffer()
-    int                        _ref_count;
-  //Byte                       _buffer [ 1/*_size*/ ];
+    union {
+        struct {
+            int _size;                           // von buffer()
+            int _ref_count;
+        };
+        long double _alignment_double;
+        #if defined __GNUC__
+            char _alignment_array[ __BIGGEST_ALIGNMENT__];
+        #endif
+    };
 };
 
 //----------------------------------------------------------------------------Const_area_handle

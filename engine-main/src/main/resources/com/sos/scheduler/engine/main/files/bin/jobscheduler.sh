@@ -11,13 +11,16 @@ set -e
 #   export SCHEDULER_WWW=$HOME/all/joc/joc-html-cockpit/target/classes (JOC's browser files)
 #   engine/bin/jobscheduler.sh -i
 
+declare SCHEDULER_HOME
+declare SCHEDULER_DATA
+declare jarDir
 declare -a javaOptions
 declare -a engineOptions
 tcpPort=4444
 
 for arg in "$@"; do
     case $arg in
-        -http-port=*)
+        -tcp-port=*)
             tcpPort="${arg#-tcp-port=}"
             shift
             ;;
@@ -28,9 +31,13 @@ for arg in "$@"; do
     esac
 done
 
+if [ -n "$tcpPort" ]; then
+    engineOptions+=("-tcp-port=$tcpPort")
+fi
+
 if [ -z "$SCHEDULER_HOME" ]; then :
-    bin=$(cd "$(dirname "$0")"; pwd)
-    SCHEDULER_HOME=$(cd "$bin/.."; pwd)
+    bin=$(cd "$(dirname "$0")" && pwd)
+    SCHEDULER_HOME=$(cd "$bin"/.. && pwd || kill $$)
 else
     bin="$SCHEDULER_HOME"/bin
 fi
@@ -68,7 +75,6 @@ executeEngine=(
     -job-java-options="$logbackArg"
     -job-java-classpath="$jarDir/*.jar"
     -configuration-directory="$liveDirectory"
-    -tcp-port="$tcpPort"
     "${engineOptions[@]}")
 echo "${executeEngine[@]}"
 exec "${executeEngine[@]}"

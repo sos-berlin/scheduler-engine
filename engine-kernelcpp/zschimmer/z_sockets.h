@@ -109,6 +109,7 @@ struct Host_and_port;
 
 //-------------------------------------------------------------------------------------------------
 
+void set_socket_non_blocking(SOCKET);
 void                            set_socket_not_inheritable  ( SOCKET  );
 int                             bind_free_port              ( SOCKET, sockaddr_in* );
 int                             z_socketpair                ( int domain, int type, int protocol, SOCKET sockets[2] );

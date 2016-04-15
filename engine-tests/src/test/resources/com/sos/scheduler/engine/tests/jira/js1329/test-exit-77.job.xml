@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/release/1.10/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
+     stderr_log_level="error"
+     process_class="test"
+>
+    <script language="shell"><![CDATA[
+echo TEST-STDOUT
+echo TEST-STDERR 1>&2
+exit 77
+    ]]></script>
+</job>

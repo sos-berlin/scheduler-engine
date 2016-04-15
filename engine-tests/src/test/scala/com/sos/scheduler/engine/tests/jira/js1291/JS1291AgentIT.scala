@@ -131,7 +131,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
       "Shell with monitor - handling unexpected process termination of monitor" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
-        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+        toleratingErrorCodes(UnexpectedProcessTerminationErrorCodes) {
           val run = startJob(JobPath("/crash"), variables = Map(SignalName → file.toString))
           file.append("x")
           awaitSuccess(run.result).logString should include ("SCHEDULER-202")
@@ -140,7 +140,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
       "Shell with monitor - unexpected process termination of one monitor does not disturb the other task" in {
         val file = createTempFile("sos", ".tmp") withCloser Files.delete
-        toleratingErrorCodes(Set(MessageCode("SCHEDULER-202"), MessageCode("SCHEDULER-280"), MessageCode("WINSOCK-10053"), MessageCode("WINSOCK-10054"), MessageCode("ERRNO-32"), MessageCode("Z-REMOTE-101"))) {
+        toleratingErrorCodes(UnexpectedProcessTerminationErrorCodes) {
           val noCrash = startJob(JobPath("/no-crash"), variables = Map(SignalName → file.toString))
           awaitSuccess(startJob(JobPath("/crash"), variables = Map(SignalName → file.toString)).result).logString should include ("SCHEDULER-202")
           awaitSuccess(noCrash.result).logString should include ("SPOOLER_PROCESS_AFTER")
@@ -184,6 +184,14 @@ object JS1291AgentIT {
   private val ScriptOutputRegex = "[^!]*!(.*)".r  // Our test script output starts with '!'
   private val ChangedVariable = Variable("CHANGED", "CHANGED-VALUE")
   val SignalName = "signalFile"
+  private val UnexpectedProcessTerminationErrorCodes = Set(
+    MessageCode("SCHEDULER-202"),
+    MessageCode("SCHEDULER-280"),
+    MessageCode("Z-REMOTE-101"),
+    MessageCode("ERRNO-32"),
+    MessageCode("ERRNO-131"),  // Solaris
+    MessageCode("WINSOCK-10053"),
+    MessageCode("WINSOCK-10054"))
 
   private case class Variable(name: String, value: String) {
     override def toString = name

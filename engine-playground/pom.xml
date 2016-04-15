@@ -14,7 +14,6 @@
     <inceptionYear>2011</inceptionYear>
 
     <modules>
-        <module>engine-playground-mq</module>
         <module>engine-playground-zschimmer</module>
     </modules>
 </project>

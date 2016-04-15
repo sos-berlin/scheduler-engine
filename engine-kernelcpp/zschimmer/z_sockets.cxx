@@ -532,13 +532,13 @@ void send_udp_message( const Host_and_port& host_and_port, const string& message
     sa.sin_port   = htons( host_and_port.port() );
 
     ulong on = 1;
-    ret = ioctlsocket( udp_socket, FIONBIO, &on );      // non-blocking I/O
-    if( ret == SOCKET_ERROR )
-    {
-        int errn = socket_errno();
+    try { 
+        set_socket_non_blocking(udp_socket);
+    }
+    catch (exception&) {
         Z_LOG2( "socket", "closesocket(" << udp_socket << ")\n" );
         closesocket( udp_socket );
-        throw_socket( errn, "ioctl(FIONBIO)" );
+        throw;
     }
 
     ret = sendto( udp_socket, message.data(), int_cast(message.length()), 0, (struct sockaddr*)&sa, sizeof sa );
@@ -553,6 +553,19 @@ void send_udp_message( const Host_and_port& host_and_port, const string& message
 
     Z_LOG2( "socket", "closesocket(" << udp_socket << ")\n" );
     closesocket( udp_socket );
+}
+
+void set_socket_non_blocking(SOCKET socket)
+{
+    #if defined Z_SOLARIS
+        Z_LOG2("socket", "fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK)\n");
+        int ret = fcntl(socket, F_SETFL, fcntl(socket, F_GETFL, 0) | O_NONBLOCK);
+        if (ret == -1) throw_errno(errno, "fcntl O_NONBLOCK");
+    #else
+        unsigned long on = 1;
+        int ret = ioctlsocket( socket, FIONBIO, &on );
+        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
+    #endif
 }
 
 //-------------------------------------------------------------------------------------------------
