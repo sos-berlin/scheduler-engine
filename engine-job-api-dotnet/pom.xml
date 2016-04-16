@@ -151,7 +151,7 @@
                             <arguments>
                                 <argument>${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1</argument>
                                 <argument>${project.basedir}/target/Generate-Jni4Net/engine-job-api.jar</argument>
-                                <argument>${project.build.directory}/src/main/dotnet/adapter</argument>
+                                <argument>${project.basedir}/src/main/dotnet/adapter</argument>
                                 <argument>${project.build.outputDirectory}/com/sos/scheduler/engine/jobapi/dotnet/dlls</argument>
                                 <argument>${project.basedir}/target/Generate-Jni4Net</argument>
                             </arguments>
@@ -170,10 +170,10 @@
                         <id>Unpack generated jni4net jar</id>
                         <phase>process-resources</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <unzip src="${project.basedir}/target/Generate-Jni4Net/com.sos-berlin.jobscheduler.engine-job-api.j4n.jar"
                                        dest="${project.build.outputDirectory}"/>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
