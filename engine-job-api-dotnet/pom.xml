@@ -190,6 +190,10 @@
                         <configuration>
                             <executable>powershell</executable>
                             <arguments>
+                                <argument>-noprofile</argument>
+                                <argument>-executionpolicy</argument>
+                                <argument>bypass</argument>
+                                <argument>-file</argument>
                                 <argument>${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1</argument>
                                 <argument>${project.basedir}/target/Generate-Jni4Net/engine-job-api.jar</argument>
                                 <argument>${project.basedir}/src/main/dotnet/adapter</argument>
