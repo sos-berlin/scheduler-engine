@@ -57,7 +57,7 @@ param(
 # Globals
 # ----------------------------------------------------------------------
 $Global:FrameworkDirectory      = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
-$Global:JDKDirectory            = "C:\Program Files\Java\jdk1.8.0_31"
+$Global:JDKDirectory            = [Environment]::GetEnvironmentVariable("JAVA_HOME")
 # ----------------------------------------------------------------------
 # Environment
 # ----------------------------------------------------------------------
@@ -69,9 +69,10 @@ $env:APP_PATH                   = Split-Path $MyInvocation.MyCommand.Path
 $Script:ProxyAssemblyBasename   = "com.sos-berlin.jobscheduler.dotnet.job-api.proxy" # This name is constant and can't be changed - the name defines the assembly name and is referenced by the another .dll files.
 $Script:ProxyOutputNamePrefix   = "com.sos-berlin.jobscheduler."
 $Script:AdapterAssemblyBasename = "com.sos-berlin.jobscheduler.dotnet.adapter"       # 
-$Script:ProxyGenDirectoryName   = "proxygen" 
+$Script:BinDirectory            = Join-Path (Get-Location) "\src\main\bin"
+$Script:ProxyGenExe             = Join-Path $Script:BinDirectory "proxygen.exe"
 $Script:Jni4NetDlls             = @("jni4net.n-0.8.8.0.dll","jni4net.n.w32.v40-0.8.8.0.dll", "jni4net.n.w64.v40-0.8.8.0.dll")
-$Script:Jni4NetReferenceDll     = Join-Path $Script:ProxyGenDirectoryName "jni4net.n-0.8.8.0.dll"
+$Script:Jni4NetReferenceDll     = Join-Path $OutputDirectoryProxyDll "jni4net.n-0.8.8.0.dll"
 $Script:JDKBinDirectory         = Join-Path $Global:JDKDirectory "bin"
 $Script:CopiedFiles             = @()
 $Script:ErrorExitCode           = 99
@@ -89,7 +90,6 @@ $Script:ProxyJar                = $null
 # ----------------------------------------------------------------------
 function Init([string] $outDirProxyDll,[string] $outDirProxyJar,[string] $dotnetAdapterSourceDirectory){
     $newPath = $Global:FrameworkDirectory+";"+$Script:JDKBinDirectory+";"+$env:Path;
-    [Environment]::SetEnvironmentVariable("JAVA_HOME",$Global:JDKDirectory)
     [Environment]::SetEnvironmentVariable("PATH", $newPath)
     
     $Script:OutDirProxyDll = $outDirProxyDll
@@ -172,9 +172,8 @@ function GenerateProxy(){
         Set-Location $env:APP_PATH
     
         $build              = Join-Path $Script:TempDirectory.Fullname "build"
-        $command            = Join-Path $Script:ProxyGenDirectoryName "proxygen.exe" 
         [Array]$arguments   = """$Script:TempApiJar""","-wd","""$build"""
-        ExecuteCommand $command $arguments;
+        ExecuteCommand $ProxyGenExe $arguments;
     
         Set-Location $build
         $buildCommand       = Join-Path $build "build.cmd"
@@ -306,7 +305,7 @@ function CopyJni4NetDlls(){
     try{
         $Script:Jni4NetDlls |foreach {
             $oldDll = Join-Path $Script:OutDirProxyDll $_
-            $dll        = Join-Path $Script:ProxyGenDirectoryName $_
+            $dll        = Join-Path $Script:BinDirectory $_
             $dllCopied  = Join-Path $Script:OutDirProxyDll $_
             if(Test-Path($oldDll)){
                 Remove-Item $oldDll -ea Stop
@@ -384,4 +383,4 @@ catch{
 finally{
     RemoveTempDirectory
 }
-    
+
