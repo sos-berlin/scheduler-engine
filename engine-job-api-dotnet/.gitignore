@@ -1,1 +1,4 @@
 /target/
+
+# Default Maven property jni4net.zip.
+/jni4net-0.8.8.0-bin.zip

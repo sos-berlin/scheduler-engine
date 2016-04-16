@@ -69,8 +69,8 @@ $env:APP_PATH                   = Split-Path $MyInvocation.MyCommand.Path
 $Script:ProxyAssemblyBasename   = "com.sos-berlin.jobscheduler.dotnet.job-api.proxy" # This name is constant and can't be changed - the name defines the assembly name and is referenced by the another .dll files.
 $Script:ProxyOutputNamePrefix   = "com.sos-berlin.jobscheduler."
 $Script:AdapterAssemblyBasename = "com.sos-berlin.jobscheduler.dotnet.adapter"       # 
-$Script:BinDirectory            = Join-Path (Get-Location) "\src\main\bin"
-$Script:ProxyGenExe             = Join-Path $Script:BinDirectory "proxygen.exe"
+$Script:DllDirectory            = Join-Path (Get-Location) "\target\jni4net\lib"
+$Script:ProxyGenExe             = Join-Path (Get-Location) "\target\jni4net\bin\proxygen.exe"
 $Script:Jni4NetDlls             = @("jni4net.n-0.8.8.0.dll","jni4net.n.w32.v40-0.8.8.0.dll", "jni4net.n.w64.v40-0.8.8.0.dll")
 $Script:Jni4NetReferenceDll     = Join-Path $OutputDirectoryProxyDll "jni4net.n-0.8.8.0.dll"
 $Script:JDKBinDirectory         = Join-Path $Global:JDKDirectory "bin"
@@ -305,7 +305,7 @@ function CopyJni4NetDlls(){
     try{
         $Script:Jni4NetDlls |foreach {
             $oldDll = Join-Path $Script:OutDirProxyDll $_
-            $dll        = Join-Path $Script:BinDirectory $_
+            $dll        = Join-Path $Script:DllDirectory $_
             $dllCopied  = Join-Path $Script:OutDirProxyDll $_
             if(Test-Path($oldDll)){
                 Remove-Item $oldDll -ea Stop
