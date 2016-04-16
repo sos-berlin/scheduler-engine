@@ -90,6 +90,31 @@
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/com/sos/scheduler/engine/jobapi/dotnet/dlls</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/bin</directory>
+                                    <includes>
+                                        <include>jni4net.n.w32.v40-0.8.8.0.dll</include>
+                                        <include>jni4net.n.w64.v40-0.8.8.0.dll</include>
+                                        <include>jni4net.n-0.8.8.0.dll</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>

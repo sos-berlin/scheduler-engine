@@ -1,1 +1,1 @@
-- Directory for DLLs, placed here by Maven pom.xml -
+For the origin of files, see pom.xml and src/main/bin.
