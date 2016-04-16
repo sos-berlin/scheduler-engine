@@ -8,6 +8,7 @@ trait DotnetModuleInstanceFactory extends AutoCloseable {
   /**
     * @tparam A [[sos.spooler.Job_impl]] or a [[sos.spooler.Monitor_impl]]
     */
+  @throws[Exception]
   def newInstance[A](clazz: Class[A], taskContext: TaskContext, reference: DotnetModuleReference): A
 }
 

@@ -26,21 +26,15 @@ public final class Jni4netModuleInstanceFactory implements
 		dotnetBridge.close();
 	}
 
-	public <T> T newInstance(Class<T> clazz, TaskContext taskContext,
-			DotnetModuleReference reference) {
-		try {
-			if (reference instanceof DotnetModuleReference.DotnetClass) {
-				DotnetApiImpl impl = newDotnetObject((DotnetModuleReference.DotnetClass) reference);
-				return newSchedulerDotnetAdapter(clazz, impl, taskContext);
-			} else if (reference instanceof DotnetModuleReference.Powershell) {
-				DotnetApiImpl impl = newPowershellObject((DotnetModuleReference.Powershell) reference);
-				return newSchedulerDotnetAdapter(clazz, impl, taskContext);
-			} else
-				throw new RuntimeException("Unknown class "
-						+ reference.getClass().getName());
-		} catch (Exception ex) {
-			throw new RuntimeException(ex.toString());
-		}
+	public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
+		if (reference instanceof DotnetModuleReference.DotnetClass) {
+			DotnetApiImpl impl = newDotnetObject((DotnetModuleReference.DotnetClass) reference);
+			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
+		} else if (reference instanceof DotnetModuleReference.Powershell) {
+			DotnetApiImpl impl = newPowershellObject((DotnetModuleReference.Powershell) reference);
+			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
+		} else
+			throw new RuntimeException("Unknown class " + reference.getClass().getName());
 	}
 
 	private DotnetApiImpl newDotnetObject(DotnetModuleReference.DotnetClass ref) {
