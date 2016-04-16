@@ -9,11 +9,13 @@ import java.nio.file.Path
   * @author Joacim Zschimmer
   */
 final class DotnetEnvironment(baseTemporaryDirectory: Path) extends HasCloser {
+
   val directory = createTempDirectory(baseTemporaryDirectory, "dotnet")
-  private val dlls = DotnetDlls.provideDlls(directory)
+  private val files = DotnetDlls.provideDlls(directory)
 
   onClose {
-    (dlls + directory) foreach deleteIfExists
+    files foreach deleteIfExists
+    deleteIfExists(directory)
   }
 
   override def toString = s"DotnetEnvironment $directory"
