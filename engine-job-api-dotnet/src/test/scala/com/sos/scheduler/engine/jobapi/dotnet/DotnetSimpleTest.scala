@@ -34,8 +34,8 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
       new sos.spooler.Spooler(null/*not used*/))
     val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, DotnetModuleReference.Powershell(s"""
       function spooler_process() {
-      throw "$error"
-    }"""))
+        throw "$error"
+      }"""))
     val e = intercept[Exception] {
       job.spooler_process()
     }
