@@ -190,6 +190,8 @@
                         <configuration>
                             <executable>powershell</executable>
                             <arguments>
+                                <argument>-NonInteractive</argument>
+                                <argument>-NoLogo</argument>
                                 <argument>-noprofile</argument>
                                 <argument>-executionpolicy</argument>
                                 <argument>bypass</argument>
