@@ -370,13 +370,13 @@ try{
     CopyJni4NetDlls
 }
 catch{
-    Write-Error "Error occurred: $($_.Exception.ToString())"
+    Write-Output "Error occurred: $($_.Exception.ToString())"
     try
     {
         RemoveCopiedFiles
     }
     catch{
-        Write-Error "Error occurred on remove copied files : $($_.Exception.ToString())"
+        Write-Output "Error occurred on remove copied files : $($_.Exception.ToString())"
     }
     exit $Script:ErrorExitCode
 }
