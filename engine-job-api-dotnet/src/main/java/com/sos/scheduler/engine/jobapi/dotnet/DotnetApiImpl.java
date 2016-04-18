@@ -136,10 +136,19 @@ public class DotnetApiImpl {
 				"spooler_process_before", true);
 	}
 
+	private system.Object toDotnetBoolean(boolean value) throws Exception {
+		return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
+				"ToBoolean", value ? "true" : "false");
+	}
+
 	public boolean spooler_process_after(boolean spooler_process_result)
 			throws Exception {
+		system.Type[] paramTypes = new system.Type[] { system.Type
+				.GetType("System.Boolean") };
+		system.Object[] params = new system.Object[] { toDotnetBoolean(spooler_process_result) };
 		return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-				"spooler_process_after", spooler_process_result);
+				"spooler_process_after", paramTypes, params,
+				spooler_process_result);
 	}
 
 }

@@ -1,7 +1,8 @@
 ﻿namespace com.sosberlin.jobscheduler.dotnet.adapter
 {
     using sos.spooler;
-
+    using System;
+   
     public class SosJobSchedulerMonitorImpl
     {
         public Spooler spooler { get; private set; }
@@ -35,5 +36,11 @@
         {
             return spoolerProcessResult;
         }
+
+        public bool ToBoolean(string value)
+        {
+            return Boolean.Parse(value);
+        }
+       
     }
 }

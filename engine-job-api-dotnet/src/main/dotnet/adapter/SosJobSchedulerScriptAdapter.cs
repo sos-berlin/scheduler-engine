@@ -1,6 +1,7 @@
 ﻿namespace com.sosberlin.jobscheduler.dotnet.adapter
 {
     using sos.spooler;
+    using System;
 
     public abstract class SosJobSchedulerScriptAdapter
     {
@@ -34,6 +35,11 @@
         public void SetScript(string val)
         {
             this.Script = val;
+        }
+
+        public bool ToBoolean(string value)
+        {
+            return Boolean.Parse(value);
         }
     }
 }
