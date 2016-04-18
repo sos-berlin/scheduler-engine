@@ -11,7 +11,7 @@
     </parent>
 
     <name>${project.artifactId}</name>
-    <inceptionYear>2001</inceptionYear>
+    <inceptionYear>2016</inceptionYear>
 
     <description>JobScheduler .Net Job API</description>
     <url>https://www.sos-berlin.com/</url>
@@ -104,8 +104,8 @@
                             <target>
                                 <unzip src="${jni4net.zip}" dest="${project.basedir}/target/jni4net">
                                     <patternset>
-                                        <include name="bin/**"/>
-                                        <include name="lib/**"/>
+                                        <include name="bin/*"/>
+                                        <include name="lib/*"/>
                                     </patternset>
                                 </unzip>
                             </target>
