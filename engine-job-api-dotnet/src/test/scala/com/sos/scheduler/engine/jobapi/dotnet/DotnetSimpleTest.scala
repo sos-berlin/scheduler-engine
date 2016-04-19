@@ -34,13 +34,13 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
       new sos.spooler.Spooler(null/*not used*/))
     val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, DotnetModuleReference.Powershell(s"""
       function spooler_process() {
-        throw "my_error"
+        throw "$error"
       }"""))
     val e = intercept[Exception] {
       job.spooler_init()
       job.spooler_process()
     }
-    assert(e.toString().contains("my_error"))
+    assert(e.getMessage contains error)
   }
 
   "PowerShell calls spooler_log.info" in {
@@ -61,7 +61,6 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
         $spooler_log.log(0, $value)
         return $true
       }"""))
-    job.spooler_init()
     job.spooler_process()
     verify(spoolerTaskInvoker).call("<order", Array())
     verify(orderInvoker).call("<params", Array())
