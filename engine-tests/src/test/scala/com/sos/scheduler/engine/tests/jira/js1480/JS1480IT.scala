@@ -3,9 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1480
 import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -37,8 +36,6 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     assert(tasks.size == view.currentTaskCount)
     val task = tasks(0)
     assert(task.pid.isDefined == isUnix)   // Not official, depends on JVM
-    assert(task.arguments.get.taskId == TaskId(SchedulerConstants.taskIdOffset))
-    assert(task.arguments.get.jobName == TestJobPath.name)
     assert(task.arguments.get.language == "java")
     assert(task.arguments.get.javaClassName contains classOf[TestJob].getName)
     assert(task.arguments.get.monitorCount == 0)
