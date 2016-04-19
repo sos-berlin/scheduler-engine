@@ -12,12 +12,13 @@
         public Task spooler_task { get; private set; }
         public Log spooler_log { get; private set; }
 
-        protected SosJobSchedulerScriptAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog)
+        protected SosJobSchedulerScriptAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog, String scriptContent)
         {
             this.spooler = contextSpooler;
             this.spooler_job = contextJob;
             this.spooler_task = contextTask;
             this.spooler_log = contextLog;
+            this.Script = scriptContent;
         }
       
         public abstract bool spooler_task_before();
@@ -31,11 +32,6 @@
         public abstract void spooler_on_error();
         public abstract bool spooler_process();
         public abstract void spooler_exit();
-
-        public void SetScript(string val)
-        {
-            this.Script = val;
-        }
 
         public bool ToBoolean(string value)
         {

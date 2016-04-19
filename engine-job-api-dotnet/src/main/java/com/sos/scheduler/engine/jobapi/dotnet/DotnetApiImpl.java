@@ -3,8 +3,10 @@ package com.sos.scheduler.engine.jobapi.dotnet;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Optional;
 
+import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleReference;
 import net.sf.jni4net.Bridge;
 import sos.spooler.Job;
 import sos.spooler.Log;
@@ -13,34 +15,54 @@ import sos.spooler.Task;
 import system.reflection.Assembly;
 
 public class DotnetApiImpl {
+	private final static String POWERSHELL_CLASS_NAME = "com.sosberlin.jobscheduler.dotnet.adapter.SosJobSchedulerPowershellAdapter";
+
 	private system.Type apiImplType;
 	private system.Object apiImplInstance = null;
-	private system.Type[] schedulerApiTypes = null;
-	private Path path;
-	private String className;
-	private String script;
+	private DotnetBridge bridge;
+	private DotnetModuleReference reference;
 
-	public DotnetApiImpl(system.Type[] types, Path dll, String dotnetClassName) {
-		this(types, dll, dotnetClassName, null);
-	}
-
-	public DotnetApiImpl(system.Type[] types, Path dll, String dotnetClassName,
-			String script) {
-		this.schedulerApiTypes = types;
-		this.path = dll;
-		this.className = dotnetClassName;
-		this.script = script;
+	public DotnetApiImpl(DotnetBridge dotnetBridge,	 DotnetModuleReference ref) {
+		this.bridge = dotnetBridge;
+		this.reference = ref;
 	}
 
 	public void init(Spooler spooler, Job spoolerJob, Task spoolerTask,
 			Log spoolerLog) throws Exception {
 
-		if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+		system.Type[] types = null;
+		system.Object[] params = null;
+		Path path = null;
+		String className = null;
+		String script = null;
+
+		if (reference instanceof DotnetModuleReference.Powershell) {
+			types = Arrays.copyOf(bridge.getSchedulerApiTypes(),bridge.getSchedulerApiTypes().length+1);
+        	types[bridge.getSchedulerApiTypes().length] = system.Type.GetType("System.String");
+
+			path = bridge.getDotnetAdapterDll();
+			className = POWERSHELL_CLASS_NAME;
+		    script = Optional.ofNullable(((DotnetModuleReference.Powershell)reference).script())
+                    .orElseThrow(
+                            () -> new Exception(String.format("Missing script")));
+
+
+		}
+		else if (reference instanceof DotnetModuleReference.DotnetClass) {
+			types = bridge.getSchedulerApiTypes();
+
+			path = ((DotnetModuleReference.DotnetClass)reference).dll();
+		    className = Optional.ofNullable(((DotnetModuleReference.DotnetClass)reference).className())
+                    .orElseThrow(
+                            () -> new Exception(String.format("Missing className")));
+		}
+
+        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
 			throw new Exception(String.format("File not found: %s",
 					path.toString()));
 		}
 
-		Assembly assembly = null;
+		Assembly assembly;
 		try {
 			assembly = Assembly.LoadFrom(path.toString());
 		} catch (Exception ex) {
@@ -48,33 +70,30 @@ public class DotnetApiImpl {
 					path.toString(), ex.toString()));
 		}
 
-		apiImplType = Optional.ofNullable(assembly.GetType(this.className))
+        Path tmpPath = path;
+        String tmpClassName = className;
+        apiImplType = Optional.ofNullable(assembly.GetType(className))
 				.orElseThrow(
 						() -> new Exception(String.format(
-								"[%s] Class not found: %s", path.toString(),
-								this.className)));
+								"[%s] Class not found: %s", tmpPath.toString(),
+                                tmpClassName)));
 
-		system.Object[] params = new system.Object[4];
+      	params = new system.Object[types.length];
 		params[0] = Bridge.wrapJVM(spooler);
 		params[1] = Bridge.wrapJVM(spoolerJob);
 		params[2] = Bridge.wrapJVM(spoolerTask);
 		params[3] = Bridge.wrapJVM(spoolerLog);
+		if (reference instanceof DotnetModuleReference.Powershell){
+			params[4] = new system.String(script);
+		}
 
 		apiImplInstance = Optional.ofNullable(
-				DotnetInvoker.createInstance(apiImplType, schedulerApiTypes,
+				DotnetInvoker.createInstance(apiImplType, types,
 						params)).orElseThrow(
 				() -> new Exception(String.format(
 						"[%s] Could not create a new instance of the class %s",
-						path.toString(), this.className)));
+						tmpPath.toString(), tmpClassName)));
 
-		if (this.script != null) {
-			invokeSetScriptMethod(this.script);
-		}
-	}
-
-	private void invokeSetScriptMethod(String script) throws Exception {
-		DotnetInvoker.invokeMethod(apiImplType, apiImplInstance, "SetScript",
-				script);
 	}
 
 	public boolean spooler_init() throws Exception {

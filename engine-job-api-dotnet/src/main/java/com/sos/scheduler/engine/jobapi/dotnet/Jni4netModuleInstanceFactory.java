@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.jobapi.dotnet.api.TaskContext;
 public final class Jni4netModuleInstanceFactory implements
 		DotnetModuleInstanceFactory {
 
-	private final static String POWERSHELL_CLASS_NAME = "com.sosberlin.jobscheduler.dotnet.adapter.SosJobSchedulerPowershellAdapter";
 	private DotnetBridge dotnetBridge;
 
 	public Jni4netModuleInstanceFactory(Path dllDirectory) throws Exception {
@@ -28,25 +27,17 @@ public final class Jni4netModuleInstanceFactory implements
 
 	public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
 		if (reference instanceof DotnetModuleReference.DotnetClass) {
-			DotnetApiImpl impl = newDotnetObject((DotnetModuleReference.DotnetClass) reference);
+			DotnetApiImpl impl = newDotnetObject(reference);
 			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
 		} else if (reference instanceof DotnetModuleReference.Powershell) {
-			DotnetApiImpl impl = newPowershellObject((DotnetModuleReference.Powershell) reference);
+			DotnetApiImpl impl = newDotnetObject(reference);
 			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
 		} else
 			throw new RuntimeException("Unknown class " + reference.getClass().getName());
 	}
 
-	private DotnetApiImpl newDotnetObject(DotnetModuleReference.DotnetClass ref) {
-		return new DotnetApiImpl(dotnetBridge.getSchedulerApiTypes(),
-				ref.dll(), ref.className());
-	}
-
-	private DotnetApiImpl newPowershellObject(
-			DotnetModuleReference.Powershell ref) {
-		return new DotnetApiImpl(dotnetBridge.getSchedulerApiTypes(),
-				dotnetBridge.getDotnetAdapterDll(), POWERSHELL_CLASS_NAME,
-				ref.script());
+	private DotnetApiImpl newDotnetObject(DotnetModuleReference ref) {
+		return new DotnetApiImpl(dotnetBridge,ref);
 	}
 
 	@SuppressWarnings("unchecked")

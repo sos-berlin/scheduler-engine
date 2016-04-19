@@ -14,8 +14,8 @@
     {
         private PowerShell Shell { get; set; }
      
-        public SosJobSchedulerPowershellAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog)
-            : base(contextSpooler, contextJob, contextTask, contextLog)
+        public SosJobSchedulerPowershellAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog,String scriptContent)
+            : base(contextSpooler, contextJob, contextTask, contextLog, scriptContent)
         {
             this.Shell = PowerShell.Create();
 
@@ -23,15 +23,13 @@
             this.Shell.Runspace.SessionStateProxy.SetVariable("spooler_job", this.spooler_job);
             this.Shell.Runspace.SessionStateProxy.SetVariable("spooler_task", this.spooler_task);
             this.Shell.Runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);
+
+            this.InitializeScript();
         }
 
         #region Public override
         public override bool spooler_task_before()
         {
-            if (!this.InitializeScript())
-            {
-                return false;
-            }
             this.Shell.AddScript("if ($function:spooler_task_before) {spooler_task_before}");
             var result = this.Shell.Invoke();
             this.ProcessOutputStreams();
@@ -69,10 +67,6 @@
 
         public override bool spooler_init()
         {
-            if (!this.InitializeScript())
-            {
-                return false;
-            }
             this.Shell.AddScript("if ($function:spooler_init) {spooler_init}");
             var result = this.Shell.Invoke();
             this.ProcessOutputStreams();
@@ -134,12 +128,11 @@
         #endregion
 
         #region Private
-        private bool InitializeScript()
+        private void InitializeScript()
         {
             if (string.IsNullOrEmpty(this.Script))
             {
-                this.spooler_log.error("[powershell] Script  was not set.");
-                return false;
+                throw new Exception("[powershell] Script  was not set.");
             }
            
             this.Shell.AddScript(this.Script);
@@ -147,12 +140,12 @@
             if (this.Shell.Streams.Error.Count <= 0)
             {
                 this.Shell.Commands.Clear();
-                return true;
             }
-
-            var err = this.Shell.Streams.Error[0].ToString();
-            this.spooler_log.error("[powershell] Error parsing script: " + err);
-            return false;
+            else
+            {
+                var err = this.Shell.Streams.Error[0].ToString();
+                throw new Exception("[powershell] Error parsing script: " + err);
+            }
         }
         
         private void ProcessOutputStreams()

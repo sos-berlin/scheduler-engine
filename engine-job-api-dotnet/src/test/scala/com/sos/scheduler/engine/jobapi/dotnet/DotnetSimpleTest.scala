@@ -37,7 +37,6 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
         throw "$error"
       }"""))
     val e = intercept[Exception] {
-      job.spooler_init()
       job.spooler_process()
     }
     assert(e.getMessage contains error)
@@ -61,7 +60,6 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
         $spooler_log.log(0, $value)
         return $true
       }"""))
-    job.spooler_init()
     job.spooler_process()
     verify(spoolerTaskInvoker).call("<order", Array())
     verify(orderInvoker).call("<params", Array())
