@@ -59,7 +59,7 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
       function spooler_process() {
         $value = $spooler_task.order().params().value("TEST")
         $spooler_log.log(0, $value)
-        return true
+        return $true
       }"""))
     job.spooler_init()
     job.spooler_process()
