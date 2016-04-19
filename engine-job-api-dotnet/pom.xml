@@ -188,19 +188,10 @@
                         <id>Generate .Net adapter</id>
                         <phase>process-resources</phase>
                         <configuration>
-                            <executable>powershell</executable>
+                            <executable>cmd</executable>
                             <arguments>
-                                <argument>-NonInteractive</argument>
-                                <argument>-NoLogo</argument>
-                                <argument>-noprofile</argument>
-                                <argument>-executionpolicy</argument>
-                                <argument>bypass</argument>
-                                <argument>-file</argument>
-                                <argument>${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1</argument>
-                                <argument>${project.basedir}/target/Generate-Jni4Net/engine-job-api.jar</argument>
-                                <argument>${project.basedir}/src/main/dotnet/adapter</argument>
-                                <argument>${project.build.outputDirectory}/com/sos/scheduler/engine/jobapi/dotnet/dlls</argument>
-                                <argument>${project.basedir}/target/Generate-Jni4Net</argument>
+                                <argument>/C</argument>
+                                <argument>powershell -NonInteractive -noprofile -executionpolicy bypass "&amp; '${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1' '${project.basedir}/target/Generate-Jni4Net/engine-job-api.jar' '${project.basedir}/src/main/dotnet/adapter' '${project.build.outputDirectory}/com/sos/scheduler/engine/jobapi/dotnet/dlls' '${project.basedir}/target/Generate-Jni4Net'" &lt; NUL</argument>
                             </arguments>
                         </configuration>
                         <goals>
