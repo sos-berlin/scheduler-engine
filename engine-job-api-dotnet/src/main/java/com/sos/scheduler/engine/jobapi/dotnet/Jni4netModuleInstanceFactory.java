@@ -15,8 +15,7 @@ public final class Jni4netModuleInstanceFactory implements
 	private DotnetBridge dotnetBridge;
 
 	public Jni4netModuleInstanceFactory(Path dllDirectory) throws Exception {
-		boolean debug = true; // ??? spooler_log.level() != 0;
-
+		boolean debug = System.getProperty("jni4net.debug") != null;
 		dotnetBridge = new DotnetBridge();
 		dotnetBridge.init(dllDirectory, debug);
 	}
