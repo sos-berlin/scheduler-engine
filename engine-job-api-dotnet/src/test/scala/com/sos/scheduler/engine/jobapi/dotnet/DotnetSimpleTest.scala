@@ -1,6 +1,9 @@
 package com.sos.scheduler.engine.jobapi.dotnet
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
+import com.sos.scheduler.engine.common.utils.Exceptions
+import com.sos.scheduler.engine.jobapi.dotnet.DotnetSimpleTest._
 import com.sos.scheduler.engine.jobapi.dotnet.api.{DotnetModuleReference, TaskContext}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
@@ -19,7 +22,7 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
 
   override protected def afterAll() = {
     instanceFactory.close()
-    dotnetEnvironment.close()
+    Exceptions.ignoreException(logger.debug) { dotnetEnvironment.close() }
   }
 
   "Error in PowerShell script is detected" in {
@@ -61,7 +64,7 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
         return $true
       }"""))
     job.spooler_process()
-    verify(spoolerTaskInvoker).call("<order", Array())
+    verify(spoolerTaskInvoker, times(2)).call("<order", Array())   // The adapter's spooler_process does one extra call
     verify(orderInvoker).call("<params", Array())
     verify(paramsInvoker).call("<value", Array("TEST"))
     verify(spoolerLogInvoker).call("log", Array(0: Integer, "HELLO"))
@@ -69,4 +72,5 @@ final class DotnetSimpleTest extends FreeSpec with BeforeAndAfterAll {
 }
 
 private object DotnetSimpleTest {
+  private val logger = Logger(getClass)
 }
