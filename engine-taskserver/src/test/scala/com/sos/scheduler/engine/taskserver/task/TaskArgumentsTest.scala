@@ -76,7 +76,7 @@ final class TaskArgumentsTest extends FreeSpec {
       "monitor.dll=test.dll",
       "monitor.dotnet_class=com.example.C",
       "monitor.script=")),
-      dllDirectory = Paths.get("/test-dlls"))
+      dllDirectory = Some(Paths.get("/test-dlls")))
     assert(a.monitors.size == 3)
     assert(a.monitors(0).name == "")
     assert(a.monitors(0).ordering == 1)

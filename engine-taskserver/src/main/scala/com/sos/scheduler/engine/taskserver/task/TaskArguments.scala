@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.EmptyPath
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.common.xml.VariableSets
@@ -18,7 +17,7 @@ import scala.util.Sorting.stableSort
 /**
  * @author Joacim Zschimmer
  */
-final class TaskArguments private(arguments: List[(String, String)], dllDirectory: Path) {
+final class TaskArguments private(arguments: List[(String, String)], dllDirectory: Option[Path] = None) {
 
   lazy val environment: Map[String, String] = VariableSets.parseXml(apply(EnvironmentKey))
   lazy val hasOrder = get(HasOrderKey) match {
@@ -116,9 +115,9 @@ object TaskArguments {
   private val logger = Logger(getClass)
 
   @TestOnly
-  private[task] def apply(arguments: VariantArray): TaskArguments = apply(arguments, dllDirectory = EmptyPath)
+  private[task] def apply(arguments: VariantArray): TaskArguments = apply(arguments, dllDirectory = None)
 
-  def apply(arguments: VariantArray, dllDirectory: Path): TaskArguments = {
+  def apply(arguments: VariantArray, dllDirectory: Option[Path]): TaskArguments = {
     val buffer = mutable.Buffer[(String, String)]()
     for (keyValueString ← arguments.indexedSeq filterNot variant.isEmpty map cast[String]) {
       val KeyValueRegex(key, value) = keyValueString

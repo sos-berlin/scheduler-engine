@@ -27,7 +27,7 @@ final case class TaskStartArguments(
   directory: Path,
   logDirectory: Path,
   dotnetDllDirectory: Option[Path] = None,
-  dllDirectory: Path,
+  dllDirectory: Option[Path] = None,
   stdFileMap: Map[StdoutStderrType, Path] = Map(),
   logStdoutAndStderr: Boolean = false,
   killScriptOption: Option[ProcessKillScript] = None,
@@ -51,7 +51,7 @@ object TaskStartArguments {
       tunnelToken = TunnelToken(TunnelId("TEST-TUNNEL"), TunnelToken.Secret("TUNNEL-SECRET")),
       directory = directory,
       logDirectory = temporaryDirectory,
-      dllDirectory = EmptyPath,
+      dllDirectory = None,
       stdFileMap = stdFileMap,
       agentTaskId = AgentTaskId("1-1"),
       rpcKeepaliveDurationOption = None)
