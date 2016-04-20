@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver.module.dotnet
 
-import com.sos.scheduler.engine.jobapi.dotnet.api.{DotnetModuleInstanceFactory, TaskContext}
+import com.sos.scheduler.engine.taskserver.dotnet.api.{TaskContext, DotnetModuleInstanceFactory}
 import com.sos.scheduler.engine.taskserver.module.ModuleArguments.DotnetModuleArguments
 import com.sos.scheduler.engine.taskserver.module._
 import com.sos.scheduler.engine.taskserver.module.dotnet.DotnetModule._

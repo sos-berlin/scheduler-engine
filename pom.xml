@@ -42,7 +42,6 @@
         <module>engine-http-client</module>
         <module>engine-http-server</module>
         <module>engine-job-api</module>
-        <module>engine-job-api-dotnet</module>
         <module>engine-minicom</module>
         <module>engine-newkernel</module>
         <module>engine-persistence</module>
@@ -60,6 +59,7 @@
         <module>engine-plugins</module>
         <module>engine-setup</module>
         <module>engine-taskserver</module>
+        <module>engine-taskserver-dotnet</module>
     </modules>
 
     <properties>

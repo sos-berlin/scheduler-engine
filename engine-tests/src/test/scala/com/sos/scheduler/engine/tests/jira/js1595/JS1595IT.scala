@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.system.FileUtils._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.jobapi.dotnet.DotnetEnvironment
+import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

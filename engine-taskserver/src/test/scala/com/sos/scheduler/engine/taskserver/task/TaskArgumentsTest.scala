@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleReference
 import com.sos.scheduler.engine.minicom.types.VariantArray
+import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference
 import com.sos.scheduler.engine.taskserver.module.ModuleArguments.{DotnetModuleArguments, JavaModuleArguments, ShellModuleArguments}
 import com.sos.scheduler.engine.taskserver.module.{DotnetClassModuleLanguage, PowershellModuleLanguage, Script}
 import java.nio.file.Paths

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.taskserver.module
 
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
-import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleReference
+import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference
 import java.nio.file.Path
 import org.jetbrains.annotations.TestOnly
 import scala.reflect.ClassTag

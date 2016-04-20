@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaShutdownHook
-import com.sos.scheduler.engine.jobapi.dotnet.DotnetEnvironment
+import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment
 import scala.util.control.NonFatal
 
 /**

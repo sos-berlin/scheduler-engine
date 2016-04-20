@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.taskserver.module.dotnet
 
-import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleInstanceFactory
+import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleInstanceFactory
 import com.sos.scheduler.engine.taskserver.module.ModuleArguments.DotnetModuleArguments
 import javax.inject.{Inject, Singleton}
 import org.jetbrains.annotations.TestOnly

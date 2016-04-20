@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.taskserver.configuration.inject
 
 import com.google.inject.Provides
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
-import com.sos.scheduler.engine.jobapi.dotnet.Jni4netModuleInstanceFactory
-import com.sos.scheduler.engine.jobapi.dotnet.api.DotnetModuleInstanceFactory
 import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
+import com.sos.scheduler.engine.taskserver.dotnet.Jni4netModuleInstanceFactory
+import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleInstanceFactory
 import javax.inject.Singleton
 import scala.concurrent.Future
 
