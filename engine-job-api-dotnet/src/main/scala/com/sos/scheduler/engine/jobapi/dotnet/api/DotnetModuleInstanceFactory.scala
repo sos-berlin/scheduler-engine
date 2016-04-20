@@ -13,9 +13,12 @@ trait DotnetModuleInstanceFactory extends AutoCloseable {
 }
 
 object DotnetModuleInstanceFactory {
-  object Unsupported extends DotnetModuleInstanceFactory {
-    def newInstance[A](clazz: Class[A], taskContext: TaskContext, reference: DotnetModuleReference) =
-      throw new NotImplementedError(".Net is not supported")
+  val Unsupported: DotnetModuleInstanceFactory = new Unsupported(new NotImplementedError(".Net is not supported"))
+
+  def unsupported(newThrowable: ⇒ Throwable): DotnetModuleInstanceFactory = new Unsupported(newThrowable)
+
+  private class Unsupported(newThrowable: ⇒ Throwable) extends DotnetModuleInstanceFactory {
+    def newInstance[A](clazz: Class[A], taskContext: TaskContext, reference: DotnetModuleReference) = throw newThrowable
 
     def close() = {}
   }

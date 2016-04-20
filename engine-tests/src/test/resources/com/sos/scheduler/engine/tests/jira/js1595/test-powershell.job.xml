@@ -6,9 +6,9 @@
 >
     <script language="powershell">
         function spooler_process() {
-            $value = $spooler_task.order.params.value("TEST")
-            $spooler_task.order.params.set_value("NEW-TEST", $value)
-            return true
+            $value = $spooler_task.order().params().value("TEST")
+            $spooler_task.order().params().set_value("NEW-TEST", $value)
+            return $true
         }
     </script>
 </job>

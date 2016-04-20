@@ -24,7 +24,7 @@ extends ScalaAbstractModule {
   def dotnetModuleInstanceFactory: DotnetModuleInstanceFactory =
     taskStartArguments.dotnetDllDirectory match {
       case Some(dllPath) ⇒ new Jni4netModuleInstanceFactory(dllPath)
-      case None ⇒ DotnetModuleInstanceFactory.Unsupported
+      case None ⇒ DotnetModuleInstanceFactory.unsupported { new RuntimeException("Missing .Net DLLs") }
     }
 
   /** If task server runs in an own process, the Future of its termination. */
