@@ -11,11 +11,13 @@ set -e
 #   export SCHEDULER_WWW=$HOME/all/joc/joc-html-cockpit/target/classes (JOC's browser files)
 #   engine/bin/jobscheduler.sh -i
 
+unset SOS_INI
+
 declare SCHEDULER_HOME
 declare SCHEDULER_DATA
-declare jarDir
-declare -a javaOptions
-declare -a engineOptions
+
+declare -a javaOptions=()
+declare -a engineOptions=()
 tcpPort=4444
 
 for arg in "$@"; do
@@ -41,6 +43,8 @@ if [ -z "$SCHEDULER_HOME" ]; then :
 else
     bin="$SCHEDULER_HOME"/bin
 fi
+
+declare jarDir
 . "$bin/set-context.sh"
 
 configDirectory="$SCHEDULER_DATA"/config
