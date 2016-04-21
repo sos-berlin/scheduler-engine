@@ -380,6 +380,9 @@ unsigned int position( const Sos_string& str, const Sos_string& to_find, unsigne
 }
 
 //-----------------------------------------------------------------length_without_trailing_char
+#if 1 == 0  //!defined Z_SOLARIS
+
+Do not compile this!
 
 uint length_without_trailing_char( const char* text, uint len, char c )
 {
@@ -424,24 +427,21 @@ uint length_without_trailing_char( const char* text, uint len, char c )
     return p - text;
 }
 
-//---------------------------------------------------------------length_without_trailing_spaces
-/* Konventionelle Version
+#else
 
-uint length_without_trailing_spaces( const char* text, uint len )
-{
+uint length_without_trailing_char(const char* text, uint len, char c) {
     const char* p = text + len;
-
-    if( text[0] == ' ' )  {
-        while( p > text  &&  p[-1] == ' ' )  p--;    // Blanks abschneiden
+    if( text[0] == c)  {
+        while (p > text  &&  p[-1] == c)  p--;    // Blanks abschneiden
     } else {
         p--;
-        while( *p == ' ' )  p--;                     // Blanks abschneiden
+        while(*p == c)  p--;                     // Blanks abschneiden
         p++;
     }
-
     return p - text;
 }
-*/
+#endif
+
 //---------------------------------------------------------------------------------------_ltrim
 
 void _ltrim( char* string )

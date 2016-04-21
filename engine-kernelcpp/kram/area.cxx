@@ -273,6 +273,9 @@ Collectable_const_area* Collectable_const_area::create( uint size )
     //if( !p )  throw No_memory_error();
     //memcpy( p + Collectable_const_area::base_size() + size, "SLUT", 4 );
     if( (int4)size < 0 )  throw_no_memory_error( size );
+    #if defined __GNUC__
+        if (Collectable_const_area::base_size() != __BIGGEST_ALIGNMENT__) z::throw_xc("NOT-BIGGEST-ALIGNMENT", Collectable_const_area::base_size(), __BIGGEST_ALIGNMENT__);
+    #endif
     Byte* p = (Byte*)sos_alloc( Collectable_const_area::base_size() + size, "Dynamic_area" );
     //LOG( "liefert " << (void*)p << "\n" );
 

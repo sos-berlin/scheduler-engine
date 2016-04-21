@@ -610,10 +610,9 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
     {
         if( options->_count >= options->_limit )  break;
 
-        if( !orders_are_distributed()  ||  job_chain->is_distributed() )
+        if (!orders_are_distributed() || !job_chain->is_distributed())
             job_chain->append_calendar_dom_elements( element, options );
     }
-
 
     if( options->_count < options->_limit  &&  orders_are_distributed()  
      &&  db()  &&  db()->opened()  &&  !db()->is_in_transaction() )
@@ -629,8 +628,6 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
         if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.db_string(time::without_ms) );
         else
         if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
-        
-        //select_sql << "  order by `distributed_next_time`";
 
         Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); 
 
@@ -646,7 +643,7 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
                 order->load_record( job_chain_path, record );
                 order->load_order_xml_blob( &ta );
 
-                order->schedule_use()->append_calendar_dom_elements( element, options );
+                order->append_calendar_dom_elements( element, options );
             }
             catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
         }
@@ -934,7 +931,7 @@ Order_source::Order_source( Job_chain* job_chain, Scheduler_object::Type_code t 
 
 //--------------------------------------------------------------------------------Order_source::log
     
-Prefix_log* Order_source::log()
+Prefix_log* Order_source::log() const
 { 
     assert( _job_chain );
     return _job_chain->log(); 

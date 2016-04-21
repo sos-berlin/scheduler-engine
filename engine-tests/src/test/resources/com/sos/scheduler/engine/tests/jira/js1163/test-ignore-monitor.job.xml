@@ -1,24 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.7/scheduler.xsd"
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
      process_class="test">
 
     <script language="shell">
         trap "" SIGTERM
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
-        sleep 1
+        for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+            echo SLEEPING
+            sleep 1
+        done
         echo "FINISHED NORMALLY"
     </script>
     <monitor>

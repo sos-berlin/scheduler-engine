@@ -1,4 +1,5 @@
-#! /bin/bash -E
+#! /bin/bash
+set -e
 
 declare -a javaOptions
 declare -a agentOptions
@@ -39,9 +40,9 @@ for arg in "$@"; do
 done
 
 
-bin=$(cd "$(dirname "$0")"; pwd)
+bin=$(cd "$(dirname "$0")" && pwd || kill $$)
 if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
-    SCHEDULER_AGENT_HOME=$(cd "$bin/.."; pwd)
+    SCHEDULER_AGENT_HOME=$(cd "$bin/.." && pwd || kill $$)
 fi
 . "$bin/set-context.sh"
 

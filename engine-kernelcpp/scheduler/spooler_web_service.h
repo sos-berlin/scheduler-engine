@@ -204,7 +204,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
                                 Web_service_request         ( Web_service_operation* );
 
     // Abstract_scheduler_object
-    Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
+    Prefix_log*                 log                         () const                                { return _web_service_operation->log(); }
     string                      obj_name                    () const;
     bool                        closed                      () const                                { return _web_service_operation == NULL; }
     void                        assert_usable               ();
@@ -245,7 +245,7 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
                                 Web_service_response        ( Web_service_operation* );
 
     // Abstract_scheduler_object
-    Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
+    Prefix_log*                 log                         () const                                { return _web_service_operation->log(); }
     string                      obj_name                    () const;
     bool                        closed                      () const                                { return _web_service_operation == NULL; }
     void                        assert_usable               ();

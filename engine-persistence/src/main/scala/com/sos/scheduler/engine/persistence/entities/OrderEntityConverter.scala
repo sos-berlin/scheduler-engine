@@ -2,12 +2,11 @@ package com.sos.scheduler.engine.persistence.entities
 
 import com.google.common.base.Strings
 import com.google.common.base.Strings.emptyToNull
-import com.sos.scheduler.engine.data.base.IsString.stringOrNull
+import com.sos.scheduler.engine.base.generic.IsString.stringOrNull
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderState, OrderId, OrderPersistentState, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderPersistentState, OrderState}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
-import com.sos.scheduler.engine.persistence.SchedulerDatabases._
-import com.sos.scheduler.engine.persistence.SchedulerDatabases.instantToDatabase
+import com.sos.scheduler.engine.persistence.SchedulerDatabases.{instantToDatabase, _}
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 
 trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistentState, OrderKey, OrderEntity] {

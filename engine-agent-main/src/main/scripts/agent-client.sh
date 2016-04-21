@@ -2,7 +2,7 @@
 set -e
 
 if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
-    SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.."; pwd)
+    SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.." && pwd || kill $$)
 fi
 . "$SCHEDULER_AGENT_HOME/bin/set-context.sh"
 

@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.base.process.ProcessSignal
+import com.sos.scheduler.engine.common.process.Processes
+import com.sos.scheduler.engine.common.process.Processes.Pid
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
@@ -14,7 +16,6 @@ import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
 import com.sos.scheduler.engine.taskserver.module.javamodule.ApiModule
 import com.sos.scheduler.engine.taskserver.module.shell.ShellModule
 import com.sos.scheduler.engine.taskserver.module.{ModuleFactory, NamedInvocables}
-import com.sos.scheduler.engine.taskserver.task.process.Processes.Pid
 import java.util.UUID
 import javax.inject.Inject
 import org.scalactic.Requirements._
@@ -133,6 +134,7 @@ object RemoteModuleInstanceServer extends InvocableFactory {
 
   /**
    * Expects an VariantArray with Some[IUnknown]
+ *
    * @return IUnknown, interpreted as Invocable
    * @throws NullPointerException when an IUnknown is null.
    */

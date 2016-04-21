@@ -56,7 +56,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     virtual bool                on_requisite_loaded         ( File_based* )                         = 0;
     virtual bool                on_requisite_to_be_removed  ( File_based* );
     virtual void                on_requisite_removed        ( File_based* );
-    virtual Has_log*            log                         ()                                      = 0;
+    virtual Has_log*            log                         () const                                = 0;
     virtual string              obj_name                    () const                                = 0;
     virtual bool                is_visible_requisite        ()                                      { return true; }
 
@@ -176,7 +176,7 @@ struct File_based : Abstract_scheduler_object,
     bool                        on_requisite_loaded         ( File_based* );
     bool                        on_requisite_to_be_removed  ( File_based* );
     void                        on_requisite_removed        ( File_based* );
-    Prefix_log*                 log                         ()                                      { return Abstract_scheduler_object::log(); }
+    Prefix_log*                 log                         () const                                { return Abstract_scheduler_object::log(); }
 
 
     // Has_includes

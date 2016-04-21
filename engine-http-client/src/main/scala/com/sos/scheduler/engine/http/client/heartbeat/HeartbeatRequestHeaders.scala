@@ -35,7 +35,7 @@ object HeartbeatRequestHeaders {
     object Value {
       def unapply(value: String): Option[(HeartbeatId, HttpHeartbeatTiming)] =
         value match {
-          case ValueRegex(heartbeatId, timing) ⇒ Some(HeartbeatId(heartbeatId), parseTimes(timing))
+          case ValueRegex(heartbeatId, timing) ⇒ Some((HeartbeatId(heartbeatId), parseTimes(timing)))
         }
       }
   }

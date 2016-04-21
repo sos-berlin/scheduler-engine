@@ -34,7 +34,7 @@ extends SimpleRoutingApp {
                 complete { XmlString(result) }
               }
               catch {
-                case NonFatal(t) ⇒ complete(BadRequest, t.toString)
+                case NonFatal(t) ⇒ complete((BadRequest, t.toString))
               }
             }
           }

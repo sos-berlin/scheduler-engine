@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
+import com.sos.scheduler.engine.base.generic.HasIsDefault
 import com.sos.scheduler.engine.base.utils.HasKey
-import com.sos.scheduler.engine.data.base.HasIsDefault
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 import javax.persistence.EntityManager
 
 /** JPA-Operationen mit Konvertierung zwischen Entity und Objekt.
+ *
   * @tparam E Entity-Klasse, mit @Entity annotiert
   * @tparam A Objektklasse
   */

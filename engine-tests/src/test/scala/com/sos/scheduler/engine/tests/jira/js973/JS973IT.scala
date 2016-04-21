@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
+import com.sos.scheduler.engine.base.generic.IsString
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.base.IsString
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}

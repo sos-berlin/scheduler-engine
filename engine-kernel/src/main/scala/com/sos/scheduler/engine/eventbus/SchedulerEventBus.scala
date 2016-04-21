@@ -57,7 +57,7 @@ final class SchedulerEventBus extends EventBus with Runnable {
   def onHotEventSourceEvent[E <: Event](eventHandler: PartialFunction[EventSourceEvent[E], Unit])(implicit closer: Closer, e: ClassTag[E]): Unit = {
     val subscription = new EventSubscription {
       val eventClass = implicitClass[E]
-      def handleEvent(e: Event) = eventHandler.applyOrElse(e.asInstanceOf[EventSourceEvent[E]], identity[EventSourceEvent[E]])
+      def handleEvent(e: Event) = eventHandler.applyOrElse(e.asInstanceOf[EventSourceEvent[E]], (_: EventSourceEvent[E]) ⇒ ())
     }
     subscribeClosable[E](hotEventBus, subscription)
   }

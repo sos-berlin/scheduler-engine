@@ -68,7 +68,7 @@ struct Socket_operation : Event_operation
     void                    set_blocking                    ( bool b )                              { _blocking = b; }
     bool                        accept                      ( SOCKET listen_socket );
 
-    void                        call_ioctl                  ( int what, unsigned long value );
+    void set_non_blocking();
     void                    set_keepalive                   ( bool );
     bool                try_set_keepalive                   ( bool );
     void                    set_linger                      ( bool, int seconds = 0 );

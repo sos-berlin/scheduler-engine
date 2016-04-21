@@ -13,7 +13,7 @@ object NewWebServiceConfigurationParser {
     ScalaXMLEventReader.parseString(xml)(parseEvents)
 
   def parse(source: Source): NewWebServicePluginConfiguration = {
-    ScalaXMLEventReader.parse(source)(parseEvents)
+    ScalaXMLEventReader.parseDocument(source)(parseEvents)
   }
 
   private def parseEvents(eventReader: ScalaXMLEventReader): NewWebServicePluginConfiguration = {
@@ -22,7 +22,7 @@ object NewWebServiceConfigurationParser {
     import eventReader._
 
     parseElement("plugin.config") {
-      builder.testMode = attributeMap.getConverted("test") { _.toBoolean } getOrElse false
+      builder.testMode = attributeMap.as[Boolean]("test", default = false)
     }
     builder.build()
   }

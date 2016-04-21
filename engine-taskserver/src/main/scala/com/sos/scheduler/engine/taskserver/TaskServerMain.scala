@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.taskserver.configuration.inject.TaskServerMainModule
 import com.sos.scheduler.engine.taskserver.data.TaskStartArguments
-import scala.concurrent.ExecutionContext
 import spray.json._
 
 /**
@@ -23,7 +22,7 @@ object TaskServerMain {
   private val logger = Logger(getClass)
 
   def main(args: Array[String]): Unit = {
-    CommandLineArguments.parse(args) { _.getString("-agent-task-id=") }  // -agent-task-id=.. is only for the kill script and ignored
+    CommandLineArguments.parse(args) { _.optionAs[String]("-agent-task-id=") }  // -agent-task-id=.. is only for the kill script and ignored
     try {
       val startArguments = new JsonParser(ByteStreams.toByteArray(System.in)).parseJsValue().asJsObject.convertTo[TaskStartArguments]
       run(startArguments)

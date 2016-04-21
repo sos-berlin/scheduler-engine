@@ -354,7 +354,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     bool                        on_requisite_loaded         ( File_based* );
     bool                        on_requisite_to_be_removed  ( File_based* );
   //void                        on_requisite_removed        ( File_based* );
-    Prefix_log*                 log                         ()                                      { return Abstract_scheduler_object::log(); }
+    Prefix_log*                 log                         () const                                { return Abstract_scheduler_object::log(); }
 
     void                        disconnect                  ();
     File_based*                 using_file_based            () const                                { return _using_object; }
@@ -429,7 +429,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
         Period                      next_local_period           ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
 
-        Prefix_log*                 log                         ()                                  { return _schedule->log(); }
+        Prefix_log*                 log                         () const                            { return _schedule->log(); }
 
       private:
         friend struct               Schedule;

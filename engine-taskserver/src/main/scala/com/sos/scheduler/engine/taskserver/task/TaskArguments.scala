@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.taskserver.task
 
+import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions
+import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
@@ -52,7 +54,7 @@ final class TaskArguments private(arguments: List[(String, String)], dllDirector
 
   private class MonitorArguments(argMap: Map[String, String]) {
     def name = argMap.getOrElse(monitor.NameKey, "")
-    val ordering = argMap.getConverted(monitor.OrderingKey) { _.toInt } getOrElse Monitor.DefaultOrdering
+    val ordering = argMap.as[Int](monitor.OrderingKey, Monitor.DefaultOrdering)
     val moduleArguments = extractModuleArguments(argMap)
   }
 

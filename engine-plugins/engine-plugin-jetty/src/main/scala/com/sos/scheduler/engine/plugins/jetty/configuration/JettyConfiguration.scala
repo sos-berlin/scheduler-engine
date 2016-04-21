@@ -15,8 +15,7 @@ final case class JettyConfiguration(
   jettyXMLURLOption: Option[URL] = None,
   accessLogFileOption: Option[File] = None,
   loginServiceOption: Option[LoginService] = None,
-  rootServletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil,
-  wars: immutable.Seq[WarEntry] = Nil)
+  rootServletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil)
 
 
 object JettyConfiguration {
@@ -40,6 +39,4 @@ object JettyConfiguration {
   final class LazyRandomTcpPortNumber extends TcpPortNumber {
     lazy val value = findRandomFreeTcpPort()
   }
-
-  final case class WarEntry(contextPath: String, warFile: File)
 }

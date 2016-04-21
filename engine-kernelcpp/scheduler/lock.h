@@ -163,7 +163,7 @@ struct Use : Object,
 
     // Dependant:
     bool                        on_requisite_loaded         ( File_based* );
-    Prefix_log*                 log                         ()                                      { return Abstract_scheduler_object::log(); }
+    Prefix_log*                 log                         () const                                { return Abstract_scheduler_object::log(); }
 
     Lock*                       lock                        () const;
     Lock*                       lock_or_null                () const;

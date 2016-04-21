@@ -193,15 +193,6 @@ static void set_linger( SOCKET socket )
     setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 }
 
-//---------------------------------------------------------------------------------set_non_blocking
-
-static void set_non_blocking( SOCKET socket )
-{
-    unsigned long on = 1;
-    int ret = ioctlsocket( socket, FIONBIO, &on );
-    if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
-}
-
 //--------------------------------------------onnection_reset_exception::Connection_reset_exception
 
 Connection_reset_exception::Connection_reset_exception( const string& code ) 
@@ -381,7 +372,7 @@ void Connection::connect_server__end()
     _my_operation = NULL;
     operation->async_check_error( Z_FUNCTION );
 
-    if( _is_async )  set_non_blocking( _socket );
+    if (_is_async) set_socket_non_blocking(_socket);
 }
 
 //-------------------------------------------------Connection::Connect_operation::Connect_operation
@@ -502,7 +493,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                     _connection->_peer._host = _connection->_remote_host;    // Hostnamen übernehmen
 
                     set_socket_not_inheritable( _connection->_socket );
-                    set_non_blocking( _connection->_socket );
+                    set_socket_non_blocking( _connection->_socket );
                     _connection->close_socket( &_connection->_listen_socket );
                     _connection->_manager->set_fd( Socket_manager::except_fd, _connection->_socket );
                     if( _connection->_event )  _connection->set_event( _connection->_event );
@@ -784,8 +775,8 @@ double Connection::async_next_gmtime()
 
 void Connection::set_async()
 {
-    if( _listen_socket != SOCKET_ERROR )  set_non_blocking( _listen_socket );
-    if( _socket        != SOCKET_ERROR )  set_non_blocking( _socket );
+    if( _listen_socket != SOCKET_ERROR )  set_socket_non_blocking( _listen_socket );
+    if( _socket        != SOCKET_ERROR )  set_socket_non_blocking( _socket );
 
     _is_async = true;
 }

@@ -1,16 +1,26 @@
+# Set variables
+# - SCHEDULER_AGENT_HOME
+# - SCHEDULER_AGENT_WORK
+# - javaDir
+# - java
+
+declare SCHEDULER_AGENT_HOME
 if [ -z "$SCHEDULER_AGENT_HOME" ]; then :
-    SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.."; pwd)
+    SCHEDULER_AGENT_HOME=$(cd "$(dirname "$0")/.." && pwd || kill $$)
 fi
 
+declare JAVA_HOME
+declare OSTYPE
 if [ "$OSTYPE" = "cygwin" ]; then
-    jarDir=$(cygpath -w "$SCHEDULER_AGENT_HOME/jar")
+    jarDir=$(cygpath -w "$SCHEDULER_AGENT_HOME/jar" || kill $$)
     javaHome=""
-    [ -n "$JAVA_HOME" ] && javaHome=$(cygpath "$JAVA_HOME")
+    [ -n "$JAVA_HOME" ] && javaHome=$(cygpath "$JAVA_HOME" || kill $$)
 else
     jarDir="$SCHEDULER_AGENT_HOME/jar"
     javaHome="$JAVA_HOME"
 fi
 
+declare SCHEDULER_AGENT_WORK
 if [ -z "$SCHEDULER_AGENT_WORK" ]; then :
     SCHEDULER_AGENT_WORK="$SCHEDULER_AGENT_HOME"
 fi

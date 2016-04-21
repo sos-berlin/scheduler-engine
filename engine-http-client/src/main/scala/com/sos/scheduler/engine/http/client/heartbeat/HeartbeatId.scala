@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.http.client.heartbeat
 
-import com.sos.scheduler.engine.data.base.IsString
+import com.sos.scheduler.engine.base.generic.IsString
 import java.util.UUID
 
 /**

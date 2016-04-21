@@ -30,6 +30,9 @@
 #ifdef Z_WINDOWS
     #define SERVER_JVM_RELATIVE_PATH "\\bin\\server\\jvm.dll"
     #define CLIENT_JVM_RELATIVE_PATH "\\bin\\client\\jvm.dll"
+#elif defined __sparc_v9__ or defined Z_SOLARIS
+    #define SERVER_JVM_RELATIVE_PATH "/lib/sparcv9/server/libjvm.so"
+    #define CLIENT_JVM_RELATIVE_PATH "/lib/sparcv9/client/libjvm.so"
 #elif defined Z_LINUX
     #if defined Z_64
         #define SERVER_JVM_RELATIVE_PATH "/lib/amd64/server/libjvm.so"
@@ -39,7 +42,8 @@
         #define CLIENT_JVM_RELATIVE_PATH "/lib/i386/client/libjvm.so"
     #endif
 #else
-#   define JVM_RELATIVE_PATH JVM_PATH_IS_UNKNOWN_FOR_THIS_PLATFORM
+#   define SERVER_JVM_RELATIVE_PATH JVM_RELATIVE_PATH_IS_UNKNOWN_FOR_THIS_PLATFORM
+#   define CLIENT_JVM_RELATIVE_PATH JVM_RELATIVE_PATH_IS_UNKNOWN_FOR_THIS_PLATFORM
 #endif
 
 using namespace std;
