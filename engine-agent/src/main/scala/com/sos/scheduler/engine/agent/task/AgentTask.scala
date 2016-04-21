@@ -64,8 +64,6 @@ with HasKey {
     arguments = taskArgumentsFuture.value collect {
       case Success(a) ⇒
         TaskOverview.Arguments(
-          taskId = a.taskId,
-          jobName = a.jobName,
           language = a.moduleArguments.language.string,
           javaClassName = condOpt(a.moduleArguments) { case o: JavaModuleArguments ⇒ o.className },
           monitorCount = a.monitors.size)
