@@ -4,10 +4,10 @@ import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
-import com.sos.scheduler.engine.common.process.Processes
 import com.sos.scheduler.engine.common.process.Processes.newTemporaryShellFile
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFututes
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.{isSolaris, isWindows}
@@ -166,7 +166,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
               IgnoringJobPath, IgnoringMonitorJobPath,
               ApiJobPath)
             val runs = jobPaths map { startJob(_) }
-            awaitSuccess(Future.sequence(runs map { _.started }))
+            runs map { _.started } await 2*60.s
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
             sleep(1.s)
             killTime = now()
@@ -259,7 +259,7 @@ private[js1163] object JS1163IT {
   private val KillTimeout = 4.s
   private val MaxKillDuration = 2.s
   private val TrapDuration = 2.s  // Trap sleeps 2s
-  private[js1163] val UndisturbedDuration = 15.s
+  private[js1163] val UndisturbedDuration = 25.s
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
