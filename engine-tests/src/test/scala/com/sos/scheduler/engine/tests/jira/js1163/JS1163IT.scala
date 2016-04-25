@@ -259,7 +259,7 @@ private[js1163] object JS1163IT {
   private val KillTimeout = 4.s
   private val MaxKillDuration = 2.s
   private val TrapDuration = 2.s  // Trap sleeps 2s
-  private[js1163] val UndisturbedDuration = 25.s
+  private[js1163] val UndisturbedDuration = 40.s
 
   private val SigtermTrapped = "SIGTERM HANDLED"
   private val FinishedNormally = "FINISHED NORMALLY"
