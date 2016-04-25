@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     process_class="/test"
+     tasks="1000"
+>
+    <script language="java:javascript">
+        var terminateFile = java.nio.file.Paths.get(spooler_task.params.value("terminate"))
+        function spooler_process() {
+            while (!java.nio.file.Files.exists(terminateFile)) java.lang.Thread.sleep(1000);
+            return false;
+        }
+    </script>
+</job>
