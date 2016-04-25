@@ -25,7 +25,6 @@
     <profiles>
         <profile>
             <id>Unix smoke test</id>
-            <!-- It has been reported that this test does not run in all cases. So we simply switch this off -
             <activation>
                 <os>
                     <family>unix</family>
@@ -34,7 +33,6 @@
                     <name>!noSmokeTest</name>
                 </property>
             </activation>
-            -->
             <build>
                 <plugins>
                     <plugin>
