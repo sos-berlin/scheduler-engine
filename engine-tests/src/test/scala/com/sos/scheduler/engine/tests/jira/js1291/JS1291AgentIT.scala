@@ -1,10 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1291
 
+import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.{RichPath, _}
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent}
@@ -24,7 +27,8 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT._
 import java.nio.file.Files
-import java.nio.file.Files.createTempFile
+import java.nio.file.Files.{createTempFile, deleteIfExists}
+import java.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -46,8 +50,8 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
   List(
-    "With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")) },
-    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri)) })
+    //"With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)) },
+    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)) })
   .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[Event]]()
@@ -162,6 +166,31 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
           runJob(JobPath("/throwing-monitor"))
         }
       }
+
+      "Run multiple tasks simultaneously" - {
+        lazy val terminateFile = testEnvironment.directory.toPath / "TERMINATE"
+
+        def runTasks(jobPath: JobPath, taskCount: Int, taskMaximumDuration: Duration): Unit = {
+          deleteIfExists(terminateFile)
+          val runs = for (jobPath ← List.fill(taskCount) { jobPath }) yield
+            startJob(jobPath, variables = Map("terminate" → s"$terminateFile"))
+          runs map { _.started } await taskCount * 20.s
+          logger.info("All tasks are running now")
+          touch(terminateFile)
+          val results = runs map { _.result } await TestTimeout
+          assert((results filterNot { _.returnCode.isSuccess }) == Nil)
+        }
+
+        val shellTaskCount = 100
+        s"Start $shellTaskCount simultaneously running shell tasks" in {
+          runTasks(JobPath("/test-sleep"), shellTaskCount, taskMaximumDuration = 1.s)
+        }
+
+        val javaTaskCount = 10
+        s"Start $javaTaskCount simultaneously running API tasks" in {
+          runTasks(JobPath("/test-sleep-api"), javaTaskCount, taskMaximumDuration = 20.s)  // 1 (out of 8) processor thread Intel 3770K (2012): 6s per task
+        }
+      }
     }
   }
 
@@ -192,6 +221,7 @@ object JS1291AgentIT {
     MessageCode("ERRNO-131"),  // Solaris
     MessageCode("WINSOCK-10053"),
     MessageCode("WINSOCK-10054"))
+  private val logger = Logger(getClass)
 
   private case class Variable(name: String, value: String) {
     override def toString = name
