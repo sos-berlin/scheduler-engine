@@ -303,6 +303,8 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
     set_checked_attribute( &_java_class_path   , element, "java_class_path", true );  // JS-540
+    set_checked_attribute(&_dotnet_class_name, element, "dotnet_class", true);
+    set_checked_attribute(&_dll, element, "dll", true);
 
     if( element.hasAttribute( "encoding" ) )
     {
