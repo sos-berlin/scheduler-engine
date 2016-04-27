@@ -20,7 +20,7 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   override protected lazy val agentConfiguration = {
     val dotnetEnv = new DotnetEnvironment(temporaryDirectory)  // .closeWithCloser  The DLLs cannot be removed. They are still loaded.
-    AgentConfiguration.forTest().copy(dotnetDllDirectory = Some(dotnetEnv.directory))
+    AgentConfiguration.forTest().copy(dotnetAdapterDllDirectory = Some(dotnetEnv.directory))
   }
 
   "JavaScript, as reference" in {
