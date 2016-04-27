@@ -40,7 +40,7 @@ object AgentMain {
     conf match {
       case c if isWindows ⇒
         val env = new DotnetEnvironment(temporaryDirectory)
-        (c.copy(dotnetAdapterDllDirectory = Some(env.directory)), env)
+        (c withDotnetAdapterDirectory Some(env.directory), env)
       case c ⇒ (c, EmptyAutoCloseable)
     }
 
