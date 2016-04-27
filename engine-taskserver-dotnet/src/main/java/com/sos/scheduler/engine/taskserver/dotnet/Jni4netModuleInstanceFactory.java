@@ -13,8 +13,10 @@ public final class Jni4netModuleInstanceFactory implements
 		DotnetModuleInstanceFactory {
 
 	private DotnetBridge dotnetBridge;
+	private final Path dllDirectory;
 
 	public Jni4netModuleInstanceFactory(Path dllDirectory) throws Exception {
+		this.dllDirectory = dllDirectory;
 		boolean debug = System.getProperty("jni4net.debug") != null;
 		dotnetBridge = new DotnetBridge();
 		dotnetBridge.init(dllDirectory, debug);
@@ -54,5 +56,10 @@ public final class Jni4netModuleInstanceFactory implements
 
 	private <T> void closeInstance(T instance) {
 		// TODO Close DotnetJob or DotnetMonitor
+	}
+
+	@Override
+	public String toString() {
+		return "Jni4netModuleInstanceFactory(" + dllDirectory + ")";
 	}
 }
