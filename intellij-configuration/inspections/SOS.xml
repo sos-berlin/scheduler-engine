@@ -42,7 +42,8 @@
   <inspection_tool class="AssignmentToNull" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="AssignmentToStaticFieldFromInstanceMethod" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="AssignmentUsedAsCondition" enabled="true" level="WARNING" enabled_by_default="true" />
-  <inspection_tool class="AutoTupling" enabled="true" level="INFO" enabled_by_default="true" />
+  <inspection_tool class="AutoTupling" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="BashSimpleVarUsage" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   <inspection_tool class="BindingAnnotationWithoutInject" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="CallToSimpleGetterInClass" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="ignoreGetterCallsOnOtherObjects" value="false" />
@@ -116,9 +117,12 @@
   <inspection_tool class="DesignForExtension" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="DisjointPackage" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="DoubleCheckedLocking" enabled="true" level="WARNING" enabled_by_default="true">
-    <option name="ignoreOnVolatileVariables" value="false" />
+    <option name="ignoreOnVolatileVariables" value="true" />
   </inspection_tool>
   <inspection_tool class="DriverManagerGetConnection" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="DropTakeToSlice" enabled="true" level="INFO" enabled_by_default="true">
+    <scope name="Production" level="WARNING" enabled="true" />
+  </inspection_tool>
   <inspection_tool class="DuplicateBooleanBranch" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="DuplicateCondition" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="ignoreMethodCalls" value="false" />
@@ -127,6 +131,7 @@
     <option name="MIN_STRING_LENGTH" value="3" />
     <option name="IGNORE_PROPERTY_KEYS" value="false" />
   </inspection_tool>
+  <inspection_tool class="EmptyCheck" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="EmptyInitializer" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="EmptyParenMethodAccessedAsParameterless" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="EmptySynchronizedStatement" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -182,6 +187,7 @@
   <inspection_tool class="HibernateResource" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="insideTryAllowed" value="false" />
   </inspection_tool>
+  <inspection_tool class="HtmlTagCanBeJavadocTag" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="IOResource" enabled="false" level="WEAK WARNING" enabled_by_default="false">
     <option name="ignoredTypesString" value="java.io.ByteArrayOutputStream,java.io.ByteArrayInputStream,java.io.StringBufferInputStream,java.io.CharArrayWriter,java.io.CharArrayReader,java.io.StringWriter,java.io.StringReader,java.io.PrintWriter" />
     <option name="insideTryAllowed" value="false" />
@@ -223,7 +229,7 @@
   <inspection_tool class="JNDIResource" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="insideTryAllowed" value="false" />
   </inspection_tool>
-  <inspection_tool class="JavaDoc" enabled="false" level="INFO" enabled_by_default="false">
+  <inspection_tool class="JavaDoc" enabled="true" level="INFO" enabled_by_default="true">
     <option name="TOP_LEVEL_CLASS_OPTIONS">
       <value>
         <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
@@ -249,7 +255,7 @@
       </value>
     </option>
     <option name="IGNORE_DEPRECATED" value="false" />
-    <option name="IGNORE_JAVADOC_PERIOD" value="true" />
+    <option name="IGNORE_JAVADOC_PERIOD" value="false" />
     <option name="IGNORE_DUPLICATED_THROWS" value="false" />
     <option name="IGNORE_POINT_TO_ITSELF" value="false" />
     <option name="myAdditionalJavadocTags" value="" />
@@ -268,6 +274,8 @@
   <inspection_tool class="LoopStatementsThatDontLoop" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="LoopWithImplicitTerminationCondition" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="MagicNumber" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+  <inspection_tool class="MapGetOrElse" enabled="false" level="INFO" enabled_by_default="false" />
+  <inspection_tool class="MapGetOrElseFalse" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="MavenRedundantGroupId" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="MethodCount" enabled="false" level="WEAK WARNING" enabled_by_default="false">
     <option name="m_limit" value="20" />
@@ -358,6 +366,7 @@
   <inspection_tool class="ObsoleteCollection" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="ignoreRequiredObsoleteCollectionTypes" value="false" />
   </inspection_tool>
+  <inspection_tool class="OptionEqualsSome" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="OverloadedMethodsWithSameNumberOfParameters" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="ignoreInconvertibleTypes" value="true" />
   </inspection_tool>
@@ -425,7 +434,9 @@
   <inspection_tool class="SameParameterValue" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="SameReturnValue" enabled="false" level="INFO" enabled_by_default="false" />
   <inspection_tool class="ScalaAbstractValueInTrait" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="ScalaDocMissingParameterDescription" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ScalaPackageName" enabled="true" level="ERROR" enabled_by_default="true" />
+  <inspection_tool class="ScalaStyle" enabled="false" level="INFO" enabled_by_default="false" />
   <inspection_tool class="ScalaUnusedSymbol" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="SideEffectsInMonadicTransformation" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="SignalWithoutCorrespondingAwait" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -440,8 +451,8 @@
   <inspection_tool class="SocketResource" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="insideTryAllowed" value="false" />
   </inspection_tool>
-  <inspection_tool class="SpellCheckingInspection" enabled="false" level="TYPO" enabled_by_default="false">
-    <option name="processCode" value="true" />
+  <inspection_tool class="SpellCheckingInspection" enabled="true" level="TYPO" enabled_by_default="true">
+    <option name="processCode" value="false" />
     <option name="processLiterals" value="true" />
     <option name="processComments" value="true" />
   </inspection_tool>
@@ -524,8 +535,12 @@
   <inspection_tool class="UnnecessaryDefault" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="UnnecessaryExplicitNumericCast" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="UnnecessaryFinalOnLocalVariableOrParameter" enabled="true" level="INFO" enabled_by_default="true" />
-  <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="true" level="INFO" enabled_by_default="true">
+  <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="false" level="INFO" enabled_by_default="false">
     <option name="m_ignoreJavadoc" value="true" />
+  </inspection_tool>
+  <inspection_tool class="UnnecessaryInheritDoc" enabled="true" level="INFO" enabled_by_default="true" />
+  <inspection_tool class="UnnecessaryJavaDocLink" enabled="true" level="INFO" enabled_by_default="true">
+    <option name="ignoreInlineLinkToSuper" value="false" />
   </inspection_tool>
   <inspection_tool class="UnnecessaryLocalVariable" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="m_ignoreImmediatelyReturnedVariables" value="false" />
@@ -557,7 +572,6 @@
     <option name="ADD_SERVLET_TO_ENTRIES" value="true" />
     <option name="ADD_NONJAVA_TO_ENTRIES" value="true" />
   </inspection_tool>
-  <inspection_tool class="UnusedImport" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="UseOfPropertiesAsHashtable" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="UseOfSunClasses" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="WARNING" enabled_by_default="true">
