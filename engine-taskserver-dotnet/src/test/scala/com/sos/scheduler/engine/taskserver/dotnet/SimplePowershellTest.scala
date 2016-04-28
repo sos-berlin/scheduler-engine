@@ -5,9 +5,8 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
 import com.sos.scheduler.engine.common.system.OperatingSystem._
-import com.sos.scheduler.engine.common.utils.Exceptions
 import com.sos.scheduler.engine.common.utils.Exceptions.ignoreException
-import com.sos.scheduler.engine.taskserver.dotnet.DotnetSimpleTest._
+import com.sos.scheduler.engine.taskserver.dotnet.SimplePowershellTest._
 import com.sos.scheduler.engine.taskserver.dotnet.api.{DotnetModuleReference, TaskContext}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
@@ -19,7 +18,7 @@ import org.scalatest.{BeforeAndAfterAll, FreeSpec}
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class DotnetSimpleTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
+final class SimplePowershellTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
 
   private lazy val dotnetEnvironment = new DotnetEnvironment(temporaryDirectory) sideEffect { o ⇒
     onClose {
@@ -82,6 +81,6 @@ final class DotnetSimpleTest extends FreeSpec with HasCloser with BeforeAndAfter
   }
 }
 
-private object DotnetSimpleTest {
+private object SimplePowershellTest {
   private val logger = Logger(getClass)
 }

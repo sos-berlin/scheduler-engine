@@ -4,13 +4,17 @@ import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.system.FileUtils._
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js1595.JS1595IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
@@ -28,19 +32,28 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     }
 
   "JavaScript, as reference" in {
-    check(JobChainPath("/test-javascript"))
+    testOrder(JobChainPath("/test-javascript"))
   }
 
   if (!isWindows) {
     ".Net is only for Windows" - {}
   } else {
     "PowerShell" in {
-      check(JobChainPath("/test-powershell"))
+      testOrder(PowershellJobChainPath).state shouldEqual OrderState("END")
+      controller.toleratingErrorCodes(Set(MessageCode("COM-80020009"))) {
+        testOrder(PowershellJobChainPath, Map("FAIL" → "1")).state shouldEqual OrderState("FAILED")
+      }
     }
   }
 
-  private def check(jobChainPath: JobChainPath): Unit = {
-    val result = runOrder(OrderCommand(jobChainPath orderKey "1", parameters = Map("TEST" → "test-value")))
-    assert(result.variables == Map("TEST" → "test-value", "NEW-TEST" → "test-value"))
+  private def testOrder(jobChainPath: JobChainPath, parameters: Map[String, String] = Map()): OrderRunResult = {
+    val p = Map("TEST" → "test-value") ++ parameters
+    val result = runOrder(OrderCommand(jobChainPath orderKey "1", parameters = p))
+    assert(result.variables == p + ("NEW-TEST" → "test-value"))
+    result
   }
+}
+
+private object JS1595IT {
+  private val PowershellJobChainPath = JobChainPath("/test-powershell")
 }
