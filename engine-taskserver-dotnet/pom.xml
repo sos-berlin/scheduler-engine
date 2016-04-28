@@ -103,6 +103,27 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>Extract sos.spooler classes</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <!-- See com.sos.scheduler.engine.taskserver.dotnet.dlls.DotnetDlls -->
+                            <!--outputDirectory>${project.build.outputDirectory}/com/sos/scheduler/engine/taskserver/dotnet/dlls</outputDirectory-->
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sos-berlin.jobscheduler.engine</groupId>
+                                    <artifactId>engine-job-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <includes>sos/spooler/*.class</includes>
+                                    <excludes>sos/spooler/Spooler_program.class</excludes>
+                                    <outputDirectory>target/jni4net-input/javaClasses</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>Copy resources</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -167,30 +188,11 @@
                                     <executable>cmd</executable>
                                     <arguments>
                                         <argument>/C</argument>
-                                        <argument>powershell -NonInteractive -noprofile -executionpolicy bypass "&amp; '${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1' '${project.basedir}/target/Generate-Jni4Net/engine-job-api.jar' '${project.basedir}/src/main/dotnet/adapter' '${project.build.outputDirectory}/com/sos/scheduler/engine/taskserver/dotnet/dlls' '${project.basedir}/target/Generate-Jni4Net'" &lt; NUL</argument>
+                                        <argument>powershell -NonInteractive -noprofile -executionpolicy bypass "&amp; '${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1' '${project.basedir}/src/main/dotnet/adapter' '${project.build.outputDirectory}/com/sos/scheduler/engine/taskserver/dotnet/dlls' '${project.basedir}/target/Generate-Jni4Net'" &lt; NUL</argument>
                                     </arguments>
                                 </configuration>
                                 <goals>
                                     <goal>exec</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>Unpack generated jni4net jar</id>
-                                <phase>process-classes</phase>
-                                <configuration>
-                                    <target>
-                                        <unzip src="${project.basedir}/target/Generate-Jni4Net/com.sos-berlin.jobscheduler.engine-job-api.j4n.jar"
-                                               dest="${project.build.outputDirectory}"/>
-                                    </target>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
                                 </goals>
                             </execution>
                         </executions>
