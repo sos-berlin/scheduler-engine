@@ -188,7 +188,7 @@
                                     <executable>cmd</executable>
                                     <arguments>
                                         <argument>/C</argument>
-                                        <argument>powershell -NonInteractive -noprofile -executionpolicy bypass "&amp; '${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1' '${project.basedir}/src/main/dotnet/adapter' '${project.build.outputDirectory}/com/sos/scheduler/engine/taskserver/dotnet/dlls' '${project.basedir}/target/Generate-Jni4Net'" &lt; NUL</argument>
+                                        <argument>powershell -NonInteractive -noprofile -executionpolicy bypass "&amp; '${project.build.scriptSourceDirectory}/Generate-Jni4Net.ps1' '${project.basedir}/src/main/dotnet/adapter' '${project.build.outputDirectory}/com/sos/scheduler/engine/taskserver/dotnet/dlls'" &lt; NUL</argument>
                                     </arguments>
                                 </configuration>
                                 <goals>
