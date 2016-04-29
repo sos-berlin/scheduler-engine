@@ -7,6 +7,9 @@
 #     - generates the JobScheduler .NET adapter .dll (com.sos-berlin.jobscheduler.dotnet.adapter-<version>.dll)
 #     - copies jni4net .NET dll files from the "proxygen" directory to the DLL location
 #
+#     Environment variables WINDOWS_NET_SDK_HOME with the installation path of Micosoft Windows SDK (.Net-SDK) is needed,
+#     for example: set WINDOWS_NET_SDK_HOME=%windir%\Microsoft.NET\Framework\v4.0.30319
+#
 # .PARAMETER DotnetJobSchedulerAdapterSourceDirectory
 #     Path to the .cs files from the .NET JobScheduler adapter implementation
 # .PARAMETER ProxyDllResultDirectory
@@ -29,6 +32,8 @@
 #             to the "C:\Temp\proxy_dll" location
 #          3) copies the existing jni4net .NET dll files from the "proxygen" location
 #             to the "C:\Temp\proxy_dll" location
+
+
 # ----------------------------------------------------------------------
 # Command Line Arguments
 # ----------------------------------------------------------------------
@@ -37,7 +42,6 @@ param(
     [parameter(Mandatory=$true)] [string] $ProxyDllResultDirectory
 )
 
-$FrameworkDirectory      = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
 $ProxyAssemblyBasename   = "com.sos-berlin.jobscheduler.dotnet.job-api.proxy"  # This name is constant and can't be changed - the name defines the assembly name and is referenced by the another .dll files.
 
 $JobApiClassesDirectory  = Join-Path (Get-Location) "target\jni4net-input\javaClasses"
@@ -51,7 +55,7 @@ $Jni4NetDlls             = @($Jni4NDllName, "jni4net.n.w32.v40-0.8.8.0.dll", "jn
 $BuildDirectory          = New-Item -Type Directory -Path "$TargetDirectory\jni4net-build"
 $GeneratedProxyDll       = Join-Path $BuildDirectory "$ProxyAssemblyBasename.j4n.dll"
 
-[Environment]::SetEnvironmentVariable("PATH", "$FrameworkDirectory;${env:JAVA_HOME}\bin;${env:PATH}");
+[Environment]::SetEnvironmentVariable("PATH", "${env:WINDOWS_NET_SDK_HOME};${env:JAVA_HOME}\bin;${env:PATH}");
 
 function GenerateProxyJarAndDll() {
     # proxygen.exe wants a Jar named as the assembly
