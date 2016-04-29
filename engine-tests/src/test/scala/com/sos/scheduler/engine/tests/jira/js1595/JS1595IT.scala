@@ -40,6 +40,9 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   } else {
     "PowerShell" in {
       testOrder(PowershellJobChainPath).state shouldEqual OrderState("END")
+    }
+
+    "Exception in Powershell script" in {
       controller.toleratingErrorCodes(Set(MessageCode("COM-80020009"))) {
         testOrder(PowershellJobChainPath, Map("FAIL" → "1")).state shouldEqual OrderState("FAILED")
       }
