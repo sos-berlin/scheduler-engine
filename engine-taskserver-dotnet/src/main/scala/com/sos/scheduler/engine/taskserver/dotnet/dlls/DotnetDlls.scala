@@ -9,7 +9,7 @@ import java.nio.file.Path
   */
 object DotnetDlls {
 
-  val DllName = "com.sos-berlin.jobscheduler.dotnet.adapter.dll"
+  val DllName = "com.sos-berlin.engine-taskserver-dotnet.dll"
   private val Dir = "com/sos/scheduler/engine/taskserver/dotnet/dlls"
   private val Jni4netDlls = Set(
       sys.props.get("sun.arch.data.model") match {
