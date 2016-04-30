@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.taskserver.dotnet;
 
+import com.sos.scheduler.engine.taskserver.dotnet.dlls.DotnetDlls$;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Arrays;
-
 import net.sf.jni4net.Bridge;
 import system.reflection.Assembly;
 
 public class DotnetBridge {
 	private system.Type[] schedulerApiTypes = null;
-	private Path dotnetProxyDll;
 	private Path dotnetAdapterDll;
 
 	public void init(Path path, boolean debug) throws Exception {
@@ -31,15 +30,9 @@ public class DotnetBridge {
 	}
 
 	private void initJni4JobSchedulerApi(Path path) throws Exception {
-		Assembly apiProxyAssembly = null;
+		this.dotnetAdapterDll = path.resolve(DotnetDlls$.MODULE$.DllName());
 
-		DotnetAssemblySeacher seacher = new DotnetAssemblySeacher();
-		seacher.findAndSetCoreAssemblies(path);
-
-		this.dotnetProxyDll = seacher.getApiProxyDll().get();
-		this.dotnetAdapterDll = seacher.getAdapterDll().get();
-
-		apiProxyAssembly = Assembly.LoadFrom(this.dotnetProxyDll.toString());
+		Assembly apiProxyAssembly = Assembly.LoadFrom(dotnetAdapterDll.toString());
 		Bridge.RegisterAssembly(apiProxyAssembly);
 		Bridge.LoadAndRegisterAssemblyFrom(this.dotnetAdapterDll.toFile());
 
@@ -61,17 +54,12 @@ public class DotnetBridge {
 		return this.schedulerApiTypes;
 	}
 
-	public Path getDotnetProxyDll() {
-		return dotnetProxyDll;
-	}
-
 	public Path getDotnetAdapterDll() {
 		return dotnetAdapterDll;
 	}
 
 	public void close() {
-		// TODO Wenn jni4net oder .Net entladen werden kann, dann wollen wir das
-		// vielleicht tun.
+		// TODO Wenn jni4net oder .Net entladen werden kann, dann wollen wir das vielleicht tun.
 	}
 
 }

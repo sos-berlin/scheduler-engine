@@ -35,9 +35,7 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     testOrder(JobChainPath("/test-javascript"))
   }
 
-  if (!isWindows) {
-    ".Net is only for Windows" - {}
-  } else {
+  if (isWindows) {
     "PowerShell" in {
       testOrder(PowershellJobChainPath).state shouldEqual OrderState("END")
     }

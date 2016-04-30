@@ -4,7 +4,7 @@
 #     - generates two proxy files to the given locations and use "JarBaseName" basename as the proxy basename
 #       1 - .jn4-<version>.dll
 #       2 - .jn4-<version>.jar
-#     - generates the JobScheduler .NET adapter .dll (com.sos-berlin.jobscheduler.dotnet.adapter-<version>.dll)
+#     - generates the JobScheduler .NET adapter .dll (com.sos-berlin.jobscheduler.dotnet.adapter.dll)
 #     - copies jni4net .NET dll files from the "proxygen" directory to the DLL location
 #
 #     Environment variables WINDOWS_NET_SDK_HOME with the installation path of Micosoft Windows SDK (.Net-SDK) is needed,
@@ -20,7 +20,7 @@
 #               com.sos-berlin.jobscheduler.engine.engine-job-api.j4n-1.10.3.dll
 #               com.sos-berlin.jobscheduler.engine.engine-job-api.j4n-1.10.3.jar
 #          2) copied the generated .NET adapter
-#               com.sos-berlin.jobscheduler.dotnet.adapter-1.10.3.dll
+#               com.sos-berlin.jobscheduler.dotnet.adapter.dll
 #          3) copied the existing jni4net .NET dll files from the "proxygen" location
 #             to the "C:\Temp\proxy" location
 #     .\Generate-Jni4Net.ps1 "C:\Temp\com.sos-berlin.jobscheduler.engine.engine-job-api-1.10.3.jar" "C:\Temp\adapter_cs" "C:\Temp\proxy_dll"
@@ -45,7 +45,6 @@ param(
 $ProxyAssemblyBasename   = "com.sos-berlin.jobscheduler.dotnet.job-api.proxy"  # This name is constant and can't be changed - the name defines the assembly name and is referenced by the another .dll files.
 
 $JobApiClassesDirectory  = Join-Path (Get-Location) "target\jni4net-input\javaClasses"
-$GeneratedProxyDll       = Join-Path $ProxyDllResultDirectory "com.sos-berlin.jobscheduler.engine-job-api.j4n.dll"
 $ResultAdapterAssemblyDll= Join-Path $ProxyDllResultDirectory "com.sos-berlin.jobscheduler.dotnet.adapter.dll"
 
 $TargetDirectory         = Join-Path (Get-Location) "target"
@@ -70,16 +69,13 @@ function CopyJni4NetDlls() {
     }
 }
 
-function CompileGeneratedCSharp() {
-    ExecuteCommand "csc" $("/nologo", "/warn:0", "/t:library", "/out:""$GeneratedProxyDll""",
-                           "/recurse:""$BuildDirectory\clr\*.cs""", "/reference:""$Jni4Net\lib\$Jni4NDllName""")
-}
-
 function CompileJobSchedulerAdapter() {
+    # We simply mix our C# files with the generated ones to get a single DLL
+    Copy-Item $DotnetJobSchedulerAdapterSourceDirectory (join-path $BuildDirectory "clr") -recurse -force -ea stop
     $powershellRef = [PsObject].Assembly.Location
     ExecuteCommand "csc" @("/nologo", "/warn:0", "/t:library", "/out:$ResultAdapterAssemblyDll",
-                           "/recurse:""$DotnetJobSchedulerAdapterSourceDirectory\*.cs""",
-                           "/reference:$powershellRef;""$Jni4Net\lib\$Jni4NDllName"";""$GeneratedProxyDll""")
+                           "/recurse:""$BuildDirectory\clr\*.cs""",
+                           "/reference:$powershellRef;""$Jni4Net\lib\$Jni4NDllName""")
 }
 
 function ExecuteCommand([string] $command, [Array]$arguments) {
@@ -96,5 +92,4 @@ function ExecuteCommand([string] $command, [Array]$arguments) {
 
 GenerateProxyJarAndDll
 CopyJni4NetDlls
-CompileGeneratedCSharp
 CompileJobSchedulerAdapter

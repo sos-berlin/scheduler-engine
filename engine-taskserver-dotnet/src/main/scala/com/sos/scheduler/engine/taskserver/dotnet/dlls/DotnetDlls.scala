@@ -9,21 +9,17 @@ import java.nio.file.Path
   */
 object DotnetDlls {
 
-  private val logger = Logger(getClass)
-
-  private[dotnet] val DllsResourcePaths = {
-    val jni4netDlls = Set(
+  val DllName = "com.sos-berlin.jobscheduler.dotnet.adapter.dll"
+  private val Dir = "com/sos/scheduler/engine/taskserver/dotnet/dlls"
+  private val Jni4netDlls = Set(
       sys.props.get("sun.arch.data.model") match {
-        case Some("64") ⇒ JavaResource("com/sos/scheduler/engine/taskserver/dotnet/dlls/jni4net.n.w64.v40-0.8.8.0.dll")
-        case Some("32") ⇒ JavaResource("com/sos/scheduler/engine/taskserver/dotnet/dlls/jni4net.n.w32.v40-0.8.8.0.dll")
+        case Some("64") ⇒ JavaResource(s"$Dir/jni4net.n.w64.v40-0.8.8.0.dll")
+        case Some("32") ⇒ JavaResource(s"$Dir/jni4net.n.w32.v40-0.8.8.0.dll")
         case o ⇒ sys.error(s"Unknown Java property sun.arch.data.model=$o")
       },
-      JavaResource("com/sos/scheduler/engine/taskserver/dotnet/dlls/jni4net.n-0.8.8.0.dll"))
-    val generatedDlls = Set(
-      JavaResource("com/sos/scheduler/engine/taskserver/dotnet/dlls/com.sos-berlin.jobscheduler.dotnet.adapter.dll"),
-      JavaResource("com/sos/scheduler/engine/taskserver/dotnet/dlls/com.sos-berlin.jobscheduler.engine-job-api.j4n.dll"))
-    jni4netDlls ++ generatedDlls
-  }
+      JavaResource(s"$Dir/jni4net.n-0.8.8.0.dll"))
+  private[dotnet] val DllsResourcePaths: Set[JavaResource] = Jni4netDlls + JavaResource(s"$Dir/$DllName")
+  private val logger = Logger(getClass)
 
   def provideDlls(directory: Path): Set[Path] =
     for (resource ← DllsResourcePaths) yield {
