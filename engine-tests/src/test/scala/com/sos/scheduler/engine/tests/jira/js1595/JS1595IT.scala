@@ -1,15 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1595
 
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.common.system.FileUtils._
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
+import com.sos.scheduler.engine.test.agent.DotnetProvidingAgent
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1595.JS1595IT._
 import org.junit.runner.RunWith
@@ -21,15 +18,7 @@ import org.scalatest.junit.JUnitRunner
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1595IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
-
-  override protected lazy val agentConfiguration =
-    if (!isWindows)
-      AgentConfiguration.forTest()
-    else {
-      val dotnetEnv = new DotnetEnvironment(temporaryDirectory)  // .closeWithCloser  The DLLs cannot be removed. They are still loaded.
-      AgentConfiguration.forTest() withDotnetAdapterDirectory Some(dotnetEnv.directory)
-    }
+final class JS1595IT extends FreeSpec with ScalaSchedulerTest with DotnetProvidingAgent {
 
   "JavaScript, as reference" in {
     testOrder(JobChainPath("/test-javascript"))

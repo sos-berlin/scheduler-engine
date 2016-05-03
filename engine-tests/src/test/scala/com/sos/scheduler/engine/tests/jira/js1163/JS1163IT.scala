@@ -64,7 +64,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     delete(killScriptCallsDir)
     delete(killScriptFile)
   }
-  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScript = Some(ProcessKillScript(killScriptFile)))
+  override protected def newAgentConfiguration() = super.newAgentConfiguration().copy(killScript = Some(ProcessKillScript(killScriptFile)))
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
