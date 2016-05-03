@@ -13,7 +13,7 @@
     <name>${project.artifactId}</name>
     <inceptionYear>2016</inceptionYear>
 
-    <description>JobScheduler .Net Job API</description>
+    <description>JobScheduler API for .Net jobs</description>
     <url>https://www.sos-berlin.com/</url>
     <licenses>
         <license>

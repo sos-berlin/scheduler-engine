@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("com.sos-berlin.engine.engine-job-api-dotnet")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("JobScheduler API for .Net jobs")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("SOS Berlin")]
 [assembly: AssemblyProduct("com.sos-berlin.engine.engine-job-api-dotnet")]
 [assembly: AssemblyCopyright("Copyright ©2016")]
 [assembly: AssemblyTrademark("")]
