@@ -67,6 +67,9 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
         }
       }
     }
+    .andThen { case _ ⇒
+      order.setEndStateReached()   // JS-1627 <file_order_sink> must not changed order state
+    }
   }
 }
 
