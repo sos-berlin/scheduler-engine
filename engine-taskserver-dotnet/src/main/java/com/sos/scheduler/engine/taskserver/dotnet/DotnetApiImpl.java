@@ -3,10 +3,8 @@ package com.sos.scheduler.engine.taskserver.dotnet;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Optional;
 
-import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
 import net.sf.jni4net.Bridge;
 import sos.spooler.Job;
 import sos.spooler.Log;
@@ -14,15 +12,19 @@ import sos.spooler.Spooler;
 import sos.spooler.Task;
 import system.reflection.Assembly;
 
+import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
+
 public class DotnetApiImpl {
 	private final static String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
 
 	private system.Type apiImplType;
-	private system.Object apiImplInstance = null;
+	private system.Object apiImplInstance;
 	private DotnetBridge bridge;
 	private DotnetModuleReference reference;
+	private Path path;
+	private String className;
 
-	public DotnetApiImpl(DotnetBridge dotnetBridge,	 DotnetModuleReference ref) {
+	public DotnetApiImpl(DotnetBridge dotnetBridge, DotnetModuleReference ref) {
 		this.bridge = dotnetBridge;
 		this.reference = ref;
 	}
@@ -30,38 +32,29 @@ public class DotnetApiImpl {
 	public void init(Spooler spooler, Job spoolerJob, Task spoolerTask,
 			Log spoolerLog) throws Exception {
 
-		system.Type[] types = null;
-		system.Object[] params = null;
-		Path path = null;
-		String className = null;
-		String script = null;
+		setPropertiesFromReference();
+		setApiImplType();
+		initApiImplInstance(spooler, spoolerJob, spoolerTask, spoolerLog);
 
+	}
+
+	private void setPropertiesFromReference() throws Exception{
 		if (reference instanceof DotnetModuleReference.Powershell) {
-			types = Arrays.copyOf(bridge.getSchedulerApiTypes(),bridge.getSchedulerApiTypes().length+1);
-        	types[bridge.getSchedulerApiTypes().length] = system.Type.GetType("System.String");
-
 			path = bridge.getDotnetAdapterDll();
 			className = POWERSHELL_CLASS_NAME;
-		    script = Optional.ofNullable(((DotnetModuleReference.Powershell)reference).script())
-                    .orElseThrow(
-                            () -> new Exception(String.format("Missing script")));
-
-
-		}
-		else if (reference instanceof DotnetModuleReference.DotnetClass) {
-			types = bridge.getSchedulerApiTypes();
-
+		} else if (reference instanceof DotnetModuleReference.DotnetClass) {
 			path = ((DotnetModuleReference.DotnetClass)reference).dll();
-		    className = Optional.ofNullable(((DotnetModuleReference.DotnetClass)reference).className())
-                    .orElseThrow(
-                            () -> new Exception(String.format("Missing className")));
+			className = ((DotnetModuleReference.DotnetClass)reference).className();
 		}
 
-        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+		if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
 			throw new Exception(String.format("File not found: %s",
 					path.toString()));
 		}
-
+	}
+	
+	private void setApiImplType() throws Exception {
+		
 		Assembly assembly;
 		try {
 			assembly = Assembly.LoadFrom(path.toString());
@@ -70,32 +63,63 @@ public class DotnetApiImpl {
 					path.toString(), ex.toString()));
 		}
 
-        Path tmpPath = path;
-        String tmpClassName = className;
-        apiImplType = Optional.ofNullable(assembly.GetType(className))
+		apiImplType = Optional.ofNullable(assembly.GetType(className))
 				.orElseThrow(
 						() -> new Exception(String.format(
-								"[%s] Class not found: %s", tmpPath.toString(),
-                                tmpClassName)));
-
-      	params = new system.Object[types.length];
-		params[0] = Bridge.wrapJVM(spooler);
-		params[1] = Bridge.wrapJVM(spoolerJob);
-		params[2] = Bridge.wrapJVM(spoolerTask);
-		params[3] = Bridge.wrapJVM(spoolerLog);
-		if (reference instanceof DotnetModuleReference.Powershell){
-			params[4] = new system.String(script);
-		}
-
-		apiImplInstance = Optional.ofNullable(
-				DotnetInvoker.createInstance(apiImplType, types,
-						params)).orElseThrow(
-				() -> new Exception(String.format(
-						"[%s] Could not create a new instance of the class %s",
-						tmpPath.toString(), tmpClassName)));
-
+								"[%s] Class not found: %s", path.toString(),
+								className)));
 	}
 
+	private void initApiImplInstance(Spooler spooler, Job spoolerJob,
+			Task spoolerTask, Log spoolerLog) throws Exception {
+		
+		if (reference instanceof DotnetModuleReference.Powershell) {
+			system.Type[] types = { 
+					bridge.getSchedulerApiTypes()[0],
+					bridge.getSchedulerApiTypes()[1],
+					bridge.getSchedulerApiTypes()[2],
+					bridge.getSchedulerApiTypes()[3],
+					system.Type.GetType("System.String") 
+					};
+
+			system.Object[] params = { 
+					Bridge.wrapJVM(spooler),
+					Bridge.wrapJVM(spoolerJob), 
+					Bridge.wrapJVM(spoolerTask),
+					Bridge.wrapJVM(spoolerLog), 
+					new system.String(((DotnetModuleReference.Powershell)reference).script()) 
+					};
+
+			apiImplInstance = Optional
+					.ofNullable(DotnetInvoker.createInstance(apiImplType, types,params))
+					.orElseThrow(
+							() -> new Exception(
+									String.format("[%s] Could not create a new instance of the class %s",
+											path.toString(), className)));
+
+		} else if (reference instanceof DotnetModuleReference.DotnetClass) {
+			system.Type[] types = new system.Type[]{};
+			system.Object[] params = new system.Object[] {};
+			
+			apiImplInstance = Optional
+					.ofNullable(DotnetInvoker.createInstance(apiImplType,types,params))
+					.orElseThrow(
+							() -> new Exception(
+									String.format(
+											"[%s] Could not create a new instance of the class %s",
+											path.toString(), className)));
+
+			setApiImplInstanceProperty("spooler",spooler);
+			setApiImplInstanceProperty("spooler_job",spoolerJob);
+			setApiImplInstanceProperty("spooler_task",spoolerTask);
+			setApiImplInstanceProperty("spooler_log",spoolerLog);
+		}
+	}
+
+	private void setApiImplInstanceProperty(String name,java.lang.Object value){
+		apiImplType.GetProperty(name).SetValue(apiImplInstance,	Bridge.wrapJVM(value),null);
+	}
+	
 	public boolean spooler_init() throws Exception {
 		return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
 				"spooler_init", true);
@@ -162,12 +186,10 @@ public class DotnetApiImpl {
 
 	public boolean spooler_process_after(boolean spooler_process_result)
 			throws Exception {
-		system.Type[] paramTypes = new system.Type[] { system.Type
-				.GetType("System.Boolean") };
+		system.Type[] paramTypes = new system.Type[] { system.Type.GetType("System.Boolean") };
 		system.Object[] params = new system.Object[] { toDotnetBoolean(spooler_process_result) };
-		return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-				"spooler_process_after", paramTypes, params,
-				spooler_process_result);
+		return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,	
+				"spooler_process_after", paramTypes, params,spooler_process_result);
 	}
 
 }
