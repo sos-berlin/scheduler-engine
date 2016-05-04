@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.tests.scheduler.fileorder
 
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{ProcessClassConfiguration, RemoveOrderCommand}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -113,9 +114,10 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
     sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
     val orderKey = TestJobChainPath orderKey matchingFile.toString
     runUntilFileRemovedMessage(orderKey) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-        matchingFile.contentString = content
-      }
+      val run = OrderRun(orderKey)
+      matchingFile.contentString = content
+      val result = run.result await TestTimeout
+      assert(result.state == OrderState("SINK"))   // JS-1627 <file_order_sink> must not changed order state
     }
   }
 
