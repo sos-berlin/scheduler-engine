@@ -1,5 +1,5 @@
 # $Id: unix.makefile 14252 2011-05-06 08:12:32Z jz $
-# Einstellungen nur für Unix
+# Einstellungen nur fÃ¼r Unix
 
 CP        = cp
 
@@ -24,12 +24,12 @@ PERL_DIR = $(PROD_DIR)/LINKS/perl/CORE
 
 #-----------------------------------------------------------------------Regeln
 
-# Ist durch $(CC) -MD überflüssig: (oder?)
+# Ist durch $(CC) -MD Ã¼berflÃ¼ssig: (oder?)
 %.d: %.cxx
 ifdef SYSTEM_GNU
 #	@echo $@
 	-C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(CPP) -M $(CFLAGS) $(INCLUDES) $< >$@
-#   -: Fehler werden für Linux ignoriert
+#   -: Fehler werden fÃ¼r Linux ignoriert
 else
 #	@echo $@
 	$(SHELL) -ec 'C_INCLUDE_PATH='$(C_INCLUDE_PATH)' $(CPP) -M $(CPPFLAGS) $(INCLUDES) $< | sed '\''s/$*.o/& $@/g'\'' >$@'
@@ -46,7 +46,7 @@ endif
 	@echo $(dispatch) $(CC) ... -c $(CFLAGS) $<
 	@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CC) -c $(HIDDEN_CFLAGS) $(CFLAGS) $(INCLUDES) -o $@  $<
 
-cxxEchoLine=@echo $(dispatch) $(CCPP) ... -c $(CFLAGS) $(CCPPFLAGS) $<
+cxxEchoLine=@echo $(dispatch) $(CCPP) ... -c $(CFLAGS) $(CCPPFLAGS)  $(INCLUDES) $<
 cxxCommandLine=@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CCPP) -c $(CFLAGS) $(CCPPFLAGS) $(HIDDEN_CFLAGS) $(HIDDEN_CCPPWARNINGS) $(INCLUDES)
 
 %.h.gch: %.h

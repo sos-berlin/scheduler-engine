@@ -59,7 +59,7 @@ SYSTEM_UNIX := 1
 SYSTEM_GNU  := 1
 endif
 
-#----------------------------------------------------------Für alle Plattformen
+#----------------------------------------------------------FÃ¼r alle Plattformen
 
 VPATH = ..
 
@@ -87,7 +87,7 @@ include $(PROD_DIR)/make/$(SYSTEM).makefile
 #CFLAGS+=$(COPTIMIZE)
 #endif
 
-# Beide Defines müssen gleich sein, das wird geprüft, damit #undef FD_SETSIZE erkannt wird, z.B. von posix_types.h
+# Beide Defines mÃ¼ssen gleich sein, das wird geprÃ¼ft, damit #undef FD_SETSIZE erkannt wird, z.B. von posix_types.h
 #CFLAGS += -DZ_FD_SETSIZE=100
 #CFLAGS += -DFD_SETSIZE=100
 

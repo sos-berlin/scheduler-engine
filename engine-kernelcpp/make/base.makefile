@@ -23,22 +23,12 @@ endif
 all:: $(O_DIR)
 
 
-# Für Joacims zwei Rechner:
-dispatch_filename=$(wildcard $(prod_dir)/dispatch)
-ifeq "$(dispatch_filename)" ""
-jobs=1
-else
-export dispatch=@../$(dispatch_filename)
-jobs=2
-endif
-
-
 Debug:
 	@rm -f $(prod_dir)/.dispatch.*.pid >/dev/null
 	@mkdir -p $@
-	@make -j$(jobs) -C $@ --no-print-directory -f ../Makefile
+	@make -C $@ --no-print-directory -f ../Makefile
 
 Release:
 	@rm -f $(prod_dir)/.dispatch.*.pid >/dev/null
 	@mkdir -p $@
-	@make -j$(jobs) -C $@ --no-print-directory -f ../Makefile
+	@make -C $@ --no-print-directory -f ../Makefile
