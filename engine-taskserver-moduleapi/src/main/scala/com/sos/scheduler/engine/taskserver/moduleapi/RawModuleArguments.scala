@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.taskserver.module
+package com.sos.scheduler.engine.taskserver.moduleapi
 
 import java.nio.file.Path
 

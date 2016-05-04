@@ -36,6 +36,11 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>engine-taskserver-moduleapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>engine-job-api</artifactId>
             <version>${project.version}</version>
         </dependency>
