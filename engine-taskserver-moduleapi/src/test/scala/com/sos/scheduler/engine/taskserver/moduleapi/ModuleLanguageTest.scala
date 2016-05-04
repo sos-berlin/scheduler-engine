@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.taskserver.module
+package com.sos.scheduler.engine.taskserver.moduleapi
 
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

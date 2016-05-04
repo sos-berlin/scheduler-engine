@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.taskserver.module
+package com.sos.scheduler.engine.taskserver.moduleapi
 
 /**
   * Defines an implementation for JobScheduler configuration &lt;script>.

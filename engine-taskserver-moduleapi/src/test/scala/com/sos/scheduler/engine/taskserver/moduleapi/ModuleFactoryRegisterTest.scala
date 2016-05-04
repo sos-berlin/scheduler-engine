@@ -1,7 +1,7 @@
-package com.sos.scheduler.engine.taskserver.module
+package com.sos.scheduler.engine.taskserver.moduleapi
 
-import com.sos.scheduler.engine.taskserver.module.ModuleFactoryRegister.UnsupportedRawModuleArgumentsException
-import com.sos.scheduler.engine.taskserver.module.ModuleFactoryRegisterTest._
+import com.sos.scheduler.engine.taskserver.moduleapi.ModuleFactoryRegister.UnsupportedRawModuleArgumentsException
+import com.sos.scheduler.engine.taskserver.moduleapi.ModuleFactoryRegisterTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

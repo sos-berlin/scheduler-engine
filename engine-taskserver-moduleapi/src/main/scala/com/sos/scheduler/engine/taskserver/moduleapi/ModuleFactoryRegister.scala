@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.taskserver.module
+package com.sos.scheduler.engine.taskserver.moduleapi
 
-import com.sos.scheduler.engine.taskserver.module.ModuleFactoryRegister._
+import com.sos.scheduler.engine.taskserver.moduleapi.ModuleFactoryRegister._
 import scala.collection.immutable
 
 /**
@@ -23,6 +23,6 @@ final class ModuleFactoryRegister(val moduleFactories: immutable.Seq[ModuleFacto
 }
 
 object ModuleFactoryRegister {
-  private[module] final class UnsupportedRawModuleArgumentsException(language: ModuleLanguage)
+  private[moduleapi] final class UnsupportedRawModuleArgumentsException(language: ModuleLanguage)
   extends NoSuchElementException(s"Unsupported script language '$language' or unsupported argument combination")
 }
