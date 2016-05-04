@@ -15,7 +15,7 @@ import sos.spooler.Task;
 import system.reflection.Assembly;
 
 public class DotnetApiImpl {
-	private final static String POWERSHELL_CLASS_NAME = "com.sosberlin.jobscheduler.dotnet.adapter.SosJobSchedulerPowershellAdapter";
+	private final static String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
 
 	private system.Type apiImplType;
 	private system.Object apiImplInstance = null;

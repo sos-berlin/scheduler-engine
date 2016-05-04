@@ -1,4 +1,4 @@
-﻿namespace com.sosberlin.jobscheduler.dotnet.adapter
+﻿namespace sos.spooler
 {
     using System;
     using System.Collections.Generic;
@@ -6,15 +6,11 @@
     using System.Linq;
     using System.Management.Automation;
 
-    using sos.spooler;
-
-    using Job = sos.spooler.Job;
-
-    public class SosJobSchedulerPowershellAdapter : SosJobSchedulerScriptAdapter
+    public class PowershellAdapter : ScriptAdapter
     {
         private PowerShell Shell { get; set; }
      
-        public SosJobSchedulerPowershellAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog,String scriptContent)
+        public PowershellAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog,String scriptContent)
             : base(contextSpooler, contextJob, contextTask, contextLog, scriptContent)
         {
             this.Shell = PowerShell.Create();
@@ -132,7 +128,7 @@
         {
             if (string.IsNullOrEmpty(this.Script))
             {
-                throw new Exception("[powershell] Script  was not set.");
+                throw new Exception("Script is null or empty.");
             }
            
             this.Shell.AddScript(this.Script);
@@ -144,7 +140,7 @@
             else
             {
                 var err = this.Shell.Streams.Error[0].ToString();
-                throw new Exception("[powershell] Error parsing script: " + err);
+                throw new Exception("Error parsing script: " + err);
             }
         }
         

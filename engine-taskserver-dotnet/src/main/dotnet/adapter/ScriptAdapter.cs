@@ -1,18 +1,16 @@
-﻿namespace com.sosberlin.jobscheduler.dotnet.adapter
+﻿namespace sos.spooler
 {
-    using sos.spooler;
     using System;
 
-    public abstract class SosJobSchedulerScriptAdapter
+    public abstract class ScriptAdapter
     {
-        public string Script { get; set; }
-        
         public Spooler spooler { get; private set; }
         public Job spooler_job { get; private set; }
         public Task spooler_task { get; private set; }
         public Log spooler_log { get; private set; }
-
-        protected SosJobSchedulerScriptAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog, String scriptContent)
+        protected string Script { get; private set; }
+        
+        protected ScriptAdapter(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog, String scriptContent)
         {
             this.spooler = contextSpooler;
             this.spooler_job = contextJob;

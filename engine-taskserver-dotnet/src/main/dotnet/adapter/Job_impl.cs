@@ -1,20 +1,18 @@
-﻿namespace com.sosberlin.jobscheduler.dotnet.adapter
+﻿namespace sos.spooler
 {
-    using sos.spooler;
-
-    public class SosJobSchedulerJobImpl
+    public class Job_impl
     {
         public Spooler spooler { get; private set; }
         public Job spooler_job { get; private set; }
         public Task spooler_task { get; private set; }
         public Log spooler_log { get; private set; }
-        
-        protected SosJobSchedulerJobImpl(Spooler javaSpooler, Job javaJob, Task javaTask, Log javaLog)
+
+        public Job_impl(Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog)
         {
-            this.spooler = javaSpooler;
-            this.spooler_job = javaJob;
-            this.spooler_task = javaTask;
-            this.spooler_log = javaLog;
+            this.spooler = contextSpooler;
+            this.spooler_job = contextJob;
+            this.spooler_task = contextTask;
+            this.spooler_log = contextLog;
         }
 
         public virtual bool spooler_init()
@@ -47,10 +45,5 @@
         public virtual void spooler_on_success()
         {
         }
-
-        public string spooler_api_version() {
-		    return "2.0.160.4605 (2006-11-23)";
-	    }
-        
     }
 }
