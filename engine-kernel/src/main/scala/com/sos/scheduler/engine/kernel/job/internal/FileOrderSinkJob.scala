@@ -38,12 +38,13 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
 
   protected def processFileOrder(order: Order): Future[Boolean] = {
     val filePath = order.filePath
-    val fileOperator = (
-      order.jobChain.fileWatchingProcessClassPathOption
-      map processClassSubsystem.processClass
-      flatMap { _.agents.headOption }
-      map { agent ⇒ new AgentFileOperator(agentClientFactory.apply(agent.address)) }
-      getOrElse LocalFileOperator)
+    val fileOperator = {
+      val processClassOption = order.jobChain.fileWatchingProcessClassPathOption map processClassSubsystem.processClass
+      processClassOption flatMap { _.agents.headOption } match {
+        case Some(agent) ⇒ new AgentFileOperator(agentClientFactory.apply(agent.address))
+        case None ⇒ LocalFileOperator
+      }
+    }
     val node = cast[SinkNode](order.jobChain.node(order.state))
     catchInFuture {
       (node.moveFileTo, node.isDeletingFile) match {
