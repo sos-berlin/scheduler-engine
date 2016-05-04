@@ -378,6 +378,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native void set_end_state__native(long cppReference, java.lang.String p0);
 
 
+    @Override public void set_end_state_reached() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_end_state_reached__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_end_state_reached__native(long cppReference);
+
+
     @Override public void set_force_file_reread() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
