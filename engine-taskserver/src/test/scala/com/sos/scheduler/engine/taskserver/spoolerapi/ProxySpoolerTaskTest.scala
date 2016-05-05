@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.system.FileUtils._
 import com.sos.scheduler.engine.minicom.idispatch.IDispatch.implicits._
-import com.sos.scheduler.engine.minicom.idispatch._
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.ClientRemoting
 import com.sos.scheduler.engine.taskserver.data.TaskServerConfiguration._
@@ -37,8 +36,8 @@ final class ProxySpoolerTaskTest extends FreeSpec with BeforeAndAfterAll with Ha
     def configure() = bindInstance[TaskStartArguments](TaskStartArguments.forTest(stdFileMap = stdFileMap))
   })
 
-  private lazy val spoolerTask = InvocableIDispatch(
-    ProxySpoolerTask(injector, mock[ClientRemoting], ProxyId(Random.nextLong()), name = "TEST", properties = Nil))
+  private lazy val spoolerTask =
+    ProxySpoolerTask(injector, mock[ClientRemoting], ProxyId(Random.nextLong()), name = "TEST", properties = Nil)
 
   override def afterAll() = closer.close()
 
