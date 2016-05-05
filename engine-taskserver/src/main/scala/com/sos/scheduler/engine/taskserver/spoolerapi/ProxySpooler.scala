@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.taskserver.spoolerapi
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.minicom.idispatch.annotation.invocable
-import com.sos.scheduler.engine.minicom.idispatch.{AnnotatedInvocable, InvocableIDispatch}
+import com.sos.scheduler.engine.minicom.idispatch.{AnnotatedInvocable, OverridingInvocableIDispatch}
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.SpecializedProxyIDispatch._
 import com.sos.scheduler.engine.minicom.remoting.proxy.{ClientRemoting, ProxyIDispatchFactory, SpecializedProxyIDispatch}
@@ -15,7 +15,7 @@ import java.util.UUID
  * @author Joacim Zschimmer
  */
 final class ProxySpooler private(protected val remoting: ClientRemoting, val id: ProxyId, val name: String, taskStartArguments: TaskStartArguments)
-extends SpecializedProxyIDispatch with AnnotatedInvocable with InvocableIDispatch {
+extends SpecializedProxyIDispatch with AnnotatedInvocable with OverridingInvocableIDispatch {
 
   @invocable
   def directory: String = (taskStartArguments.directory resolve ".").toString stripSuffix "."  // Should end with "/"

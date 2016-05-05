@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.minicom.idispatch
 
 import com.sos.scheduler.engine.minicom.idispatch.IDispatch.implicits.RichIDispatch
-import com.sos.scheduler.engine.minicom.idispatch.SimpleInvocableIDispatchTest._
+import com.sos.scheduler.engine.minicom.idispatch.InvocableIDispatchTest._
 import com.sos.scheduler.engine.minicom.idispatch.annotation.invocable
 import com.sos.scheduler.engine.minicom.types.HRESULT._
 import com.sos.scheduler.engine.minicom.types.{COMException, VariantArray}
@@ -15,7 +15,7 @@ import scala.annotation.meta.{getter, setter}
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class SimpleInvocableIDispatchTest extends FreeSpec {
+final class InvocableIDispatchTest extends FreeSpec {
 
   private val annotated = new Annotated
 
@@ -68,7 +68,7 @@ final class SimpleInvocableIDispatchTest extends FreeSpec {
     OverridingAnnotated.call("overridden") shouldEqual "OVERRIDDEN"
     OverridingAnnotated.call("notOverridden") shouldEqual "NOT OVERRIDDEN"
   }
-  
+
   "Property" in {
     assert(annotated.invokeGet("property") == 0)
     annotated.invokePut("property", 7)
@@ -77,10 +77,10 @@ final class SimpleInvocableIDispatchTest extends FreeSpec {
   }
 }
 
-private object SimpleInvocableIDispatchTest {
+private object InvocableIDispatchTest {
   private val ALong = 111222333444555666L
 
-  private class Annotated extends AnnotatedInvocable with SimpleInvocableIDispatch {
+  private class Annotated extends AnnotatedInvocable with InvocableIDispatch {
     @invocable def int(o: Int) = o + 1
     @invocable def boxedInteger(o: java.lang.Integer): java.lang.Integer = o + 1
     @invocable def long(o: Long) = o + 1
@@ -92,7 +92,7 @@ private object SimpleInvocableIDispatchTest {
     @invocable def string(i: Int, l: Long, d: Double, b: Boolean, o: String) = s"$i $l $d $b $o"
     @invocable def array(a: VariantArray) = a.indexedSeq(0).asInstanceOf[Long] + a.indexedSeq(1).asInstanceOf[Double]
     @invocable def optional(a: Option[java.lang.Integer], b: Option[java.lang.Double]) = {
-      // As long as InvocableIDispatch uses Java reflection is used, only Option[_ <: AnyRef] can be used as parameter type.
+      // As long as OverridingInvocableIDispatch uses Java reflection is used, only Option[_ <: AnyRef] can be used as parameter type.
       val aa = a map { o => o: Int }
       val bb = b map { o => o: Double }
       (aa getOrElse 0) + (bb getOrElse 0.0)
@@ -101,7 +101,7 @@ private object SimpleInvocableIDispatchTest {
     def noCom(): Unit = {}
   }
 
-  private object Public extends PublicMethodsAreInvocable with SimpleInvocableIDispatch {
+  private object Public extends PublicMethodsAreInvocable with InvocableIDispatch {
     def someMethod = 1
   }
 
@@ -119,7 +119,7 @@ private object SimpleInvocableIDispatchTest {
     }
   }
 
-  private object OverridingAnnotated extends MyIDispatch with AnnotatedInvocable with InvocableIDispatch {
+  private object OverridingAnnotated extends MyIDispatch with AnnotatedInvocable with OverridingInvocableIDispatch {
     @invocable def overridden = "OVERRIDDEN"
   }
 }
