@@ -31,7 +31,7 @@ object HRESULT {
   //final val DISP_E_BADINDEX               = HRESULT(0x8002000B)
   final val DISP_E_BADPARAMCOUNT          = HRESULT(0x8002000E)
 //final val CLASS_E_CLASSNOTAVAILABLE     = HRESULT(0x80040111)
-//final val REGDB_E_CLASSNOTREG           = HRESULT(0x80040154)
+  final val REGDB_E_CLASSNOTREG           = HRESULT(0x80040154)
   final val E_INVALIDARG                  = HRESULT(0x80070057)
 //final val CO_S_NOTALLINTERFACES         = HRESULT(0x00080012)
 }

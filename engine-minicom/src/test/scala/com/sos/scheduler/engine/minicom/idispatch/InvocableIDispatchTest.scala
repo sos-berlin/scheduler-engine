@@ -60,7 +60,7 @@ final class InvocableIDispatchTest extends FreeSpec {
     annotated.call("int", List(7)) shouldEqual 8
   }
 
-  "PublicMethodsAreInvocable" in {
+  "PublicMethodsInvocable" in {
     Public.call("someMethod") shouldEqual 1
   }
 
@@ -101,7 +101,7 @@ private object InvocableIDispatchTest {
     def noCom(): Unit = {}
   }
 
-  private object Public extends PublicMethodsAreInvocable with InvocableIDispatch {
+  private object Public extends PublicMethodsInvocable with InvocableIDispatch {
     def someMethod = 1
   }
 

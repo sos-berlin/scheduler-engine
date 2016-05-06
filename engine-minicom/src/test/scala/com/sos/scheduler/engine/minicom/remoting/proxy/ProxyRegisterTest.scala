@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.minicom.remoting.proxy
 
 import com.google.inject.Guice
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.minicom.idispatch.{IDispatch, Invocable}
+import com.sos.scheduler.engine.minicom.idispatch.IDispatch
 import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.remoting.proxy.ProxyRegister.DuplicateKeyException
 import com.sos.scheduler.engine.minicom.types.HRESULT._
@@ -36,7 +36,7 @@ final class ProxyRegisterTest extends FreeSpec {
 
   "Own IDispatch" in {
     proxyRegister.size shouldEqual 1
-    val iDispatch = mock[Invocable]
+    val iDispatch = mock[IDispatch]
     val (proxyId, true) = proxyRegister.iUnknownToProxyId(iDispatch)
     proxyId.index shouldEqual 0x40000001
     proxyRegister.iUnknownToProxyId(iDispatch) shouldEqual ((proxyId, false))
@@ -44,7 +44,7 @@ final class ProxyRegisterTest extends FreeSpec {
     intercept[DuplicateKeyException] { proxyRegister.registerProxy(newProxy(proxyId)) }
 
     proxyRegister.size shouldEqual 2
-    val (otherProxyId, true) = proxyRegister.iUnknownToProxyId(mock[Invocable])
+    val (otherProxyId, true) = proxyRegister.iUnknownToProxyId(mock[IDispatch])
     otherProxyId.index shouldEqual 0x40000002
     proxyRegister.size shouldEqual 3
   }

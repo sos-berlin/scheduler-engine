@@ -7,7 +7,7 @@ import java.lang.reflect.Method
   *
   * @author Joacim Zschimmer
   */
-trait PublicMethodsAreInvocable extends Invocable {
+trait PublicMethodsInvocable extends Invocable {
 
   final def invocableMethods: Seq[Method] = getClass.getMethods
 }

@@ -6,8 +6,10 @@ import com.sos.scheduler.engine.minicom.remoting.calls.ProxyId
 import com.sos.scheduler.engine.minicom.types.CLSID
 
 /**
- * @author Joacim Zschimmer
- */
+  * A simple proxy with no local operation.
+  *
+  * @author Joacim Zschimmer
+  */
 private[proxy] final class SimpleProxyIDispatch(
   protected val remoting: ClientRemoting,
   val id: ProxyId,
@@ -19,7 +21,7 @@ private[minicom] object SimpleProxyIDispatch extends ProxyIDispatchFactory {
   private val logger = Logger(getClass)
 
   def apply(injector: Injector, remoting: ClientRemoting, id: ProxyId, name: String, properties: Iterable[(String, Any)]) = {
-    if (properties.nonEmpty) logger.warn(s"IGNORED: $properties")
+    if (properties.nonEmpty) logger.warn(s"Properties ignored for '$name': $properties")  // No exception for future compatibility ???
     new SimpleProxyIDispatch(remoting, id, name)
   }
 }

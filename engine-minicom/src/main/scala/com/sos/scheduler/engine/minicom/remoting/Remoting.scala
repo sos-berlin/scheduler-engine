@@ -15,7 +15,8 @@ import com.sos.scheduler.engine.minicom.remoting.serial.CallSerializer.serialize
 import com.sos.scheduler.engine.minicom.remoting.serial.ErrorSerializer.serializeError
 import com.sos.scheduler.engine.minicom.remoting.serial.ResultSerializer.serializeResult
 import com.sos.scheduler.engine.minicom.remoting.serial.{ResultDeserializer, ServerRemoting}
-import com.sos.scheduler.engine.minicom.types.{CLSID, IID, IUnknown}
+import com.sos.scheduler.engine.minicom.types.HRESULT.REGDB_E_CLASSNOTREG
+import com.sos.scheduler.engine.minicom.types.{CLSID, COMException, HRESULT, IID, IUnknown}
 import java.time.{Duration, Instant}
 import org.scalactic.Requirements._
 import scala.annotation.tailrec
@@ -29,7 +30,7 @@ import scala.util.control.NonFatal
 final class Remoting(
   injector: Injector,
   dialogConnection: DialogConnection,
-  invocableFactories: Iterable[IUnknownFactory],
+  iUnknownFactories: Iterable[IUnknownFactory],
   proxyIDispatchFactories: Iterable[ProxyIDispatchFactory],
   name: String,
   returnAfterReleaseOf: IUnknown ⇒ Boolean = _ ⇒ false,
@@ -38,9 +39,10 @@ extends ServerRemoting with ClientRemoting {
 
   private val logger = Logger.withPrefix(getClass, name)
   private val proxyRegister = new ProxyRegister
-  private val createInvocable = toCreateIUnknownByCLSID(invocableFactories)
-  private val proxyClsidMap: Map[CLSID, ProxyIDispatchFactory.Fun] =
-    (List(SimpleProxyIDispatch) ++ proxyIDispatchFactories).map { o ⇒ o.clsid → o.apply _ } (breakOut)
+  private val createIUnknown = toCreateIUnknownByCLSID(iUnknownFactories)
+  private val clsidToProxyFactory: PartialFunction[CLSID, ProxyIDispatchFactory.Fun] =
+    ((List(SimpleProxyIDispatch) ++ proxyIDispatchFactories) map { o ⇒ o.clsid → o.apply _ }).toMap
+      .withDefault { clsid ⇒ throw new COMException(REGDB_E_CLASSNOTREG, s"No ProxyIDispatchFactory registered for $clsid") }
   private var end = false
 
   def run(): Unit = {
@@ -93,7 +95,7 @@ extends ServerRemoting with ClientRemoting {
   private def executeCall(call: Call): Result = call match {
     case CreateInstanceCall(clsid, outer, context, iids) ⇒
       require(outer == null && context == 0 && iids.size == 1)
-      CreateInstanceResult(iUnknown = createInvocable(clsid, iids.head))
+      CreateInstanceResult(iUnknown = createIUnknown(clsid, iids.head))
 
     case ReleaseCall(proxyId) ⇒
       val released = proxyRegister.iUnknown(proxyId)
@@ -117,10 +119,9 @@ extends ServerRemoting with ClientRemoting {
   }
 
   private[remoting] def newProxy(proxyId: ProxyId, name: String, proxyClsid: CLSID, properties: Iterable[(String, Any)]) = {
-    val newProxy = proxyClsidMap.getOrElse(proxyClsid, proxyClsidMap(CLSID.Null))   // TODO getOrElse solange nicht alle Proxys implementiert sind
-    val result = newProxy(injector, this, proxyId, name, properties)
-    proxyRegister.registerProxy(result)
-    result
+    val proxy = clsidToProxyFactory(proxyClsid)(injector, this, proxyId, name, properties)
+    proxyRegister.registerProxy(proxy)
+    proxy
   }
 
   private[remoting] def iUnknown(proxyId: ProxyId) = proxyRegister.iUnknown(proxyId)
@@ -147,8 +148,8 @@ extends ServerRemoting with ClientRemoting {
     new ResultDeserializer(this, byteString)
   }
 
-  private def toCreateIUnknownByCLSID(invocableFactories: Iterable[IUnknownFactory]): CreateIUnknownByCLSID = {
-    val clsidToFactoryMap = invocableFactories toKeyedMap { _.clsid }
+  private def toCreateIUnknownByCLSID(iUnknownFactories: Iterable[IUnknownFactory]): CreateIUnknownByCLSID = {
+    val clsidToFactoryMap = iUnknownFactories toKeyedMap { _.clsid }
     def createIUnknown(clsId: CLSID, iid: IID): IUnknown = {
       val factory = clsidToFactoryMap(clsId)
       require(factory.iid == iid, s"IID $iid is not supported by $factory")

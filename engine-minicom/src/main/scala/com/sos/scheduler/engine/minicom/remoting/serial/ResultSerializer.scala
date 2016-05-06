@@ -13,10 +13,10 @@ private final class ResultSerializer(protected val proxyRegister: ProxyRegister)
   def writeResult(result: Result): Unit = {
     writeByte(MessageClass.Answer)
     result match {
-      case CreateInstanceResult(invocable) ⇒
+      case CreateInstanceResult(iUnknown) ⇒
         writeInt32(S_OK.value)
         writeInt32(S_OK.value)  // For IID
-        writeIUnknown(invocable)
+        writeIUnknown(iUnknown)
       case InvokeResult(value) ⇒
         writeInt32(S_OK.value)
         writeVariant(value)
