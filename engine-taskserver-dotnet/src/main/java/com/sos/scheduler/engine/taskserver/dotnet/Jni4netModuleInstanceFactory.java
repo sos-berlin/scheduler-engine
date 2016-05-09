@@ -1,13 +1,11 @@
 package com.sos.scheduler.engine.taskserver.dotnet;
 
-import java.nio.file.Path;
-
-import sos.spooler.Job_impl;
-import sos.spooler.Monitor_impl;
-
 import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleInstanceFactory;
 import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
 import com.sos.scheduler.engine.taskserver.dotnet.api.TaskContext;
+import java.nio.file.Path;
+import sos.spooler.Job_impl;
+import sos.spooler.Monitor_impl;
 
 public final class Jni4netModuleInstanceFactory implements
 		DotnetModuleInstanceFactory {
@@ -27,10 +25,7 @@ public final class Jni4netModuleInstanceFactory implements
 	}
 
 	public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
-		if (reference instanceof DotnetModuleReference.DotnetClass) {
-			DotnetApiImpl impl = newDotnetObject(reference);
-			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
-		} else if (reference instanceof DotnetModuleReference.Powershell) {
+		if (reference instanceof DotnetModuleReference.DotnetClass || reference instanceof DotnetModuleReference.Powershell) {
 			DotnetApiImpl impl = newDotnetObject(reference);
 			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
 		} else

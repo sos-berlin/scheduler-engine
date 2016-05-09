@@ -4,13 +4,16 @@ import com.sos.scheduler.engine.taskserver.dotnet.dlls.DotnetDlls$;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import net.sf.jni4net.Bridge;
 import system.reflection.Assembly;
 
 public class DotnetBridge {
 	private system.Type[] schedulerApiTypes = null;
-	private Path dotnetAdapterDll;
+	private Path dotnetAdapterDll = null;
+	private List<DotnetApiImpl> dotnetApiImpls = new ArrayList<>();
 
 	public void init(Path path, boolean debug) throws Exception {
 		if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
@@ -18,7 +21,7 @@ public class DotnetBridge {
 					"Can't initialize jni4net Bridge. Directory not found: %s",
 					path.toString()));
 		}
-		initJni4NetBridge(path, debug);
+ 		initJni4NetBridge(path, debug);
 		initJni4JobSchedulerApi(path);
 	}
 
@@ -30,7 +33,7 @@ public class DotnetBridge {
 	}
 
 	private void initJni4JobSchedulerApi(Path path) throws Exception {
-		this.dotnetAdapterDll = path.resolve(DotnetDlls$.MODULE$.DllName());
+		dotnetAdapterDll = path.resolve(DotnetDlls$.MODULE$.DllName());
 
 		Assembly apiProxyAssembly = Assembly.LoadFrom(dotnetAdapterDll.toString());
 		Bridge.RegisterAssembly(apiProxyAssembly);
@@ -50,16 +53,24 @@ public class DotnetBridge {
 		}
 	}
 
-	public system.Type[] getSchedulerApiTypes() {
-		return this.schedulerApiTypes;
+	public void close(){
+		for(DotnetApiImpl apiImpl : dotnetApiImpls){
+            try {
+                apiImpl.close();
+            }
+            catch(Exception ex){
+            }
+ 		}
 	}
+
+	public system.Type[] getSchedulerApiTypes() { return schedulerApiTypes; }
 
 	public Path getDotnetAdapterDll() {
 		return dotnetAdapterDll;
 	}
 
-	public void close() {
-		// TODO Wenn jni4net oder .Net entladen werden kann, dann wollen wir das vielleicht tun.
+	public void addDotnetApiImpl(DotnetApiImpl apiImpl) {
+		dotnetApiImpls.add(apiImpl);
 	}
 
 }

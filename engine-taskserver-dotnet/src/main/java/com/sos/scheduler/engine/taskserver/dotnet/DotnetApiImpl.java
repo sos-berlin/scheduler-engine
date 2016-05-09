@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.taskserver.dotnet;
 
+import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Optional;
-
 import net.sf.jni4net.Bridge;
 import sos.spooler.Job;
 import sos.spooler.Log;
@@ -12,10 +12,8 @@ import sos.spooler.Spooler;
 import sos.spooler.Task;
 import system.reflection.Assembly;
 
-import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
-
 public class DotnetApiImpl {
-	private final static String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
+	private static final String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
 
 	private system.Type apiImplType;
 	private system.Object apiImplInstance;
@@ -25,8 +23,8 @@ public class DotnetApiImpl {
 	private String className;
 
 	public DotnetApiImpl(DotnetBridge dotnetBridge, DotnetModuleReference ref) {
-		this.bridge = dotnetBridge;
-		this.reference = ref;
+		bridge = dotnetBridge;
+		reference = ref;
 	}
 
 	public void init(Spooler spooler, Job spoolerJob, Task spoolerTask,
@@ -35,7 +33,7 @@ public class DotnetApiImpl {
 		setPropertiesFromReference();
 		setApiImplType();
 		initApiImplInstance(spooler, spoolerJob, spoolerTask, spoolerLog);
-
+		bridge.addDotnetApiImpl(this);
 	}
 
 	private void setPropertiesFromReference() throws Exception{
@@ -192,4 +190,11 @@ public class DotnetApiImpl {
 				"spooler_process_after", paramTypes, params,spooler_process_result);
 	}
 
+	public void close() throws Exception {
+        if (reference instanceof DotnetModuleReference.Powershell) {
+            if (apiImplType != null && apiImplInstance != null) {
+                DotnetInvoker.invokeMethod(apiImplType, apiImplInstance, "Close");
+            }
+        }
+	}
 }
