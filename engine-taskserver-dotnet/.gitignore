@@ -1,1 +1,9 @@
 /target/
+
+/src/main/c/Debug/
+/src/main/c/Release/
+/src/main/c/scriptengine/Debug/
+/src/main/c/scriptengine/Release/
+/src/main/c/engine-taskserver-windows.v12.suo
+/src/main/c/engine-taskserver-windows.sdf
+/src/main/c/engine-taskserver-windows.opensdf
