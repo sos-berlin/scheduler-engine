@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     process_class="/test-agent"
+>
+    <script language="shell"><![CDATA[
+        :;if false; then :
+        @echo off
+        goto WINDOWS
+        fi
+
+        for ((i=1; i <= $SCHEDULER_PARAM_N; i++)); do
+            echo "....'....1....'....2....'....3....'....4....'....5....'....6....'....7....'....8....'....9....'....0 $i"
+        done
+        exit
+
+        :WINDOWS
+        for /l %%i in (1, 1, %SCHEDULER_PARAM_N%) do (
+            echo ....'....1....'....2....'....3....'....4....'....5....'....6....'....7....'....8....'....9....'....0 %%i
+        )
+    ]]></script>
+</job>
