@@ -196,7 +196,7 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentWith
 
   /** Selects all lines matching `CalledPattern` and returns a list of the names. */
   private def calls(logString: String): List[String] = {
-    val r = for (line ← logString split "\n";
+    val r = for (line ← logString.lines;
                  content ← (CalledPattern findFirstMatchIn line) map { _.group(1) })
             yield content
     r.toList

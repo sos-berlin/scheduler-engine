@@ -44,5 +44,5 @@ final class JS1393IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   }
 
   private def selectStdLines(log: String, channel: String) =
-    log split '\n' filter { _ contains channel } map { line ⇒ (line split Regex.quote(channel))(1).trim }
+    log.lines filter { _ contains channel } map { line ⇒ (line split Regex.quote(channel))(1).trim }
 }
