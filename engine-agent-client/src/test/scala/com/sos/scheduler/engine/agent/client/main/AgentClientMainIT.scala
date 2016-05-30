@@ -2,13 +2,18 @@ package com.sos.scheduler.engine.agent.client.main
 
 import com.sos.scheduler.engine.agent.client.main.AgentClientMainIT._
 import com.sos.scheduler.engine.agent.command.{CommandExecutor, CommandMeta}
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.agent.configuration.AgentConfiguration.Https
 import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{Command, Terminate}
 import com.sos.scheduler.engine.agent.test.AgentTest
+import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.common.utils.JavaResource
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
@@ -20,6 +25,10 @@ import scala.concurrent.Future
  */
 @RunWith(classOf[JUnitRunner])
 final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCloser with AgentTest {
+
+  override protected def agentConfiguration = AgentConfiguration(
+    httpInterfaceRestriction = Some("127.0.0.1"),
+    https = Some(Https(findRandomFreeTcpPort(), TestKeyStoreRef)))
 
   override def afterAll(): Unit = {
     onClose { super.afterAll() }
@@ -42,7 +51,7 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
   "main" in {
     val output = mutable.Buffer[String]()
     val commandYaml = """{ $TYPE: Terminate, sigtermProcesses: true, sigkillProcessesAfter: 10 }"""
-    AgentClientMain.run(List(agent.localUri, commandYaml, "/"), o ⇒ output += o)
+    AgentClientMain.run(List(agent.localUri, commandYaml, "/"), o ⇒ output += o, Some(TestKeyStoreRef))
     assert(output.size == 3)
     assert(output(0) == "{}")
     assert(output(1) == "---")
@@ -54,12 +63,16 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
 
   "main with Agent URI only checks wether Agent is responding" in {
     val output = mutable.Buffer[String]()
-    AgentClientMain.run(List(agent.localUri), o ⇒ output += o)
+    AgentClientMain.run(List(agent.localUri), o ⇒ output += o, Some(TestKeyStoreRef))
     assert(output == List("JobScheduler Agent is responding"))
-    intercept[Exception] { AgentClientMain.run(List(s"http://127.0.0.1:${findRandomFreeTcpPort()}"), _ ⇒ ()) }
+    intercept[Exception] { AgentClientMain.run(List(s"http://127.0.0.1:${findRandomFreeTcpPort()}"), _ ⇒ (), Some(TestKeyStoreRef)) }
   }
 }
 
 private object AgentClientMainIT {
+  private val TestKeyStoreRef = KeystoreReference(
+    JavaResource("com/sos/scheduler/engine/agent/client/main/test-keystore.jks").url,
+    keyPassword = SecretString("test-keystore.p12"),
+    storePassword = Some(SecretString("test-keystore.jks")))
   private val ExpectedTerminate = Terminate(sigtermProcesses = true, sigkillProcessesAfter = Some(10.s))
 }
