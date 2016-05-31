@@ -22,7 +22,7 @@ trait AgentTest extends BeforeAndAfterAll {
   protected def extraAgentModule: Module = EMPTY_MODULE
 
   protected def agentConfiguration = AgentConfiguration(
-    httpPort = findRandomFreeTcpPort(),
+    httpPort = Some(findRandomFreeTcpPort()),
     httpInterfaceRestriction = Some("127.0.0.1"))
 
   protected lazy final val agent = {

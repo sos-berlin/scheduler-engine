@@ -6,11 +6,14 @@ import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.common.ClassLoaders._
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
+import com.sos.scheduler.engine.common.sprayutils.https.Https.enableTlsFor
+import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.typesafe.config.ConfigFactory
 import java.nio.charset.StandardCharsets._
 import scala.concurrent.Future
+import scala.util.Try
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpEntity
@@ -21,13 +24,19 @@ import spray.httpx.marshalling.Marshaller
 import spray.json.{JsValue, JsonParser}
 
 /**
- * @author Joacim Zschimmer
- */
-private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit) extends AutoCloseable {
+  * @author Joacim Zschimmer
+  */
+private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit, keystoreRef: Option[KeystoreReference] = None) extends AutoCloseable {
 
   private val agentUris = AgentUris(agentUri)
   private implicit val actorSystem = ActorSystem("AgentClient", ConfigFactory.load(currentClassLoader, ConfigurationResource.path))
   import actorSystem.dispatcher
+
+  keystoreRef match {
+    case Some(ref) ⇒ enableTlsFor(agentUri, ref)
+    case None ⇒
+  }
+
   private val pipeline = addHeader(Accept(`text/plain`)) ~> addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
       encode(Gzip) ~> sendReceive ~> decode(Gzip) ~> unmarshal[String]
   private var needYamlDocumentSeparator = false
@@ -72,10 +81,7 @@ object TextAgentClient {
   }
 
   private def forceToJson(jsonOrYaml: String): JsValue =
-    try JsonParser(jsonOrYaml)
-    catch {
-      case _: Exception ⇒ yamlToJsValue(jsonOrYaml)
-    }
+    Try { JsonParser(jsonOrYaml) } getOrElse yamlToJsValue(jsonOrYaml)
 
   private def resultString(future: Future[String]) = awaitResult(future, 2 * AgentClient.RequestTimeout)
 }

@@ -48,7 +48,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
 
   private lazy val agent = {
     val conf = AgentConfiguration(
-      httpPort = findRandomFreeTcpPort(),
+      httpPort = Some(findRandomFreeTcpPort()),
       httpInterfaceRestriction = Some("127.0.0.1"),
       uriPathPrefix = "test")
     new Agent(conf).closeWithCloser

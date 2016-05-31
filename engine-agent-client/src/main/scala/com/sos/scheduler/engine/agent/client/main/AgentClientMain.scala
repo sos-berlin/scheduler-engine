@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.agent.client.TextAgentClient
 import com.sos.scheduler.engine.common.commandline.CommandLineArguments
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import scala.util.control.NonFatal
 
 /**
@@ -15,7 +16,7 @@ object AgentClientMain {
 
   def main(args: Array[String]): Unit =
     try {
-      val rc = run(args, println)
+      val rc = run(args, println, None)
       System.exit(rc)
     }
     catch { case NonFatal(t) ⇒
@@ -24,9 +25,9 @@ object AgentClientMain {
       System.exit(1)
     }
 
-  private[client] def run(args: Seq[String], print: String ⇒ Unit): Int = {
+  private[client] def run(args: Seq[String], print: String ⇒ Unit, keystoreRef: Option[KeystoreReference] = None): Int = {
     val (agentUri, operations) = parseArgs(args)
-    autoClosing(new TextAgentClient(agentUri, print)) { client ⇒
+    autoClosing(new TextAgentClient(agentUri, print, keystoreRef)) { client ⇒
       if (operations.isEmpty)
         if (client.checkIsResponding()) 0 else 1
       else {
