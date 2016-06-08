@@ -9,12 +9,11 @@ import system.reflection.MethodInfo;
 
 public class DotnetInvoker {
 
-	public static Object createInstance(Type type, Type[] paramTypes,
-			Object[] params) throws Exception {
+	public static Object createInstance(Type type, Type[] paramTypes, Object[] params) {
 		ConstructorInfo ci = Optional
 				.ofNullable(type.GetConstructor(paramTypes))
 				.orElseThrow(
-						() -> new Exception(
+						() -> new RuntimeException(
 								String.format(
 										"[%s] Can't find the constructor with the specified parameters",
 										type.getAssembly().getLocation())));
@@ -22,12 +21,11 @@ public class DotnetInvoker {
 	}
 
 	public static system.Object invokeMethod(Type type, Object instance,
-			String methodName, Type[] paramTypes, Object[] params)
-			throws Exception {
+			String methodName, Type[] paramTypes, Object[] params) {
 		MethodInfo mi = Optional
 				.ofNullable(type.GetMethod(methodName, paramTypes))
 				.orElseThrow(
-						() -> new Exception(
+						() -> new RuntimeException(
 								String.format(
 										"[%s] Can't find the method %s with the specified parameters",
 										type.getAssembly().getLocation(),
@@ -36,15 +34,14 @@ public class DotnetInvoker {
 		return mi.Invoke(instance, params);
 	}
 
-	public static system.Object invokeMethod(Type type, Object instance,
-			String methodName, String value) throws Exception {
+	public static system.Object invokeMethod(Type type, Object instance, String methodName, String value) {
 		MethodInfo mi = Optional
 				.ofNullable(
 						type.GetMethod(methodName,
 								new system.Type[] { system.Type
 										.GetType("System.String") }))
 				.orElseThrow(
-						() -> new Exception(
+						() -> new RuntimeException(
 								String.format(
 										"[%s] Can't find the method %s with the specified string parameter %s",
 										type.getAssembly().getLocation(),
@@ -54,11 +51,10 @@ public class DotnetInvoker {
 				value) });
 	}
 
-	public static system.Object invokeMethod(Type type, Object instance,
-			String methodName) throws Exception {
+	public static system.Object invokeMethod(Type type, Object instance, String methodName) {
 		MethodInfo mi = Optional.ofNullable(
 				type.GetMethod(methodName, new system.Type[] {})).orElseThrow(
-				() -> new Exception(String.format(
+				() -> new RuntimeException(String.format(
 						"[%s] Can't find the method %s", type.getAssembly()
 								.getLocation(), methodName)));
 
@@ -66,14 +62,14 @@ public class DotnetInvoker {
 	}
 
 	public static boolean invokeMethod(Type type, Object instance,
-			String methodName, boolean defaultValue) throws Exception {
+			String methodName, boolean defaultValue) {
 		return getReturnValue(invokeMethod(type, instance, methodName),
 				defaultValue);
 	}
 
 	public static boolean invokeMethod(Type type, Object instance,
 			String methodName, Type[] paramTypes, Object[] params,
-			boolean defaultValue) throws Exception {
+			boolean defaultValue) {
 		return getReturnValue(
 				invokeMethod(type, instance, methodName, paramTypes, params),
 				defaultValue);

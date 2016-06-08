@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.dotnet;
 
 import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
+import com.sos.scheduler.engine.taskserver.dotnet.api.TaskContext;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -27,16 +28,14 @@ public class DotnetApiImpl {
         reference = ref;
     }
 
-    public void init(Spooler spooler, Job spoolerJob, Task spoolerTask,
-            Log spoolerLog) throws Exception {
-
+    public void init(Spooler spooler, Job spoolerJob, Task spoolerTask, Log spoolerLog) {
         setPropertiesFromReference();
         setApiImplType();
         initApiImplInstance(spooler, spoolerJob, spoolerTask, spoolerLog);
         bridge.addDotnetApiImpl(this);
     }
 
-    private void setPropertiesFromReference() throws Exception{
+    private void setPropertiesFromReference() {
         if (reference instanceof DotnetModuleReference.Powershell) {
             path = bridge.getDotnetAdapterDll();
             className = POWERSHELL_CLASS_NAME;
@@ -47,30 +46,30 @@ public class DotnetApiImpl {
             throw new IllegalArgumentException();
 
         if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-            throw new Exception(String.format("File not found: %s",
+            throw new RuntimeException(String.format("File not found: %s",
                     path.toString()));
         }
     }
 
-    private void setApiImplType() throws Exception {
+    private void setApiImplType() {
 
         Assembly assembly;
         try {
             assembly = Assembly.LoadFrom(path.toString());
         } catch (Exception ex) {
-            throw new Exception(String.format("[%s] Can't load assembly: %s",
+            throw new RuntimeException(String.format("[%s] Can't load assembly: %s",
                     path.toString(), ex.toString()));
         }
 
         apiImplType = Optional.ofNullable(assembly.GetType(className))
                 .orElseThrow(
-                        () -> new Exception(String.format(
+                        () -> new RuntimeException(String.format(
                                 "[%s] Class not found: %s", path.toString(),
                                 className)));
     }
 
     private void initApiImplInstance(Spooler spooler, Job spoolerJob,
-            Task spoolerTask, Log spoolerLog) throws Exception {
+            Task spoolerTask, Log spoolerLog) {
 
         if (reference instanceof DotnetModuleReference.Powershell) {
             system.Type[] types = {
@@ -92,7 +91,7 @@ public class DotnetApiImpl {
             apiImplInstance = Optional
                     .ofNullable(DotnetInvoker.createInstance(apiImplType, types,params))
                     .orElseThrow(
-                            () -> new Exception(
+                            () -> new RuntimeException(
                                     String.format("[%s] Could not create a new instance of the class %s",
                                             path.toString(), className)));
 
@@ -103,7 +102,7 @@ public class DotnetApiImpl {
             apiImplInstance = Optional
                     .ofNullable(DotnetInvoker.createInstance(apiImplType,types,params))
                     .orElseThrow(
-                            () -> new Exception(
+                            () -> new RuntimeException(
                                     String.format(
                                             "[%s] Could not create a new instance of the class %s",
                                             path.toString(), className)));
