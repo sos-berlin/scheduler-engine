@@ -43,7 +43,8 @@ public class DotnetApiImpl {
 		} else if (reference instanceof DotnetModuleReference.DotnetClass) {
 			path = ((DotnetModuleReference.DotnetClass)reference).dll();
 			className = ((DotnetModuleReference.DotnetClass)reference).className();
-		}
+		} else
+			throw new IllegalArgumentException();
 
 		if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
 			throw new Exception(String.format("File not found: %s",
