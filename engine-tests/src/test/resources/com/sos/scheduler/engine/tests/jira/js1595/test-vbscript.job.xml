@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/master/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
+     order="true"
+     stop_on_error="false"
+     process_class="/test-agent"
+>
+    <script language="vbscript"><![CDATA[
+        Function spooler_process()
+            value = spooler_task.order.params.value("TEST")
+            value2 = spooler_task.order().params().value("TEST")
+            if (value <> value2) Throw New Exception("order() and order are different")
+            spooler_task.order.params.set_value("NEW-TEST", value)
+            spooler_log.set_level(-7)
+            If spooler_log.level <> -7 Then
+                Throw New Exception("spooler_log.level == -7 expected")
+            End If
+            spooler_log.set_level(0)
+            If spooler_task.order.params.value("FAIL") <> "" Then
+                Throw New Exception("TEST-FAIL")
+            End If
+            spooler_process = True
+        End Function
+    ]]></script>
+</job>

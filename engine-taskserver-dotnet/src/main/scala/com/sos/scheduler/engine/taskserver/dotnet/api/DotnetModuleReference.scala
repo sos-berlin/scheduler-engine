@@ -13,4 +13,7 @@ object DotnetModuleReference {
 
   final case class Powershell(script: String)
   extends DotnetModuleReference
+
+  final case class ScriptControl(language: String, script: String)
+  extends DotnetModuleReference
 }

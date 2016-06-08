@@ -8,13 +8,14 @@ import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.DotnetProvidingAgent
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import com.sos.scheduler.engine.tests.jira.js1595.JS1595IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
+  * JS-1595 Powershell, JS-1623 VBScript.
+  *
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
@@ -25,15 +26,19 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with DotnetProvidi
   }
 
   if (isWindows) {
-    "PowerShell" in {
-      testOrder(PowershellJobChainPath).state shouldEqual OrderState("END")
-    }
+    for (language ← List("PowerShell" /*FIXME, "VBScript"*/))
+      s"$language" - {
+        val jobChainPath = JobChainPath(s"/test-${language.toLowerCase}")
+        "Script" in {
+          testOrder(jobChainPath).state shouldEqual OrderState("END")
+        }
 
-    "Exception in Powershell script" in {
-      controller.toleratingErrorCodes(Set(MessageCode("COM-80020009"))) {
-        testOrder(PowershellJobChainPath, Map("FAIL" → "1")).state shouldEqual OrderState("FAILED")
+        "Exception in script" in {
+          controller.toleratingErrorCodes(Set(MessageCode("COM-80020009"))) {
+            testOrder(jobChainPath, Map("FAIL" → "1")).state shouldEqual OrderState("FAILED")
+          }
+        }
       }
-    }
   }
 
   private def testOrder(jobChainPath: JobChainPath, parameters: Map[String, String] = Map()): OrderRunResult = {
@@ -42,8 +47,4 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with DotnetProvidi
     assert(result.variables == p + ("NEW-TEST" → "test-value"))
     result
   }
-}
-
-private object JS1595IT {
-  private val PowershellJobChainPath = JobChainPath("/test-powershell")
 }
