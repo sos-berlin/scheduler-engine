@@ -73,7 +73,7 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
     val port = findRandomFreeTcpPort()
     val output = mutable.Buffer[String]()
     assertResult(1) {
-      AgentClientMain.run(List(s"http://127.0.0.1:${findRandomFreeTcpPort()}"), _ ⇒ (), Some(TestKeyStoreRef))
+      AgentClientMain.run(List(s"http://127.0.0.1:$port"), output += _, Some(TestKeyStoreRef))
     }
     assert(output == List(s"JobScheduler Agent is not responding: Connection attempt to 127.0.0.1:$port failed"))
   }
