@@ -18,11 +18,11 @@ final class ModuleFactoryRegister(val moduleFactories: immutable.Seq[ModuleFacto
 
   def moduleFactory(arguments: RawModuleArguments): ModuleFactory =
     moduleFactories collectFirst { case o if o.toModuleArguments isDefinedAt arguments ⇒ o } getOrElse {
-      throw new UnsupportedRawModuleArgumentsException(arguments.language)
+      throw new UnsupportedRawModuleArgumentsException(arguments)
     }
 }
 
 object ModuleFactoryRegister {
-  private[moduleapi] final class UnsupportedRawModuleArgumentsException(language: ModuleLanguage)
-  extends NoSuchElementException(s"Unsupported script language '$language' or unsupported argument combination")
+  private[moduleapi] final class UnsupportedRawModuleArgumentsException(raw: RawModuleArguments)
+  extends NoSuchElementException(s"Unsupported script language '${raw.language}' or unsupported argument combination $raw")
 }

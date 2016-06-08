@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.moduleapi
 
+import com.sos.scheduler.engine.common.utils.Strings.TruncatedString
 import java.nio.file.Path
 
 /**
@@ -13,4 +14,12 @@ final case class RawModuleArguments(
   script: Script = Script.Empty,
   dllOption: Option[Path],
   dotnetClassNameOption: Option[String]) {
+
+  override def toString = (
+      Some(s"language=$language") ++
+      (javaClassNameOption map { o ⇒ s"java_class=$o" }) ++
+      (dllOption map { o ⇒ s"dll=$o" }) ++
+      (dotnetClassNameOption map { o ⇒ s"dotnet_class=$o" }) ++
+      Some(s"script=${script.string truncateWithEllipsis 50}")
+    ).mkString("RawModuleArguments(", " ", ")")
 }
