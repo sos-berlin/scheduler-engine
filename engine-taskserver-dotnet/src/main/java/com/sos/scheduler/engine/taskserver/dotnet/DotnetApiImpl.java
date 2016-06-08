@@ -16,22 +16,19 @@ import system.reflection.Assembly;
 public class DotnetApiImpl {
     private static final String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
 
-    private system.Type apiImplType;
-    private system.Object apiImplInstance;
-    private DotnetBridge bridge;
-    private DotnetModuleReference reference;
+    private final DotnetBridge bridge;
+    private final DotnetModuleReference reference;
+    private final system.Type apiImplType;
     private Path path;
     private String className;
+    private system.Object apiImplInstance;
 
-    public DotnetApiImpl(DotnetBridge dotnetBridge, DotnetModuleReference ref) {
+    public DotnetApiImpl(DotnetBridge dotnetBridge, DotnetModuleReference ref, TaskContext taskContext) {
         bridge = dotnetBridge;
         reference = ref;
-    }
-
-    public void init(Spooler spooler, Job spoolerJob, Task spoolerTask, Log spoolerLog) {
         setPropertiesFromReference();
-        setApiImplType();
-        initApiImplInstance(spooler, spoolerJob, spoolerTask, spoolerLog);
+        apiImplType = apiImplType(path, className);
+        initApiImplInstance(taskContext.spooler(), taskContext.spoolerJob(), taskContext.spoolerTask(), taskContext.spoolerLog());
         bridge.addDotnetApiImpl(this);
     }
 
@@ -51,8 +48,7 @@ public class DotnetApiImpl {
         }
     }
 
-    private void setApiImplType() {
-
+    private static system.Type apiImplType(Path path, String className) {
         Assembly assembly;
         try {
             assembly = Assembly.LoadFrom(path.toString());
@@ -61,7 +57,7 @@ public class DotnetApiImpl {
                     path.toString(), ex.toString()));
         }
 
-        apiImplType = Optional.ofNullable(assembly.GetType(className))
+        return Optional.ofNullable(assembly.GetType(className))
                 .orElseThrow(
                         () -> new RuntimeException(String.format(
                                 "[%s] Class not found: %s", path.toString(),

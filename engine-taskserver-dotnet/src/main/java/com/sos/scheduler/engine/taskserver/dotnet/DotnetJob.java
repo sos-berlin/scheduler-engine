@@ -13,7 +13,6 @@ public final class DotnetJob extends sos.spooler.Job_impl {
 		spooler_job = taskContext.spoolerJob();
 		spooler = taskContext.spooler();
 		this.apiImpl = dotnetApiImpl;
-		this.apiImpl.init(spooler, spooler_job, spooler_task, spooler_log);
 	}
 
 	@Override

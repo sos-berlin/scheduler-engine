@@ -6,14 +6,9 @@ public final class DotnetMonitor extends sos.spooler.Monitor_impl {
 	private final static String LOG_PREFIX = "[.NET module]";
 	private final DotnetApiImpl apiImpl;
 
-	DotnetMonitor(TaskContext taskContext, DotnetApiImpl dotnetApiImpl)
+	DotnetMonitor(DotnetApiImpl dotnetApiImpl)
 			throws Exception {
-		spooler_log = taskContext.spoolerLog();
-		spooler_task = taskContext.spoolerTask();
-		spooler_job = taskContext.spoolerJob();
-		spooler = taskContext.spooler();
 		this.apiImpl = dotnetApiImpl;
-		this.apiImpl.init(spooler, spooler_job, spooler_task, spooler_log);
 	}
 
 	@Override
