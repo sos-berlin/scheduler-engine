@@ -29,7 +29,7 @@ public final class Jni4netModuleInstanceFactory implements
 			DotnetApiImpl impl = newDotnetObject(reference);
 			return newSchedulerDotnetAdapter(clazz, impl, taskContext);
 		} else
-			throw new RuntimeException("Unknown class " + reference.getClass().getName());
+			throw new RuntimeException("Unsupported " + reference.getClass());
 	}
 
 	private DotnetApiImpl newDotnetObject(DotnetModuleReference ref) {
