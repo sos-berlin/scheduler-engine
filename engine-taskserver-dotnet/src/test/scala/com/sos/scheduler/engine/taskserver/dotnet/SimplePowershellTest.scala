@@ -14,7 +14,7 @@ final class SimplePowershellTest extends SimpleDotnetTest {
 
   protected def language = "PowerShell"
 
-  if (!isWindows) {
+  if (isWindows) {
     addScriptErrorTest(DotnetModuleReference.Powershell(s"""
       function spooler_process() {
         throw "$TestErrorMessage"
@@ -22,7 +22,9 @@ final class SimplePowershellTest extends SimpleDotnetTest {
 
     addStandardTest(DotnetModuleReference.Powershell("""
       function spooler_process() {
-        $value = $spooler_task.order().params().value("TEST")
+        $orderVariables = $spooler_task.order().params()
+        $value = $orderVariables.value("TEST")
+        $orderVariables.set_value("TEST", "TEST-CHANGED")
         $spooler_log.log(0, $value)
         return $true
       }"""))
