@@ -81,8 +81,8 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
 
 private object AgentClientMainIT {
   private val TestKeyStoreRef = KeystoreReference(
-    JavaResource("com/sos/scheduler/engine/agent/client/main/test-keystore.jks").url,
-    keyPassword = SecretString("test-keystore.p12"),
-    storePassword = Some(SecretString("test-keystore.jks")))
+    JavaResource("com/sos/scheduler/engine/agent/client/main/https.jks").url,
+    keyPassword = SecretString("https.p12"),
+    storePassword = Some(SecretString("https.jks")))
   private val ExpectedTerminate = Terminate(sigtermProcesses = true, sigkillProcessesAfter = Some(10.s))
 }
