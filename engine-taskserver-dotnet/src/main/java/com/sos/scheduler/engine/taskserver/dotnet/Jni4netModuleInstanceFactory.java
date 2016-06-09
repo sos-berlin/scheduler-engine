@@ -8,49 +8,49 @@ import sos.spooler.Job_impl;
 import sos.spooler.Monitor_impl;
 
 public final class Jni4netModuleInstanceFactory implements
-		DotnetModuleInstanceFactory {
+        DotnetModuleInstanceFactory {
 
-	private final DotnetBridge dotnetBridge;
-	private final Path dllDirectory;
+    private final DotnetBridge dotnetBridge;
+    private final Path dllDirectory;
 
-	public Jni4netModuleInstanceFactory(Path dllDirectory) throws Exception {
-		this.dllDirectory = dllDirectory;
-		boolean debug = System.getProperty("jni4net.debug") != null;
-		dotnetBridge = new DotnetBridge();
-		dotnetBridge.init(dllDirectory, debug);
-	}
+    public Jni4netModuleInstanceFactory(Path dllDirectory) throws Exception {
+        this.dllDirectory = dllDirectory;
+        boolean debug = System.getProperty("jni4net.debug") != null;
+        dotnetBridge = new DotnetBridge();
+        dotnetBridge.init(dllDirectory, debug);
+    }
 
-	public void close() {
-		dotnetBridge.close();
-	}
+    public void close() {
+    }
 
-	public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
-		if (reference instanceof DotnetModuleReference.DotnetClass || reference instanceof DotnetModuleReference.Powershell) {
-			return newSchedulerDotnetAdapter(clazz, reference, taskContext);
-		} else
-			throw new RuntimeException("Unsupported " + reference.getClass());
-	}
+    public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
+        if (reference instanceof DotnetModuleReference.DotnetClass || reference instanceof DotnetModuleReference.Powershell) {
+            return newSchedulerDotnetAdapter(clazz, reference, taskContext);
+        } else
+            throw new RuntimeException("Unsupported " + reference.getClass());
+    }
 
-	@SuppressWarnings("unchecked")
-	private <T> T newSchedulerDotnetAdapter(Class<T> clazz,
-			DotnetModuleReference reference, TaskContext taskContext)
-			throws Exception {
-		DotnetApiImpl dotnetObject = new DotnetApiImpl(dotnetBridge, reference, taskContext);;
-		if (Job_impl.class.isAssignableFrom(clazz)) {
-			return (T) new DotnetJob(taskContext, dotnetObject);
-		} else if (Monitor_impl.class.isAssignableFrom(clazz)) {
-			return (T) new DotnetMonitor(dotnetObject);
-		} else {
-			throw new IllegalArgumentException("Unsupported " + clazz);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    private <T> T newSchedulerDotnetAdapter(Class<T> clazz,
+            DotnetModuleReference reference, TaskContext taskContext)
+            throws Exception {
+        DotnetApiImpl dotnetObject = new DotnetApiImpl(dotnetBridge, reference, taskContext);
+        ;
+        if (Job_impl.class.isAssignableFrom(clazz)) {
+            return (T)new DotnetJob(taskContext, dotnetObject);
+        } else if (Monitor_impl.class.isAssignableFrom(clazz)) {
+            return (T)new DotnetMonitor(dotnetObject);
+        } else {
+            throw new IllegalArgumentException("Unsupported " + clazz);
+        }
+    }
 
-	private <T> void closeInstance(T instance) {
-		// TODO Close DotnetJob or DotnetMonitor
-	}
+    private <T> void closeInstance(T instance) {
+        // TODO Close DotnetJob or DotnetMonitor
+    }
 
-	@Override
-	public String toString() {
-		return "Jni4netModuleInstanceFactory(" + dllDirectory + ")";
-	}
+    @Override
+    public String toString() {
+        return "Jni4netModuleInstanceFactory(" + dllDirectory + ")";
+    }
 }

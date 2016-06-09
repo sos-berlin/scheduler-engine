@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.taskserver.dotnet;
 import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
 import com.sos.scheduler.engine.taskserver.dotnet.api.TaskContext;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Optional;
 import net.sf.jni4net.Bridge;
@@ -29,7 +28,6 @@ public class DotnetApiImpl {
         setPropertiesFromReference();
         apiImplType = apiImplType(path, className);
         initApiImplInstance(taskContext.spooler(), taskContext.spoolerJob(), taskContext.spoolerTask(), taskContext.spoolerLog());
-        bridge.addDotnetApiImpl(this);
     }
 
     private void setPropertiesFromReference() {
@@ -42,7 +40,7 @@ public class DotnetApiImpl {
         } else
             throw new IllegalArgumentException();
 
-        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+        if (!Files.exists(path)) {
             throw new RuntimeException(String.format("File not found: %s",
                     path.toString()));
         }
@@ -74,7 +72,7 @@ public class DotnetApiImpl {
                     bridge.getSchedulerApiTypes()[2],
                     bridge.getSchedulerApiTypes()[3],
                     system.Type.GetType("System.String")
-                    };
+            };
 
             system.Object[] params = {
                     Bridge.wrapJVM(spooler),
@@ -82,36 +80,35 @@ public class DotnetApiImpl {
                     Bridge.wrapJVM(spoolerTask),
                     Bridge.wrapJVM(spoolerLog),
                     new system.String(((DotnetModuleReference.Powershell)reference).script())
-                    };
+            };
 
             apiImplInstance = Optional
-                    .ofNullable(DotnetInvoker.createInstance(apiImplType, types,params))
+                    .ofNullable(DotnetInvoker.createInstance(apiImplType, types, params))
                     .orElseThrow(
                             () -> new RuntimeException(
                                     String.format("[%s] Could not create a new instance of the class %s",
                                             path.toString(), className)));
-
         } else if (reference instanceof DotnetModuleReference.DotnetClass) {
             system.Type[] types = new system.Type[]{};
-            system.Object[] params = new system.Object[] {};
+            system.Object[] params = new system.Object[]{};
 
             apiImplInstance = Optional
-                    .ofNullable(DotnetInvoker.createInstance(apiImplType,types,params))
+                    .ofNullable(DotnetInvoker.createInstance(apiImplType, types, params))
                     .orElseThrow(
                             () -> new RuntimeException(
                                     String.format(
                                             "[%s] Could not create a new instance of the class %s",
                                             path.toString(), className)));
 
-            setApiImplInstanceProperty("spooler",spooler);
-            setApiImplInstanceProperty("spooler_job",spoolerJob);
-            setApiImplInstanceProperty("spooler_task",spoolerTask);
-            setApiImplInstanceProperty("spooler_log",spoolerLog);
+            setApiImplInstanceProperty("spooler", spooler);
+            setApiImplInstanceProperty("spooler_job", spoolerJob);
+            setApiImplInstanceProperty("spooler_task", spoolerTask);
+            setApiImplInstanceProperty("spooler_log", spoolerLog);
         }
     }
 
-    private void setApiImplInstanceProperty(String name,java.lang.Object value){
-        apiImplType.GetProperty(name).SetValue(apiImplInstance,	Bridge.wrapJVM(value),null);
+    private void setApiImplInstanceProperty(String name, java.lang.Object value) {
+        apiImplType.GetProperty(name).SetValue(apiImplInstance, Bridge.wrapJVM(value), null);
     }
 
     public boolean spooler_init() throws Exception {
@@ -165,7 +162,6 @@ public class DotnetApiImpl {
     public void spooler_task_after() throws Exception {
         DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_task_after");
-
     }
 
     public boolean spooler_process_before() throws Exception {
@@ -175,22 +171,14 @@ public class DotnetApiImpl {
 
     private system.Object toDotnetBoolean(boolean value) throws Exception {
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                "ToBoolean", value ? "true" : "false");
+                "ToBoolean", value? "true" : "false");
     }
 
     public boolean spooler_process_after(boolean spooler_process_result)
             throws Exception {
-        system.Type[] paramTypes = new system.Type[] { system.Type.GetType("System.Boolean") };
-        system.Object[] params = new system.Object[] { toDotnetBoolean(spooler_process_result) };
+        system.Type[] paramTypes = new system.Type[]{system.Type.GetType("System.Boolean")};
+        system.Object[] params = new system.Object[]{toDotnetBoolean(spooler_process_result)};
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                "spooler_process_after", paramTypes, params,spooler_process_result);
-    }
-
-    public void close() throws Exception {
-        if (reference instanceof DotnetModuleReference.Powershell) {
-            if (apiImplType != null && apiImplInstance != null) {
-                DotnetInvoker.invokeMethod(apiImplType, apiImplInstance, "Close");
-            }
-        }
+                "spooler_process_after", paramTypes, params, spooler_process_result);
     }
 }

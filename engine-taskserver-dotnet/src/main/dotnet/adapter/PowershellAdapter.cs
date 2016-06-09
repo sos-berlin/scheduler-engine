@@ -35,8 +35,15 @@
 
         public override void spooler_task_after()
         {
-            var results = this.InvokeCommand("spooler_task_after");
-            this.Log(results);
+            try
+            {
+                var results = this.InvokeCommand("spooler_task_after");
+                this.Log(results);
+            }
+            finally
+            {
+                this.Close();
+            }
         }
 
         public override bool spooler_process_before()
@@ -100,18 +107,25 @@
 
         public override void spooler_exit()
         {
-            var results = this.InvokeCommand("spooler_exit");
-            this.Log(results);
-        }
-
-        public override void Close()
-        {
-            this.Shell.Dispose();
+            try
+            {
+                var results = this.InvokeCommand("spooler_exit");
+                this.Log(results);
+            }
+            finally
+            {
+                this.Close();
+            }
         }
 
         #endregion
 
         #region Private
+        private void Close()
+        {
+           this.Shell.Dispose();
+        }
+
         private void InitializeScript()
         {
             if (string.IsNullOrEmpty(this.Script))

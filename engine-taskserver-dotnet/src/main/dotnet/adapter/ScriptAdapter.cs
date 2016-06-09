@@ -30,7 +30,6 @@
         public abstract void spooler_on_error();
         public abstract bool spooler_process();
         public abstract void spooler_exit();
-        public abstract void Close();
         public bool ToBoolean(string value)
         {
             return Boolean.Parse(value);
