@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tunnel.data
 
 import com.sos.scheduler.engine.base.generic.IsString
 import com.sos.scheduler.engine.tunnel.data.TunnelToken._
+import java.security.SecureRandom
 import java.util.Base64
-import scala.util.Random
 import spray.json.DefaultJsonProtocol._
 
 /**
@@ -15,13 +15,14 @@ final case class TunnelToken(id: TunnelId, secret: Secret) {
 
 object TunnelToken {
   implicit val MyJsonFormat = jsonFormat2(apply)
-
-  private val SecretLength = 20
+  private val ByteCount = 18  // 144 bits (a UUID has 128 bits). For base64, a multiple of 3 bytes is good.
+  private val toUrlBase64 = Base64.getUrlEncoder.encodeToString _
+  private val random = new SecureRandom
 
   private[tunnel] def newSecret() = Secret({
-    val bytes = new Array[Byte](SecretLength)
-    Random.nextBytes(bytes)
-    Base64.getUrlEncoder.encodeToString(bytes)
+    val bytes = new Array[Byte](ByteCount)
+    random.nextBytes(bytes)
+    toUrlBase64(bytes) stripSuffix "="
   })
 
   final case class Secret(string: String) extends IsString {
@@ -30,4 +31,3 @@ object TunnelToken {
 
   object Secret extends IsString.HasJsonFormat[Secret]
 }
-
