@@ -1,18 +1,19 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.util.Timeout
+import com.google.inject.{AbstractModule, Provides}
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.client.AgentClientCommandMarshallingTest._
 import com.sos.scheduler.engine.agent.command.{CommandExecutor, CommandMeta}
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, Response}
 import com.sos.scheduler.engine.agent.data.commands.{AbortImmediately, Command, RequestFileOrderSourceContent, Terminate}
 import com.sos.scheduler.engine.agent.test.AgentTest
-import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
+import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
@@ -31,19 +32,20 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
     close()
   }
 
-  override protected def extraAgentModule = new ScalaAbstractModule {
-    def configure() = {
-      bindInstance[CommandExecutor](new CommandExecutor {
-        def executeCommand(command: Command, meta: CommandMeta): Future[command.Response] =
-          Future {
-            (command match {
-              case ExpectedTerminate ⇒ EmptyResponse
-              case xx ⇒ ExpectedFileOrderSourceContent
-            })
-            .asInstanceOf[command.Response]
-          }
-      })
-    }
+  override protected def extraAgentModule = new AbstractModule {
+    def configure() = {}
+
+    @Provides @Singleton
+    def commandExecutor(): CommandExecutor = new CommandExecutor {
+      def executeCommand(command: Command, meta: CommandMeta): Future[command.Response] =
+        Future {
+          (command match {
+            case ExpectedTerminate ⇒ EmptyResponse
+            case xx ⇒ ExpectedFileOrderSourceContent
+          })
+          .asInstanceOf[command.Response]
+        }
+      }
   }
 
   override implicit val patienceConfig = PatienceConfig(timeout = 10.s.toConcurrent)
