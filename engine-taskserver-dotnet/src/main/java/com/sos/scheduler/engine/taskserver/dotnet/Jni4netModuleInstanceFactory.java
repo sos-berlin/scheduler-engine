@@ -35,7 +35,7 @@ public final class Jni4netModuleInstanceFactory implements
             DotnetModuleReference reference, TaskContext taskContext)
             throws Exception {
         DotnetApiImpl dotnetObject = new DotnetApiImpl(dotnetBridge, reference, taskContext);
-        ;
+
         if (Job_impl.class.isAssignableFrom(clazz)) {
             return (T)new DotnetJob(taskContext, dotnetObject);
         } else if (Monitor_impl.class.isAssignableFrom(clazz)) {
