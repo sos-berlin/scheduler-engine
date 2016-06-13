@@ -172,6 +172,23 @@
                                     </artifactItems>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>Extract jni4net forked binary for Generate-Jni4Net.ps1</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.sos-berlin</groupId>
+                                            <artifactId>jni4net.n-sos</artifactId>
+                                            <version>${jni4net.version}</version>
+                                            <outputDirectory>target/jni4net_forked</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                     <plugin>

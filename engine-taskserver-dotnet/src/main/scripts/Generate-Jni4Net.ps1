@@ -24,6 +24,9 @@ $JobApiClassesDirectory = "target\jni4net-input\javaClasses"
 # Directory with extracted jni4net.zip distribution
 $Jni4Net = "target\jni4net"
 
+# Directory with extracted jni4net forked distribution
+$Jni4NetForked = "target\jni4net_forked"
+
 # Target DLL directory
 $ProxyDllResultDirectory = mkdir 'target/classes/com/sos/scheduler/engine/taskserver/dotnet/dlls' -force
 
@@ -52,6 +55,8 @@ ExecuteCommand "$Jni4Net\bin\proxygen.exe" @("""$jar""", "-wd", """$BuildDirecto
 $Jni4NetDlls | foreach {
     Copy-Item "$Jni4Net\lib\$_" $ProxyDllResultDirectory
 }
+# Overwrite the original jni4net.n DLL with the forked version
+Copy-Item (join-path $Jni4NetForked $Jni4NDllName) $ProxyDllResultDirectory -force
 
 # We simply mix our C# files with the generated ones to get a single DLL
 Copy-Item $CSharpSourceDirectory (join-path $BuildDirectory "clr") -recurse -force
@@ -73,4 +78,4 @@ Get-ChildItem -Path $csharpJobApiBuildDirectory | Where {!$_.PSIsContainer -and 
 $powershellRef = [PsObject].Assembly.Location
 ExecuteCommand "$WindowsSDK/csc" @("/nologo", "/warn:0", "/t:library", "/out:$ResultAdapterAssemblyDll",
                                    "/recurse:""$BuildDirectory\clr\*.cs""",
-                                   "/reference:$powershellRef;""$Jni4Net\lib\$Jni4NDllName""")
+                                   "/reference:$powershellRef;""$ProxyDllResultDirectory\$Jni4NDllName""")
