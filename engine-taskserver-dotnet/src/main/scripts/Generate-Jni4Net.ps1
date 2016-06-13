@@ -53,9 +53,23 @@ $Jni4NetDlls | foreach {
     Copy-Item "$Jni4Net\lib\$_" $ProxyDllResultDirectory
 }
 
-# CompileCSharp
 # We simply mix our C# files with the generated ones to get a single DLL
 Copy-Item $CSharpSourceDirectory (join-path $BuildDirectory "clr") -recurse -force
+# Replace a generated with the proxygen tool java.lang.String parameter and return value type to a .NET string type
+$csharpJobApiBuildDirectory = (join-path $BuildDirectory "clr\sos\spooler")
+Get-ChildItem -Path $csharpJobApiBuildDirectory | Where {!$_.PSIsContainer -and $_.extension -eq ".cs"} | Foreach-Object {
+     $content = [System.IO.File]::ReadAllText($_.FullName)
+     $content = $content.replace('global::java.lang.String ','string ')
+     $content = $content.replace('java.lang.String ','string ')
+     $content = $content.replace("global::net.sf.jni4net.utils.Convertor.ParStrongCp2J(","sos.spooler.JniValueConverter.ParStrongCp2J(")
+
+     $newFile = Join-Path -Path $csharpJobApiBuildDirectory -ChildPath $_.Name
+     if(Test-Path($newFile)){
+         Remove-Item $newFile -Force
+     }
+     [System.IO.File]::WriteAllText($newFile, $content);
+}
+# CompileCSharp
 $powershellRef = [PsObject].Assembly.Location
 ExecuteCommand "$WindowsSDK/csc" @("/nologo", "/warn:0", "/t:library", "/out:$ResultAdapterAssemblyDll",
                                    "/recurse:""$BuildDirectory\clr\*.cs""",
