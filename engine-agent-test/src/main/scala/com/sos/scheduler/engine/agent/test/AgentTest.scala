@@ -27,7 +27,7 @@ trait AgentTest extends BeforeAndAfterAll {
 
   protected lazy final val agent = {
     val confModule = new AgentModule(agentConfiguration)
-    val combinedModule = Modules.combine(confModule, extraAgentModule)
+    val combinedModule = Modules.`override`(confModule) `with` extraAgentModule
     new Agent(combinedModule).closeWithCloser
   }
 

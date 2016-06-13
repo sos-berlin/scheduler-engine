@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{Command, Terminate}
 import com.sos.scheduler.engine.agent.test.AgentTest
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
@@ -21,10 +22,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCloser with AgentTest {
 
-  override def afterAll() = {
-    onClose { super.afterAll() }
-    close()
-  }
+  override def afterAll() = closer.closeThen { super.afterAll() }
 
   override protected def extraAgentModule = new ScalaAbstractModule {
     def configure() = {
