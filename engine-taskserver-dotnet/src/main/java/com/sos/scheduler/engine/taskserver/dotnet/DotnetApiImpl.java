@@ -14,6 +14,7 @@ import system.reflection.Assembly;
 
 public class DotnetApiImpl {
     private static final String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
+    private static final String SCRIPT_CONTROL_CLASS_NAME = "sos.spooler.ScriptControlAdapter";
 
     private final DotnetBridge bridge;
     private final DotnetModuleReference reference;
@@ -37,6 +38,9 @@ public class DotnetApiImpl {
         } else if (reference instanceof DotnetModuleReference.DotnetClass) {
             path = ((DotnetModuleReference.DotnetClass)reference).dll();
             className = ((DotnetModuleReference.DotnetClass)reference).className();
+        } else if (reference instanceof DotnetModuleReference.ScriptControl) {
+            path = bridge.getDotnetAdapterDll();
+            className = SCRIPT_CONTROL_CLASS_NAME;
         } else
             throw new IllegalArgumentException();
 
@@ -65,41 +69,55 @@ public class DotnetApiImpl {
     private void initApiImplInstance(Spooler spooler, Job spoolerJob,
             Task spoolerTask, Log spoolerLog) {
 
+        system.Type[] types;
+        system.Object[] params;
         if (reference instanceof DotnetModuleReference.Powershell) {
-            system.Type[] types = {
+            types = new system.Type[]{
                     bridge.getSchedulerApiTypes()[0],
                     bridge.getSchedulerApiTypes()[1],
                     bridge.getSchedulerApiTypes()[2],
                     bridge.getSchedulerApiTypes()[3],
                     system.Type.GetType("System.String")
             };
-
-            system.Object[] params = {
+            params = new system.Object[]{
                     Bridge.wrapJVM(spooler),
                     Bridge.wrapJVM(spoolerJob),
                     Bridge.wrapJVM(spoolerTask),
                     Bridge.wrapJVM(spoolerLog),
                     new system.String(((DotnetModuleReference.Powershell)reference).script())
             };
-
-            apiImplInstance = Optional
-                    .ofNullable(DotnetInvoker.createInstance(apiImplType, types, params))
-                    .orElseThrow(
-                            () -> new RuntimeException(
-                                    String.format("[%s] Could not create a new instance of the class %s",
-                                            path.toString(), className)));
         } else if (reference instanceof DotnetModuleReference.DotnetClass) {
-            system.Type[] types = new system.Type[]{};
-            system.Object[] params = new system.Object[]{};
+            types = new system.Type[]{};
+            params = new system.Object[]{};
+        } else if (reference instanceof DotnetModuleReference.ScriptControl) {
+            types = new system.Type[]{
+                    bridge.getSchedulerApiTypes()[0],
+                    bridge.getSchedulerApiTypes()[1],
+                    bridge.getSchedulerApiTypes()[2],
+                    bridge.getSchedulerApiTypes()[3],
+                    system.Type.GetType("System.String"),
+                    system.Type.GetType("System.String")
+            };
+            params = new system.Object[]{
+                    Bridge.wrapJVM(spooler),
+                    Bridge.wrapJVM(spoolerJob),
+                    Bridge.wrapJVM(spoolerTask),
+                    Bridge.wrapJVM(spoolerLog),
+                    new system.String(((DotnetModuleReference.ScriptControl)reference).script()),
+                    new system.String(((DotnetModuleReference.ScriptControl)reference).language())
+            };
+        } else {
+            throw new IllegalArgumentException();
+        }
 
-            apiImplInstance = Optional
-                    .ofNullable(DotnetInvoker.createInstance(apiImplType, types, params))
-                    .orElseThrow(
-                            () -> new RuntimeException(
-                                    String.format(
-                                            "[%s] Could not create a new instance of the class %s",
-                                            path.toString(), className)));
+        apiImplInstance = Optional
+                .ofNullable(DotnetInvoker.createInstance(apiImplType, types, params))
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                String.format("[%s] Could not create a new instance of the class %s",
+                                        path.toString(), className)));
 
+        if (reference instanceof DotnetModuleReference.DotnetClass) {
             setApiImplInstanceProperty("spooler", spooler);
             setApiImplInstanceProperty("spooler_job", spoolerJob);
             setApiImplInstanceProperty("spooler_task", spoolerTask);
@@ -176,8 +194,8 @@ public class DotnetApiImpl {
 
     public boolean spooler_process_after(boolean spooler_process_result)
             throws Exception {
-        system.Type[] paramTypes = new system.Type[]{system.Type.GetType("System.Boolean")};
-        system.Object[] params = new system.Object[]{toDotnetBoolean(spooler_process_result)};
+        system.Type[] paramTypes = {system.Type.GetType("System.Boolean")};
+        system.Object[] params = {toDotnetBoolean(spooler_process_result)};
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_process_after", paramTypes, params, spooler_process_result);
     }

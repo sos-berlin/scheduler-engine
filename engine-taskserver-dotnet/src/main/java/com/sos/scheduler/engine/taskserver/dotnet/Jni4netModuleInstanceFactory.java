@@ -24,7 +24,9 @@ public final class Jni4netModuleInstanceFactory implements
     }
 
     public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
-        if (reference instanceof DotnetModuleReference.DotnetClass || reference instanceof DotnetModuleReference.Powershell) {
+        if (reference instanceof DotnetModuleReference.DotnetClass
+                || reference instanceof DotnetModuleReference.Powershell
+                || reference instanceof DotnetModuleReference.ScriptControl) {
             return newSchedulerDotnetAdapter(clazz, reference, taskContext);
         } else
             throw new RuntimeException("Unsupported " + reference.getClass());
