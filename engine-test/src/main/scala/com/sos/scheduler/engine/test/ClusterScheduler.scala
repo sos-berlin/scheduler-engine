@@ -36,7 +36,8 @@ extends AutoCloseable {
       s"-distributed-orders",
       s"-roles=scheduler",
       s"-db=${databaseConfiguration.hostwarePath}",
-      s"-configuration-directory=${controller.environment.configDirectory.getPath}",
+      s"-config=${controller.environment.configDirectory / "scheduler.xml"}",
+      s"-configuration-directory=${controller.environment.liveDirectory}",
       (controller.environment.configDirectory / "scheduler.xml").getPath)
     new ExtraScheduler(
       args = args,

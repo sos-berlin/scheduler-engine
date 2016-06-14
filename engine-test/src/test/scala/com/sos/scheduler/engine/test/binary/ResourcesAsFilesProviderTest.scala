@@ -15,7 +15,7 @@ final class ResourcesAsFilesProviderTest extends FreeSpec {
   "provideResourcesAsFiles" in {
     val directory = createTempDir()
     try {
-      val resources = (new PathMatchingResourcePatternResolver).getResources("classpath*:com/sos/scheduler/engine/test/config/*")
+      val resources = (new PathMatchingResourcePatternResolver).getResources("classpath*:com/sos/scheduler/engine/test/files/config/*")
       provideResourcesAsFiles(resources, directory).keySet shouldEqual Set("scheduler.xml", "factory.ini", "sos.ini")
     }
     finally removeDirectoryRecursivly(directory)

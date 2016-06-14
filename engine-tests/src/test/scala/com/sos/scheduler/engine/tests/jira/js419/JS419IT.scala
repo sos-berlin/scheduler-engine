@@ -26,7 +26,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class JS419IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val testIncludeFile = testEnvironment.configDirectory / "test-include.xml"
+  private lazy val testIncludeFile = testEnvironment.liveDirectory / "test-include.xml"
   private lazy val jobSubsystem = instance[JobSubsystem]
 
   "Changing includes holidays file should effect job" in {

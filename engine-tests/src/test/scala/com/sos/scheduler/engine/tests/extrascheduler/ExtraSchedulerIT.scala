@@ -58,7 +58,7 @@ final class ExtraSchedulerIT extends FreeSpec with ProvidesTestDirectory {
         s"-job-java-classpath=${System.getProperty("java.class.path")}",
         s"-roles=scheduler",
         s"-db=jdbc -class=org.h2.Driver jdbc:h2:mem:ExtraScheduler",
-        s"-configuration-directory=${testEnvironment.configDirectory.getPath}",
+        s"-configuration-directory=${testEnvironment.liveDirectory}",
         (testEnvironment.configDirectory / "scheduler.xml").getPath)
       val scheduler = new ExtraScheduler(args, httpPort = Some(masterHttpPort)).closeWithCloser
       val agent = new Agent(AgentConfiguration(httpPort = Some(agentHttpPort)))

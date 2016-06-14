@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.test
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
 import com.sos.scheduler.engine.common.scalautil.FileUtils.createShortNamedDirectory
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
@@ -29,11 +30,12 @@ final class TestEnvironment(
     fileTransformer: ResourceToFileTransformer)
 extends HasCloser {
 
-  val configDirectory = new File(directory, ConfigSubdirectoryName)
-  val liveDirectory = configDirectory
-  val logDirectory = directory
-  val schedulerLog = new File(logDirectory, "scheduler.log")
+  val configDirectory = directory / ConfigSubdirectoryName
+  val liveDirectory = configDirectory / "live"
+  val logDirectory = directory / "logs"
+  val schedulerLog = logDirectory / "scheduler.log"
   val databaseDirectory = directory
+  val agentDirectory = directory / "agent"  // Optional
   private var isPrepared = false
 
   def prepare(): Unit = {
@@ -47,8 +49,9 @@ extends HasCloser {
     makeDirectories(directory)
     removeDirectoryContentRecursivly(directory)
     makeDirectories(configDirectory)
+    makeDirectories(liveDirectory)
     makeDirectories(logDirectory)
-    TestEnvironmentFiles.copy(resourcePath, configDirectory, renameFile, fileTransformer)
+    TestEnvironmentFiles.copy(resourcePath, directory, renameFile, fileTransformer)
   }
 
   private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Seq[String] = {
@@ -68,32 +71,33 @@ extends HasCloser {
       "-ip-address=127.0.0.1",
       s"-env=JAVA_HOME=${sys.props("java.home")}",
       if (OperatingSystem.isUnix) "-env=" + libraryPathEnv(cppBinaries.directory) else "",
-      configDirectory.getPath
+      s"-config=${configDirectory / "scheduler.xml"}",
+      s"-configuration-directory=$liveDirectory"
     ) filter { _.nonEmpty }
   }
 
-  def sosIniFile =
-    new File(configDirectory, "sos.ini").getAbsoluteFile
+  def sosIniFile = (configDirectory / "sos.ini").getAbsoluteFile
 
-  def iniFile =
-    new File(configDirectory, "factory.ini").getAbsoluteFile
+  def iniFile = (configDirectory / "factory.ini").getAbsoluteFile
 
-  def fileFromPath(p: TypedPath) =
-    p.file(configDirectory)
+  def fileFromPath(p: TypedPath) = p.file(liveDirectory)
 
-  /** @return Pfad der Auftragsprotokolldatei für einfache OrderKey */
+  /**
+    * @return Pfad der Auftragsprotokolldatei für einfache OrderKey
+    */
   def orderLogFile(orderKey: OrderKey) =
     new File(logDirectory, s"order.${orderKey.jobChainPath.withoutStartingSlash}.${orderKey.id.string}.log")
 
   def taskLogFileString(jobPath: JobPath): String =
     GuavaFiles.toString(taskLogFile(jobPath), schedulerEncoding)
 
-  /** @return Pfad einer Task-Potokolldatei für einfachen JobPath. */
+  /**
+    * @return Pfad einer Task-Potokolldatei für einfachen JobPath.
+    */
   def taskLogFile(jobPath: JobPath) =
     new File(logDirectory, s"task.${jobPath.withoutStartingSlash}.log")
 
-  def subdirectory(name: String) =
-    new File(directory, name) sideEffect makeDirectory
+  def subdirectory(name: String) = new File(directory, name) sideEffect makeDirectory
 
   /** @return a temporary directory for use in &lt;file_order_source>.
     *         Under Windows, which allows not more than 260 character in a file path (the order log file),
@@ -107,7 +111,6 @@ extends HasCloser {
     }
 }
 
-
 object TestEnvironment {
   val TestSchedulerId = new SchedulerId("test")
   private val JobJavaOptions = "-Xms10m -Xmx20m"
@@ -116,7 +119,7 @@ object TestEnvironment {
   def apply(testConfiguration: TestConfiguration, directory: File) =
     new TestEnvironment(
       resourcePath = JavaResource(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
-      directory = directory,
+      directory = directory.toAbsolutePath,
       renameFile = testConfiguration.renameConfigurationFile,
       fileTransformer = testConfiguration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
