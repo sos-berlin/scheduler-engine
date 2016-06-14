@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.ClassLoaders._
 import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
-import com.sos.scheduler.engine.common.sprayutils.https.Https.enableTlsFor
+import com.sos.scheduler.engine.common.sprayutils.https.Https.acceptTlsCertificateFor
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
@@ -29,7 +29,7 @@ import spray.json.{JsValue, JsonParser}
   * @author Joacim Zschimmer
   */
 private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit,
-  keystore: Option[KeystoreReference] = None, userAndPassword: Option[UserAndPassword] = None)
+  userAndPassword: Option[UserAndPassword] = None, keystore: Option[KeystoreReference] = None)
 extends AutoCloseable {
 
   private val agentUris = AgentUris(agentUri)
@@ -37,17 +37,22 @@ extends AutoCloseable {
   import actorSystem.dispatcher
 
   keystore match {
-    case Some(ref) ⇒ enableTlsFor(agentUri, ref)
+    case Some(ref) ⇒ acceptTlsCertificateFor(ref, agentUri)
     case None ⇒
   }
 
   private val pipeline = {
-    val r = addHeader(Accept(`text/plain`)) ~> addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
-      encode(Gzip) ~> sendReceive ~> decode(Gzip) ~> unmarshal[String]
-    userAndPassword match {
-      case Some(UserAndPassword(user, SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password)) ~> r
-      case _ ⇒ r
+    val addUserAndPassword: RequestTransformer = userAndPassword match {
+      case Some(UserAndPassword(user, SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
+      case _ ⇒ identity
     }
+    addUserAndPassword ~>
+      addHeader(Accept(`text/plain`)) ~>
+      addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
+      encode(Gzip) ~>
+      sendReceive ~>
+      decode(Gzip) ~>
+      unmarshal[String]
   }
   private var needYamlDocumentSeparator = false
 
