@@ -4,12 +4,16 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
+import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
@@ -33,6 +37,7 @@ import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import java.nio.file.Files
 import java.time.ZoneId
 import java.util.UUID.randomUUID
 import javax.inject.Singleton
@@ -87,6 +92,13 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def keystoreReferenceOption(schedulerConfiguration: SchedulerConfiguration): Option[KeystoreReference] =
+    Files.exists(schedulerConfiguration.keystoreFile) option KeystoreReference(
+      schedulerConfiguration.keystoreFile.toUri.toURL,
+      Some(SecretString("jobscheduler")),
+      SecretString("jobscheduler"))
 
   @Provides @Singleton
   private def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =

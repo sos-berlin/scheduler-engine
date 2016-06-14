@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1480
 
-import com.sos.scheduler.engine.agent.client.AgentClientFactory
+import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.job.JobPath
@@ -27,7 +27,7 @@ final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     eventBus.awaitingEvent[InfoLogEvent](_.message contains TestJob.LogLine) {
       startJob(TestJobPath)
     }
-    val agentClient = instance[AgentClientFactory].apply(agentUri)
+    val agentClient = instance[SchedulerAgentClientFactory].apply(agentUri)
     val view = awaitSuccess(agentClient.task.overview)
     logger.info(view.toString)
     assert(view.currentTaskCount == 1)

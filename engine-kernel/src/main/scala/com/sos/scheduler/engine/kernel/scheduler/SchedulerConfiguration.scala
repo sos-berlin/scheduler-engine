@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.someUnless
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
@@ -15,7 +16,6 @@ trait SchedulerConfiguration {
 
   def mainConfigurationFile: File
 
-  /** Das Verzeichnis der Konfigurationsdatei scheduler.xml, Normalerweise "config" */
   def localConfigurationDirectory: File
 
   def logDirectory: File
@@ -29,6 +29,10 @@ trait SchedulerConfiguration {
   def udpPort: Option[Int]
 
   def webDirectoryUrlOption: Option[URL]
+
+  def keystoreFile = mainConfigurationDirectory / "https.jks"
+
+  def passwordFile = mainConfigurationDirectory / "private" / "password.txt"
 }
 
 object SchedulerConfiguration {

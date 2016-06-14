@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.test.agent
 
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.client.{AgentClient, AgentClientFactory}
+import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
+import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -26,7 +27,7 @@ trait AgentWithSchedulerTest extends HasCloser {
     agent
   }
   protected final lazy val agentUri = agent.localUri
-  protected final lazy val agentClient: AgentClient = instance[AgentClientFactory].apply(agent.localUri)
+  protected final lazy val agentClient: AgentClient = instance[SchedulerAgentClientFactory].apply(agent.localUri)
 
   protected def newAgentConfiguration() = AgentConfiguration.forTest()
 

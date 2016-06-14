@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
 import com.sos.scheduler.engine.client.agent.CppFileOrderSourceClient._
 import com.sos.scheduler.engine.common.async.CallQueue
@@ -23,7 +22,7 @@ import scala.util.Try
  */
 @ForCpp
 final class CppFileOrderSourceClient private(
-  agentClientFactory: AgentClientFactory,
+  agentClientFactory: SchedulerAgentClientFactory,
   agentUri: String,
   directory: String,
   regex: String,
@@ -68,7 +67,7 @@ object CppFileOrderSourceClient {
   @ForCpp
   def apply(agentUri: String, directory: String, regex: String, durationMillis: Long)(injector: Injector) =
     new CppFileOrderSourceClient(
-      injector.instance[AgentClientFactory],
+      injector.instance[SchedulerAgentClientFactory],
       agentUri = agentUri,
       directory = directory,
       regex = regex,
