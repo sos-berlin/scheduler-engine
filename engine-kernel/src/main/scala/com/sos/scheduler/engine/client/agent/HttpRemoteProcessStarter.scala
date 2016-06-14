@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.AgentClientFactory
 import com.sos.scheduler.engine.agent.data.web.AgentUris
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.{RichClosersAutoCloseable, RichClosersCloser}
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.tunnel.client.WebTunnelClient
 import javax.inject.{Inject, Singleton}
@@ -14,7 +13,7 @@ import scala.concurrent.Future
  */
 @Singleton
 final class HttpRemoteProcessStarter @Inject private(
-  agentClientFactory: AgentClientFactory,
+  agentClientFactory: SchedulerAgentClientFactory,
   newHeartbeatRequestor: HeartbeatRequestor.Factory)
   (implicit actorSystem: ActorSystem) {
 
@@ -38,6 +37,7 @@ final class HttpRemoteProcessStarter @Inject private(
         val tunnelClient = new WebTunnelClient(
           processDescriptor_.tunnelToken,
           AgentUris(agentUri).tunnel(processDescriptor_.tunnelToken.id),
+          agentClient.addUserAndPassword,
           timing map newHeartbeatRequestor)(
           HttpRemoteProcessStarter.this.actorSystem)
         .closeWithCloser
