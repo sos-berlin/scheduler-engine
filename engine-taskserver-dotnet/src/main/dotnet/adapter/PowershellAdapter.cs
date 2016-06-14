@@ -118,7 +118,7 @@
             var results = this.InvokeCommand("spooler_process_after", spoolerProcessResult);
             var index = GetReturnValueIndex(results);
             this.Log(results, index);
-            return GetReturnValue(results, index, true);
+            return GetReturnValue(results, index, spoolerProcessResult);
         }
 
         public override void spooler_on_success()
