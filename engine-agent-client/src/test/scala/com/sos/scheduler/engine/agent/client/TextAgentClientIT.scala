@@ -100,7 +100,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
   }
 
   private def newTextAgentClient(output: String ⇒ Unit, login: Option[UserAndPassword]) =
-    new TextAgentClient(agentUri = agent.localUri, output, keystore = Some(keystoreReference), login)
+    new TextAgentClient(agentUri = agent.localUri, output, login, Some(keystoreReference))
 }
 
 private object TextAgentClientIT {

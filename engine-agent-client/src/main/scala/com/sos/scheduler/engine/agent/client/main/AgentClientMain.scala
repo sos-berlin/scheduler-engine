@@ -16,7 +16,7 @@ object AgentClientMain {
 
   def main(args: Array[String]): Unit =
     try {
-      val rc = run(args, println, None)
+      val rc = run(args, println)
       System.exit(rc)
     }
     catch { case NonFatal(t) ⇒
@@ -25,9 +25,9 @@ object AgentClientMain {
       System.exit(1)
     }
 
-  private[client] def run(args: Seq[String], print: String ⇒ Unit, keystoreRef: Option[KeystoreReference] = None): Int = {
+  private[client] def run(args: Seq[String], print: String ⇒ Unit): Int = {
     val (agentUri, operations) = parseArgs(args)
-    autoClosing(new TextAgentClient(agentUri, print, keystoreRef)) { client ⇒
+    autoClosing(new TextAgentClient(agentUri, print)) { client ⇒
       if (operations.isEmpty)
         if (client.checkIsResponding()) 0 else 1
       else {
