@@ -10,9 +10,10 @@ import com.sos.scheduler.engine.common.scalautil.ConcurrentMemoizer
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
-import com.sos.scheduler.engine.common.sprayutils.https.{Https, KeystoreReference}
+import com.sos.scheduler.engine.common.sprayutils.https.Https
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import java.nio.file.{Files, Path}
+import java.nio.file.Files.exists
+import java.nio.file.Path
 import javax.inject.{Inject, Singleton}
 import scala.collection.immutable
 import spray.http.Uri
@@ -26,14 +27,12 @@ final class SchedulerAgentClientFactory @Inject private[client](
   schedulerConfiguration: SchedulerConfiguration,
   licenseKeys: immutable.Iterable[LicenseKeyString]) {
 
-  private val keystoreReferenceOption = Files.exists(schedulerConfiguration.keystoreFile) option KeystoreReference(
-    schedulerConfiguration.keystoreFile.toUri.toURL,
-    Some(SecretString("jobscheduler")),
-    SecretString("jobscheduler"))
+  private val keystoreReferenceOption = exists(schedulerConfiguration.agentHttpsKeystoreFile) option
+    schedulerConfiguration.agentHttpsKeystoreReference
 
   private val userAndPassword = {
     val file = schedulerConfiguration.passwordFile
-    Files.exists(file) option {
+    exists(file) option {
       UserAndPassword(schedulerConfiguration.schedulerId.string, readPassword(file))
     }
   }

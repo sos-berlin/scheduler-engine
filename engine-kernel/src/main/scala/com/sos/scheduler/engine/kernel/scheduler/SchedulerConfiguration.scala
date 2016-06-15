@@ -1,7 +1,9 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
+import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.someUnless
+import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import java.io.File
@@ -30,9 +32,14 @@ trait SchedulerConfiguration {
 
   def webDirectoryUrlOption: Option[URL]
 
-  def keystoreFile = mainConfigurationDirectory / "https.jks"
+  def agentHttpsKeystoreFile = mainConfigurationDirectory / "agent-https.jks"
 
-  def passwordFile = mainConfigurationDirectory / "private" / "password.txt"
+  val agentHttpsKeystoreReference = KeystoreReference(
+    agentHttpsKeystoreFile.toUri.toURL,
+    Some(SecretString("jobscheduler")),
+    Some(SecretString("jobscheduler")))
+
+  def passwordFile = mainConfigurationDirectory / "private" / "own-password.txt"
 }
 
 object SchedulerConfiguration {
