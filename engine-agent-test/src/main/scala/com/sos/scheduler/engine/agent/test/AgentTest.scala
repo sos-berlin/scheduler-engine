@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.configuration.inject.AgentModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -32,7 +32,7 @@ trait AgentTest extends BeforeAndAfterAll {
   }
 
   override protected def beforeAll() = {
-    awaitResult(agent.start(), 10.s)
+    agent.start() await 10.s
     super.beforeAll()
   }
 }

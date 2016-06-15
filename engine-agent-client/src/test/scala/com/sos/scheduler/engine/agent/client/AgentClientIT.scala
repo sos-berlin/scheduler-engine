@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
@@ -61,7 +62,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
   })
   private lazy val client = injector.instance[AgentClientFactory].apply(agentUri = agent.localUri)
 
-  override def beforeAll() = awaitResult(agent.start(), 10.s)
+  override def beforeAll() = agent.start() await 10.s
 
   override def afterAll() = {
     closer.close()
