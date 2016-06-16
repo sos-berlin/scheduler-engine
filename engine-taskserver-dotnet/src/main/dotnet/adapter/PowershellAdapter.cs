@@ -39,7 +39,7 @@
                 return true;
             }
 
-            if (!this.InitializeScript())
+            if (!this.InitializeScript(false))
             {
                 return false;
             }
@@ -65,7 +65,7 @@
 
         public override bool spooler_task_before()
         {
-            if (!this.InitializeScript())
+            if (!this.InitializeScript(false))
             {
                 return false;
             }
@@ -100,17 +100,17 @@
         public override bool spooler_process()
         {
             var defaultReturnValue = this.spooler_task.order() != null;
-            if (!this.isShellMode)
-            {
-                var results = this.InvokeCommand("spooler_process");
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
 
-                return GetReturnValue(results, index, defaultReturnValue);
+            if (this.isShellMode)
+            {
+                this.InitializeScript(true);
+                return defaultReturnValue;
             }
 
-            this.InitializeScript();
-            return defaultReturnValue;
+            var results = this.InvokeCommand("spooler_process");
+            var index = GetReturnValueIndex(results);
+            this.Log(results, index);
+            return GetReturnValue(results, index, defaultReturnValue);
         }
 
         public override bool spooler_process_after(bool spoolerProcessResult)
@@ -192,10 +192,10 @@
             this.isShellMode = functionSpoolerProcess == null;
         }
 
-        private bool InitializeScript()
+        private bool InitializeScript(bool useGlobalScope)
         {
             this.shell.Commands.Clear();
-            this.shell.AddScript(this.Script, this.isShellMode);
+            this.shell.AddScript(this.Script,useGlobalScope);
             this.shell.AddCommand("Out-String").AddParameter("Stream",true);
             var results = this.shell.Invoke();
             var success = this.shell.Streams.Error.Count == 0;
