@@ -36,10 +36,10 @@ public class DotnetBridge {
         Bridge.LoadAndRegisterAssemblyFrom(this.dotnetAdapterDll.toFile());
 
         schedulerApiTypes = new system.Type[4];
-        schedulerApiTypes[0] = apiProxyAssembly.GetType("sos.spooler.Spooler");
-        schedulerApiTypes[1] = apiProxyAssembly.GetType("sos.spooler.Job");
-        schedulerApiTypes[2] = apiProxyAssembly.GetType("sos.spooler.Task");
-        schedulerApiTypes[3] = apiProxyAssembly.GetType("sos.spooler.Log");
+        schedulerApiTypes[0] = apiProxyAssembly.GetType("sos.spooler.Log");
+        schedulerApiTypes[1] = apiProxyAssembly.GetType("sos.spooler.Task");
+        schedulerApiTypes[2] = apiProxyAssembly.GetType("sos.spooler.Job");
+        schedulerApiTypes[3] = apiProxyAssembly.GetType("sos.spooler.Spooler");
 
         if (Arrays.asList(schedulerApiTypes).contains(null)) {
             throw new Exception(

@@ -28,21 +28,22 @@ public class DotnetApiImpl {
         reference = ref;
         setPropertiesFromReference();
         apiImplType = apiImplType(path, className);
-        initApiImplInstance(taskContext.spooler(), taskContext.spoolerJob(), taskContext.spoolerTask(), taskContext.spoolerLog());
+        initApiImplInstance(taskContext.spoolerLog(), taskContext.spoolerTask(), taskContext.spoolerJob(), taskContext.spooler());
     }
 
     private void setPropertiesFromReference() {
-        if (reference instanceof DotnetModuleReference.Powershell) {
-            path = bridge.getDotnetAdapterDll();
-            className = POWERSHELL_CLASS_NAME;
-        } else if (reference instanceof DotnetModuleReference.DotnetClass) {
+        if (reference instanceof DotnetModuleReference.DotnetClass) {
             path = ((DotnetModuleReference.DotnetClass)reference).dll();
             className = ((DotnetModuleReference.DotnetClass)reference).className();
+        } else if (reference instanceof DotnetModuleReference.Powershell) {
+            path = bridge.getDotnetAdapterDll();
+            className = POWERSHELL_CLASS_NAME;
         } else if (reference instanceof DotnetModuleReference.ScriptControl) {
             path = bridge.getDotnetAdapterDll();
             className = SCRIPT_CONTROL_CLASS_NAME;
-        } else
-            throw new IllegalArgumentException();
+        } else {
+            throw new RuntimeException("Unsupported reference " + reference.getClass());
+        }
 
         if (!Files.exists(path)) {
             throw new RuntimeException(String.format("File not found: %s",
@@ -66,8 +67,7 @@ public class DotnetApiImpl {
                                 className)));
     }
 
-    private void initApiImplInstance(Spooler spooler, Job spoolerJob,
-            Task spoolerTask, Log spoolerLog) {
+    private void initApiImplInstance(Log spoolerLog, Task spoolerTask, Job spoolerJob, Spooler spooler) {
 
         system.Type[] types;
         system.Object[] params;
@@ -80,10 +80,10 @@ public class DotnetApiImpl {
                     system.Type.GetType("System.String")
             };
             params = new system.Object[]{
-                    Bridge.wrapJVM(spooler),
-                    Bridge.wrapJVM(spoolerJob),
-                    Bridge.wrapJVM(spoolerTask),
                     Bridge.wrapJVM(spoolerLog),
+                    Bridge.wrapJVM(spoolerTask),
+                    Bridge.wrapJVM(spoolerJob),
+                    Bridge.wrapJVM(spooler),
                     new system.String(((DotnetModuleReference.Powershell)reference).script())
             };
         } else if (reference instanceof DotnetModuleReference.DotnetClass) {
@@ -99,10 +99,10 @@ public class DotnetApiImpl {
                     system.Type.GetType("System.String")
             };
             params = new system.Object[]{
-                    Bridge.wrapJVM(spooler),
-                    Bridge.wrapJVM(spoolerJob),
-                    Bridge.wrapJVM(spoolerTask),
                     Bridge.wrapJVM(spoolerLog),
+                    Bridge.wrapJVM(spoolerTask),
+                    Bridge.wrapJVM(spoolerJob),
+                    Bridge.wrapJVM(spooler),
                     new system.String(((DotnetModuleReference.ScriptControl)reference).script()),
                     new system.String(((DotnetModuleReference.ScriptControl)reference).language())
             };
@@ -118,10 +118,10 @@ public class DotnetApiImpl {
                                         path.toString(), className)));
 
         if (reference instanceof DotnetModuleReference.DotnetClass) {
-            setApiImplInstanceProperty("spooler", spooler);
-            setApiImplInstanceProperty("spooler_job", spoolerJob);
-            setApiImplInstanceProperty("spooler_task", spoolerTask);
             setApiImplInstanceProperty("spooler_log", spoolerLog);
+            setApiImplInstanceProperty("spooler_task", spoolerTask);
+            setApiImplInstanceProperty("spooler_job", spoolerJob);
+            setApiImplInstanceProperty("spooler", spooler);
         }
     }
 
@@ -129,16 +129,14 @@ public class DotnetApiImpl {
         apiImplType.GetProperty(name).SetValue(apiImplInstance, Bridge.wrapJVM(value), null);
     }
 
+    private system.Object toDotnetBoolean(boolean value) throws Exception {
+        return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
+                "ToBoolean", value? "true" : "false");
+    }
+
     public boolean spooler_init() throws Exception {
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_init", true);
-    }
-
-    public void spooler_exit() throws Exception {
-        if (apiImplType != null && apiImplInstance != null) {
-            DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                    "spooler_exit");
-        }
     }
 
     public boolean spooler_open() throws Exception {
@@ -146,22 +144,15 @@ public class DotnetApiImpl {
                 "spooler_open", true);
     }
 
-    public void spooler_close() throws Exception {
-        if (apiImplType != null && apiImplInstance != null) {
-            DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                    "spooler_close");
-        }
-    }
-
     public boolean spooler_process() throws Exception {
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_process", false);
     }
 
-    public void spooler_on_error() throws Exception {
+    public void spooler_close() throws Exception {
         if (apiImplType != null && apiImplInstance != null) {
             DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                    "spooler_on_error");
+                    "spooler_close");
         }
     }
 
@@ -172,24 +163,28 @@ public class DotnetApiImpl {
         }
     }
 
+    public void spooler_on_error() throws Exception {
+        if (apiImplType != null && apiImplInstance != null) {
+            DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
+                    "spooler_on_error");
+        }
+    }
+
+    public void spooler_exit() throws Exception {
+        if (apiImplType != null && apiImplInstance != null) {
+            DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
+                    "spooler_exit");
+        }
+    }
+
     public boolean spooler_task_before() throws Exception {
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_task_before", true);
     }
 
-    public void spooler_task_after() throws Exception {
-        DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                "spooler_task_after");
-    }
-
     public boolean spooler_process_before() throws Exception {
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_process_before", true);
-    }
-
-    private system.Object toDotnetBoolean(boolean value) throws Exception {
-        return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
-                "ToBoolean", value? "true" : "false");
     }
 
     public boolean spooler_process_after(boolean spooler_process_result)
@@ -198,5 +193,10 @@ public class DotnetApiImpl {
         system.Object[] params = {toDotnetBoolean(spooler_process_result)};
         return DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
                 "spooler_process_after", paramTypes, params, spooler_process_result);
+    }
+
+    public void spooler_task_after() throws Exception {
+        DotnetInvoker.invokeMethod(apiImplType, apiImplInstance,
+                "spooler_task_after");
     }
 }

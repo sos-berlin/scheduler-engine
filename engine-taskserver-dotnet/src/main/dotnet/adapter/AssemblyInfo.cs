@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("com.sos-berlin.engine.engine-job-api-dotnet")]
 [assembly: AssemblyDescription("JobScheduler API for .Net jobs")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SOS Berlin")]
+[assembly: AssemblyCompany("Software- und Organisations-Service GmbH")]
 [assembly: AssemblyProduct("com.sos-berlin.engine.engine-job-api-dotnet")]
 [assembly: AssemblyCopyright("Copyright ©2016")]
 [assembly: AssemblyTrademark("")]

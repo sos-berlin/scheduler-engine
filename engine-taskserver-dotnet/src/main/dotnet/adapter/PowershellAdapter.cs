@@ -15,22 +15,24 @@
         #region Constructor
 
         public PowershellAdapter(
-            Spooler contextSpooler, Job contextJob, Task contextTask, Log contextLog, String scriptContent)
-            : base(contextSpooler, contextJob, contextTask, contextLog, scriptContent)
+            Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String scriptContent)
+            : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
         {
             this.shell = PowerShell.Create();
 
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler", this.spooler);
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_job", this.spooler_job);
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_task", this.spooler_task);
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);
+            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_task", this.spooler_task);
+            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_job", this.spooler_job);
+            this.shell.Runspace.SessionStateProxy.SetVariable("spooler", this.spooler);
 
             this.ParseScript();
         }
 
         #endregion
 
-        #region Public override methods
+        #region Public JobScheduler API methods
+
+        #region Public Job_impl methods
 
         public override bool spooler_init()
         {
@@ -63,62 +65,29 @@
             return GetReturnValue(results, index, true);
         }
 
-        public override bool spooler_task_before()
-        {
-            if (!this.InitializeScript(false))
-            {
-                return false;
-            }
-
-            var results = this.InvokeCommand("spooler_task_before");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, true);
-        }
-
-        public override void spooler_task_after()
-        {
-            try
-            {
-                var results = this.InvokeCommand("spooler_task_after");
-                this.Log(results);
-            }
-            finally
-            {
-                this.Close();
-            }
-        }
-
-        public override bool spooler_process_before()
-        {
-            var results = this.InvokeCommand("spooler_process_before");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, true);
-        }
-
         public override bool spooler_process()
         {
-            var defaultReturnValue = this.spooler_task.order() != null;
-
             if (this.isShellMode)
             {
                 this.InitializeScript(true);
-                return defaultReturnValue;
+                return this.IsOrderJob;
             }
 
             var results = this.InvokeCommand("spooler_process");
             var index = GetReturnValueIndex(results);
             this.Log(results, index);
-            return GetReturnValue(results, index, defaultReturnValue);
+            return GetReturnValue(results, index, this.IsOrderJob);
         }
 
-        public override bool spooler_process_after(bool spoolerProcessResult)
+        public override void spooler_close()
         {
-            var results = this.InvokeCommand("spooler_process_after", spoolerProcessResult);
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, spoolerProcessResult);
+            if (this.isShellMode)
+            {
+                return;
+            }
+
+            var results = this.InvokeCommand("spooler_close");
+            this.Log(results);
         }
 
         public override void spooler_on_success()
@@ -143,17 +112,6 @@
             this.Log(results);
         }
 
-        public override void spooler_close()
-        {
-            if (this.isShellMode)
-            {
-                return;
-            }
-
-            var results = this.InvokeCommand("spooler_close");
-            this.Log(results);
-        }
-
         public override void spooler_exit()
         {
             try
@@ -172,6 +130,54 @@
                 this.Close();
             }
         }
+
+        #endregion
+
+        #region Public Monitor_impl methods
+
+        public override bool spooler_task_before()
+        {
+            if (!this.InitializeScript(false))
+            {
+                return false;
+            }
+
+            var results = this.InvokeCommand("spooler_task_before");
+            var index = GetReturnValueIndex(results);
+            this.Log(results, index);
+            return GetReturnValue(results, index, true);
+        }
+
+        public override bool spooler_process_before()
+        {
+            var results = this.InvokeCommand("spooler_process_before");
+            var index = GetReturnValueIndex(results);
+            this.Log(results, index);
+            return GetReturnValue(results, index, true);
+        }
+
+        public override bool spooler_process_after(bool spoolerProcessResult)
+        {
+            var results = this.InvokeCommand("spooler_process_after", spoolerProcessResult);
+            var index = GetReturnValueIndex(results);
+            this.Log(results, index);
+            return GetReturnValue(results, index, spoolerProcessResult);
+        }
+
+        public override void spooler_task_after()
+        {
+            try
+            {
+                var results = this.InvokeCommand("spooler_task_after");
+                this.Log(results);
+            }
+            finally
+            {
+                this.Close();
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -195,8 +201,8 @@
         private bool InitializeScript(bool useGlobalScope)
         {
             this.shell.Commands.Clear();
-            this.shell.AddScript(this.Script,useGlobalScope);
-            this.shell.AddCommand("Out-String").AddParameter("Stream",true);
+            this.shell.AddScript(this.Script, useGlobalScope);
+            this.shell.AddCommand("Out-String").AddParameter("Stream", true);
             var results = this.shell.Invoke();
             var success = this.shell.Streams.Error.Count == 0;
             this.Log(results);
