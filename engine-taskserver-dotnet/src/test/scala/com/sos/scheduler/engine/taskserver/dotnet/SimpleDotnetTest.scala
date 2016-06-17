@@ -54,7 +54,7 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
       val spoolerLogInvoker, spoolerTaskInvoker, orderInvoker, paramsInvoker = mock[sos.spooler.Invoker]
       val order = new sos.spooler.Order(orderInvoker)
       val variableSet = new sos.spooler.Variable_set(paramsInvoker)
-      when(spoolerTaskInvoker.call("<order", Array())).thenReturn(order, null)
+      when(spoolerTaskInvoker.call("<order", Array())).thenReturn(order, order)
       when(orderInvoker.call("<params", Array())).thenReturn(variableSet, null)
       when(paramsInvoker.call("<value", Array("TEST"))).thenReturn("HELLO", null)
       val taskContext = TaskContext(

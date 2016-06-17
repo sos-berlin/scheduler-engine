@@ -20,16 +20,14 @@ final class SimplePowershellTest extends SimpleDotnetTest {
         throw "$TestErrorMessage"
       }"""))
 
-    if (false) { // FIXME
-      addStandardTest(DotnetModuleReference.Powershell(
-        """
-      function spooler_process() {
-        $orderVariables = $spooler_task.order().params()
-        $value = $orderVariables.value("TEST")
-        $orderVariables.set_value("TEST", "TEST-CHANGED")
-        $spooler_log.log(0, $value)
-        return $true
-      }"""))
-    }
+    addStandardTest(DotnetModuleReference.Powershell(
+       """
+    function spooler_process() {
+      $orderVariables = $spooler_task.order().params()
+      $value = $orderVariables.value("TEST")
+      $orderVariables.set_value("TEST", "TEST-CHANGED")
+      $spooler_log.log(0, $value)
+      return $true
+    }"""))
   }
 }
