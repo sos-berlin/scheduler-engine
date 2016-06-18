@@ -3,11 +3,15 @@ package com.sos.scheduler.engine.kernel.scheduler
 import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.someUnless
+import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.typesafe.config.{Config, ConfigFactory}
 import java.io.File
 import java.net.{URI, URL}
+import java.nio.file.Files._
 import javax.inject.{Inject, Provider}
 
 trait SchedulerConfiguration {
@@ -32,21 +36,23 @@ trait SchedulerConfiguration {
 
   def webDirectoryUrlOption: Option[URL]
 
-  def agentHttpsKeystoreFile = mainConfigurationDirectory / "agent-https.jks"
-
-  val agentHttpsKeystoreReference = KeystoreReference(
-    agentHttpsKeystoreFile.toUri.toURL,
-    Some(SecretString("jobscheduler")),
-    Some(SecretString("jobscheduler")))
-
-  def passwordFile = mainConfigurationDirectory / "private" / "own-password.txt"
+  lazy val keystoreReferenceOption = {
+    val file = mainConfigurationDirectory / "agent-https.jks"
+    exists(file) option KeystoreReference(
+      file.toUri.toURL,
+      Some(SecretString("jobscheduler")),
+      Some(SecretString("jobscheduler")))
+  }
 }
 
 object SchedulerConfiguration {
+  private val ConfigResource = JavaResource("com/sos/scheduler/engine/kernel/configuration/default.conf")
+  lazy val DefaultConfig: Config = ConfigFactory.load(getClass.getClassLoader, ConfigResource.path)
+
   final class InjectProvider @Inject private(spoolerC: SpoolerC) extends Provider[SchedulerConfiguration] {
     private lazy val settingsC = spoolerC.settings
 
-    def get() = new SchedulerConfiguration {
+    private lazy val conf = new SchedulerConfiguration {
       def clusterMemberId: ClusterMemberId =
         ClusterMemberId(spoolerC.cluster_member_id)
 
@@ -62,8 +68,8 @@ object SchedulerConfiguration {
 
       def logDirectory: File =
         spoolerC.log_directory match {
-          case null | "" | "*stderr" => throw new SchedulerException("Scheduler runs without a log directory")
-          case o => new File(o)
+          case null | "" | "*stderr" ⇒ throw new SchedulerException("Scheduler runs without a log directory")
+          case o ⇒ new File(o)
         }
 
       def schedulerId: SchedulerId =
@@ -78,9 +84,11 @@ object SchedulerConfiguration {
 
       lazy val webDirectoryUrlOption: Option[URL] =
         settingsC._web_directory match {
-          case "" => None
-          case o => Some(new URI(o).toURL)
+          case "" ⇒ None
+          case o ⇒ Some(new URI(o).toURL)
         }
     }
+
+    def get() = conf
   }
 }
