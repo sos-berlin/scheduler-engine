@@ -123,8 +123,10 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         }
       }
       eventPipe.queued[OrderStepStartedEvent] shouldBe empty
-      eventPipe.nextKeyedEvents[OrderStepStartedEvent](Set(a2OrderKey, b2OrderKey)) map { _.state } shouldEqual List(OrderState("100"), OrderState("100"))
+      val eventPipe2 = controller.newEventPipe()
       eventPipe.nextKeyedEvents[OrderFinishedEvent](Set(a2OrderKey, b2OrderKey))
+      eventPipe2.queued[OrderStepStartedEvent] filter { e ⇒ Set(a2OrderKey, b2OrderKey)(e.key) } map { _.state } shouldEqual
+        List(OrderState("100"), OrderState("100"))
     }
   }
 
