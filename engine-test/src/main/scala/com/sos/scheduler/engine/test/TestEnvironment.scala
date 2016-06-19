@@ -19,6 +19,7 @@ import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.TestEnvironment._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
+import java.nio.file.Files.{createDirectory, exists}
 import java.nio.file._
 import scala.collection.immutable
 
@@ -35,7 +36,7 @@ extends HasCloser {
   val logDirectory = directory / "logs"
   val schedulerLog = logDirectory / "scheduler.log"
   val databaseDirectory = directory
-  val agentDirectory = directory / "agent"  // Optional
+  lazy val agent = new AgentEnvironment(directory)
   private var isPrepared = false
 
   def prepare(): Unit = {
@@ -128,5 +129,12 @@ object TestEnvironment {
     val varName = operatingSystem.getDynamicLibraryEnvironmentVariableName
     val previous = nullToEmpty(System.getenv(varName))
     s"$varName=" + OperatingSystem.concatFileAndPathChain(directory, previous)
+  }
+
+  final class AgentEnvironment(directory: Path) {
+    val dataDirectory = directory / "agent"
+    val logDirectory = dataDirectory / "logs"
+    if (!exists(dataDirectory)) createDirectory(dataDirectory)
+    if (!exists(logDirectory)) createDirectory(logDirectory)
   }
 }
