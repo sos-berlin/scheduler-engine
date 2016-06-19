@@ -32,8 +32,7 @@ import spray.routing.authentication._
 @RunWith(classOf[JUnitRunner])
 final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCloser with AgentTest with AgentConfigDirectoryProvider {
 
-  override protected def agentConfiguration = super.agentConfiguration.copy(
-    dataDirectory = Some(dataDirectory),
+  override protected def agentConfiguration = AgentConfiguration.forTest(Some(dataDirectory)).copy(
     httpPort = None)
     .withHttpsPort(super.agentConfiguration.httpPort)
 

@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.EventSubscription
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import java.nio.file.Path
 
 /**
  * @author Joacim Zschimmer
@@ -28,7 +29,9 @@ trait AgentWithSchedulerTest extends HasCloser with ScalaSchedulerTest {
   protected final lazy val agentUri = agent.localUri
   protected final lazy val agentClient: AgentClient = instance[SchedulerAgentClientFactory].apply(agent.localUri)
 
-  protected def newAgentConfiguration() = AgentConfiguration.forTest()
+  protected def newAgentConfiguration(): AgentConfiguration = newAgentConfiguration(None)
+
+  protected final def newAgentConfiguration(data: Option[Path]) = AgentConfiguration.forTest(data = data)
 
   protected override def onSchedulerActivated() = {
     val started = agent.start()
