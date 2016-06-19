@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
@@ -26,7 +25,7 @@ import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._
-import java.nio.file.Files.{createTempDirectory, delete, list}
+import java.nio.file.Files.{createTempDirectory, delete}
 import java.time.Instant
 import java.time.Instant.now
 import org.junit.runner.RunWith
