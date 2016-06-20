@@ -33,8 +33,8 @@ import spray.routing.authentication._
 final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCloser with AgentTest with AgentConfigDirectoryProvider {
 
   override protected def agentConfiguration = AgentConfiguration.forTest(Some(dataDirectory)).copy(
-    httpPort = None)
-    .withHttpsPort(super.agentConfiguration.httpPort.get)
+    httpAddress = None)
+    .withHttpsInetSocketAddress(super.agentConfiguration.httpAddress.get)
 
   override def afterAll() = {
     onClose { super.afterAll() }

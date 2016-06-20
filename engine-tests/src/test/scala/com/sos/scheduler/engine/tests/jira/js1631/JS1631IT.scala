@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -20,8 +21,8 @@ final class JS1631IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   override protected def newAgentConfiguration() = {
     PrivateHttpJksResource.copyToFile(testEnvironment.agent.dataDirectory / "config/private/private-https.jks")
     super.newAgentConfiguration(data = Some(testEnvironment.agent.dataDirectory)).copy(
-      httpPort = None)
-      .withHttpsPort(findRandomFreeTcpPort())
+      httpAddress = None)
+      .withHttpsInetSocketAddress(new InetSocketAddress("127.0.0.1", findRandomFreeTcpPort()))
   }
 
   "Run job over HTTPS Agent" in {
