@@ -21,7 +21,6 @@ import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import java.nio.file.Files
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
@@ -48,10 +47,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
   private implicit val closer = Closer.create()
 
   private lazy val agent = {
-    val conf = AgentConfiguration(
-      httpPort = Some(findRandomFreeTcpPort()),
-      httpInterfaceRestriction = Some("127.0.0.1"),
-      uriPathPrefix = "test")
+    val conf = AgentConfiguration.forTest().copy(uriPathPrefix = "test")
     new Agent(conf).closeWithCloser
   }
 

@@ -61,7 +61,7 @@ final class ExtraSchedulerIT extends FreeSpec with ProvidesTestDirectory {
         s"-configuration-directory=${testEnvironment.liveDirectory}",
         (testEnvironment.configDirectory / "scheduler.xml").getPath)
       val scheduler = new ExtraScheduler(args, httpPort = Some(masterHttpPort)).closeWithCloser
-      val agent = new Agent(AgentConfiguration(httpPort = Some(agentHttpPort)))
+      val agent = new Agent(AgentConfiguration.forTest(httpPort = agentHttpPort))
       awaitResults(List(scheduler.start(), agent.start()))
 
       val client = injector.instance[SchedulerClientFactory].apply(scheduler.uri)

@@ -34,7 +34,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
 
   override protected def agentConfiguration = AgentConfiguration.forTest(Some(dataDirectory)).copy(
     httpPort = None)
-    .withHttpsPort(super.agentConfiguration.httpPort)
+    .withHttpsPort(super.agentConfiguration.httpPort.get)
 
   override def afterAll() = {
     onClose { super.afterAll() }
