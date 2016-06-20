@@ -4,9 +4,12 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
+import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
 import com.sos.scheduler.engine.common.async.StandardCallQueue
+import com.sos.scheduler.engine.common.configutils.Configs
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
@@ -16,7 +19,6 @@ import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerCluste
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
-import com.sos.scheduler.engine.kernel.configuration.AkkaProvider.newActorSystem
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
@@ -33,6 +35,7 @@ import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import com.typesafe.config.Config
 import java.time.ZoneId
 import java.util.UUID.randomUUID
 import javax.inject.Singleton
@@ -40,6 +43,7 @@ import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 import scala.reflect.ClassTag
 
 final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
@@ -123,7 +127,20 @@ with HasCloser {
   private def zoneId: ZoneId = _zoneId
 
   @Provides @Singleton
-  private def actorSystem: ActorSystem = newActorSystem(closer)
+  private def actorSystem(config: Config): ActorSystem = {
+    val actorSystem = ActorSystem("Engine", config)
+    closer.onClose {
+      actorSystem.shutdown()
+      actorSystem.awaitTermination(30.seconds)
+    }
+    DeadLetterActor.subscribe(actorSystem)
+    actorSystem
+  }
+
+  @Provides @Singleton
+  private def config(conf: SchedulerConfiguration): Config =
+    Configs.parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf") withFallback
+      SchedulerConfiguration.DefaultConfig
 
   @Provides @Singleton
   private def executionContext(actorSystem: ActorSystem): ExecutionContext = actorSystem.dispatcher
@@ -132,12 +149,12 @@ with HasCloser {
   private def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
 
   @Provides @Singleton
-  private def timerService(implicit executionContext: ExecutionContext): TimerService = { TimerService().closeWithCloser }
+  private def timerService(implicit executionContext: ExecutionContext): TimerService = TimerService().closeWithCloser
 }
 
 object SchedulerModule {
   private def commandHandlers(objects: Iterable[AnyRef]): Iterable[CommandHandler] =
-    (objects collect { case o: HasCommandHandlers => o.commandHandlers: Iterable[CommandHandler] }).flatten
+    (objects collect { case o: HasCommandHandlers ⇒ o.commandHandlers: Iterable[CommandHandler] }).flatten
 
   final case class LateBoundCppSingletons(interfaces: Vector[Class[_]])
 }

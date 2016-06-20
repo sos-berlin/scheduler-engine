@@ -42,7 +42,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   private val finishedOrderParametersPromise = Promise[Map[String, String]]()
   private val eventsPromise = Promise[immutable.Seq[Event]]()
-  private lazy val testTextFile = testEnvironment.configDirectory / TestTextFilename
+  private lazy val testTextFile = testEnvironment.liveDirectory / TestTextFilename
   private lazy val taskLogLines = eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message }
 
   protected override def onSchedulerActivated() = {

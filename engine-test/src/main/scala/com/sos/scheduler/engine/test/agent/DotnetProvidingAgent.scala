@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test.agent
 
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.system.FileUtils._
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment

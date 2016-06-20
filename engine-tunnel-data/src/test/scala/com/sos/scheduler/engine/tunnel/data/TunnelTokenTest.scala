@@ -15,9 +15,25 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class TunnelTokenTest extends FreeSpec {
 
-  "newSecret" in {
-    logger.debug(newSecret().toString)
-    val result = measureTime(1000, "newSecret") { newSecret() }
+  "newSecret returns different secrets" in {
+    logger.debug(newSecret().string)
+    val n = 100000
+    val secrets = for (_ ← 1 to n) yield newSecret()
+    assert(secrets.distinct.size == n)
+    assert(secrets.map(_.string).distinct.size == n)
+    assert(secrets.distinct == secrets)
+  }
+
+  "newSecret returns restricted character set" in {
+    for (_ ← 1 to 1000) {
+      val secretString = newSecret().string
+      assert(secretString forall ExpectedCharacters)
+      assert(secretString.size == SecretSize)
+    }
+  }
+
+  "newSecret is fast" in {
+    val result = measureTime(10000, "newSecret") { newSecret() }
     assert(result.singleDuration < 1.ms)
   }
 
@@ -28,4 +44,6 @@ final class TunnelTokenTest extends FreeSpec {
 
 private object TunnelTokenTest {
   private val logger = Logger(getClass)
+  private val ExpectedCharacters = Set('-', '_') ++ ('A' to 'Z') ++ ('a' to 'z') ++ ('0' to '9')
+  private val SecretSize = 24   // = 28/3*4
 }

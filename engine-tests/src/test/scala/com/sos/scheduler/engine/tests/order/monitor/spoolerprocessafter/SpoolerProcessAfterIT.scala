@@ -40,7 +40,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       s"-http-port=$javaPort"),
     terminateOnError = false)
 
-  private lazy val agent = new Agent(AgentConfiguration(httpPort = Some(agentHttpPort), httpInterfaceRestriction = Some("127.0.0.1"))).closeWithCloser
+  private lazy val agent = new Agent(AgentConfiguration.forTest(httpPort = agentHttpPort)).closeWithCloser
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
   private lazy val jobSubsystem = instance[JobSubsystem]
   private lazy val orderSubsystem = instance[OrderSubsystem]

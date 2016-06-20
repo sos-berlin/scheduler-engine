@@ -19,7 +19,7 @@ trait ProvideUmlautJob {
    */
   final def provideUmlautJob(): Unit = {
     assert(!isUnix)
-    Files.move(testEnvironment.configDirectory / "test-umlauts.job.txt", testEnvironment.fileFromPath(UmlautJobPath))
+    Files.move(testEnvironment.liveDirectory / "test-umlauts.job.txt", testEnvironment.fileFromPath(UmlautJobPath))
     instance[FolderSubsystem].updateFolders()
   }
 }

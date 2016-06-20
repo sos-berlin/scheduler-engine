@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel.job.internal
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.agent.client.{AgentClient, AgentClientFactory}
+import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile}
+import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
@@ -29,7 +30,7 @@ final class FileOrderSinkJob private(
   protected val task: Task,
   protected val messageCodeToString: MessageCodeHandler,
   processClassSubsystem: ProcessClassSubsystem,
-  agentClientFactory: AgentClientFactory)
+  agentClientFactory: SchedulerAgentClientFactory)
   (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
    executionContext: ExecutionContext)
 extends StandardAsynchronousJob with OrderAsynchronousJob {
@@ -79,7 +80,7 @@ object FileOrderSinkJob {
       task,
       injector.instance[MessageCodeHandler],
       injector.instance[ProcessClassSubsystem],
-      injector.instance[AgentClientFactory])(
+      injector.instance[SchedulerAgentClientFactory])(
         injector.instance[SchedulerThreadCallQueue],
         injector.instance[ExecutionContext])
 
