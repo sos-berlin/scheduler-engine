@@ -6,11 +6,13 @@
     using System.Globalization;
     using System.Linq;
     using System.Management.Automation;
+    using System.Text;
 
     public class PowershellAdapter : ScriptAdapter
     {
         private bool isShellMode;
         private readonly PowerShell shell;
+        private readonly dynamic spoolerParams;
 
         #region Constructor
 
@@ -18,14 +20,15 @@
             Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String scriptContent)
             : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
         {
-            this.shell = PowerShell.Create();
+            this.ParseScript();
+            this.spoolerParams = new SpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob, this.isShellMode);
 
+            this.shell = PowerShell.Create();
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler_task", this.spooler_task);
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler_job", this.spooler_job);
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler", this.spooler);
-
-            this.ParseScript();
+            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_params", this.spoolerParams);
         }
 
         #endregion
@@ -69,6 +72,7 @@
         {
             if (this.isShellMode)
             {
+                this.spoolerParams.SetEnvVars();
                 this.InitializeScript(true);
                 return this.IsOrderJob;
             }
@@ -194,7 +198,14 @@
             var tokens = PSParser.Tokenize(this.Script, out parseErrors);
             var functionSpoolerProcess =
                 tokens.FirstOrDefault(
-                    t => t.Content.Equals("spooler_process") && t.Type.Equals(PSTokenType.CommandArgument));
+                    t => t.Type.Equals(PSTokenType.CommandArgument) &&
+                    (t.Content.Equals("spooler_init")
+                    || t.Content.Equals("spooler_open")
+                    || t.Content.Equals("spooler_process")
+                    || t.Content.Equals("spooler_close")
+                    || t.Content.Equals("spooler_on_success")
+                    || t.Content.Equals("spooler_on_error")
+                    || t.Content.Equals("spooler_exit")));
             this.isShellMode = functionSpoolerProcess == null;
         }
 
@@ -251,7 +262,7 @@
         {
             if (this.shell.Streams.Error.Count > 0)
             {
-                this.spooler_log.error(this.shell.Streams.Error[0].ToString());
+                this.spooler_log.error(GetErrorMessage(this.shell.Streams.Error));
             }
             if (this.shell.Streams.Warning.Count > 0)
             {
@@ -266,6 +277,19 @@
                 this.spooler_log.info(this.shell.Streams.Verbose[0].ToString());
             }
             this.shell.Streams.ClearStreams();
+        }
+
+        private static string GetErrorMessage(IList<ErrorRecord> rec)
+        {
+            var sb = new StringBuilder(rec[0].ToString());
+            sb.Append(Environment.NewLine);
+            sb.Append(
+                String.Format(
+                    "At line: {0} char: {1}. For: {2}"
+                    , rec[0].InvocationInfo.ScriptLineNumber
+                    , rec[0].InvocationInfo.OffsetInLine
+                    , rec[0].InvocationInfo.Line));
+            return sb.ToString();
         }
 
         private static int GetReturnValueIndex(IEnumerable<PSObject> results)
