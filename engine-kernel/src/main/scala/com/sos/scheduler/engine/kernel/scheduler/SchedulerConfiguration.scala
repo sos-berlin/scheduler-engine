@@ -46,7 +46,7 @@ trait SchedulerConfiguration {
 }
 
 object SchedulerConfiguration {
-  private val ConfigResource = JavaResource("com/sos/scheduler/engine/kernel/configuration/default.conf")
+  private val ConfigResource = JavaResource("com/sos/scheduler/engine/kernel/configuration/defaults.conf")
   lazy val DefaultConfig: Config = ConfigFactory.load(getClass.getClassLoader, ConfigResource.path)
 
   final class InjectProvider @Inject private(spoolerC: SpoolerC) extends Provider[SchedulerConfiguration] {
