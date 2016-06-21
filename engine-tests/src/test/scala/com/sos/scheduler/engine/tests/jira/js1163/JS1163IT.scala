@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.process.Processes.newTemporaryShellFile
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFututes
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.{isSolaris, isWindows}
