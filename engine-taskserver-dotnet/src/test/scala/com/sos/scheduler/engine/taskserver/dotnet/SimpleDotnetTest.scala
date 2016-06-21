@@ -31,14 +31,19 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
 
   protected def addScriptErrorTest(dotnetModuleReference: DotnetModuleReference): Unit = {
     s"Error in $language script is detected" in {
-      val spoolerTaskInvoker,spoolerJobInvoker, orderInvoker = mock[sos.spooler.Invoker]
+      val spoolerLogInvoker, spoolerTaskInvoker, spoolerJobInvoker, spoolerInvoker, orderInvoker, variablesInvoker = mock[sos.spooler.Invoker]
       val order = new sos.spooler.Order(orderInvoker)
+      val spoolerVariableSet = new sos.spooler.Variable_set(variablesInvoker)
+      when(spoolerInvoker.call("<variables", Array())).thenReturn(spoolerVariableSet, spoolerVariableSet)
+      when(variablesInvoker.call("<value", Array("scheduler.variable_name_prefix"))).thenReturn("SCHEDULER_PARAM_", "SCHEDULER_PARAM_")
       when(spoolerTaskInvoker.call("<order", Array())).thenReturn(order, null)
+
       val taskContext = TaskContext(
-        new sos.spooler.Log(null /*not used*/),
+        new sos.spooler.Log(spoolerLogInvoker),
         new sos.spooler.Task(spoolerTaskInvoker),
         new sos.spooler.Job(spoolerJobInvoker),
-        new sos.spooler.Spooler(null /*not used*/))
+        new sos.spooler.Spooler(spoolerInvoker))
+
       val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, dotnetModuleReference)
       job.spooler_init()
       val e = intercept[Exception] {
@@ -51,9 +56,13 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
 
   protected def addStandardTest(dotnetModuleReference: DotnetModuleReference): Unit = {
     s"$language calls spooler_log.info" in {
-      val spoolerLogInvoker, spoolerTaskInvoker,spoolerJobInvoker, orderInvoker, paramsInvoker = mock[sos.spooler.Invoker]
+      val spoolerLogInvoker, spoolerTaskInvoker, spoolerJobInvoker, spoolerInvoker, orderInvoker, paramsInvoker, variablesInvoker = mock[sos.spooler.Invoker]
       val order = new sos.spooler.Order(orderInvoker)
+
+      val spoolerVariableSet = new sos.spooler.Variable_set(variablesInvoker)
       val variableSet = new sos.spooler.Variable_set(paramsInvoker)
+      when(spoolerInvoker.call("<variables", Array())).thenReturn(spoolerVariableSet, spoolerVariableSet)
+      when(variablesInvoker.call("<value", Array("scheduler.variable_name_prefix"))).thenReturn("SCHEDULER_PARAM_", "SCHEDULER_PARAM_")
       when(spoolerTaskInvoker.call("<order", Array())).thenReturn(order, order)
       when(orderInvoker.call("<params", Array())).thenReturn(variableSet, null)
       when(paramsInvoker.call("<value", Array("TEST"))).thenReturn("HELLO", null)
@@ -61,7 +70,7 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
         new sos.spooler.Log(spoolerLogInvoker),
         new sos.spooler.Task(spoolerTaskInvoker),
         new sos.spooler.Job(spoolerJobInvoker),
-        new sos.spooler.Spooler(null /*not used*/))
+        new sos.spooler.Spooler(spoolerInvoker))
       val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, dotnetModuleReference)
       job.spooler_init()
       val result = job.spooler_process()

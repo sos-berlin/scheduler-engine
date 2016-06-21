@@ -14,7 +14,7 @@ final class SimplePowershellTest extends SimpleDotnetTest {
 
   protected def language = "PowerShell"
 
-  if (isWindows && false) {//FIXME
+  if (isWindows) {
     addScriptErrorTest(DotnetModuleReference.Powershell(s"""
       function spooler_process() {
         throw "$TestErrorMessage"

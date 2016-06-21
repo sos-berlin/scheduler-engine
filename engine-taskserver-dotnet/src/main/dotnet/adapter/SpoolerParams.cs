@@ -22,7 +22,7 @@
             this.isOrderJob = isOrderJob;
             this.isShellMode = isShellMode;
 
-            this.schedulerVariableNamePrefix = this.spooler.variables().var("scheduler.variable_name_prefix");
+            this.schedulerVariableNamePrefix = this.spooler.variables().value("scheduler.variable_name_prefix");
         }
 
         #endregion
