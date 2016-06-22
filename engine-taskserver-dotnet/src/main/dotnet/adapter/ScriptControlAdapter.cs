@@ -1,9 +1,11 @@
 ﻿namespace sos.spooler
 {
     using System;
+    using System.Text;
 
     public class ScriptControlAdapter : ScriptAdapter
     {
+        private readonly SpoolerParams spoolerParams;
         private readonly dynamic scriptControl;
 
         #region Constructor
@@ -13,6 +15,8 @@
             string language)
             : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
         {
+            this.spoolerParams = new SpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob,false);
+            
             var scriptType = Type.GetTypeFromCLSID(Guid.Parse("0E59F1D5-1FBE-11D0-8FF2-00A0D10038BC"));
             this.scriptControl = Activator.CreateInstance(scriptType, false);
             this.scriptControl.Language = language;
@@ -21,8 +25,7 @@
             this.scriptControl.AddObject("spooler_task", this.spooler_task, true);
             this.scriptControl.AddObject("spooler_job", this.spooler_job, true);
             this.scriptControl.AddObject("spooler", this.spooler, true);
-
-            this.scriptControl.AddCode(scriptContent);
+            this.scriptControl.AddObject("spooler_params", this.spoolerParams, true);
         }
 
         #endregion
@@ -33,40 +36,91 @@
 
         public override bool spooler_init()
         {
-            var result = this.scriptControl.Eval("spooler_init");
-            return GetReturnValue(result, true);
+            try
+            {
+                this.InitializeScript(false);
+
+                var result = this.scriptControl.Eval("spooler_init");
+                return GetReturnValue(result, true);
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override bool spooler_open()
         {
-            var result = this.scriptControl.Eval("spooler_open");
-            return GetReturnValue(result, true);
+            try
+            {
+                var result = this.scriptControl.Eval("spooler_open");
+                return GetReturnValue(result, true);
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override bool spooler_process()
         {
-            var result = this.scriptControl.Eval("spooler_process");
-            return GetReturnValue(result, this.IsOrderJob);
+            try
+            {
+                var result = this.scriptControl.Eval("spooler_process");
+                return GetReturnValue(result, this.IsOrderJob);
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override void spooler_close()
         {
-            this.scriptControl.Eval("spooler_close");
+            try
+            {
+                this.scriptControl.Eval("spooler_close");
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override void spooler_on_success()
         {
-            this.scriptControl.Eval("spooler_on_success");
+            try
+            {
+                this.scriptControl.Eval("spooler_on_success");
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override void spooler_on_error()
         {
-            this.scriptControl.Eval("spooler_on_error");
+            try
+            {
+                this.scriptControl.Eval("spooler_on_error");
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override void spooler_exit()
         {
-            this.scriptControl.Eval("spooler_exit");
+            try
+            {
+                this.scriptControl.Eval("spooler_exit");
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         #endregion
@@ -75,25 +129,55 @@
 
         public override bool spooler_task_before()
         {
-            var result = this.scriptControl.Eval("spooler_task_before");
-            return GetReturnValue(result, true);
+            try
+            {
+                this.InitializeScript(true);
+
+                var result = this.scriptControl.Eval("spooler_task_before");
+                return GetReturnValue(result, true);
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override bool spooler_process_before()
         {
-            var result = this.scriptControl.Eval("spooler_process_before");
-            return GetReturnValue(result, true);
+            try
+            {
+                var result = this.scriptControl.Eval("spooler_process_before");
+                return GetReturnValue(result, true);
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override bool spooler_process_after(bool spoolerProcessResult)
         {
-            var result = this.scriptControl.Eval("spooler_process_after(" + spoolerProcessResult + ")");
-            return GetReturnValue(result, spoolerProcessResult);
+            try
+            {
+                var result = this.scriptControl.Eval("spooler_process_after(" + spoolerProcessResult + ")");
+                return GetReturnValue(result, spoolerProcessResult);
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         public override void spooler_task_after()
         {
-            this.scriptControl.Eval("spooler_task_after");
+            try
+            {
+                this.scriptControl.Eval("spooler_task_after");
+            }
+            catch (Exception ex)
+            {
+                throw this.GetException(ex);
+            }
         }
 
         #endregion
@@ -101,6 +185,50 @@
         #endregion
 
         #region Private methods
+
+        private void InitializeScript(bool isMonitorImpl)
+        {
+            if (isMonitorImpl)
+            {
+                this.scriptControl.AddCode(GetMonitorImplDefaultFunctions());
+            }
+            this.scriptControl.AddCode(this.Script);
+        }
+
+        private Exception GetException(Exception ex)
+        {
+            try
+            {
+                return new Exception(this.GetErrorMessage());
+            }
+            catch (Exception)
+            {
+                return ex;
+            }
+        }
+
+        private string GetErrorMessage()
+        {
+            return String.Format(
+                "{0}[{1}]: {2}{3}At line: {4} char: {5}"
+                , this.scriptControl.Error.Source
+                , this.scriptControl.Error.Number
+                , this.scriptControl.Error.Description
+                , Environment.NewLine
+                , this.scriptControl.Error.Line
+                , this.scriptControl.Error.Column);
+        }
+
+        private static string GetMonitorImplDefaultFunctions()
+        {
+            var sb = new StringBuilder();
+            sb.Append("Function spooler_process_after(spoolerProcessResult) ");
+            sb.Append(Environment.NewLine);
+            sb.Append("spooler_process_after=spoolerProcessResult");
+            sb.Append(Environment.NewLine);
+            sb.Append("End Function");
+            return sb.ToString();
+        }
 
         private static bool GetReturnValue(dynamic value, bool defaultValue)
         {

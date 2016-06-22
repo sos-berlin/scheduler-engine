@@ -11,9 +11,9 @@
     public class PowershellAdapter : ScriptAdapter
     {
         private bool isShellMode;
+        private readonly SpoolerParams spoolerParams;
         private readonly PowerShell shell;
-        private readonly dynamic spoolerParams;
-
+        
         #region Constructor
 
         public PowershellAdapter(

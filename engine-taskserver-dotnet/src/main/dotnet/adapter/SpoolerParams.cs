@@ -21,15 +21,17 @@
             this.spooler = spooler;
             this.isOrderJob = isOrderJob;
             this.isShellMode = isShellMode;
-
-            this.schedulerVariableNamePrefix = this.spooler.variables().value("scheduler.variable_name_prefix");
+            if (this.isShellMode)
+            {
+                this.schedulerVariableNamePrefix = this.spooler.variables().value("scheduler.variable_name_prefix");
+            }
         }
 
         #endregion
 
         #region Public Methods
 
-        public Variable_set get()
+        public Variable_set getAll()
         {
             var parameters = this.spooler.create_variable_set();
             parameters.merge(this.spoolerTask.@params());
@@ -67,11 +69,11 @@
         {
             if (this.isOrderJob)
             {
-                 var op = this.spoolerTask.order();
-                 if (op != null)
-                 {
-                     this.spoolerTask.order().@params().set_var(name, value);
-                 }
+                var op = this.spoolerTask.order();
+                if (op != null)
+                {
+                    this.spoolerTask.order().@params().set_var(name, value);
+                }
             }
             else
             {
@@ -90,7 +92,7 @@
             {
                 dynamic eo = new ExpandoObject();
                 var d = eo as IDictionary<String, object>;
-                var parameters = this.get();
+                var parameters = this.getAll();
                 var names = parameters.names().Split(';');
                 foreach (var name in names)
                 {
@@ -106,7 +108,12 @@
 
         internal void SetEnvVars()
         {
-            var parameters = this.get();
+            if (!this.isShellMode)
+            {
+                return;
+            }
+
+            var parameters = this.getAll();
             var names = parameters.names().Split(';');
             foreach (var name in names)
             {
@@ -120,6 +127,10 @@
 
         private void SetEnvVar(string name, string value)
         {
+            if (!this.isShellMode)
+            {
+                return;
+            }
             Environment.SetEnvironmentVariable(this.schedulerVariableNamePrefix + name.ToUpper(), value);
         }
 
