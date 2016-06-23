@@ -11,7 +11,7 @@
     public class PowershellAdapter : ScriptAdapter
     {
         private bool isShellMode;
-        private readonly SpoolerParams spoolerParams;
+        private readonly PowershellSpoolerParams spoolerParams;
         private readonly PowerShell shell;
         
         #region Constructor
@@ -21,7 +21,7 @@
             : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
         {
             this.ParseScript();
-            this.spoolerParams = new SpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob, this.isShellMode);
+            this.spoolerParams = new PowershellSpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob, this.isShellMode);
 
             this.shell = PowerShell.Create();
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);

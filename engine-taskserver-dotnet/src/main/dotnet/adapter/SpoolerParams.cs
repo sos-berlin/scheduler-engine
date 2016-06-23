@@ -1,8 +1,6 @@
 ﻿namespace sos.spooler
 {
     using System;
-    using System.Collections.Generic;
-    using System.Dynamic;
 
     public class SpoolerParams
     {
@@ -83,22 +81,6 @@
             if (this.isShellMode)
             {
                 this.SetEnvVar(name, value);
-            }
-        }
-
-        public dynamic items
-        {
-            get
-            {
-                dynamic eo = new ExpandoObject();
-                var d = eo as IDictionary<String, object>;
-                var parameters = this.getAll();
-                var names = parameters.names().Split(';');
-                foreach (var name in names)
-                {
-                    d[name] = parameters.var(name);
-                }
-                return eo;
             }
         }
 
