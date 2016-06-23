@@ -204,11 +204,12 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).endedInstant should be < killTime + MaxKillDuration + KillTimeout
             results(jobPath).duration should be < UndisturbedDuration
             val normalizedReturnCode = results(jobPath).returnCode
-            if (setting == universalAgentSetting && jobPath == IgnoringJobPath)
+            if (setting == universalAgentSetting && jobPath == IgnoringJobPath) {
+              val expected = setting.returnCode(SIGKILL)
               ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
-                assert(normalizedReturnCode == setting.returnCode(SIGKILL))
+                assert(normalizedReturnCode == expected)
               }
-            else
+            } else
               // Why not this ??? results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGKILL)
               results(jobPath).returnCode.normalized shouldEqual (if (jobPath == IgnoringJobPath) setting.returnCode(SIGKILL) else ReturnCode(1))   // Warum nicht auch SIGKILL ???
             assert(job(jobPath).state == JobState.stopped)
@@ -292,7 +293,7 @@ private[js1163] object JS1163IT {
     def agentUriOption = Some(agentUri())
     def returnCode(signal: ProcessSignal): ReturnCode =
       if (isWindows) {
-        require(signal == SIGTERM)
+        require(signal == SIGKILL)
         ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
       }
       else if (isSolaris)
