@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
 import com.sos.scheduler.engine.base.generic.SecretString
+import com.sos.scheduler.engine.common.configutils.Configs
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.someUnless
 import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
@@ -8,7 +9,7 @@ import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import java.io.File
 import java.net.{URI, URL}
 import java.nio.file.Files._
@@ -46,8 +47,7 @@ trait SchedulerConfiguration {
 }
 
 object SchedulerConfiguration {
-  private val ConfigResource = JavaResource("com/sos/scheduler/engine/kernel/configuration/defaults.conf")
-  lazy val DefaultConfig: Config = ConfigFactory.load(getClass.getClassLoader, ConfigResource.path)
+  lazy val DefaultConfig: Config = Configs.loadResource(JavaResource("com/sos/scheduler/engine/kernel/configuration/defaults.conf"))
 
   final class InjectProvider @Inject private(spoolerC: SpoolerC) extends Provider[SchedulerConfiguration] {
     private lazy val settingsC = spoolerC.settings

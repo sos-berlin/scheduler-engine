@@ -4,15 +4,14 @@ import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.TextAgentClient._
 import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.ClassLoaders._
 import com.sos.scheduler.engine.common.auth.UserAndPassword
+import com.sos.scheduler.engine.common.configutils.Configs
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
 import com.sos.scheduler.engine.common.sprayutils.https.Https.acceptTlsCertificateFor
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.typesafe.config.ConfigFactory
 import java.nio.charset.StandardCharsets._
 import scala.concurrent.Future
 import scala.util.Try
@@ -33,7 +32,7 @@ private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit,
 extends AutoCloseable {
 
   private val agentUris = AgentUris(agentUri)
-  private implicit val actorSystem = ActorSystem("AgentClient", ConfigFactory.load(currentClassLoader, ConfigurationResource.path))
+  private implicit val actorSystem = ActorSystem("AgentClient", Configs.loadResource(ConfigurationResource))
   import actorSystem.dispatcher
 
   keystore match {
