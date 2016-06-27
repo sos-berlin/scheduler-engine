@@ -12,27 +12,25 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class SimpleVBScriptTest extends SimpleDotnetTest {
 
-  protected def language = "PowerShell"
+  protected def language = "VBScript"
 
-  if (isWindows) {
-    if (false) { // FIXME
+  if (isWindows && false) {// FIXME
     def vbscriptRef(script: String) = DotnetModuleReference.ScriptControl(language = "vbscript", script)
 
-    addScriptErrorTest(vbscriptRef(s"""
+    addScriptErrorTest(vbscriptRef(
+      s"""
       Function spooler_process
-        Throw New Exception("$TestErrorMessage")
+        Call Err.Raise(99, "VBScript Test","$TestErrorMessage")
       End Function"""))
 
-    addStandardTest(vbscriptRef("""
+    addStandardTest(vbscriptRef(
+      """
       Function spooler_process
-        orderVariables = spooler_task.order.params
-        v = spooler_task.order().params()
-        value = orderVariables.value("TEST")
-        if (value <> v.value("TEST")) Throw New Exception("order() and order are different")
-        orderVariables.set_value("TEST", "TEST-CHANGED")
-        spooler_log.log(0, value)
-        spooler_process = True
-      }"""))
-  }
+        set orderVariables = spooler_task.order.params
+        varValue = orderVariables.value("TEST")
+        call orderVariables.set_value("TEST", "TEST-CHANGED")
+        call spooler_log.log(0, varValue)
+      spooler_process = True
+      End Function"""))
   }
 }
