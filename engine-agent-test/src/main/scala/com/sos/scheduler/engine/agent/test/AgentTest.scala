@@ -7,10 +7,9 @@ import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.configuration.inject.AgentModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Futures._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 /**
@@ -21,18 +20,16 @@ trait AgentTest extends BeforeAndAfterAll {
 
   protected def extraAgentModule: Module = EMPTY_MODULE
 
-  protected def agentConfiguration = AgentConfiguration(
-    httpPort = Some(findRandomFreeTcpPort()),
-    httpInterfaceRestriction = Some("127.0.0.1"))
+  protected def agentConfiguration = AgentConfiguration.forTest()
 
   protected lazy final val agent = {
     val confModule = new AgentModule(agentConfiguration)
-    val combinedModule = Modules.combine(confModule, extraAgentModule)
+    val combinedModule = Modules.`override`(confModule) `with` extraAgentModule
     new Agent(combinedModule).closeWithCloser
   }
 
   override protected def beforeAll() = {
-    awaitResult(agent.start(), 10.s)
+    agent.start() await 10.s
     super.beforeAll()
   }
 }

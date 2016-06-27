@@ -29,7 +29,7 @@ import scala.util.matching.Regex
 final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val aMonitorFile = testEnvironment.fileFromPath(MonitorPath("/subfolder/test-a"))
-  private lazy val sIncludeFile = testEnvironment.configDirectory / "subfolder/test-s.js"
+  private lazy val sIncludeFile = testEnvironment.liveDirectory / "subfolder" / "test-s.js"
 
   "Named monitor" in {
     runNamedMonitorJob()
@@ -109,7 +109,7 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
     // So, we do not implement this for <script> in <monitor>, too.
     val jobPath = JobPath("/subfolder/test-include")
     runJobReturnLogLines(jobPath) shouldEqual List("TEST-INCLUDE.JS")
-    val file = testEnvironment.configDirectory / "subfolder/test-include.js"
+    val file = testEnvironment.liveDirectory / "subfolder" / "test-include.js"
     val renamedFile = new File(s"$file~")
     Files.move(file, renamedFile)
     updateFolders()

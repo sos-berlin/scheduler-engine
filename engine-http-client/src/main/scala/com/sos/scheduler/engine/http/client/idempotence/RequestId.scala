@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.http.client.idempotence
 
-import java.util.concurrent.atomic.{AtomicReference, AtomicLong}
 import java.lang.Math.addExact
+import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 
 /**
   * @author Joacim Zschimmer

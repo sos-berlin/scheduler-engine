@@ -10,10 +10,12 @@
 goto WINDOWS
 fi
 
+touch $SCHEDULER_PARAM_SIGNALFILE
 sleep 600
 exit 1
 
 :WINDOWS
+echo >%SCHEDULER_PARAM_SIGNALFILE%
 ping -n 601 127.0.0.1 >nul
 exit 1
     ]]></script>

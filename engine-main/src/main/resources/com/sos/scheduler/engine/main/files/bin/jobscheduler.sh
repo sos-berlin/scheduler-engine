@@ -23,7 +23,7 @@ tcpPort=4444
 for arg in "$@"; do
     case $arg in
         -tcp-port=*)
-            tcpPort="${arg#-tcp-port=}"
+            tcpPort="${arg#*=}"
             shift
             ;;
         *)
@@ -37,15 +37,9 @@ if [ -n "$tcpPort" ]; then
     engineOptions+=("-tcp-port=$tcpPort")
 fi
 
-if [ -z "$SCHEDULER_HOME" ]; then :
-    bin=$(cd "$(dirname "$0")" && pwd)
-    SCHEDULER_HOME=$(cd "$bin"/.. && pwd || kill $$)
-else
-    bin="$SCHEDULER_HOME"/bin
-fi
-
 declare jarDir
-. "$bin/set-context.sh"
+. "$(cd "$(dirname "$0")" && pwd || kill $$)/set-context.sh"
+export SCHEDULER_HOME SCHEDULER_DATA
 
 configDirectory="$SCHEDULER_DATA"/config
 if [ ! -d "$configDirectory" ]; then :
@@ -68,9 +62,9 @@ fi
 logbackArg="-Dlogback.configurationFile=$logbackConfig"
 javaOptions=("$logbackArg" "${javaOptions[@]}")
 
-export LD_LIBRARY_PATH="$bin:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$SCHEDULER_HOME/bin:$LD_LIBRARY_PATH"
 executeEngine=(
-    "$bin/scheduler"
+    "$SCHEDULER_HOME/bin/scheduler"
     -sos.ini="$configDirectory/sos.ini"
     -ini="$configDirectory/scheduler.ini"
     -config="$configDirectory/scheduler.xml"

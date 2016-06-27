@@ -59,9 +59,10 @@ extends AutoCloseable {
     val emptyRequest = request withEntity HttpEntity.Empty
     val sentAt = now
     val myRequest = request withHeaders `X-JobScheduler-Heartbeat-Start`(timing) :: request.headers
-    idempotentRequestor.sendAndRetry(firstRequestTransformer ~> mySendReceive, myRequest, requestDuration = timing.period)
+    val whenResponded = idempotentRequestor.sendAndRetry(firstRequestTransformer ~> mySendReceive, myRequest, requestDuration = timing.period)
       .flatMap(handleResponse(mySendReceive, emptyRequest))
-      .sideEffect { _ onSuccess { case _ ⇒ clientHeartbeat(sentAt, mySendReceive, emptyRequest) }}
+    for (_ ← whenResponded) clientHeartbeat(sentAt, mySendReceive, emptyRequest)
+    whenResponded
   }
 
   private def handleResponse(mySendReceive: SendReceive, emptyRequest: HttpRequest)(httpResponse: HttpResponse): Future[HttpResponse] = {

@@ -8,6 +8,8 @@ import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, File
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
 import com.sos.scheduler.engine.agent.data.web.AgentUris
+import com.sos.scheduler.engine.base.generic.SecretString
+import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
@@ -43,12 +45,18 @@ trait AgentClient {
   protected[client] val agentUri: String
   protected def licenseKeys: immutable.Iterable[LicenseKeyString]
   implicit protected val actorRefFactory: ActorRefFactory
+  protected def userAndPasswordOption: Option[UserAndPassword] = None
 
   protected lazy val agentUris = AgentUris(agentUri)
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
     else identity
+  lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
+    case Some(UserAndPassword(user, SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
+    case None ⇒ identity
+  }
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
-    addHeader(Accept(`application/json`)) ~>
+    addUserAndPassword ~>
+      addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
       addLicenseKeys ~>
       encode(Gzip) ~>
@@ -74,7 +82,8 @@ trait AgentClient {
   private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
     val timeout = commandDurationToRequestTimeout(command.duration)
     val pipeline =
-      addHeader(Accept(`application/json`)) ~>
+      addUserAndPassword ~>
+        addHeader(Accept(`application/json`)) ~>
         addLicenseKeys ~>
         encode(Gzip) ~>
         sendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>

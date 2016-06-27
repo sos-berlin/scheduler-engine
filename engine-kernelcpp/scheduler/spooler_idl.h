@@ -680,6 +680,8 @@ struct Iorder : IDispatch
     virtual HRESULT     get_Ignore_max_orders       ( VARIANT_BOOL* )                               = 0;
 
     virtual HRESULT     get_History_id              ( BSTR* )                                       = 0;
+
+    virtual HRESULT     get_Last_error              ( BSTR* )                                       = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

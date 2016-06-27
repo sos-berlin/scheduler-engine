@@ -77,7 +77,7 @@ final class HeartbeatIT extends FreeSpec with BeforeAndAfterAll {
     autoClosing(new HeartbeatRequestor(timing)) { heartbeatRequestor ⇒
       val request = Data(duration.toString)
       val response = heartbeatRequestor.apply(addHeader(Accept(`application/json`)) ~> sendReceive, Post(s"$baseUri/test/$runId", request)).await(10.s)
-      assert((response.status, response.as[Data]) == (OK, Right(request.toResponse)))
+      assert((response.status, response.as[Data]) == ((OK, Right(request.toResponse))))
       assert(WebActor.getHeartbeatCount(webService) == heartbeatRequestor.serverHeartbeatCount)
       assert(heartbeatRequestor.serverHeartbeatCount == 1)
       assert(heartbeatRequestor.clientHeartbeatCount == 0)
@@ -186,7 +186,7 @@ object HeartbeatIT {
     def receive = myReceive orElse runRoute(route)
 
     private def myReceive: Receive = {
-      case ("GET", id: String) ⇒ sender() ! (idToHeartbeatService(id).pendingOperationsMaximum, idToHeartbeatService(id).pendingHeartbeatIds)
+      case ("GET", id: String) ⇒ sender() ! ((idToHeartbeatService(id).pendingOperationsMaximum, idToHeartbeatService(id).pendingHeartbeatIds))
       case "GET-HEARTBEATS" ⇒ sender() ! {
         val r = heartbeatCount
         heartbeatCount = 0

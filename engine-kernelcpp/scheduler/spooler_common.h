@@ -62,6 +62,13 @@ enum Visibility
 
 typedef int64                   Process_id;   // Für Process
 
+enum Task_end_mode { 
+    task_end_none = 0, 
+    task_end_normal, 
+    task_end_nice, 
+    task_end_kill_immediately 
+};
+
 //-------------------------------------------------------------------------------------------------
 
 ptr<Com_variable_set>           variable_set_from_environment();

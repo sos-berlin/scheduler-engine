@@ -372,16 +372,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if (key_word == "stderr_log_level") _stderr_log_level = make_log_level(value);
                 else
-                if( key_word == "process.filename"      )  _server->_module->_process_filename      = value;
-                else
-                if( key_word == "process.param_raw"     )  _server->_module->_process_param_raw     = value;
-                else
-                if( key_word == "process.log_filename"  )  _server->_module->_process_log_filename  = value;
-                else
-                if( key_word == "process.ignore_error"  )  _server->_module->_process_ignore_error  = as_bool( value );
-                else
-                if( key_word == "process.ignore_signal" )  _server->_module->_process_ignore_signal = as_bool( value );
-                else
                 if( key_word == "process.shell_variable_prefix"  )  _server->_module->_process_shell_variable_prefix = value;
                 else
                 if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!

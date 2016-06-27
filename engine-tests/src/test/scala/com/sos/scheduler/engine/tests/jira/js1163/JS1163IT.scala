@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.process.Processes.newTemporaryShellFile
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFututes
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.OperatingSystem.{isSolaris, isWindows}
@@ -26,7 +25,7 @@ import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1163.JS1163IT._
-import java.nio.file.Files.{createTempDirectory, delete, list}
+import java.nio.file.Files.{createTempDirectory, delete}
 import java.time.Instant
 import java.time.Instant.now
 import org.junit.runner.RunWith
@@ -60,11 +59,11 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       s"""touch "$killScriptCallsDir/$$arguments"""" + "\n"
   }
   onClose {
-    list(killScriptCallsDir) foreach delete
+    killScriptCallsDir.pathSet foreach delete
     delete(killScriptCallsDir)
     delete(killScriptFile)
   }
-  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(killScript = Some(ProcessKillScript(killScriptFile)))
+  override protected def newAgentConfiguration() = super.newAgentConfiguration().copy(killScript = Some(ProcessKillScript(killScriptFile)))
   private var results: Map[JobPath, TaskResult] = null
   private var killTime: Instant = null
 
@@ -93,7 +92,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "Z-REMOTE-122", "ERRNO-32", "WINSOCK-10053", "WINSOCK-10054", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          controller.suppressingTerminateOnError {
+          controller.toleratingErrorCodes(_ ⇒ true) {
             val runs = jobPaths map { startJob(_) }
             awaitSuccess(Future.sequence(runs map { _.started }))
             // Now, during slow Java start, shell scripts should have executed their "trap" commands
@@ -124,7 +123,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         if (setting eq universalAgentSetting) {
           "Kill script has been called" in {
             // Each filename in the directory is the argument list of the kill script call.
-            val names = list(killScriptCallsDir).toVector map { _.getFileName.toString }
+            val names = killScriptCallsDir.pathSet map { _.getFileName.toString }
             val expectedArg = "-kill-agent-task-id="
             for (name ← names) {
               assert(name contains expectedArg)
@@ -159,7 +158,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          controller.suppressingTerminateOnError {
+          controller.toleratingErrorLogEvent(_ ⇒ true) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
               TrapJobPath, TrapMonitorJobPath,
@@ -205,11 +204,12 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).endedInstant should be < killTime + MaxKillDuration + KillTimeout
             results(jobPath).duration should be < UndisturbedDuration
             val normalizedReturnCode = results(jobPath).returnCode
-            if (setting == universalAgentSetting && jobPath == IgnoringJobPath)
+            if (setting == universalAgentSetting && jobPath == IgnoringJobPath) {
+              val expected = setting.returnCode(SIGKILL)
               ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
-                assert(normalizedReturnCode == setting.returnCode(SIGKILL))
+                assert(normalizedReturnCode == expected)
               }
-            else
+            } else
               // Why not this ??? results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGKILL)
               results(jobPath).returnCode.normalized shouldEqual (if (jobPath == IgnoringJobPath) setting.returnCode(SIGKILL) else ReturnCode(1))   // Warum nicht auch SIGKILL ???
             assert(job(jobPath).state == JobState.stopped)
@@ -293,7 +293,7 @@ private[js1163] object JS1163IT {
     def agentUriOption = Some(agentUri())
     def returnCode(signal: ProcessSignal): ReturnCode =
       if (isWindows) {
-        require(signal == SIGTERM)
+        require(signal == SIGKILL)
         ReturnCode(1)  // Java's Process.destroyForcibly terminates with 1
       }
       else if (isSolaris)

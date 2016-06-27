@@ -437,7 +437,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, int_cast((16+2) + 8 * _module->_monitors->module_monitors().size()) );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, int_cast((18+2) + 10 * _module->_monitors->module_monitors().size()) );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -449,6 +449,8 @@ AGAIN:
                 params_array[ nr++ ] = "java_class="      + _module->_java_class_name;
                 params_array[ nr++ ] = "java_options="    + _module->_java_options;
                 params_array[ nr++ ] = "java_class_path=" + _module->_java_class_path;  // JS-540
+                if (_module->_dotnet_class_name != "") params_array[ nr++ ] = "dotnet_class=" + _module->_dotnet_class_name;
+                if (_module->_dll != "") params_array[ nr++ ] = "dll=" + _module->_dll;
 
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.includes_resolved().xml_string();
                 params_array[ nr++ ] = "job="             + _job_name;
@@ -459,12 +461,6 @@ AGAIN:
                 params_array[ nr++ ] = "has_order=1";
                 if (_task->stderr_log_level() != log_info) 
                     params_array[nr++] = "stderr_log_level=" + as_string(_task->stderr_log_level());
-
-                params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
-                params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;
-                params_array[ nr++ ] = "process.log_filename="  + _module->_process_log_filename;
-                params_array[ nr++ ] = "process.ignore_error="  + as_string( (int)_module->_process_ignore_error );
-                params_array[ nr++ ] = "process.ignore_signal=" + as_string( (int)_module->_process_ignore_signal );
 
                 // prefix is transferred only if it is set in scheduler.xml otherwise the remote side will work with the default
                 // that is because old agents could not work, if process.shell_variable_prefix is set
@@ -481,6 +477,8 @@ AGAIN:
                     params_array[ nr++ ] = "monitor.filename="        + monitor->module()->_filename;
                     params_array[ nr++ ] = "monitor.java_class="      + monitor->module()->_java_class_name;
                     params_array[ nr++ ] = "monitor.script="          + monitor->module()->_text_with_includes.includes_resolved().xml_string();    // JS-444  // Muss der letzte Parameter sein!
+                    if (monitor->module()->_dotnet_class_name != "") params_array[ nr++ ] = "dotnet_class=" + monitor->module()->_dotnet_class_name;
+                    if (monitor->module()->_dll != "") params_array[ nr++ ] = "dll=" + monitor->module()->_dll;
                 }
             }
 

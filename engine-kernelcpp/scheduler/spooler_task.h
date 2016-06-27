@@ -157,8 +157,7 @@ struct Task : Object,
 
     int                         id                          () const                                { return _id; }
 
-    enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
-    void                        cmd_end                     (End_mode = end_normal, const Duration& timeout = Duration(0));
+    void                        cmd_end                     (Task_end_mode = task_end_normal, const Duration& timeout = Duration(0));
     void                        cmd_nice_end                (Process_class_requestor*);
 
     void                        close                       ();
@@ -288,6 +287,10 @@ struct Task : Object,
         return _stderr_log_level;
     }
 
+    void set_killed_immediately_by_command() {
+        _killed_immediately_by_command = true;
+    }
+
   protected:
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;
@@ -396,7 +399,7 @@ struct Task : Object,
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _begin_called;
-    End_mode                   _end;
+    Task_end_mode              _end;
     bool                       _scheduler_815_logged;
     bool                       _closed;
     int                        _delayed_after_error_task_id;
@@ -419,6 +422,7 @@ struct Task : Object,
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
+    bool _killed_immediately_by_command;
     bool                       _module_instance_async_error;    // SCHEDULER-202
     bool                       _is_in_database;             // Datensatz für diese Task ist in der Datenbank
     bool                       _running_state_reached;      // Zustand s_running... erreicht

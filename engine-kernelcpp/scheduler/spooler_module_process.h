@@ -34,7 +34,6 @@ struct Process_module_instance : Module_instance
 
     void                        init                        ();
     bool                        load                        ();
-    void                        start                       ();
     void                        close__end                  ();
     void                        close_process               ();
     Async_operation*            begin__start                ();
@@ -75,7 +74,6 @@ struct Process_module_instance : Module_instance
 
     bool                       _is_killed;
     File                       _shell_file;
-    string                     _process_param;
 
 #   ifdef Z_WINDOWS
         Event                  _process_handle;

@@ -34,7 +34,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  override protected lazy val agentConfiguration = AgentConfiguration.forTest().copy(environment = Map("TEST_AGENT" → "*AGENT*"))
+  override protected def newAgentConfiguration() = super.newAgentConfiguration().copy(environment = Map("TEST_AGENT" → "*AGENT*"))
 
   "Order changes to error state when job chain process class is missing" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {

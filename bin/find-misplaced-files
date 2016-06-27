@@ -1,0 +1,5 @@
+#! /bin/bash
+set -e
+
+find -type f \( -path "**/src/main/scala/**" -not -name "*.scala" -or \
+                -path "**/src/main/java/**" -not -name "*.java" \)

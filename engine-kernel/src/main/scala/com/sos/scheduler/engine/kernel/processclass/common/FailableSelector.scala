@@ -46,19 +46,22 @@ class FailableSelector[Failable, Result](
           case Success(Failure(throwable)) ⇒ // Tolerated failure
             failables.setFailure(failable, throwable)
             loopUntilConnected()
-          case x@Failure(_: TimedCall.CancelledException) ⇒
-            logger.debug(s"$x")
+          case f @ Failure(_: TimedCall.CancelledException) ⇒
+            logger.debug(s"$f")
             promise.failure(new CancelledException)
-          case x@Failure(throwable) ⇒ // Failure lets abort FailableSelector
+          case Failure(throwable) ⇒ // Failure lets abort FailableSelector
             failables.setFailure(failable, throwable)
             promise.failure(throwable)
         }
       })
       callQueue.add(t)
       timedCall = t
-      t.future.withThisStackTrace onFailure {
-        case throwable: TimedCall.CancelledException ⇒ promise.tryFailure(new CancelledException)
-        case throwable ⇒ promise.tryFailure(throwable)
+      for (throwable ← t.future.withThisStackTrace.failed) {
+        val x = throwable match {
+          case _: TimedCall.CancelledException ⇒ new CancelledException
+          case _ ⇒ throwable
+        }
+        promise.tryFailure(x)
       }
     }
     loopUntilConnected()

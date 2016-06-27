@@ -59,7 +59,7 @@ extends AutoCloseable {
 
   def changeFailableAgents(failableAgents: FailableAgents): Unit = {
     val a = agentSelector
-    agentSelector.future onFailure { case t ⇒
+    agentSelector.future.failed foreach { t ⇒
       logger.debug(s"$t")
       agentSelector = startNewAgentSelector(failableAgents)
     }
@@ -73,17 +73,17 @@ extends AutoCloseable {
         logger.debug(s"Process on agent $agent started: $httpRemoteProcess")
         httpRemoteProcess.start()
         resultCall.call(Success(agent.address: String))
-      case f @ Failure(throwable) if waitStopped ⇒
+      case failure @ Failure(throwable) if waitStopped ⇒
         logger.debug(s"Waiting for agent has been stopped: $throwable")
-        resultCall.call(f)
-      case f @ Failure(_: FailableSelector.CancelledException) ⇒
-        logger.debug(s"$f")
-      case f @ Failure(throwable) ⇒
+        resultCall.call(failure)
+      case failure @ Failure(_: FailableSelector.CancelledException) ⇒
+        logger.debug(s"$failure")
+      case failure @ Failure(throwable) ⇒
         if (result.isCancelled) {
-          logger.debug(s"$f")
+          logger.debug(s"$failure")
         } else {
           logger.debug(s"Process on $result could not be started: $throwable", throwable)
-          resultCall.call(Failure(throwable))
+          resultCall.call(failure)
         }
     }
     result
@@ -110,23 +110,19 @@ extends AutoCloseable {
       case null ⇒ false
       case _ ⇒
         agentSelector.cancel()
-        agentSelector.future onSuccess {
-          case (agent, httpRemoteProcess) ⇒
-            killOnlySignal match {
-              case Some(signal) ⇒
-                require(signal == SIGTERM.value, "SIGTERM (15) required")
-                httpRemoteProcess.sendSignal(SIGTERM) onFailure {
-                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
-                }
-              case None ⇒
-                val closed = httpRemoteProcess.closeRemoteTask(kill = kill)
-                closed onFailure {
-                  case t ⇒ logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be closed: $t", t)
-                }
-                closed onComplete { _ ⇒ httpRemoteProcess.close() }
-                remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
-            }
-            // C++ will keine Bestätigung
+        agentSelector.future foreach { case (_, httpRemoteProcess) ⇒
+          killOnlySignal match {
+            case Some(signal) ⇒
+              require(signal == SIGTERM.value, "SIGTERM (15) required")
+              val whenSignalled = httpRemoteProcess.sendSignal(SIGTERM)
+              for (t ← whenSignalled.failed) logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be signalled: $t", t)
+            case None ⇒
+              val whenClosed = httpRemoteProcess.closeRemoteTask(kill = kill)
+              for (t ← whenClosed.failed) logger.error(s"Process '$httpRemoteProcess' on agent '$agentSelector' could not be closed: $t", t)
+              whenClosed onComplete { _ ⇒ httpRemoteProcess.close() }
+              remoteTaskClosed = true  // Do not execute remote_scheduler.remote_task.close twice!
+          }
+          // C++ will keine Bestätigung
         }
         true
     }

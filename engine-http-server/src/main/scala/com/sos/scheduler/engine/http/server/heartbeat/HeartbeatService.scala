@@ -60,7 +60,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
 
   def continueHeartbeat(implicit actorRefFactory: ActorRefFactory): Route =
     headerValueByName(`X-JobScheduler-Heartbeat-Continue`.name) { case `X-JobScheduler-Heartbeat-Continue`.Value(heartbeatId, times) ⇒
-      handleExceptions(ExceptionHandler { case t: UnknownHeartbeatIdException ⇒ complete(BadRequest, s"Unknown or expired $heartbeatId" )}) {
+      handleExceptions(ExceptionHandler { case t: UnknownHeartbeatIdException ⇒ complete((BadRequest, s"Unknown or expired $heartbeatId"))} ) {
         requestEntityEmpty {
           idempotence {
             val pendingOperation = pendingOperations.remove(heartbeatId) getOrElse { throw new UnknownHeartbeatIdException } // Catched above
@@ -69,7 +69,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
           }
         }
       } ~
-        complete(BadRequest, "Heartbeat with payload?")
+        complete((BadRequest, "Heartbeat with payload?"))
     }
 
   private def startHeartbeatPeriod(pendingOperation: PendingOperation, timing: HttpHeartbeatTiming)(implicit actorRefFactory: ActorRefFactory): Future[HttpResponse] = {

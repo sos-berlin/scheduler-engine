@@ -834,6 +834,8 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP get_History_id(BSTR*);
 
+    STDMETHODIMP get_Last_error(BSTR*);
+
   private:
     Fill_zero                  _zero_;
     Order*                     _order;

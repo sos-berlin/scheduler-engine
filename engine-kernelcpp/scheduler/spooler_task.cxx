@@ -489,16 +489,16 @@ Time Task::calculated_start_time( const Time& now )
 
 //------------------------------------------------------------------------------------Task::cmd_end
 
-void Task::cmd_end(End_mode end_mode, const Duration& timeout)
+void Task::cmd_end(Task_end_mode end_mode, const Duration& timeout)
 {
-    assert( end_mode != end_none );
+    assert( end_mode != task_end_none );
 
     //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-    if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
+    if( end_mode == task_end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
-    if( _end != end_kill_immediately )  _end = end_mode;
+    if( _end != task_end_kill_immediately )  _end = end_mode;
 
-    if (end_mode == end_kill_immediately) {
+    if (end_mode == task_end_kill_immediately) {
         if (!timeout.is_zero()) {
             if (_module_instance) {
                 _module_instance->kill(Z_SIGTERM);
@@ -535,7 +535,7 @@ void Task::cmd_nice_end(Process_class_requestor* for_requestor)
     Scheduler_object* obj = dynamic_cast<Scheduler_object*>(for_requestor);
     if (!obj) z::throw_xc(Z_FUNCTION);
     _log->info(message_string("SCHEDULER-271", obj->obj_name()));   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
-    cmd_end( end_nice );
+    cmd_end( task_end_nice );
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
@@ -569,11 +569,24 @@ void Task::set_error_xc_only( const Xc& x )
 
 void Task::set_error_xc_only_base( const Xc& x )
 {
-    _error = x;
-    if( _job )  
-        _job->set_error_xc_only( x );
-    if( _order )  
-        _order->set_task_error( x );
+    Xc_copy xx = x;
+    if (_killed_immediately_by_command) {
+        if (_error && strcmp(_error->code(), "SCHEDULER-728")) return;
+        xx = Xc("SCHEDULER-728");
+    }
+    bool timed_out = _error && strcmp(_error->code(), "SCHEDULER-272") == 0;
+    if (!timed_out) {
+        const char* scheduler272 = strstr(xx->what(), "SCHEDULER-272 ");
+        if (strcmp(xx->code(), "SCHEDULER-140") == 0 && scheduler272) {
+            xx->set_code("SCHEDULER-272");  // Remove SCHEDULER-140
+            xx->set_what(scheduler272);
+        }
+        _error = *xx;
+        if (_job) 
+            _job->set_error_xc_only(*xx);
+        if( _order )  
+            _order->set_task_error(*xx);
+    }
 
     if (_exit_code == 0) {
         _exit_code = 1;
@@ -1396,7 +1409,7 @@ bool Task::do_something()
                         }
 
                         if( _state < s_ending  &&  _end ) {     // Task beenden?
-                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 ) {  // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
+                            if( _end == task_end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 ) {  // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
                                 if( !_scheduler_815_logged ) {
                                     _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
                                     _scheduler_815_logged = true;
@@ -1629,7 +1642,7 @@ bool Task::do_something()
                             if( now >= _idle_timeout_at ) {
                                 if( _job->_force_idle_timeout  ||  _job->above_min_tasks() ) {
                                     _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
-                                    _end = end_normal;
+                                    _end = task_end_normal;
                                     loop = true;
                                 } else {
                                     _idle_timeout_at = now + _job->_idle_timeout;
@@ -1881,11 +1894,12 @@ bool Task::do_something()
 
                     if( _operation ) {
                         loop |= _operation->async_finished();   // Falls Sync_operation
-                    } else {
+                    } else 
+                    if (_state != s_running_process) {
                         set_enqueued_state();   // Wegen _operation verzögerten Zustand setzen
 
                         if( (!ok || has_error() || _killed) && _state < s_ending && _state != s_running_process)  
-                             set_state_direct( s_ending ), loop = true;
+                                set_state_direct( s_ending ), loop = true;
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
@@ -1899,7 +1913,7 @@ bool Task::do_something()
                 catch( exception& x ) { _log->error( "detach_order_after_error: " + string(x.what()) ); }
 
                 if( error_count == 0  &&  _state < s_ending ) {
-                    _end = end_normal;
+                    _end = task_end_normal;
                     loop = true;
                 }
                 else
@@ -2219,7 +2233,7 @@ void Task::postprocess_order(const Order_state_transition& state_transition, boo
         
         if (!_order->job_chain_path().empty())
             report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()), _order->java_sister());
-        _order->postprocessing( state_transition );
+        _order->postprocessing(state_transition, _error);
         
         if( due_to_exception && !_order->setback_called() ) 
             _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
@@ -2325,7 +2339,7 @@ void Task::finish(const Order_state_transition& error_order_state_transition)
     if( _web_service )
         _web_service->forward_task( *this );
 
-    _job->on_task_finished( this );
+    _job->on_task_finished(this, _end);
 
     {
         // eMail versenden
@@ -2531,7 +2545,7 @@ void Task::do_close__end()
         int exit_code = _module_instance->kind() == Module::kind_process? _module_instance->exit_code() : _exit_code;
         if( exit_code ) {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
-            if( _module_instance->_module->kind() == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
+            if (_module_instance->_module->kind() == Module::kind_process)  
                 set_error( x );
             else  
                 _log->warn( x.what() );
@@ -2542,9 +2556,8 @@ void Task::do_close__end()
         if( int termination_signal = _module_instance->termination_signal() ) {
             z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) + " " + signal_title_from_code( termination_signal ) );
 
-            if( !_job->_ignore_every_signal 
-             && _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
-             && ( _module_instance->_module->kind() != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
+            if (!_job->_ignore_every_signal 
+             && _job->_ignore_signals_set.find(termination_signal) == _job->_ignore_signals_set.end())
             {
                 set_error( x );
             } else {

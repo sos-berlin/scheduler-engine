@@ -137,7 +137,8 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
       s"-java-classpath=${sys.props("java.class.path")}",
       s"-job-java-classpath=${sys.props("java.class.path")}",
       s"-e",
-      new File(controller.environment.configDirectory.getPath, "agent-scheduler.xml").getPath)
+      s"-config=" + (controller.environment.configDirectory / "agent-scheduler.xml"),
+      s"-configuration-directory=${controller.environment.liveDirectory}")
     val testValue = s"TEST-$tcpPort"
     new Agent(new ExtraScheduler(args, List(TestVariableName -> testValue), tcpPort=Some(tcpPort)), s"*$testValue*")
   }

@@ -970,40 +970,7 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                if( _module->_process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
-
                 _module->set_dom( e );
-                _module->_process_filename     = "";
-                _module->_process_param_raw    = "";
-                _module->_process_log_filename = "";
-            }
-            else
-            if( e.nodeName_is( "process"    ) )
-            {
-                if( _module->set() )  z::throw_xc( "SCHEDULER-234", obj_name() );
-
-                _module->_process_filename     = subst_env( e.     getAttribute( "file"         , _module->_process_filename      ) );
-                _module->_process_param_raw    =            e.     getAttribute( "param"        , _module->_process_param_raw     );
-                _module->_process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module->_process_log_filename  ) );
-                _module->_process_ignore_error = e.bool_getAttribute( "ignore_error" , _module->_process_ignore_error  );
-                _module->_process_ignore_signal= e.bool_getAttribute( "ignore_signal", _module->_process_ignore_signal );
-
-                DOM_FOR_EACH_ELEMENT( e, ee )
-                {
-                    if( ee.nodeName_is( "environment" ) )   // Veraltet
-                    {
-                        DOM_FOR_EACH_ELEMENT( ee, eee )
-                        {
-                            if( eee.nodeName_is( "variable" ) ) 
-                            {
-                                _module->_process_environment->set_var( eee.getAttribute( "name" ), 
-                                                                        subst_env( eee.getAttribute( "value" ), _module->_process_environment ) );
-                            }
-                        }
-                    }
-                }
-
-                _module->set_process();
             }
             else
             if (e.nodeName_is("monitor.use") || e.nodeName_is("monitor"))
@@ -1941,7 +1908,7 @@ void Standard_job::end_tasks( const string& task_warning )
         if( !task->ending() )
         {
             if( task_warning != "" )  task->log()->warn( task_warning );
-            task->cmd_end( Task::end_normal );
+            task->cmd_end( task_end_normal );
         }
     }
 }
@@ -3017,7 +2984,7 @@ bool Standard_job::try_start_one_task()
 
 //-------------------------------------------------------------------Standard_job::on_task_finished
 
-void Standard_job::on_task_finished( Task* task )
+void Standard_job::on_task_finished(Task* task, Task_end_mode end_mode)
 {
     if( !_start_min_tasks  &&  ( _state == s_pending  ||  _state == s_running ) )
     {
@@ -3028,7 +2995,8 @@ void Standard_job::on_task_finished( Task* task )
         else
         if( should_start_task_because_of_min_tasks() )
         {
-            _log->warn( message_string( "SCHEDULER-970", task->obj_name(), _min_tasks ) );   // Task hat sich zu schnell beendet, wir starten keine neue
+            _log->log(end_mode == task_end_nice ? log_info : log_warn, 
+                message_string("SCHEDULER-970", task->obj_name(), _min_tasks));   // Task hat sich zu schnell beendet, wir starten keine neue
         }
     }
 }
@@ -3627,7 +3595,8 @@ void Standard_job::kill_task(int id, bool immediately, const Duration& timeout)
 {
     Z_FOR_EACH( Task_set, _running_tasks, t ) {
         if( (*t)->_id == id ) { 
-            (*t)->cmd_end(immediately? Task::end_kill_immediately : Task::end_normal, timeout);       // Ruft kill_queued_task()
+            if (immediately) (*t)->set_killed_immediately_by_command();
+            (*t)->cmd_end(immediately? task_end_kill_immediately : task_end_normal, timeout);       // Ruft kill_queued_task()
             return;
         }
     }

@@ -76,9 +76,8 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
     bIncludeFile.setLastModified((now() + sign * (8*30) * 24.h).toEpochMilli)
   }
 
-  private def jobFile = testEnvironment.fileFromPath(TestJobPath)
-  private def aIncludeFile = testEnvironment.configDirectory / TestAIncludeName
-  private def bIncludeFile = testEnvironment.configDirectory / TestBIncludeName
+  private def aIncludeFile = testEnvironment.liveDirectory / TestAIncludeName
+  private def bIncludeFile = testEnvironment.liveDirectory / TestBIncludeName
 }
 
 private object JS1141IT {

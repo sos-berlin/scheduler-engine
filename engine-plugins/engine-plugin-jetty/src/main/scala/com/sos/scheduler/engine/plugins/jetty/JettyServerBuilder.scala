@@ -2,9 +2,8 @@ package com.sos.scheduler.engine.plugins.jetty
 
 import com.google.inject.servlet.GuiceFilter
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{WarEntry, WebAppContextConfiguration}
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.WebAppContextConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.{Config, JettyConfiguration}
-import java.io.File
 import javax.servlet.Filter
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.server._
@@ -40,13 +39,6 @@ object JettyServerBuilder {
       val webAppContext = newStandardWebAppContext(contextPath)
       webAppContext.setResourceBase(c.resourceBaseURL.toExternalForm)
       for (f <- c.webXMLFileOption) webAppContext.setDescriptor(f.getPath)
-      new WebXmlConfiguration().configure(webAppContext)
-      webAppContext
-    }
-
-    def newWarWebAppContext(contextPath: String, warFile: File): WebAppContext = {
-      val webAppContext = newStandardWebAppContext(contextPath)
-      webAppContext.setWar(warFile.getAbsolutePath)
       new WebXmlConfiguration().configure(webAppContext)
       webAppContext
     }
@@ -90,7 +82,6 @@ object JettyServerBuilder {
       logHandlerOption ++
       Some(newJobSchedulerContextHandler()) ++
       Some(newRootContextHandler()) ++
-      (config.wars map { case WarEntry(contextPath, warFile) ⇒ newWarWebAppContext(contextPath, warFile) }) ++
       Some(new RootForwardingHandler) ++
       Some(new DefaultHandler)))
     for (o <- config.jettyXMLURLOption) new XmlConfiguration(o).configure(result)

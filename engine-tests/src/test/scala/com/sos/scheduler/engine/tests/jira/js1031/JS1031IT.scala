@@ -24,6 +24,7 @@ final class JS1031IT extends FreeSpec with ScalaSchedulerTest {
   override def onBeforeSchedulerActivation() = eventPipe
 
   "Missing test.schedule.xml prevents order start" in {
+    logger.info(s"Time zone: ${instance[ZoneId]}")
     assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
     val at = now() + 5.s `with` (MILLI_OF_SECOND, 0)
     val scheduleElem = <schedule><at at={ISO_LOCAL_DATE_TIME withZone instance[ZoneId] format at}/></schedule>

@@ -914,9 +914,7 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
         else 
         if( in_string ) 
         {
-            if( _dbms == dbms_mysql ||
-                _dbms == dbms_postgresql )
-            {
+            if (_dbms == dbms_mysql) {
                 do switch( char c = *p++ )
                 {
                     case '\0': result += "\\0";  break;

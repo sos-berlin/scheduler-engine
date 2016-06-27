@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/master/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
+     order="true"
+     stop_on_error="false"
+     process_class="/test-agent"
+>
+    <script language="powershell">
+        function spooler_process() {
+            $value = $spooler_task.order().params().value("TEST")
+            $spooler_task.order().params().set_value("NEW-TEST", $value)
+            $spooler_log.set_level(-7)
+            if ($spooler_log.level() -ne -7) {
+                throw "spooler_log.level == -7 expected"
+            }
+            $spooler_log.set_level(0)
+            if ($spooler_task.order().params().value("FAIL") -ne "") {
+                throw "TEST-FAIL"
+            }
+            return $true
+        }
+    </script>
+</job>

@@ -6,10 +6,9 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, TcpPortNumber, WarEntry, WebAppContextConfiguration}
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.{FixedTcpPortNumber, LazyRandomTcpPortNumber, TcpPortNumber, WebAppContextConfiguration}
 import com.sos.scheduler.engine.plugins.jetty.configuration.PluginLoginService.Login
 import java.io.File
-import java.net.URL
 import java.util.regex.Pattern
 import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.util.security.Password
@@ -31,7 +30,6 @@ object SchedulerConfigurationAdapter {
         val portOption = port(attributeMap get "port", schedulerConfiguration.httpPortOption)
         val children = forEachStartElement {
           case "loginService" ⇒ parseLoginService()
-          case "webContexts" ⇒ parseWebContexts()
         }
         JettyConfiguration(
           portOption = portOption,
@@ -40,7 +38,6 @@ object SchedulerConfigurationAdapter {
             resourceBaseURL = schedulerConfiguration.webDirectoryUrlOption getOrElse Config.ResourceBaseResource.url,
             webXMLFileOption = configFileIfExists("web.xml"))),
           loginServiceOption = children.option[LoginService]("loginService"),
-          wars = children.byName[immutable.IndexedSeq[WarEntry]]("webContexts").flatten,
           accessLogFileOption = Some(new File(schedulerConfiguration.logDirectory, "http.log")))
       }
 
@@ -68,17 +65,6 @@ object SchedulerConfigurationAdapter {
         }
         PluginLoginService(children.one[immutable.Seq[Login]]("logins"))
       }
-
-    def parseWebContexts(): immutable.IndexedSeq[WarEntry] =
-      parseElement("webContexts") {
-        forEachStartElement {
-          case "warWebContext" ⇒
-            parseElement() {
-              WarEntry(contextPath = attributeMap("contextPath"), warFile = new File(attributeMap("war")))
-            }
-        }
-      }
-      .values
 
     def configFileIfExists(filename: String) = Some(schedulerConfiguration.mainConfigurationDirectory / filename) filter { _.exists }
 

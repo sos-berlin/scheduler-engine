@@ -50,11 +50,12 @@ final class IdempotentRequestor(requestTimeout: Duration)(implicit ec: Execution
         failedPromise trySuccess s"After ${(now - firstSentAt).pretty} of no response"
       }
       firstCompletedOf(List(promise.future, response)) onComplete { _ ⇒ timerService.cancel(timer) }
-      failedPromise.future onSuccess { case startOfMessage ⇒
+      for (startOfMessage ← failedPromise.future) {
         if (!promise.isCompleted) {
           if (now < timeoutAt) {
-            logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated #${retryNr+1}: ${request.method} ${request.uri} $requestId")
-            if (retryNr == 0) promise.future onSuccess { case _ ⇒ logger.info(s"HTTP request has finally succeeded: ${request.method} ${request.uri} $requestId") }
+            val req = s"${request.method} ${request.uri} $requestId"
+            logger.warn(s"$startOfMessage, HTTP request of $firstSentAt is being repeated #${retryNr+1}: $req")
+            if (retryNr == 0) for (_ ← promise.future) logger.info(s"HTTP request has finally succeeded: $req")
             cycle(retryNr + 1, retriedRequestDuration = 0.s)
           } else
             promise tryFailure new HttpRequestTimeoutException(requestTimeout)

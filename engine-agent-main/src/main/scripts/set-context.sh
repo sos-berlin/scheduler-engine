@@ -1,6 +1,6 @@
 # Set variables
 # - SCHEDULER_AGENT_HOME
-# - SCHEDULER_AGENT_WORK
+# - SCHEDULER_AGENT_DATA
 # - javaDir
 # - java
 
@@ -20,9 +20,9 @@ else
     javaHome="$JAVA_HOME"
 fi
 
-declare SCHEDULER_AGENT_WORK
-if [ -z "$SCHEDULER_AGENT_WORK" ]; then :
-    SCHEDULER_AGENT_WORK="$SCHEDULER_AGENT_HOME"
+declare SCHEDULER_AGENT_DATA
+if [ -z "$SCHEDULER_AGENT_DATA" ]; then :
+    SCHEDULER_AGENT_DATA="$SCHEDULER_AGENT_HOME"
 fi
 
 java=java

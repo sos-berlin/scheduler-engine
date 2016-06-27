@@ -28,7 +28,6 @@ extern const string spooler_close_name;
 extern const string spooler_process_name;
 extern const string spooler_on_error_name;
 extern const string spooler_on_success_name;
-extern const string spooler_api_version_name;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -97,7 +96,6 @@ struct Module : Object
     void                        set_folder_path             ( const Absolute_path& p )              { _folder_path = p; }
     void                        set_dom                     ( const xml::Element_ptr& );
     void                        set_xml_string_text_with_includes(const string& xml);
-    void                        set_process                 ();                                     // Für <process>
     void                        init0                       ();
     void                        init                        ();
 
@@ -138,12 +136,11 @@ struct Module : Object
     string                     _java_options;               // Gehört eigentlich nach Job
     string                     _java_class_path;            // JS-540
 
-    // Process
-    string                     _process_filename;           // Job ist ein externes Programm
-    string                     _process_param_raw;          // Parameter für das Programm, vor der Variablenersetzung
-    string                     _process_log_filename;
-    bool                       _process_ignore_error;
-    bool                       _process_ignore_signal;
+    // .Net
+    string _dotnet_class_name;
+    string _dll;
+
+    // Shell script
     ptr<Com_variable_set>      _process_environment;
     string                     _process_shell_variable_prefix;
     bool                       _process_shell_variable_prefix_is_configured;
@@ -305,7 +302,7 @@ struct Module_instance : Object
     bool                       _initialized;
     bool                       _load_called;
 
-    ptr<Com_variable_set>      _process_environment;
+    ptr<Com_variable_set> const _process_environment;
     bool                       _has_order;
     Object_list                _object_list;
     ptr<IDispatch>             _idispatch;

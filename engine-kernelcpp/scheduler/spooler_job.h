@@ -375,7 +375,7 @@ struct Standard_job : Job
     void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     bool                        above_min_tasks             () const;
-    void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
+    void                        on_task_finished            (Task*, Task_end_mode);                              // Task::finished() ruft das
     void                        try_start_tasks             ();
     bool                        try_start_one_task          ();
     public: Process_class* default_process_class() const;
