@@ -8,7 +8,7 @@ declare SCHEDULER_AGENT_DATA
 for arg in "$@"; do
     case $arg in
         -rmx-port=*)
-            port=${arg/-rmx-port=/}
+            port="${arg#*=}"
             javaOptions=(
                 "-Dcom.sun.management.jmxremote"
                 "-Dcom.sun.management.jmxremote.ssl=false"
@@ -17,12 +17,12 @@ for arg in "$@"; do
             shift
             ;;
         -intellij-port=*)
-            port=${arg/-intellij-port=/}
+            port="${arg#*=}"
             javaOptions=("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=$port")
             shift
             ;;
         -data-directory=*)
-            SCHEDULER_AGENT_DATA="${arg#-data-directory=}"
+            SCHEDULER_AGENT_DATA="${arg#*=}"
             agentOptions+=("$arg")
             shift
             ;;

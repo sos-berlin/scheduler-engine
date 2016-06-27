@@ -23,7 +23,7 @@ tcpPort=4444
 for arg in "$@"; do
     case $arg in
         -tcp-port=*)
-            tcpPort="${arg#-tcp-port=}"
+            tcpPort="${arg#*=}"
             shift
             ;;
         *)
