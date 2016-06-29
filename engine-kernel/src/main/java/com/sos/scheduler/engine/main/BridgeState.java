@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.main;
 
 /** Die Zustände werden nacheinander, ohne Wiederholung, durchlaufen. */
-public enum SchedulerState {
+public enum BridgeState {
     /** Scheduler startet und kann noch nicht benutzt werden. */
     starting,
 

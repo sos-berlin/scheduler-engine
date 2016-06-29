@@ -8,11 +8,9 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
-
 import javax.annotation.Nullable;
-
-import static com.sos.scheduler.engine.main.SchedulerState.active;
-import static com.sos.scheduler.engine.main.SchedulerState.terminated;
+import static com.sos.scheduler.engine.main.BridgeState.active;
+import static com.sos.scheduler.engine.main.BridgeState.terminated;
 
 final class SchedulerThreadControllerBridge implements SchedulerControllerBridge, EventHandlerAnnotated {
     private final SchedulerThreadController schedulerThreadController;
@@ -68,7 +66,7 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
         stateBridge.setStateClosed();
     }
 
-    Scheduler waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
+    Scheduler waitUntilSchedulerState(BridgeState awaitedState) throws InterruptedException {
         return stateBridge.waitUntilSchedulerState(awaitedState);
     }
 
