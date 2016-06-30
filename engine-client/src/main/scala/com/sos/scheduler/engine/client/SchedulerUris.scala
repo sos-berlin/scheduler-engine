@@ -15,8 +15,6 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   def orderOverviews = uriString(s"$Api/order/")
 
-  //def orderOverviews(query: OrderQuery) = uriString("$Api/subsystem/order/")
-
   object test {
     val error500 = uriString(s"$Api/test/ERROR-500")
     val outOfMemoryError = uriString(s"$Api/test/OutOfMemoryError")
@@ -25,9 +23,9 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   //private def uriString(path: Path): String = uriString(Uri(path = path))
 
-  private def uriString(uri: Uri): String = withPath(uri).toString()
+  private def uriString(uri: Uri): String = resolvePathUri(uri).toString()
 
-  def withPath(uri: Uri): Uri = {
+  def resolvePathUri(uri: Uri): Uri = {
     val u = uri.resolvedAgainst(prefixedUri)
     u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString())}"))
   }

@@ -252,7 +252,7 @@ with HasCloser {
     cppProxy.tcp_port
   }
 
-  def overviewFuture: Future[SchedulerOverview] =
+  def overview: Future[SchedulerOverview] =
     schedulerThreadFuture {
       new SchedulerOverview(
         version = mavenProperties.version,

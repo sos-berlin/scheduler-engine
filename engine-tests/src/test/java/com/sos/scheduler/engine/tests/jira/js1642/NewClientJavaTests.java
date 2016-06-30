@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1642;
 
+import com.sos.scheduler.engine.client.StandardWebSchedulerClient;
 import com.sos.scheduler.engine.data.filebased.FileBasedState;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderOverview;
 import com.sos.scheduler.engine.data.order.OrderState;
-import com.sos.scheduler.engine.client.WebSchedulerClient;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
@@ -19,10 +19,10 @@ import static scala.collection.JavaConversions.asJavaCollection;
  */
 final class NewClientJavaTests implements AutoCloseable {
 
-    private final WebSchedulerClient.Standard client;
+    private final StandardWebSchedulerClient client;
 
     NewClientJavaTests(String schedulerUri) {
-        this.client = new WebSchedulerClient.Standard(schedulerUri);
+        this.client = new StandardWebSchedulerClient(schedulerUri);
     }
 
     public void close() {

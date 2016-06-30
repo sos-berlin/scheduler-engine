@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.client
 
-import akka.actor.{ActorRefFactory, ActorSystem}
+import akka.actor.ActorRefFactory
+import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
@@ -14,6 +15,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding.Gzip
 import spray.httpx.unmarshalling._
 import spray.json.DefaultJsonProtocol._
+import spray.json.JsObject
 
 /**
  * Client for JobScheduler Agent.
@@ -35,9 +37,14 @@ trait WebSchedulerClient extends SchedulerClient {
     sendReceive ~>
     decode(Gzip)
 
-  final def overview: Future[SchedulerOverview] = get[SchedulerOverview](_.overview)
+  final def overview: Future[SchedulerOverview] =
+    get[SchedulerOverview](_.overview)
 
-  final def orderOverviews: Future[immutable.Seq[OrderOverview]] = get[immutable.Seq[OrderOverview]](_.orderOverviews)
+  final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
+    get[immutable.Seq[OrderOverview]](_.orderOverviews)
+
+  final def getJson(pathUri: String): Future[String] =
+    get[JsObject](_.resolvePathUri(pathUri).toString) map { _.toString }
 
   final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String): Future[A] =
     unmarshallingPipeline[A].apply(Get(uri(uris)))
@@ -45,18 +52,4 @@ trait WebSchedulerClient extends SchedulerClient {
   private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"WebSchedulerClient($schedulerUri)"
-}
-
-object WebSchedulerClient {
-  def apply(schedulerUri: String): WebSchedulerClient with AutoCloseable = new Standard(schedulerUri)
-
-  final class Standard(protected val schedulerUri: String) extends WebSchedulerClient with AutoCloseable {
-    private val actorSystem = ActorSystem("WebSchedulerClient")
-    protected val actorRefFactory = actorSystem
-
-    def close() = {
-      actorSystem.shutdown()
-      actorSystem.awaitTermination()
-    }
-  }
 }

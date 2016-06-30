@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.ActorRefFactory
+import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.plugins.newwebservice.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.MyDirectives.toughComplete
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
-import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import spray.routing.Directives._
 import spray.routing.Route
 
@@ -39,7 +39,7 @@ trait WebServices {
       pathEndOrSingleSlash {
         detach(()) {
           complete {
-            scheduler.overviewFuture
+            scheduler.overview
           }
         }
       } ~
