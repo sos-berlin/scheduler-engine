@@ -66,7 +66,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     "orderOverviews" in {
       val orders = client.orderOverviews await TestTimeout
       assert(orders == (directSchedulerClient.orderOverviews await TestTimeout))
-      assert(orders.toVector.sortBy { _.path } == ExpectedOrderViews.sortBy { _.path })
+      assert(orders.toVector.sortBy { _.path } == ExpectedOrderOverviews.sortBy { _.path })
     }
 
     "orderOverviews speed" in {
@@ -98,66 +98,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "orderOverviews" in {
-      val orderOverviews = webSchedulerClient.get[JsArray](_.orderOverviews) await TestTimeout
-      // The array's ordering is not assured.
-      assert(orderOverviews == """[
-        {
-          "path": "/aFolder/a-aJobChain,1",
-          "orderState": "100",
-          "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false,
-          "isOnBlacklist": false
-        },
-        {
-          "path": "/aFolder/a-aJobChain,2",
-          "orderState": "100",
-          "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false,
-          "isOnBlacklist": false
-        },
-        {
-          "path": "/aFolder/a-bJobChain,1",
-          "orderState": "100",
-          "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false,
-          "isOnBlacklist": false
-        },
-        {
-          "path": "/bJobChain,1",
-          "orderState": "100",
-          "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false,
-          "isOnBlacklist": false
-        },
-        {
-          "path": "/aJobChain,2",
-          "orderState": "100",
-          "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false,
-          "isOnBlacklist": false
-        },
-        {
-          "path": "/aJobChain,1",
-          "orderState": "100",
-          "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false,
-          "isOnBlacklist": false
-        },
-        {
-          "path": "/aJobChain,AD-HOC",
-          "orderState": "100",
-          "nextStepAt": "2038-01-01T11:22:33Z",
-          "fileBasedState": "notInitialized",
-          "isSuspended": true,
-          "isOnBlacklist": false
-        }
-      ]""".parseJson)
+      val orderOverviews = webSchedulerClient.get[JsArray](_.order.overviews) await TestTimeout
+
+      def path(o: JsValue) = o.asJsObject.fields("path").asInstanceOf[JsString].value   // The array's ordering is not assured.
+      assert(orderOverviews.elements.sortBy(path) == ExpectedOrderOverviewsJson.elements.sortBy(path))
     }
   }
 
@@ -194,7 +138,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 private object JS1642IT {
   final val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
 
-  val ExpectedOrderViews = Vector(
+  private val ExpectedOrderOverviews = Vector(
     OrderOverview(
       JobChainPath("/aJobChain") orderKey "1",
       FileBasedState.active,
@@ -232,5 +176,63 @@ private object JS1642IT {
       OrderState("100"),
       nextStepAt = Some(EPOCH)))
 
-  val OrderCount = ExpectedOrderViews.size
+  private val OrderCount = ExpectedOrderOverviews.size
+  private val ExpectedOrderOverviewsJson = """[
+    {
+      "path": "/aFolder/a-aJobChain,1",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aFolder/a-aJobChain,2",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aFolder/a-bJobChain,1",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/bJobChain,1",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aJobChain,2",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aJobChain,1",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aJobChain,AD-HOC",
+      "orderState": "100",
+      "nextStepAt": "2038-01-01T11:22:33Z",
+      "fileBasedState": "notInitialized",
+      "isSuspended": true,
+      "isOnBlacklist": false
+    }
+  ]""".parseJson.asInstanceOf[JsArray]
 }

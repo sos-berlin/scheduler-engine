@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.client
 
 import akka.actor.ActorRefFactory
-import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
@@ -15,7 +14,6 @@ import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding.Gzip
 import spray.httpx.unmarshalling._
 import spray.json.DefaultJsonProtocol._
-import spray.json.JsObject
 
 /**
  * Client for JobScheduler Agent.
@@ -41,10 +39,10 @@ trait WebSchedulerClient extends SchedulerClient {
     get[SchedulerOverview](_.overview)
 
   final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
-    get[immutable.Seq[OrderOverview]](_.orderOverviews)
+    get[immutable.Seq[OrderOverview]](_.order.overviews)
 
   final def getJson(pathUri: String): Future[String] =
-    get[JsObject](_.resolvePathUri(pathUri).toString) map { _.toString }
+    get[String](_.resolvePathUri(pathUri).toString)
 
   final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String): Future[A] =
     unmarshallingPipeline[A].apply(Get(uri(uris)))

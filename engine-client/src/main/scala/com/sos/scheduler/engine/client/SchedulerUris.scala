@@ -11,9 +11,11 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   private val prefixedUri = Uri(s"$schedulerUriString/$Prefix")
 
-  def overview = uriString(Api)
+  val overview = uriString(Api)
 
-  def orderOverviews = uriString(s"$Api/order/")
+  object order {
+    val overviews = uriString(s"$Api/order/")
+  }
 
   object test {
     val error500 = uriString(s"$Api/test/ERROR-500")
@@ -21,13 +23,11 @@ final class SchedulerUris private(schedulerUriString: String) {
     val unknown = uriString(s"$Api/test/UNKNOWN")
   }
 
-  //private def uriString(path: Path): String = uriString(Uri(path = path))
-
-  private def uriString(uri: Uri): String = resolvePathUri(uri).toString()
+  private def uriString(uri: Uri): String = resolvePathUri(uri).toString
 
   def resolvePathUri(uri: Uri): Uri = {
     val u = uri.resolvedAgainst(prefixedUri)
-    u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString())}"))
+    u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString)}"))
   }
 }
 
