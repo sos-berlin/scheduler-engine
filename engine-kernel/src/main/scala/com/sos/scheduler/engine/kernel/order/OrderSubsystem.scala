@@ -5,17 +5,19 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.jobchain.{Node, JobChain}
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 import javax.persistence.EntityManagerFactory
+import scala.collection.immutable
+import scala.concurrent.Future
 
 @ForCpp
 @Singleton
@@ -61,6 +63,13 @@ extends FileBasedSubsystem {
         o.remove()
     }
   }
+
+  def orderOverviews: Future[immutable.Seq[OrderOverview]] =
+    schedulerThreadFuture {
+      orders.toVector map { _.overview }
+    }
+
+  private def orders: Seq[Order] = jobChains flatMap { _.orders }
 
   def order(orderKey: OrderKey): Order =
     jobChain(orderKey.jobChainPath).order(orderKey.id)

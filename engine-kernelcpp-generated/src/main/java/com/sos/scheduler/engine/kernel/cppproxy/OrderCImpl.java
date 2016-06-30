@@ -304,6 +304,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native java.lang.String name__native(long cppReference);
 
 
+    @Override public long next_step_at_millis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return next_step_at_millis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long next_step_at_millis__native(long cppReference);
+
+
     @Override public long next_time_millis() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -476,6 +490,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native void set_title__native(long cppReference, java.lang.String p0);
 
 
+    @Override public long setback_millis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return setback_millis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long setback_millis__native(long cppReference);
+
+
     @Override public byte[] source_xml_bytes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -552,6 +580,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native boolean suspended__native(long cppReference);
+
+
+    @Override public int task_id() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return task_id__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int task_id__native(long cppReference);
 
 
     @Override public java.lang.String title() {

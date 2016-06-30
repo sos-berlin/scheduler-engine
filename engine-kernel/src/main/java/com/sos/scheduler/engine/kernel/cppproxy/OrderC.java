@@ -34,4 +34,7 @@ public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
     boolean is_on_blacklist();
     void set_on_blacklist();
     void set_end_state_reached();
+    long next_step_at_millis();
+    long setback_millis();
+    int task_id();
 }

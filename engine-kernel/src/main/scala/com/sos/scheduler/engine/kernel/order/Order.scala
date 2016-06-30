@@ -5,11 +5,14 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
+import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.EternalCppMillis
 import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderState}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.async.CppCall
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
@@ -59,6 +62,19 @@ with OrderPersistence {
     }
   }
 
+  override def overview: OrderOverview =
+    inSchedulerThread {
+      OrderOverview(
+        path = key,  // key because this.path is valid only for permanent orders
+        fileBasedState,
+        orderState = state,
+        nextStepAt = nextStepAt,
+        setbackUntil = setbackUntil,
+        taskId = taskId,
+        isOnBlacklist = isOnBlacklist,
+        isSuspended = isSuspended)
+    }
+
   def stringToPath(o: String) = OrderKey(o)
 
   def fileBasedType = FileBasedType.order
@@ -83,6 +99,24 @@ with OrderPersistence {
   def endState_=(s: OrderState): Unit = {
     cppProxy.set_end_state(s.string)
   }
+
+  private def nextStepAt: Option[Instant] =
+    cppProxy.next_step_at_millis match {
+      case EternalCppMillis ⇒ None
+      case millis ⇒ Some(Instant ofEpochMilli millis)
+    }
+
+  private def setbackUntil: Option[Instant] =
+    cppProxy.setback_millis match {
+      case 0 ⇒ None
+      case millis ⇒ Some(Instant ofEpochMilli millis)
+    }
+
+  private def taskId: Option[TaskId] =
+    cppProxy.task_id match {
+      case 0 ⇒ None
+      case o ⇒ Some(TaskId(o))
+    }
 
   def priority: Int =
     cppProxy.priority

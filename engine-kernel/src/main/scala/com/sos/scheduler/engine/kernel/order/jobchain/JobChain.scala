@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Collections
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -144,6 +143,8 @@ with UnmodifiableJobChain {
 
   def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
+
+  def orders: Seq[Order] = cppProxy.java_orders
 
   def isStopped =
     cppProxy.is_stopped
