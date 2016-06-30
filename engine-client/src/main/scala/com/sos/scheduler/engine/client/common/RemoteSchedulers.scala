@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client.command
+package com.sos.scheduler.engine.client.common
 
 import com.sos.scheduler.engine.common.convert.As
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._

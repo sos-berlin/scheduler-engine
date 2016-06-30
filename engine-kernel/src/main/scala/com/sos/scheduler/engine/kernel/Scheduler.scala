@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.maven.MavenProperties
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
@@ -24,7 +25,7 @@ import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOv
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread, schedulerThreadFuture}
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.directOrSchedulerThreadFuture
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -50,7 +51,7 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -75,6 +76,7 @@ with HasCloser {
   private lazy val pluginSubsystem = injector.instance[PluginSubsystem]
   private lazy val commandSubsystem = injector.instance[CommandSubsystem]
   private lazy val databaseSubsystem = injector.instance[DatabaseSubsystem]
+  private implicit lazy val executionContext = injector.instance[ExecutionContext]
 
   val startInstant = now()
 
@@ -222,38 +224,48 @@ with HasCloser {
   private def executeXmlString(o: String) = Result(executeXml(o))
 
   /** Löst bei einem ERROR-Element eine Exception aus. */
-  def executeXml(xml: String): String = {
-    val result = uncheckedExecuteXml(xml)
-    if (result contains "<ERROR") {
-      for (e <- childElements(loadXml(result).getDocumentElement);
-           error <- new NamedChildElements("ERROR", e))
-        throw new SchedulerException(error.getAttribute("text"))
+  def executeXml(xml: String): String =
+    executeXmlFuture(xml) awaitWithStackTrace MaxDuration
+
+  /** Löst bei einem ERROR-Element eine Exception aus. */
+  def executeXmlFuture(xml: String): Future[String] =
+    uncheckedExecuteXmlFuture(xml) map { result ⇒
+      if (result contains "<ERROR") {
+        for (e ← childElements(loadXml(result).getDocumentElement);
+             error ← new NamedChildElements("ERROR", e))
+          throw new SchedulerException(error.getAttribute("text"))
+      }
+      result
     }
-    result
-  }
 
   /** execute_xml_string() der C++-Klasse Spooler */
-  def uncheckedExecuteXml(xml: String): String = {
+  def uncheckedExecuteXml(xml: String): String =
+    uncheckedExecuteXmlFuture(xml) awaitWithStackTrace MaxDuration
+
+  /** execute_xml_string() der C++-Klasse Spooler */
+  def uncheckedExecuteXmlFuture(xml: String): Future[String] = {
     if (closed) sys.error("Scheduler is closed")
-    inSchedulerThread { cppProxy.execute_xml_string(xml) }
-    .stripSuffix("\u0000")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
+    directOrSchedulerThreadFuture { cppProxy.execute_xml_string(xml) } map {
+      _ stripSuffix "\u0000"  // Von C++ angehängtes '\0', siehe Command_response::end_standard_response()
+    }
   }
 
   def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String) =
-    inSchedulerThread { cppProxy.execute_xml_string_with_security_level(xml, securityLevel.cppName, clientHostName) }
-    .stripSuffix("\u0000")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
+    uncheckedExecuteXmlFuture(xml, securityLevel, clientHostName) awaitWithStackTrace MaxDuration
 
-  //    /** @param text Sollte auf \n enden */
-  //    public void writeToSchedulerLog(LogCategory category, String text) {
-  //        cppProxy.write_to_scheduler_log(category.string(), text);
-  //    }
+  def uncheckedExecuteXmlFuture(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String): Future[String] =
+    directOrSchedulerThreadFuture {
+      cppProxy.execute_xml_string_with_security_level(xml, securityLevel.cppName, clientHostName)
+    } map {
+      _ stripSuffix "\u0000"  // Von C++ angehängtes '\0', siehe Command_response::end_standard_response()
+    }
 
   def callCppAndDoNothing(): Unit = {
     cppProxy.tcp_port
   }
 
   def overview: Future[SchedulerOverview] =
-    schedulerThreadFuture {
+    directOrSchedulerThreadFuture {
       new SchedulerOverview(
         version = mavenProperties.version,
         versionCommitHash = mavenProperties.versionCommitHash,

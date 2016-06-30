@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client.command
+package com.sos.scheduler.engine.client.api
 
 import scala.concurrent.Future
 
@@ -7,15 +7,15 @@ import scala.concurrent.Future
  *
  * @author Joacim Zschimmer
  */
-trait SchedulerCommandClient {
+trait CommandClient {
   /**
-   * Like unchechedExecuteXml, but fails when response contains an ERROR element.
+   * Like uncheckedExecuteXml, but fails when response contains an ERROR element.
    * @return XML response
    */
   def executeXml(xmlBytes: Array[Byte]): Future[String]
 
   /**
-   * Like unchechedExecuteXml, but fails when response contains an ERROR element.
+   * Like uncheckedExecuteXml, but fails when response contains an ERROR element.
    * @return XML response
    */
   def execute(elem: xml.Elem): Future[String]

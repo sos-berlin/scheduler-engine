@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.client.command
+package com.sos.scheduler.engine.client.common
 
-import com.sos.scheduler.engine.client.command.RemoteSchedulers._
+import com.sos.scheduler.engine.client.common.RemoteSchedulers._
 import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, StringSource}
 import javax.xml.stream.events.StartElement
 import org.junit.runner.RunWith

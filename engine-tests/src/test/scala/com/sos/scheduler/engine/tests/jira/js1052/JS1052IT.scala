@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1052
 
-import com.sos.scheduler.engine.client.command.RemoteSchedulers
+import com.sos.scheduler.engine.client.common.RemoteSchedulers
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

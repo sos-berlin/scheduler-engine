@@ -1,19 +1,21 @@
 package com.sos.scheduler.engine.client.command
 
-import akka.actor.ActorSystem
-import com.google.inject.{AbstractModule, Guice}
+import akka.actor.{ActorRefFactory, ActorSystem}
+import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.client.command.SchedulerClientFactoryTest._
+import com.sos.scheduler.engine.client.common.RemoteSchedulers
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.typesafe.config.ConfigFactory
+import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.scalatest.Inside.inside
 import org.scalatest.Matchers._
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import scala.concurrent.duration._
@@ -26,24 +28,30 @@ import scala.util.Failure
 @RunWith(classOf[JUnitRunner])
 final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
 
-  private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val injector = Guice.createInjector(new AbstractModule {
-    override def configure(): Unit = {
-      bind(classOf[ActorSystem]) toInstance ActorSystem("SchedulerClientFactoryTest", AkkaConfig)
-      bind(classOf[ExecutionContext]) toInstance ExecutionContext.global
-    }
+    def configure() {}
+
+    @Provides @Singleton
+    def executionContext(actorSystem: ActorSystem): ExecutionContext = actorSystem.dispatcher
+
+    @Provides @Singleton
+    def actorRefFactory(actorSystem: ActorSystem): ActorRefFactory = actorSystem
+
+    @Provides @Singleton
+    def actorSystem(): ActorSystem = ActorSystem("SchedulerClientFactoryTest", AkkaConfig)
   })
+  private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val server = injector.instance[TestCommandExecutorHttpServer.Factory].apply(httpPort, executeCommand)
   private lazy val clientFactory = injector.instance[SchedulerClientFactory]
   private lazy val uri = s"http://$HttpInterface:$httpPort/"
   private lazy val client = clientFactory.apply(uri)
 
-  override def beforeAll(): Unit = {
+  override def beforeAll() = {
     val future = server.start()
     awaitResult(future, TestTimeout)
   }
 
-  override def afterAll(): Unit = {
+  override def afterAll() = {
     injector.instance[ActorSystem].shutdown()
   }
 
