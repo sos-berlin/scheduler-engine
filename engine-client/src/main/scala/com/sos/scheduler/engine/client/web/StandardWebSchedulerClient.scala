@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client
+package com.sos.scheduler.engine.client.web
 
 import akka.actor.ActorSystem
 

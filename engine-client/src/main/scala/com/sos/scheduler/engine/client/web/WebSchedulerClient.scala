@@ -1,6 +1,7 @@
-package com.sos.scheduler.engine.client
+package com.sos.scheduler.engine.client.web
 
 import akka.actor.ActorRefFactory
+import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable

@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.client
+package com.sos.scheduler.engine.client.web
 
-import com.sos.scheduler.engine.client.SchedulerUris._
+import com.sos.scheduler.engine.client.web.SchedulerUris._
 import spray.http.Uri
 import spray.http.Uri.Path
 

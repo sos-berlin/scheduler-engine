@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client
+package com.sos.scheduler.engine.client.web
 
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

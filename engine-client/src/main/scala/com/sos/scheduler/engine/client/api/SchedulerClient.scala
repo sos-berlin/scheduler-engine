@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client
+package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview

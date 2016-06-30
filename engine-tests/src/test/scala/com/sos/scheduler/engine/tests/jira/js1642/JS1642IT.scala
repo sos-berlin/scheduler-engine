@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
-import com.sos.scheduler.engine.client.{SchedulerClient, StandardWebSchedulerClient}
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
@@ -70,16 +70,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "orderOverviews speed" in {
-      Stopwatch.measureTime(1000, s""""orderOverviews with $OrderCount orders"""") {
+      Stopwatch.measureTime(100, s""""orderOverviews with $OrderCount orders"""") {
         client.orderOverviews await TestTimeout
       }
     }
   }
 
   "StandardWebSchedulerClient in Java" in {
-    autoClosing(new NewClientJavaTests(schedulerUri)) {
-      _.test()
-    }
+    SchedulerClientJavaTester.run(schedulerUri)
   }
 
   "JSON" - {

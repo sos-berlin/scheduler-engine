@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel
 
-import com.sos.scheduler.engine.client.SchedulerClient
+import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import javax.inject.{Inject, Singleton}
 
