@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel
 
-import com.sos.scheduler.engine.data.scheduler.SchedulerId
+import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.scheduler.engine.data.scheduler.SchedulerStates.SchedulerStateJsonFormat
+import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import java.time.Instant
 import spray.json.DefaultJsonProtocol._
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 
 final case class SchedulerOverview(
   version: String,
@@ -13,9 +14,8 @@ final case class SchedulerOverview(
   schedulerId: SchedulerId,
   tcpPort: Option[Int],
   udpPort: Option[Int],
-  processId: Int,
-  state: String)
-
+  pid: Int,
+  state: SchedulerState)
 
 object SchedulerOverview {
   implicit val MyJsonFormat = jsonFormat9(apply)

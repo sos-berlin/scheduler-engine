@@ -20,11 +20,11 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
+import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread, schedulerThreadFuture}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -43,12 +43,14 @@ import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
 import java.time.Instant.now
+import java.time.ZoneId
 import java.time.ZoneOffset.UTC
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -250,18 +252,18 @@ with HasCloser {
     cppProxy.tcp_port
   }
 
-  def overview: SchedulerOverview =
-    inSchedulerThread {
+  def overviewFuture: Future[SchedulerOverview] =
+    schedulerThreadFuture {
       new SchedulerOverview(
         version = mavenProperties.version,
         versionCommitHash = mavenProperties.versionCommitHash,
         startInstant = startInstant,
-        instant = now(),
+        instant = now,
         schedulerId = schedulerConfiguration.schedulerId,
         tcpPort = schedulerConfiguration.tcpPort match { case 0 ⇒ None case n ⇒ Some(n) },
         udpPort = schedulerConfiguration.udpPort,
-        processId = cppProxy.pid,
-        state = cppProxy.state_name)
+        pid = cppProxy.pid,
+        state = SchedulerState.ofCppName(cppProxy.state_name))
     }
 
   def isClosed = closed
@@ -272,6 +274,7 @@ object Scheduler {
   private val logger = Logger(getClass)
   private val mavenProperties = new MavenProperties(JavaResource("com/sos/scheduler/engine/kernel/maven.properties"))
   private val _defaultTimezoneId = DateTimeZone.getDefault.getID
+  val DefaultZoneId = ZoneId.of(_defaultTimezoneId)
 
   @ForCpp
   def defaultTimezoneId: String = _defaultTimezoneId
