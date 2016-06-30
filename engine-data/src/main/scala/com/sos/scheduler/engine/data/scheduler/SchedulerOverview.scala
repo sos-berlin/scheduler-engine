@@ -1,8 +1,7 @@
-package com.sos.scheduler.engine.kernel
+package com.sos.scheduler.engine.data.scheduler
 
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.data.scheduler.SchedulerStates.SchedulerStateJsonFormat
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import java.time.Instant
 import spray.json.DefaultJsonProtocol._
 
