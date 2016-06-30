@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.plugins.newwebservice
 
-import com.google.inject.Injector
-import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.google.inject.{AbstractModule, Injector, Provides}
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, PluginSubsystem, Plugins}
 import com.sos.scheduler.engine.plugins.jetty.{JettyPlugin, JettyPluginExtension}
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
-import javax.inject.{Inject, Named}
+import javax.inject.{Inject, Named, Singleton}
 import org.w3c.dom.Element
 
 /**
@@ -20,10 +19,12 @@ final class NewWebServicePlugin @Inject private(
 extends Plugin {
 
   override def onPrepare() = {
-    val myInjector = injector.createChildInjector(new ScalaAbstractModule {
-      def configure() = {
-        bindClass[NewWebServicePluginConfiguration] toInstance NewWebServiceConfigurationParser.parseString(toXml(pluginElement))
-      }
+    val myInjector = injector.createChildInjector(new AbstractModule {
+      def configure() = {}
+
+      @Provides @Singleton
+      def newWebServicePluginConfiguration: NewWebServicePluginConfiguration =
+        NewWebServiceConfigurationParser.parseString(toXml(pluginElement))
     })
     pluginSubsystem.pluginByClass(classOf[JettyPlugin]).addExtension(
       JettyPluginExtension(
