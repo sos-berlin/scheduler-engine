@@ -15,8 +15,8 @@
             string language)
             : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
         {
-            this.spoolerParams = new SpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob,false);
-            
+            this.spoolerParams = new SpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob, false);
+
             var scriptType = Type.GetTypeFromCLSID(Guid.Parse("0E59F1D5-1FBE-11D0-8FF2-00A0D10038BC"));
             this.scriptControl = Activator.CreateInstance(scriptType, false);
             this.scriptControl.Language = language;
@@ -43,9 +43,10 @@
                 var result = this.scriptControl.Eval("spooler_init");
                 return GetReturnValue(result, true);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
+                return false;
             }
         }
 
@@ -56,9 +57,10 @@
                 var result = this.scriptControl.Eval("spooler_open");
                 return GetReturnValue(result, true);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
+                return false;
             }
         }
 
@@ -69,9 +71,10 @@
                 var result = this.scriptControl.Eval("spooler_process");
                 return GetReturnValue(result, this.IsOrderJob);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
+                return this.IsOrderJob;
             }
         }
 
@@ -81,9 +84,9 @@
             {
                 this.scriptControl.Eval("spooler_close");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
             }
         }
 
@@ -93,9 +96,9 @@
             {
                 this.scriptControl.Eval("spooler_on_success");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
             }
         }
 
@@ -105,9 +108,9 @@
             {
                 this.scriptControl.Eval("spooler_on_error");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
             }
         }
 
@@ -117,9 +120,9 @@
             {
                 this.scriptControl.Eval("spooler_exit");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
             }
         }
 
@@ -136,9 +139,10 @@
                 var result = this.scriptControl.Eval("spooler_task_before");
                 return GetReturnValue(result, true);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
+                return false;
             }
         }
 
@@ -149,9 +153,10 @@
                 var result = this.scriptControl.Eval("spooler_process_before");
                 return GetReturnValue(result, true);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
+                return false;
             }
         }
 
@@ -162,9 +167,10 @@
                 var result = this.scriptControl.Eval("spooler_process_after(" + spoolerProcessResult + ")");
                 return GetReturnValue(result, spoolerProcessResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
+                return spoolerProcessResult;
             }
         }
 
@@ -174,9 +180,9 @@
             {
                 this.scriptControl.Eval("spooler_task_after");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw this.GetException(ex);
+                this.spooler_log.error(this.GetErrorMessage());
             }
         }
 
@@ -195,28 +201,17 @@
             this.scriptControl.AddCode(this.Script);
         }
 
-        private Exception GetException(Exception ex)
-        {
-            try
-            {
-                return new Exception(this.GetErrorMessage());
-            }
-            catch (Exception)
-            {
-                return ex;
-            }
-        }
-
         private string GetErrorMessage()
         {
             return String.Format(
-                "{0}[{1}]: {2}{3}At line: {4} char: {5}"
-                , this.scriptControl.Error.Source
+                "{0} {1}: {2}{3}Line: {4}, char: {5}{6}"
                 , this.scriptControl.Error.Number
+                , this.scriptControl.Error.Source
                 , this.scriptControl.Error.Description
                 , Environment.NewLine
                 , this.scriptControl.Error.Line
-                , this.scriptControl.Error.Column);
+                , this.scriptControl.Error.Column
+                , this.scriptControl.Error.Text);
         }
 
         private static string GetMonitorImplDefaultFunctions()
