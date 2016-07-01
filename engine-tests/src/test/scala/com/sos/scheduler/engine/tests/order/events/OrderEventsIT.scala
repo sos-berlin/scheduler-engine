@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.order.events
 
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.InsertableMutableMap
 import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
@@ -86,12 +87,12 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
       "OrderTouched UnmodifiableOrder"            → OrderTouchedEvent(orderKey),
       "OrderTouched Order"                        → OrderTouchedEvent(orderKey),
       "OrderFinished UnmodifiableOrder"           → OrderFinishedEvent(orderKey, OrderState("end")),
-      "OrderStepStarted UnmodifiableOrder state1" → OrderStepStartedEvent(orderKey, OrderState("state1")),
-      "OrderStepStarted Order state1"             → OrderStepStartedEvent(orderKey, OrderState("state1")),
+      "OrderStepStarted UnmodifiableOrder state1" → OrderStepStartedEvent(orderKey, OrderState("state1"), TaskId.Null),
+      "OrderStepStarted Order state1"             → OrderStepStartedEvent(orderKey, OrderState("state1"), TaskId.Null),
       "OrderStepEnded UnmodifiableOrder state1"   → OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
       "OrderStepEnded Order state1"               → OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
-      "OrderStepStarted UnmodifiableOrder state2" → OrderStepStartedEvent(orderKey, OrderState("state2")),
-      "OrderStepStarted Order state2"             → OrderStepStartedEvent(orderKey, OrderState("state2")),
+      "OrderStepStarted UnmodifiableOrder state2" → OrderStepStartedEvent(orderKey, OrderState("state2"), TaskId.Null),
+      "OrderStepStarted Order state2"             → OrderStepStartedEvent(orderKey, OrderState("state2"), TaskId.Null),
       "OrderStepEnded UnmodifiableOrder state2"   → OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
       "OrderStepEnded Order state2"               → OrderStepEndedEvent(orderKey, SuccessOrderStateTransition),
       "OrderSuspended UnmodifiableOrder"          → OrderSuspendedEvent(orderKey),
@@ -117,10 +118,10 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     fail("@HotEventHandler def handleHotEvent(e: OrderFinishedEvent, o: Order) should not be called because of UnmodifiableOrder")
 
   @HotEventHandler def handleHotEvent(e: OrderStepStartedEvent, o: UnmodifiableOrder): Unit =
-    addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${o.state}" → e)
+    addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${o.state}" → e.copy(taskId = TaskId.Null))
 
   @HotEventHandler def handleHotEvent(e: OrderStepStartedEvent, o: Order): Unit =
-    addEvent(hotEvents, s"OrderStepStarted Order ${o.state}" → e)
+    addEvent(hotEvents, s"OrderStepStarted Order ${o.state}" → e.copy(taskId = TaskId.Null))
 
   @HotEventHandler def handleHotEvent(e: OrderStepEndedEvent, o: UnmodifiableOrder): Unit =
     addEvent(hotEvents, s"OrderStepEnded UnmodifiableOrder ${o.state}" → e)

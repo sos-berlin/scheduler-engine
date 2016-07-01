@@ -112,7 +112,7 @@ with OrderPersistence {
       case millis ⇒ Some(Instant ofEpochMilli millis)
     }
 
-  private def taskId: Option[TaskId] =
+  def taskId: Option[TaskId] =
     cppProxy.task_id match {
       case 0 ⇒ None
       case o ⇒ Some(TaskId(o))

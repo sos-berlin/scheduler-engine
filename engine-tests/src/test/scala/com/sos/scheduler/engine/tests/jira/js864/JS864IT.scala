@@ -26,32 +26,32 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
 
   addOrderTests(1, "All job chain node have action='process'", Nil) { orderKey ⇒
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
+    expectOrderStepStartedEvent(orderKey, AState)
+    expectOrderStepStartedEvent(orderKey, BState)
+    expectOrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey, EndState)
   }
 
   addOrderTests(2, "Job chain node B has action='next_state'", List(BState → NextStateAction)) { orderKey ⇒
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
+    expectOrderStepStartedEvent(orderKey, AState)
+    expectOrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey, EndState)
   }
 
   addOrderTests(3, "Job chain node A has action='next_state'", List(BState → ProcessAction, AState → NextStateAction)) { orderKey ⇒
     // Alle wartenden Auftrage wechseln zu B
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
+    expectOrderStepStartedEvent(orderKey, BState)
+    expectOrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey, EndState)
   }
 
   addOrderTests(4, "Again, all job chain nodes have action='process'", List(AState → ProcessAction)) { orderKey ⇒
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
     // AState nicht, weil next_state im vorangehenden Test den Auftrag schon weitergeschoben hat.
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
+    expectOrderStepStartedEvent(orderKey, BState)
+    expectOrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey, EndState)
   }
 
@@ -63,9 +63,9 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
   addOrderTests(6, "Again, all job chain nodes have action='process'", List(AState → ProcessAction, BState → ProcessAction, CState → ProcessAction),
       addOrderFor = Set(NonpermanentJobChainPath)) { orderKey ⇒
     nextOrderEvent(orderKey) shouldBe OrderTouchedEvent(orderKey)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, AState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, BState)
-    nextOrderEvent(orderKey) shouldBe OrderStepStartedEvent(orderKey, CState)
+    expectOrderStepStartedEvent(orderKey, AState)
+    expectOrderStepStartedEvent(orderKey, BState)
+    expectOrderStepStartedEvent(orderKey, CState)
     nextOrderEvent(orderKey) shouldBe OrderFinishedEvent(orderKey, EndState)
   }
 
@@ -89,6 +89,10 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
       }
     }
 
+  private def expectOrderStepStartedEvent(orderKey: OrderKey, orderState: OrderState): Unit = {
+    val e = nextOrderEvent(orderKey).asInstanceOf[OrderStepStartedEvent]
+    assert(e.orderKey == orderKey && e.state == orderState)
+  }
   private def nextOrderEvent(orderKey: OrderKey) =
     eventPipe.nextWithCondition { e: OrderEvent ⇒ e.orderKey == orderKey && isRelevantOrderEventClass(e.getClass) }
 
