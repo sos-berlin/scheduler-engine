@@ -1,4 +1,7 @@
-package com.sos.scheduler.engine.kernel.job;
+package com.sos.scheduler.engine.data.job;
+
+import com.sos.scheduler.engine.base.sprayjson.JavaEnumJsonFormat;
+import spray.json.JsonFormat;
 
 /**
  * Mirror of spooler_task.cxx, Task::State.
@@ -42,4 +45,6 @@ public enum TaskState {
         }
         throw new IllegalArgumentException("Unknown TaskState '" + name + "'");
     }
+
+    public static final JsonFormat<TaskState> MyJsonFormat = new JavaEnumJsonFormat<>(TaskState.class);
 }

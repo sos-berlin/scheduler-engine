@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{TaskId, TaskState}
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
