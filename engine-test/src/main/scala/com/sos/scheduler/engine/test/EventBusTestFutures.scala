@@ -2,11 +2,10 @@ package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{implicitClass, withToString1}
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
-import java.util.concurrent.TimeoutException
 import java.time.Duration
+import java.util.concurrent.TimeoutException
 import scala.concurrent.{Future, Promise}
 import scala.reflect.ClassTag
 
