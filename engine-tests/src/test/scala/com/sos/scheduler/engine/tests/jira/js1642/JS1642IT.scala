@@ -1,27 +1,34 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
+import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
-import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
+import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.json.JsonRegexMatcher._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
+import java.nio.file.Files.deleteIfExists
 import java.time.Instant
 import java.time.Instant._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 import spray.http.StatusCodes.{InternalServerError, NotFound}
 import spray.httpx.UnsuccessfulResponseException
@@ -34,24 +41,40 @@ import spray.json._
   */
 @RunWith(classOf[JUnitRunner])
 final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
-  private lazy val directSchedulerClient = instance[DirectSchedulerClient]
 
-  private lazy val port: Int = jettyPortNumber(injector)
-  private lazy val schedulerUri = s"http://127.0.0.1:$port"
+  private lazy val directSchedulerClient = instance[DirectSchedulerClient]
+  private lazy val schedulerUri = s"http://127.0.0.1:${jettyPortNumber(injector)}"
   private lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
-  private implicit lazy val executinoContext = instance[ExecutionContext]
+  private lazy val barrierFile = testEnvironment.tmpDirectory / "TEST-BARRIER"
+  private implicit lazy val executionContext = instance[ExecutionContext]
+  private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
   override protected def onSchedulerActivated() = {
-    scheduler executeXml OrderCommand(
-      JobChainPath("/aJobChain") orderKey "AD-HOC",
-      at = Some(OrderStartAt),
-      suspended = Some(true))
     super.onSchedulerActivated()
+  }
+
+  override def afterAll(): Unit = {
+    deleteIfExists(barrierFile)
+    super.afterAll()
   }
 
   private val setting = List[(String, () ⇒ SchedulerClient)](
     "DirectSchedulerClient" → { () ⇒ directSchedulerClient },
     "WebSchedulerClient" → { () ⇒ webSchedulerClient })
+
+  "Prepare tests" in {
+    val variableSet = instance[VariableSet]
+    variableSet(TestJob.BarrierFileVariableName) = barrierFile.toString
+    touch(barrierFile)
+    scheduler executeXml OrderCommand(aAdHocOrderKey, at = Some(OrderStartAt), suspended = Some(true))
+    for ((orderKey, expectedTaskId) ← ProcessableOrderKeys.zipWithIndex map { case (o, i) ⇒ o → (TaskId.First + i) }) {
+      val event = eventBus.awaitingKeyedEvent[OrderStepStartedEvent](orderKey) {
+        scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
+      }
+      assert(event.taskId == expectedTaskId)
+      orderKeyToTaskId(orderKey) = event.taskId
+    }
+  }
 
   for ((testGroup, getClient) ← setting) testGroup - {
     lazy val client = getClient()
@@ -66,7 +89,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     "orderOverviews" in {
       val orders = client.orderOverviews await TestTimeout
       assert(orders == (directSchedulerClient.orderOverviews await TestTimeout))
-      assert(orders.toVector.sortBy { _.path } == ExpectedOrderOverviews.sortBy { _.path })
+      assert(orders.toVector.sortBy { _.orderKey } == ExpectedOrderOverviews.sortBy { _.orderKey })
     }
 
     "orderOverviews speed" in {
@@ -134,48 +157,105 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS1642IT {
-  final val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
+  private val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
+
+  private val aJobChainPath = JobChainPath("/aJobChain")
+  private val a1OrderKey = aJobChainPath orderKey "1"
+  private val a2OrderKey = aJobChainPath orderKey "2"
+  private val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
+
+  private val bJobChainPath = JobChainPath("/bJobChain")
+  private val b1OrderKey = bJobChainPath orderKey "1"
+
+  private val aaJobChainPath = JobChainPath("/aFolder/a-aJobChain")
+  private val aa1OrderKey = aaJobChainPath orderKey "1"
+  private val aa2OrderKey = aaJobChainPath orderKey "2"
+
+  private val abJobChainPath = JobChainPath("/aFolder/a-bJobChain")
+  private val ab1OrderKey = abJobChainPath orderKey "1"
+
+  private val OrderKeys = List(a1OrderKey, a2OrderKey, b1OrderKey, aAdHocOrderKey, aa1OrderKey, aa2OrderKey, ab1OrderKey)
+  private val ProcessableOrderKeys = List(a1OrderKey, a2OrderKey, b1OrderKey)
 
   private val ExpectedOrderOverviews = Vector(
     OrderOverview(
-      JobChainPath("/aJobChain") orderKey "1",
+      a1OrderKey,
       FileBasedState.active,
       OrderState("100"),
-      nextStepAt = Some(EPOCH)),
+      nextStepAt = Some(EPOCH),
+      taskId = Some(TaskId.First)),
     OrderOverview(
-      JobChainPath("/aJobChain") orderKey "2",
+      a2OrderKey,
       FileBasedState.active,
       OrderState("100"),
-      nextStepAt = Some(EPOCH)),
+      nextStepAt = Some(EPOCH),
+      taskId = Some(TaskId.First + 1)),
     OrderOverview(
-      JobChainPath("/aJobChain") orderKey "AD-HOC",
+      b1OrderKey,
+      FileBasedState.active,
+      OrderState("100"),
+      nextStepAt = Some(EPOCH),
+      taskId = Some(TaskId.First + 2)),
+    OrderOverview(
+      aAdHocOrderKey,
       FileBasedState.notInitialized,
       OrderState("100"),
       nextStepAt = Some(OrderStartAt),
       isSuspended = true),
     OrderOverview(
-      JobChainPath("/bJobChain") orderKey "1",
+      aa1OrderKey,
       FileBasedState.active,
       OrderState("100"),
       nextStepAt = Some(EPOCH)),
     OrderOverview(
-      JobChainPath("/aFolder/a-aJobChain") orderKey "1",
+      aa2OrderKey,
       FileBasedState.active,
       OrderState("100"),
       nextStepAt = Some(EPOCH)),
     OrderOverview(
-      JobChainPath("/aFolder/a-aJobChain") orderKey "2",
-      FileBasedState.active,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH)),
-    OrderOverview(
-      JobChainPath("/aFolder/a-bJobChain") orderKey "1",
+      ab1OrderKey,
       FileBasedState.active,
       OrderState("100"),
       nextStepAt = Some(EPOCH)))
 
   private val OrderCount = ExpectedOrderOverviews.size
+
   private val ExpectedOrderOverviewsJson = """[
+    {
+      "path": "/aJobChain,1",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "taskId": "3",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aJobChain,2",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "taskId": "4",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/bJobChain,1",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "fileBasedState": "active",
+      "taskId": "5",
+      "isSuspended": false,
+      "isOnBlacklist": false
+    },
+    {
+      "path": "/aJobChain,AD-HOC",
+      "orderState": "100",
+      "nextStepAt": "2038-01-01T11:22:33Z",
+      "fileBasedState": "notInitialized",
+      "isSuspended": true,
+      "isOnBlacklist": false
+    },
     {
       "path": "/aFolder/a-aJobChain,1",
       "orderState": "100",
@@ -198,38 +278,6 @@ private object JS1642IT {
       "nextStepAt": "1970-01-01T00:00:00Z",
       "fileBasedState": "active",
       "isSuspended": false,
-      "isOnBlacklist": false
-    },
-    {
-      "path": "/bJobChain,1",
-      "orderState": "100",
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
-      "isSuspended": false,
-      "isOnBlacklist": false
-    },
-    {
-      "path": "/aJobChain,2",
-      "orderState": "100",
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
-      "isSuspended": false,
-      "isOnBlacklist": false
-    },
-    {
-      "path": "/aJobChain,1",
-      "orderState": "100",
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
-      "isSuspended": false,
-      "isOnBlacklist": false
-    },
-    {
-      "path": "/aJobChain,AD-HOC",
-      "orderState": "100",
-      "nextStepAt": "2038-01-01T11:22:33Z",
-      "fileBasedState": "notInitialized",
-      "isSuspended": true,
       "isOnBlacklist": false
     }
   ]""".parseJson.asInstanceOf[JsArray]

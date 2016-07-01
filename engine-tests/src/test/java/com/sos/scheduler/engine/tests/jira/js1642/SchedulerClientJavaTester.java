@@ -46,20 +46,20 @@ final class SchedulerClientJavaTester implements AutoCloseable {
 
     private void testPermanentOrderOverview(Collection<OrderOverview> orderOverviews) {
         OrderOverview orderOverview = orderOverviews.stream()
-            .filter(o -> o.path().equals(aJobChainPath.orderKey("1")))
+            .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("1")))
             .findFirst().get();
-        assertEquals(orderOverview.orderState(), new OrderState("100"));
-        assertEquals(orderOverview.fileBasedState(), FileBasedState.active);
-        assertEquals(toJavaOptional(orderOverview.nextStepAt()), Optional.of(EPOCH));
+        assertEquals(new OrderState("100"), orderOverview.orderState());
+        assertEquals(FileBasedState.active, orderOverview.fileBasedState());
+        assertEquals(Optional.of(EPOCH), toJavaOptional(orderOverview.nextStepAt()));
     }
 
     private void testAdHocOrderOverview(Collection<OrderOverview> orderOverviews) {
         OrderOverview orderOverview = orderOverviews.stream()
-            .filter(o -> o.path().equals(aJobChainPath.orderKey("AD-HOC")))
+            .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("AD-HOC")))
             .findFirst().get();
-        assertEquals(orderOverview.orderState(), new OrderState("100"));
-        assertEquals(orderOverview.fileBasedState(), FileBasedState.notInitialized);
-        assertEquals(toJavaOptional(orderOverview.nextStepAt()), Optional.of(Instant.parse("2038-01-01T11:22:33Z")));
+        assertEquals(new OrderState("100"), orderOverview.orderState());
+        assertEquals(FileBasedState.notInitialized, orderOverview.fileBasedState());
+        assertEquals(Optional.of(Instant.parse("2038-01-01T11:22:33Z")), toJavaOptional(orderOverview.nextStepAt()));
     }
 
     static void run(String schedulerUri) {
