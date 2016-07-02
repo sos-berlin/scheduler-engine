@@ -43,8 +43,8 @@ trait WebServices {
           }
         }
       } ~
-      pathPrefix("OrderOverview") {
-        pathSingleSlash {
+      pathPrefix("order") {
+        (pathSingleSlash | pathPrefix("OrderOverview") & pathSingleSlash) {
           detach(()) {
             complete {
               orderSubsystem.orderOverviews

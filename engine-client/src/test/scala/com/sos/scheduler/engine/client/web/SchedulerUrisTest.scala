@@ -17,6 +17,6 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "orderOverview" in {
-    assert(uris.order.overviews == "http://0.0.0.0:1111/new/master/api/OrderOverview/")
+    assert(uris.order.overviews == "http://0.0.0.0:1111/new/master/api/order/OrderOverview/")
   }
 }
