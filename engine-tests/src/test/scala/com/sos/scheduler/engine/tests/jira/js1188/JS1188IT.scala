@@ -7,12 +7,11 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskState}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
-import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.test.SchedulerTestUtils._

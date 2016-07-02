@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
+import com.sos.scheduler.engine.data.job.JobState
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystemOverview
 import spray.json.DefaultJsonProtocol._
 

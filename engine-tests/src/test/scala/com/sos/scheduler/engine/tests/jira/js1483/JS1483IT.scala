@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1483
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyParameterIsMissingException
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.job.JobState
+import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

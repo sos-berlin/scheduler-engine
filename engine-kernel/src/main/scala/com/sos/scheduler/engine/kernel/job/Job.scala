@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskPersistentState}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
