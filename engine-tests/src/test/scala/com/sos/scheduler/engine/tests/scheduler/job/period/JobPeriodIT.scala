@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.scheduler.job.period
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
-import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.period.JobPeriodIT._
 import org.joda.time.Instant.now
@@ -11,40 +10,39 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 final class JobPeriodIT extends FreeSpec with ScalaSchedulerTest {
 
-  private val counts = mutable.HashMap[JobPath, Int]() ++ (JobConfigs map { _.path -> 0 })
+  private val counts = mutable.HashMap[JobPath, Int]() ++ (JobConfigs map { _.path → 0 })
   private val n = 3
 
-  for (j <- JobConfigs) {
+  eventBus.on[TaskStartedEvent] { case e ⇒
+    counts(e.jobPath) += 1
+  }
+
+  for (j ← JobConfigs) {
     val duration = n * j.interval + 500.ms
     s"Task ${j.path} should start about $n times in ${duration.getMillis}ms" in {
       sleep(durationUntilNextInterval(j.interval, (-900).ms))
       scheduler executeXml j.xmlElem
       sleep(duration)
-      withClue(s"At ${now() toDateTime DateTimeZone.getDefault}: ") {
+      withClue(s"At ${now toDateTime DateTimeZone.getDefault}: ") {
         counts(j.path) should be (n +- 1)
       }
       stopJob(j.path)
     }
   }
 
-  @EventHandler def handle(e: TaskStartedEvent): Unit = {
-    counts(e.jobPath) += 1
-  }
-
-  private def stopJob(jobPath: JobPath): Unit = {
+  private def stopJob(jobPath: JobPath) =
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
-  }
 }
 
 private object JobPeriodIT {
   private def durationUntilNextInterval(interval: Duration, shift: Duration) = {
     val i = interval.getMillis
-    val nw = now() - shift
+    val nw = now - shift
     new Instant(nw.getMillis / i * i + i) - nw
   }
 
@@ -54,7 +52,7 @@ private object JobPeriodIT {
     val xmlElem: xml.Elem
   }
 
-  private val JobConfigs = immutable.Seq(
+  private val JobConfigs = List(
     new JobConfig {
       val path = JobPath("/test-shell")
       val interval = 2.s
