@@ -43,7 +43,7 @@ trait WebServices {
           }
         }
       } ~
-      pathPrefix("order") {
+      pathPrefix("OrderOverview") {
         pathSingleSlash {
           detach(()) {
             complete {
