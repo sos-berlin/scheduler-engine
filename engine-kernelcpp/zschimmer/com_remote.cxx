@@ -111,12 +111,6 @@ const string socket_environment_name = "__scheduler_socket";
 
 namespace zschimmer {
 
-//-------------------------------------------------------------------------------------------static
-
-#ifndef Z_WINDOWS
-    const static int                our_kill_signal    = SIGUSR2;              // SIGUSR1 wird von Suns Java verwendet
-#endif
-
 //-------------------------------------------------------------------------------------------Z_INIT
 
 extern Message_code_text com_remote_messages[];
