@@ -38,7 +38,7 @@
                 var op = this.spoolerTask.order();
                 if (op != null)
                 {
-                    parameters.merge(this.spoolerTask.order().@params());
+                    parameters.merge(op.@params());
                 }
             }
             return parameters;
@@ -46,16 +46,16 @@
 
         public string get(string name)
         {
-            string result = null;
+            var result = "";
             if (this.isOrderJob)
             {
                 var op = this.spoolerTask.order();
                 if (op != null)
                 {
-                    result = this.spoolerTask.order().@params().var(name);
+                    result = op.@params().var(name);
                 }
             }
-            return result ?? (this.spoolerTask.@params().var(name));
+            return string.IsNullOrEmpty(result) ? this.spoolerTask.@params().var(name) : result;
         }
 
         public string value(string name)
@@ -70,7 +70,7 @@
                 var op = this.spoolerTask.order();
                 if (op != null)
                 {
-                    this.spoolerTask.order().@params().set_var(name, value);
+                    op.@params().set_var(name, value);
                 }
             }
             else

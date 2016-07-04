@@ -59,8 +59,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
-                return false;
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -80,8 +79,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
-                return false;
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -103,8 +101,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
-                return this.IsOrderJob;
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -122,7 +119,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -140,7 +137,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -158,7 +155,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -177,7 +174,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
             finally
             {
@@ -205,8 +202,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
-                return false;
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -221,8 +217,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
-                return false;
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -237,8 +232,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
-                return spoolerProcessResult;
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
         }
 
@@ -251,7 +245,7 @@
             }
             catch (RuntimeException ex)
             {
-                this.spooler_log.error(GetErrorMessage(ex.ErrorRecord));
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
             finally
             {
@@ -274,7 +268,7 @@
 
             Collection<PSParseError> parseErrors;
             var tokens = PSParser.Tokenize(this.Script, out parseErrors);
-            var functionSpoolerProcess =
+            var apiFunction =
                 tokens.FirstOrDefault(
                     t => t.Type.Equals(PSTokenType.CommandArgument) &&
                          (t.Content.Equals("spooler_init")
@@ -284,7 +278,7 @@
                           || t.Content.Equals("spooler_on_success")
                           || t.Content.Equals("spooler_on_error")
                           || t.Content.Equals("spooler_exit")));
-            this.isShellMode = functionSpoolerProcess == null;
+            this.isShellMode = apiFunction == null;
         }
 
         private bool InitializeScript(bool useGlobalScope)

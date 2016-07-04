@@ -21,11 +21,11 @@
             this.scriptControl = Activator.CreateInstance(scriptType, false);
             this.scriptControl.Language = language;
 
-            this.scriptControl.AddObject("spooler_log", this.spooler_log, true);
-            this.scriptControl.AddObject("spooler_task", this.spooler_task, true);
-            this.scriptControl.AddObject("spooler_job", this.spooler_job, true);
-            this.scriptControl.AddObject("spooler", this.spooler, true);
-            this.scriptControl.AddObject("spooler_params", this.spoolerParams, true);
+            this.scriptControl.AddObject("spooler_log", this.spooler_log, false);
+            this.scriptControl.AddObject("spooler_task", this.spooler_task, false);
+            this.scriptControl.AddObject("spooler_job", this.spooler_job, false);
+            this.scriptControl.AddObject("spooler", this.spooler, false);
+            this.scriptControl.AddObject("spooler_params", this.spoolerParams, false);
         }
 
         #endregion
@@ -40,13 +40,12 @@
             {
                 this.InitializeScript(false);
 
-                var result = this.scriptControl.Eval("spooler_init");
+                var result = this.Eval("spooler_init");
                 return GetReturnValue(result, true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
-                return false;
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -54,13 +53,12 @@
         {
             try
             {
-                var result = this.scriptControl.Eval("spooler_open");
+                var result = this.Eval("spooler_open");
                 return GetReturnValue(result, true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
-                return false;
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -68,13 +66,12 @@
         {
             try
             {
-                var result = this.scriptControl.Eval("spooler_process");
+                var result = this.Eval("spooler_process");
                 return GetReturnValue(result, this.IsOrderJob);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
-                return this.IsOrderJob;
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -82,11 +79,11 @@
         {
             try
             {
-                this.scriptControl.Eval("spooler_close");
+                this.Eval("spooler_close");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -94,11 +91,11 @@
         {
             try
             {
-                this.scriptControl.Eval("spooler_on_success");
+                this.Eval("spooler_on_success");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -106,11 +103,11 @@
         {
             try
             {
-                this.scriptControl.Eval("spooler_on_error");
+                this.Eval("spooler_on_error");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -118,11 +115,11 @@
         {
             try
             {
-                this.scriptControl.Eval("spooler_exit");
+                this.Eval("spooler_exit");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -136,13 +133,12 @@
             {
                 this.InitializeScript(true);
 
-                var result = this.scriptControl.Eval("spooler_task_before");
+                var result = this.Eval("spooler_task_before");
                 return GetReturnValue(result, true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
-                return false;
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -150,13 +146,12 @@
         {
             try
             {
-                var result = this.scriptControl.Eval("spooler_process_before");
+                var result = this.Eval("spooler_process_before");
                 return GetReturnValue(result, true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
-                return false;
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -164,13 +159,12 @@
         {
             try
             {
-                var result = this.scriptControl.Eval("spooler_process_after(" + spoolerProcessResult + ")");
+                var result = this.Eval("spooler_process_after(" + spoolerProcessResult + ")");
                 return GetReturnValue(result, spoolerProcessResult);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
-                return spoolerProcessResult;
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -178,11 +172,11 @@
         {
             try
             {
-                this.scriptControl.Eval("spooler_task_after");
+                this.Eval("spooler_task_after");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                this.spooler_log.error(this.GetErrorMessage());
+                throw new Exception(this.GetErrorMessage(ex));
             }
         }
 
@@ -201,7 +195,13 @@
             this.scriptControl.AddCode(this.Script);
         }
 
-        private string GetErrorMessage()
+        private object Eval(string expresion)
+        {
+            this.scriptControl.Error.Clear();
+            return this.scriptControl.Eval(expresion);
+        }
+
+        private string GetErrorMessage(Exception ex)
         {
             return String.Format(
                 "{0} {1}: {2}{3}Line: {4}, char: {5}{6}"
