@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.client.api
 
+import akka.util.ByteString
 import scala.concurrent.Future
 
 /**
@@ -8,11 +9,18 @@ import scala.concurrent.Future
  * @author Joacim Zschimmer
  */
 trait CommandClient {
+
   /**
    * Like uncheckedExecuteXml, but fails when response contains an ERROR element.
    * @return XML response
    */
-  def executeXml(xmlBytes: Array[Byte]): Future[String]
+  def executeXml(string: String): Future[String]
+
+  /**
+   * Like uncheckedExecuteXml, but fails when response contains an ERROR element.
+   * @return XML response
+   */
+  def executeXml(byteString: ByteString): Future[String]
 
   /**
    * Like uncheckedExecuteXml, but fails when response contains an ERROR element.
@@ -23,7 +31,12 @@ trait CommandClient {
   /**
    * @return XML response
    */
-  def uncheckedExecuteXml(xmlBytes: Array[Byte]): Future[String]
+  def uncheckedExecuteXml(string: String): Future[String]
+
+  /**
+   * @return XML response
+   */
+  def uncheckedExecuteXml(byteString: ByteString): Future[String]
 
   /**
    * @return XML response

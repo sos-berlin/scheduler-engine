@@ -60,7 +60,7 @@ final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "executeXml" in {
-    expectError(client.executeXml(TestCommandElem.toBytes(schedulerEncoding)))
+    expectError(client.executeXml(TestCommandElem.toByteString(schedulerEncoding)))
   }
 
   private def expectError[A](future: Future[A]): Unit =
@@ -74,7 +74,7 @@ final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "uncheckedExecuteXml" in {
-    val startFuture = client.uncheckedExecuteXml(TestCommandElem.toBytes(schedulerEncoding))
+    val startFuture = client.uncheckedExecuteXml(TestCommandElem.toByteString(schedulerEncoding))
     awaitResult(startFuture, MaxDuration) shouldEqual TestResponseString
   }
 
