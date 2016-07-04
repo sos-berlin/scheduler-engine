@@ -249,6 +249,41 @@ bool Communication::Listen_socket::async_continue_( Continue_flags )
     return something_done;
 }
 
+#if defined Z_UNIX
+void Communication::Internal_signaling_socket::init() {
+    if (_read_socket == SOCKET_ERROR) {
+        int fds[2];
+        int ret = ::pipe(fds);
+        if (ret == -1) throw_errno(errno, "pipe", "Internal_signaling_socket::init");
+        for (int i = 0; i < 2; i++) {
+            set_socket_not_inheritable(fds[i]);
+            set_socket_non_blocking(fds[i]);
+        }
+        _read_socket = fds[0];
+        _write_socket = fds[1];
+        set_event_name("Internal signaling socket");
+        add_to_socket_manager(_spooler->_connection_manager);
+        socket_expect_signals(Socket_operation::sig_read);
+    }
+}
+#endif
+
+void Communication::Internal_signaling_socket::signal() {
+    char signal = '!';
+    int len = write(_write_socket, &signal, 1);
+    if (len < 0 && errno != EWOULDBLOCK) throw_errno(errno, "write", "Internal_signaling_socket::signal");
+}
+
+bool Communication::Internal_signaling_socket::async_continue_(Continue_flags)
+{
+    char buffer [4096];
+    int len = read(_read_socket, buffer, sizeof buffer); 
+    bool something_done = len > 0;
+    // The only purpose of receiving is to stop sleeping and to go through the big scheduler loop.
+    async_clear_signaled();
+    return something_done;
+}
+
 //-------------------------------------------------------Communication::Udp_socket::async_continue_
 
 bool Communication::Udp_socket::async_continue_( Continue_flags )
@@ -642,6 +677,7 @@ Communication::Communication( Spooler* spooler )
     _zero_(this+1), 
     _spooler(spooler),
     _listen_socket(this),
+    _internal_signaling_socket(this),
     _udp_socket(this)
 {
 }
@@ -669,6 +705,7 @@ void Communication::close( double wait_time )
     _listen_socket.set_linger( true, 0 );
     _listen_socket.close();
 
+    _internal_signaling_socket.close();
     _udp_socket.set_linger( true, 0 );
     _udp_socket.close();
 
@@ -816,6 +853,9 @@ void Communication::bind()
     int                 ret;
     unsigned long       on = 1;
 
+    #if defined Z_UNIX
+        _internal_signaling_socket.init();
+    #endif
 
     // UDP:
 

@@ -2728,6 +2728,11 @@ bool Spooler::run_continue( const Time& now )
 void Spooler::signal()       
 { 
     _scheduler_event.signal(""); 
+    #ifdef Z_UNIX
+        if (::pthread_self() != _spooler->thread_id()) {
+            _communication.signal();
+        }
+    #endif
 }
 
 //---------------------------------------------------------------------------Spooler::check_cluster

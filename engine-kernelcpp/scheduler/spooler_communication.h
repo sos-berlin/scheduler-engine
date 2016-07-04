@@ -89,6 +89,20 @@ struct Communication
     };
 
 
+    struct Internal_signaling_socket : Socket_operation
+    {
+                                Internal_signaling_socket   ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
+
+        void init();
+        void signal();
+        virtual bool            async_continue_             ( Continue_flags );
+        virtual bool            async_finished_             () const                                { return false; }
+        virtual string          async_state_text_           () const                                { return "Internal_signaling_socket " + Socket_operation::async_state_text_();  }
+
+        Spooler*               _spooler;
+        Communication*         _communication;
+    };
+
     struct Udp_socket : Socket_operation
     {
                                 Udp_socket                  ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
@@ -100,7 +114,6 @@ struct Communication
         Spooler*               _spooler;
         Communication*         _communication;
     };
-
 
     
     struct Operation : Async_operation
@@ -208,6 +221,10 @@ struct Communication
     void                        rebind                      ()                                      { bind(); }
     bool                        started                     ()                                      { return _started; }
     void                        remove_connection           ( Connection* );
+    
+    void signal() {
+        _internal_signaling_socket.signal();
+    }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& ) const;
 
@@ -220,6 +237,7 @@ struct Communication
 
   private:
     Listen_socket              _listen_socket;
+    Internal_signaling_socket  _internal_signaling_socket;
     Udp_socket                 _udp_socket;
     Connection_list            _connection_list;
     bool                       _terminate;
