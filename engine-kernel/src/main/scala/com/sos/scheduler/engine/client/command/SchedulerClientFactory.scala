@@ -15,10 +15,16 @@ import spray.http.Uri
 @Singleton
 final class SchedulerClientFactory @Inject private(implicit actorRefFactory: ActorRefFactory) {
 
-  def apply(schedulerUri: Uri): CommandClient = new MyWebCommandClient(schedulerUri, actorRefFactory)
+  def apply(schedulerUri: Uri): CommandClient = {
+    val commandUri = schedulerUri.path match {
+      case Uri.Path.Empty | Uri.Path.SingleSlash ⇒ schedulerUri.copy(path = Uri.Path("/jobscheduler/engine/command"))
+      case _ ⇒ throw new IllegalArgumentException(s"Invalid JobScheduler URL: $schedulerUri")
+    }
+    new MyWebCommandClient(commandUri, actorRefFactory)
+  }
 }
 
 object SchedulerClientFactory {
-  private final class MyWebCommandClient(protected val schedulerUri: Uri, protected val actorRefFactory: ActorRefFactory)
+  private final class MyWebCommandClient(protected val commandUri: Uri, protected val actorRefFactory: ActorRefFactory)
   extends WebCommandClient
 }

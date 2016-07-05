@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.client.web
 
-import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.order.OrderOverview
@@ -23,13 +22,14 @@ import spray.json.DefaultJsonProtocol._
  *
  * @author Joacim Zschimmer
  */
-trait WebSchedulerClient extends SchedulerClient {
+trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
+
   import actorRefFactory.dispatcher
 
-  protected val schedulerUri: String
-  protected implicit val actorRefFactory: ActorRefFactory
+  protected final def commandUri = uris.command
 
-  lazy val uris = SchedulerUris(schedulerUri)
+  def uris: SchedulerUris
+
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
     addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
@@ -54,5 +54,5 @@ trait WebSchedulerClient extends SchedulerClient {
 
   private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
 
-  override def toString = s"WebSchedulerClient($schedulerUri)"
+  override def toString = s"WebSchedulerClient($uris)"
 }

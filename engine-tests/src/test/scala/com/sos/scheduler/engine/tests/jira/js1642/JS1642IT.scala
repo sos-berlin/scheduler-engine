@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
@@ -120,6 +121,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       Stopwatch.measureTime(100, "ordersFullOverview") {
         client.ordersFullOverview await TestTimeout
       }
+    }
+
+    "<show_state>" in {
+      val response = client.executeXml("<show_state/>") map SafeXML.loadString await TestTimeout
+      println(response)
+      val state = response \ "answer" \ "state"
+      assert((state \ "@state").toString == "running")
+      assert((state \ "@ip_address").toString == "127.0.0.1")
     }
   }
 

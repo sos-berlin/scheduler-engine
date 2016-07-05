@@ -9,7 +9,7 @@ import scala.concurrent.Future
 /**
   * @author Joacim Zschimmer
   */
-trait SchedulerClient {
+trait SchedulerClient extends CommandClient {
 
   def overview: Future[SchedulerOverview]
 

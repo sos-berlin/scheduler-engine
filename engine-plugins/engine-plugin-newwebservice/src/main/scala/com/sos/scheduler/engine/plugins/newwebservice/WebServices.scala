@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.plugins.newwebservice.JsonProtocol._
@@ -24,47 +25,52 @@ trait WebServices {
 
   final def route: Route =
     (decompressRequest() & compressResponseIfRequested(())) {
-      get {
-        pathPrefix("new" / "master" / "api") {  // Nicht "jobscheduler", weil sonst Jettys GzipFilter dazwischenfunkt und jpeg falsch liefert. com.sos.scheduler.engine.plugins.jetty.configuration.Config.contextPath stripPrefix "/"
-          apiRoute ~ testRoute
-        }
+      pathPrefix("new" / "master" / "api") {  // Nicht "jobscheduler", weil sonst Jettys GzipFilter dazwischenfunkt und jpeg falsch liefert. com.sos.scheduler.engine.plugins.jetty.configuration.Config.contextPath stripPrefix "/"
+        apiRoute ~ testRoute
       }
     }
 
   private def apiRoute: Route =
-    get {
-      pathEndOrSingleSlash {
+    pathEndOrSingleSlash {
+      detach(()) {
+        complete {
+          client.overview
+        }
+      }
+    } ~
+    (pathPrefix("command") & pathEnd & post) {
+      entity(as[XmlString]) { case XmlString(xmlString) ⇒
+       detach(()) {
+         complete {
+           client.executeXml(xmlString) map XmlString.apply
+         }
+       }
+      }
+    } ~
+    pathPrefix("order") {
+      (pathSingleSlash | pathPrefix("OrderOverview") & pathSingleSlash & get) {
         detach(()) {
           complete {
-            client.overview
+            client.orderOverviews
           }
         }
       } ~
-      pathPrefix("order") {
-        (pathSingleSlash | pathPrefix("OrderOverview") & pathSingleSlash) {
-          detach(()) {
-            complete {
-              client.orderOverviews
-            }
-          }
-        } ~
-        (path("OrdersFullOverview") & pathEnd) {
-          detach(()) {
-            complete {
-              client.ordersFullOverview
-            }
+      (path("OrdersFullOverview") & pathEnd & get) {
+        detach(()) {
+          complete {
+            client.ordersFullOverview
           }
         }
       }
-      /*~
-      pathPrefix("subsystems") {
-        subsystemsRoute
-      }
-      */
     }
+    /*~
+    pathPrefix("subsystems") {
+      subsystemsRoute
+    }
+    */
 
   private def subsystemsRoute: Route =
-    pathEnd {
+    (pathEnd & get) {
       complete {
         fileBasedSubsystemRegister.descriptions map { _.fileBasedType.cppName }
       }
@@ -104,7 +110,7 @@ trait WebServices {
 
   private def testRoute: Route =
     if (configuration.testMode)
-      pathPrefix("test") {
+      (pathPrefix("test") & get) {
         path("OutOfMemoryError") {
           toughComplete {
             throw new OutOfMemoryError

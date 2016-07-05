@@ -5,8 +5,10 @@ import akka.actor.ActorSystem
 /**
   * @author Joacim Zschimmer
   */
-final class StandardWebSchedulerClient(protected val schedulerUri: String)
+final class StandardWebSchedulerClient(val uris: SchedulerUris)
 extends WebSchedulerClient with AutoCloseable {
+
+  def this(schedulerUri: String) = this(SchedulerUris(schedulerUri))
 
   private val actorSystem = ActorSystem("WebSchedulerClient")
   protected val actorRefFactory = actorSystem

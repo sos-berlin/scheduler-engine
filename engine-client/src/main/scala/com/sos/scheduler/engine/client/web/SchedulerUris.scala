@@ -11,17 +11,19 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   private val prefixedUri = Uri(s"$schedulerUriString/$Prefix")
 
-  val overview = uriString(Api)
+  lazy val command = resolvePathUri("api/command")
+
+  lazy val overview = uriString("api")
 
   object order {
-    val overviews = uriString(s"$Api/order/OrderOverview/")
-    val fullOverview = uriString(s"$Api/order/OrdersFullOverview")
+    lazy val overviews = uriString("api/order/OrderOverview/")
+    lazy val fullOverview = uriString("api/order/OrdersFullOverview")
   }
 
   object test {
-    val error500 = uriString(s"$Api/test/ERROR-500")
-    val outOfMemoryError = uriString(s"$Api/test/OutOfMemoryError")
-    val unknown = uriString(s"$Api/test/UNKNOWN")
+    lazy val error500 = uriString("api/test/ERROR-500")
+    lazy val outOfMemoryError = uriString("api/test/OutOfMemoryError")
+    lazy val unknown = uriString("api/test/UNKNOWN")
   }
 
   private def uriString(uri: Uri): String = resolvePathUri(uri).toString
@@ -30,11 +32,14 @@ final class SchedulerUris private(schedulerUriString: String) {
     val u = uri.resolvedAgainst(prefixedUri)
     u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString)}"))
   }
+
+  override def toString = s"SchedulerUris($schedulerUriString)"
 }
 
 object SchedulerUris {
   private val Prefix = "new/master"
-  private val Api = "api"
+
+  def apply(schedulerUri: Uri): SchedulerUris = apply(schedulerUri.toString)
 
   def apply(schedulerUri: String) = new SchedulerUris(schedulerUri stripSuffix "/")
 

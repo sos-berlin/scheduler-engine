@@ -8,18 +8,20 @@ import com.sos.scheduler.engine.kernel.job.TaskSubsystem
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 /**
   * @author Joacim Zschimmer
   */
 @Singleton
 final class DirectSchedulerClient @Inject private(
-  scheduler: Scheduler,
+  protected val scheduler: Scheduler,
   orderSubsystem: OrderSubsystem,
   taskSubsystem: TaskSubsystem,
   processClassSubsystem: ProcessClassSubsystem)(
-  implicit schedulerThreadCallQueue: SchedulerThreadCallQueue)
-extends SchedulerClient {
+  implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  protected val executionContext: ExecutionContext)
+extends SchedulerClient with DirectCommandClient {
 
   def overview = scheduler.overview
 
