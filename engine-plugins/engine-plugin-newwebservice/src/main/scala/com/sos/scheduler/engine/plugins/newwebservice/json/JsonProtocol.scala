@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.newwebservice
+package com.sos.scheduler.engine.plugins.newwebservice.json
 
 import com.sos.scheduler.engine.data.filebased.FileBasedDetails
 import com.sos.scheduler.engine.data.jobchain.JobChainDetails

@@ -20,13 +20,10 @@ final class SchedulerUris private(schedulerUriString: String) {
     lazy val fullOverview = uriString("api/order/OrdersFullOverview")
   }
 
-  object test {
-    lazy val error500 = uriString("api/test/ERROR-500")
-    lazy val outOfMemoryError = uriString("api/test/OutOfMemoryError")
-    lazy val unknown = uriString("api/test/UNKNOWN")
-  }
-
-  private def uriString(uri: Uri): String = resolvePathUri(uri).toString
+  /**
+    * Public for tests only.
+    */
+  def uriString(uri: Uri): String = resolvePathUri(uri).toString
 
   def resolvePathUri(uri: Uri): Uri = {
     val u = uri.resolvedAgainst(prefixedUri)

@@ -193,21 +193,18 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
   "Web service error behavior" - {
     "jobscheduler/master/api/ERROR-500" in {
-      assert(webSchedulerClient.uris.test.error500 == s"$schedulerUri/jobscheduler/master/api/test/ERROR-500")
-      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.test.error500) await TestTimeout }
+      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString(s"TEST/ERROR-500")) await TestTimeout }
         .response.status shouldEqual InternalServerError
     }
 
     "jobscheduler/master/api/OutOfMemoryError" in {
-      assert(webSchedulerClient.uris.test.outOfMemoryError == s"$schedulerUri/jobscheduler/master/api/test/OutOfMemoryError")
-      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.test.outOfMemoryError) await TestTimeout }
+      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString("TEST/OutOfMemoryError")) await TestTimeout }
         .response.status shouldEqual InternalServerError
       webSchedulerClient.get[String](_.overview) await TestTimeout
     }
 
     "jobscheduler/master/api/UNKNOWN" in {
-      assert(webSchedulerClient.uris.test.unknown == s"$schedulerUri/jobscheduler/master/api/test/UNKNOWN")
-      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.test.unknown) await TestTimeout }
+      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString("TEST/UNKNOWN")) await TestTimeout }
         .response.status shouldEqual NotFound
     }
   }

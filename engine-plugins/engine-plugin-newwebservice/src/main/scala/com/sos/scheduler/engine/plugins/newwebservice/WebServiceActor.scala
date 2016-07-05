@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
+import com.sos.scheduler.engine.plugins.newwebservice.routes.WebServices
 import javax.inject.Inject
 import spray.routing._
 

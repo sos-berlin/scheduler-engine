@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.newwebservice
+package com.sos.scheduler.engine.plugins.newwebservice.common
 
 import spray.routing.Directives._
 import spray.routing._
