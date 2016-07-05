@@ -689,7 +689,6 @@ struct Spooler : Object,
     ptr<Event_subsystem>             _event_subsystem;
 
     Wait_handles               _wait_handles;
-
     Event                      _scheduler_event;
     typed_call_register<Spooler> _call_register;
 

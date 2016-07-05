@@ -155,6 +155,11 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual bool on_monitor_to_be_removed(Monitor*) = 0;;
 
     virtual string script_text() const = 0;
+    virtual Absolute_path default_process_class_path() const = 0;
+    virtual bool is_in_period(const Time& = Time::now()) = 0;
+    virtual bool max_tasks_reached() const = 0;
+    virtual int max_tasks() const = 0;
+    virtual int running_tasks_count() const = 0;
 
   private:
     Fill_zero                  _zero_;
@@ -322,7 +327,7 @@ struct Standard_job : Job
     void                        on_call                     (const job::Locks_available_call&);
     void                        on_call                     (const job::Remove_temporary_job_call&);
 
-    bool                        is_in_period                ( const Time& );
+    bool                        is_in_period                (const Time&);
     void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
     int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
@@ -385,8 +390,20 @@ struct Standard_job : Job
         return !_default_process_class_path.empty();
     }
 
+    public: Absolute_path default_process_class_path() const {
+        return _default_process_class_path;
+    }
+
     public: bool max_tasks_reached() const {
-        return _running_tasks.size() >= _max_tasks;
+        return running_tasks_count() >= _max_tasks;
+    }
+
+    public: int max_tasks() const {
+        return _max_tasks;
+    }
+
+    public: int running_tasks_count() const {
+        return _running_tasks.size();
     }
 
   private:

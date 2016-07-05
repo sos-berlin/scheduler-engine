@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.client.web
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
@@ -41,6 +42,9 @@ trait WebSchedulerClient extends SchedulerClient {
 
   final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
     get[immutable.Seq[OrderOverview]](_.order.overviews)
+
+  final def ordersFullOverview: Future[OrdersFullOverview] =
+    get[OrdersFullOverview](_.order.fullOverview)
 
   final def getJson(pathUri: String): Future[String] =
     get[String](_.resolvePathUri(pathUri).toString)

@@ -2,9 +2,8 @@ package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.kernel.Scheduler
+import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
-import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.plugins.newwebservice.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.MyDirectives.toughComplete
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
@@ -15,10 +14,8 @@ import spray.routing.Route
   * @author Joacim Zschimmer
   */
 trait WebServices {
-  protected def orderSubsystem: OrderSubsystem
-  protected def standingOrderSubsystem: StandingOrderSubsystem
+  protected def client: DirectSchedulerClient
   protected def configuration: NewWebServicePluginConfiguration
-  protected def scheduler: Scheduler
   protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
   protected implicit def actorRefFactory: ActorRefFactory
   protected implicit def executionContext = actorRefFactory.dispatcher
@@ -39,7 +36,7 @@ trait WebServices {
       pathEndOrSingleSlash {
         detach(()) {
           complete {
-            scheduler.overview
+            client.overview
           }
         }
       } ~
@@ -47,7 +44,14 @@ trait WebServices {
         (pathSingleSlash | pathPrefix("OrderOverview") & pathSingleSlash) {
           detach(()) {
             complete {
-              orderSubsystem.orderOverviews
+              client.orderOverviews
+            }
+          }
+        } ~
+        (path("OrdersFullOverview") & pathEnd) {
+          detach(()) {
+            complete {
+              client.ordersFullOverview
             }
           }
         }

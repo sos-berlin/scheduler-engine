@@ -17,11 +17,10 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import javax.inject.{Inject, Singleton}
 import javax.persistence.EntityManagerFactory
 import scala.collection.immutable
-import scala.concurrent.Future
 
 @ForCpp
 @Singleton
-final class OrderSubsystem @Inject private(
+private[engine] final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   injector: Injector)
@@ -64,12 +63,9 @@ extends FileBasedSubsystem {
     }
   }
 
-  def orderOverviews: Future[immutable.Seq[OrderOverview]] =
-    schedulerThreadFuture {
-      orders.toVector map { _.overview }
-    }
+  def orderOverviews: immutable.Seq[OrderOverview] = orders.toVector map { _.overview }
 
-  private def orders: Seq[Order] = jobChains flatMap { _.orders }
+  def orders: Seq[Order] = jobChains flatMap { _.orders }
 
   def order(orderKey: OrderKey): Order =
     jobChain(orderKey.jobChainPath).order(orderKey.id)

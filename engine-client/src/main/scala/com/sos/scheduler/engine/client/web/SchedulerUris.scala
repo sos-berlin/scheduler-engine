@@ -15,6 +15,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   object order {
     val overviews = uriString(s"$Api/order/OrderOverview/")
+    val fullOverview = uriString(s"$Api/order/OrdersFullOverview")
   }
 
   object test {

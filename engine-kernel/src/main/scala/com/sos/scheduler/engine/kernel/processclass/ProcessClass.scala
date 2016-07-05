@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, ProcessClassOverview, TaskId}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
@@ -94,6 +94,9 @@ extends FileBased {
     try client.close()
     finally clients -= client
   }
+
+  override def overview = ProcessClassOverview(path, fileBasedState,
+    processLimit = cppProxy.max_processes, usedProcessCount = cppProxy.used_process_count)
 
   def agents: immutable.Seq[Agent] = config.agents
 
