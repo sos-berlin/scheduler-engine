@@ -25,7 +25,7 @@ trait WebServices {
 
   final def route: Route =
     (decompressRequest() & compressResponseIfRequested(())) {
-      pathPrefix("new" / "master" / "api") {  // Nicht "jobscheduler", weil sonst Jettys GzipFilter dazwischenfunkt und jpeg falsch liefert. com.sos.scheduler.engine.plugins.jetty.configuration.Config.contextPath stripPrefix "/"
+      pathPrefix("jobscheduler" / "master" / "api") {  // Prefix "jobscheduler" equals JettyPlugin's context name. This lets Jetty's GzipFilter scramble JPEG.
         apiRoute ~ testRoute
       }
     }

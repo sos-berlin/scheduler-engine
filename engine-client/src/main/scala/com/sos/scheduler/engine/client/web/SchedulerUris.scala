@@ -37,7 +37,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 }
 
 object SchedulerUris {
-  private val Prefix = "new/master"
+  private val Prefix = "jobscheduler/master"
 
   def apply(schedulerUri: Uri): SchedulerUris = apply(schedulerUri.toString)
 
