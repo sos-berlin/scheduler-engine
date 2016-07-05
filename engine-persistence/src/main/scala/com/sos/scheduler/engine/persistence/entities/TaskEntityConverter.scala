@@ -15,10 +15,10 @@ trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistentState, Tas
   protected lazy val schedulerIdDBString = schedulerIdToDatabase(schedulerId)
   protected lazy val clusterMemberIdDBString = emptyToNull(clusterMemberId.string)
 
-  protected def toEntityKey(taskId: TaskId) = java.lang.Integer.valueOf(taskId.value)
+  protected def toEntityKey(taskId: TaskId) = java.lang.Integer.valueOf(taskId.number)
 
   protected def toEntity(o: TaskPersistentState) =  {
-    val e = new TaskEntity(o.taskId.value)
+    val e = new TaskEntity(o.taskId.number)
     e.schedulerId = schedulerIdDBString
     e.clusterMemberId = clusterMemberIdDBString
     e.jobPath = toDBString(o.jobPath)

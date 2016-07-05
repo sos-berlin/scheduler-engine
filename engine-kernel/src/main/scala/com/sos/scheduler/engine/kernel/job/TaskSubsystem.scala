@@ -9,10 +9,10 @@ import javax.inject.{Inject, Singleton}
 final class TaskSubsystem @Inject private(cppProxy: Task_subsystemC) {
 
   def task(id: TaskId): Task =
-    Option(cppProxy.get_task_or_null(id.value)) map { _.getSister } getOrElse {
+    Option(cppProxy.get_task_or_null(id.number)) map { _.getSister } getOrElse {
       throw new NoSuchElementException(s"Unknown TaskID '${id.string}'") }
 
   def taskLog(taskId: TaskId): String =
-    try cppProxy.task_log(taskId.value)
+    try cppProxy.task_log(taskId.number)
     catch { case e: CppException if e.getCode == "SOS-1251" => throw new TaskNotFoundException(taskId) }
 }

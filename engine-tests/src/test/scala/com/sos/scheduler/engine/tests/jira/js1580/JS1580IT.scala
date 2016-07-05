@@ -29,7 +29,7 @@ final class JS1580IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         for (_ ← run.started) yield
           transaction(entityManagerFactory) { em ⇒
             val e = em.fetchOption[TaskHistoryEntity]("select t from TaskHistoryEntity t where t.id = :taskId",
-              List("taskId" → run.taskId.value))
+              List("taskId" → run.taskId.number))
             assert(Option(e.get.agentUrl) == expectedAgentUri)
             true
           }
