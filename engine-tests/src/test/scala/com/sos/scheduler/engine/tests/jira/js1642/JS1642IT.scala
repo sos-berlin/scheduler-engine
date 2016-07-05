@@ -33,7 +33,8 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
-import spray.http.StatusCodes.{InternalServerError, NotFound}
+import spray.http.MediaTypes.`text/richtext`
+import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
 import spray.json._
 
@@ -125,7 +126,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
     "<show_state>" in {
       val response = client.executeXml("<show_state/>") map SafeXML.loadString await TestTimeout
-      println(response)
       val state = response \ "answer" \ "state"
       assert((state \ "@state").toString == "running")
       assert((state \ "@ip_address").toString == "127.0.0.1")
@@ -173,6 +173,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     def sortArray(jsArray: JsArray, key: String) = JsArray(jsArray.elements.sortBy(selectString(key)))
 
     def selectString(key: String)(o: JsValue): String = o.asJsObject.fields(key).asInstanceOf[JsString].value
+  }
+
+  "Unknown Accept content type is rejected" - {
+    "overview" in {
+      intercept[UnsuccessfulResponseException] {
+        webSchedulerClient.get[String](_.overview, accept = `text/richtext`) await TestTimeout
+      }.response.status shouldEqual NotAcceptable
+    }
   }
 
   "WebSchedulerClient.getJson" in {

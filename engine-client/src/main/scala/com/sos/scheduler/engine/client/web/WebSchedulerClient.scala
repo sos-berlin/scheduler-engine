@@ -31,7 +31,6 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   def uris: SchedulerUris
 
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
-    addHeader(Accept(`application/json`)) ~>
     addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
     encode(Gzip) ~>
     sendReceive ~>
@@ -49,10 +48,11 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def getJson(pathUri: String): Future[String] =
     get[String](_.resolvePathUri(pathUri).toString)
 
-  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String): Future[A] =
-    unmarshallingPipeline[A].apply(Get(uri(uris)))
+  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`) =
+    unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
 
-  private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
+  private def unmarshallingPipeline[A: FromResponseUnmarshaller](accept: MediaType) =
+    addHeader(Accept(accept)) ~> nonCachingHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"WebSchedulerClient($uris)"
 }
