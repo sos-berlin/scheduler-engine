@@ -1,5 +1,5 @@
 #! /bin/bash
 set -e
 
-mvn --no-snapshot-updates --threads 1C -D maven.test.skip -pl :engine-data,:engine-common,:engine-persistence,:engine-client,:engine-kernel,:engine-newkernel clean install
+mvn --no-snapshot-updates --threads 1C -D maven.test.skip -pl :engine-base,engine-data,:engine-common,:engine-persistence,:engine-client,:engine-kernel,:engine-newkernel clean install
 mvn --no-snapshot-updates --threads 1C -D maven.test.skip -pl :engine-kernelcpp-generated,:engine-kernelcpp generate-sources
