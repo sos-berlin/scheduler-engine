@@ -13,7 +13,7 @@ struct TaskId__class : ::zschimmer::javabridge::Class
     TaskId__class(const string& class_name);
    ~TaskId__class();
 
-    ::zschimmer::javabridge::Method const _value____method;
+    ::zschimmer::javabridge::Method const _number____method;
 
     static const ::zschimmer::javabridge::class_factory< TaskId__class > class_factory;
 };
@@ -22,7 +22,7 @@ const ::zschimmer::javabridge::class_factory< TaskId__class > TaskId__class::cla
 
 TaskId__class::TaskId__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_value____method(this, "value", "()I"){}
+    ,_number____method(this, "number", "()I"){}
 
 TaskId__class::~TaskId__class() {}
 
@@ -42,10 +42,10 @@ TaskId::~TaskId() { assign_(NULL); }
 
 
 
-jint TaskId::value() const {
+jint TaskId::number() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     TaskId__class* cls = _class.get();
-    return cls->_value____method.int_call(get_jobject(), parameter_list);
+    return cls->_number____method.int_call(get_jobject(), parameter_list);
 }
 
 
