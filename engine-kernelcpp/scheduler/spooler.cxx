@@ -3944,7 +3944,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         {
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
-            string msg = sos::scheduler::Spooler::backup_logfile( path );
+            string msg = sos::scheduler::Spooler::backup_logfile( path );  // Does not backup for "-log=+scheduler.log" due to '+' in path.
             log_start( log_filename );
             if (!msg.empty()) Z_LOG2("scheduler",msg);
         }
