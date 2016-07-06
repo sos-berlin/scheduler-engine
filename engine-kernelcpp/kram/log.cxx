@@ -386,7 +386,6 @@ Mswin_debug_streambuf::~Mswin_debug_streambuf()
     {
         close( _out );  
         _out = -1;
-        sos_static_ptr()->_log_filename = "";
     }
 }
 

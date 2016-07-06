@@ -27,8 +27,10 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val schedulerOldLogFile = testEnvironment.logDirectory / "scheduler-old.log"
 
   "spooler.log contains log category {scheduler}" in {
+    assert(numberOfLogStarts == 1)
     scheduler executeXml firstCommand
     assert(schedulerLogAsString contains firstCommand)
+    assert(numberOfLogStarts == 1)
     checkSchedulerLog()
   }
 
@@ -38,12 +40,16 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
     withClue("New file should not contain previous lines:") {
       assert(!(schedulerLogAsString contains firstCommand))
     }
+    assert(numberOfLogStarts == 1)
     assert(schedulerLogAsString contains secondCommand)
     checkSchedulerLog()
   }
 
   "JS-1644 spooler_log.info() in next job does not start new scheduler.log" in {
     runJobAndWaitForEnd(JobPath("/log"))
+    assert(numberOfLogStarts == 2)
+    runJobAndWaitForEnd(JobPath("/log"))
+    assert(numberOfLogStarts == 3)
     withClue("After next job with spooler_log.info(), scheduler.log should keep its content: ") {
       assert(schedulerLogAsString contains secondCommand)
     }
@@ -64,4 +70,6 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def schedulerLogAsString = testEnvironment.schedulerLog.contentString
+
+  private def numberOfLogStarts: Int = schedulerLogAsString split '\n' count { _.indexOf("Aufruf: ") >= 0 }
 }
