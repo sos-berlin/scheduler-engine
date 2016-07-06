@@ -47,11 +47,7 @@
 
             try
             {
-                if (!this.InitializeScript(false))
-                {
-                    return false;
-                }
-
+                this.InitializeScript(false);
                 var results = this.InvokeCommand("spooler_init");
                 var index = GetReturnValueIndex(results);
                 this.Log(results, index);
@@ -91,6 +87,7 @@
                 {
                     this.spoolerParams.SetEnvVars();
                     this.InitializeScript(true);
+                    this.CheckLastExitCode(true);
                     return this.IsOrderJob;
                 }
 
@@ -190,11 +187,7 @@
         {
             try
             {
-                if (!this.InitializeScript(false))
-                {
-                    return false;
-                }
-
+                this.InitializeScript(false);
                 var results = this.InvokeCommand("spooler_task_before");
                 var index = GetReturnValueIndex(results);
                 this.Log(results, index);
@@ -281,18 +274,40 @@
             this.isShellMode = apiFunction == null;
         }
 
-        private bool InitializeScript(bool useGlobalScope)
+        private void InitializeScript(bool useLocalScope)
         {
             this.shell.Commands.Clear();
-            this.shell.AddScript(this.Script, useGlobalScope);
+            this.shell.AddScript(this.Script, useLocalScope);
             this.shell.AddCommand("Out-String").AddParameter("Stream", true);
             var results = this.shell.Invoke();
-            var success = this.shell.Streams.Error.Count == 0;
             this.Log(results);
-
-            return success;
         }
 
+        private void CheckLastExitCode(bool useLocalScope)
+        {
+            this.shell.Commands.Clear();
+            this.shell.AddScript("$Global:LastExitCode", useLocalScope);
+            var lastExitCode = this.shell.Invoke().FirstOrDefault();
+            var exitCode = 0;
+            if (lastExitCode != null)
+            {
+                try
+                {
+                    exitCode = Int32.Parse(lastExitCode.ToString());
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            if (exitCode == 0)
+            {
+                return;
+            }
+            this.spooler_log.error(String.Format("Process terminated with exit code {0}. See the following warning SCHEDULER-280.", exitCode));
+            this.spooler_task.set_exit_code(exitCode);
+        }
+        
         private Collection<PSObject> InvokeCommand(String methodName, bool? param = null)
         {
             this.shell.Commands.Clear();
@@ -322,9 +337,9 @@
             var i = 0;
             foreach (var psObject in results)
             {
-                if (i != returnValueIndex)
+                if (psObject != null && i != returnValueIndex)
                 {
-                    this.spooler_log.info(psObject.ToString());
+                    Console.Out.WriteLine(psObject.ToString());
                 }
                 i++;
             }
@@ -334,19 +349,19 @@
         {
             if (this.shell.Streams.Error.Count > 0)
             {
-                this.spooler_log.error(GetErrorMessage(this.shell.Streams.Error[0]));
+                Console.Error.WriteLine(GetErrorMessage(this.shell.Streams.Error[0]));
             }
             if (this.shell.Streams.Warning.Count > 0)
             {
-                this.spooler_log.warn(this.shell.Streams.Warning[0].ToString());
+                Console.Out.WriteLine(this.shell.Streams.Warning[0].ToString());
             }
             if (this.shell.Streams.Debug.Count > 0)
             {
-                this.spooler_log.debug1(this.shell.Streams.Debug[0].ToString());
+                Console.Out.WriteLine(this.shell.Streams.Debug[0].ToString());
             }
             if (this.shell.Streams.Verbose.Count > 0)
             {
-                this.spooler_log.info(this.shell.Streams.Verbose[0].ToString());
+                Console.Out.WriteLine(this.shell.Streams.Verbose[0].ToString());
             }
             this.shell.Streams.ClearStreams();
         }
