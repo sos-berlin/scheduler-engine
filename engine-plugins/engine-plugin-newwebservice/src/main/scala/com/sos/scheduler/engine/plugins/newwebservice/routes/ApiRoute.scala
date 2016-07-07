@@ -30,13 +30,6 @@ trait ApiRoute extends OrderRoute {
           completeAsHtmlPageOrOther(client.overview)
         }
       } ~
-      pathEndOrSingleSlash {
-        detach(()) {
-          complete {
-            client.overview
-          }
-        }
-      } ~
       pathSingleSlash {
         get {
           accept(`text/html`) {
