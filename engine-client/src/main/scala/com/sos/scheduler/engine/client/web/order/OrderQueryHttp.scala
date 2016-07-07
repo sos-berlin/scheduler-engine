@@ -3,8 +3,10 @@ package com.sos.scheduler.engine.client.web.order
 import com.google.common.base.Splitter
 import com.sos.scheduler.engine.data.order.{OrderQuery, OrderSourceType}
 import scala.collection.JavaConversions._
+import spray.http.Uri
 import spray.routing.Directives._
 import spray.routing._
+import spray.routing.directives.BasicDirectives.{extract ⇒ _, provide ⇒ _}
 
 /**
   * @author Joacim Zschimmer
@@ -41,10 +43,15 @@ object OrderQueryHttp {
     (q.isSourceType map ( o ⇒ SourceTypeName → (o mkString ",")))
 
   object directives {
-    def orderQuery: Directive1[OrderQuery] =
-      extract { ctx ⇒ OrderQueryHttp.fromHttpQuery(ctx.request.uri.query.toMap) } flatMap {
-        case Right(o) ⇒ provide(o)
-        case Left(rejection) ⇒ reject(rejection)
+    def orderQuery(parameters: Map[String, String]): Directive1[OrderQuery] =
+      unmatchedPath flatMap { path ⇒
+        if (path startsWith Uri.Path.SingleSlash)
+          OrderQueryHttp.fromHttpQuery(parameters) match {
+            case Right(query) ⇒ provide(query.copy(jobChains = path.toString))
+            case Left(rejection) ⇒ reject(rejection)
+          }
+        else
+          reject
       }
-  }
+    }
 }

@@ -19,12 +19,15 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   object order {
     def overviews(query: OrderQuery = OrderQuery.All): String =
-      resolvePathUri(Uri(path = Uri.Path("api/order/OrderOverview/"), query = toQuery(query))).toString
+      resolveWithOrderQuery(query, "OrderOverview").toString
 
     def fullOverview(query: OrderQuery = OrderQuery.All): String =
-      resolvePathUri(Uri(path = Uri.Path("api/order/OrdersFullOverview"), query = toQuery(query))).toString
+      resolveWithOrderQuery(query, "OrdersFullOverview").toString
 
-    private def toQuery(query: OrderQuery) = Uri.Query(OrderQueryHttp.toHttpQueryMap(query))
+    private def resolveWithOrderQuery(orderQuery: OrderQuery, typeName: String) =
+      resolvePathUri(Uri(
+        path = Uri.Path(s"api/order${orderQuery.jobChains}"),
+        query = Uri.Query(OrderQueryHttp.toHttpQueryMap(orderQuery) + ("return" → typeName))))
   }
 
   /**

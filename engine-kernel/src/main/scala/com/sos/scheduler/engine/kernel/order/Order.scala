@@ -88,8 +88,9 @@ with OrderPersistence {
     else if (cppProxy.has_base_file) OrderSourceType.fileBased
     else OrderSourceType.adHoc
 
-  def key: OrderKey =
-    jobChainPath orderKey id
+  def key = orderKey
+
+  def orderKey: OrderKey = jobChainPath orderKey id
 
   def id: OrderId =
     OrderId(cppProxy.string_id)

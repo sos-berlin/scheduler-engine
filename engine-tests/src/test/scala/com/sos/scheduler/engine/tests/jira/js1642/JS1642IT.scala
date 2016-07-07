@@ -112,7 +112,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       assert(sortOrdersFullOverview(fullOverview) == ExpectedOrderFullOverview)
     }
 
-    "ordersFullOverview with OrderQuery" in {
+    "ordersFullOverview isSuspended" in {
       val orderQuery = OrderQuery(isSuspended = Some(true))
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
@@ -121,6 +121,34 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
         usedTasks = Nil,
         usedJobs = Nil,
         usedProcessClasses = Nil))
+    }
+
+    "ordersFullOverview /aJobChain" in {
+      val orderQuery = OrderQuery(jobChains = "/aJobChain")
+      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
+      assert((fullOverview.orders map { _.orderKey }) == Vector(a1OrderKey, a2OrderKey, aAdHocOrderKey))
+    }
+
+    "ordersFullOverview /aJobChain/ returns nothing" in {
+      val orderQuery = OrderQuery(jobChains = "/aJobChain/")
+      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
+      assert(fullOverview.orders.isEmpty)
+    }
+
+    "ordersFullOverview /xFolder/" in {
+      val orderQuery = OrderQuery(jobChains = "/xFolder/")
+      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
+      assert((fullOverview.orders map { _.orderKey }) == Vector(xa1OrderKey, xa2OrderKey, xb1OrderKey))
+    }
+
+    "ordersFullOverview /xFolder returns nothing" in {
+      val orderQuery = OrderQuery(jobChains = "/xFolder")
+      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
+      assert(fullOverview.orders.isEmpty)
     }
 
     def sortOrdersFullOverview(o: OrdersFullOverview) = o.copy(
@@ -251,12 +279,12 @@ private object JS1642IT {
   private val bJobChainPath = JobChainPath("/bJobChain")
   private val b1OrderKey = bJobChainPath orderKey "1"
 
-  private val aaJobChainPath = JobChainPath("/xFolder/a-aJobChain")
-  private val aa1OrderKey = aaJobChainPath orderKey "1"
-  private val aa2OrderKey = aaJobChainPath orderKey "2"
+  private val xaJobChainPath = JobChainPath("/xFolder/a-aJobChain")
+  private val xa1OrderKey = xaJobChainPath orderKey "1"
+  private val xa2OrderKey = xaJobChainPath orderKey "2"
 
-  private val abJobChainPath = JobChainPath("/xFolder/a-bJobChain")
-  private val ab1OrderKey = abJobChainPath orderKey "1"
+  private val xbJobChainPath = JobChainPath("/xFolder/a-bJobChain")
+  private val xb1OrderKey = xbJobChainPath orderKey "1"
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
 
@@ -290,19 +318,20 @@ private object JS1642IT {
       nextStepAt = Some(EPOCH),
       taskId = Some(TaskId.First + 2)),
     OrderOverview(
-      aa1OrderKey,
+      xa1OrderKey,
       FileBasedState.active,
       OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH)),
     OrderOverview(
-      aa2OrderKey,
+      xa2OrderKey,
       FileBasedState.active,
       OrderSourceType.fileBased,
       OrderState("100"),
-      nextStepAt = Some(EPOCH)),
+      nextStepAt = Some(EPOCH),
+      isSuspended = true),
     OrderOverview(
-      ab1OrderKey,
+      xb1OrderKey,
       FileBasedState.active,
       OrderSourceType.fileBased,
       OrderState("100"),
@@ -376,7 +405,7 @@ private object JS1642IT {
       "sourceType": "fileBased",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false,
+      "isSuspended": true ,
       "isBlacklisted": false
     },
     {

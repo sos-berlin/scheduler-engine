@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.job.TaskOverview;
 import com.sos.scheduler.engine.data.job.TaskState;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderOverview;
+import com.sos.scheduler.engine.data.order.OrderQuery;
 import com.sos.scheduler.engine.data.order.OrderSourceType;
 import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath;
@@ -27,7 +28,11 @@ import static com.sos.scheduler.engine.common.javautils.ScalaInJava.toJavaOption
 import static java.time.Instant.EPOCH;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static scala.collection.JavaConversions.asJavaCollection;
 import static scala.collection.JavaConversions.seqAsJavaList;
 
 /**
@@ -50,6 +55,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
     private void run() {
         testOrderOverviews();
         testOrdersFullOverview();
+        testOrdersFullOverviewWithQuery();
     }
 
     private void testOrderOverviews() {
@@ -81,6 +87,24 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                         3)));  // usedTaskCount
             assertEquals(seqAsJavaList(fullOverview.usedProcessClasses()), singletonList(
                 new ProcessClassOverview(ProcessClassPath.Default(), FileBasedState.active, 30/*processLimit*/, 3/*usedProcessCount*/)));
+        } catch (InterruptedException | ExecutionException e) { throw propagate(e); }
+    }
+
+    private void testOrdersFullOverviewWithQuery() {
+        try {
+            OrderQuery query = OrderQuery.All()
+                .withJobChains("/xFolder/")
+                .withIsSuspended(false)
+                .withSourceTypes(singletonList(OrderSourceType.fileBased));
+            OrdersFullOverview fullOverview = asJavaFuture(client.ordersFullOverview(query)).get();
+            assertThat(
+                asJavaCollection(fullOverview.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
+                containsInAnyOrder(
+                    new JobChainPath("/xFolder/a-aJobChain").orderKey("1"),
+                    new JobChainPath("/xFolder/a-bJobChain").orderKey("1")));
+            assertTrue(fullOverview.usedTasks().isEmpty());
+            assertTrue(fullOverview.usedJobs().isEmpty());
+            assertTrue(fullOverview.usedProcessClasses().isEmpty());
         } catch (InterruptedException | ExecutionException e) { throw propagate(e); }
     }
 

@@ -65,7 +65,19 @@ extends FileBasedSubsystem {
 
   def orderOverviews: immutable.Seq[OrderOverview] = orderOverviews(OrderQuery.All)
 
-  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = (orders filter query).toVector map { _.overview }
+  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = ordersByQuery(query).toVector map { _.overview }
+
+  private def jobChainsByPattern(pattern: String): Seq[JobChain] = {
+    if (pattern endsWith "/") {
+      jobChains filter { _.path.string startsWith pattern }
+    } else {
+      val jobChainPath = JobChainPath(pattern)
+      if (contains(jobChainPath)) List(jobChain(jobChainPath)) else Nil
+    }
+  }
+
+  private def ordersByQuery(query: OrderQuery): Seq[Order] =
+    jobChainsByPattern(query.jobChains) flatMap { _.orders } filter query
 
   def orders: Seq[Order] = jobChains flatMap { _.orders }
 

@@ -24,7 +24,9 @@ final class OrderQueryHttpTest extends FreeSpec {
     checkQuery(OrderQuery(), Map())
     checkQuery(OrderQuery(isSuspended = Some(true)), Map("suspended" → "true"))
     checkQuery(OrderQuery(isSuspended = Some(false)), Map("suspended" → "false"))
-    checkQuery(OrderQuery(isSuspended = Some(false), isSourceType = Some(Set(OrderSourceType.adHoc, OrderSourceType.fileBased))), Map("suspended" → "false", "sourceType" → "adHoc,fileBased"))
+    checkQuery(
+      OrderQuery(isSuspended = Some(false), isSourceType = Some(Set(OrderSourceType.adHoc, OrderSourceType.fileBased))),
+      Map("suspended" → "false", "sourceType" → "adHoc,fileBased"))  // Incidentally, Scala Set with two elements retains orders
   }
 
   private def checkQuery(orderQuery: OrderQuery, parameters: Map[String, String]) = {

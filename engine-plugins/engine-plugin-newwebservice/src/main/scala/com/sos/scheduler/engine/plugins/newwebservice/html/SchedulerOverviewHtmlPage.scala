@@ -25,7 +25,9 @@ extends SchedulerHtmlPage {
         .mkString(" · ")
     }</p>
     <p>
-      <a href="api/order/OrdersFullOverview">Orders</a>
+      <a href="api/order/">Orders</a>,
+      <a href="api/order/?suspended=true">suspended</a>,
+      <a href="api/order/?sourceType=adHoc">ad-hoc</a>
     </p>
   }
 }
