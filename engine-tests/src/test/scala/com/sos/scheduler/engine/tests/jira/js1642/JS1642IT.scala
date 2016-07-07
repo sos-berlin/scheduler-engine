@@ -127,7 +127,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       val orderQuery = OrderQuery(jobChains = "/aJobChain")
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
-      assert((fullOverview.orders map { _.orderKey }) == Vector(a1OrderKey, a2OrderKey, aAdHocOrderKey))
+      assert((fullOverview.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
     "ordersFullOverview /aJobChain/ returns nothing" in {
@@ -141,7 +141,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       val orderQuery = OrderQuery(jobChains = "/xFolder/")
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
-      assert((fullOverview.orders map { _.orderKey }) == Vector(xa1OrderKey, xa2OrderKey, xb1OrderKey))
+      assert((fullOverview.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey))
     }
 
     "ordersFullOverview /xFolder returns nothing" in {

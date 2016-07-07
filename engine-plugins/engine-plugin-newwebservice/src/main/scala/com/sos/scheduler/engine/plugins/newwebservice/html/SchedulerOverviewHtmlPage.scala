@@ -27,6 +27,7 @@ extends SchedulerHtmlPage {
     <p>
       <a href="api/order/">Orders</a>,
       <a href="api/order/?suspended=true">suspended</a>,
+      <a href="api/order/?sourceType=fileBased">fileBased</a>,
       <a href="api/order/?sourceType=adHoc">ad-hoc</a>
     </p>
   }
