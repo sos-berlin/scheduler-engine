@@ -806,7 +806,7 @@ string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  
     else {
         const int limit = 1000;
         string job_chain_clause = "";
-        if (db()->dbms_kind() == dbms_oracle && job_chain_names.size() > limit) {
+        if ((db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin) && job_chain_names.size() > limit) {
             list<string> chunks;
             list<string>::iterator i = job_chain_names.begin();
             while (i != job_chain_names.end()) {

@@ -13,7 +13,7 @@
         private bool isShellMode;
         private readonly PowershellSpoolerParams spoolerParams;
         private readonly PowerShell shell;
-        
+
         #region Constructor
 
         public PowershellAdapter(
@@ -21,7 +21,8 @@
             : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
         {
             this.ParseScript();
-            this.spoolerParams = new PowershellSpoolerParams(this.spooler_task, this.spooler, this.IsOrderJob, this.isShellMode);
+            this.spoolerParams = new PowershellSpoolerParams(
+                this.spooler_task, this.spooler, this.IsOrderJob, this.isShellMode);
 
             this.shell = PowerShell.Create();
             this.shell.Runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);
@@ -44,15 +45,18 @@
                 return true;
             }
 
-            if (!this.InitializeScript(false))
+            try
             {
-                return false;
+                this.InitializeScript(false);
+                var results = this.InvokeCommand("spooler_init");
+                var index = GetReturnValueIndex(results);
+                this.Log(results, index);
+                return GetReturnValue(results, index, true);
             }
-
-            var results = this.InvokeCommand("spooler_init");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, true);
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override bool spooler_open()
@@ -62,25 +66,40 @@
                 return true;
             }
 
-            var results = this.InvokeCommand("spooler_open");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, true);
+            try
+            {
+                var results = this.InvokeCommand("spooler_open");
+                var index = GetReturnValueIndex(results);
+                this.Log(results, index);
+                return GetReturnValue(results, index, true);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override bool spooler_process()
         {
-            if (this.isShellMode)
+            try
             {
-                this.spoolerParams.SetEnvVars();
-                this.InitializeScript(true);
-                return this.IsOrderJob;
-            }
+                if (this.isShellMode)
+                {
+                    this.spoolerParams.SetEnvVars();
+                    this.InitializeScript(true);
+                    this.CheckLastExitCode(true);
+                    return this.IsOrderJob;
+                }
 
-            var results = this.InvokeCommand("spooler_process");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, this.IsOrderJob);
+                var results = this.InvokeCommand("spooler_process");
+                var index = GetReturnValueIndex(results);
+                this.Log(results, index);
+                return GetReturnValue(results, index, this.IsOrderJob);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override void spooler_close()
@@ -90,8 +109,15 @@
                 return;
             }
 
-            var results = this.InvokeCommand("spooler_close");
-            this.Log(results);
+            try
+            {
+                var results = this.InvokeCommand("spooler_close");
+                this.Log(results);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override void spooler_on_success()
@@ -101,8 +127,15 @@
                 return;
             }
 
-            var results = this.InvokeCommand("spooler_on_success");
-            this.Log(results);
+            try
+            {
+                var results = this.InvokeCommand("spooler_on_success");
+                this.Log(results);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override void spooler_on_error()
@@ -112,8 +145,15 @@
                 return;
             }
 
-            var results = this.InvokeCommand("spooler_on_error");
-            this.Log(results);
+            try
+            {
+                var results = this.InvokeCommand("spooler_on_error");
+                this.Log(results);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override void spooler_exit()
@@ -129,6 +169,10 @@
                     this.Log(results);
                 }
             }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
             finally
             {
                 this.Close();
@@ -141,31 +185,48 @@
 
         public override bool spooler_task_before()
         {
-            if (!this.InitializeScript(false))
+            try
             {
-                return false;
+                this.InitializeScript(false);
+                var results = this.InvokeCommand("spooler_task_before");
+                var index = GetReturnValueIndex(results);
+                this.Log(results, index);
+                return GetReturnValue(results, index, true);
             }
-
-            var results = this.InvokeCommand("spooler_task_before");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, true);
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override bool spooler_process_before()
         {
-            var results = this.InvokeCommand("spooler_process_before");
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, true);
+            try
+            {
+                var results = this.InvokeCommand("spooler_process_before");
+                var index = GetReturnValueIndex(results);
+                this.Log(results, index);
+                return GetReturnValue(results, index, true);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override bool spooler_process_after(bool spoolerProcessResult)
         {
-            var results = this.InvokeCommand("spooler_process_after", spoolerProcessResult);
-            var index = GetReturnValueIndex(results);
-            this.Log(results, index);
-            return GetReturnValue(results, index, spoolerProcessResult);
+            try
+            {
+                var results = this.InvokeCommand("spooler_process_after", spoolerProcessResult);
+                var index = GetReturnValueIndex(results);
+                this.Log(results, index);
+                return GetReturnValue(results, index, spoolerProcessResult);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
         }
 
         public override void spooler_task_after()
@@ -174,6 +235,10 @@
             {
                 var results = this.InvokeCommand("spooler_task_after");
                 this.Log(results);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
             }
             finally
             {
@@ -196,31 +261,53 @@
 
             Collection<PSParseError> parseErrors;
             var tokens = PSParser.Tokenize(this.Script, out parseErrors);
-            var functionSpoolerProcess =
+            var apiFunction =
                 tokens.FirstOrDefault(
                     t => t.Type.Equals(PSTokenType.CommandArgument) &&
-                    (t.Content.Equals("spooler_init")
-                    || t.Content.Equals("spooler_open")
-                    || t.Content.Equals("spooler_process")
-                    || t.Content.Equals("spooler_close")
-                    || t.Content.Equals("spooler_on_success")
-                    || t.Content.Equals("spooler_on_error")
-                    || t.Content.Equals("spooler_exit")));
-            this.isShellMode = functionSpoolerProcess == null;
+                         (t.Content.Equals("spooler_init")
+                          || t.Content.Equals("spooler_open")
+                          || t.Content.Equals("spooler_process")
+                          || t.Content.Equals("spooler_close")
+                          || t.Content.Equals("spooler_on_success")
+                          || t.Content.Equals("spooler_on_error")
+                          || t.Content.Equals("spooler_exit")));
+            this.isShellMode = apiFunction == null;
         }
 
-        private bool InitializeScript(bool useGlobalScope)
+        private void InitializeScript(bool useLocalScope)
         {
             this.shell.Commands.Clear();
-            this.shell.AddScript(this.Script, useGlobalScope);
+            this.shell.AddScript(this.Script, useLocalScope);
             this.shell.AddCommand("Out-String").AddParameter("Stream", true);
             var results = this.shell.Invoke();
-            var success = this.shell.Streams.Error.Count == 0;
             this.Log(results);
-
-            return success;
         }
 
+        private void CheckLastExitCode(bool useLocalScope)
+        {
+            this.shell.Commands.Clear();
+            this.shell.AddScript("$Global:LastExitCode", useLocalScope);
+            var lastExitCode = this.shell.Invoke().FirstOrDefault();
+            var exitCode = 0;
+            if (lastExitCode != null)
+            {
+                try
+                {
+                    exitCode = Int32.Parse(lastExitCode.ToString());
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            if (exitCode == 0)
+            {
+                return;
+            }
+            this.spooler_log.error(String.Format("Process terminated with exit code {0}. See the following warning SCHEDULER-280.", exitCode));
+            this.spooler_task.set_exit_code(exitCode);
+        }
+        
         private Collection<PSObject> InvokeCommand(String methodName, bool? param = null)
         {
             this.shell.Commands.Clear();
@@ -250,9 +337,9 @@
             var i = 0;
             foreach (var psObject in results)
             {
-                if (i != returnValueIndex)
+                if (psObject != null && i != returnValueIndex)
                 {
-                    this.spooler_log.info(psObject.ToString());
+                    Console.Out.WriteLine(psObject.ToString());
                 }
                 i++;
             }
@@ -262,33 +349,27 @@
         {
             if (this.shell.Streams.Error.Count > 0)
             {
-                this.spooler_log.error(GetErrorMessage(this.shell.Streams.Error));
+                Console.Error.WriteLine(GetErrorMessage(this.shell.Streams.Error[0]));
             }
             if (this.shell.Streams.Warning.Count > 0)
             {
-                this.spooler_log.warn(this.shell.Streams.Warning[0].ToString());
+                Console.Out.WriteLine(this.shell.Streams.Warning[0].ToString());
             }
             if (this.shell.Streams.Debug.Count > 0)
             {
-                this.spooler_log.debug1(this.shell.Streams.Debug[0].ToString());
+                Console.Out.WriteLine(this.shell.Streams.Debug[0].ToString());
             }
             if (this.shell.Streams.Verbose.Count > 0)
             {
-                this.spooler_log.info(this.shell.Streams.Verbose[0].ToString());
+                Console.Out.WriteLine(this.shell.Streams.Verbose[0].ToString());
             }
             this.shell.Streams.ClearStreams();
         }
 
-        private static string GetErrorMessage(IList<ErrorRecord> rec)
+        private static string GetErrorMessage(ErrorRecord errorRecord)
         {
-            var sb = new StringBuilder(rec[0].ToString());
-            sb.Append(Environment.NewLine);
-            sb.Append(
-                String.Format(
-                    "At line: {0} char: {1}. For: {2}"
-                    , rec[0].InvocationInfo.ScriptLineNumber
-                    , rec[0].InvocationInfo.OffsetInLine
-                    , rec[0].InvocationInfo.Line));
+            var sb = new StringBuilder(errorRecord.ToString());
+            sb.Append(errorRecord.InvocationInfo.PositionMessage);
             return sb.ToString();
         }
 
