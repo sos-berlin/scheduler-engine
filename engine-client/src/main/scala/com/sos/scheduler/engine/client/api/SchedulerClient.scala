@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
-import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -13,7 +13,12 @@ trait SchedulerClient extends CommandClient {
 
   def overview: Future[SchedulerOverview]
 
-  def orderOverviews: Future[immutable.Seq[OrderOverview]]
+  final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
+    orderOverviews(OrderQuery.All)
 
-  def ordersFullOverview: Future[OrdersFullOverview]
+  def orderOverviews(query: OrderQuery = OrderQuery.All): Future[immutable.Seq[OrderOverview]]
+
+  final def ordersFullOverview: Future[OrdersFullOverview] = ordersFullOverview(OrderQuery.All)
+
+  def ordersFullOverview(query: OrderQuery = OrderQuery.All): Future[OrdersFullOverview]
 }

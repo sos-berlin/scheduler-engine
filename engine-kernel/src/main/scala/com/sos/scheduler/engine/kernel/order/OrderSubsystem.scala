@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
@@ -63,7 +63,9 @@ extends FileBasedSubsystem {
     }
   }
 
-  def orderOverviews: immutable.Seq[OrderOverview] = orders.toVector map { _.overview }
+  def orderOverviews: immutable.Seq[OrderOverview] = orderOverviews(OrderQuery.All)
+
+  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = (orders filter query).toVector map { _.overview }
 
   def orders: Seq[Order] = jobChains flatMap { _.orders }
 

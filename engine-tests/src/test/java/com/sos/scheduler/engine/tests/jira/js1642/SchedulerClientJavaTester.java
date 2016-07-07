@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1642;
 
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient;
-import com.sos.scheduler.engine.data.agent.AgentAddress;
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview;
 import com.sos.scheduler.engine.data.filebased.FileBasedState;
 import com.sos.scheduler.engine.data.job.JobOverview;
@@ -13,6 +12,7 @@ import com.sos.scheduler.engine.data.job.TaskOverview;
 import com.sos.scheduler.engine.data.job.TaskState;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderOverview;
+import com.sos.scheduler.engine.data.order.OrderSourceType;
 import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath;
 import java.time.Instant;
@@ -66,15 +66,15 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                 .sorted(SchedulerClientJavaTester::compareTaskOverview)
                 .collect(Collectors.toList());
             assertEquals(orderedTasks, asList(
-                new TaskOverview(new TaskId(3), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.<AgentAddress>empty()),
-                new TaskOverview(new TaskId(4), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.<AgentAddress>empty()),
-                new TaskOverview(new TaskId(5), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.<AgentAddress>empty())));
+                new TaskOverview(new TaskId(3), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.empty()),
+                new TaskOverview(new TaskId(4), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.empty()),
+                new TaskOverview(new TaskId(5), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.empty())));
             assertEquals(seqAsJavaList(fullOverview.usedJobs()),
                 singletonList(
                     new JobOverview(
                         new JobPath("/test"),
                         FileBasedState.active,
-                        Option.<ProcessClassPath>empty(),
+                        Option.empty(),
                         JobState.running,
                         true,  // isInPeriod
                         10,    // taskLimit
@@ -95,6 +95,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
             .findFirst().get();
         assertEquals(new OrderState("100"), orderOverview.orderState());
         assertEquals(FileBasedState.active, orderOverview.fileBasedState());
+        assertEquals(OrderSourceType.fileBased, orderOverview.sourceType());
         assertEquals(Optional.of(EPOCH), toJavaOptional(orderOverview.nextStepAt()));
     }
 
@@ -104,6 +105,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
             .findFirst().get();
         assertEquals(new OrderState("100"), orderOverview.orderState());
         assertEquals(FileBasedState.notInitialized, orderOverview.fileBasedState());
+        assertEquals(OrderSourceType.adHoc, orderOverview.sourceType());
         assertEquals(Optional.of(Instant.parse("2038-01-01T11:22:33Z")), toJavaOptional(orderOverview.nextStepAt()));
     }
 

@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.web.SchedulerUris._
+import com.sos.scheduler.engine.client.web.order.OrderQueryHttp
+import com.sos.scheduler.engine.data.order.OrderQuery
 import spray.http.Uri
 import spray.http.Uri.Path
 
@@ -16,8 +18,13 @@ final class SchedulerUris private(schedulerUriString: String) {
   lazy val overview = uriString("api")
 
   object order {
-    lazy val overviews = uriString("api/order/OrderOverview/")
-    lazy val fullOverview = uriString("api/order/OrdersFullOverview")
+    def overviews(query: OrderQuery = OrderQuery.All): String =
+      resolvePathUri(Uri(path = Uri.Path("api/order/OrderOverview/"), query = toQuery(query))).toString
+
+    def fullOverview(query: OrderQuery = OrderQuery.All): String =
+      resolvePathUri(Uri(path = Uri.Path("api/order/OrdersFullOverview"), query = toQuery(query))).toString
+
+    private def toQuery(query: OrderQuery) = Uri.Query(OrderQueryHttp.toHttpQueryMap(query))
   }
 
   /**
@@ -27,7 +34,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   def resolvePathUri(uri: Uri): Uri = {
     val u = uri.resolvedAgainst(prefixedUri)
-    u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString)}"))
+    u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString)}"), query = u.query)
   }
 
   override def toString = s"SchedulerUris($schedulerUriString)"

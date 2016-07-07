@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.Eterna
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -29,6 +29,7 @@ final class Order private(
   protected val cppProxy: OrderC,
   protected val subsystem: StandingOrderSubsystem)
 extends FileBased
+with QueryableOrder
 with UnmodifiableOrder
 with HasUnmodifiableDelegate[UnmodifiableOrder]
 with OrderPersistence {
@@ -67,17 +68,25 @@ with OrderPersistence {
       OrderOverview(
         path = key,  // key because this.path is valid only for permanent orders
         fileBasedState,
+        sourceType,
         orderState = state,
         nextStepAt = nextStepAt,
         setbackUntil = setbackUntil,
         taskId = taskId,
-        isOnBlacklist = isOnBlacklist,
+        isBlacklisted = isBlacklisted,
         isSuspended = isSuspended)
     }
+
+  def isSetback = setbackUntil.isDefined
 
   def stringToPath(o: String) = OrderKey(o)
 
   def fileBasedType = FileBasedType.order
+
+  def sourceType: OrderSourceType =
+    if (cppProxy.is_file_order) OrderSourceType.fileOrderSource
+    else if (cppProxy.has_base_file) OrderSourceType.fileBased
+    else OrderSourceType.adHoc
 
   def key: OrderKey =
     jobChainPath orderKey id
@@ -132,7 +141,10 @@ with OrderPersistence {
     cppProxy.set_suspended(b)
   }
 
-  def isOnBlacklist = cppProxy.is_on_blacklist()
+  @Deprecated
+  def isOnBlacklist = isBlacklisted
+
+  def isBlacklisted = cppProxy.is_on_blacklist()
 
   def title: String =
     cppProxy.title

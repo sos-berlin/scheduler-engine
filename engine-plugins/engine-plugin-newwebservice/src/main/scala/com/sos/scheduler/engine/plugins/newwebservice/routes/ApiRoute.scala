@@ -6,69 +6,57 @@ import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import scala.concurrent.ExecutionContext
+import spray.http.StatusCodes.TemporaryRedirect
 import spray.routing.Directives._
 import spray.routing.Route
 
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute {
+trait ApiRoute extends OrderRoute {
 
   protected def client: DirectSchedulerClient
   protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
   protected implicit def executionContext: ExecutionContext
 
   protected final def apiRoute: Route =
-    pathEndOrSingleSlash {
-      detach(()) {
-        complete {
-          client.overview
-        }
-      }
-    } ~
-    (pathPrefix("command") & pathEnd) {
-      post {
-        entity(as[XmlString]) { case XmlString(xmlString) ⇒
-         detach(()) {
-           complete {
-             client.executeXml(xmlString) map XmlString.apply
-           }
-         }
-        }
-      }
-    } ~
-    pathPrefix("order") {
-      (pathSingleSlash | pathPrefix("OrderOverview") & pathSingleSlash) {
+    pathPrefix("api") {
+      pathEnd {
         get {
-          detach(()) {
-            complete {
-              client.orderOverviews
-            }
+          complete(client.overview)
+        }
+      } ~
+      pathEndOrSingleSlash {
+        detach(()) {
+          complete {
+            client.overview
           }
         }
       } ~
-      (path("OrdersFullOverview") & pathEnd) {
-        get {
-          detach(()) {
-            complete {
-              client.ordersFullOverview
-            }
+      (pathPrefix("command") & pathEnd) {
+        post {
+          entity(as[XmlString]) { case XmlString(xmlString) ⇒
+           complete(client.executeXml(xmlString) map XmlString.apply)
           }
         }
+      } ~
+      pathPrefix("order") {
+        (pathEnd & get) {
+           redirect("order/", TemporaryRedirect)
+        } ~
+        orderRoute
       }
+      /*~
+      pathPrefix("subsystems") {
+        subsystemsRoute
+      }
+      */
     }
-    /*~
-    pathPrefix("subsystems") {
-      subsystemsRoute
-    }
-    */
 
   private def subsystemsRoute: Route =
     pathEnd {
       get {
-        complete {
-          fileBasedSubsystemRegister.descriptions map { _.fileBasedType.cppName }
-        }
+        complete(fileBasedSubsystemRegister.descriptions map { _.fileBasedType.cppName })
       }
     } /*~
     pathPrefix(Segment) { subsystemName ⇒

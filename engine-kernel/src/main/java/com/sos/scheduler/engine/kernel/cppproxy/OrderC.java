@@ -37,4 +37,5 @@ public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
     long next_step_at_millis();
     long setback_millis();
     int task_id();
+    boolean is_file_order();
 }

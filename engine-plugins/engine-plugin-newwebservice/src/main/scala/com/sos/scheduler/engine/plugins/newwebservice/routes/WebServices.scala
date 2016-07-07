@@ -15,9 +15,7 @@ trait WebServices extends ApiRoute with TestRoute {
   final def route: Route =
     (decompressRequest() & compressResponseIfRequested(())) {
       pathPrefix("jobscheduler" / "master") {  // Prefix "jobscheduler" equals JettyPlugin's context name. This lets Jetty's GzipFilter scramble JPEG.
-        pathPrefix("api") {
-          apiRoute
-        } ~
+        apiRoute ~
         pathPrefix("TEST") {
           testRoute
         }

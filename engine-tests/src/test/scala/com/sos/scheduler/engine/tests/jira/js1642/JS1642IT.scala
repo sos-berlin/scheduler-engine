@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderState, OrderStepStartedEvent}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
@@ -33,7 +33,7 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
-import spray.http.MediaTypes.`text/richtext`
+import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
 import spray.json._
@@ -96,7 +96,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
     "orderOverviews" in {
       val orders = client.orderOverviews await TestTimeout
-      assert(orders == (directSchedulerClient.orderOverviews await TestTimeout))
+      assert(orders == (directSchedulerClient.orderOverviews() await TestTimeout))
       assert(orders.toVector.sorted == ExpectedOrderOverviews)
     }
 
@@ -108,15 +108,26 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
     "ordersFullOverview" in {
       val fullOverview = client.ordersFullOverview await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersFullOverview await TestTimeout))
-      val sorted = fullOverview.copy(
-        orders = fullOverview.orders.sorted,
-        usedTasks = fullOverview.usedTasks.sorted,
-        usedJobs = fullOverview.usedJobs.sorted,
-        usedProcessClasses = fullOverview.usedProcessClasses.sorted
-      )
-      assert(sorted == ExpectedOrderFullOverview)
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview() await TestTimeout))
+      assert(sortOrdersFullOverview(fullOverview) == ExpectedOrderFullOverview)
     }
+
+    "ordersFullOverview with OrderQuery" in {
+      val orderQuery = OrderQuery(isSuspended = Some(true))
+      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
+      assert(sortOrdersFullOverview(fullOverview) == ExpectedOrderFullOverview.copy(
+        orders = ExpectedOrderFullOverview.orders filter { _.isSuspended },
+        usedTasks = Nil,
+        usedJobs = Nil,
+        usedProcessClasses = Nil))
+    }
+
+    def sortOrdersFullOverview(o: OrdersFullOverview) = o.copy(
+      orders = o.orders.sorted,
+      usedTasks = o.usedTasks.sorted,
+      usedJobs = o.usedJobs.sorted,
+      usedProcessClasses = o.usedProcessClasses.sorted)
 
     "ordersFullOverview speed" in {
       Stopwatch.measureTime(100, "ordersFullOverview") {
@@ -152,13 +163,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "orderOverviews" in {
-      val orderOverviews = webSchedulerClient.get[JsArray](_.order.overviews) await TestTimeout
+      val orderOverviews = webSchedulerClient.get[JsArray](_.order.overviews()) await TestTimeout
       // The array's ordering is not assured.
       assert(sortArray(orderOverviews, "path") == ExpectedOrderOverviewsJsArray)
     }
 
     "ordersFullOverview" in {
-      val fullOverview = webSchedulerClient.get[JsObject](_.order.fullOverview) await TestTimeout
+      val fullOverview = webSchedulerClient.get[JsObject](_.order.fullOverview()) await TestTimeout
       // The array's ordering is not assured.
       val orderedFullOverview = JsObject(fullOverview.fields ++ Map(
         sortArrayField(fullOverview, "orders", "path"),
@@ -236,40 +247,47 @@ private object JS1642IT {
     OrderOverview(
       a1OrderKey,
       FileBasedState.active,
+      OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH),
       taskId = Some(TaskId.First)),
     OrderOverview(
       a2OrderKey,
       FileBasedState.active,
+      OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH),
       taskId = Some(TaskId.First + 1)),
     OrderOverview(
       aAdHocOrderKey,
       FileBasedState.notInitialized,
+      OrderSourceType.adHoc,
       OrderState("100"),
       nextStepAt = Some(OrderStartAt),
       isSuspended = true),
     OrderOverview(
       b1OrderKey,
       FileBasedState.active,
+      OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH),
       taskId = Some(TaskId.First + 2)),
     OrderOverview(
       aa1OrderKey,
       FileBasedState.active,
+      OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH)),
     OrderOverview(
       aa2OrderKey,
       FileBasedState.active,
+      OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH)),
     OrderOverview(
       ab1OrderKey,
       FileBasedState.active,
+      OrderSourceType.fileBased,
       OrderState("100"),
       nextStepAt = Some(EPOCH)))
 
@@ -289,62 +307,69 @@ private object JS1642IT {
   private val ExpectedOrderOverviewsJsArray: JsArray = """[
     {
       "path": "/aJobChain,1",
+      "fileBasedState": "active",
+      "sourceType": "fileBased",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
       "taskId": "3",
       "isSuspended": false,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     },
     {
       "path": "/aJobChain,2",
+      "fileBasedState": "active",
+      "sourceType": "fileBased",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
       "taskId": "4",
       "isSuspended": false,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     },
     {
       "path": "/aJobChain,AD-HOC",
-      "orderState": "100",
-      "nextStepAt": "2038-01-01T11:22:33Z",
       "fileBasedState": "notInitialized",
+      "orderState": "100",
+      "sourceType": "adHoc",
+      "nextStepAt": "2038-01-01T11:22:33Z",
       "isSuspended": true,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     },
     {
       "path": "/bJobChain,1",
-      "orderState": "100",
-      "nextStepAt": "1970-01-01T00:00:00Z",
       "fileBasedState": "active",
+      "orderState": "100",
+      "sourceType": "fileBased",
+      "nextStepAt": "1970-01-01T00:00:00Z",
       "taskId": "5",
       "isSuspended": false,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     },
     {
       "path": "/xFolder/a-aJobChain,1",
+      "fileBasedState": "active",
+      "sourceType": "fileBased",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
       "isSuspended": false,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     },
     {
       "path": "/xFolder/a-aJobChain,2",
+      "fileBasedState": "active",
+      "sourceType": "fileBased",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
       "isSuspended": false,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     },
     {
       "path": "/xFolder/a-bJobChain,1",
+      "fileBasedState": "active",
+      "sourceType": "fileBased",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "fileBasedState": "active",
       "isSuspended": false,
-      "isOnBlacklist": false
+      "isBlacklisted": false
     }
   ]""".parseJson.asInstanceOf[JsArray]
 

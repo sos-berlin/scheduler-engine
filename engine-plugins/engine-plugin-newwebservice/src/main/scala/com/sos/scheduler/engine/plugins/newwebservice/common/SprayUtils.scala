@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.common
 
+import spray.http.HttpHeaders.Accept
+import spray.http.MediaType
 import spray.routing.Directives._
 import spray.routing._
 
@@ -16,4 +18,12 @@ object SprayUtils {
         }
     }
   }
+
+  def accept(mediaType: MediaType): Directive0 =
+    mapInnerRoute { route ⇒
+      headerValueByType[Accept]() {
+        case Accept(mediaTypes) if mediaTypes exists { _ matches mediaType } ⇒ route
+        case _ ⇒ reject
+      }
+    }
 }

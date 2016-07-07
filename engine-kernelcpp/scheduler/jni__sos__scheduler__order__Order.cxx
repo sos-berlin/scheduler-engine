@@ -204,6 +204,23 @@ static jboolean JNICALL is_1file_1based_1reread(JNIEnv* jenv, jobject, jlong cpp
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jboolean JNICALL is_1file_1order(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::is_file_order()");
+        return (o_->is_file_order());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jboolean JNICALL is_1on_1blacklist(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -698,6 +715,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"has_base_file__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::has_1base_1file },
     { (char*)"initial_state_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::initial_1state_1string },
     { (char*)"is_file_based_reread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based_1reread },
+    { (char*)"is_file_order__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1order },
     { (char*)"is_on_blacklist__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1on_1blacklist },
     { (char*)"is_to_be_removed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1to_1be_1removed },
     { (char*)"is_visible__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1visible },

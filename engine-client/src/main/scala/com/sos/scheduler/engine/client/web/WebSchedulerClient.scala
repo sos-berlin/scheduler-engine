@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
-import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -39,11 +39,11 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def overview: Future[SchedulerOverview] =
     get[SchedulerOverview](_.overview)
 
-  final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
-    get[immutable.Seq[OrderOverview]](_.order.overviews)
+  final def orderOverviews(query: OrderQuery): Future[immutable.Seq[OrderOverview]] =
+    get[immutable.Seq[OrderOverview]](_.order.overviews(query))
 
-  final def ordersFullOverview: Future[OrdersFullOverview] =
-    get[OrdersFullOverview](_.order.fullOverview)
+  final def ordersFullOverview(query: OrderQuery = OrderQuery.All): Future[OrdersFullOverview] =
+    get[OrdersFullOverview](_.order.fullOverview(query))
 
   final def getJson(pathUri: String): Future[String] =
     get[String](_.resolvePathUri(pathUri).toString)
