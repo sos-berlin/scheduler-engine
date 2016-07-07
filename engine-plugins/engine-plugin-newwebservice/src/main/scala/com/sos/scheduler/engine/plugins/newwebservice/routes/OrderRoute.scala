@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.orderQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersFullOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import scala.concurrent.ExecutionContext
 import spray.http.StatusCodes.TemporaryRedirect
@@ -31,7 +33,7 @@ trait OrderRoute {
     (path("OrdersFullOverview") & pathEnd) {
       get {
         orderQuery { query ⇒
-          complete(client.ordersFullOverview(query))
+          completeAsHtmlPageOrOther(client.ordersFullOverview(query))
         }
       }
     }

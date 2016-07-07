@@ -4,8 +4,12 @@ import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
+import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.accept
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.completeAsHtmlPageOrOther
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import scala.concurrent.ExecutionContext
+import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes.TemporaryRedirect
 import spray.routing.Directives._
 import spray.routing.Route
@@ -23,13 +27,20 @@ trait ApiRoute extends OrderRoute {
     pathPrefix("api") {
       pathEnd {
         get {
-          complete(client.overview)
+          completeAsHtmlPageOrOther(client.overview)
         }
       } ~
       pathEndOrSingleSlash {
         detach(()) {
           complete {
             client.overview
+          }
+        }
+      } ~
+      pathSingleSlash {
+        get {
+          accept(`text/html`) {
+            redirect("../api", TemporaryRedirect)
           }
         }
       } ~

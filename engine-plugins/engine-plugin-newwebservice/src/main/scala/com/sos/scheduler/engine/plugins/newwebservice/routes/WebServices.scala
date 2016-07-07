@@ -7,7 +7,7 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-trait WebServices extends ApiRoute with TestRoute {
+trait WebServices extends ApiRoute with WebjarsRoute with TestRoute {
 
   protected implicit def actorRefFactory: ActorRefFactory
   protected def executionContext = actorRefFactory.dispatcher
@@ -16,6 +16,9 @@ trait WebServices extends ApiRoute with TestRoute {
     (decompressRequest() & compressResponseIfRequested(())) {
       pathPrefix("jobscheduler" / "master") {  // Prefix "jobscheduler" equals JettyPlugin's context name. This lets Jetty's GzipFilter scramble JPEG.
         apiRoute ~
+        pathPrefix("webjars") {
+          webjarsRoute
+        } ~
         pathPrefix("TEST") {
           testRoute
         }

@@ -194,6 +194,23 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
+  "text/html" - {  // Inofficial
+    "overview" in {
+      val html = webSchedulerClient.get[String](_.overview, accept = `text/html`) await TestTimeout
+      assert(html startsWith "<!DOCTYPE html")
+      assert(html endsWith "</html>")
+      assert(html contains "JobScheduler")
+      assert(html contains "Started at")
+    }
+
+    "order.fullOverview" in {
+      val html = webSchedulerClient.get[String](_.order.fullOverview(), accept = `text/html`) await TestTimeout
+      assert(html startsWith "<!DOCTYPE html")
+      assert(html endsWith "</html>")
+      assert(html contains "JobScheduler")
+    }
+  }
+
   "WebSchedulerClient.getJson" in {
     val jsonString = webSchedulerClient.getJson("api") await TestTimeout
     val jsObject = jsonString.parseJson.asJsObject
