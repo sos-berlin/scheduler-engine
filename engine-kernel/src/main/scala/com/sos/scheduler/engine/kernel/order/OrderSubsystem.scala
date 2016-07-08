@@ -4,7 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -65,19 +65,13 @@ extends FileBasedSubsystem {
 
   def orderOverviews: immutable.Seq[OrderOverview] = orderOverviews(OrderQuery.All)
 
-  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = ordersByQuery(query).toVector map { _.overview }
+  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] =
+    ordersByQuery(query).toVector map { _.overview }
 
-  private def jobChainsByPattern(pattern: String): Seq[JobChain] = {
-    if (pattern endsWith "/") {
-      jobChains filter { _.path.string startsWith pattern }
-    } else {
-      val jobChainPath = JobChainPath(pattern)
-      if (contains(jobChainPath)) List(jobChain(jobChainPath)) else Nil
-    }
+  private def ordersByQuery(query: OrderQuery): Seq[Order] = {
+    val q = query.copy(jobChainQuery = JobChainQuery.All)
+    jobChainsByQuery(query.jobChainQuery) flatMap { _.orders } filter q.matches
   }
-
-  private def ordersByQuery(query: OrderQuery): Seq[Order] =
-    jobChainsByPattern(query.jobChains) flatMap { _.orders } filter query
 
   def orders: Seq[Order] = jobChains flatMap { _.orders }
 
@@ -94,6 +88,13 @@ extends FileBasedSubsystem {
   def jobChainsOfJob(job: Job): Iterable[JobChain] =
     inSchedulerThread {
       jobChains filter { _ refersToJob job }
+    }
+
+  private def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] =
+    query.reduce match {
+      case JobChainQuery.All ⇒ jobChains
+      case jobChainPath: JobChainPath ⇒ if (contains(jobChainPath)) List(jobChain(jobChainPath)) else Nil
+      case _ ⇒ jobChains filter { o ⇒ query.matches(o.path) }
     }
 
   def jobChains: Seq[JobChain] =

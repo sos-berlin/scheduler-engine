@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.data.job.TaskId;
 import com.sos.scheduler.engine.data.job.TaskOverview;
 import com.sos.scheduler.engine.data.job.TaskState;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
+import com.sos.scheduler.engine.data.jobchain.JobChainQuery;
 import com.sos.scheduler.engine.data.order.OrderOverview;
 import com.sos.scheduler.engine.data.order.OrderQuery;
 import com.sos.scheduler.engine.data.order.OrderSourceType;
@@ -93,7 +94,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
     private void testOrdersFullOverviewWithQuery() {
         try {
             OrderQuery query = OrderQuery.All()
-                .withJobChains("/xFolder/")
+                .withJobChainQuery(new JobChainQuery("/xFolder/"))
                 .withIsSuspended(false)
                 .withSourceTypes(singletonList(OrderSourceType.fileBased));
             OrdersFullOverview fullOverview = asJavaFuture(client.ordersFullOverview(query)).get();

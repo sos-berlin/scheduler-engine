@@ -26,7 +26,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 
     private def resolveWithOrderQuery(orderQuery: OrderQuery, typeName: String) =
       resolvePathUri(Uri(
-        path = Uri.Path(s"api/order${orderQuery.jobChains}"),
+        path = Uri.Path(s"api/order${orderQuery.jobChainQuery.uriPath}"),
         query = Uri.Query(OrderQueryHttp.toHttpQueryMap(orderQuery) + ("return" → typeName))))
   }
 
