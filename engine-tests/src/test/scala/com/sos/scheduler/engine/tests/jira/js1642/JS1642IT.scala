@@ -3,21 +3,24 @@ package com.sos.scheduler.engine.tests.jira.js1642
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
+import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -101,7 +104,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "orderOverviews speed" in {
-      Stopwatch.measureTime(100, s""""orderOverviews with $OrderCount orders"""") {
+      Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
         client.orderOverviews await TestTimeout
       }
     }
@@ -123,29 +126,29 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
         usedProcessClasses = Nil))
     }
 
-    "ordersFullOverview /aJobChain" in {
-      val orderQuery = OrderQuery(jobChains = "/aJobChain")
+    "ordersFullOverview query /aJobChain" in {
+      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain"))
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
       assert((fullOverview.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
-    "ordersFullOverview /aJobChain/ returns nothing" in {
-      val orderQuery = OrderQuery(jobChains = "/aJobChain/")
+    "ordersFullOverview query /aJobChain/ returns nothing" in {
+      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain/"))
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
       assert(fullOverview.orders.isEmpty)
     }
 
-    "ordersFullOverview /xFolder/" in {
-      val orderQuery = OrderQuery(jobChains = "/xFolder/")
+    "ordersFullOverview query /xFolder/" in {
+      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/xFolder/"))
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
       assert((fullOverview.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey))
     }
 
-    "ordersFullOverview /xFolder returns nothing" in {
-      val orderQuery = OrderQuery(jobChains = "/xFolder")
+    "ordersFullOverview query /xFolder returns nothing" in {
+      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/xFolder"))
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
       assert(fullOverview.orders.isEmpty)
@@ -158,7 +161,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       usedProcessClasses = o.usedProcessClasses.sorted)
 
     "ordersFullOverview speed" in {
-      Stopwatch.measureTime(100, "ordersFullOverview") {
+      Stopwatch.measureTime(50, "ordersFullOverview") {
         client.ordersFullOverview await TestTimeout
       }
     }
@@ -168,6 +171,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       val state = response \ "answer" \ "state"
       assert((state \ "@state").toString == "running")
       assert((state \ "@ip_address").toString == "127.0.0.1")
+    }
+
+    "Speed test <show_state>" in {
+      Stopwatch.measureTime(10, "<show_state what='orders'>") {
+        client.executeXml("<show_state what='orders'/>") map SafeXML.loadString await TestTimeout
+      }
     }
   }
 
@@ -264,9 +273,36 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
         .response.status shouldEqual NotFound
     }
   }
+
+  "Speed test simple direct OrderOverview C++ access" in {
+    inSchedulerThread {
+      Stopwatch.measureTime(1000, "OrderOverview") {
+        directSchedulerClient.orderOverviews().successValue
+      }
+    }
+  }
+
+  for (n ← sys.props.optionAs[Int]("JS1642IT")) {
+    s"Speed test: OrdersFullOverview with $n orders, OrderQuery.All" - {
+      s"(Add $n orders)" in {
+        val stopwatch = new Stopwatch
+        for (orderKey ← 1 to n map { i ⇒ aJobChainPath orderKey s"adhoc-$i" })
+          controller.scheduler executeXml OrderCommand(orderKey)
+        logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
+      }
+      for ((testName, getClient) ← setting) {
+        testName in {
+          val stopwatch = new Stopwatch
+          getClient().ordersFullOverview await TestTimeout
+          logger.info(s"OrdersFullOverview $testName: " + stopwatch.itemsPerSecondString(n, "order"))
+        }
+      }
+    }
+  }
 }
 
 private object JS1642IT {
+  private val logger = Logger(getClass)
   private val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
 
   private val TestJobPath = JobPath("/test")
