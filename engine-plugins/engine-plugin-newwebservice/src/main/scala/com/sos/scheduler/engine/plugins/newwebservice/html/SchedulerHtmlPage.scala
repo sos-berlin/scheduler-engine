@@ -19,7 +19,7 @@ import scala.language.implicitConversions
   */
 trait SchedulerHtmlPage extends HtmlPage {
 
-  protected def schedulerOverview: SchedulerOverview
+  protected val schedulerOverview: SchedulerOverview
   protected def title: String
   protected def headlineSuffix = title
   private val rootUri = "/jobscheduler/master/api"

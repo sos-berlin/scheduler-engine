@@ -28,12 +28,12 @@ extends SchedulerClient with DirectCommandClient {
   def overview = scheduler.overview
 
   def orderOverviews(query: OrderQuery): Future[immutable.Seq[OrderOverview]] =
-    schedulerThreadFuture {
+    directOrSchedulerThreadFuture {
       orderSubsystem.orderOverviews(query)
     }
 
   def ordersFullOverview(query: OrderQuery) =
-    schedulerThreadFuture {
+    directOrSchedulerThreadFuture {
       val orderOverviews = orderSubsystem.orderOverviews(query)
       val tasks = orderOverviews flatMap { _.taskId } map taskSubsystem.task
       val jobs = (tasks map { _.job }).distinct

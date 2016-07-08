@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.async.CppCall
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
@@ -64,18 +63,16 @@ with OrderPersistence {
   }
 
   override def overview: OrderOverview =
-    inSchedulerThread {
-      OrderOverview(
-        path = key,  // key because this.path is valid only for permanent orders
-        fileBasedState,
-        sourceType,
-        orderState = state,
-        nextStepAt = nextStepAt,
-        setbackUntil = setbackUntil,
-        taskId = taskId,
-        isBlacklisted = isBlacklisted,
-        isSuspended = isSuspended)
-    }
+    OrderOverview(
+      path = key,  // key because this.path is valid only for permanent orders
+      fileBasedState,
+      sourceType,
+      orderState = state,
+      nextStepAt = nextStepAt,
+      setbackUntil = setbackUntil,
+      taskId = taskId,
+      isBlacklisted = isBlacklisted,
+      isSuspended = isSuspended)
 
   def isSetback = setbackUntil.isDefined
 
@@ -173,7 +170,7 @@ with OrderPersistence {
   def nextInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_time_millis)
 
-  def createdAtOption: Option[Instant] = ???
+  def createdAtOption: Option[Instant] = throw new UnsupportedOperationException
 
   override def toString = {
     val result = getClass.getSimpleName
