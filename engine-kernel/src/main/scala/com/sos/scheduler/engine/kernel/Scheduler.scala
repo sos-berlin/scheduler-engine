@@ -225,7 +225,7 @@ with HasCloser {
 
   /** Löst bei einem ERROR-Element eine Exception aus. */
   def executeXml(xml: String): String =
-    executeXmlFuture(xml) awaitWithStackTrace MaxDuration
+    executeXmlFuture(xml) await MaxDuration
 
   /** Löst bei einem ERROR-Element eine Exception aus. */
   def executeXmlFuture(xml: String): Future[String] =
@@ -240,7 +240,7 @@ with HasCloser {
 
   /** execute_xml_string() der C++-Klasse Spooler */
   def uncheckedExecuteXml(xml: String): String =
-    uncheckedExecuteXmlFuture(xml) awaitWithStackTrace MaxDuration
+    uncheckedExecuteXmlFuture(xml) await MaxDuration
 
   /** execute_xml_string() der C++-Klasse Spooler */
   def uncheckedExecuteXmlFuture(xml: String): Future[String] = {
@@ -251,7 +251,7 @@ with HasCloser {
   }
 
   def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String) =
-    uncheckedExecuteXmlFuture(xml, securityLevel, clientHostName) awaitWithStackTrace MaxDuration
+    uncheckedExecuteXmlFuture(xml, securityLevel, clientHostName) await MaxDuration
 
   def uncheckedExecuteXmlFuture(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String): Future[String] =
     directOrSchedulerThreadFuture {
