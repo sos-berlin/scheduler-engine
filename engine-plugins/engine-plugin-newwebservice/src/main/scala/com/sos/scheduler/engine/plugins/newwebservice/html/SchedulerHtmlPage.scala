@@ -58,6 +58,8 @@ trait SchedulerHtmlPage extends HtmlPage {
         {s"· PID ${schedulerOverview.pid} · ${schedulerOverview.state}"}
       </div>
     </div>
+
+  protected def headline =
     <h3>{
       val prefix = <a href={rootUri} class="inherit-markup">{schedulerOverview.schedulerId}</a>
       emptyToNone(headlineSuffix) match {
@@ -82,6 +84,9 @@ th {
 }
 a.inherit-markup {
   color: inherit;
+}
+label {
+  font-weight: inherit;
 }
 """
 }

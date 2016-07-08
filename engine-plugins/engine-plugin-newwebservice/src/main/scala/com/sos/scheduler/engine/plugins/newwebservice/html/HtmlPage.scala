@@ -6,7 +6,7 @@ import scala.language.implicitConversions
 import spray.http.HttpCharsets.`UTF-8`
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes.`text/html`
-import spray.http.{HttpEntity, HttpRequest, MediaRange}
+import spray.http.{HttpEntity, MediaRange}
 import spray.httpx.marshalling.{Marshaller, ToResponseMarshallable}
 import spray.routing.Directives._
 import spray.routing._
@@ -31,22 +31,22 @@ object HtmlPage {
   def completeAsHtmlPageOrOther[A](future: ⇒ Future[A])
     (implicit toHtmlPage: A ⇒ Future[HtmlPage], ec: ExecutionContext, toResponseMarshallable: A ⇒ ToResponseMarshallable): Route
   =
-    htmlIsPreferred {
-      handleRejections(RejectionHandler.Default) {
-        complete(future flatMap toHtmlPage)
-      }
+    htmlPreferred {
+      complete(future flatMap toHtmlPage)
     } ~
       complete(future map toResponseMarshallable)
 
-  def htmlIsPreferred: Directive0 =
+  def htmlPreferred: Directive0 =
     mapInnerRoute { route ⇒
       requestInstance { request ⇒
-        if (isHtmlPreferred(request)) route else reject
+        if (request.header[Accept] exists { o ⇒ isHtmlPreferred(o.mediaRanges) })
+          handleRejections(RejectionHandler.Default) {
+            route
+          }
+        else
+          reject
       }
     }
-
-  private def isHtmlPreferred(request: HttpRequest): Boolean =
-    request.header[Accept] exists { o ⇒ isHtmlPreferred(o.mediaRanges) }
 
   /**
     * Workaround for Spray 1.3.3, which priorities the MediaType ordering of the UnMarshaller over higher weight of more specific MediaRange.

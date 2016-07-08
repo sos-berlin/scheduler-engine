@@ -92,7 +92,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
     "overview" in {
       val overview = client.overview await TestTimeout
-      assert(overview == (directSchedulerClient.overview await TestTimeout).copy(instant = overview.instant))
+      assert(overview == (directSchedulerClient.overview await  TestTimeout).copy(instant = overview.instant))
       assert(overview.schedulerId == SchedulerId("test"))
       assert(overview.state == SchedulerState.running)
     }

@@ -16,6 +16,7 @@ extends SchedulerHtmlPage {
   override def headlineSuffix = ""
 
   def node = page {
+    headline ++
     <p style="margin-bottom: 30px">
       Started at {instantWithDurationToHtml(startInstant)} · {
         ((tcpPort map { o ⇒ s" TCP port $o" }) ++
@@ -25,10 +26,7 @@ extends SchedulerHtmlPage {
         .mkString(" · ")
     }</p>
     <p>
-      <a href="api/order/">Orders</a>,
-      <a href="api/order/?suspended=true">suspended</a>,
-      <a href="api/order/?sourceType=fileBased">fileBased</a>,
-      <a href="api/order/?sourceType=adHoc">ad-hoc</a>
+      <a href="api/order/">Orders</a>
     </p>
   }
 }
