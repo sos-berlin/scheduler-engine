@@ -134,7 +134,7 @@ struct Time
     double                      as_double                   () const;
     double                      as_double_or_never          () const;
     double                      as_utc_double               () const;
-    int64                       millis                      () const                        { return (int64)(as_double() * 1000); }
+    int64                       millis                      () const                        { return (int64)(as_double() * 1000 + 0.5); }
     Time                        time_of_day                 () const                        { return Time((*this - midnight()).as_double()); }
     Time                        midnight                    () const                        { return Time(day_nr() * 24*60*60); }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
@@ -143,7 +143,6 @@ struct Time
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
     static double               cut_fraction                ( string* datetime_string );
-    int64                       ms                          () const                        { return (int64)(_time * 1000 + 0.5); }
     Time                        utc_from_time_zone          (const string&) const;
     Time                        local_time                  (const string& time_zone) const;
 

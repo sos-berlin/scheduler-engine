@@ -2420,6 +2420,13 @@ ArrayListJ Job_chain::java_nodes()
     return result;
 }
 
+ArrayListJ Job_chain::java_orders() {
+    ArrayListJ result = ArrayListJ::new_instance(int_cast(_order_map.size()));
+    Z_FOR_EACH_CONST(Order_map, _order_map, it) 
+        result.add(it->second->java_sister());
+    return result;
+}
+
 //-------------------------------------------------------------------------Job_chain::on_initialize
 
 bool Job_chain::on_initialize()

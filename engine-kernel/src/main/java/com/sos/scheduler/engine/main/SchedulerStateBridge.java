@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.main;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
-
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.sos.scheduler.engine.main.SchedulerState.started;
-import static com.sos.scheduler.engine.main.SchedulerState.starting;
-import static com.sos.scheduler.engine.main.SchedulerState.subsystemClosed;
+import static com.sos.scheduler.engine.main.BridgeState.started;
+import static com.sos.scheduler.engine.main.BridgeState.starting;
+import static com.sos.scheduler.engine.main.BridgeState.subsystemClosed;
 
 final class SchedulerStateBridge {
     private final AtomicReference<Scheduler> schedulerAtom = new AtomicReference<Scheduler>();
-    private volatile SchedulerState state = starting;
+    private volatile BridgeState state = starting;
 
     synchronized void setStateStarted(Scheduler scheduler) {
         schedulerAtom.set(scheduler);
@@ -18,7 +16,7 @@ final class SchedulerStateBridge {
         notifyAll();
     }
 
-    synchronized void setState(SchedulerState s) {
+    synchronized void setState(BridgeState s) {
         state = s;
         notifyAll();
     }
@@ -29,7 +27,7 @@ final class SchedulerStateBridge {
         notifyAll();
     }
 
-    synchronized Scheduler waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
+    synchronized Scheduler waitUntilSchedulerState(BridgeState awaitedState) throws InterruptedException {
         while (state.ordinal() < awaitedState.ordinal())
             wait();
         return scheduler();

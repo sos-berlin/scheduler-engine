@@ -124,7 +124,7 @@ struct File_based : Abstract_scheduler_object,
                     Has_includes,
                     zschimmer::Has_addref_release
 {
-    enum State
+    enum State   // Same order as FileBaseState in Java !
     {
         s_undefined,            // Fehler in XML-Definition
         s_not_initialized,      // on_initialized() gescheitert, Objekt ist nicht im Folder

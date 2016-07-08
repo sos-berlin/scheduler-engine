@@ -49,7 +49,7 @@ struct TaskId : ::zschimmer::javabridge::proxy_jobject< TaskId >, ::javaproxy::j
     }
   public:
 
-    jint value() const;
+    jint number() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

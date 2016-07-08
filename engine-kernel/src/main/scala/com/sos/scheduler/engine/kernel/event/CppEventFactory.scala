@@ -61,7 +61,7 @@ import com.sos.scheduler.engine.kernel.order.Order
 
       case `orderStepStartedEvent` =>
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderStepStartedEvent(order.key, order.state)
+        new OrderStepStartedEvent(order.key, order.state, order.taskId getOrElse TaskId.Null)
 
       case o =>
         sys.error(s"Not implemented cppEventCode=$o")

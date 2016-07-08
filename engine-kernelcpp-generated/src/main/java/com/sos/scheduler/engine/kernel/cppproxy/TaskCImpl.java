@@ -44,6 +44,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.JobC job__native(long cppReference);
 
 
+    @Override public java.lang.String job_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = job_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String job_path__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -106,6 +122,38 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
+
+
+    @Override public java.lang.String process_class_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = process_class_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String process_class_path__native(long cppReference);
+
+
+    @Override public java.lang.String remote_scheduler_address() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = remote_scheduler_address__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String remote_scheduler_address__native(long cppReference);
 
 
     @Override public java.lang.String state_name() {

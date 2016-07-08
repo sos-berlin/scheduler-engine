@@ -9,7 +9,7 @@
         <artifactId>engine-plugins</artifactId>
         <version>1.10.6-SNAPSHOT</version>
     </parent>
-    
+
     <inceptionYear>2014</inceptionYear>
     <description>JobScheduler New Webservices</description>
 
@@ -113,7 +113,6 @@
         <dependency>
             <groupId>io.spray</groupId>
             <artifactId>spray-client_${scala.binaryVersion}</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.spray</groupId>
@@ -140,6 +139,11 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>3.3.6</version>
         </dependency>
     </dependencies>
 </project>

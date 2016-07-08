@@ -5,11 +5,11 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosedEvent}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}

@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.data.filebased.TypedPath.ordering
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.data.jobchain._
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
@@ -217,7 +217,7 @@ private object FileBasedSubsystemIT {
     schedulerServiceForwarderJobPath,
     emptyProcessClassPath,
     rootFolderPath)
-  
+
   private val pathIsInvisible = Set[TypedPath](
     schedulerServiceForwardingJobChainPath,
     schedulerServiceForwarderJobPath)

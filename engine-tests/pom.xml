@@ -37,7 +37,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <dependencies>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
@@ -48,6 +48,12 @@
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-plugin-jetty</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
+            <artifactId>engine-plugin-newwebservice</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.http.client.common
 
-import com.sos.scheduler.engine.common.scalautil.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.http.client.common.OwnHttpHeaderTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

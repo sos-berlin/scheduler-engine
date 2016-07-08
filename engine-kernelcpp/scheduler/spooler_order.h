@@ -266,6 +266,7 @@ struct Order : Com_order,
     Web_service_operation*      web_service_operation        () const;
     Web_service_operation*      web_service_operation_or_null() const                               { return _http_operation? _http_operation->web_service_operation_or_null() : NULL; }
 
+    int task_id() const;
     Task*                       task                    () const                                    { return _task; }
 
 
@@ -390,6 +391,14 @@ struct Order : Com_order,
 
     string history_id() const {
         return as_string(_history_id);
+    }
+
+    int64 next_step_at_millis() const {
+        return _setback.millis();
+    }
+
+    int64 setback_millis() const {
+        return _setback_count ? _setback.millis() : 0;
     }
 
   private:
@@ -954,6 +963,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            node_from_state_or_null     ( const Order::State& ) const;
     job_chain::Job_node*        node_from_job               ( Job* );
     ArrayListJ java_nodes();
+    ArrayListJ java_orders();
 
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );

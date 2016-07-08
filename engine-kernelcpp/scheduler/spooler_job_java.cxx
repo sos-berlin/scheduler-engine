@@ -244,6 +244,12 @@ struct Java_job : Job {
     string script_text() const { 
         return "script_text() not implemented"; 
     }
+
+    Absolute_path default_process_class_path() const { throw_xc("NOT-IMPLEMENTED"); }
+    bool is_in_period(const Time& = Time::now()) { throw_xc("NOT-IMPLEMENTED"); }
+    bool max_tasks_reached() const { throw_xc("NOT-IMPLEMENTED"); }
+    int max_tasks() const { throw_xc("NOT-IMPLEMENTED"); }
+    int running_tasks_count() const { throw_xc("NOT-IMPLEMENTED"); }
 };
 
 ptr<Job> new_java_job(Spooler* spooler) {

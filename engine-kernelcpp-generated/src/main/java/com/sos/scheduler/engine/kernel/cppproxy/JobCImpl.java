@@ -14,6 +14,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public java.lang.String default_process_class_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = default_process_class_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String default_process_class_path__native(long cppReference);
+
+
     @Override public java.lang.String description() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -58,6 +74,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native java.lang.String file__native(long cppReference);
+
+
+    @Override public int file_based_state() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return file_based_state__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int file_based_state__native(long cppReference);
 
 
     @Override public java.lang.String file_based_state_name() {
@@ -118,6 +148,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean is_file_based_reread__native(long cppReference);
 
 
+    @Override public boolean is_in_period() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_in_period__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_in_period__native(long cppReference);
+
+
     @Override public boolean is_permanently_stopped() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -176,6 +220,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log__native(long cppReference);
 
 
+    @Override public int max_tasks() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return max_tasks__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int max_tasks__native(long cppReference);
+
+
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -220,6 +278,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native java.lang.String path__native(long cppReference);
+
+
+    @Override public int running_tasks_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return running_tasks_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int running_tasks_count__native(long cppReference);
 
 
     @Override public java.lang.String script_text() {

@@ -1,7 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1387
 
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.time.SchedulerDateTime.{formatLocally, formatUtc}
+import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1387.JS1387IT._
@@ -11,7 +14,6 @@ import java.time.{Instant, Period}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.common.time.ScalaTime._
 
 /**
   * @author Joacim Zschimmer
@@ -52,19 +54,19 @@ private[js1387] object JS1387IT {
     val at: Instant
     def toOrderCommand: xml.Elem
     def toExpectedCalendarEntry =
-      <at job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at={SchedulerDateTime.formatUtc(at)}/>
+      <at job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at={formatUtc(at)}/>
   }
 
   private final case class AtTimedOrder(orderKey: OrderKey, at: Instant) extends TimedOrder {
     def toOrderCommand =
-      <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string} at={SchedulerDateTime.formatLocally(at)}/>
+      <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string} at={formatLocally(Scheduler.DefaultZoneId, at)}/>
   }
 
   private final case class RuntimeTimedOrder(orderKey: OrderKey, at: Instant) extends TimedOrder {
     def toOrderCommand =
       <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
         <run_time>
-          <at at={SchedulerDateTime.formatLocally(at)}/>
+          <at at={formatLocally(Scheduler.DefaultZoneId, at)}/>
         </run_time>
       </order>
   }

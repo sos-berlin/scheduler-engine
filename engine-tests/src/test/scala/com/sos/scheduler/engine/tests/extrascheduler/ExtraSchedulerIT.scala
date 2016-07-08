@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.tests.extrascheduler
 
-import akka.actor.ActorSystem
-import com.google.inject.Guice
+import akka.actor.ActorRefFactory
+import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.{AgentConfiguration, Akkas}
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
-import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -20,6 +19,7 @@ import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinaries}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.{ImplicitTimeout, ProvidesTestDirectory, TestEnvironment}
+import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -40,8 +40,11 @@ final class ExtraSchedulerIT extends FreeSpec with ProvidesTestDirectory {
       val actorSystem = Akkas.newActorSystem(getClass.getSimpleName)
       closer.onClose { actorSystem.shutdown() }
       import actorSystem.dispatcher
-      val injector = Guice.createInjector(new ScalaAbstractModule {
-        def configure() = bindInstance[ActorSystem](actorSystem)
+      val injector = Guice.createInjector(new AbstractModule {
+        def configure() = ()
+
+        @Provides @Singleton
+        def actorRefFactory(): ActorRefFactory = actorSystem
       })
       //implicit val timeout = Timeout(10.s)
       implicit val implicitTimeout = ImplicitTimeout(10.s)

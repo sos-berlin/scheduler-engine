@@ -46,6 +46,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native java.lang.String file__native(long cppReference);
 
 
+    @Override public int file_based_state() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return file_based_state__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int file_based_state__native(long cppReference);
+
+
     @Override public java.lang.String file_based_state_name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -190,6 +204,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     }
 
     private static native java.util.List java_nodes__native(long cppReference);
+
+
+    @Override public java.util.List java_orders() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.util.List result = java_orders__native(cppReference());
+            checkIsNotReleased(java.util.List.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.util.List java_orders__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {

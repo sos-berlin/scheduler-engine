@@ -30,6 +30,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     private static native java.lang.String file__native(long cppReference);
 
 
+    @Override public int file_based_state() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return file_based_state__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int file_based_state__native(long cppReference);
+
+
     @Override public java.lang.String file_based_state_name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -132,6 +146,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log__native(long cppReference);
 
 
+    @Override public int max_processes() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return max_processes__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int max_processes__native(long cppReference);
+
+
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -192,6 +220,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     }
 
     private static native byte[] source_xml_bytes__native(long cppReference);
+
+
+    @Override public int used_process_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return used_process_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int used_process_count__native(long cppReference);
 
 
     // </editor-fold>

@@ -56,7 +56,7 @@ with EventSource {
   def fileBasedType: FileBasedType
 
   def fileBasedState =
-    FileBasedState.ofCppName(cppProxy.file_based_state_name)
+    FileBasedState.values()(cppProxy.file_based_state)
 
   /** Für Java. */
   def getPath: TypedPath = path

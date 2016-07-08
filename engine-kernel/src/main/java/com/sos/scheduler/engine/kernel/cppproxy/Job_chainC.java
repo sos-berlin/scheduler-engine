@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
+import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.order.jobchain.Node;
 import java.util.List;
@@ -13,6 +14,7 @@ public interface Job_chainC extends CppProxyWithSister<JobChain>, File_basedC<Jo
     List<Node> java_nodes();
     OrderC order(String orderId);
     OrderC order_or_null(String orderID);
+    List<Order> java_orders();
     boolean is_stopped();
     void set_stopped(boolean o);
     int max_orders();

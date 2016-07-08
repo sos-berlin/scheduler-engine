@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1301
 
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedRemovedEvent
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskEndedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -13,7 +12,6 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand, ProcessClassConfiguration}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.JobState
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
