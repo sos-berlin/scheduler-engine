@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.accept
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
@@ -21,7 +21,7 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute extends JobChainRoute with OrderRoute with HtmlDirectives {
+trait ApiRoute extends JobChainRoute with OrderRoute {
 
   protected def client: DirectSchedulerClient
   protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
@@ -32,7 +32,7 @@ trait ApiRoute extends JobChainRoute with OrderRoute with HtmlDirectives {
       respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
         handleExceptions(ApiExceptionHandler) {
           (pathEnd & get) {
-            completeAsHtmlPageOrOther(client.overview)
+            completeTryHtml(client.overview)
           } ~
           (pathSingleSlash & get) {
             accept(`text/html`) {

@@ -6,6 +6,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.emptyParameterMap
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
+import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import scala.concurrent._
 import spray.http.StatusCodes.NotFound
@@ -44,15 +46,15 @@ trait JobChainRoute {
       case e: CppException if e.getMessage startsWith "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
     }) {
       returnType match {
-        case Some("JobChainOverview") | None ⇒ complete(client.jobChainOverview(jobChainPath))
-        case Some("JobChainDetails") ⇒ complete(client.jobChainDetails(jobChainPath))
+        case Some("JobChainOverview") | None ⇒ completeTryHtml(client.jobChainOverview(jobChainPath))
+        case Some("JobChainDetails") ⇒ completeTryHtml(client.jobChainDetails(jobChainPath))
         case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
       }
     }
 
   private def multipleJobChainsRoute(query: JobChainQuery, returnType: Option[String]): Route =
     returnType match {
-      case Some("JobChainOverview") | None ⇒ complete(client.jobChainOverviews(query))
+      case Some("JobChainOverview") | None ⇒ completeTryHtml(client.jobChainOverviews(query))
       case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
     }
 }

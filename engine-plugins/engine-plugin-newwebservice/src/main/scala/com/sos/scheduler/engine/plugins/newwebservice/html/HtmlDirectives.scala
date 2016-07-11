@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import spray.http.HttpHeaders.Accept
@@ -8,28 +8,26 @@ import spray.http.MediaRange
 import spray.http.MediaTypes.`text/html`
 import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing.Directives._
-import spray.routing.{RejectionHandler, _}
+import spray.routing._
 
 /**
   * @author Joacim Zschimmer
   */
-trait HtmlDirectives {
+object HtmlDirectives {
 
-  protected implicit def webServiceContext: WebServiceContext
-
-  def completeAsHtmlPageOrOther[A](future: ⇒ Future[A])(
+  def completeTryHtml[A](resultFuture: ⇒ Future[A])(
     implicit
       toHtmlPage: A ⇒ Future[HtmlPage],
       webServiceContext: WebServiceContext,
       ec: ExecutionContext,
       toResponseMarshallable: A ⇒ ToResponseMarshallable): Route
   =
-    htmlPreferred {
-      complete(future flatMap toHtmlPage)
+    htmlPreferred(webServiceContext) {
+      complete(resultFuture flatMap toHtmlPage)
     } ~
-      complete(future map toResponseMarshallable)
+      complete(resultFuture map toResponseMarshallable)
 
-  def htmlPreferred: Directive0 =
+  def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒
       if (webServiceContext.htmlEnabled)
         requestInstance { request ⇒
@@ -43,11 +41,9 @@ trait HtmlDirectives {
       else
         reject
     }
-}
 
-object HtmlDirectives {
   /**
-    * Workaround for Spray 1.3.3, which priorities the MediaType ordering of the UnMarshaller over higher weight of more specific MediaRange.
+    * Workaround for Spray 1.3.3, which weights the MediaType ordering of the UnMarshaller over the (higher) weight of more specific MediaRange.
     * <p>
     * <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2">https://tools.ietf.org/html/rfc7231#section-5.3.2</a>.
     */
