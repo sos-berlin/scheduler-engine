@@ -35,23 +35,27 @@ final class SchedulerUris private(schedulerUriString: String) {
   }
 
   object jobChain {
-    def overview(jobChainPath: JobChainPath): String = overviews(JobChainQuery(jobChainPath))
-
     def overviews(query: JobChainQuery = JobChainQuery.All): String = {
       val subpath = JobChainQueryHttp.toUriPath(query)
-      assert(subpath endsWith "/")
+      require(subpath endsWith "/", "JobChainQuery must denote folder, terminated by a slash")
       uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default with trailing slash: query = Uri.Query("return" → "JobChainOverview")))
+    }
+
+    def overview(jobChainPath: JobChainPath): String = {
+      val subpath = JobChainQueryHttp.toUriPath(jobChainPath)
+      require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
+      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath"), query = Uri.Query("return" → "JobChainOverview")))
     }
 
     def details(jobChainPath: JobChainPath): String = {
       val subpath = JobChainQueryHttp.toUriPath(jobChainPath)
-      assert(!subpath.endsWith("/"))
+      require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
       uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
     }
   }
 
   /**
-    * Public for tests only.
+    * Public for tests.
     */
   def uriString(uri: Uri): String = resolvePathUri(uri).toString
 

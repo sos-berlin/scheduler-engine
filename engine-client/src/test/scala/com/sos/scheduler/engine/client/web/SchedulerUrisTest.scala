@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.client.web
 
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderQuery, OrderSourceType}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -48,6 +49,19 @@ final class SchedulerUrisTest extends FreeSpec {
           "blacklisted" → "false",
           "sourceType" → "fileOrderSource,adHoc",  // Incidentally, Scala Set with two elements retains orders
           "return" → "OrdersFullOverview")).toString)
+  }
+
+  "jobChain.overviews" in {
+    assert(uris.jobChain.overviews(JobChainQuery("/a/")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/")
+    intercept[IllegalArgumentException] { uris.jobChain.overviews(JobChainQuery("/a")) }
+  }
+
+  "jobChain.overview" in {
+    assert(uris.jobChain.overview(JobChainPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b?return=JobChainOverview")
+  }
+
+  "jobChain.detail" in {
+    assert(uris.jobChain.details(JobChainPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b")
   }
 
   "resolveUri" in {

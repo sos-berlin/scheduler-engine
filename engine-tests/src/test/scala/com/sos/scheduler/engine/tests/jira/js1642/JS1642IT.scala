@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, JobChainQuery}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, JobChainQuery, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.concurrent.ExecutionContext
 import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
@@ -152,6 +152,42 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
       assert(fullOverview.orders.isEmpty)
+    }
+
+    "jobChainOverview" in {
+      val query = JobChainQuery("/xFolder/")
+      val jobChainOverviews: immutable.Seq[JobChainOverview] = client.jobChainOverviews(query) await TestTimeout
+      assert(jobChainOverviews == (directSchedulerClient.jobChainOverviews(query) await TestTimeout))
+      assert(jobChainOverviews.toSet == Set(
+        JobChainOverview(
+          xaJobChainPath,
+          FileBasedState.active),
+        JobChainOverview(
+          xbJobChainPath,
+          FileBasedState.active)))
+    }
+
+    "jobChainOverviews" in {
+      val jobChainDetails: JobChainDetails = client.jobChainDetails(xaJobChainPath) await TestTimeout
+      assert(jobChainDetails == (directSchedulerClient.jobChainDetails(xaJobChainPath) await TestTimeout))
+      assert(jobChainDetails.copy(fileModifiedAt = None, sourceXml = None) ==
+        JobChainDetails(
+          xaJobChainPath,
+          FileBasedState.active,
+          Some(testEnvironment.fileFromPath(xaJobChainPath)),
+          fileModifiedAt = None,
+          sourceXml = None,
+          List(
+            SimpleJobNodeOverview(
+              orderState = OrderState("100"),
+              nextState = OrderState("END"),
+              errorState = OrderState(""),
+              JobChainNodeAction.process,
+              JobPath("/xFolder/test"),
+              orderCount = 2),
+            EndNodeOverview(
+              orderState = OrderState("END")))))
+      assert(jobChainDetails.sourceXml.get startsWith "<job_chain ")
     }
 
     def sortOrdersFullOverview(o: OrdersFullOverview) = o.copy(
