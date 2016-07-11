@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice
 import com.google.inject.{AbstractModule, Injector, Provides}
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
-import com.sos.scheduler.engine.kernel.plugin.{Plugin, PluginSubsystem, Plugins}
+import com.sos.scheduler.engine.kernel.plugin.{Plugin, PluginSubsystem, Plugins, UseGuiceModule}
 import com.sos.scheduler.engine.plugins.jetty.{JettyPlugin, JettyPluginExtension}
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import javax.inject.{Inject, Named, Singleton}
@@ -12,6 +12,7 @@ import org.w3c.dom.Element
 /**
  * @author Joacim Zschimmer
  */
+@UseGuiceModule(classOf[NewWebServiceModule])
 final class NewWebServicePlugin @Inject private(
   pluginSubsystem: PluginSubsystem,
   @Named(Plugins.configurationXMLName) pluginElement: Element,
