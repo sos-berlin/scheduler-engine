@@ -101,7 +101,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
             touch(file)
           }
         }
-        assert(orderIsOnBlacklist(orderKey))
+        assert(orderIsBlacklisted(orderKey))
         scheduler executeXml RemoveOrderCommand(orderKey)
         assert(Files.exists(file))
         // ??? Pausenlose RequestFileOrderSource, wenn wir die Datei nicht löschen.

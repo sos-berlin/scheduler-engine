@@ -18,7 +18,7 @@ public final class JS782IT extends SchedulerTest {
         super(new TestConfigurationBuilder(JS782IT.class).terminateOnError(false).build());
     }
 
-    @Test public void suspendedOrderMovedToEndStateShouldBeOnBlacklist() {
+    @Test public void suspendedOrderMovedToEndStateShouldBlacklisted() {
         controller().activateScheduler();
         doTest();
         controller().terminateScheduler();
@@ -26,13 +26,13 @@ public final class JS782IT extends SchedulerTest {
 
     private void doTest() {
         scheduler().executeXml("<modify_order job_chain='a' order='testOrder' suspended='true'/>");
-        assertTrue("Order should be on blacklist", orderIsOnBlacklist());
+        assertTrue("Order should be blacklisted", orderIsBlacklisted());
 
         scheduler().executeXml("<modify_order job_chain='a' order='testOrder' suspended='false'/>");
-        assertTrue("Order should not be blacklist", !orderIsOnBlacklist());
+        assertTrue("Order should not blacklisted", !orderIsBlacklisted());
     }
 
-    private boolean orderIsOnBlacklist() {
+    private boolean orderIsBlacklisted() {
         Document doc = loadXml(scheduler().executeXml("<show_job_chain job_chain='a' what='job_chain_orders blacklist'/>"));
         return stringXPath(doc, "/spooler/answer/job_chain/blacklist/order/@order").equals(orderId.string());
     }

@@ -64,7 +64,7 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
       log.warn(t.toString)
       fileOperator.fileExists(filePath) flatMap { exists ⇒
         schedulerThreadFuture {
-          if (exists) order.setOnBlacklist()
+          if (exists) order.blacklist()
           !exists
         }
       }

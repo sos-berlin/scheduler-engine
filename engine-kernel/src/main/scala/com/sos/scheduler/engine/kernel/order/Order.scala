@@ -139,9 +139,6 @@ with OrderPersistence {
     cppProxy.set_suspended(b)
   }
 
-  @Deprecated
-  def isOnBlacklist = isBlacklisted
-
   def isBlacklisted = cppProxy.is_on_blacklist()
 
   def title: String =
@@ -178,7 +175,7 @@ with OrderPersistence {
     else result
   }
 
-  def setOnBlacklist(): Unit = cppProxy.set_on_blacklist()
+  def blacklist(): Unit = cppProxy.set_on_blacklist()
 
   private def throwNotInAJobChain() = throw new SchedulerException(s"Order is not in a job chain: $toString")
 

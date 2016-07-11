@@ -48,7 +48,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
 
   for ((withAgent, testGroupName) ← List(false → "Without Agent", true → "With Agent")) testGroupName - {
     lazy val agentUriOption = withAgent.option(agentUri)
-    lazy val orderSetOnBlacklistErrorSet = (!withAgent).option(MessageCode("SCHEDULER-340")).toSet
+    lazy val orderBlacklistedErrorSet = (!withAgent).option(MessageCode("SCHEDULER-340")).toSet
     lazy val notificationIsActive = withAgent || isWindows
     for ((isDistributed, testGroupName) ← List(false → "Not distributed", true → "Distributed")) testGroupName - {
 
@@ -87,29 +87,29 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         }
       }
 
-      "A file, not removed by job chain, stays on blacklist until removed later" in {
+      "A file, not removed by job chain, stays blacklisted until removed later" in {
         logger.info(s"Test: $testName")
         val repeat = 1.s
         val delay = repeat dividedBy 2
         deleteAndWriteConfigurationFile(TestJobChainPath, makeJobChainElem(directory, JobPath("/test-dont-delete"), repeat, isDistributed = isDistributed))
         val file = directory / "X-MATCHING-TEST-DONT-DELETE"
         val orderKey = TestJobChainPath orderKey file.toString
-        controller.toleratingErrorCodes(orderSetOnBlacklistErrorSet) {
+        controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
           runUntilFileRemovedMessage(orderKey) {
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
               touch(file)
             }
             val startedAgain = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
-            assert(orderIsOnBlacklist(orderKey))
+            assert(orderIsBlacklisted(orderKey))
             sleep(repeat + delay)
-            assert(orderIsOnBlacklist(orderKey))
+            assert(orderIsBlacklisted(orderKey))
             assert(!startedAgain.isCompleted)
             logger.info(s"delete $file")
             delete(file)
           }
         }
         assert(!orderExists(orderKey))
-        controller.toleratingErrorCodes(orderSetOnBlacklistErrorSet) {
+        controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
           runUntilFileRemovedMessage(orderKey) {
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
               val started = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
@@ -118,7 +118,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
               assert(!started.isCompleted)
               touch(file)
             }
-            assert(orderIsOnBlacklist(orderKey))
+            assert(orderIsBlacklisted(orderKey))
             logger.info(s"delete $file")
             delete(file)
           }
@@ -134,7 +134,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
       List(matchingFile, ignoredFile) foreach touch
       val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }
       val ignoredStarted = eventBus.keyedEventFuture[OrderTouchedEvent](ignoredOrderKey)
-      controller.toleratingErrorCodes(orderSetOnBlacklistErrorSet) {
+      controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
         runUntilFileRemovedMessage(matchingOrderKey) {
           eventBus.awaitingKeyedEvent[OrderFinishedEvent](matchingOrderKey) {
             touch(matchingFile)
