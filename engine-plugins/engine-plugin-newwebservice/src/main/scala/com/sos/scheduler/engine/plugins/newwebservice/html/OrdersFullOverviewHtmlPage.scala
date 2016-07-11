@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.job.JobOverview
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderOverviewCollection, OrderQuery, OrderSourceType}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -11,6 +12,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersFullOverviewHtm
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
+import scalatags.Text.all._
+import scalatags.Text.attrs
 
 /**
   * @author Joacim Zschimmer
@@ -19,7 +22,8 @@ final class OrdersFullOverviewHtmlPage private(
   query: OrderQuery,
   fullOverview: OrdersFullOverview,
   protected val webServiceContext: WebServiceContext,
-  protected val schedulerOverview: SchedulerOverview)
+  protected val schedulerOverview: SchedulerOverview)(
+  implicit ec: ExecutionContext)
 extends SchedulerHtmlPage {
 
   private val taskMap = fullOverview.usedTasks toKeyedMap { _.id }
@@ -29,67 +33,63 @@ extends SchedulerHtmlPage {
 
   protected def title = "Orders"
 
-  def node = page(
-    <script type="text/javascript">{xml.Unparsed(orderSelection.javascript)}</script> ++
-      orderSelection.html ++
-      headline ++
-      ordersStatistics ++
-      orderTable(orderOverviews))
+  def scalatag = htmlPage(
+    raw(s"<script type='text/javascript'>${orderSelection.javascript}</script>"),
+    orderSelection.html,
+    headline,
+    ordersStatistics,
+    orderTable(orderOverviews))
 
   private def ordersStatistics =
-    <p style="margin-bottom: 30px">{
-      s"$size orders: $inProcessCount in process using ${jobMap.size} jobs, $suspendedCount suspended, $blacklistedCount blacklisted"
-    }</p>
+    p(marginBottom := "30px")(
+      s"$size orders: $inProcessCount in process using ${jobMap.size} jobs, $suspendedCount suspended, $blacklistedCount blacklisted")
 
   private def orderTable(orders: immutable.Seq[OrderOverview]) =
-    <table class="table table-condensed table-hover">
-      <thead>
-        <th>JobChain</th>
-        <th>Node</th>
-        <th>OrderId</th>
-        <th><span class="visible-lg-block">SourceType</span></th>
-        <th>Task / Date</th>
-        <th>Flags</th>
-        <th><small>FileBasedState</small></th>
-      </thead>
-      <tbody>{
-        for (order ← orders sortBy { o ⇒ (o.orderKey.jobChainPath, o.orderState, o.orderKey.id) }) yield {
-          import order._
-          val taskNode: Option[xml.Node] = for (t ← taskId) yield {
-            val job: Option[JobOverview] = taskMap.get(t) flatMap { task ⇒ jobMap.get(task.job) }
-            <b><span class="visible-lg-inline">Task </span>{((job map { _.path.string }) ++ Some(t.number)).mkString(":")}</b>  // "JobPath:TaskId"
-          }
-          def nextStepEntry = nextStepAt map instantWithDurationToHtml
-          <tr class={orderToTrClass(order)}>
-            <td><a href={uris.jobChain.details(orderKey.jobChainPath)}>{orderKey.jobChainPath.string}</a></td>
-            <td>{orderState.string}</td>
-            <td>{orderKey.id.string}</td>
-            <td><span class="visible-lg-block">{sourceType}</span></td>
-            <td>{(taskNode orElse nextStepEntry).orNull}</td>
-            <td>{(isSuspended option "suspended") ++ (isBlacklisted option "blacklisted") mkString " "}</td>
-            <td>{if (sourceType == OrderSourceType.fileBased) <small>{fileBasedStateToHtml(fileBasedState)}</small> else ""}</td>
-          </tr>
-        }}</tbody>
-    </table>
+    table(cls := "table table-condensed table-hover")(
+      thead(
+        th("JobChain"),
+        th("Node"),
+        th("OrderId"),
+        th(span(cls := "visible-lg-block")("SourceType"),
+        th("Task / Date"),
+        th("Flags"),
+        th(small("FileBasedState"))),
+      tbody((orders.sorted.par map orderToTr).seq)))
+
+  private def orderToTr(order: OrderOverview) = {
+    //import order._  // does not work with ScalaTags ?
+    val taskOption = for (t ← order.taskId) yield {
+      val job: Option[JobOverview] = taskMap.get(t) flatMap { task ⇒ jobMap.get(task.job) }
+      b(span(cls := "visible-lg-inline")("Task ", ((job map { _.path.string }) ++ Some(t.number)).mkString(":"))) :: Nil // "JobPath:TaskId"
+    }
+    def nextStepEntry = order.nextStepAt map instantWithDurationToHtml
+    tr(cls := orderToTrClass(order))(
+      td(jobChainPathToA(order.orderKey.jobChainPath)),
+      td(order.orderState.string),
+      td(order.orderKey.id.string),
+      td(span(cls := "visible-lg-block")(order.sourceType.toString)),
+      td(taskOption orElse nextStepEntry getOrElse EmptyFrag :: Nil: _*),
+      td((order.isSuspended option "suspended") ++ (order.isBlacklisted option "blacklisted") mkString " "),
+      td(if (order.sourceType == OrderSourceType.fileBased) small(fileBasedStateToHtml(order.fileBasedState)) else EmptyFrag))
+  }
+
+  private def jobChainPathToA(jobChainPath: JobChainPath) = a(href := uris.jobChain.details(jobChainPath))(jobChainPath.string)
 
   private object orderSelection {
     def html =
-      <div style="float: right; line-height: 1em; background: #f5f5f5; padding: 2px 4px; border-radius: 4px">
-        Filter<br/>{
-          val inputs = for (
-          (key, valueOption) ← List("suspended" → query.isSuspended, "setback" → query.isSetback, "blacklisted" → query.isBlacklisted)) yield
-          inputElement(key, valueOption) ++ xml.Text(" ") ++ inputElement(key, valueOption, checkedMeans = false)
-        inputs reduce { _ ++ <br/> ++ _ }
-      }</div>
+      div(float.right, lineHeight := "1em", background := "#f5f5f5", padding := "2px 4px", borderRadius := "4px")(
+        "Filter",
+        br,
+        for ((key, valueOption) ← List("suspended" → query.isSuspended, "setback" → query.isSetback, "blacklisted" → query.isBlacklisted)) yield
+          inputElement(key, valueOption) :: StringFrag(" ") :: inputElement(key, valueOption, checkedMeans = false) :: br :: Nil)
 
-    private def inputElement(key: String, value: Option[Boolean], checkedMeans: Boolean = true): xml.Node = {
+    private def inputElement(key: String, value: Option[Boolean], checkedMeans: Boolean = true) = {
       val name = if (checkedMeans) key else s"not-$key"
-      val checked = !checkedMeans ^ (value getOrElse !checkedMeans) option "checked"
+      val checked = !checkedMeans ^ (value getOrElse !checkedMeans)
       val onClick = s"javascript:reload({$key: document.getElementsByName('$name')[0].checked ? $checkedMeans : undefined})"
-      <label>
-        <input name={name} type="checkbox" checked={checked.orNull} onclick={onClick}/>
-        {if (checkedMeans) key else s"not"}
-      </label>
+      label(
+        input(attrs.name := name, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
+        if (checkedMeans) key else s"not")
     }
 
     def javascript = s"""
@@ -126,5 +126,5 @@ object OrdersFullOverviewHtmlPage {
     if (order.isSuspended || order.isBlacklisted) "warning"
     else if (order.taskId.isDefined) "info"
     else if (!order.fileBasedState.isOkay) "danger"
-    else null
+    else ""
 }

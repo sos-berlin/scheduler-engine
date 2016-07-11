@@ -52,6 +52,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.lihaoyi</groupId>
+            <artifactId>scalatags_${scala.binaryVersion}</artifactId>
+            <version>0.5.5</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
