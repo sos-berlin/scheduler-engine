@@ -269,9 +269,11 @@ void Communication::Internal_signaling_socket::init() {
 #endif
 
 void Communication::Internal_signaling_socket::signal() {
-    char signal = '!';
-    int len = write(_write_socket, &signal, 1);
-    if (len < 0 && errno != EWOULDBLOCK) throw_errno(errno, "write", "Internal_signaling_socket::signal");
+    if (_write_socket != SOCKET_ERROR) {
+        char signal = '!';
+        int len = write(_write_socket, &signal, 1);
+        if (len < 0 && errno != EWOULDBLOCK) throw_errno(errno, "write", "Internal_signaling_socket::signal");
+    }
 }
 
 bool Communication::Internal_signaling_socket::async_continue_(Continue_flags)
