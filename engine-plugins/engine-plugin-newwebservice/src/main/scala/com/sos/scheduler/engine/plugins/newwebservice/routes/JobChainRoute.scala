@@ -46,8 +46,8 @@ trait JobChainRoute {
       case e: CppException if e.getMessage startsWith "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
     }) {
       returnType match {
-        case Some("JobChainOverview") | None ⇒ completeTryHtml(client.jobChainOverview(jobChainPath))
-        case Some("JobChainDetails") ⇒ completeTryHtml(client.jobChainDetails(jobChainPath))
+        case Some("JobChainOverview") ⇒ completeTryHtml(client.jobChainOverview(jobChainPath))
+        case Some("JobChainDetails") | None ⇒ completeTryHtml(client.jobChainDetails(jobChainPath))
         case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
       }
     }

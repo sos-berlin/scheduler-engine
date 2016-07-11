@@ -39,12 +39,14 @@ final class SchedulerUris private(schedulerUriString: String) {
 
     def overviews(query: JobChainQuery = JobChainQuery.All): String = {
       val subpath = JobChainQueryHttp.toUriPath(query)
-      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath"), query = Uri.Query("return" → "JobChainOverview")))
+      assert(subpath endsWith "/")
+      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default with trailing slash: query = Uri.Query("return" → "JobChainOverview")))
     }
 
     def details(jobChainPath: JobChainPath): String = {
-      val subpath = JobChainQueryHttp.toUriPath(JobChainQuery(jobChainPath))
-      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath"), query = Uri.Query("return" → "JobChainDetails")))
+      val subpath = JobChainQueryHttp.toUriPath(jobChainPath)
+      assert(!subpath.endsWith("/"))
+      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
     }
   }
 
