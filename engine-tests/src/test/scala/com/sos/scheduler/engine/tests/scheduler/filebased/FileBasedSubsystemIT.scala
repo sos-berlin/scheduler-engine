@@ -93,7 +93,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             if (pathDontHasXml(path))
               intercept[RuntimeException] { o.file }
             else
-              o.file shouldEqual testEnvironment.fileFromPath(path)
+              o.file shouldEqual testEnvironment.fileFromPath(path).toPath
           }
 
           "fileBasedState" in {
