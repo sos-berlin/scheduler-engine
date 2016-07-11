@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel.filebased
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.cplusplus.runtime.HasSister
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -19,7 +20,7 @@ trait FileBasedSubsystem extends Subsystem {
   type ThisSubsystem <: FileBasedSubsystem
   type ThisFileBased <: FileBased
   type ThisFile_basedC <: File_basedC[ThisFileBased] with HasSister[ThisFileBased]
-  type Path = ThisFileBased#Path
+  type Path = ThisFileBased#ThisPath
 
   val description: FileBasedSubsystem.AbstractDesription[ThisSubsystem, Path, ThisFileBased]
 

@@ -21,7 +21,7 @@ with Sister
 with UnmodifiableJob
 with JobPersistence {
 
-  type Path = JobPath
+  type ThisPath = JobPath
 
   def onCppProxyInvalidated(): Unit = {}
 

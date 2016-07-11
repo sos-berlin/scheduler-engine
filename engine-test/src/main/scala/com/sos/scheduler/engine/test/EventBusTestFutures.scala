@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.{implicitClass, withToString1}
 import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.{implicitClass, withToString1}
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
 import java.time.Duration

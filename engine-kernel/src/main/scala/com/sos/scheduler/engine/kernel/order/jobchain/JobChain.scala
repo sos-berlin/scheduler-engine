@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -33,7 +34,7 @@ final class JobChain(
 extends FileBased
 with UnmodifiableJobChain {
 
-  type Path = JobChainPath
+  type ThisPath = JobChainPath
 
   private object cppPredecessors {
     private var _edgeSet: Set[(OrderState, OrderState)] = null

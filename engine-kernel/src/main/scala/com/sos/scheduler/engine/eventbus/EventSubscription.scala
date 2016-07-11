@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.data.event.Event
 import scala.reflect.ClassTag
 

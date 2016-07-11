@@ -3,10 +3,11 @@ package com.sos.scheduler.engine.kernel.job.internal
 import com.google.inject.Injector
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile}
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.cast
 import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture

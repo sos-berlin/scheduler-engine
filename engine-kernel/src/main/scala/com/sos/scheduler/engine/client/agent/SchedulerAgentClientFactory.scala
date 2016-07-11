@@ -3,10 +3,11 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.base.generic.SecretString
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.scalautil.ConcurrentMemoizer
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.https.{Https, KeystoreReference}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration

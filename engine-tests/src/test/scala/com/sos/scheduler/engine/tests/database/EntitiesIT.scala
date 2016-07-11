@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
+import java.nio.file.Files.deleteIfExists
 import java.time.Instant.now
 import java.time.{Instant, LocalDateTime, ZoneId}
 import javax.persistence.EntityManagerFactory
@@ -216,7 +217,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     withEventPipe { eventPipe ⇒
-      instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
+      deleteIfExists(instance[OrderSubsystem].jobChain(jobChainPath).file) || sys.error("JobChain configuration file could not be deleted")
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)
       tryFetchJobChainEntity(jobChainPath) shouldBe 'empty

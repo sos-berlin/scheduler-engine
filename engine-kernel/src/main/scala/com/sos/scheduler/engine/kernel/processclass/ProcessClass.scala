@@ -33,7 +33,7 @@ final class ProcessClass private(
   val agentConnectRetryDelayLazy: () ⇒ Duration)
 extends FileBased {
 
-  type Path = ProcessClassPath
+  type ThisPath = ProcessClassPath
 
   private[this] var _config = Configuration(None, immutable.IndexedSeq())
   private[this] var _failableAgents: FailableCollection[Agent] = null

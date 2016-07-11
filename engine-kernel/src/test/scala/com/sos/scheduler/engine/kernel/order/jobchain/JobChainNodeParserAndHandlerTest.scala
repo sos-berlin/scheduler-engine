@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlElemSource}
 import com.sos.scheduler.engine.data.job.ReturnCode
 import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, SuccessOrderStateTransition}

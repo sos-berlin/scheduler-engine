@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.xml.VariableSets
 import com.sos.scheduler.engine.data.jobchain.JobChainPath

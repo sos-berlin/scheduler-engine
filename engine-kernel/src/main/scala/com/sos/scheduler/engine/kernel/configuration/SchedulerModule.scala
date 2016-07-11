@@ -4,6 +4,8 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.configutils.Configs
@@ -11,7 +13,6 @@ import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister

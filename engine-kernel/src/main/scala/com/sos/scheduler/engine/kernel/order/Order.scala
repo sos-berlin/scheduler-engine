@@ -35,7 +35,7 @@ with OrderPersistence {
 
   import subsystem.agentClientFactory
 
-  type Path = OrderKey
+  type ThisPath = OrderKey
 
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
 
