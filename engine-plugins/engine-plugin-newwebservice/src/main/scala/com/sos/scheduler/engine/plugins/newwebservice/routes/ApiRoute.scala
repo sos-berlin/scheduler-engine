@@ -11,6 +11,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtml
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import scala.concurrent.ExecutionContext
+import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
+import spray.http.HttpHeaders.`Cache-Control`
 import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes._
 import spray.routing.Directives._
@@ -27,37 +29,39 @@ trait ApiRoute extends JobChainRoute with OrderRoute with HtmlDirectives {
 
   protected final def apiRoute: Route =
     pathPrefix("api") {
-      handleExceptions(ApiExceptionHandler) {
-        (pathEnd & get) {
-          completeAsHtmlPageOrOther(client.overview)
-        } ~
-        (pathSingleSlash & get) {
-          accept(`text/html`) {
-            redirect("../api", TemporaryRedirect)
-          }
-        } ~
-        (pathPrefix("command") & pathEnd & post) {
-          entity(as[XmlString]) { case XmlString(xmlString) ⇒
-           complete(client.executeXml(xmlString) map XmlString.apply)
-          }
-        } ~
-        pathPrefix("order") {
+      respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
+        handleExceptions(ApiExceptionHandler) {
           (pathEnd & get) {
-             redirect("order/", TemporaryRedirect)
+            completeAsHtmlPageOrOther(client.overview)
           } ~
-          orderRoute
-        } ~
-        pathPrefix("jobChain") {
-          (pathEnd & get) {
-             redirect("jobChain/", TemporaryRedirect)
+          (pathSingleSlash & get) {
+            accept(`text/html`) {
+              redirect("../api", TemporaryRedirect)
+            }
           } ~
-          jobChainRoute
+          (pathPrefix("command") & pathEnd & post) {
+            entity(as[XmlString]) { case XmlString(xmlString) ⇒
+             complete(client.executeXml(xmlString) map XmlString.apply)
+            }
+          } ~
+          pathPrefix("order") {
+            (pathEnd & get) {
+               redirect("order/", TemporaryRedirect)
+            } ~
+            orderRoute
+          } ~
+          pathPrefix("jobChain") {
+            (pathEnd & get) {
+               redirect("jobChain/", TemporaryRedirect)
+            } ~
+            jobChainRoute
+          }
+          /*~
+          pathPrefix("subsystems") {
+            subsystemsRoute
+          }
+          */
         }
-        /*~
-        pathPrefix("subsystems") {
-          subsystemsRoute
-        }
-        */
       }
     }
 
