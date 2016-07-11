@@ -11,7 +11,7 @@ final case class SimpleFileBasedDetails(
   path: TypedPath,
   fileBasedState: FileBasedState,
   file: Option[File],
-  fileModificationInstant: Option[Instant],
+  fileModifiedAt: Option[Instant],
   sourceXml: Option[String])
 extends FileBasedDetails
 

@@ -1,17 +1,19 @@
 package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.web.SchedulerUris._
+import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp
+import com.sos.scheduler.engine.common.scalautil.Collections._
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.OrderQuery
 import spray.http.Uri
-import spray.http.Uri.Path
 
 /**
   * @author Joacim Zschimmer
   */
 final class SchedulerUris private(schedulerUriString: String) {
 
-  private val prefixedUri = Uri(s"$schedulerUriString/$Prefix")
+  private val rootUri = Uri(s"$schedulerUriString/$Prefix/")
 
   lazy val command = resolvePathUri("api/command")
 
@@ -24,10 +26,26 @@ final class SchedulerUris private(schedulerUriString: String) {
     def fullOverview(query: OrderQuery = OrderQuery.All): String =
       resolveWithOrderQuery(query, "OrdersFullOverview").toString
 
-    private def resolveWithOrderQuery(orderQuery: OrderQuery, typeName: String) =
+    private def resolveWithOrderQuery(orderQuery: OrderQuery, typeName: String) = {
+      val subpath = JobChainQueryHttp.toUriPath(orderQuery.jobChainQuery)
       resolvePathUri(Uri(
-        path = Uri.Path(s"api/order${orderQuery.jobChainQuery.uriPath}"),
+        path = Uri.Path(s"api/order$subpath"),
         query = Uri.Query(OrderQueryHttp.toHttpQueryMap(orderQuery) + ("return" → typeName))))
+    }
+  }
+
+  object jobChain {
+    def overview(jobChainPath: JobChainPath): String = overviews(JobChainQuery(jobChainPath))
+
+    def overviews(query: JobChainQuery = JobChainQuery.All): String = {
+      val subpath = JobChainQueryHttp.toUriPath(query)
+      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath"), query = Uri.Query("return" → "JobChainOverview")))
+    }
+
+    def details(jobChainPath: JobChainPath): String = {
+      val subpath = JobChainQueryHttp.toUriPath(JobChainQuery(jobChainPath))
+      uriString(Uri(path = Uri.Path(s"api/jobChain$subpath"), query = Uri.Query("return" → "JobChainDetails")))
+    }
   }
 
   /**
@@ -35,10 +53,7 @@ final class SchedulerUris private(schedulerUriString: String) {
     */
   def uriString(uri: Uri): String = resolvePathUri(uri).toString
 
-  def resolvePathUri(uri: Uri): Uri = {
-    val u = uri.resolvedAgainst(prefixedUri)
-    u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString)}"), query = u.query)
-  }
+  def resolvePathUri(uri: Uri): Uri = resolveUri(uri, rootUri)
 
   override def toString = s"SchedulerUris($schedulerUriString)"
 }
@@ -50,8 +65,9 @@ object SchedulerUris {
 
   def apply(schedulerUri: String) = new SchedulerUris(schedulerUri stripSuffix "/")
 
-  private def stripLeadingSlash(o: String) =
-    o match {
-      case _ ⇒ o stripPrefix "/"
-    }
+  private[web] def resolveUri(uri: Uri, against: Uri) = {
+    val scheme = emptyToNone(uri.scheme) getOrElse against.scheme
+    val dummyAbsolute = Uri("dummy:")
+    uri.resolvedAgainst(against resolvedAgainst dummyAbsolute).withScheme(scheme)
+  }
 }

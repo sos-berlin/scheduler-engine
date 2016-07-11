@@ -49,4 +49,17 @@ final class SchedulerUrisTest extends FreeSpec {
           "sourceType" → "fileOrderSource,adHoc",  // Incidentally, Scala Set with two elements retains orders
           "return" → "OrdersFullOverview")).toString)
   }
+
+  "resolveUri" in {
+    import SchedulerUris.resolveUri
+    assert(resolveUri(Uri(""), Uri("/resolved")) == Uri("/resolved"))
+    assert(resolveUri(Uri("path"), Uri("/resolved")) == Uri("/path"))
+    assert(resolveUri(Uri("path"), Uri("/resolved/")) == Uri("/resolved/path"))
+    assert(resolveUri(Uri("path"), Uri("resolved:")) == Uri("resolved:path"))
+    assert(resolveUri(Uri("/path"), Uri("resolved:")) == Uri("resolved:///path"))
+    assert(resolveUri(Uri("scheme:path"), Uri("resolved:/")) == Uri("scheme:path"))
+    assert(resolveUri(Uri("scheme:/path"), Uri("resolved:/")) == Uri("scheme:/path"))
+    assert(resolveUri(Uri("scheme://path"), Uri("resolved:/")) == Uri("scheme://path"))
+    assert(resolveUri(Uri("scheme:///path"), Uri("resolved:/")) == Uri("scheme:///path"))
+  }
 }

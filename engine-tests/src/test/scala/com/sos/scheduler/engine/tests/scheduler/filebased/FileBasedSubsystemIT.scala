@@ -130,9 +130,9 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
               'file (Try(o.file).toOption),
               'sourceXml (emptyToNone(o.sourceXmlBytes) map xmlBytesToString))
             if (o.hasBaseFile)
-              o.details.fileModificationInstant.get should (be >= (now() - 30.s) and be <= now())
+              o.details.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
             else
-              o.details.fileModificationInstant shouldBe None
+              o.details.fileModifiedAt shouldBe None
           }
 
           "toString" in {

@@ -90,12 +90,14 @@ extends FileBasedSubsystem {
       jobChains filter { _ refersToJob job }
     }
 
-  private def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] =
+  def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] = {
+    def visibleJobChains = visiblePaths map jobChain
     query.reduce match {
-      case JobChainQuery.All ⇒ jobChains
+      case JobChainQuery.All ⇒ visibleJobChains
       case jobChainPath: JobChainPath ⇒ if (contains(jobChainPath)) List(jobChain(jobChainPath)) else Nil
-      case _ ⇒ jobChains filter { o ⇒ query.matches(o.path) }
+      case _ ⇒ visibleJobChains filter { o ⇒ query.matches(o.path) }
     }
+  }
 
   def jobChains: Seq[JobChain] =
     fileBaseds

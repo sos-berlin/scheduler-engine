@@ -7,7 +7,9 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * @author Joacim Zschimmer
   */
-final class SchedulerOverviewHtmlPage private(protected val schedulerOverview: SchedulerOverview)
+final class SchedulerOverviewHtmlPage private(
+  protected val schedulerOverview: SchedulerOverview,
+  protected val webServiceContext: WebServiceContext)
 extends SchedulerHtmlPage {
 
   import schedulerOverview._
@@ -27,6 +29,8 @@ extends SchedulerHtmlPage {
     }</p>
     <p>
       <a href="api/order/">Orders</a>
+      <br/>
+      <a href="api/jobChain/">Job chains</a>
     </p>
   }
 }
@@ -34,6 +38,6 @@ extends SchedulerHtmlPage {
 object SchedulerOverviewHtmlPage {
   import scala.language.implicitConversions
 
-  implicit def apply(overview: SchedulerOverview)(implicit ec: ExecutionContext): Future[HtmlPage] =
-    Future.successful(new SchedulerOverviewHtmlPage(overview))
+  implicit def toHtml(overview: SchedulerOverview)(implicit webServiceContext: WebServiceContext, ec: ExecutionContext): Future[HtmlPage] =
+    Future.successful(new SchedulerOverviewHtmlPage(overview, webServiceContext))
 }

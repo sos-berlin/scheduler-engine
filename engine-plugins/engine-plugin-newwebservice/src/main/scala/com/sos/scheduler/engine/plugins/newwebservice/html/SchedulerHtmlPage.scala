@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
@@ -7,9 +8,10 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.Scheduler.buildVersion
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.WebjarsRoute
 import java.time.Instant.now
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-import java.time.format.DateTimeFormatterBuilder
+import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField._
 import java.time.{Instant, OffsetDateTime}
 import scala.language.implicitConversions
@@ -22,8 +24,9 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected val schedulerOverview: SchedulerOverview
   protected def title: String
   protected def headlineSuffix = title
-  private val rootUri = "/jobscheduler/master/api"
-  private val webjarsUri = "/jobscheduler/master/webjars"
+  protected val webServiceContext: WebServiceContext
+
+  protected final lazy val uris = SchedulerUris(webServiceContext.baseUri)
 
   protected def page(innerBody: xml.NodeSeq): xml.Node =
     <html lang="en">
@@ -36,7 +39,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <title>{s"$title · ${schedulerOverview.schedulerId}"}</title>
-      <link rel="stylesheet" href={s"$webjarsUri/bootstrap/3.3.6/css/bootstrap.min.css"} integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"/>
+      {webServiceContext.toStylesheetLinkHtml(WebjarsRoute.BootstrapCss)}
       <style type="text/css">{css}</style>
     </head>
 
@@ -52,16 +55,14 @@ trait SchedulerHtmlPage extends HtmlPage {
     <div class="gray-box" style="margin-bottom: 20px">
       <div style="float: right"><a href="javascript:window.location.href = window.location.href" class="inherit-markup">{localDateTimeWithZoneToHtml(now)}</a></div>
       <div style="color: grey">
-        <a href={rootUri} class="inherit-markup">{
-          s"JobScheduler $buildVersion Master"
-        }</a>
+        <a href={uris.overview} class="inherit-markup">{s"JobScheduler $buildVersion Master"}</a>
         {s"· PID ${schedulerOverview.pid} · ${schedulerOverview.state}"}
       </div>
     </div>
 
   protected def headline =
     <h3>{
-      val prefix = <a href={rootUri} class="inherit-markup">{schedulerOverview.schedulerId}</a>
+      val prefix = <a href={uris.overview} class="inherit-markup">{schedulerOverview.schedulerId}</a>
       emptyToNone(headlineSuffix) match {
         case None ⇒ prefix
         case Some(suffix) ⇒ prefix ++  " · " ++ suffix
@@ -73,6 +74,7 @@ trait SchedulerHtmlPage extends HtmlPage {
   private def css = """
 body {
   color: black;
+  font-size: 13px;
 }
 th {
   font-weight: normal;
@@ -88,6 +90,10 @@ a.inherit-markup {
 label {
   font-weight: inherit;
 }
+span.time-extra {
+ font-size: 11px;
+ color: #808080;
+}
 """
 }
 
@@ -102,9 +108,9 @@ object SchedulerHtmlPage {
     case _ ⇒ ""
   }
 
-  def instantWithDurationToHtml(instant: Instant): xml.Node =
+  def instantWithDurationToHtml(instant: Instant): xml.NodeSeq =
     if (instant == Instant.EPOCH) xml.Text("now")
-    else xml.Text(s"""${localDateTimeToHtml(instant)} (${(now - instant).pretty})""")
+    else localDateTimeToHtml(instant) ++ <span class="time-extra">{s".${formatTime(LocalMillisFormatter, instant)} (${(now - instant).pretty})"}</span>
 
   private val LocalDateTimeFormatter = new DateTimeFormatterBuilder()
     .append(ISO_LOCAL_DATE)
@@ -114,19 +120,26 @@ object SchedulerHtmlPage {
     .appendValue(MINUTE_OF_HOUR, 2)
     .appendLiteral(':')
     .appendValue(SECOND_OF_MINUTE, 2)
-    .appendLiteral('.')
+    .toFormatter
+
+  private val LocalMillisFormatter = new DateTimeFormatterBuilder()
     .appendValue(MILLI_OF_SECOND, 3)
     .toFormatter
 
   private val LocalDateTimeWithZoneFormatter = new DateTimeFormatterBuilder()
     .append(LocalDateTimeFormatter)
     .appendLiteral(' ')
+    .appendLiteral("<span class='time-extra'>")
     .appendOffsetId
+    .appendLiteral("</span>")
     .toFormatter
 
   def localDateTimeToHtml(instant: Instant): xml.Node =
-    xml.Text(LocalDateTimeFormatter.format(OffsetDateTime.ofInstant(instant, Scheduler.DefaultZoneId)))
+    xml.Text(formatTime(LocalDateTimeFormatter, instant))
 
   def localDateTimeWithZoneToHtml(instant: Instant): xml.Node =
-    xml.Text(LocalDateTimeWithZoneFormatter.format(OffsetDateTime.ofInstant(instant, Scheduler.DefaultZoneId)))
+    xml.Unparsed(formatTime(LocalDateTimeWithZoneFormatter, instant))
+
+  private def formatTime(formatter: DateTimeFormatter, instant: Instant) =
+    formatter.format(OffsetDateTime.ofInstant(instant, Scheduler.DefaultZoneId))
 }

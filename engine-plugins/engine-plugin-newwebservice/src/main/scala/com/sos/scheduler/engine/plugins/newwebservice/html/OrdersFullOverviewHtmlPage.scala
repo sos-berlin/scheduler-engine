@@ -4,14 +4,13 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.job.JobOverview
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderOverviewCollection, OrderQuery}
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderOverviewCollection, OrderQuery, OrderSourceType}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersFullOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
-import scala.xml.Utility.trim
 
 /**
   * @author Joacim Zschimmer
@@ -19,6 +18,7 @@ import scala.xml.Utility.trim
 final class OrdersFullOverviewHtmlPage private(
   query: OrderQuery,
   fullOverview: OrdersFullOverview,
+  protected val webServiceContext: WebServiceContext,
   protected val schedulerOverview: SchedulerOverview)
 extends SchedulerHtmlPage {
 
@@ -41,39 +41,42 @@ extends SchedulerHtmlPage {
       s"$size orders: $inProcessCount in process using ${jobMap.size} jobs, $suspendedCount suspended, $blacklistedCount blacklisted"
     }</p>
 
-  private def orderTable(orders: immutable.Seq[OrderOverview]) = trim(
+  private def orderTable(orders: immutable.Seq[OrderOverview]) =
     <table class="table table-condensed table-hover">
       <thead>
         <th>JobChain</th>
+        <th>Node</th>
         <th>OrderId</th>
-        <th>SourceType</th>
+        <th><span class="visible-lg-block">SourceType</span></th>
         <th>Task / Date</th>
         <th>Flags</th>
-        <th>FileBasedState</th>
+        <th><small>FileBasedState</small></th>
       </thead>
       <tbody>{
-        for (order ← orders.sorted) yield {
+        for (order ← orders sortBy { o ⇒ (o.orderKey.jobChainPath, o.orderState, o.orderKey.id) }) yield {
           import order._
           val taskNode: Option[xml.Node] = for (t ← taskId) yield {
             val job: Option[JobOverview] = taskMap.get(t) flatMap { task ⇒ jobMap.get(task.job) }
-            <b>{"Task " + ((job map { _.path.string }) ++ Some(t.number)).mkString(":")}</b>  // "JobPath:TaskId"
+            <b><span class="visible-lg-inline">Task </span>{((job map { _.path.string }) ++ Some(t.number)).mkString(":")}</b>  // "JobPath:TaskId"
           }
           def nextStepEntry = nextStepAt map instantWithDurationToHtml
           <tr class={orderToTrClass(order)}>
-            <td>{orderKey.jobChainPath.string}</td>
+            <td><a href={uris.jobChain.details(orderKey.jobChainPath)}>{orderKey.jobChainPath.string}</a></td>
+            <td>{orderState.string}</td>
             <td>{orderKey.id.string}</td>
-            <td>{sourceType}</td>
+            <td><span class="visible-lg-block">{sourceType}</span></td>
             <td>{(taskNode orElse nextStepEntry).orNull}</td>
             <td>{(isSuspended option "suspended") ++ (isBlacklisted option "blacklisted") mkString " "}</td>
-            <td>{fileBasedStateToHtml(fileBasedState)}</td>
+            <td>{if (sourceType == OrderSourceType.fileBased) <small>{fileBasedStateToHtml(fileBasedState)}</small> else ""}</td>
           </tr>
         }}</tbody>
-    </table>)
+    </table>
 
   private object orderSelection {
     def html =
-      <div style="float: right; line-height: 1em; background: #f5f5f5; padding: 2px 4px; border-radius: 4px">{
-        val inputs = for (
+      <div style="float: right; line-height: 1em; background: #f5f5f5; padding: 2px 4px; border-radius: 4px">
+        Filter<br/>{
+          val inputs = for (
           (key, valueOption) ← List("suspended" → query.isSuspended, "setback" → query.isSetback, "blacklisted" → query.isBlacklisted)) yield
           inputElement(key, valueOption) ++ xml.Text(" ") ++ inputElement(key, valueOption, checkedMeans = false)
         inputs reduce { _ ++ <br/> ++ _ }
@@ -110,8 +113,8 @@ object OrdersFullOverviewHtmlPage {
 
   import scala.language.implicitConversions
 
-  def toHtml(query: OrderQuery)(fullOverview: OrdersFullOverview)(implicit client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
-    for (schedulerOverview ← client.overview) yield new OrdersFullOverviewHtmlPage(query, fullOverview, schedulerOverview)
+  def toHtml(query: OrderQuery)(fullOverview: OrdersFullOverview)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
+    for (schedulerOverview ← client.overview) yield new OrdersFullOverviewHtmlPage(query, fullOverview, context, schedulerOverview)
 
   private def toJavascript(query: OrderQuery) =
     ((for (o ← query.isSuspended) yield s"suspended:$o") ++

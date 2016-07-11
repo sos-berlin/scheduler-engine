@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, JobChainPersistentState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
@@ -53,6 +53,10 @@ with UnmodifiableJobChain {
       _edgeSet = null
     }
   }
+
+  override def overview = JobChainOverview(
+    path = path,
+    fileBasedState = fileBasedState)
 
   def stringToPath(o: String) =
     JobChainPath(o)
@@ -112,7 +116,7 @@ with UnmodifiableJobChain {
       d.path.asInstanceOf[JobChainPath],
       d.fileBasedState,
       d.file,
-      d.fileModificationInstant,
+      d.fileModifiedAt,
       d.sourceXml,
       nodes = nodes map { _.overview }
     )

@@ -44,7 +44,7 @@ with EventSource {
         path = overview.path,
         fileBasedState = overview.fileBasedState,
         file = self.fileOption,
-        fileModificationInstant = fileModificationInstantOption,
+        fileModifiedAt = fileModificationInstantOption,
         sourceXml = sourceXmlBytes match {
           case o if o.isEmpty ⇒ None
           case o ⇒

@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.order.OrderQuery
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
-import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersFullOverviewHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlDirectives, OrdersFullOverviewHtmlPage, WebServiceContext}
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import scala.concurrent.ExecutionContext
 import spray.routing.Directives._
@@ -14,13 +14,14 @@ import spray.routing.{Route, ValidationRejection}
 /**
   * @author Joacim Zschimmer
   */
-trait OrderRoute {
+trait OrderRoute extends HtmlDirectives {
 
   protected implicit def client: DirectSchedulerClient
+  protected implicit def webServiceContext: WebServiceContext
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    // unmatchPath is eaten by orderQuery
+    // unmatchedPath is eaten by orderQuery
     get {
       parameterMap { parameters ⇒
         val returnType = parameters.getOrElse("return", "OrdersFullOverview")

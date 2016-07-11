@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
@@ -44,6 +45,20 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   final def ordersFullOverview(query: OrderQuery = OrderQuery.All): Future[OrdersFullOverview] =
     get[OrdersFullOverview](_.order.fullOverview(query))
+
+  final def jobChainOverview(jobChainPath: JobChainPath): Future[JobChainOverview] =
+    get[JobChainOverview](_.jobChain.overviews(JobChainQuery(jobChainPath)))
+
+  final def jobChainOverviews(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]] = {
+    query.reduce match {
+      case jobChainPath: JobChainPath ⇒ get[JobChainOverview](_.jobChain.overview(jobChainPath)) map { o ⇒ Vector(o) }  // Web service return a single object (not an array), if path denotes a single job chain path
+      case _ ⇒ get[immutable.Seq[JobChainOverview]](_.jobChain.overviews(query))
+    }
+  }
+
+  final def jobChainDetails(jobChainPath: JobChainPath) =
+    get[JobChainDetails](_.jobChain.details(jobChainPath))
+
 
   final def getJson(pathUri: String): Future[String] =
     get[String](_.resolvePathUri(pathUri).toString)

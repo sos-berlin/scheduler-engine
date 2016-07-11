@@ -2,22 +2,24 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.XmlString
+import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.accept
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.completeAsHtmlPageOrOther
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import scala.concurrent.ExecutionContext
 import spray.http.MediaTypes.`text/html`
-import spray.http.StatusCodes.TemporaryRedirect
+import spray.http.StatusCodes._
 import spray.routing.Directives._
-import spray.routing.Route
+import spray.routing.{ExceptionHandler, Route}
 
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute extends OrderRoute {
+trait ApiRoute extends JobChainRoute with OrderRoute with HtmlDirectives {
 
   protected def client: DirectSchedulerClient
   protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
@@ -25,36 +27,38 @@ trait ApiRoute extends OrderRoute {
 
   protected final def apiRoute: Route =
     pathPrefix("api") {
-      pathEnd {
-        get {
+      handleExceptions(ApiExceptionHandler) {
+        (pathEnd & get) {
           completeAsHtmlPageOrOther(client.overview)
-        }
-      } ~
-      pathSingleSlash {
-        get {
+        } ~
+        (pathSingleSlash & get) {
           accept(`text/html`) {
             redirect("../api", TemporaryRedirect)
           }
-        }
-      } ~
-      (pathPrefix("command") & pathEnd) {
-        post {
+        } ~
+        (pathPrefix("command") & pathEnd & post) {
           entity(as[XmlString]) { case XmlString(xmlString) ⇒
            complete(client.executeXml(xmlString) map XmlString.apply)
           }
-        }
-      } ~
-      pathPrefix("order") {
-        (pathEnd & get) {
-           redirect("order/", TemporaryRedirect)
         } ~
-        orderRoute
+        pathPrefix("order") {
+          (pathEnd & get) {
+             redirect("order/", TemporaryRedirect)
+          } ~
+          orderRoute
+        } ~
+        pathPrefix("jobChain") {
+          (pathEnd & get) {
+             redirect("jobChain/", TemporaryRedirect)
+          } ~
+          jobChainRoute
+        }
+        /*~
+        pathPrefix("subsystems") {
+          subsystemsRoute
+        }
+        */
       }
-      /*~
-      pathPrefix("subsystems") {
-        subsystemsRoute
-      }
-      */
     }
 
   private def subsystemsRoute: Route =
@@ -95,4 +99,10 @@ trait ApiRoute extends OrderRoute {
       }
     }
     */
+}
+
+object ApiRoute {
+  private val ApiExceptionHandler = ExceptionHandler {
+    case e: CppException ⇒ complete((NotFound, e.getMessage))
+  }
 }

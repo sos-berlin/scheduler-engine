@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -166,6 +166,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       }
     }
 
+    "jobChainView" in {
+      assert((client.jobChainOverviews(JobChainQuery.All) await TestTimeout).toSet == Set(
+        JobChainOverview(aJobChainPath, FileBasedState.active),
+        JobChainOverview(bJobChainPath, FileBasedState.active),
+        JobChainOverview(xaJobChainPath, FileBasedState.active),
+        JobChainOverview(xbJobChainPath, FileBasedState.active)))
+    }
+
     "<show_state>" in {
       val response = client.executeXml("<show_state/>") map SafeXML.loadString await TestTimeout
       val state = response \ "answer" \ "state"
@@ -315,11 +323,11 @@ private object JS1642IT {
   private val bJobChainPath = JobChainPath("/bJobChain")
   private val b1OrderKey = bJobChainPath orderKey "1"
 
-  private val xaJobChainPath = JobChainPath("/xFolder/a-aJobChain")
+  private val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
   private val xa1OrderKey = xaJobChainPath orderKey "1"
   private val xa2OrderKey = xaJobChainPath orderKey "2"
 
-  private val xbJobChainPath = JobChainPath("/xFolder/a-bJobChain")
+  private val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
   private val xb1OrderKey = xbJobChainPath orderKey "1"
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
@@ -427,7 +435,7 @@ private object JS1642IT {
       "isBlacklisted": false
     },
     {
-      "path": "/xFolder/a-aJobChain,1",
+      "path": "/xFolder/x-aJobChain,1",
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",
@@ -436,7 +444,7 @@ private object JS1642IT {
       "isBlacklisted": false
     },
     {
-      "path": "/xFolder/a-aJobChain,2",
+      "path": "/xFolder/x-aJobChain,2",
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",
@@ -445,7 +453,7 @@ private object JS1642IT {
       "isBlacklisted": false
     },
     {
-      "path": "/xFolder/a-bJobChain,1",
+      "path": "/xFolder/x-bJobChain,1",
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",

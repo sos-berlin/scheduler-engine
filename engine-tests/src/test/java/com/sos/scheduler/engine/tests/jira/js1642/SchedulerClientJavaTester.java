@@ -101,8 +101,8 @@ final class SchedulerClientJavaTester implements AutoCloseable {
             assertThat(
                 asJavaCollection(fullOverview.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
                 containsInAnyOrder(
-                    new JobChainPath("/xFolder/a-aJobChain").orderKey("1"),
-                    new JobChainPath("/xFolder/a-bJobChain").orderKey("1")));
+                    new JobChainPath("/xFolder/x-aJobChain").orderKey("1"),
+                    new JobChainPath("/xFolder/x-bJobChain").orderKey("1")));
             assertTrue(fullOverview.usedTasks().isEmpty());
             assertTrue(fullOverview.usedJobs().isEmpty());
             assertTrue(fullOverview.usedProcessClasses().isEmpty());

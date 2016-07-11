@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.web.order
 
 import com.google.common.base.Splitter
-import com.sos.scheduler.engine.data.jobchain.JobChainQuery
+import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp
 import com.sos.scheduler.engine.data.order.{OrderQuery, OrderSourceType}
 import scala.collection.JavaConversions._
 import spray.http.Uri
@@ -48,8 +48,10 @@ object OrderQueryHttp {
       unmatchedPath flatMap { path ⇒
         if (path startsWith Uri.Path.SingleSlash)
           OrderQueryHttp.fromHttpQuery(parameters) match {
-            case Right(query) ⇒ provide(query.copy(jobChainQuery = JobChainQuery.fromUriPath(path.toString)))
             case Left(rejection) ⇒ reject(rejection)
+            case Right(query1) ⇒
+              val query = query1.copy(jobChainQuery = JobChainQueryHttp.fromUriPath(path.toString))
+              provide(query)
           }
         else
           reject
