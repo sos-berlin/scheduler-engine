@@ -68,7 +68,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
           </job_chain_node>
           <job_chain_node.end state="end"/>
         </job_chain>
-    } .getMessage should include ("must denote the own job_chain")
+    } .getMessage should include ("must not denote the own job_chain")
   }
 }
 
@@ -81,7 +81,7 @@ private object NodeOrderPluginIT {
     (JobChainPath("/test-folder-c/c") orderKey "TEST") → OriginalVariables, // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
     (JobChainPath("/test-folder/d") orderKey "aaaTESTzzz") → Map("test" → "TEST", "a" → "AAA", "b" → "BBB")  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d" NodeOrderPlugin:id="aaa${ORDER_ID}zzz"/>
   )
-  private val OrderKeys = ExpectedVariables map { _._1 }
+  private val OrderKeys = ExpectedVariables.keys
 
   private val ErrorOrderKey = JobChainPath("/test-folder/error") orderKey "TEST"
   private val MissingJobchainCode = MessageCode("SCHEDULER-161")
