@@ -107,6 +107,7 @@ trait ApiRoute extends JobChainRoute with OrderRoute {
 
 object ApiRoute {
   private val ApiExceptionHandler = ExceptionHandler {
-    case e: CppException ⇒ complete((NotFound, e.getMessage))
+    case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
+    case e: CppException ⇒ complete((BadRequest, e.getMessage))
   }
 }

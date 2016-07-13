@@ -127,17 +127,17 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "ordersFullOverview query /aJobChain" in {
-      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain"))
-      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
+      val query = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain"))
+      val fullOverview = client.ordersFullOverview(query) await TestTimeout
+      assert(fullOverview == (directSchedulerClient.ordersFullOverview(query) await TestTimeout))
       assert((fullOverview.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
-    "ordersFullOverview query /aJobChain/ returns nothing" in {
-      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain/"))
-      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
-      assert(fullOverview.orders.isEmpty)
+    "ordersFullOverview query /aJobChain/ throws SCHEDULER-161" in {
+      val query = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain/"))
+      intercept[RuntimeException] {
+        client.ordersFullOverview(query) await TestTimeout
+      } .getMessage should include ("SCHEDULER-161")
     }
 
     "ordersFullOverview query /xFolder/" in {
@@ -147,11 +147,11 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
       assert((fullOverview.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey))
     }
 
-    "ordersFullOverview query /xFolder returns nothing" in {
-      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/xFolder"))
-      val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
-      assert(fullOverview.orders.isEmpty)
+    "ordersFullOverview query /xFolder throws SCHEDULER-161" in {
+      val query = OrderQuery(jobChainQuery = JobChainQuery("/xFolder"))
+      intercept[RuntimeException] {
+        client.ordersFullOverview(query) await TestTimeout
+      } .getMessage should include ("SCHEDULER-161")
     }
 
     "jobChainOverview" in {
