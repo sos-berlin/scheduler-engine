@@ -61,8 +61,8 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
       "overview" in {
         val expectedFileBasedStates = Map(
-          FileBasedState.notInitialized -> (paths count pathIsNotInitialized),
-          FileBasedState.active -> (paths count { o ⇒ !pathIsNotInitialized(o) }))
+          FileBasedState.not_initialized → (paths count pathIsNotInitialized),
+          FileBasedState.active → (paths count { o ⇒ !pathIsNotInitialized(o) }))
         subsystem.overview should have (
           'fileBasedType (subsystemDescription.fileBasedType),
           'count (paths.size),
@@ -70,7 +70,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
       }
 
       for (path <- testPaths map { _.asInstanceOf[subsystem.Path] }) {
-        def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.notInitialized else FileBasedState.active
+        def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.not_initialized else FileBasedState.active
         s"fileBased $path" - {
           lazy val o = subsystem.fileBased(path)
 
@@ -159,7 +159,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
   "JobSubsystemOverview" in {
     jobSubsystem.overview should have (
-      'jobStateCounts (Map(JobState.pending -> jobSubsystemSetting.paths.size))
+      'jobStateCounts (Map(JobState.pending → jobSubsystemSetting.paths.size))
     )
   }
 
@@ -209,14 +209,13 @@ private object FileBasedSubsystemIT {
   private val schedulerServiceForwardingJobChainPath = JobChainPath("/scheduler_service_forwarding")
   private val schedulerServiceForwarderJobPath = JobPath("/scheduler_service_forwarder")
   private val emptyProcessClassPath = ProcessClassPath("")
-  private val rootFolderPath = FolderPath("/")
   //private val testNestedJobChainPath =
 
   private val pathDontHasXml = Set[TypedPath](
     schedulerFileOrderSinkJobPath,
     schedulerServiceForwarderJobPath,
     emptyProcessClassPath,
-    rootFolderPath)
+    FolderPath.Root)
 
   private val pathIsInvisible = Set[TypedPath](
     schedulerServiceForwardingJobChainPath,
@@ -233,7 +232,7 @@ private object FileBasedSubsystemIT {
     TestSubsystemSetting(
       FolderSubsystem,
       Nil,
-      List(rootFolderPath)),
+      List(FolderPath.Root)),
     jobSubsystemSetting,
     TestSubsystemSetting(
       LockSubsystem,

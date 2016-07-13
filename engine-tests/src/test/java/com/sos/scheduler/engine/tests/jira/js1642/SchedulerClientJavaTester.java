@@ -129,7 +129,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
             .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("AD-HOC")))
             .findFirst().get();
         assertEquals(new OrderState("100"), orderOverview.orderState());
-        assertEquals(FileBasedState.notInitialized, orderOverview.fileBasedState());
+        assertEquals(FileBasedState.not_initialized, orderOverview.fileBasedState());
         assertEquals(OrderSourceType.adHoc, orderOverview.sourceType());
         assertEquals(Optional.of(Instant.parse("2038-01-01T11:22:33Z")), toJavaOptional(orderOverview.nextStepAt()));
     }

@@ -385,7 +385,7 @@ private object JS1642IT {
       taskId = Some(TaskId.First + 1)),
     OrderOverview(
       aAdHocOrderKey,
-      FileBasedState.notInitialized,
+      FileBasedState.not_initialized,
       OrderSourceType.adHoc,
       OrderState("100"),
       nextStepAt = Some(OrderStartAt),
@@ -453,7 +453,7 @@ private object JS1642IT {
     },
     {
       "path": "/aJobChain,AD-HOC",
-      "fileBasedState": "notInitialized",
+      "fileBasedState": "not_initialized",
       "orderState": "100",
       "sourceType": "adHoc",
       "nextStepAt": "2038-01-01T11:22:33Z",
