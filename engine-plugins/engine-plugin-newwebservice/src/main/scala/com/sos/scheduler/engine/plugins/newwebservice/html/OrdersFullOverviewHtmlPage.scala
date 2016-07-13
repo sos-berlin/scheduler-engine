@@ -158,7 +158,7 @@ div.orderSelection {
         if (checkedMeans) key else s"not")
     }
 
-    def javascript = """
+    def javascript = s"""
       function reloadPage(change) {
         var query = ${toJavascript(query)};
         var key, v;
