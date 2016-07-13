@@ -138,22 +138,28 @@ div.orderSelection {
   private object orderSelection {
     def html =
       div(cls := "orderSelection")(
-        "Filter",
+        "Selection",
         br,
-        for ((key, valueOption) ← List("suspended" → query.isSuspended, "setback" → query.isSetback, "blacklisted" → query.isBlacklisted)) yield
-          inputElement(key, valueOption) :: StringFrag(" ") :: inputElement(key, valueOption, checkedMeans = false) :: br :: Nil)
+        for ((key, valueOption) ← List("suspended" → query.isSuspended,
+                                       "setback" → query.isSetback,
+                                       "blacklisted" → query.isBlacklisted))
+          yield List(
+            inputElement(key, valueOption, checkedMeans = true),
+            StringFrag(" "),
+            inputElement(key, valueOption, checkedMeans = false),
+            br))
 
-    private def inputElement(key: String, value: Option[Boolean], checkedMeans: Boolean = true) = {
+    private def inputElement(key: String, value: Option[Boolean], checkedMeans: Boolean) = {
       val name = if (checkedMeans) key else s"not-$key"
-      val checked = !checkedMeans ^ (value getOrElse !checkedMeans)
-      val onClick = s"javascript:reload({$key: document.getElementsByName('$name')[0].checked ? $checkedMeans : undefined})"
+      val checked = !checkedMeans ^ (value getOrElse checkedMeans)
+      val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? undefined : !$checkedMeans})"
       label(
         input(attrs.name := name, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
         if (checkedMeans) key else s"not")
     }
 
-    def javascript = s"""
-      function reload(change) {
+    def javascript = """
+      function reloadPage(change) {
         var query = ${toJavascript(query)};
         var key, v;
         var q = [];
