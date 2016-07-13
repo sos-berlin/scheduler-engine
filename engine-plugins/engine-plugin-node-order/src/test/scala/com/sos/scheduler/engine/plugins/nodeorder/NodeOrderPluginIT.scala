@@ -36,7 +36,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
         val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))
-        assert((OrderKeys zip results).toMap == ExpectedVariables)
+        assert((OrderKeys zip results) == ExpectedVariables)
       }
     }
   }
@@ -75,13 +75,13 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 private object NodeOrderPluginIT {
   private val OriginalOrderKey = JobChainPath("/test-folder/a") orderKey "TEST"
   private val OriginalVariables = Map("a" → "A", "test" → "TEST")
-  private val ExpectedVariables = Map(
+  private val ExpectedVariables = List(
     OriginalOrderKey → OriginalVariables,
     (JobChainPath("/test-folder/b") orderKey "TEST") → OriginalVariables,   // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-b"/>
     (JobChainPath("/test-folder-c/c") orderKey "TEST") → OriginalVariables, // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-c"/>
     (JobChainPath("/test-folder/d") orderKey "aaaTESTzzz") → Map("test" → "TEST", "a" → "AAA", "b" → "BBB")  // Added by <NodeOrderPlugin:add_order NodeOrderPlugin:job_chain="/test-d" NodeOrderPlugin:id="aaa${ORDER_ID}zzz"/>
   )
-  private val OrderKeys = ExpectedVariables.keys
+  private val OrderKeys = ExpectedVariables map { _._1 }
 
   private val ErrorOrderKey = JobChainPath("/test-folder/error") orderKey "TEST"
   private val MissingJobchainCode = MessageCode("SCHEDULER-161")
