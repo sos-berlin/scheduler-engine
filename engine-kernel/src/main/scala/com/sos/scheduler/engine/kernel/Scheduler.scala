@@ -73,10 +73,6 @@ with HasCloser {
 
   private var closed = false
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
-  private lazy val pluginSubsystem = injector.instance[PluginSubsystem]
-  private lazy val commandSubsystem = injector.instance[CommandSubsystem]
-  private lazy val databaseSubsystem = injector.instance[DatabaseSubsystem]
-  private implicit lazy val executionContext = injector.instance[ExecutionContext]
 
   val startInstant = now()
 
@@ -94,8 +90,17 @@ with HasCloser {
     onClose { threadUnlock() } //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
   }
 
+  private var pluginSubsystem: PluginSubsystem = null
+  private var commandSubsystem: CommandSubsystem = null
+  private var databaseSubsystem: DatabaseSubsystem = null
+  private implicit var executionContext: ExecutionContext = null
+
   @ForCpp
   private def initialize(): Unit = {
+    pluginSubsystem = injector.instance[PluginSubsystem]
+    commandSubsystem = injector.instance[CommandSubsystem]
+    databaseSubsystem = injector.instance[DatabaseSubsystem]
+    executionContext = injector.instance[ExecutionContext]
     val eventSubscription = {
       val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
       val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
