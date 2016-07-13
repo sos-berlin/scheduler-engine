@@ -13,7 +13,7 @@ final class Folder(
   protected val subsystem: FolderSubsystem)
 extends FileBased {
 
-  type Path = FolderPath
+  type ThisPath = FolderPath
 
   def stringToPath(o: String) = FolderPath(o)
 

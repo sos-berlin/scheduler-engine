@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskPersistentState}
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -19,13 +21,24 @@ with Sister
 with UnmodifiableJob
 with JobPersistence {
 
-  type Path = JobPath
+  type ThisPath = JobPath
 
   def onCppProxyInvalidated(): Unit = {}
 
   def fileBasedType = FileBasedType.job
 
   def stringToPath(o: String) = JobPath(o)
+
+  override def overview = JobOverview(path, fileBasedState, defaultProcessClassPathOption, state,
+    isInPeriod = isInPeriod, taskLimit = taskMaximum, usedTaskCount = runningTasksCount)
+
+  def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+
+  def isInPeriod = cppProxy.is_in_period
+
+  def taskMaximum = cppProxy.max_tasks
+
+  def runningTasksCount = cppProxy.running_tasks_count
 
   def title: String = cppProxy.title
 

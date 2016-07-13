@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.async
 
 import com.sos.scheduler.engine.common.async.FutureCompletion.{callFuture, timedCallFuture}
-import com.sos.scheduler.engine.common.scalautil.Tries.ModifiedStackTraceTry
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import java.lang.Thread.currentThread
 import java.time.Instant
 import scala.concurrent.duration.Duration
@@ -11,7 +11,7 @@ import scala.util.Try
 object SchedulerThreadFutures {
 
   def inSchedulerThread[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): A =
-    Await.ready(directOrSchedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf).value.get.withThisStackTrace.get
+    Await.ready(directOrSchedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf).successValue
 
   /** Executes f, directly if in JobScheduler thread, else by CallQueue. */
   def directOrSchedulerThreadFuture[A](f: ⇒ A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =

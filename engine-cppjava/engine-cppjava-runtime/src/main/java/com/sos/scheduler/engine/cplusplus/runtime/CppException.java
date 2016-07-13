@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
 public class CppException extends RuntimeException {
-    public CppException(Throwable t) {
-        super(t.toString(), t);
+
+    public CppException(String message, Throwable t) {
+        super(message, t);
     }
 
     public final String getCode() {

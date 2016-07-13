@@ -2,7 +2,9 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
     <script language="java:javascript">
         function spooler_process() {
+            spooler_log.info("************************************* Before start_new_file")
             spooler.log.start_new_file()
+            spooler_log.info("************************************* After start_new_file")
             return false
         }
     </script>

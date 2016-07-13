@@ -291,6 +291,10 @@ struct Task : Object,
         _killed_immediately_by_command = true;
     }
 
+    const Absolute_path job_path() const {
+        return _job->path();
+    }
+
   protected:
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;

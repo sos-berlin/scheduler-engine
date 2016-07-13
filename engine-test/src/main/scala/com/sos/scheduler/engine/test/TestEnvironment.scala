@@ -34,6 +34,7 @@ extends HasCloser {
   val configDirectory = directory / ConfigSubdirectoryName
   val liveDirectory = configDirectory / "live"
   val logDirectory = directory / "logs"
+  lazy val tmpDirectory = directory / "tmp" sideEffect { o ⇒ createDirectory(o) }
   val schedulerLog = logDirectory / "scheduler.log"
   val databaseDirectory = directory
   lazy val agent = new AgentEnvironment(directory)

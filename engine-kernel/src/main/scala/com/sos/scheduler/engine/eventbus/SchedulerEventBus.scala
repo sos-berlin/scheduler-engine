@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.eventbus
 
 import com.google.common.io.Closer
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus._
 import scala.reflect.ClassTag

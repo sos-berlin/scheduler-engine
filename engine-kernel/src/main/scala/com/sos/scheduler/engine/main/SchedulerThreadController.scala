@@ -9,8 +9,8 @@ import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.settings.CppSettings
 import com.sos.scheduler.engine.main.SchedulerThreadController._
 import java.io.File
-import java.util.concurrent.TimeUnit
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import org.scalactic.Requirements._
 import scala.collection.JavaConversions._
 
@@ -49,7 +49,7 @@ final class SchedulerThreadController(val name: String, cppSettings: CppSettings
     throwableMailbox.throwUncheckedIfSet()
   }
 
-  def waitUntilSchedulerState(s: SchedulerState): Scheduler = {
+  def waitUntilSchedulerState(s: BridgeState): Scheduler = {
     checkIsStarted()
     val scheduler = controllerBridge.waitUntilSchedulerState(s)
     throwableMailbox.throwUncheckedIfSet()

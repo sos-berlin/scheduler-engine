@@ -1,16 +1,16 @@
 package com.sos.scheduler.engine.plugins.jetty.test
 
-import JettyPluginJerseyTester._
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.scalautil.{Logger, HasCloser}
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester._
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
+import java.io.Reader
 import java.net.URI
 import javax.ws.rs.core.MediaType
 import scala.reflect.ClassTag
-import java.io.Reader
 import scala.util.Try
 
 /**

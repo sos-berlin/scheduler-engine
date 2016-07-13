@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicits.ToStringFunction1
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.xml.VariableSets
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -48,7 +49,8 @@ extends JobChainNodeNamespaceXmlPlugin {
     val addOrder = parseElement("add_order") {
       val jobChainPath = JobChainPath.makeAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain"))
       val idPattern = attributeMap.getOrElse("id", "")
-      if (jobChainPath == jobNode.jobChainPath && idPattern.isEmpty) throw new IllegalArgumentException(s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> must denote the own job_chain")
+      if (jobChainPath == jobNode.jobChainPath && idPattern.isEmpty)
+        throw new IllegalArgumentException(s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> without attribute id= must not denote the own job_chain")
       val elementMap = forEachStartElement {
         case ParamsElementName ⇒ VariableSets.parseXml(eventReader, "params", s"{$XmlNamespace}param")
       }

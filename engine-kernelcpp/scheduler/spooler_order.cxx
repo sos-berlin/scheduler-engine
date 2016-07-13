@@ -803,9 +803,26 @@ string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  
 
     if( job_chain_names.empty() ) 
         return "";
-    else
+    else {
+        const int limit = 1000;
+        string job_chain_clause = "";
+        if ((db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin) && job_chain_names.size() > limit) {
+            list<string> chunks;
+            list<string>::iterator i = job_chain_names.begin();
+            while (i != job_chain_names.end()) {
+                list<string> next_job_chain_names;
+                while (i != job_chain_names.end() && next_job_chain_names.size() < limit) {
+                    next_job_chain_names.push_back(*i++);
+                }
+                chunks.push_back(S() << "`job_chain` in (" << join(",", next_job_chain_names) << ")");
+            }
+            job_chain_clause = S() << "(" << join(" or ", chunks) << ")";
+        } else {
+            job_chain_clause = S() << "`job_chain` in (" << join( ",", job_chain_names ) << ")";
+        }
         return S() << db_where_condition() 
-                   << " and `job_chain` in (" << join( ",", job_chain_names ) << ")"; 
+                   << " and " << job_chain_clause;; 
+    }
 }
 
 //----------------------------------------------------------------Order_subsystem_impl::order_count
@@ -2400,6 +2417,13 @@ ArrayListJ Job_chain::java_nodes()
     ArrayListJ result = ArrayListJ::new_instance(int_cast(_node_list.size()));
     Z_FOR_EACH (Node_list, _node_list, it)
         result.add((*it)->java_sister());
+    return result;
+}
+
+ArrayListJ Job_chain::java_orders() {
+    ArrayListJ result = ArrayListJ::new_instance(int_cast(_order_map.size()));
+    Z_FOR_EACH_CONST(Order_map, _order_map, it) 
+        result.add(it->second->java_sister());
     return result;
 }
 

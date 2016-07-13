@@ -188,7 +188,11 @@ struct Process_class : Process_class_configuration,
     void set_dom(const xml::Element_ptr&);
 
     public: bool max_processes_reached() const {
-        return _process_set.size() >= _max_processes;
+        return used_process_count() >= _max_processes;
+    }
+
+    public: int used_process_count() const {
+        return _process_set.size();
     }
 
     bool is_remote_host() const { 

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
+import akka.util.ByteString
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -22,7 +23,7 @@ final class CppHttpSchedulerCommandClient @Inject private(
 
   @ForCpp
   def postXml(uri: String, xmlBytes: Array[Byte], resultCall: CppCall): Unit =
-    schedulerClientFactory.apply(uri).uncheckedExecuteXml(xmlBytes).onComplete { o: Try[String] ⇒
+    schedulerClientFactory.apply(uri).uncheckedExecuteXml(ByteString(xmlBytes)).onComplete { o: Try[String] ⇒
       val documentTry = o map loadXml
       callQueue {
         resultCall.call(documentTry: Try[Document])

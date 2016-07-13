@@ -5,7 +5,7 @@ import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.{autoClosing, closeOnError}
-import com.sos.scheduler.engine.common.scalautil.{AutoClosing, HasCloser, Logger}
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
@@ -16,7 +16,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.kernel.util.Hostware
-import com.sos.scheduler.engine.main.{CppBinaries, CppBinary, SchedulerState, SchedulerThreadController}
+import com.sos.scheduler.engine.main.{BridgeState, CppBinaries, CppBinary, SchedulerThreadController}
 import com.sos.scheduler.engine.test.TestSchedulerController._
 import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinaries}
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
@@ -125,7 +125,7 @@ with HasInjector {
   /** Wartet, bis das Objekt [[com.sos.scheduler.engine.kernel.Scheduler]] verfügbar ist. */
   def waitUntilSchedulerIsActive(): Unit = {
     val previous = _scheduler
-    _scheduler = delegate.waitUntilSchedulerState(SchedulerState.active)
+    _scheduler = delegate.waitUntilSchedulerState(BridgeState.active)
     if (_scheduler == null) {
       waitForTermination()   // Should throw the exception causing the activation failure
       throw new RuntimeException("Scheduler aborted before startup")

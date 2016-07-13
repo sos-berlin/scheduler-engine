@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -241,7 +242,7 @@ object SchedulerTestUtils {
   }
 
   def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
-    controller.toleratingErrorCodes(errorCodes.toSet) {
+    controller.toleratingErrorCodes(errorCodes) {
       val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.codeOption contains o) }
       body
       try awaitResults(futures)
@@ -251,13 +252,13 @@ object SchedulerTestUtils {
     }
 
 
-  def orderIsOnBlacklist(orderKey: OrderKey)(implicit hasInjector: HasInjector, entityManagerFactory: EntityManagerFactory): Boolean =
+  def orderIsBlacklisted(orderKey: OrderKey)(implicit hasInjector: HasInjector, entityManagerFactory: EntityManagerFactory): Boolean =
     if (jobChain(orderKey.jobChainPath).isDistributed)
       transaction { implicit entityManager ⇒
-        instance[HibernateOrderStore].fetch(orderKey).isOnBlacklist
+        instance[HibernateOrderStore].fetch(orderKey).isBlacklisted
       }
     else
-      order(orderKey).isOnBlacklist
+      order(orderKey).isBlacklisted
 
   final case class ResultAndEvent[A](result: A, event: ErrorLogEvent)
 }

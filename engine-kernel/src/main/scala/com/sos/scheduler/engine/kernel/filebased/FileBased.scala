@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.File_basedC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
-import java.io.File
+import java.nio.file.{Path, Paths}
 import java.time.Instant
 import scala.util.control.NonFatal
 
@@ -19,7 +19,7 @@ extends Sister
 with EventSource {
   self ⇒
 
-  type Path <: TypedPath
+  type ThisPath <: TypedPath
 
   protected def subsystem: FileBasedSubsystem
 
@@ -43,8 +43,8 @@ with EventSource {
       SimpleFileBasedDetails(
         path = overview.path,
         fileBasedState = overview.fileBasedState,
-        file = self.fileOption,
-        fileModificationInstant = fileModificationInstantOption,
+        file = fileOption,
+        fileModifiedAt = fileModificationInstantOption,
         sourceXml = sourceXmlBytes match {
           case o if o.isEmpty ⇒ None
           case o ⇒
@@ -56,13 +56,12 @@ with EventSource {
   def fileBasedType: FileBasedType
 
   def fileBasedState =
-    FileBasedState.ofCppName(cppProxy.file_based_state_name)
+    FileBasedState.values()(cppProxy.file_based_state)
 
   /** Für Java. */
   def getPath: TypedPath = path
 
-  def path: Path =
-    stringToPath(cppProxy.path)
+  def path: ThisPath = stringToPath(cppProxy.path)
 
   def name =
     cppProxy.name
@@ -79,13 +78,12 @@ with EventSource {
   def configurationXmlBytes =
     cppProxy.source_xml_bytes
 
-  def file: File =
-    fileOption getOrElse sys.error(s"$toString has no source file")
+  def file: Path = fileOption getOrElse sys.error(s"$toString has no source file")
 
-  def fileOption: Option[File] =
+  def fileOption: Option[Path] =
     cppProxy.file match {
-      case "" => None
-      case o => Some(new File(o))
+      case "" ⇒ None
+      case o ⇒ Some(Paths.get(o))
     }
 
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
@@ -106,5 +104,5 @@ with EventSource {
 
   override def toString = path.toString
 
-  def stringToPath(o: String): Path
+  def stringToPath(o: String): ThisPath
 }

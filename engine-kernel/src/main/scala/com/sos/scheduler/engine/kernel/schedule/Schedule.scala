@@ -13,7 +13,7 @@ final class Schedule private(
   protected val subsystem: ScheduleSubsystem)
 extends FileBased {
 
-  type Path = SchedulePath
+  type ThisPath = SchedulePath
 
   def stringToPath(o: String) = SchedulePath(o)
 

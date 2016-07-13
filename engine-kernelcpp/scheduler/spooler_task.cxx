@@ -56,9 +56,9 @@ using namespace job;
 //------------------------------------------------------------------------------Task_lock_requestor
 
 struct Task_lock_requestor : lock::Requestor {
-    Task_lock_requestor( Task* task ) : 
-        Requestor( task ), 
-        _task(task) 
+    Task_lock_requestor( Task* task ) :
+        Requestor( task ),
+        _task(task)
     {}
 
     ~Task_lock_requestor() {}
@@ -67,7 +67,7 @@ struct Task_lock_requestor : lock::Requestor {
         return locks_are_available_for_holder( _task->_lock_holder );
     }
 
-    void on_locks_are_available() { 
+    void on_locks_are_available() {
         _task->on_locks_are_available( this );
     }
 
@@ -104,7 +104,7 @@ xml::Element_ptr Task_subsystem::dom_element( const xml::Document_ptr& dom_docum
     xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
     xml::Element_ptr task_subsystem_element = dom_document.createElement( "task_subsystem" );
 
-    if( show_what.is_set( show_statistics ) ) {        
+    if( show_what.is_set( show_statistics ) ) {
         xml::Element_ptr statistics_element = task_subsystem_element.append_new_element( "task_subsystem.statistics" );
         xml::Element_ptr task_statistics_element = statistics_element.append_new_element( "task.statistics" );
         task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_running ));
@@ -133,7 +133,7 @@ xml::Element_ptr Task_subsystem::exist_task_statistic_element( const xml::Docume
 
 //-------------------------------------------------------Task_subsystem::state_task_statistic_element
 
-xml::Element_ptr Task_subsystem::task_statistic_element( const xml::Document_ptr& dom_document, 
+xml::Element_ptr Task_subsystem::task_statistic_element( const xml::Document_ptr& dom_document,
     const string& attribute_name, const string& attribute_value, int count ) const
 {
     xml::Element_ptr result = dom_document.createElement( "task.statistic" );
@@ -203,7 +203,7 @@ Task::Task(Standard_job* job, Log_level stderr_log_level)
     _params = new Com_variable_set();
     _params->merge( job->_default_params );
 
-    _environment = new Com_variable_set(); 
+    _environment = new Com_variable_set();
 
     _lock_holder = Z_NEW( lock::Holder( this ) );
 }
@@ -213,7 +213,7 @@ Task::Task(Standard_job* job, Log_level stderr_log_level)
 
 Task::~Task()
 {
-    if( _file_logger )  
+    if( _file_logger )
         _file_logger->set_async_manager( NULL );
 
     try {
@@ -243,7 +243,7 @@ void Task::close()
             _file_logger->close();
         }
 
-        FOR_EACH( Registered_pids, _registered_pids, p )  
+        FOR_EACH( Registered_pids, _registered_pids, p )
             p->second->close();
 
         if( _operation ) {
@@ -259,7 +259,7 @@ void Task::close()
             _process_class->remove_requestor(this);
         }
         _order_for_task_end = NULL;
-        
+
         if( _order ) {
             _order->remove_from_job_chain();
             _order->close();  //detach_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
@@ -290,7 +290,7 @@ void Task::close()
         _history.end();    // DB-Operation, kann Exception auslösen
     }
 
-    if( _lock_holder )  
+    if( _lock_holder )
         _lock_holder->release_locks(),  _lock_holder = NULL;
 
     set_state_direct( s_closed );
@@ -311,7 +311,7 @@ void Task::init()
 void Task::set_dom( const xml::Element_ptr& element )
 {
     _force_start = element.bool_getAttribute( "force_start" );
-    
+
     string web_service_name = element.getAttribute( "web_service" );
     if( web_service_name != "" )  set_web_service( web_service_name );
 
@@ -389,7 +389,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
             }
         }
 
-        if( _operation ) 
+        if( _operation )
             task_element.setAttribute( "operation", _operation->async_state_text() );
 
       //if( _lock_holder )  task_element.appendChild( _lock_holder->dom_element( document, show ) );
@@ -460,9 +460,9 @@ xml::Document_ptr Task::dom( const Show_what& show ) const
 
 //-------------------------------------------------------------------Task::write_element_attributes
 
-void Task::write_element_attributes( const xml::Element_ptr& element ) const 
-{ 
-    element.setAttribute( "job" , _job->path() ); 
+void Task::write_element_attributes( const xml::Element_ptr& element ) const
+{
+    element.setAttribute( "job" , _job->path() );
     element.setAttribute( "task", _id );
 }
 
@@ -478,7 +478,7 @@ Standard_job* Task::job()
 
 Time Task::calculated_start_time( const Time& now )
 {
-    if( _force_start ) 
+    if( _force_start )
         return _start_at;
     else
     if( _job->file_based_state() == Job::s_active )
@@ -582,9 +582,9 @@ void Task::set_error_xc_only_base( const Xc& x )
             xx->set_what(scheduler272);
         }
         _error = *xx;
-        if (_job) 
+        if (_job)
             _job->set_error_xc_only(*xx);
-        if( _order )  
+        if( _order )
             _order->set_task_error(*xx);
     }
 
@@ -613,7 +613,7 @@ void Task::set_error_xc( const zschimmer::Xc& xx )
             s << "(no job)";
         }
         else {
-            if( _job->_ignore_every_signal )  
+            if( _job->_ignore_every_signal )
                 s << "all";
             else {
                 Z_FOR_EACH( stdext::hash_set<int>, _job->_ignore_signals_set, it ) {
@@ -671,7 +671,7 @@ void Task::set_error( const _com_error& x )
 
 /**
  * \brief Status zum Setzen vormerken
- * \detail 
+ * \detail
  * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
  * Merkt bei laufender Operation einen Status zum Setzen vor. Läuft keine Operation (z.B. spooler.process)
  * wird der Status via set_state_direct() sofort gesetzt.
@@ -697,9 +697,9 @@ void Task::set_state( State new_state )
 
 /**
  * \brief Status zum Setzen vormerken
- * \detail 
+ * \detail
  * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
- * Setzt einen bereits vorgemerketer Status für eine Task endgültig. Ist kein Status zum Setzen vorgemerkt, bleibt der 
+ * Setzt einen bereits vorgemerketer Status für eine Task endgültig. Ist kein Status zum Setzen vorgemerkt, bleibt der
  * Aufruf ohne Wirkung.
  * \version 2.1.1 - 2010-04-29
  *
@@ -718,9 +718,9 @@ void Task::set_enqueued_state()
 
 /**
  * \brief Status setzen (ehemals set_state)
- * \detail 
+ * \detail
  * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
- * Setzt einen Status unmittelbar. Ein evtl. vorgemerkter Status (_enqueued_state) wird verworfen. 
+ * Setzt einen Status unmittelbar. Ein evtl. vorgemerkter Status (_enqueued_state) wird verworfen.
  * \version 2.1.1 - 2010-04-29
  *
  * \param new_state - Status auf den die task gesetzt wird
@@ -732,7 +732,7 @@ void Task::set_state_direct( State new_state )
         _enqueued_state = s_none;
     }
 
-    if( new_state != s_running_waiting_for_order )  
+    if( new_state != s_running_waiting_for_order )
         _idle_since = Time(0);
 
     if( new_state != _state ) {
@@ -764,7 +764,7 @@ void Task::set_state_direct( State new_state )
 
             case s_running_waiting_for_order: {
                 _call_register.call_at<Next_order_step_call>(_job->next_order_time());
-                if (_state != s_running_waiting_for_order)  
+                if (_state != s_running_waiting_for_order)
                     _idle_since = Time::now();
                 if (_idle_timeout_at != Time::never)
                     _call_register.call_at<Task_idle_timeout_call>(_idle_timeout_at);
@@ -787,7 +787,7 @@ void Task::set_state_direct( State new_state )
             if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
         }
 
-        if( new_state != s_running_delayed )  
+        if( new_state != s_running_delayed )
             _next_spooler_process = Time(0);
 
         State old_state = _state;
@@ -811,7 +811,7 @@ void Task::set_state_direct( State new_state )
 
 //---------------------------------------------------------------------------------Task::state_name
 
-string Task::state_name( State state ) 
+string Task::state_name( State state )
 {
     switch( state )
     {
@@ -868,9 +868,9 @@ void Task::set_history_field( const string& name, const Variant& value )
 //------------------------------------------------------------------Task::set_delay_spooler_process
 
 void Task::set_delay_spooler_process(const Duration& d)
-{ 
-    _log->debug("delay_spooler_process=" + d.as_string() ); 
-    _next_spooler_process = Time::now() + d; 
+{
+    _log->debug("delay_spooler_process=" + d.as_string() );
+    _next_spooler_process = Time::now() + d;
     _call_register.call_at<Task_delayed_spooler_process_call>(_next_spooler_process);
 }
 
@@ -903,7 +903,7 @@ bool Task::try_hold_lock( const Path& lock_relative_path, lock::Lock::Lock_mode 
 void Task::delay_until_locks_available()
 {
     if( _state != s_opening  &&
-        _state != s_running     )  z::throw_xc( "SCHEDULER-468" );        // Verhindert auch doppelten Aufruf 
+        _state != s_running     )  z::throw_xc( "SCHEDULER-468" );        // Verhindert auch doppelten Aufruf
 
     Lock_level       lock_level     = current_lock_level();
     lock::Requestor* lock_requestor = _lock_requestors[ lock_level ];
@@ -921,11 +921,11 @@ void Task::delay_until_locks_available()
 
 //-------------------------------------------------------------------------Task::current_lock_level
 
-Task::Lock_level Task::current_lock_level() 
+Task::Lock_level Task::current_lock_level()
 {
     if( _state == s_opening  ||
         _state == s_opening_waiting_for_locks )  return lock_level_task_api;
-    
+
     if( _state == s_running  ||
         _state == s_running_waiting_for_locks )  return lock_level_process_api;
 
@@ -935,7 +935,7 @@ Task::Lock_level Task::current_lock_level()
 //---------------------------------------------------------------------Task::on_locks_are_available
 
 void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
-{    
+{
     assert( _lock_holder->is_known_requestor( lock_requestor ) );
     assert( lock_requestor == _lock_requestors[ current_lock_level() ] );
     assert( lock_requestor->is_enqueued() );
@@ -976,9 +976,9 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 //            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
 //        } else {
 //            Duration t = _timeout;
-//            result = t.is_eternal()? Time::never 
+//            result = t.is_eternal()? Time::never
 //                                   : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
-//        }                 
+//        }
 //    }
 //    else
 //    if( _state == s_running_process  &&  !_timeout.is_eternal() )
@@ -1002,7 +1002,7 @@ void Task::notify_a_process_is_available() {
     _call_register.call<Process_class_available_call>();
 }
 
-bool Task::on_requisite_loaded(File_based* file_based) { 
+bool Task::on_requisite_loaded(File_based* file_based) {
     if (dynamic_cast<Process_class*>(file_based) && _state == s_waiting_for_process) {
         _call_register.call<Task_do_something_call>();
     }
@@ -1125,9 +1125,9 @@ void Task::on_call(const job::Task_do_something_call&) {
 
 //----------------------------------------------------------------------Task::wake_when_longer_than
 
-void Task::wake_when_longer_than() 
+void Task::wake_when_longer_than()
 {
-    if (!_warn_if_longer_than.is_eternal())
+    if (!_warn_if_longer_than.is_eternal() && _call_register.at<Warn_longer_than_call>().is_never())
         _call_register.call_at<Warn_longer_than_call>(Time::now() + _warn_if_longer_than);
 }
 
@@ -1147,11 +1147,11 @@ bool Task::check_timeout( const Time& now )
 
 void Task::check_if_shorter_than( const Time& now )
 {
-    if( _warn_if_shorter_than.not_zero() ) 
+    if( _warn_if_shorter_than.not_zero() )
     {
         Duration step_time = now - _last_operation_time;
 
-        if( step_time < _warn_if_shorter_than ) 
+        if( step_time < _warn_if_shorter_than )
         {
             string msg = message_string( "SCHEDULER-711", _warn_if_shorter_than.as_string( time::without_ms ), step_time.as_string( time::without_ms ) );
             _log->warn( msg );
@@ -1175,12 +1175,12 @@ bool Task::check_if_longer_than( const Time& now )
 
     if( !_warn_if_longer_than.is_eternal() ) {
         Duration step_time = now - _last_operation_time;   // JS-448
-        
+
         if( step_time > _warn_if_longer_than ) {
             // JS-448 something_done = true;
             if( _last_warn_if_longer_operation_time != _last_operation_time ) {    // Merker, damit nur einmal gewarnt wird
                 something_done = true;  // JS-448
-                _last_warn_if_longer_operation_time = _last_operation_time;       
+                _last_warn_if_longer_operation_time = _last_operation_time;
                 string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( time::without_ms ) );
                 _log->warn( msg );
                 Scheduler_event scheduler_event(evt_task_step_too_long, log_error, this);
@@ -1191,7 +1191,7 @@ bool Task::check_if_longer_than( const Time& now )
                                               "Task step time: " << step_time << "\n" <<
                                               "warn_if_longer_than=" << _warn_if_longer_than.as_string( time::without_ms ) );
                 scheduler_event.send_mail( mail_defaults );
-            }     
+            }
         }
     }
 
@@ -1235,7 +1235,7 @@ void Task::add_subprocess( int pid, const Duration& timeout, bool ignore_exitcod
 {
     Z_LOG2( "scheduler", Z_FUNCTION << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
     Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
-    
+
     if( !_module_instance->is_remote_host() ) {
         Time timeout_at = timeout.is_eternal()? Time::never : Time::now() + timeout;
         _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
@@ -1253,7 +1253,7 @@ bool Task::shall_wait_for_registered_pid()
 
 //-------------------------------------------------------------Task::Registered_pid::Registered_pid
 
-Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_at, bool wait, bool ignore_error, bool ignore_signal, 
+Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_at, bool wait, bool ignore_error, bool ignore_signal,
                                       bool is_process_group, const string& title )
 :
     _spooler(task->_spooler),
@@ -1300,7 +1300,7 @@ void Task::Registered_pid::try_kill()
 #               endif
                     kill_process_immediately( _pid, obj_name() );
 
-                _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
+                _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen"
             }
             catch( exception& x ) {
                 _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
@@ -1328,7 +1328,7 @@ bool Task::check_subprocess_timeout( const Time& now )
     bool something_done = false;
     if( _subprocess_timeout <= now ) {
         FOR_EACH( Registered_pids, _registered_pids, p ) {
-            Registered_pid* subprocess = p->second; 
+            Registered_pid* subprocess = p->second;
             if( subprocess->_timeout_at <= now ) {
                 _log->warn( message_string( "SCHEDULER-275", subprocess->_pid ) );
                 subprocess->try_kill();
@@ -1353,7 +1353,7 @@ bool Task::try_kill()
         if( !_killed ) _log->warn( message_string( "SCHEDULER-276" ) );
     }
     catch( const exception& x ) { _log->warn( x.what() ); }
-    
+
     return _killed;
 }
 
@@ -1416,10 +1416,10 @@ bool Task::do_something()
                                 }
                             }
                             else
-                            if( !loaded() )  
+                            if( !loaded() )
                                 set_state_direct( s_ended );
                             else
-                            if( !_begin_called )    
+                            if( !_begin_called )
                                 set_state_direct( s_release );
                             else
                                 set_state_direct( s_ending );
@@ -1446,7 +1446,7 @@ bool Task::do_something()
                                         log()->info(Message_string("SCHEDULER-949", _module_instance->process_class()->path()));
                                         process_class()->enqueue_requestor(this);
                                         task_subsystem()->try_to_free_process(this, _process_class);     // Beendet eine Task in s_running_waiting_for_order
-                                    } 
+                                    }
                                     set_state_direct( s_waiting_for_process );
                                 }
                             } else {
@@ -1483,7 +1483,7 @@ bool Task::do_something()
 
                                 set_state_direct( !ok? s_ending :
                                                 _module_instance->_module->kind() == Module::kind_process?
-                                                _module_instance->kind() == Module::kind_remote? s_running_remote_process 
+                                                _module_instance->kind() == Module::kind_remote? s_running_remote_process
                                                                                                : s_running_process
                                            : s_opening );
                                 report_event_code(taskStartedEvent, java_sister());
@@ -1492,6 +1492,7 @@ bool Task::do_something()
                                         report_event_code(orderStepStartedEvent, _order->java_sister());
                                     }
                                     _last_operation_time = now;
+                                    wake_when_longer_than();
                                     if (!_timeout.is_eternal()) {
                                         _call_register.call_at<Task_timeout_call>(_last_operation_time + _timeout);
                                     }
@@ -1527,7 +1528,7 @@ bool Task::do_something()
                             break;
                         }
 
-                        case s_opening_waiting_for_locks: 
+                        case s_opening_waiting_for_locks:
                             break;
 
                         case s_running_process:
@@ -1545,7 +1546,6 @@ bool Task::do_something()
                                 loop = true;
                                 if (!_running_state_reached) {
                                     _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
-                                    wake_when_longer_than();
                                     //_next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
                                 }
                             }
@@ -1585,7 +1585,7 @@ bool Task::do_something()
                                     }
                                     _running_state_reached = true;
                                     _last_process_start_time = now;
-                                    if( _step_count + 1 == _job->_history.min_steps() )  
+                                    if( _step_count + 1 == _job->_history.min_steps() )
                                         _history.start();
                                     if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] ) {
                                         _lock_holder->hold_locks( lock_requestor );
@@ -1603,7 +1603,7 @@ bool Task::do_something()
                                 close_operation();
 
                                 if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] ) {
-                                    if( ok  &&  !_delay_until_locks_available  &&  !_lock_holder->is_holding_all_of( lock_requestor ) )  
+                                    if( ok  &&  !_delay_until_locks_available  &&  !_lock_holder->is_holding_all_of( lock_requestor ) )
                                         log()->warn( message_string( "SCHEDULER-469" ) );    // Try_hold_lock() hat versagt und Call_me_again_when_locks_available() nicht aufgerufen
 
                                     _lock_holder->release_locks( lock_requestor );  // Task.Try_hold_lock() wieder aufheben
@@ -1633,7 +1633,7 @@ bool Task::do_something()
                             if( _next_spooler_process.not_zero() ) {
                                 set_state_direct( s_running_delayed );
                                 something_done = true;
-                            } else 
+                            } else
                             if( fetch_and_occupy_order( now, state_name() ) ) {
                                 set_state_direct( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
                                 loop = true;                // _order wird in step__end() wieder abgeräumt
@@ -1641,15 +1641,15 @@ bool Task::do_something()
                             else
                             if( now >= _idle_timeout_at ) {
                                 if( _job->_force_idle_timeout  ||  _job->above_min_tasks() ) {
-                                    _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
+                                    _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich"
                                     _end = task_end_normal;
                                     loop = true;
                                 } else {
                                     _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
-                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout has been elapsed but force_idle_timeout=\"no\" and not more than min_tasks tasks are running, now=" << 
+                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout has been elapsed but force_idle_timeout=\"no\" and not more than min_tasks tasks are running, now=" <<
                                         now.as_string(_job->time_zone_name()) << "\n" );
-                                    //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
+                                    //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich"
                                     something_done = true;
                                 }
                             }
@@ -1667,12 +1667,12 @@ bool Task::do_something()
                             break;
                         }
 
-                        case s_running_waiting_for_locks: 
+                        case s_running_waiting_for_locks:
                             break;
 
                         case s_ending: {
                             if( !_operation ) {
-                                if( has_error()  ||  _log->highest_level() >= log_error )  
+                                if( has_error()  ||  _log->highest_level() >= log_error )
                                     _history.start();
                                 if( _begin_called ) {
                                     _operation = do_end__start();
@@ -1728,7 +1728,7 @@ bool Task::do_something()
                                 operation__end();
                                 set_state_direct( s_exit );
                                 loop = true;
-                            } 
+                            }
 
                             something_done = true;
                             break;
@@ -1740,7 +1740,7 @@ bool Task::do_something()
                                if (!_operation->async_finished())
                                     _operation->on_async_finished_call(_call_register.new_async_call<Task_on_error_completed_call>());
                             }
-                            else  
+                            else
                                 operation__end(), set_state_direct( s_exit ), loop = true;
                             something_done = true;
                             break;
@@ -1810,12 +1810,12 @@ bool Task::do_something()
                                     if (_order_state_transition != Order_state_transition::keep) {
                                         bool is_simple_shell_error = _module_instance->_module->kind() == Module::kind_process && _module_instance->_module->_monitors->is_empty() && has_error() && _job->stops_on_task_error();
                                         if (!is_simple_shell_error) {
-                                            postprocess_order(_order_state_transition);       
+                                            postprocess_order(_order_state_transition);
                                         } else {
                                             // finish() will handle this case
                                         }
                                     }
-                                }                                                               
+                                }
 
                                 report_event(CppEventFactoryJ::newTaskEndedEvent(_id, _job->path(), _exit_code), java_sister());
                                 set_state_direct( s_deleting_files );
@@ -1844,29 +1844,29 @@ bool Task::do_something()
 
                                     ok = _module_instance->try_delete_files( my_log );
                                     if (ok) {
-                                        if( _trying_deleting_files_until.not_zero() )  
+                                        if( _trying_deleting_files_until.not_zero() )
                                             _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
                                     } else {
                                         if (!_trying_deleting_files_until) {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
                                         }
-                                        
+
                                         if (_trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until) {   // Nach Fristablauf geben wir auf
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->info( message_string( "SCHEDULER-878", paths ) );
                                             _job->log()->warn( message_string( "SCHEDULER-878", paths ) );
                                             ok = true;
-                                        } 
-                                        else 
-                                        if (!_trying_deleting_files_until)  
+                                        }
+                                        else
+                                        if (!_trying_deleting_files_until)
                                             _trying_deleting_files_until = now + delete_temporary_files_delay;
                                     }
 
                                     something_done = true;
                                 }
                             }
-                            
+
                             if (!ok) {
                                 _call_register.call_at<Try_deleting_files_call>(min(now + delete_temporary_files_retry, _trying_deleting_files_until));
                             } else {
@@ -1877,7 +1877,7 @@ bool Task::do_something()
                                 set_state_direct( s_closed );
                                 something_done = true;
                                 loop = true;
-                            } 
+                            }
                             break;
                         }
 
@@ -1894,11 +1894,11 @@ bool Task::do_something()
 
                     if( _operation ) {
                         loop |= _operation->async_finished();   // Falls Sync_operation
-                    } else 
+                    } else
                     if (_state != s_running_process) {
                         set_enqueued_state();   // Wegen _operation verzögerten Zustand setzen
 
-                        if( (!ok || has_error() || _killed) && _state < s_ending && _state != s_running_process)  
+                        if( (!ok || has_error() || _killed) && _state < s_ending && _state != s_running_process)
                                 set_state_direct( s_ending ), loop = true;
                     }
                 }
@@ -1993,10 +1993,10 @@ bool Task::load()
     _last_operation_time = now;
     _timeout = _job->_task_timeout;
 
-    if( _job->is_machine_resumable() ) 
+    if( _job->is_machine_resumable() )
         _spooler->begin_dont_suspend_machine();
 
-    if (!_let_run) 
+    if (!_let_run)
         _call_register.call_at<Task_end_with_period_call>(_job->_period.end());   // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
     return do_load();
@@ -2027,7 +2027,7 @@ bool Task::step__end()
             continue_task = result = check_result( spooler_process_result );
         }
 
-        if( _job->is_order_controlled() )  
+        if( _job->is_order_controlled() )
             continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state_direct(), §1495 )
 
         count_step();
@@ -2036,13 +2036,13 @@ bool Task::step__end()
             postprocess_order(_delay_until_locks_available ? Order_state_transition::keep : Order_state_transition::of_bool(result));
         }
 
-        if( _next_spooler_process.not_zero() )  
+        if( _next_spooler_process.not_zero() )
             continue_task = true;
     }
-    catch( const exception& x ) { 
-        set_error(x); 
+    catch( const exception& x ) {
+        set_error(x);
         if( _order )  detach_order_after_error(error_order_state_transition());
-        continue_task = false; 
+        continue_task = false;
     }
 
     return continue_task;
@@ -2099,14 +2099,14 @@ string Task::remote_process_step__end()
         _job->count_step();
         _step_count++;
     }
-    catch( const exception& x )  { 
-        set_error(x); 
+    catch( const exception& x )  {
+        set_error(x);
         if( _order ) {
             _order_state_transition = _job->stops_on_task_error()? Order_state_transition::keep : Order_state_transition::standard_error;
             if (_module_instance->_module->_kind != Module::kind_process) {
                 detach_order_after_error(error_order_state_transition());
             }
-        } 
+        }
     }
 
     close_operation();
@@ -2115,43 +2115,43 @@ string Task::remote_process_step__end()
 
 //-----------------------------------------------------------------------------Task::operation__end
 
-bool Task::operation__end() 
+bool Task::operation__end()
 {
     bool result = false;
 
     try {
         switch( _state ) {
             case s_starting:
-                result = do_begin__end();    
+                result = do_begin__end();
                 break;
             case s_opening:
-                result = do_call__end();     
+                result = do_call__end();
                 break;
             case s_ending:
                 do_end__end();
                 break;
-            case s_ending_waiting_for_subprocesses: 
+            case s_ending_waiting_for_subprocesses:
                 if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
                     m->_remote_instance->call__end();
-                else 
+                else
                     assert(0), throw_xc( "NO_REMOTE_INSTANCE" );
                 break;
-            case s_on_error:   
-                result = do_call__end();     
+            case s_on_error:
+                result = do_call__end();
                 break;
-            case s_on_success:   
-                result = do_call__end();     
+            case s_on_success:
+                result = do_call__end();
                 break;
             case s_exit:
-                result = do_call__end();     
+                result = do_call__end();
                 break;
-            case s_release: 
-                do_release__end();  
+            case s_release:
+                do_release__end();
                 break;
             case s_ended:
-                do_close__end();    
+                do_close__end();
                 break;
-            default: 
+            default:
                 assert(0), throw_xc( "Task::operation__end" );
         }
     }
@@ -2177,11 +2177,11 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
     assert( !_operation );
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
 
-    if( !_order  
-     && !_end  // Kann beim Aufruf aus Job::do_something() passieren 
+    if( !_order
+     && !_end  // Kann beim Aufruf aus Job::do_something() passieren
      && _spooler->state() != Spooler::s_paused) {
         if( Order* order = _job->fetch_and_occupy_order(this, now, cause, _process_class) ) {
-            if( order->is_file_order() )  
+            if( order->is_file_order() )
                 _trigger_files = order->file_path();
             _order = order;
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
@@ -2189,7 +2189,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
             if (!_job->has_own_process_class() && !_has_remote_scheduler) {
                 Process_class* process_class;
-                try { 
+                try {
                     process_class = _spooler->process_class_subsystem()->process_class(order->job_chain()->default_process_class_path());
                 } catch (exception& x) {
                     order->log()->error(x.what());
@@ -2197,20 +2197,20 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
                     assert(!_order);
                     return NULL;
                 }
-                if (!_process_class) {  
-                    // First order 
+                if (!_process_class) {
+                    // First order
                     assert(_state == s_none);
                     assert(!_module_instance);
                     _process_class = process_class;
                     add_requisite(Requisite_path(_process_class->subsystem(), _process_class->path()));
-                } 
+                }
                 if (_process_class != process_class) z::throw_xc(Z_FUNCTION, "Process classes differ", _process_class->obj_name(), process_class->obj_name());
             }
             _log->info(message_string("SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url(), _process_class ? ", Order's " + _process_class->obj_name() : ""));
         } else {
             bool order_announced = _job->request_order(now, cause);
             if (order_announced && !_job->has_own_process_class() && _job->max_tasks_reached()) {
-                // An order has been announced which probably has a different process class (because fetch_and_occupy_order did not fetch it), 
+                // An order has been announced which probably has a different process class (because fetch_and_occupy_order did not fetch it),
                 // and a further task cannot be started. So we terminate in favour of a new task, running in that different process class.
                 cmd_nice_end(_job);
             }
@@ -2230,12 +2230,12 @@ void Task::postprocess_order(const Order_state_transition& state_transition, boo
 {
     if( _order ) {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
-        
+
         if (!_order->job_chain_path().empty())
             report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()), _order->java_sister());
         _order->postprocessing(state_transition, _error);
-        
-        if( due_to_exception && !_order->setback_called() ) 
+
+        if( due_to_exception && !_order->setback_called() )
             _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
         detach_order();
         //_call_register.call<Task_check_for_order_call>();
@@ -2277,7 +2277,7 @@ Order_state_transition Task::error_order_state_transition() const {
 
 void Task::detach_order()
 {
-    if( _order->is_file_order() )  
+    if( _order->is_file_order() )
         _trigger_files = "";
     _log->set_order_log( NULL );
     _order = NULL;
@@ -2358,7 +2358,7 @@ void Task::finish(const Order_state_transition& error_order_state_transition)
 void Task::set_state_texts_from_stdout( const string& state_text )
 {
     _job->set_state_text( state_text );
-    if( _order )  
+    if( _order )
         _order->set_state_text( state_text );
 }
 
@@ -2390,8 +2390,8 @@ void Task::process_on_exit_commands()
             Command_processor cp ( _spooler, Security::seclev_all );
             cp.set_log( _log );
             cp.set_variable_set( "task", _params );
-            
-            if (_order_for_task_end) 
+
+            if (_order_for_task_end)
                 cp.set_variable_set("order", _order_for_task_end->params_or_null());
 
             DOM_FOR_EACH_ELEMENT( commands_element, c ) {
@@ -2462,7 +2462,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
                     case fl_all:                    break;
                     case fl_first_only:             if( !_is_first_job_delay_after_error )  mail_due_to_error_or_warning = false;  break;
                     case fl_last_only:              if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
-                    case fl_first_and_last_only:    if( !_is_first_job_delay_after_error  
+                    case fl_first_and_last_only:    if( !_is_first_job_delay_after_error
                                                     &&  !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
                     default: assert(0), z::throw_xc( Z_FUNCTION );
                 }
@@ -2471,12 +2471,12 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             mail_it = mail_due_to_error_or_warning;
         }
 
-        if( !mail_it  &&  _log->_mail_on_success  &&  _step_count >= 0)  
+        if( !mail_it  &&  _log->_mail_on_success  &&  _step_count >= 0)
             mail_it = true;
-        if( !mail_it  &&  _log->_mail_on_process  &&  _step_count >= _log->_mail_on_process )  
+        if( !mail_it  &&  _log->_mail_on_process  &&  _step_count >= _log->_mail_on_process )
             mail_it = true;
 
-        if( _log->_mail_it )  
+        if( _log->_mail_it )
             mail_it = true;
 
         if( mail_it )
@@ -2497,17 +2497,17 @@ bool Task::wait_until_terminated( double )
 //----------------------------------------------------------------------------Task::set_web_service
 
 void Task::set_web_service( const string& name )
-{ 
+{
     if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
     set_web_service( name == ""? NULL  : _spooler->_web_services->web_service_by_name( name ) );
 }
 
 //----------------------------------------------------------------------------Task::set_web_service
 
-void Task::set_web_service( Web_service* web_service )                
-{ 
+void Task::set_web_service( Web_service* web_service )
+{
     if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
-    _web_service = web_service; 
+    _web_service = web_service;
 }
 
 //--------------------------------------------------------------------------------Task::web_service
@@ -2545,25 +2545,25 @@ void Task::do_close__end()
         int exit_code = _module_instance->kind() == Module::kind_process? _module_instance->exit_code() : _exit_code;
         if( exit_code ) {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
-            if (_module_instance->_module->kind() == Module::kind_process)  
+            if (_module_instance->_module->kind() == Module::kind_process)
                 set_error( x );
-            else  
+            else
                 _log->warn( x.what() );
 
             _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
-                                          
+
         if( int termination_signal = _module_instance->termination_signal() ) {
             z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) + " " + signal_title_from_code( termination_signal ) );
 
-            if (!_job->_ignore_every_signal 
+            if (!_job->_ignore_every_signal
              && _job->_ignore_signals_set.find(termination_signal) == _job->_ignore_signals_set.end())
             {
                 set_error( x );
             } else {
                 _log->warn( x.what() );
                 _log->debug( message_string( "SCHEDULER-973" ) ); //, signal_name_from_code( termination_signal ) ) );
-                
+
                 if( _is_connection_reset_error )
                 {
                     _error = _non_connection_reset_error;    // Vorherigen Fehler (vor dem Verbindungsverlust) wiederherstellen
@@ -2574,7 +2574,7 @@ void Task::do_close__end()
 
             _exit_code = -termination_signal;
         }
- 
+
         _file_logger->finish();
         _file_logger->close();
 
@@ -2597,7 +2597,7 @@ bool Task::do_load()
 {
     string remote_scheduler = read_remote_scheduler_parameter();
     _has_remote_scheduler = !remote_scheduler.empty();
-    
+
     if (!_process_class) {
         // fetch_and_occupy_order has not been called. This task has no order.
         _process_class = _job->default_process_class();
@@ -2659,7 +2659,7 @@ Async_operation* Task::do_end__start()
 
 void Task::do_end__end()
 {
-    if( _module_instance ) 
+    if( _module_instance )
         _module_instance->end__end();
 }
 
@@ -2677,7 +2677,7 @@ Async_operation* Task::do_step__start()
 }
 
 string Task::message_726() const {
-        string a = _module_instance->remote_scheduler_address();
+    string a = _module_instance->remote_scheduler_address();
     return Message_string("SCHEDULER-726", a.empty()? "this JobScheduler '" + _spooler->http_url() + "'" : "remote scheduler " + a);
 }
 

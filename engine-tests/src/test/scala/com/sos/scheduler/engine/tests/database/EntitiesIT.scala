@@ -5,11 +5,11 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosedEvent}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.database.EntitiesIT._
+import java.nio.file.Files.deleteIfExists
 import java.time.Instant.now
 import java.time.{Instant, LocalDateTime, ZoneId}
 import javax.persistence.EntityManagerFactory
@@ -216,7 +217,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     withEventPipe { eventPipe ⇒
-      instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
+      deleteIfExists(instance[OrderSubsystem].jobChain(jobChainPath).file) || sys.error("JobChain configuration file could not be deleted")
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)
       tryFetchJobChainEntity(jobChainPath) shouldBe 'empty

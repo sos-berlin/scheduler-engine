@@ -45,6 +45,7 @@ final class JS1421IT extends FreeSpec with ScalaSchedulerTest {
         MessageCode("SCHEDULER-202"),
         MessageCode("SCHEDULER-279"),
         MessageCode("Z-REMOTE-101"),
+        MessageCode("ERRNO-104"),  // Connection reset by peer
         MessageCode("ERRNO-131"),  // Solaris
         MessageCode("WINSOCK-10054")))
       {

@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import java.sql.{Connection, PreparedStatement}
 import javax.persistence.EntityManager
 import org.hibernate.jdbc.Work

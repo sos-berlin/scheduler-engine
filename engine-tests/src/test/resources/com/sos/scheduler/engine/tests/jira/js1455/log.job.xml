@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <script language="java:javascript">
+        function spooler_process() {
+            spooler_log.info("************************************* TEST-INFO")
+            return false
+        }
+    </script>
+</job>

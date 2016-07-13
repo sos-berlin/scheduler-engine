@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.base.utils.ScalaUtils
+import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Collections
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, JobChainPersistentState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
@@ -34,7 +34,7 @@ final class JobChain(
 extends FileBased
 with UnmodifiableJobChain {
 
-  type Path = JobChainPath
+  type ThisPath = JobChainPath
 
   private object cppPredecessors {
     private var _edgeSet: Set[(OrderState, OrderState)] = null
@@ -54,6 +54,10 @@ with UnmodifiableJobChain {
       _edgeSet = null
     }
   }
+
+  override def overview = JobChainOverview(
+    path = path,
+    fileBasedState = fileBasedState)
 
   def stringToPath(o: String) =
     JobChainPath(o)
@@ -113,7 +117,7 @@ with UnmodifiableJobChain {
       d.path.asInstanceOf[JobChainPath],
       d.fileBasedState,
       d.file,
-      d.fileModificationInstant,
+      d.fileModifiedAt,
       d.sourceXml,
       nodes = nodes map { _.overview }
     )
@@ -144,6 +148,8 @@ with UnmodifiableJobChain {
 
   def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
+
+  def orders: Seq[Order] = cppProxy.java_orders
 
   def isStopped =
     cppProxy.is_stopped

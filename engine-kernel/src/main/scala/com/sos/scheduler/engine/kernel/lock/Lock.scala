@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 final class Lock private(protected[this] val cppProxy: LockC, protected val subsystem: LockSubsystem)
 extends FileBased {
 
-  type Path = LockPath
+  type ThisPath = LockPath
 
   def stringToPath(o: String) = LockPath(o)
 

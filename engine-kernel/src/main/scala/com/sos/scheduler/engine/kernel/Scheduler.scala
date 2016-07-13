@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.maven.MavenProperties
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
@@ -20,11 +21,11 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
+import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.directOrSchedulerThreadFuture
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -43,12 +44,14 @@ import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
 import java.time.Instant.now
+import java.time.ZoneId
 import java.time.ZoneOffset.UTC
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -70,9 +73,6 @@ with HasCloser {
 
   private var closed = false
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
-  private lazy val pluginSubsystem = injector.instance[PluginSubsystem]
-  private lazy val commandSubsystem = injector.instance[CommandSubsystem]
-  private lazy val databaseSubsystem = injector.instance[DatabaseSubsystem]
 
   val startInstant = now()
 
@@ -90,8 +90,17 @@ with HasCloser {
     onClose { threadUnlock() } //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
   }
 
+  private var pluginSubsystem: PluginSubsystem = null
+  private var commandSubsystem: CommandSubsystem = null
+  private var databaseSubsystem: DatabaseSubsystem = null
+  private implicit var executionContext: ExecutionContext = null
+
   @ForCpp
   private def initialize(): Unit = {
+    pluginSubsystem = injector.instance[PluginSubsystem]
+    commandSubsystem = injector.instance[CommandSubsystem]
+    databaseSubsystem = injector.instance[DatabaseSubsystem]
+    executionContext = injector.instance[ExecutionContext]
     val eventSubscription = {
       val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
       val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
@@ -220,48 +229,58 @@ with HasCloser {
   private def executeXmlString(o: String) = Result(executeXml(o))
 
   /** Löst bei einem ERROR-Element eine Exception aus. */
-  def executeXml(xml: String): String = {
-    val result = uncheckedExecuteXml(xml)
-    if (result contains "<ERROR") {
-      for (e <- childElements(loadXml(result).getDocumentElement);
-           error <- new NamedChildElements("ERROR", e))
-        throw new SchedulerException(error.getAttribute("text"))
+  def executeXml(xml: String): String =
+    executeXmlFuture(xml) await MaxDuration
+
+  /** Löst bei einem ERROR-Element eine Exception aus. */
+  def executeXmlFuture(xml: String): Future[String] =
+    uncheckedExecuteXmlFuture(xml) map { result ⇒
+      if (result contains "<ERROR") {
+        for (e ← childElements(loadXml(result).getDocumentElement);
+             error ← new NamedChildElements("ERROR", e))
+          throw new SchedulerException(error.getAttribute("text"))
+      }
+      result
     }
-    result
-  }
 
   /** execute_xml_string() der C++-Klasse Spooler */
-  def uncheckedExecuteXml(xml: String): String = {
+  def uncheckedExecuteXml(xml: String): String =
+    uncheckedExecuteXmlFuture(xml) await MaxDuration
+
+  /** execute_xml_string() der C++-Klasse Spooler */
+  def uncheckedExecuteXmlFuture(xml: String): Future[String] = {
     if (closed) sys.error("Scheduler is closed")
-    inSchedulerThread { cppProxy.execute_xml_string(xml) }
-    .stripSuffix("\u0000")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
+    directOrSchedulerThreadFuture { cppProxy.execute_xml_string(xml) } map {
+      _ stripSuffix "\u0000"  // Von C++ angehängtes '\0', siehe Command_response::end_standard_response()
+    }
   }
 
   def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String) =
-    inSchedulerThread { cppProxy.execute_xml_string_with_security_level(xml, securityLevel.cppName, clientHostName) }
-    .stripSuffix("\u0000")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
+    uncheckedExecuteXmlFuture(xml, securityLevel, clientHostName) await MaxDuration
 
-  //    /** @param text Sollte auf \n enden */
-  //    public void writeToSchedulerLog(LogCategory category, String text) {
-  //        cppProxy.write_to_scheduler_log(category.string(), text);
-  //    }
+  def uncheckedExecuteXmlFuture(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String): Future[String] =
+    directOrSchedulerThreadFuture {
+      cppProxy.execute_xml_string_with_security_level(xml, securityLevel.cppName, clientHostName)
+    } map {
+      _ stripSuffix "\u0000"  // Von C++ angehängtes '\0', siehe Command_response::end_standard_response()
+    }
 
   def callCppAndDoNothing(): Unit = {
     cppProxy.tcp_port
   }
 
-  def overview: SchedulerOverview =
-    inSchedulerThread {
+  def overview: Future[SchedulerOverview] =
+    directOrSchedulerThreadFuture {
       new SchedulerOverview(
         version = mavenProperties.version,
         versionCommitHash = mavenProperties.versionCommitHash,
         startInstant = startInstant,
-        instant = now(),
+        instant = now,
         schedulerId = schedulerConfiguration.schedulerId,
         tcpPort = schedulerConfiguration.tcpPort match { case 0 ⇒ None case n ⇒ Some(n) },
         udpPort = schedulerConfiguration.udpPort,
-        processId = cppProxy.pid,
-        state = cppProxy.state_name)
+        pid = cppProxy.pid,
+        state = SchedulerState.ofCppName(cppProxy.state_name))
     }
 
   def isClosed = closed
@@ -272,6 +291,7 @@ object Scheduler {
   private val logger = Logger(getClass)
   private val mavenProperties = new MavenProperties(JavaResource("com/sos/scheduler/engine/kernel/maven.properties"))
   private val _defaultTimezoneId = DateTimeZone.getDefault.getID
+  val DefaultZoneId = ZoneId.of(_defaultTimezoneId)
 
   @ForCpp
   def defaultTimezoneId: String = _defaultTimezoneId

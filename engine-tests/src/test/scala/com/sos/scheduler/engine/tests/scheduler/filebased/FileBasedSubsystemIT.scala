@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.data.filebased.TypedPath.ordering
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.data.jobchain._
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
@@ -61,8 +61,8 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
       "overview" in {
         val expectedFileBasedStates = Map(
-          FileBasedState.notInitialized -> (paths count pathIsNotInitialized),
-          FileBasedState.active -> (paths count { o ⇒ !pathIsNotInitialized(o) }))
+          FileBasedState.not_initialized → (paths count pathIsNotInitialized),
+          FileBasedState.active → (paths count { o ⇒ !pathIsNotInitialized(o) }))
         subsystem.overview should have (
           'fileBasedType (subsystemDescription.fileBasedType),
           'count (paths.size),
@@ -70,7 +70,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
       }
 
       for (path <- testPaths map { _.asInstanceOf[subsystem.Path] }) {
-        def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.notInitialized else FileBasedState.active
+        def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.not_initialized else FileBasedState.active
         s"fileBased $path" - {
           lazy val o = subsystem.fileBased(path)
 
@@ -93,7 +93,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             if (pathDontHasXml(path))
               intercept[RuntimeException] { o.file }
             else
-              o.file shouldEqual testEnvironment.fileFromPath(path)
+              o.file shouldEqual testEnvironment.fileFromPath(path).toPath
           }
 
           "fileBasedState" in {
@@ -130,9 +130,9 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
               'file (Try(o.file).toOption),
               'sourceXml (emptyToNone(o.sourceXmlBytes) map xmlBytesToString))
             if (o.hasBaseFile)
-              o.details.fileModificationInstant.get should (be >= (now() - 30.s) and be <= now())
+              o.details.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
             else
-              o.details.fileModificationInstant shouldBe None
+              o.details.fileModifiedAt shouldBe None
           }
 
           "toString" in {
@@ -159,7 +159,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
   "JobSubsystemOverview" in {
     jobSubsystem.overview should have (
-      'jobStateCounts (Map(JobState.pending -> jobSubsystemSetting.paths.size))
+      'jobStateCounts (Map(JobState.pending → jobSubsystemSetting.paths.size))
     )
   }
 
@@ -209,15 +209,14 @@ private object FileBasedSubsystemIT {
   private val schedulerServiceForwardingJobChainPath = JobChainPath("/scheduler_service_forwarding")
   private val schedulerServiceForwarderJobPath = JobPath("/scheduler_service_forwarder")
   private val emptyProcessClassPath = ProcessClassPath("")
-  private val rootFolderPath = FolderPath("/")
   //private val testNestedJobChainPath =
 
   private val pathDontHasXml = Set[TypedPath](
     schedulerFileOrderSinkJobPath,
     schedulerServiceForwarderJobPath,
     emptyProcessClassPath,
-    rootFolderPath)
-  
+    FolderPath.Root)
+
   private val pathIsInvisible = Set[TypedPath](
     schedulerServiceForwardingJobChainPath,
     schedulerServiceForwarderJobPath)
@@ -233,7 +232,7 @@ private object FileBasedSubsystemIT {
     TestSubsystemSetting(
       FolderSubsystem,
       Nil,
-      List(rootFolderPath)),
+      List(FolderPath.Root)),
     jobSubsystemSetting,
     TestSubsystemSetting(
       LockSubsystem,

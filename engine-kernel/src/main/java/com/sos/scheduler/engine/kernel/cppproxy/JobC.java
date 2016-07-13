@@ -7,8 +7,13 @@ import com.sos.scheduler.engine.kernel.job.Job;
 
 @CppClass(clas="sos::scheduler::Job", directory="scheduler", include="spooler.h")
 public interface JobC extends CppProxyWithSister<Job>, File_basedC<Job> {
+
     Job.Type sisterType = new Job.Type();
 
+    String default_process_class_path();
+    boolean is_in_period();
+    int max_tasks();
+    int running_tasks_count();
     String script_text();
     String title();
     String description();

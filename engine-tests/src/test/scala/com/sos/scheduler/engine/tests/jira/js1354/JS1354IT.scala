@@ -80,7 +80,7 @@ final class JS1354IT extends FreeSpec with ScalaSchedulerTest {
     body
     awaitSuccess(ordersFinished)
     val postId = nextTaskId
-    assert(postId == TaskId(preId.value + files.size * JobChainTaskCount))
+    assert(postId == TaskId(preId.number + files.size * JobChainTaskCount))
     sleep(1.s)
     assert(nextTaskId == postId)
   }

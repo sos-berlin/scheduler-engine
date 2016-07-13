@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.jobmethods
 
-import com.sos.scheduler.engine.common.scalautil.ScalazStyle._
+import com.sos.scheduler.engine.base.utils.ScalazStyle._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
