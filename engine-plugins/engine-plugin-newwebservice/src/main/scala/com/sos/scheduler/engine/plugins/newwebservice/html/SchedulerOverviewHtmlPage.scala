@@ -23,9 +23,9 @@ extends SchedulerHtmlPage {
       headline,
       p(marginBottom := "30px")(
         s"Started at ",
-        instantWithDurationToHtml(startInstant),
-        " ",
-        ( (tcpPort map { o ⇒ s" TCP port $o" }) ++
+        instantWithDurationToHtml(startedAt),
+        " · ",
+        ( (httpPort map { o ⇒ s" HTTP port $o" }) ++
           (udpPort map { o ⇒ s" UDP port $o" }) ++
           Some(s"PID $pid") ++
           Some(state))

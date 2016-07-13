@@ -5,8 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.kernel.Scheduler
-import com.sos.scheduler.engine.kernel.Scheduler.buildVersion
+import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.WebjarsRoute
 import java.time.Instant.now
@@ -50,12 +49,14 @@ trait SchedulerHtmlPage extends HtmlPage {
         pageHeader,
         innerBody))
 
-  protected def pageHeader =
+  protected def pageHeader = {
+    import schedulerOverview.{pid, state, version}
     div(cls := "gray-box", marginBottom := "20px")(
       div(float.right)(a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(localDateTimeWithZoneToHtml(now))),
       div(color.gray)(
-        a(href := uris.overview, cls := "inherit-markup")(s"JobScheduler $buildVersion Master"),
-        s"· PID ${schedulerOverview.pid} · ${schedulerOverview.state}"))
+        a(href := uris.overview, cls := "inherit-markup")(s"JobScheduler $version Master"),
+        s" · PID $pid · $state"))
+  }
 
   protected def headline =
     h3 {
@@ -145,5 +146,5 @@ object SchedulerHtmlPage {
     raw(formatTime(LocalDateTimeWithZoneFormatter, instant))
 
   private def formatTime(formatter: DateTimeFormatter, instant: Instant) =
-    formatter.format(OffsetDateTime.ofInstant(instant, Scheduler.DefaultZoneId))
+    formatter.format(OffsetDateTime.ofInstant(instant, DefaultZoneId))
 }

@@ -74,7 +74,7 @@ with HasCloser {
   private var closed = false
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
 
-  val startInstant = now()
+  private val startedAt = now()
 
   onClose { injector.instance[DependencyInjectionCloser].closer.close() }
   enableJavaUtilLoggingOverSLF4J()
@@ -272,12 +272,10 @@ with HasCloser {
   def overview: Future[SchedulerOverview] =
     directOrSchedulerThreadFuture {
       new SchedulerOverview(
-        version = mavenProperties.version,
-        versionCommitHash = mavenProperties.versionCommitHash,
-        startInstant = startInstant,
-        instant = now,
+        version = mavenProperties.buildVersion,
+        startedAt = startedAt,
         schedulerId = schedulerConfiguration.schedulerId,
-        tcpPort = schedulerConfiguration.tcpPort match { case 0 ⇒ None case n ⇒ Some(n) },
+        httpPort = schedulerConfiguration.httpPortOption,
         udpPort = schedulerConfiguration.udpPort,
         pid = cppProxy.pid,
         state = SchedulerState.ofCppName(cppProxy.state_name))
