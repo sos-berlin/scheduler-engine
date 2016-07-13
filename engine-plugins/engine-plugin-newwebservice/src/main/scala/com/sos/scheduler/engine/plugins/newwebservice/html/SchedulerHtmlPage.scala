@@ -68,7 +68,7 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   //<link rel="stylesheet" href="/jobscheduler/master/webjars/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"/>
 
-  private def css = """
+  protected def css = """
 body {
   color: black;
   font-size: 13px;
@@ -78,7 +78,7 @@ th {
 }
 .gray-box {
   background-color: #f5f5f5;
-  border-radius = 4px;
+  border-radius = 2px;
   padding: 1px 5px 0 5px;
 }
 a.inherit-markup {
