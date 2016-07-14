@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
@@ -11,6 +12,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtml
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import scala.concurrent.ExecutionContext
+import scala.util.control.NonFatal
 import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
 import spray.http.HttpHeaders.`Cache-Control`
 import spray.http.MediaTypes.`text/html`
@@ -106,8 +108,19 @@ trait ApiRoute extends JobChainRoute with OrderRoute {
 }
 
 object ApiRoute {
+  private val logger = Logger(getClass)
+
   private val ApiExceptionHandler = ExceptionHandler {
+    // This is an internal API, so we expose internal error messages !!!
     case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
-    case e: CppException ⇒ complete((BadRequest, e.getMessage))
+    case e: IllegalArgumentException ⇒ complete((BadRequest, e.getMessage))
+    case e: RuntimeException ⇒ complete((BadRequest, e.getMessage))
+    case NonFatal(t) ⇒
+      logger.debug(t.toString, t)
+      val message = t match {
+        case _: IllegalArgumentException | _: RuntimeException ⇒ t.getMessage
+        case _ ⇒ t.toString
+      }
+      complete((BadRequest, message))
   }
 }
