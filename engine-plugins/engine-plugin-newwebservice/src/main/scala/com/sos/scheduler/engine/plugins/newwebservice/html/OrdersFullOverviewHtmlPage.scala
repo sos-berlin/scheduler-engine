@@ -34,13 +34,6 @@ extends SchedulerHtmlPage {
   protected def title = "Orders"
 
   override protected val css = s"""
-h3 {
-  margin-top: 30px;
-}
-div.jobChainHeadline {
-  font-weight: bold;
-  margin: 0 0 5px 0;
-}
 div.nodeHeadline {
   padding: 5px 0 0 5px;
   font-weight: bold;
@@ -65,10 +58,9 @@ div.orderSelection {
     ordersStatistics,
     query.jobChainQuery.reduce match {
       case jobChainPath: JobChainPath ⇒ div(jobChainOrders(jobChainPath, fullOverview.orders))
-      case folderPath: FolderPath ⇒ div(treeHtml(FolderTree(folderPath, fullOverview.orders)))
-      case _ ⇒ div(treeHtml(FolderTree(FolderPath.Root, fullOverview.orders)))
+      case folderPath: FolderPath ⇒ div(treeHtml(FolderTree.fromHasPaths(folderPath, fullOverview.orders)))
+      case _ ⇒ div(treeHtml(FolderTree.fromHasPaths(FolderPath.Root, fullOverview.orders)))
     })
-
 
   private def ordersStatistics = {
     val statistics = new OrderOverview.Statistics(fullOverview.orders)
@@ -78,25 +70,25 @@ div.orderSelection {
   }
 
   def treeHtml(tree: FolderTree[OrderOverview]): Vector[Frag] =
-    Vector[Frag](h3("Folder ", folderPathToOrdersA(tree.path)(tree.path.string))) ++
+    Vector[Frag](h2("Folder ", folderPathToOrdersA(tree.path)(tree.path.string))) ++
     folderOrders(tree.leafs map { _.obj }) ++
-    (for (folder ← tree.subfolders.sorted; o ← treeHtml(folder)) yield o)
+    (for (folder ← tree.subfolders.sortBy(_.path)(FolderPath.NameOrdering); o ← treeHtml(folder)) yield o)
 
   private def folderOrders(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
-    for ((jobChainPath, orders) ← orders groupBy { _.orderKey.jobChainPath };
+    for ((jobChainPath, orders) ← (orders groupBy { _.orderKey.jobChainPath }).toVector.sortBy(_._1)(JobChainPath.NameOrdering);
          o ← jobChainOrders(jobChainPath, orders))
       yield o
 
   private def jobChainOrders(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
-      Vector(div(cls := "jobChainHeadline")(
-        s"JobChain ",
-        jobChainPathToOrdersA(jobChainPath)(jobChainPath.string),
-        span(paddingLeft := 10.px)(" "),
-        jobChainPathToA(jobChainPath)("(definition)"))) ++
-      nodeOrders(orders)
+    Vector(h3(
+      s"JobChain ",
+      jobChainPathToOrdersA(jobChainPath)(jobChainPath.string),
+      span(paddingLeft := 10.px)(" "),
+      jobChainPathToA(jobChainPath)("(definition)"))) ++
+    nodeOrders(orders)
 
   private def nodeOrders(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
-    for ((node, orders) ← orders groupBy { _.orderState }) yield
+    for ((node, orders) ← orders retainOrderGroupBy { _.orderState }) yield
       div(cls := "nodeOrders")(
         div(cls := "nodeHeadline")(s"Node ${node.string}"),
         orderTable(orders)
@@ -138,7 +130,7 @@ div.orderSelection {
   private object orderSelection {
     def html =
       div(cls := "orderSelection")(
-        "Selection",
+        "Show only",
         br,
         for ((key, valueOption) ← List("suspended" → query.isSuspended,
                                        "setback" → query.isSetback,
@@ -151,8 +143,8 @@ div.orderSelection {
 
     private def inputElement(key: String, value: Option[Boolean], checkedMeans: Boolean) = {
       val name = if (checkedMeans) key else s"not-$key"
-      val checked = !checkedMeans ^ (value getOrElse checkedMeans)
-      val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? undefined : !$checkedMeans})"
+      val checked = !checkedMeans ^ (value getOrElse !checkedMeans)
+      val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? $checkedMeans : undefined})"
       label(
         input(attrs.name := name, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
         if (checkedMeans) key else s"not")

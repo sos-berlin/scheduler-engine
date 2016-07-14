@@ -2421,9 +2421,18 @@ ArrayListJ Job_chain::java_nodes()
 }
 
 ArrayListJ Job_chain::java_orders() {
+    // Retain order of Nodes and Orders
     ArrayListJ result = ArrayListJ::new_instance(int_cast(_order_map.size()));
-    Z_FOR_EACH_CONST(Order_map, _order_map, it) 
-        result.add(it->second->java_sister());
+    Z_FOR_EACH_CONST(Node_list, _node_list, n) {
+        if (Order_queue_node* q = Order_queue_node::try_cast(*n)) {
+            Z_FOR_EACH_REVERSE_CONST(Order_queue::Queue, q->order_queue()->_queue, o) {
+                result.add((*o)->java_sister());
+            }
+        }
+    }
+    Z_FOR_EACH_CONST(Blacklist_map, _blacklist_map, i) {
+        result.add(i->second->java_sister());
+    }
     return result;
 }
 

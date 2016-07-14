@@ -5,8 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.kernel.Scheduler
-import com.sos.scheduler.engine.kernel.Scheduler.buildVersion
+import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.WebjarsRoute
 import java.time.Instant.now
@@ -46,20 +45,23 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   protected def pageBody(innerBody: Frag*) =
     body(
+      pageHeader,
       div(cls := "container", width := "100%")(
-        pageHeader,
         innerBody))
 
-  protected def pageHeader =
-    div(cls := "gray-box", marginBottom := "20px")(
+  protected def pageHeader = {
+    import schedulerOverview.{pid, state, version}
+    div(cls := "pageHeader")(
       div(float.right)(a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(localDateTimeWithZoneToHtml(now))),
       div(color.gray)(
-        a(href := uris.overview, cls := "inherit-markup")(s"JobScheduler $buildVersion Master"),
-        s"· PID ${schedulerOverview.pid} · ${schedulerOverview.state}"))
+        a(href := uris.overview, cls := "inherit-markup")(s"JobScheduler $version Master"),
+        s" · PID $pid · $state"))
+  }
 
   protected def headline =
-    h3 {
-      val prefix = a(href := uris.overview, cls := "inherit-markup")(schedulerOverview.schedulerId.string)
+    h1 {
+      val prefix = a(href := uris.overview, cls := "inherit-markup")(
+        s"JobScheduler '${schedulerOverview.schedulerId.string}'")
       emptyToNone(headlineSuffix) match {
         case None ⇒ prefix
         case Some(suffix) ⇒ prefix :: StringFrag(s" · $suffix") :: Nil
@@ -73,13 +75,23 @@ body {
   color: black;
   font-size: 13px;
 }
+div.pageHeader {
+  margin-bottom: 10px;
+  padding: 1px 5px 0 5px;
+  border-radius = 2px;
+  background-color: #f5f5f5;
+}
+h2 {
+  margin-top: 30px;
+  font-size: 24px;
+}
+h3 {
+  margin: 20px 0 10px 0;
+  font-size: 13px;
+  font-weight: bold;
+}
 th {
   font-weight: normal;
-}
-.gray-box {
-  background-color: #f5f5f5;
-  border-radius = 2px;
-  padding: 1px 5px 0 5px;
 }
 a.inherit-markup {
   color: inherit;
@@ -145,5 +157,5 @@ object SchedulerHtmlPage {
     raw(formatTime(LocalDateTimeWithZoneFormatter, instant))
 
   private def formatTime(formatter: DateTimeFormatter, instant: Instant) =
-    formatter.format(OffsetDateTime.ofInstant(instant, Scheduler.DefaultZoneId))
+    formatter.format(OffsetDateTime.ofInstant(instant, DefaultZoneId))
 }

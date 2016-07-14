@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
 import com.google.common.io.Files.touch
+import com.sos.scheduler.engine.base.sprayjson.JsonRegexMatcher._
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
@@ -11,6 +12,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
@@ -22,9 +24,8 @@ import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderComma
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.variable.VariableSet
-import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
-import com.sos.scheduler.engine.test.json.JsonRegexMatcher._
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
 import java.nio.file.Files.deleteIfExists
@@ -50,8 +51,10 @@ import spray.json._
 final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val directSchedulerClient = instance[DirectSchedulerClient]
-  private lazy val schedulerUri = s"http://127.0.0.1:${jettyPortNumber(injector)}"
+  private lazy val httpPort = findRandomFreeTcpPort()
+  private lazy val schedulerUri = s"http://127.0.0.1:$httpPort"
   private lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
+  protected override lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-http-port=$httpPort"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
@@ -92,7 +95,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
     "overview" in {
       val overview = client.overview await TestTimeout
-      assert(overview == (directSchedulerClient.overview await  TestTimeout).copy(instant = overview.instant))
+      assert(overview == (directSchedulerClient.overview await TestTimeout))
       assert(overview.schedulerId == SchedulerId("test"))
       assert(overview.state == SchedulerState.running)
     }
@@ -230,15 +233,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
 
   "JSON" - {
     "overview" in {
-      val overview = webSchedulerClient.get[JsObject](_.overview) await TestTimeout
-      checkRegexJson(
-        json = overview.toString,
+      val overviewString = webSchedulerClient.get[String](_.overview) await TestTimeout
+      testRegexJson(
+        json = overviewString,
         patternMap = Map(
           "version" → """\d+\..+""".r,
-          "versionCommitHash" → ".*".r,
-          "startInstant" → AnyIsoTimestamp,
-          "instant" → AnyIsoTimestamp,
+          "version" → """.+""".r,
+          "startedAt" → AnyIsoTimestamp,
           "schedulerId" → "test",
+          "httpPort" → httpPort,
           "pid" → AnyInt,
           "state" → "running"))
     }
@@ -297,7 +300,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     val jsObject = jsonString.parseJson.asJsObject
     val directOverview = directSchedulerClient.overview await TestTimeout
     assert(jsObject.fields("version") == JsString(directOverview.version))
-    assert(jsObject.fields("versionCommitHash") == JsString(directOverview.versionCommitHash))
   }
 
   "Web service error behavior" - {
