@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting.
 
 final case class Setting(details: SettingDetail*) {
 
-  private val name = details flatMap {_.jobNameParts} mkString "_"
-  val jobPath = JobPath(s"/test_$name")
+  private val name = details flatMap { _.jobNameParts } mkString "-"
+  val jobPath = JobPath(s"/$name")
   val orderKey = OrderKey("/test", name)
   private val orderState = s"$InitialOrderStatePrefix$name"
 
@@ -22,5 +22,5 @@ final case class Setting(details: SettingDetail*) {
 }
 
 object Setting {
-  val InitialOrderStatePrefix = "initial_"
+  val InitialOrderStatePrefix = "initial-"
 }
