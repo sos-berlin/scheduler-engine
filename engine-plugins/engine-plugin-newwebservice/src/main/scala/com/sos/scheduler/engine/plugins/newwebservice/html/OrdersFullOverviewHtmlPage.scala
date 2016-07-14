@@ -130,7 +130,7 @@ div.orderSelection {
   private object orderSelection {
     def html =
       div(cls := "orderSelection")(
-        "Selection",
+        "Show only",
         br,
         for ((key, valueOption) ← List("suspended" → query.isSuspended,
                                        "setback" → query.isSetback,
@@ -143,8 +143,8 @@ div.orderSelection {
 
     private def inputElement(key: String, value: Option[Boolean], checkedMeans: Boolean) = {
       val name = if (checkedMeans) key else s"not-$key"
-      val checked = !checkedMeans ^ (value getOrElse checkedMeans)
-      val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? undefined : !$checkedMeans})"
+      val checked = !checkedMeans ^ (value getOrElse !checkedMeans)
+      val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? $checkedMeans : undefined})"
       label(
         input(attrs.name := name, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
         if (checkedMeans) key else s"not")
