@@ -28,14 +28,14 @@ trait CommandRoute {
           val command = parameterMap.get("command") match {
             case Some(cmd) if cmd startsWith "<" ⇒ cmd
             case Some(cmd) ⇒ s"<$cmd/>"
-            case None ⇒ <show_state/>.toString
+            case None ⇒ <s/>.toString
           }
           emptyParameterMap(parameterMap - "command") {
             if (commandIsReadOnly(command)) {
               val elem = SafeXML.loadString(command)  // Verify valid XML
               complete(client.uncheckedExecute(elem) map XmlString.apply)
             } else
-              complete(Forbidden)
+              complete(Forbidden, "Only a read-only command is allowed")
           }
         }
       }
