@@ -6,9 +6,9 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class WebServiceContext(
-  val baseUri: Uri,
-  val webjarsUri: Uri,
-  val htmlEnabled: Boolean)
+  val baseUri: Uri = Uri("/"),
+  val webjarsUri: Uri = Uri("/jobscheduler/master/webjars"),
+  val htmlEnabled: Boolean = false)
 {
   def toStylesheetLinkHtml(relativePath: String) = <link rel="stylesheet" href={s"$webjarsUri/$relativePath"}/>
 }

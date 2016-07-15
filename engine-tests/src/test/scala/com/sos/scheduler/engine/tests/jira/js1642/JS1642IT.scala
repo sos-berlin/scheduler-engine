@@ -10,7 +10,6 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
@@ -306,12 +305,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     "jobscheduler/master/api/ERROR-500" in {
       intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString(s"TEST/ERROR-500")) await TestTimeout }
         .response.status shouldEqual InternalServerError
-    }
-
-    "jobscheduler/master/api/OutOfMemoryError" in {
-      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString("TEST/OutOfMemoryError")) await TestTimeout }
-        .response.status shouldEqual InternalServerError
-      webSchedulerClient.get[String](_.overview) await TestTimeout
     }
 
     "jobscheduler/master/api/UNKNOWN" in {

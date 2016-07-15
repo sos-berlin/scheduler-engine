@@ -5,17 +5,13 @@ import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.accept
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, _}
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
-import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
 import spray.http.HttpHeaders.`Cache-Control`
-import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes._
 import spray.routing.Directives._
 import spray.routing.{ExceptionHandler, Route}
@@ -26,53 +22,47 @@ import spray.routing.{ExceptionHandler, Route}
 trait ApiRoute extends JobChainRoute with OrderRoute {
 
   protected def client: DirectSchedulerClient
-  protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
+  //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
   protected implicit def executionContext: ExecutionContext
 
   protected final def apiRoute: Route =
-    pathPrefix("api") {
-      respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
-        handleExceptions(ApiExceptionHandler) {
-          (pathEnd & get) {
+    respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
+      handleExceptions(ApiExceptionHandler) {
+        pathEndElseRedirect(webServiceContext) {
+          get {
             completeTryHtml(client.overview)
-          } ~
-          (pathSingleSlash & get) {
-            accept(`text/html`) {
-              redirect("../api", TemporaryRedirect)
-            }
-          } ~
-          (pathPrefix("command") & pathEnd & post) {
-            entity(as[XmlString]) { case XmlString(xmlString) ⇒
-             complete(client.executeXml(xmlString) map XmlString.apply)
-            }
-          } ~
-          pathPrefix("order") {
-            (pathEnd & get) {
-               redirect("order/", TemporaryRedirect)
-            } ~
+          }
+        } ~
+        (pathPrefix("command") & pathEnd & post) {
+          entity(as[XmlString]) { case XmlString(xmlString) ⇒
+            complete(client.executeXml(xmlString) map XmlString.apply)
+          }
+        } ~
+        pathPrefix("order") {
+          eatSlash(webServiceContext) {
             orderRoute
-          } ~
-          pathPrefix("jobChain") {
-            (pathEnd & get) {
-               redirect("jobChain/", TemporaryRedirect)
-            } ~
+          }
+        } ~
+        pathPrefix("jobChain") {
+          eatSlash(webServiceContext) {
             jobChainRoute
           }
-          /*~
-          pathPrefix("subsystems") {
-            subsystemsRoute
-          }
-          */
         }
+        /*~
+        pathPrefix("subsystems") {
+          subsystemsRoute
+        }
+        */
       }
     }
 
+  /*
   private def subsystemsRoute: Route =
     pathEnd {
       get {
         complete(fileBasedSubsystemRegister.descriptions map { _.fileBasedType.cppName })
       }
-    } /*~
+    } ~
     pathPrefix(Segment) { subsystemName ⇒
       val subsystem = fileBasedSubsystemRegister.subsystem(FileBasedType.fromCppName(subsystemName))
       pathEnd {
