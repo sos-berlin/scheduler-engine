@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
+import akka.util.ByteString
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.base.sprayjson.JsonRegexMatcher._
 import com.sos.scheduler.engine.client.api.SchedulerClient
@@ -10,6 +11,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
@@ -35,7 +37,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
@@ -212,16 +214,77 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
         JobChainOverview(xbJobChainPath, FileBasedState.active)))
     }
 
-    "<show_state>" in {
-      val response = client.executeXml("<show_state/>") map SafeXML.loadString await TestTimeout
-      val state = response \ "answer" \ "state"
-      assert((state \ "@state").toString == "running")
-      assert((state \ "@ip_address").toString == "127.0.0.1")
-    }
+    "command" - {
+      "<show_state> as xml.Elem" in {
+        testValidExecute {
+          client.execute(<show_state/>)
+        }
+        testThrowingExecute {
+          client.execute(<UNKNOWN/>)
+        }
+        testValidExecute {
+          client.uncheckedExecute(<show_state/>)
+        }
+        testUncheckedExecute {
+          client.uncheckedExecute(<UNKNOWN/>)
+        }
+      }
 
-    "Speed test <show_state>" in {
-      Stopwatch.measureTime(10, "<show_state what='orders'>") {
-        client.executeXml("<show_state what='orders'/>") map SafeXML.loadString await TestTimeout
+      "<show_state> as String" in {
+        testValidExecute {
+          client.executeXml("<show_state/>")
+        }
+        testValidExecute {
+          client.uncheckedExecuteXml("<show_state/>")
+        }
+        testThrowingExecute {
+          client.executeXml("<UNKNOWN/>")
+        }
+        testUncheckedExecute {
+          client.uncheckedExecuteXml("<UNKNOWN/>")
+        }
+      }
+
+      "<show_state> as ByteString" in {
+        testValidExecute {
+          client.executeXml(ByteString("<show_state/>"))
+        }
+        testValidExecute {
+          client.uncheckedExecuteXml(ByteString("<show_state/>"))
+        }
+        testThrowingExecute {
+          client.executeXml(ByteString("<UNKNOWN/>"))
+        }
+        testUncheckedExecute {
+          client.uncheckedExecuteXml(ByteString("<UNKNOWN/>"))
+        }
+      }
+
+      def testValidExecute(execute: ⇒ Future[String]): Unit = {
+        val response = execute map SafeXML.loadString await TestTimeout
+        val state = response \ "answer" \ "state"
+        assert((state \ "@state").toString == "running")
+        assert((state \ "@ip_address").toString == "127.0.0.1")
+      }
+
+      def testThrowingExecute(execute: ⇒ Future[String]): Unit =
+        intercept[RuntimeException] {
+          controller.toleratingErrorCodes(_ ⇒ true) {
+            execute await TestTimeout
+          }
+        }
+
+      def testUncheckedExecute(execute: ⇒ Future[String]): Unit = {
+        val response = controller.toleratingErrorCodes(_ ⇒ true) {
+          execute map SafeXML.loadString await TestTimeout
+        }
+        assert((response \ "answer" \ "ERROR" \ "@code").toString.nonEmpty)
+      }
+
+      "Speed test <show_state>" in {
+        Stopwatch.measureTime(10, "<show_state what='orders'>") {
+          client.executeXml("<show_state what='orders'/>") map SafeXML.loadString await TestTimeout
+        }
       }
     }
   }

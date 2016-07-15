@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, _}
@@ -19,7 +18,7 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute extends JobChainRoute with OrderRoute {
+trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute {
 
   protected def client: DirectSchedulerClient
   //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
@@ -33,10 +32,8 @@ trait ApiRoute extends JobChainRoute with OrderRoute {
             completeTryHtml(client.overview)
           }
         } ~
-        (pathPrefix("command") & pathEnd & post) {
-          entity(as[XmlString]) { case XmlString(xmlString) ⇒
-            complete(client.executeXml(xmlString) map XmlString.apply)
-          }
+        (pathPrefix("command") & pathEnd) {
+          commandRoute
         } ~
         pathPrefix("order") {
           eatSlash(webServiceContext) {

@@ -38,8 +38,8 @@ trait WebCommandClient extends CommandClient {
       decode(Gzip) ~>
       unmarshal[XmlString]
 
-  final def executeXml(string: String): Future[String] =
-    uncheckedExecuteXml(string) map { response ⇒
+  final def execute(elem: xml.Elem): Future[String] =
+    uncheckedExecute(elem) map { response ⇒
       checkResponseForError(StringSource(response))
       response
     }
@@ -50,15 +50,15 @@ trait WebCommandClient extends CommandClient {
       response
     }
 
-  final def execute(elem: xml.Elem): Future[String] =
-    uncheckedExecute(elem) map { response ⇒
+  final def executeXml(string: String): Future[String] =
+    uncheckedExecuteXml(string) map { response ⇒
       checkResponseForError(StringSource(response))
       response
     }
 
-  final def uncheckedExecuteXml(string: String): Future[String] = {
-    logger.debug(s"POST $commandUri $string}")
-    pipeline(Post(commandUri, XmlString(string))) map { _.string }
+  final def uncheckedExecute(elem: xml.Elem): Future[String] = {
+    logger.debug(s"POST $commandUri $elem")
+    pipeline(Post(commandUri, elem)) map { _.string }
   }
 
   final def uncheckedExecuteXml(byteString: ByteString): Future[String] = {
@@ -66,9 +66,9 @@ trait WebCommandClient extends CommandClient {
     pipeline(Post(commandUri, XmlBytes(byteString))) map { _.string }
   }
 
-  final def uncheckedExecute(elem: xml.Elem): Future[String] = {
-    logger.debug(s"POST $commandUri $elem")
-    pipeline(Post(commandUri, elem)) map { _.string }
+  final def uncheckedExecuteXml(string: String): Future[String] = {
+    logger.debug(s"POST $commandUri $string}")
+    pipeline(Post(commandUri, XmlString(string))) map { _.string }
   }
 }
 
