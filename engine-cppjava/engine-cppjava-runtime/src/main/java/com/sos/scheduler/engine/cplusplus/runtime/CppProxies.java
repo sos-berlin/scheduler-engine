@@ -6,7 +6,7 @@ public final class CppProxies {
         if (x instanceof CppProxyInvalidatedException)
             throw (CppProxyInvalidatedException)x;
         String msg = x.getMessage();
-        if (msg.startsWith("Z-JAVA-111 "))
+        if (msg != null && msg.startsWith("Z-JAVA-111 "))
             throw new CppProxyInvalidatedException(x.getMessage() +", "+ cppProxy, x);
         throw new CppException(x);
     }
