@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.command
 import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.client.command.SchedulerClientFactoryTest._
-import com.sos.scheduler.engine.client.common.RemoteSchedulers
+import com.sos.scheduler.engine.client.web.WebCommandClient
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
@@ -65,7 +65,7 @@ final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
 
   private def expectError[A](future: Future[A]): Unit =
     inside(Await.ready(future, Duration.Inf).value.get) {
-      case Failure(e: RemoteSchedulers.XmlResponseException) ⇒ e.getMessage shouldEqual ErrorMessage
+      case Failure(e: WebCommandClient.XmlException) ⇒ e.getMessage shouldEqual ErrorMessage
     }
 
   "uncheckedExecute" in {

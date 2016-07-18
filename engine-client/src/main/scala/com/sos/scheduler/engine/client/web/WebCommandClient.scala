@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.client.web
 
 import akka.actor.ActorRefFactory
 import akka.util.ByteString
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.api.CommandClient
-import com.sos.scheduler.engine.client.common.RemoteSchedulers.checkResponseForError
 import com.sos.scheduler.engine.client.web.WebCommandClient._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.{SafeXML, StringSource}
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.{XmlBytes, XmlString}
 import java.io.ByteArrayInputStream
 import scala.concurrent.Future
@@ -40,19 +40,19 @@ trait WebCommandClient extends CommandClient {
 
   final def execute(elem: xml.Elem): Future[String] =
     uncheckedExecute(elem) map { response ⇒
-      checkResponseForError(StringSource(response))
+      checkResponseForError(response)
       response
     }
 
   final def executeXml(byteString: ByteString): Future[String] =
     uncheckedExecuteXml(byteString) map { response ⇒
-      checkResponseForError(StringSource(response))
+      checkResponseForError(response)
       response
     }
 
   final def executeXml(string: String): Future[String] =
     uncheckedExecuteXml(string) map { response ⇒
-      checkResponseForError(StringSource(response))
+      checkResponseForError(response)
       response
     }
 
@@ -74,4 +74,16 @@ trait WebCommandClient extends CommandClient {
 
 object WebCommandClient {
   private val logger = Logger(getClass)
+
+  // Similar to RemoteSchedulers.checkResponseForError, but accepts text in XML and is faster
+  def checkResponseForError(xmlString: String): Unit = {
+    xmlString.contains("<ERROR") option  {
+      val error = SafeXML.loadString(xmlString) \ "answer" \ "ERROR"
+      //val code = (error \ "@code").toString
+      val message = (error \ "@text").toString
+      throw new XmlException(message)
+    }
+  }
+
+  final class XmlException(message: String) extends RuntimeException(message)
 }

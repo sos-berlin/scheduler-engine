@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1052
 
-import com.sos.scheduler.engine.client.common.RemoteSchedulers
+import com.sos.scheduler.engine.client.web.WebCommandClient
+import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -8,10 +9,10 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1052.JS1052IT._
 import java.io.{ByteArrayInputStream, OutputStreamWriter}
 import java.net.Socket
-import javax.xml.transform.stream.StreamSource
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
+import org.xml.sax.InputSource
 import scala.collection.mutable
 
 /** JS-1052 Many TCP supervisor clients
@@ -19,6 +20,7 @@ import scala.collection.mutable
  */
 @RunWith(classOf[JUnitRunner])
 final class JS1052IT extends FreeSpec with ScalaSchedulerTest {
+
   private lazy val supervisorTcpPort = findRandomFreeTcpPort()
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
@@ -33,7 +35,8 @@ final class JS1052IT extends FreeSpec with ScalaSchedulerTest {
       val length = socket.getInputStream.read(b)
       assert(length > 0)
       val len = if (b(length - 1) == '\u0000') length -1 else length
-      RemoteSchedulers.checkResponseForError(new StreamSource(new ByteArrayInputStream(b, 0, len)))
+      val xmlResponseString = SafeXML.load(new InputSource(new ByteArrayInputStream(b, 0, len))).toString
+      WebCommandClient.checkResponseForError(xmlResponseString)
     }
 
     val sockets = mutable.Buffer[Socket]()
