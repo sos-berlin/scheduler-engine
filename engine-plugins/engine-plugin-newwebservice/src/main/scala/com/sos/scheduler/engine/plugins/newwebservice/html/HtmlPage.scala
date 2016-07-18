@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import scala.language.implicitConversions
 import scalatags.Text.TypedTag
 import spray.http.HttpEntity
@@ -14,11 +15,18 @@ trait HtmlPage {
 }
 
 object HtmlPage {
+  private val logger = Logger(getClass)
 
   implicit val marshaller = Marshaller.of[HtmlPage](`text/html`) { (htmlPage, contentType, ctx) ⇒
-    val sb = new StringBuilder(10000)
-    sb.append("<!DOCTYPE html>")
-    htmlPage.scalatag.writeTo(sb)
-    ctx.marshalTo(HttpEntity(contentType, sb.toString))
+    try {
+      val sb = new StringBuilder(10000)
+      sb.append("<!DOCTYPE html>")
+      htmlPage.scalatag.writeTo(sb)
+      ctx.marshalTo(HttpEntity(contentType, sb.toString))
+    } catch {
+      case e: OutOfMemoryError ⇒
+        logger.error(e.toString)
+        throw new RuntimeException(e.toString, e)  // Too avoid termination of Akka
+    }
   }
 }
