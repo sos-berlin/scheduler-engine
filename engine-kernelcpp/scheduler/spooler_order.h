@@ -182,6 +182,10 @@ struct Order : Com_order,
     static string               string_id               ( const Id& );
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { return _id == id; }
+    
+    bool id_locked() const {
+        return _id_locked;
+    }
 
     void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  log()->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { return _title; }
@@ -204,6 +208,7 @@ struct Order : Com_order,
     bool                        is_in_job_chain         () const                                    { return !_job_chain_path.empty(); }
     Job_chain*                  job_chain_for_api       () const;
     job_chain::Node*            job_chain_node          () const                                    { return _job_chain_node; }
+    javabridge::Lightweight_jobject java_job_chain_node() const;
     Order_queue*                order_queue             ();
 
     bool                        finished                ();

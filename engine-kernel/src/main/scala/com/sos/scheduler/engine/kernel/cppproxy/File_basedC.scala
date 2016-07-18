@@ -16,4 +16,5 @@ trait File_basedC[S <: Sister] {
   def is_visible: Boolean
   def has_base_file: Boolean
   def is_to_be_removed: Boolean
+  def name_is_fixed: Boolean
 }

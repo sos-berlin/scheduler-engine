@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.cplusplus.runtime.HasSister
@@ -53,7 +52,8 @@ trait FileBasedSubsystem extends Subsystem {
   final def count =
     paths.size
 
-  final def contains(path: Path) = visiblePaths contains path
+  final def contains(path: Path) =
+    (paths contains path) && (Option(cppProxy.java_file_based_or_null(path.string)) exists { _.is_visible })
 
   final def paths: Seq[Path] =
     mutablePathSet.synchronized {
@@ -62,6 +62,8 @@ trait FileBasedSubsystem extends Subsystem {
 
   def visiblePaths: Seq[Path] =
     cppProxy.file_based_paths(visibleOnly = true) map description.stringToPath
+
+  def visibleFileBaseds: Seq[ThisFileBased] = fileBaseds filter { _.isVisible }
 
   final def fileBased(path: Path): ThisFileBased =
     cppProxy.java_file_based(path.string).getSister

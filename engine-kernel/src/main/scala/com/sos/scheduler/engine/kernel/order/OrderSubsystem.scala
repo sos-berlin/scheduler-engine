@@ -93,16 +93,14 @@ extends FileBasedSubsystem {
       jobChains filter { _ refersToJob job }
     }
 
-  def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] = {
-    def visibleJobChains = visiblePaths map jobChain
+  def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] =
     query.reduce match {
-      case JobChainQuery.All ⇒ visibleJobChains
+      case JobChainQuery.All ⇒ visibleFileBaseds
       case jobChainPath: JobChainPath ⇒ List(jobChain(jobChainPath))
       case folderPath: FolderPath ⇒
         folderSubsystem.fileBased(folderPath)  // Fails if folders does not exists
-        visibleJobChains filter { o ⇒ query.matches(o.path) }
+        visibleFileBaseds filter { o ⇒ query.matches(o.path) }
     }
-  }
 
   def jobChains: Seq[JobChain] =
     fileBaseds

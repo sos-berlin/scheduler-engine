@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
+import com.sos.scheduler.engine.common.scalautil.SetOnce
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -20,6 +21,8 @@ with EventSource {
   self ⇒
 
   type ThisPath <: TypedPath
+
+  private val fixedPath = new SetOnce[ThisPath]
 
   protected def subsystem: FileBasedSubsystem
 
@@ -61,7 +64,14 @@ with EventSource {
   /** Für Java. */
   def getPath: TypedPath = path
 
-  def path: ThisPath = stringToPath(cppProxy.path)
+  def path: ThisPath =
+    fixedPath getOrElse {
+      if (cppProxy.name_is_fixed) {
+        fixedPath.trySet(stringToPath(cppProxy.path))
+        fixedPath()
+      } else
+        stringToPath(cppProxy.path)
+    }
 
   def name =
     cppProxy.name

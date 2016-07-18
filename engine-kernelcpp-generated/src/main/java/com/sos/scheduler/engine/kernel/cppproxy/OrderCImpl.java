@@ -168,6 +168,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native boolean has_base_file__native(long cppReference);
 
 
+    @Override public boolean id_locked() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return id_locked__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean id_locked__native(long cppReference);
+
+
     @Override public java.lang.String initial_state_string() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -284,6 +298,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.order.jobchain.Node java_job_chain_node() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.order.jobchain.Node result = job_chain_node_sister__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.Node.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.order.jobchain.Node job_chain_node_sister__native(long cppReference);
+
+
     @Override public java.lang.String job_chain_path_string() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -330,6 +360,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native java.lang.String name__native(long cppReference);
+
+
+    @Override public boolean name_is_fixed() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return name_is_fixed__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean name_is_fixed__native(long cppReference);
 
 
     @Override public long next_step_at_millis() {

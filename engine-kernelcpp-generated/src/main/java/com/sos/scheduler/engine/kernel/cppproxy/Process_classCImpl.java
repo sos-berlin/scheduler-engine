@@ -176,6 +176,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     private static native java.lang.String name__native(long cppReference);
 
 
+    @Override public boolean name_is_fixed() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return name_is_fixed__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean name_is_fixed__native(long cppReference);
+
+
     @Override public java.lang.String path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

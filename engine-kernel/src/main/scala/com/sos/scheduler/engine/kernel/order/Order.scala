@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
 import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.EternalCppMillis
@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.async.CppCall
-import com.sos.scheduler.engine.kernel.cppproxy.OrderC
+import com.sos.scheduler.engine.kernel.cppproxy.{NodeCI, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
@@ -38,6 +38,8 @@ with OrderPersistence {
   type ThisPath = OrderKey
 
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
+  private val idOnce = new SetOnce[OrderId]
+  private val sourceTypeOnce = new SetOnce[OrderSourceType]
 
   def onCppProxyInvalidated(): Unit = {}
 
@@ -81,21 +83,32 @@ with OrderPersistence {
   def fileBasedType = FileBasedType.order
 
   def sourceType: OrderSourceType =
-    if (cppProxy.is_file_order) OrderSourceType.fileOrderSource
-    else if (cppProxy.has_base_file) OrderSourceType.fileBased
-    else OrderSourceType.adHoc
+    sourceTypeOnce getOrUpdate {
+      if (cppProxy.is_file_order) OrderSourceType.fileOrderSource
+      else if (cppProxy.has_base_file) OrderSourceType.fileBased
+      else OrderSourceType.adHoc
+    }
 
   def key = orderKey
 
   def orderKey: OrderKey = jobChainPath orderKey id
 
   def id: OrderId =
-    OrderId(cppProxy.string_id)
+    idOnce getOrElse {
+      if (cppProxy.id_locked) {
+        idOnce.trySet(OrderId(cppProxy.string_id))
+        idOnce()
+      } else
+        OrderId(cppProxy.string_id)
+      }
 
   def nodeKey = NodeKey(jobChainPath, state)
 
   def state: OrderState =
-    OrderState(cppProxy.string_state)
+    cppProxy.java_job_chain_node match {
+      case null ⇒ OrderState(cppProxy.string_state)
+      case node ⇒ node.orderState  // java_job_chain_node is somewhat faster then accessing string_state
+    }
 
   def initialState: OrderState =
     OrderState(cppProxy.initial_state_string)
@@ -149,7 +162,10 @@ with OrderPersistence {
   }
 
   def jobChainPath: JobChainPath =
-    emptyToNone(cppProxy.job_chain_path_string) map JobChainPath.apply getOrElse throwNotInAJobChain()
+    cppProxy.job_chain match {
+      case null ⇒ emptyToNone(cppProxy.job_chain_path_string) map JobChainPath.apply getOrElse throwNotInAJobChain()
+      case o ⇒ o.getSister.path   // Faster
+    }
 
   def jobChain: JobChain =
     jobChainOption getOrElse throwNotInAJobChain()

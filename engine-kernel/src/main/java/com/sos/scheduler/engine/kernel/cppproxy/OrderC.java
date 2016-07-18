@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 import com.sos.scheduler.engine.kernel.order.Order;
+import com.sos.scheduler.engine.kernel.order.jobchain.Node;
 
 @CppClass(clas="sos::scheduler::order::Order", directory="scheduler", include="spooler.h")
 public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
@@ -38,4 +39,6 @@ public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
     long setback_millis();
     int task_id();
     boolean is_file_order();
+    boolean id_locked();
+    Node java_job_chain_node();
 }

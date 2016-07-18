@@ -250,6 +250,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.lang.String name__native(long cppReference);
 
 
+    @Override public boolean name_is_fixed() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return name_is_fixed__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean name_is_fixed__native(long cppReference);
+
+
     @Override public long next_start_time_millis() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

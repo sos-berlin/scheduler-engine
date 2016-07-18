@@ -5,6 +5,7 @@
 #include "com__sos__scheduler__engine__kernel__cppproxy__OrderC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.h"
+#include "com__sos__scheduler__engine__kernel__order__jobchain__Node.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 

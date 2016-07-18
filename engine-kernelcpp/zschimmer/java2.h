@@ -320,6 +320,18 @@ struct Abstract_jobject : Object
     void                        steal_local_ref             (const Local_jobject&);                 // Falsche Benutzung
 };
 
+
+struct Lightweight_jobject {
+    public: Lightweight_jobject(jobject o) : 
+        _jobject(o) {}
+    
+    public: jobject local_ref() const {  // May be a global reference - C++/Java bridge expects this name
+        return _jobject; 
+    }
+    
+    private: jobject _jobject;
+};
+
 //--------------------------------------------------------------------------Abstract_global_jobject
 // Neue, vereinfachte Version von Global_jobject
 // Ohne jobject, assign_jobject() implementiert mit NewGlobalRef() und DeleteGlobalRef.

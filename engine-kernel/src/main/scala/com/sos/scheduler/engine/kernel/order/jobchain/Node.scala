@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, SetOnce}
 import com.sos.scheduler.engine.common.xml.XmlUtils.nodeListToSeq
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -24,6 +24,8 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   protected val cppProxy: NodeCI
 
+  private val orderStateOnce = new SetOnce[OrderState]
+
   def onCppProxyInvalidated() = close()
 
   @ForCpp
@@ -42,7 +44,7 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   final def jobChainPath = JobChainPath(cppProxy.job_chain_path)
 
-  final def orderState = OrderState(cppProxy.string_order_state)
+  final def orderState = orderStateOnce getOrUpdate OrderState(cppProxy.string_order_state)
 
   final def nextState = OrderState(cppProxy.string_next_state)
 

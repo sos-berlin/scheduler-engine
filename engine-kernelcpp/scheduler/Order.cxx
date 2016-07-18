@@ -2688,6 +2688,10 @@ Job_chain* Order::job_chain_for_api() const
                                               : NULL;
 }
 
+javabridge::Lightweight_jobject Order::java_job_chain_node() const {
+    return javabridge::Lightweight_jobject(_job_chain_node  ? _job_chain_node->java_sister() : NULL);
+}
+
 //----------------------------------------------------------------------------Order::postprocessing
 
 void Order::postprocessing(const Order_state_transition& state_transition, const Xc* exception)

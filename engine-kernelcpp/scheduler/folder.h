@@ -210,6 +210,11 @@ struct File_based : Abstract_scheduler_object,
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     void                        fix_name                    ()                                      { _name_is_fixed = true; }
+    
+    bool name_is_fixed() const { 
+        return _name_is_fixed; 
+    }
+
     Absolute_path               path                        () const;
     Absolute_path               path_or_empty               () const;
     string                      string_path                 () const                                { return path().with_slash(); }
