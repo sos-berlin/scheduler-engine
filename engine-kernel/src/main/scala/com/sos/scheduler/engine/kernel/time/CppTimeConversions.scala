@@ -7,12 +7,21 @@ object CppTimeConversions {
 
   def eternalCppMillisToNoneInstant(millis: Long): Option[Instant] = {
     require(millis > 0, s"Timestamp from C++ is negative: $millis")
-    Some(millis) filter { _ != EternalCppMillis } map Instant.ofEpochMilli
+    if (millis == EternalCppMillis)
+      None
+    else
+      Some(Instant.ofEpochMilli(millis))
   }
 
   def zeroCppMillisToNoneInstant(millis: Long): Option[Instant] =
-    Some(millis) filter { _ != 0 } map Instant.ofEpochMilli
+    if (millis == 0)
+      None
+    else
+      Some(Instant.ofEpochMilli(millis))
 
   def neverCppMillisToNoneDuration(millis: Long): Option[Duration] =
-    Some(millis) filter { _ != NeverCppMillis } map Duration.ofMillis
+    if (millis == NeverCppMillis)
+      None
+    else
+      Some(Duration.ofMillis(millis))
 }
