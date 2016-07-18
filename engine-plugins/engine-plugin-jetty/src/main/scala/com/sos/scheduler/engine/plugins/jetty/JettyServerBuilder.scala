@@ -71,7 +71,17 @@ object JettyServerBuilder {
       def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*): Unit = {
         handler.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
       }
-      addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
+      addFilter(classOf[GzipFilter], "/*",
+        "mimeTypes" → List(  // Exclude images, especially if returned from NewWebServicePlugin (Spray/Akka)
+          "application/javascript",
+          "application/json",
+          "application/xhtml+xml",
+          "image/svg+xml",
+          "text/css",
+          "text/html",
+          "text/javascript",
+          "text/plain",
+          "text/xml").mkString(","))
     }
 
     val result = new Server
