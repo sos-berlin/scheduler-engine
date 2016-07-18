@@ -268,6 +268,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native boolean is_visible__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.order.jobchain.Node java_job_chain_node() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.order.jobchain.Node result = java_job_chain_node__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.Node.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.order.jobchain.Node java_job_chain_node__native(long cppReference);
+
+
     @Override public void java_remove() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -296,22 +312,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain__native(long cppReference);
-
-
-    @Override public com.sos.scheduler.engine.kernel.order.jobchain.Node java_job_chain_node() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            com.sos.scheduler.engine.kernel.order.jobchain.Node result = job_chain_node_sister__native(cppReference());
-            checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.Node.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native com.sos.scheduler.engine.kernel.order.jobchain.Node job_chain_node_sister__native(long cppReference);
 
 
     @Override public java.lang.String job_chain_path_string() {

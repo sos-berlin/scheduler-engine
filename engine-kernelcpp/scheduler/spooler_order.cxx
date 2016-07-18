@@ -2412,26 +2412,42 @@ Node* Job_chain::add_end_node( const Order::State& state )
 
 //----------------------------------------------------------------------------Job_chain::java_nodes
 
-ArrayListJ Job_chain::java_nodes() 
+vector<javabridge::Has_proxy*> Job_chain::java_nodes() 
 {
-    ArrayListJ result = ArrayListJ::new_instance(int_cast(_node_list.size()));
-    Z_FOR_EACH (Node_list, _node_list, it)
-        result.add((*it)->java_sister());
+    vector<javabridge::Has_proxy*> result;
+    result.reserve(_node_list.size());
+    Z_FOR_EACH (Node_list, _node_list, it) {
+        Node* node = *it;
+        if (Sink_node* n = Sink_node::try_cast(node)) 
+            result.push_back((has_proxy<Sink_node>*)n);
+        else
+        if (Job_node* n = Job_node::try_cast(node)) 
+            result.push_back(n);
+        else
+        if (Nested_job_chain_node* n = Nested_job_chain_node::try_cast(node)) 
+            result.push_back(n);
+        else
+        if (End_node* n = End_node::try_cast(node)) 
+            result.push_back(n);
+        else
+            z::throw_xc("UNKNOWN-NODE-TYPE", n->obj_name());
+    }
     return result;
 }
 
-ArrayListJ Job_chain::java_orders() {
+vector<javabridge::Has_proxy*> Job_chain::java_orders() {
     // Retain order of Nodes and Orders
-    ArrayListJ result = ArrayListJ::new_instance(int_cast(_order_map.size()));
+    vector<javabridge::Has_proxy*> result;
+    result.reserve(_order_map.size());
     Z_FOR_EACH_CONST(Node_list, _node_list, n) {
         if (Order_queue_node* q = Order_queue_node::try_cast(*n)) {
             Z_FOR_EACH_REVERSE_CONST(Order_queue::Queue, q->order_queue()->_queue, o) {
-                result.add((*o)->java_sister());
+                result.push_back(*o);
             }
         }
     }
     Z_FOR_EACH_CONST(Blacklist_map, _blacklist_map, i) {
-        result.add(i->second->java_sister());
+        result.push_back(i->second);
     }
     return result;
 }

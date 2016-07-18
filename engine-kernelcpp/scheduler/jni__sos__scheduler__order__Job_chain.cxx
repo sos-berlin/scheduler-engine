@@ -226,7 +226,7 @@ static jobject JNICALL java_1nodes(JNIEnv* jenv, jobject, jlong cppReference)
     Env env = jenv;
     try {
         ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::java_nodes()");
-        return (o_->java_nodes()).local_ref();
+        return java_array_from_c(o_->java_nodes());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -243,7 +243,7 @@ static jobject JNICALL java_1orders(JNIEnv* jenv, jobject, jlong cppReference)
     Env env = jenv;
     try {
         ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::java_orders()");
-        return (o_->java_orders()).local_ref();
+        return java_array_from_c(o_->java_orders());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -450,8 +450,8 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"is_stopped__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1stopped },
     { (char*)"is_to_be_removed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1to_1be_1removed },
     { (char*)"is_visible__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1visible },
-    { (char*)"java_nodes__native", (char*)"(J)Ljava/util/List;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1nodes },
-    { (char*)"java_orders__native", (char*)"(J)Ljava/util/List;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1orders },
+    { (char*)"java_nodes__native", (char*)"(J)[Ljava/lang/Object;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1nodes },
+    { (char*)"java_orders__native", (char*)"(J)[Ljava/lang/Object;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1orders },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },
     { (char*)"max_orders__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::max_1orders },
     { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name },

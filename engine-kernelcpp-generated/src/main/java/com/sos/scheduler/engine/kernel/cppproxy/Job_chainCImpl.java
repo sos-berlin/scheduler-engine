@@ -190,11 +190,11 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native boolean is_visible__native(long cppReference);
 
 
-    @Override public java.util.List java_nodes() {
+    @Override public Object[] java_nodes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.util.List result = java_nodes__native(cppReference());
-            checkIsNotReleased(java.util.List.class, result);
+            Object[] result = java_nodes__native(cppReference());
+            checkIsNotReleased(Object[].class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -203,14 +203,14 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
         }
     }
 
-    private static native java.util.List java_nodes__native(long cppReference);
+    private static native Object[] java_nodes__native(long cppReference);
 
 
-    @Override public java.util.List java_orders() {
+    @Override public Object[] java_orders() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.util.List result = java_orders__native(cppReference());
-            checkIsNotReleased(java.util.List.class, result);
+            Object[] result = java_orders__native(cppReference());
+            checkIsNotReleased(Object[].class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -219,7 +219,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
         }
     }
 
-    private static native java.util.List java_orders__native(long cppReference);
+    private static native Object[] java_orders__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {

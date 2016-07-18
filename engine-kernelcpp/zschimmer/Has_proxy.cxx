@@ -95,6 +95,19 @@ jobjectArray java_array_from_c(const std::vector<string>& v) {
     return result;
 }
 
+//--------------------------------------------------------------------------------java_array_from_c
+
+jobjectArray java_array_from_c(const std::vector<Has_proxy*>& v) {
+    Env jenv;
+    jint n = int_cast(v.size());
+    jobjectArray result = jenv->NewObjectArray(n, Vm::static_vm->standard_classes()->_java_lang_object_class, NULL);
+    if (result != NULL) {  // Keine Exception
+        for (int i = 0; i < n; i++)
+            jenv->SetObjectArrayElement(result, i, v[i]->java_proxy_jobject());
+    }
+    return result;
+}
+
 //---------------------------------------------------------------------------java_byte_array_from_c
 
 jbyteArray java_byte_array_from_c(const string& s) {

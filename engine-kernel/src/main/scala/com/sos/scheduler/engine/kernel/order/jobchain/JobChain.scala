@@ -1,18 +1,17 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
+import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain._
@@ -24,7 +23,7 @@ import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.collection.{immutable, mutable}
+import scala.collection.{breakOut, immutable, mutable}
 
 @ForCpp
 final class JobChain(
@@ -135,10 +134,10 @@ with UnmodifiableJobChain {
     nodeMap(o)
 
   lazy val nodeMap: Map[OrderState, Node] =
-    (nodes map { n => n.orderState -> n }).toMap
+    (nodes map { n ⇒ n.orderState → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
 
-  lazy val nodes: immutable.Seq[Node] =
-    immutable.Seq() ++ cppProxy.java_nodes
+  lazy val nodes: Vector[Node] =
+    (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector
 
   def order(id: OrderId) =
     orderOption(id) getOrElse sys.error(s"$toString does not contain order '$id'")
@@ -149,7 +148,7 @@ with UnmodifiableJobChain {
   def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
 
-  def orders: Seq[Order] = cppProxy.java_orders
+  def orders: Vector[Order] = cppProxy.java_orders.map { o ⇒ o.asInstanceOf[OrderC].getSister } (breakOut)
 
   def isStopped =
     cppProxy.is_stopped

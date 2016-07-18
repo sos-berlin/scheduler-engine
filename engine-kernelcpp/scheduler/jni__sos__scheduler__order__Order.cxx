@@ -306,6 +306,23 @@ static jboolean JNICALL is_1visible(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL java_1job_1chain_1node(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::java_job_chain_node()");
+        return (o_->java_job_chain_node()).local_ref();
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL java_1remove(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -328,23 +345,6 @@ static jobject JNICALL job_1chain(JNIEnv* jenv, jobject, jlong cppReference)
     try {
         ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::job_chain()");
         return Has_proxy::jobject_of(o_->job_chain());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jobject();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static jobject JNICALL job_1chain_1node_1sister(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::job_chain_node_sister()");
-        return (o_->java_job_chain_node()).local_ref();
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -789,9 +789,9 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"is_on_blacklist__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1on_1blacklist },
     { (char*)"is_to_be_removed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1to_1be_1removed },
     { (char*)"is_visible__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1visible },
+    { (char*)"java_job_chain_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/order/jobchain/Node;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1job_1chain_1node },
     { (char*)"java_remove__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1remove },
     { (char*)"job_chain__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain },
-    { (char*)"job_chain_node_sister__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/order/jobchain/Node;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain_1node_1sister },
     { (char*)"job_chain_path_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain_1path_1string },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },
     { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name },
