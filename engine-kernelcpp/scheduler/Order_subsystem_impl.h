@@ -148,6 +148,10 @@ struct Order_subsystem_impl : Order_subsystem
 
     void wake_distributed_order_processing();
 
+    const Bstr& scheduler_file_order_path_variable_name_Bstr() const {
+        return _scheduler_file_order_path_variable_name_Bstr;
+    }
+
     Fill_zero                  _zero_;
     Order_id_spaces            _order_id_spaces;
 
@@ -156,6 +160,7 @@ struct Order_subsystem_impl : Order_subsystem
     ptr<Database_order_detector> _database_order_detector;
     int                        _started_orders_count;
     int                        _finished_orders_count;
+    const Bstr _scheduler_file_order_path_variable_name_Bstr;
 };
 
 }}} //namespaces

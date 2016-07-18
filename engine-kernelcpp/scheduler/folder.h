@@ -196,7 +196,7 @@ struct File_based : Abstract_scheduler_object,
     bool                        is_in_folder                () const                                { return _typed_folder != NULL; }
     Typed_folder*               typed_folder                () const                                { return _typed_folder; }
     Folder*                     folder                      () const;
-    bool                        has_base_file               () const                                { return _base_file_info._filename != ""; }
+    bool                        has_base_file               () const                                { return !_base_file_info._filename.empty(); }
     bool                        is_file_based               () const                                { return _base_file_info._last_write_time != 0; }  // Verteilte Aufträge können dateibasiert, aber auf einem Scheduler ohne Datei sein.
     const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
     bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }

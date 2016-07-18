@@ -13,7 +13,7 @@ using namespace job_chain;
 //---------------------------------------------------------------------------------------------const
 
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
-const string scheduler_file_order_path_variable_name = "scheduler_file_path";
+extern const string scheduler_file_order_path_variable_name = "scheduler_file_path";
 const string scheduler_file_order_agent_variable_name = "scheduler_file_remote_scheduler";
 
 DEFINE_SIMPLE_CALL(Order, File_exists_call)
@@ -1953,7 +1953,7 @@ File_path Order::file_path() const
         if( ptr<Com_variable_set> order_params = params_or_null() )
         {
             Variant path;
-            order_params->get_Var( Bstr( scheduler_file_order_path_variable_name ), &path );
+            order_params->get_Var(order_subsystem()->scheduler_file_order_path_variable_name_Bstr(), &path);
             result.set_path( string_from_variant( path ) );
         }
     }
@@ -1966,7 +1966,18 @@ File_path Order::file_path() const
 
 bool Order::is_file_order() const
 {
-    return file_path() != "";
+    File_path result;
+
+    try {
+        if (ptr<Com_variable_set> order_params = params_or_null()) {
+            return order_params->contains(order_subsystem()->scheduler_file_order_path_variable_name_Bstr());
+        } else
+            return false;
+    }
+    catch( exception& x )  { 
+        Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() << "\n" ); 
+        return false;
+    }
 }
 
 

@@ -50,6 +50,9 @@ enum Untouched_is_allowed {
     untouched_allowed = true
 };
 
+
+extern const string scheduler_file_order_path_variable_name;
+
 //---------------------------------------------------------------------------Order_state_transition
 
 struct Order_state_transition { 
@@ -1220,6 +1223,7 @@ struct Order_subsystem: Object,
     virtual int                 finished_orders_count       () const                                = 0;
     virtual Order_id_spaces_interface* order_id_spaces_interface()                                  = 0;
     virtual Order_id_spaces*    order_id_spaces             ()                                      = 0;
+    virtual const Bstr& scheduler_file_order_path_variable_name_Bstr() const = 0;
 };
 
 

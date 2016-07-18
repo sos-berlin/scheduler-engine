@@ -461,7 +461,8 @@ Order_subsystem_impl::Order_subsystem_impl( Spooler* spooler )
 :
     Order_subsystem( spooler ),
     _zero_(this+1),
-    _order_id_spaces(this)
+    _order_id_spaces(this),
+    _scheduler_file_order_path_variable_name_Bstr(scheduler_file_order_path_variable_name)
 {
 }
 
