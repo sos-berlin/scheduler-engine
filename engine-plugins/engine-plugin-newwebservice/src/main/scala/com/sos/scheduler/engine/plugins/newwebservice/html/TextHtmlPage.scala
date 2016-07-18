@@ -15,8 +15,12 @@ final class TextHtmlPage(protected val schedulerOverview: SchedulerOverview, tex
 extends SchedulerHtmlPage {
 
   protected def title = "JobScheduler"
+  override def headlineSuffix = ""
 
-  def scalatag = htmlPage(pre(StringFrag(text)))
+  def scalatag = htmlPage(
+    headline,
+    pre(
+      StringFrag(text)))
 }
 
 object TextHtmlPage {

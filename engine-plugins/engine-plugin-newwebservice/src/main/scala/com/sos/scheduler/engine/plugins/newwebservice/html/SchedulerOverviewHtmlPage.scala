@@ -15,7 +15,7 @@ extends SchedulerHtmlPage {
 
   import schedulerOverview._
 
-  override def title = "JobScheduler"
+  protected def title = "JobScheduler"
   override def headlineSuffix = ""
 
   def scalatag =
@@ -36,12 +36,14 @@ extends SchedulerHtmlPage {
           a(href := "api/jobChain/")("Job chains"),
           br,
           form(action := "api/command", method := "get")(
-            label(cls := "input-group input-group-sm")(
-              span(cls := "input-group-addon")("XML command: "),
-              input(`type` := "text", name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
+            span(cls := "input-group input-group-sm")(
+              span(cls := "input-group-addon")(
+                "XML command: "),
+              input(`type` := "text", autofocus, name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
               " ",
-              span(cls := "input-group-btn")(
-                button(`type` := "submit", cls := "btn btn-primary")("Execute")))))))
+              span(cls := "input-group-btn")
+                (button(`type` := "submit", cls := "btn btn-primary")(
+                  "Execute")))))))
 }
 
 object SchedulerOverviewHtmlPage {

@@ -35,7 +35,7 @@ trait CommandRoute {
               val elem = SafeXML.loadString(command)  // Verify valid XML
               complete(client.uncheckedExecute(elem) map XmlString.apply)
             } else
-              complete(Forbidden, "Only a read-only command is allowed")
+              complete((Forbidden, "Only a read-only command is allowed"))
           }
         }
       }

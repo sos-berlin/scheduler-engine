@@ -59,9 +59,11 @@ trait SchedulerHtmlPage extends HtmlPage {
   }
 
   protected def headline =
-    h1 {
+    h1(cls := "headLine") {
       val prefix = a(href := uris.overview, cls := "inherit-markup")(
-        s"JobScheduler '${schedulerOverview.schedulerId.string}'")
+        img("width".attr := 40, "height".attr := 40, verticalAlign.`text-bottom`,
+          src := s"${uris.resolvePathUri("api/frontend/images/job_scheduler_rabbit_circle_60x60.gif")}"),
+        s" JobScheduler '${schedulerOverview.schedulerId.string}'")
       emptyToNone(headlineSuffix) match {
         case None ⇒ prefix
         case Some(suffix) ⇒ prefix :: StringFrag(s" · $suffix") :: Nil
@@ -80,6 +82,9 @@ div.pageHeader {
   padding: 1px 5px 0 5px;
   border-radius = 2px;
   background-color: #f5f5f5;
+}
+h1.headLine {
+  margin-top: 0;
 }
 h2 {
   margin-top: 30px;

@@ -1,15 +1,17 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, _}
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
-import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
+import spray.http.CacheDirectives.{`max-age`, `min-fresh`, `no-cache`, `no-store`}
 import spray.http.HttpHeaders.`Cache-Control`
 import spray.http.StatusCodes._
 import spray.routing.Directives._
@@ -23,35 +25,51 @@ trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute {
   protected def client: DirectSchedulerClient
   //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
   protected implicit def executionContext: ExecutionContext
+  protected implicit def actorRefFactory: ActorRefFactory
 
   protected final def apiRoute: Route =
     respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
       handleExceptions(ApiExceptionHandler) {
-        pathEndElseRedirect(webServiceContext) {
-          get {
-            completeTryHtml(client.overview)
-          }
-        } ~
-        (pathPrefix("command") & pathEnd) {
-          commandRoute
-        } ~
-        pathPrefix("order") {
-          eatSlash(webServiceContext) {
-            orderRoute
-          }
-        } ~
-        pathPrefix("jobChain") {
-          eatSlash(webServiceContext) {
-            jobChainRoute
-          }
-        }
-        /*~
-        pathPrefix("subsystems") {
-          subsystemsRoute
-        }
-        */
+        realApiRoute
+      }
+    } ~
+    pathPrefix("frontend") {
+      frontEndRoute
+    }
+
+  private def realApiRoute =
+    pathEndElseRedirect(webServiceContext) {
+      get {
+        completeTryHtml(client.overview)
+      }
+    } ~
+    (pathPrefix("command") & pathEnd) {
+      commandRoute
+    } ~
+    pathPrefix("order") {
+      eatSlash(webServiceContext) {
+        orderRoute
+      }
+    } ~
+    pathPrefix("jobChain") {
+      eatSlash(webServiceContext) {
+        jobChainRoute
       }
     }
+    /*~
+    pathPrefix("subsystems") {
+      subsystemsRoute
+    }
+    */
+
+  private def frontEndRoute =
+    get {
+      respondWithHeader(`Cache-Control`(`min-fresh`(60))) {
+        getFromResourceDirectory(FrontendResourceDirectory.path)
+      }
+    }
+
+
 
   /*
   private def subsystemsRoute: Route =
@@ -96,6 +114,7 @@ trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute {
 
 object ApiRoute {
   private val logger = Logger(getClass)
+  private val FrontendResourceDirectory = JavaResource("com/sos/scheduler/engine/plugins/newwebservice/frontend")
 
   private val ApiExceptionHandler = ExceptionHandler {
     // This is an internal API, so we expose internal error messages !!!
