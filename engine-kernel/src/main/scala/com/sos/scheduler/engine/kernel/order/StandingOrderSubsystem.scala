@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.order.OrderKey
@@ -16,7 +17,8 @@ final class StandingOrderSubsystem @Inject private(
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   entityManagerFactoryProvider: Provider[EntityManagerFactory],
   orderStoreProvider: Provider[HibernateOrderStore],
-  agentClientFactoryProvider: Provider[SchedulerAgentClientFactory])
+  agentClientFactoryProvider: Provider[SchedulerAgentClientFactory],
+  protected val injector: Injector)
 extends FileBasedSubsystem {
 
   type ThisSubsystem = StandingOrderSubsystem

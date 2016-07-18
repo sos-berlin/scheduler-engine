@@ -1,17 +1,18 @@
 package com.sos.scheduler.engine.kernel.schedule
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.kernel.cppproxy.{Schedule_subsystemC, ScheduleC}
+import com.sos.scheduler.engine.kernel.cppproxy.{ScheduleC, Schedule_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import javax.inject.{Inject, Singleton}
-import com.sos.scheduler.engine.data.folder.FolderPath
 
 @Singleton
 final class ScheduleSubsystem @Inject private(
   protected[this] val cppProxy: Schedule_subsystemC,
-  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  protected val injector: Injector)
 extends FileBasedSubsystem {
 
   type ThisSubsystem = ScheduleSubsystem

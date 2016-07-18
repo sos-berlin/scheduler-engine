@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -10,7 +11,8 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 final class ProcessClassSubsystem @Inject private(
   protected[this] val cppProxy: Process_class_subsystemC,
-  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  protected val injector: Injector)
 extends FileBasedSubsystem{
   type ThisSubsystem = ProcessClassSubsystem
   type ThisFileBased = ProcessClass

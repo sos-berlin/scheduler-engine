@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.folder
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -12,7 +13,8 @@ import scala.collection.immutable
 @Singleton
 final class FolderSubsystem @Inject private(
   protected[this] val cppProxy: Folder_subsystemC,
-  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  protected val injector: Injector)
 extends FileBasedSubsystem {
 
   type ThisSubsystem = FolderSubsystem

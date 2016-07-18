@@ -26,7 +26,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   private val hotEvents = mutable.Map[String, Event]()
   private val coldEvents = mutable.Map[String, Event]()
 
-  "Persistent order" in {
+  "Permanent order" in {
     checkOrderStates(PersistentOrderKey)
     eventPipe.nextAny[OrderEvent] match {
       case e: OrderStateChangedEvent ⇒
@@ -114,9 +114,6 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   @HotEventHandler def handleHotEvent(e: OrderFinishedEvent, o: UnmodifiableOrder): Unit =
     addEvent(hotEvents, "OrderFinished UnmodifiableOrder" → e)
 
-  @HotEventHandler def handleHotEvent(e: OrderFinishedEvent, o: Order): Unit =
-    fail("@HotEventHandler def handleHotEvent(e: OrderFinishedEvent, o: Order) should not be called because of UnmodifiableOrder")
-
   @HotEventHandler def handleHotEvent(e: OrderStepStartedEvent, o: UnmodifiableOrder): Unit =
     addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${o.state}" → e.copy(taskId = TaskId.Null))
 
@@ -135,17 +132,11 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   @HotEventHandler def handleHotEvent(e: OrderSuspendedEvent, o: UnmodifiableOrder): Unit =
     addEvent(hotEvents, "OrderSuspended UnmodifiableOrder" → e)
 
-  @HotEventHandler def handleHotEvent(e: OrderSuspendedEvent, o: Order): Unit =
-    fail("@HotEventHandler def handleHotEvent(e: OrderSuspendedEvent, o: Order) should not be called because of UnmodifiableOrder")
-
   @EventHandler def handleEvent(e: OrderResumedEvent): Unit =
     addEvent(coldEvents, "OrderResumed" → e)
 
   @HotEventHandler def handleHotEvent(e: OrderResumedEvent, o: UnmodifiableOrder): Unit =
     addEvent(hotEvents, "OrderResumed UnmodifiableOrder" → e)
-
-  @HotEventHandler def handleHotEvent(e: OrderResumedEvent, o: Order): Unit =
-    fail("@HotEventHandler def handleHotEvent(e: OrderResumedEvent, o: Order) should not be called because of UnmodifiableOrder")
 
   private def addEvent(m: mutable.Map[String,Event], pair: (String, Event)): Unit =
     m.synchronized {

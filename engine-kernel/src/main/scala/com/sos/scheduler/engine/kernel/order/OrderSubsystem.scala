@@ -26,7 +26,7 @@ private[engine] final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   folderSubsystem: FolderSubsystem,
-  injector: Injector)
+  protected val injector: Injector)
 extends FileBasedSubsystem {
 
   type ThisSubsystem = OrderSubsystem
@@ -37,20 +37,6 @@ extends FileBasedSubsystem {
 
   private implicit lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
   private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
-
-//  def jobChainMap = new Map[JobChainPath, JobChain] {
-//    def get(key: JobChainPath) =
-//      jobChainOption(key)
-//
-//    def iterator =
-//      jobChains.iterator map { o => o.path -> o }
-//
-//    def -(key: JobChainPath) =
-//      throw new NotImplementedError
-//
-//    def +[B1 >: JobChain](kv: (JobChainPath, B1)) =
-//      throw new NotImplementedError
-//  }
 
   @ForCpp
   def persistNodeState(node: Node): Unit = {

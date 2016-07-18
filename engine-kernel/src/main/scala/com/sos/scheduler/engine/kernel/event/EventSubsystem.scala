@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.kernel.event
 
-import EventSubsystem._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.AbstractEvent
-import com.sos.scheduler.engine.eventbus.EventSource
-import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.eventbus.{EventSource, SchedulerEventBus}
+import com.sos.scheduler.engine.kernel.event.EventSubsystem._
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Inject, Singleton}
 
@@ -33,7 +31,7 @@ final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends 
     try {
       val o = eventSource.asInstanceOf[EventSource]
       val e = CppEventFactory.newInstance(CppEventCode.values()(cppEventCode), o)
-      eventBus.publish(e, tryUnmodifiableEventSource(e, o))
+      eventBus.publish(e, o)
     }
     catch {
       case x: Exception => logger.error(s"EventSubsystem.reportEventClass($cppEventCode):", x)

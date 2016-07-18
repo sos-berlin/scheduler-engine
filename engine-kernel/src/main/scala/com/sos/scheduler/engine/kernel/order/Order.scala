@@ -10,9 +10,8 @@ import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
-import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.async.CppCall
-import com.sos.scheduler.engine.kernel.cppproxy.{NodeCI, OrderC}
+import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
@@ -30,14 +29,12 @@ final class Order private(
 extends FileBased
 with QueryableOrder
 with UnmodifiableOrder
-with HasUnmodifiableDelegate[UnmodifiableOrder]
 with OrderPersistence {
 
   import subsystem.agentClientFactory
 
   type ThisPath = OrderKey
 
-  lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
   private val idOnce = new SetOnce[OrderId]
   private val sourceTypeOnce = new SetOnce[OrderSourceType]
 

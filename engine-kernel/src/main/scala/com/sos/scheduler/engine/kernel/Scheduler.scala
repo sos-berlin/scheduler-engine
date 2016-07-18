@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
-import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
+import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.directOrSchedulerThreadFuture
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -33,7 +33,7 @@ import com.sos.scheduler.engine.kernel.configuration.SchedulerModule.LateBoundCp
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
-import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
+import com.sos.scheduler.engine.kernel.filebased.{FileBased, FileBasedSubsystem}
 import com.sos.scheduler.engine.kernel.log.{CppLogger, PrefixLog}
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Result
@@ -50,7 +50,6 @@ import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
-import scala.collection.breakOut
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -101,13 +100,19 @@ with HasCloser {
     commandSubsystem = injector.instance[CommandSubsystem]
     databaseSubsystem = injector.instance[DatabaseSubsystem]
     executionContext = injector.instance[ExecutionContext]
-    val eventSubscription = {
-      val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
-      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
-      EventSubscription[FileBasedEvent] { e ⇒ for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) }
+    catchFileBasedEvents()
+  }
+
+  private def catchFileBasedEvents(): Unit = {
+    val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
+    val subsystemMap: Map[FileBasedType, FileBasedSubsystem] =
+      subsystemDescriptions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
+    eventBus.onHotEventSourceEvent[FileBasedEvent] {
+      case EventSourceEvent(event, fileBased: FileBased) ⇒
+        for (subsystem ← subsystemMap.get(event.typedPath.fileBasedType)) {
+          subsystem.onFileBasedEvent(event, fileBased)
+        }
     }
-    eventBus.registerHot(eventSubscription)
-    onClose { eventBus.unregisterHot(eventSubscription) }
   }
 
   def onCppProxyInvalidated(): Unit = {}
