@@ -289,6 +289,7 @@ struct Order : Com_order,
     void                        set_on_blacklist        ();
     void                        remove_from_blacklist   ();
     bool                        is_on_blacklist         ()                                          { return _is_on_blacklist; }
+    jlong                       java_fast_flags         () const;
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed( const string& debug_text );

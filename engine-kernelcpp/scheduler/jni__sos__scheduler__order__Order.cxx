@@ -306,6 +306,23 @@ static jboolean JNICALL is_1visible(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jlong JNICALL java_1fast_1flags(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::java_fast_flags()");
+        return (o_->java_fast_flags());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jlong();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL java_1job_1chain_1node(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -789,6 +806,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"is_on_blacklist__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1on_1blacklist },
     { (char*)"is_to_be_removed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1to_1be_1removed },
     { (char*)"is_visible__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1visible },
+    { (char*)"java_fast_flags__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1fast_1flags },
     { (char*)"java_job_chain_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/order/jobchain/Node;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1job_1chain_1node },
     { (char*)"java_remove__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1remove },
     { (char*)"job_chain__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain },

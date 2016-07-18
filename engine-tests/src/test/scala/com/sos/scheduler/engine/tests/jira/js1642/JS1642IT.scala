@@ -55,7 +55,9 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val schedulerUri = s"http://127.0.0.1:$httpPort"
   private lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
-  protected override lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-http-port=$httpPort"))
+  protected override lazy val testConfiguration = TestConfiguration(getClass,
+    //binariesDebugMode = Some(CppBinariesDebugMode.release),
+    mainArguments = List(s"-http-port=$httpPort"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
@@ -74,7 +76,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     "DirectSchedulerClient" → { () ⇒ directSchedulerClient },
     "WebSchedulerClient" → { () ⇒ webSchedulerClient })
 
-  "Prepare tests" in {
+  override protected def onSchedulerActivated() = {
+    super.onSchedulerActivated()
     barrier.touchFile()
     scheduler executeXml OrderCommand(aAdHocOrderKey, at = Some(OrderStartAt), suspended = Some(true))
     startOrderProcessing()
@@ -376,27 +379,40 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  "Speed test simple direct OrderOverview C++ access" in {
-    inSchedulerThread {
-      Stopwatch.measureTime(1000, "OrderOverview") {
-        directSchedulerClient.orderOverviews().successValue
+  for (n ← sys.props.optionAs[Int]("JS1642IT")) {
+    "Speed test simple direct OrderOverview C++ access" in {
+      inSchedulerThread {
+        for (_ ← 1 to 5)
+        Stopwatch.measureTime(100000, "OrderOverview") {
+          directSchedulerClient.orderOverviews().successValue
+        }
       }
     }
-  }
 
-  for (n ← sys.props.optionAs[Int]("JS1642IT")) {
-    s"Speed test: OrdersFullOverview with $n orders, OrderQuery.All" - {
+    "Speed test: OrdersFullOverview" - {
       s"(Add $n orders)" in {
         val stopwatch = new Stopwatch
         for (orderKey ← 1 to n map { i ⇒ aJobChainPath orderKey s"adhoc-$i" })
           controller.scheduler executeXml OrderCommand(orderKey)
         logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
       }
-      for ((testName, getClient) ← setting) {
-        testName in {
+      val m = 20
+
+      "OrdersFullOverview" in {
+        for (_ ← 1 to m) {
           val stopwatch = new Stopwatch
-          getClient().ordersFullOverview await TestTimeout
-          logger.info(s"OrdersFullOverview $testName: " + stopwatch.itemsPerSecondString(n, "order"))
+          webSchedulerClient.get[String](_.order.fullOverview(OrderQuery.All)) await TestTimeout
+          val s = stopwatch.itemsPerSecondString(n, "order")
+          logger.info(s"OrdersFullOverview $testName: $s")
+        }
+      }
+
+      "<show_state>" in {
+        for (_ ← 1 to m) {
+          val stopwatch = new Stopwatch
+          webSchedulerClient.uncheckedExecute(<s/>) await TestTimeout
+          val s = stopwatch.itemsPerSecondString(n, "order")
+          logger.info(s"<s/> $testName: $s")
         }
       }
     }

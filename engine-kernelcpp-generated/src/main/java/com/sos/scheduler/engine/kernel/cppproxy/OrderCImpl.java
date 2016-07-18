@@ -11,7 +11,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private OrderCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.OrderC$.MODULE$.sisterType().sister(this, context));
     }
 
     @Override public java.lang.String calculate_db_distributed_next_time() {
@@ -266,6 +266,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native boolean is_visible__native(long cppReference);
+
+
+    @Override public long java_fast_flags() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return java_fast_flags__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long java_fast_flags__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.order.jobchain.Node java_job_chain_node() {

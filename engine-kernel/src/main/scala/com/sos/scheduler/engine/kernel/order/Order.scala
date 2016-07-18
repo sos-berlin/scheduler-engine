@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
 import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.EternalCppMillis
-import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
-import com.sos.scheduler.engine.kernel.time.CppTimeConversions.eternalCppMillisToNoneInstant
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import java.time.Instant
 import scala.util.{Failure, Success}
@@ -61,17 +61,19 @@ with OrderPersistence {
     }
   }
 
-  override def overview: OrderOverview =
+  override def overview: OrderOverview = {
+    val flags = cppProxy.java_fast_flags
     OrderOverview(
       path = key,  // key because this.path is valid only for permanent orders
-      fileBasedState,
-      sourceType,
+      cppFastFlags.fileBasedState(flags),
+      cppFastFlags.sourceType(flags),
       orderState = state,
       nextStepAt = nextStepAt,
-      setbackUntil = setbackUntil,
+      setbackUntil = if (cppFastFlags.isSetback(flags)) setbackUntil else None,
       taskId = taskId,
-      isBlacklisted = isBlacklisted,
-      isSuspended = isSuspended)
+      isBlacklisted = cppFastFlags.isBlacklisted(flags),
+      isSuspended = cppFastFlags.isSuspended(flags))
+  }
 
   def isSetback = setbackUntil.isDefined
 
@@ -80,11 +82,7 @@ with OrderPersistence {
   def fileBasedType = FileBasedType.order
 
   def sourceType: OrderSourceType =
-    sourceTypeOnce getOrUpdate {
-      if (cppProxy.is_file_order) OrderSourceType.fileOrderSource
-      else if (cppProxy.has_base_file) OrderSourceType.fileBased
-      else OrderSourceType.adHoc
-    }
+    sourceTypeOnce getOrUpdate toOrderSourceType(hasBaseFile = cppProxy.has_base_file, isFileOrder = cppProxy.is_file_order)
 
   def key = orderKey
 
@@ -123,11 +121,7 @@ with OrderPersistence {
       case millis ⇒ Some(Instant ofEpochMilli millis)
     }
 
-  private def setbackUntil: Option[Instant] =
-    cppProxy.setback_millis match {
-      case 0 ⇒ None
-      case millis ⇒ Some(Instant ofEpochMilli millis)
-    }
+  private def setbackUntil: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
 
   def taskId: Option[TaskId] =
     cppProxy.task_id match {
@@ -149,7 +143,7 @@ with OrderPersistence {
     cppProxy.set_suspended(b)
   }
 
-  def isBlacklisted = cppProxy.is_on_blacklist()
+  def isBlacklisted = cppProxy.is_on_blacklist
 
   def title: String =
     cppProxy.title
@@ -195,9 +189,8 @@ with OrderPersistence {
   def setEndStateReached() = cppProxy.set_end_state_reached()
 }
 
-
 object Order {
-  final class Type extends SisterType[Order, OrderC] {
+  object Type extends SisterType[Order, OrderC] {
     def sister(proxy: OrderC, context: Sister): Order = {
       val injector = context.asInstanceOf[HasInjector].injector
       new Order(proxy, injector.instance[StandingOrderSubsystem])
@@ -205,4 +198,22 @@ object Order {
   }
 
   private val logger = Logger(getClass)
+
+  object cppFastFlags {
+    def hasBaseFile   (flags: Long) = (flags &  0x01) != 0
+    def isSuspended   (flags: Long) = (flags &  0x02) != 0
+    def isBlacklisted (flags: Long) = (flags &  0x04) != 0
+    def isFileOrder   (flags: Long) = (flags &  0x08) != 0
+    def fileBasedState(flags: Long) = FileBasedState.values()(((flags & 0xf0) >> 4).toInt)
+    def isSetback     (flags: Long) = (flags & 0x100) != 0
+    def sourceType    (flags: Long) = toOrderSourceType(hasBaseFile = hasBaseFile(flags), isFileOrder = isFileOrder(flags))
+  }
+
+  private def toOrderSourceType(hasBaseFile: Boolean, isFileOrder: Boolean) =
+    if (isFileOrder)
+      OrderSourceType.fileOrderSource
+    else if (hasBaseFile)
+      OrderSourceType.fileBased
+    else
+      OrderSourceType.adHoc
 }
