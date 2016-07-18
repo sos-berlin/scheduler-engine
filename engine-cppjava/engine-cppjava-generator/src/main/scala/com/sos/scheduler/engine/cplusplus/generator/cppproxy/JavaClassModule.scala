@@ -5,11 +5,13 @@ import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.runtime._
 import scala.language.existentials
+import scala.util.Try
 
 final class JavaClassModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature])
 extends JavaModule {
 
   private val interface = config.interface
+  private val companionClassOption = Try(Class.forName(config.interface.getName + "$")).toOption
   private val suffix = "Impl"
   val name = interface.getName + suffix
 
@@ -28,8 +30,10 @@ extends JavaModule {
     def constructor = {
       val sisterCode =
         if (interface.getFields exists {_.getName == "sisterType"})
-        //"        requireContext(context);\n" +
           "        setSister(sisterType.sister(this, context));\n"
+        else
+        if (companionClassOption exists { _.getMethod("sisterType") != null })  // Scala object exposes static method
+          s"        setSister(${companionClassOption.get.getName}.MODULE$$.sisterType().sister(this, context));\n"
         else
           "        requireContextIsNull(context);\n"
 
