@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js832
 
 import com.google.common.io.Files
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js832.JS832IT._
@@ -17,7 +17,7 @@ import scala.collection.mutable
 final class JS832IT extends FunSuite with ScalaSchedulerTest {
 
   test("When order is finished, Order log should be closed and reopened for next repetition") {
-    def logFile(o: OrderKey) = instance[OrderSubsystem].order(o).log.file
+    def logFile(o: OrderKey) = instance[OrderSubsystemClient].order(o).log.file
     val eventPipe = controller.newEventPipe()
     val firstLines = new mutable.HashSet[String]
     for (i <- 1 to 3) {

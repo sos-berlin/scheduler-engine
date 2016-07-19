@@ -75,7 +75,7 @@ trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute {
   private def subsystemsRoute: Route =
     pathEnd {
       get {
-        complete(fileBasedSubsystemRegister.descriptions map { _.fileBasedType.cppName })
+        complete(fileBasedSubsystemRegister.companions map { _.fileBasedType.cppName })
       }
     } ~
     pathPrefix(Segment) { subsystemName ⇒
@@ -103,7 +103,7 @@ trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute {
         parameter("path") { fileBasedPath ⇒
           detach(()) {
             complete {
-              subsystem.fileBased(subsystem.description.stringToPath(fileBasedPath)).details
+              subsystem.fileBased(subsystem.companion.stringToPath(fileBasedPath)).details
             }
           }
         }

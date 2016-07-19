@@ -4,8 +4,8 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderStepEndedEvent}
-import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ModifyOrderCommand}
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate.transaction
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -41,7 +41,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
 
   "Changing the order configuration file" in {
     file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(OriginalTitle, AChangedTitle)
-    instance[FolderSubsystem].updateFolders()
+    instance[FolderSubsystemClient].updateFolders()
     transaction { implicit entityManager ⇒
       orderStore.fetch(TestOrderKey).title shouldEqual AChangedTitle
     }
@@ -57,7 +57,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     }
     eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestOrderKey) {
       file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
       transaction { implicit entityManager ⇒
         orderStore.fetch(TestOrderKey) should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
       }

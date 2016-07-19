@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.tests.order.ordersubsystemofjob;
 
-import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.job.JobPath;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.kernel.job.Job;
-import com.sos.scheduler.engine.kernel.job.JobSubsystem;
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.hamcrest.Matchers;
 import org.junit.Test;
-
 import static org.junit.Assert.assertThat;
 import static scala.collection.JavaConversions.asJavaIterable;
 
@@ -21,7 +20,7 @@ public final class OrderSubsystemOfJobIT extends SchedulerTest {
     }
 
     private void doTest() {
-        JobSubsystem jobSubsystem = instance(JobSubsystem.class);
+        JobSubsystemClient jobSubsystem = instance(JobSubsystemClient.class);
         OrderSubsystem orderSubsystem = instance(OrderSubsystem.class);
 
         Job aJob = jobSubsystem.job(new JobPath("/A"));

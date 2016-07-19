@@ -9,21 +9,24 @@ import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-final class ScheduleSubsystem @Inject private(
+private[kernel] final class ScheduleSubsystem @Inject private(
   protected[this] val cppProxy: Schedule_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val injector: Injector)
 extends FileBasedSubsystem {
 
+  type ThisSubsystemClient = ScheduleSubsystemClient
   type ThisSubsystem = ScheduleSubsystem
   type ThisFileBased = Schedule
   type ThisFile_basedC = ScheduleC
 
-  val description = ScheduleSubsystem
+  val companion = ScheduleSubsystem
 }
 
 
-object ScheduleSubsystem extends FileBasedSubsystem.AbstractDesription[ScheduleSubsystem, SchedulePath, Schedule] {
+object ScheduleSubsystem extends
+FileBasedSubsystem.AbstractCompanion[ScheduleSubsystemClient, ScheduleSubsystem, SchedulePath, Schedule] {
+
   val fileBasedType = FileBasedType.schedule
   val stringToPath = SchedulePath.apply _
 

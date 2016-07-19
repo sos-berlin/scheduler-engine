@@ -12,7 +12,7 @@ import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 
 @Singleton
-final class StandingOrderSubsystem @Inject private(
+private[kernel] final class StandingOrderSubsystem @Inject private(
   protected[this] val cppProxy: Standing_order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   entityManagerFactoryProvider: Provider[EntityManagerFactory],
@@ -21,19 +21,22 @@ final class StandingOrderSubsystem @Inject private(
   protected val injector: Injector)
 extends FileBasedSubsystem {
 
+  type ThisSubsystemClient = StandingOrderSubsystemClient
   type ThisSubsystem = StandingOrderSubsystem
   type ThisFileBased = Order
   type ThisFile_basedC = OrderC
 
-  val description = StandingOrderSubsystem
-  def agentClientFactory = agentClientFactoryProvider.get
+  val companion = StandingOrderSubsystem
+  private[kernel] def agentClientFactory = agentClientFactoryProvider.get
 
-  private[order] lazy val entityManagerFactory = entityManagerFactoryProvider.get
-  private[order] lazy val orderStore = orderStoreProvider.get
+  private[order] def entityManagerFactory = entityManagerFactoryProvider.get
+  private[order] def orderStore = orderStoreProvider.get
 }
 
 
-object StandingOrderSubsystem extends FileBasedSubsystem.AbstractDesription[StandingOrderSubsystem, OrderKey, Order] {
+object StandingOrderSubsystem
+extends FileBasedSubsystem.AbstractCompanion[StandingOrderSubsystemClient, StandingOrderSubsystem, OrderKey, Order] {
+
   val fileBasedType = FileBasedType.order
   val stringToPath = { o: String ⇒ OrderKey(o) }
 }

@@ -37,31 +37,31 @@ import com.sos.scheduler.engine.kernel.order.Order
         new TaskClosedEvent(task.id, task.job.path)
 
       case `orderTouchedEvent` =>
-        new OrderTouchedEvent(eventSource.asInstanceOf[Order].key)
+        new OrderTouchedEvent(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderFinishedEvent` =>
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderFinishedEvent(eventSource.asInstanceOf[Order].key, order.state)
+        new OrderFinishedEvent(eventSource.asInstanceOf[Order].orderKey, order.state)
 
       case `orderNestedTouchedEvent` =>
-        new OrderNestedTouchedEvent(eventSource.asInstanceOf[Order].key)
+        new OrderNestedTouchedEvent(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderNestedFinishedEvent` =>
-        new OrderNestedFinishedEvent(eventSource.asInstanceOf[Order].key)
+        new OrderNestedFinishedEvent(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderSuspendedEvent` =>
-        new OrderSuspendedEvent(eventSource.asInstanceOf[Order].key)
+        new OrderSuspendedEvent(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderResumedEvent` =>
-        new OrderResumedEvent(eventSource.asInstanceOf[Order].key)
+        new OrderResumedEvent(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderSetBackEvent` =>
         val order = eventSource.asInstanceOf[Order]
-        new OrderSetBackEvent(order.key, order.state)
+        new OrderSetBackEvent(order.orderKey, order.state)
 
       case `orderStepStartedEvent` =>
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderStepStartedEvent(order.key, order.state, order.taskId getOrElse TaskId.Null)
+        new OrderStepStartedEvent(order.orderKey, order.state, order.taskId getOrElse TaskId.Null)
 
       case o =>
         sys.error(s"Not implemented cppEventCode=$o")

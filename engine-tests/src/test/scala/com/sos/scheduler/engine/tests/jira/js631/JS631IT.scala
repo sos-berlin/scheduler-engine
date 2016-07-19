@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js631
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderState, OrderStateChangedEvent, OrderTouchedEvent}
-import com.sos.scheduler.engine.test.SchedulerTestUtils.order
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOverview}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js631.JS631IT._
 import org.junit.runner.RunWith
@@ -49,7 +49,7 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml <job_chain_node.modify job_chain={AOrderKey.jobChainPath.string} state={A2State.string} action="next_state"/>
       scheduler executeXml <modify_order job_chain={BOrderKey.jobChainPath.string} order={BOrderKey.id.string} action="reset"/>
       order(BOrderKey).nextInstantOption shouldEqual None
-      order(BOrderKey).state should be(B1State)
+      orderOverview(BOrderKey).orderState should be(B1State)
       scheduler executeXml <job_chain_node.modify job_chain={AOrderKey.jobChainPath.string} state={A1State.string} action="process"/>
       scheduler executeXml <job_chain_node.modify job_chain={AOrderKey.jobChainPath.string} state={A2State.string} action="process"/>
     }
@@ -58,10 +58,10 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
   "Reset in second nested job chain" in {
     withEventPipe { eventPipe ⇒
       order(BOrderKey).nextInstantOption shouldEqual None
-      order(BOrderKey).state should be(B1State)
+      orderOverview(BOrderKey).orderState should be(B1State)
       scheduler executeXml <modify_order job_chain={BOrderKey.jobChainPath.string} order={BOrderKey.id.string} action="reset"/> // Was error: SCHEDULER-149  There is no job in job chain "/test-nested-b" for the state "A"
       order(AOrderKey).nextInstantOption shouldEqual None
-      order(AOrderKey).state should be(A1State)
+      orderOverview(AOrderKey).orderState should be(A1State)
     }
   }
 

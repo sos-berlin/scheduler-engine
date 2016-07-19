@@ -76,13 +76,13 @@ public final class JS655IT extends SchedulerTest {
 
     @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, JobChain jobChain) throws InterruptedException {
         ignore(e);
-        if (jobChain.path().equals(rightJobChainPath))
+        if (jobChain.overview().path().equals(rightJobChainPath))
             gate.put(jobChainActivated);
     }
 
     @HotEventHandler public void handleEvent(FileBasedRemovedEvent e, JobChain jobChain) throws InterruptedException {
         ignore(e);
-        if (jobChain.path().equals(rightJobChainPath))
+        if (jobChain.overview().path().equals(rightJobChainPath))
             gate.put(jobChainRemoved);
     }
 

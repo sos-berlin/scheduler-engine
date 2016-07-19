@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.google.inject.{Guice, Injector}
+import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
@@ -19,6 +19,7 @@ import scala.reflect.ClassTag
 trait FileBasedSubsystem extends Subsystem {
   self ⇒
 
+  type ThisSubsystemClient <: FileBasedSubsystemClient
   type ThisSubsystem <: FileBasedSubsystem
   type ThisFileBased <: FileBased
   type ThisFile_basedC <: File_basedC[ThisFileBased] with HasSister[ThisFileBased]
@@ -27,16 +28,16 @@ trait FileBasedSubsystem extends Subsystem {
   protected def injector: Injector
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue
 
-  val description: FileBasedSubsystem.AbstractDesription[ThisSubsystem, Path, ThisFileBased]
+  val companion: FileBasedSubsystem.AbstractCompanion[ThisSubsystemClient, ThisSubsystem, Path, ThisFileBased]
   private val _pathToFileBased = new ScalaConcurrentHashMap[Path, ThisFileBased]
 
   lazy val messageCodeHandler = injector.instance[MessageCodeHandler]
 
-  def onFileBasedEvent(e: FileBasedEvent, fileBased: FileBased): Unit = {
+  private[kernel] def onFileBasedEvent(e: FileBasedEvent, fileBased: FileBased): Unit = {
     val path = e.typedPath.asInstanceOf[Path]
     assert(e.typedPath.fileBasedType == fileBasedType)
     assert(fileBased.fileBasedType == fileBasedType)
-    assert(path.getClass == description.pathClass, s"${path.getClass} is not expected ${description.getClass}")
+    assert(path.getClass == companion.pathClass, s"${path.getClass} is not expected ${companion.getClass}")
     e match {
       case e: FileBasedAddedEvent ⇒ _pathToFileBased += path → fileBased.asInstanceOf[ThisFileBased]
       case e: FileBasedReplacedEvent ⇒ _pathToFileBased(path) = fileBased.asInstanceOf[ThisFileBased]
@@ -45,7 +46,7 @@ trait FileBasedSubsystem extends Subsystem {
     }
   }
 
-  def overview: FileBasedSubsystemOverview =
+  private[kernel] def overview: FileBasedSubsystemOverview =
     inSchedulerThread {
       SimpleFileBasedSubsystemOverview(
         fileBasedType = self.fileBasedType,
@@ -53,20 +54,20 @@ trait FileBasedSubsystem extends Subsystem {
         fileBasedStateCounts = (fileBaseds map { _.fileBasedState }).countEquals)
     }
 
-  final def count: Int =
+  private[kernel] final def count: Int =
     _pathToFileBased.size
 
-  final def contains(path: Path): Boolean =
+  private[kernel] final def contains(path: Path): Boolean =
     _pathToFileBased.get(path) exists { _.isVisible }
 
-  final def paths: immutable.Seq[Path] = _pathToFileBased.keys.toVector
+  private[kernel] final def paths: immutable.Seq[Path] = _pathToFileBased.keys.toVector
 
-  def visiblePaths: Seq[Path] =
-    cppProxy.file_based_paths(visibleOnly = true) map description.stringToPath
+  private[kernel] def visiblePaths: Seq[Path] =
+    cppProxy.file_based_paths(visibleOnly = true) map companion.stringToPath
 
-  def visibleFileBaseds: Vector[ThisFileBased] = fileBaseds filter { _.isVisible }
+  private[kernel] def visibleFileBaseds: Vector[ThisFileBased] = fileBaseds filter { _.isVisible }
 
-  final def fileBased(path: Path): ThisFileBased =
+  private[kernel] final def fileBased(path: Path): ThisFileBased =
     _pathToFileBased.getOrElse(path, {  throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string)) })
 
   final def fileBasedOption(path: Path): Option[ThisFileBased] =
@@ -75,7 +76,7 @@ trait FileBasedSubsystem extends Subsystem {
   final def fileBaseds: Vector[ThisFileBased] =
     _pathToFileBased.values.toVector
 
-  final def fileBasedType = description.fileBasedType
+  final def fileBasedType = companion.fileBasedType
 
   protected[this] def cppProxy: SubsystemC[ThisFileBased, ThisFile_basedC]
 }
@@ -83,12 +84,14 @@ trait FileBasedSubsystem extends Subsystem {
 
 object FileBasedSubsystem {
 
-  trait Description {
+  trait Companion {
+    type ThisFileBasedSubsystemClient <: FileBasedSubsystemClient
     type ThisFileBasedSubsystem <: FileBasedSubsystem
     type ThisFileBased <: FileBased
     type Path <: TypedPath
 
     val subsystemClass: Class[ThisFileBasedSubsystem]
+    val clientClass: Class[ThisFileBasedSubsystemClient]
     val pathClass: Class[Path]
     val fileBasedType: FileBasedType
     val stringToPath: String ⇒ Path
@@ -96,23 +99,26 @@ object FileBasedSubsystem {
     override def toString = subsystemClass.getSimpleName
   }
 
-  abstract class AbstractDesription[S <: FileBasedSubsystem : ClassTag, P <: TypedPath : ClassTag, F <: FileBased]
-  extends Description {
+  abstract class AbstractCompanion[C <: FileBasedSubsystemClient: ClassTag, S <: FileBasedSubsystem: ClassTag, P <: TypedPath: ClassTag, F <: FileBased]
+  extends Companion {
+    type ThisFileBasedSubsystemClient = C
     type ThisFileBasedSubsystem = S
     type ThisFileBased = F
     type Path = P
+    val clientClass = implicitClass[ThisFileBasedSubsystemClient]
     val subsystemClass = implicitClass[ThisFileBasedSubsystem]
     val pathClass = implicitClass[Path]
   }
 
-  final class Register private(injector: Injector, typeToDescription: Map[FileBasedType, Description]) {
-    val descriptions = typeToDescription.values.toImmutableSeq
-    def subsystem(t: FileBasedType): FileBasedSubsystem = injector.getInstance(description(t).subsystemClass)
-    def description(t: FileBasedType): Description = typeToDescription(t)
+  final class Register private(injector: Injector, typeToCompanion: Map[FileBasedType, Companion]) {
+    val companions = typeToCompanion.values.toImmutableSeq
+    private[kernel] def subsystem(t: FileBasedType): FileBasedSubsystem = injector.getInstance(companion(t).subsystemClass)
+    def client(t: FileBasedType): FileBasedSubsystemClient = injector.getInstance(companion(t).clientClass)
+    def companion(t: FileBasedType): Companion = typeToCompanion(t)
   }
 
   object Register {
-    def apply(injector: Injector, descriptions: immutable.Seq[Description]) =
+    def apply(injector: Injector, descriptions: immutable.Seq[Companion]) =
       new Register(injector, descriptions toKeyedMap { _.fileBasedType })
   }
 }

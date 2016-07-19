@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import com.sos.scheduler.engine.common.system.OperatingSystem._
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests.{AJobPath, UmlautJobPath}
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.plugins.jetty.test.{JettyPluginJerseyTester, ProvideUmlautJob}
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -21,7 +20,7 @@ final class JobServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
     testPackage = Some(Tests.testPackage))
 
   "Read a job configuration" in {
-    val jobXml = instance[JobSubsystem].job(AJobPath).sourceXmlBytes
+    val jobXml = testEnvironment.fileFromPath(JobPath("/a")).contentBytes
     get[Array[Byte]]("/jobscheduler/engine/job/configuration?job=/a", Accept = List(TEXT_XML_TYPE)) shouldEqual jobXml
   }
 

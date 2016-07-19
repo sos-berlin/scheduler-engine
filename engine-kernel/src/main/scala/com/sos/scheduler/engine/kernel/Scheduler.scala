@@ -34,6 +34,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.filebased.{FileBased, FileBasedSubsystem}
+import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.log.{CppLogger, PrefixLog}
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Result
@@ -96,6 +97,7 @@ with HasCloser {
 
   @ForCpp
   private def initialize(): Unit = {
+    instantiateSubsystems()
     pluginSubsystem = injector.instance[PluginSubsystem]
     commandSubsystem = injector.instance[CommandSubsystem]
     databaseSubsystem = injector.instance[DatabaseSubsystem]
@@ -103,10 +105,18 @@ with HasCloser {
     catchFileBasedEvents()
   }
 
+  private def instantiateSubsystems(): Unit = {
+    for (companion ← injector.instance[FileBasedSubsystem.Register].companions) {
+      injector.getInstance(companion.subsystemClass)
+      injector.getInstance(companion.clientClass)
+    }
+    injector.instance[TaskSubsystemClient]
+  }
+
   private def catchFileBasedEvents(): Unit = {
-    val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
+    val subsystemCompanions = injector.instance[FileBasedSubsystem.Register].companions
     val subsystemMap: Map[FileBasedType, FileBasedSubsystem] =
-      subsystemDescriptions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
+      subsystemCompanions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
     eventBus.onHotEventSourceEvent[FileBasedEvent] {
       case EventSourceEvent(event, fileBased: FileBased) ⇒
         for (subsystem ← subsystemMap.get(event.typedPath.fileBasedType)) {

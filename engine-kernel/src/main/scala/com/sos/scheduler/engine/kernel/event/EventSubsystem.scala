@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Inject, Singleton}
 
 @ForCpp @Singleton
-final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
+private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
 
   /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event]],
     *         weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */

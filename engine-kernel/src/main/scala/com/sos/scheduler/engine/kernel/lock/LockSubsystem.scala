@@ -9,20 +9,23 @@ import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-final class LockSubsystem @Inject private(
+private[kernel] final class LockSubsystem @Inject private(
   protected[this] val cppProxy: Lock_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val injector: Injector)
 extends FileBasedSubsystem {
 
+  type ThisSubsystemClient = LockSubsystemClient
   type ThisSubsystem = LockSubsystem
   type ThisFile_basedC = LockC
   type ThisFileBased = Lock
 
-  val description = LockSubsystem
+  val companion = LockSubsystem
 }
 
-object LockSubsystem extends FileBasedSubsystem.AbstractDesription[LockSubsystem, LockPath, Lock] {
+object LockSubsystem
+extends FileBasedSubsystem.AbstractCompanion[LockSubsystemClient, LockSubsystem, LockPath, Lock] {
+
   val fileBasedType = FileBasedType.lock
   val stringToPath = LockPath.apply _
 }

@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.job.internal
 import com.google.inject.Injector
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile}
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.cast
 import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
@@ -16,11 +15,12 @@ import com.sos.scheduler.engine.kernel.job.internal.FileOrderSinkJob._
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.SinkNode
-import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
+import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystemClient
 import java.nio.file.Files._
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Paths}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.util.Try
 
 /**
  * Implementation of &lt;file_order_sink>.
@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 final class FileOrderSinkJob private(
   protected val task: Task,
   protected val messageCodeToString: MessageCodeHandler,
-  processClassSubsystem: ProcessClassSubsystem,
+  processClassSubsystem: ProcessClassSubsystemClient,
   agentClientFactory: SchedulerAgentClientFactory)
   (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
    executionContext: ExecutionContext)
@@ -48,7 +48,8 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
       }
     }
     val node = cast[SinkNode](order.jobChain.node(order.state))
-    catchInFuture {
+
+    val resultFuture: Future[Boolean] = catchInFuture {
       (node.moveFileTo, node.isDeletingFile) match {
         case ("", true) ⇒
           log.info(messageCodeToString(MessageCode("SCHEDULER-979"), filePath))
@@ -69,9 +70,14 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
         }
       }
     }
-    .andThen { case _ ⇒
-      order.setEndStateReached()   // JS-1627 <file_order_sink> must not changed order state
+
+    val promise = Promise[Boolean]()
+    resultFuture.onComplete { result: Try[Boolean] ⇒
+      promise.completeWith {
+        schedulerThreadFuture { order.setEndStateReached() } map { _ ⇒ result.get }    // JS-1627 <file_order_sink> must not changed order state
+      }
     }
+    promise.future
   }
 }
 
@@ -80,7 +86,7 @@ object FileOrderSinkJob {
     new FileOrderSinkJob(
       task,
       injector.instance[MessageCodeHandler],
-      injector.instance[ProcessClassSubsystem],
+      injector.instance[ProcessClassSubsystemClient],
       injector.instance[SchedulerAgentClientFactory])(
         injector.instance[SchedulerThreadCallQueue],
         injector.instance[ExecutionContext])

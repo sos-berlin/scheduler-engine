@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js578
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js578.JS578IT._
@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS578IT extends FunSuite with ScalaSchedulerTest {
-  private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystem])
+  private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystemClient])
 
   test("<modify_order at='now'/>") {
     val eventPipe = controller.newEventPipe()
@@ -26,7 +26,7 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
     setJobChainNodeStop(true)
     startOrderAt("now")
     eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
-    orderSubsystem.order(orderKey).state should equal (OrderState("200"))
+    orderSubsystem.orderOverview(orderKey).orderState should equal (OrderState("200"))
 
     startOrderAt("now")
     setJobChainNodeStop(false)
@@ -48,7 +48,7 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
       setJobChainNodeStop(true)
       startOrderAt("next")
       eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
-      orderSubsystem.order(orderKey).state should equal (OrderState("200"))
+      orderSubsystem.orderOverview(orderKey).orderState should equal (OrderState("200"))
 
       startOrderAt("next")
       setJobChainNodeStop(false)

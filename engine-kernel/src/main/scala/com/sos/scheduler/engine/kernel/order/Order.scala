@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
 import com.sos.scheduler.engine.kernel.async.CppCall
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.Order._
@@ -23,9 +24,9 @@ import java.time.Instant
 import scala.util.{Failure, Success}
 
 @ForCpp
-final class Order private(
-  protected val cppProxy: OrderC,
-  protected val subsystem: StandingOrderSubsystem)
+private[engine] final class Order private(
+  protected[this] val cppProxy: OrderC,
+  protected[kernel] val subsystem: StandingOrderSubsystem)
 extends FileBased
 with QueryableOrder
 with UnmodifiableOrder
@@ -40,12 +41,12 @@ with OrderPersistence {
 
   def onCppProxyInvalidated(): Unit = {}
 
-  def remove(): Unit = {
+  private[kernel] def remove(): Unit = {
     cppProxy.java_remove()
   }
 
   @ForCpp
-  def agentFileExists(cppCall: CppCall): Unit = {
+  private def agentFileExists(cppCall: CppCall): Unit = {
     import subsystem.schedulerThreadCallQueue.implicits.executionContext
     val orderId = id
     val p = parameters
@@ -61,10 +62,10 @@ with OrderPersistence {
     }
   }
 
-  override def overview: OrderOverview = {
+  private[kernel] override def overview: OrderOverview = {
     val flags = cppProxy.java_fast_flags
     OrderOverview(
-      path = key,  // key because this.path is valid only for permanent orders
+      path = orderKey,  // key because this.path is valid only for permanent orders
       cppFastFlags.fileBasedState(flags),
       cppFastFlags.sourceType(flags),
       orderState = state,
@@ -81,39 +82,42 @@ with OrderPersistence {
 
   def fileBasedType = FileBasedType.order
 
+  // Public for QueryableOrder
   def sourceType: OrderSourceType =
     sourceTypeOnce getOrUpdate toOrderSourceType(hasBaseFile = cppProxy.has_base_file, isFileOrder = cppProxy.is_file_order)
 
-  def key = orderKey
-
-  def orderKey: OrderKey = jobChainPath orderKey id
+  def orderKey: OrderKey = inSchedulerThread { jobChainPath orderKey id }
 
   def id: OrderId =
-    idOnce getOrElse {
-      if (cppProxy.id_locked) {
-        idOnce.trySet(OrderId(cppProxy.string_id))
-        idOnce()
-      } else
-        OrderId(cppProxy.string_id)
-      }
-
-  def nodeKey = NodeKey(jobChainPath, state)
-
-  def state: OrderState =
-    cppProxy.java_job_chain_node match {
-      case null ⇒ OrderState(cppProxy.string_state)
-      case node ⇒ node.orderState  // java_job_chain_node is somewhat faster then accessing string_state
+    inSchedulerThread {
+      idOnce getOrElse {
+        if (cppProxy.id_locked) {
+          idOnce.trySet(OrderId(cppProxy.string_id))
+          idOnce()
+        } else
+          OrderId(cppProxy.string_id)
+        }
     }
 
-  def initialState: OrderState =
+  def nodeKey = inSchedulerThread { NodeKey(jobChainPath, state) }
+
+  def state: OrderState =
+    inSchedulerThread {
+      cppProxy.java_job_chain_node match {
+        case null ⇒ OrderState(cppProxy.string_state)
+        case node ⇒ node.orderState  // java_job_chain_node is somewhat faster then accessing string_state
+      }
+    }
+
+  private[kernel] def initialState: OrderState =
     OrderState(cppProxy.initial_state_string)
 
-  def endState: OrderState =
-    OrderState(cppProxy.end_state_string)
-
-  def endState_=(s: OrderState): Unit = {
-    cppProxy.set_end_state(s.string)
-  }
+//  def endState: OrderState =
+//    OrderState(cppProxy.end_state_string)
+//
+//  def endState_=(s: OrderState): Unit = {
+//    cppProxy.set_end_state(s.string)
+//  }
 
   private def nextStepAt: Option[Instant] =
     cppProxy.next_step_at_millis match {
@@ -123,70 +127,66 @@ with OrderPersistence {
 
   private def setbackUntil: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
 
-  def taskId: Option[TaskId] =
+  private[kernel] def taskId: Option[TaskId] =
     cppProxy.task_id match {
       case 0 ⇒ None
       case o ⇒ Some(TaskId(o))
     }
 
-  def priority: Int =
+  private[kernel] def priority: Int =
     cppProxy.priority
 
-  def priority_=(o: Int): Unit = {
-    cppProxy.set_priority(o)
-  }
+//  def priority_=(o: Int): Unit = {
+//    cppProxy.set_priority(o)
+//  }
 
+  // Public for QueryableOrder
   def isSuspended: Boolean =
     cppProxy.suspended
 
-  def isSuspended_=(b: Boolean): Unit = {
-    cppProxy.set_suspended(b)
-  }
+//  def isSuspended_=(b: Boolean): Unit = {
+//    cppProxy.set_suspended(b)
+//  }
 
+  // Public for QueryableOrder
   def isBlacklisted = cppProxy.is_on_blacklist
 
-  def title: String =
-    cppProxy.title
+  def title: String = inSchedulerThread { cppProxy.title }
 
-  def title_=(o: String): Unit = {
-    cppProxy.set_title(o)
-  }
+//  def title_=(o: String): Unit = {
+//    cppProxy.set_title(o)
+//  }
 
-  def jobChainPath: JobChainPath =
+  private[kernel] def jobChainPath: JobChainPath =
     cppProxy.job_chain match {
       case null ⇒ emptyToNone(cppProxy.job_chain_path_string) map JobChainPath.apply getOrElse throwNotInAJobChain()
       case o ⇒ o.getSister.path   // Faster
     }
 
-  def jobChain: JobChain =
+  private[kernel] def jobChain: JobChain =
     jobChainOption getOrElse throwNotInAJobChain()
 
-  def jobChainOption: Option[JobChain] =
+  private def jobChainOption: Option[JobChain] =
     Option(cppProxy.job_chain) map { _.getSister }
 
-  def filePath: String = cppProxy.params.get_string(FileOrderPathVariableName)
+  private[kernel] def filePath: String = cppProxy.params.get_string(FileOrderPathVariableName)
 
-  def fileAgentUri: String = cppProxy.params.get_string(FileOrderAgentUriVariableName)
+  //private def fileAgentUri: String = cppProxy.params.get_string(FileOrderAgentUriVariableName)
 
-  def parameters: VariableSet =
-    cppProxy.params.getSister
+  def parameters: VariableSet = inSchedulerThread { cppProxy.params.getSister }
 
   def nextInstantOption: Option[Instant] =
-    eternalCppMillisToNoneInstant(cppProxy.next_time_millis)
+    inSchedulerThread { eternalCppMillisToNoneInstant(cppProxy.next_time_millis) }
 
-  def createdAtOption: Option[Instant] = throw new UnsupportedOperationException
+  private[kernel] def createdAtOption: Option[Instant] = throw new UnsupportedOperationException
 
-  override def toString = {
-    val result = getClass.getSimpleName
-    if (cppProxy.cppReferenceIsValid) s"$result ${cppProxy.job_chain_path_string}:$id"
-    else result
-  }
+  override def toString = getClass.getSimpleName + (idOnce.toOption map { o ⇒ s"('$o')" })
 
-  def blacklist(): Unit = cppProxy.set_on_blacklist()
+  private[kernel] def blacklist(): Unit = cppProxy.set_on_blacklist()
 
   private def throwNotInAJobChain() = throw new SchedulerException(s"Order is not in a job chain: $toString")
 
-  def setEndStateReached() = cppProxy.set_end_state_reached()
+  private[kernel] def setEndStateReached() = cppProxy.set_end_state_reached()
 }
 
 object Order {

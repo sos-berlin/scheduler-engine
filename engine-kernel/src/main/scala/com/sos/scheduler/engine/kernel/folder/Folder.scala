@@ -8,9 +8,9 @@ import com.sos.scheduler.engine.kernel.cppproxy.FolderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
-final class Folder(
+private[kernel] final class Folder(
   protected[this] val cppProxy: FolderC,
-  protected val subsystem: FolderSubsystem)
+  protected[kernel] val subsystem: FolderSubsystem)
 extends FileBased {
 
   type ThisPath = FolderPath

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand, ProcessClassConfiguration}
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -61,11 +61,11 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       sleep(2.s)
       eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-989")) { // "Process_class cannot be removed now, it will be done later"
         delete(file)
-        instance[FolderSubsystem].updateFolders()
+        instance[FolderSubsystemClient].updateFolders()
       }
       events.next[TaskEndedEvent](_.jobPath == JavaJobPath, 10.s)
       events.nextKeyed[FileBasedRemovedEvent](AProcessClassPath)
-      assert(order(orderKey).state == OrderState("200"))
+      assert(orderOverview(orderKey).orderState == OrderState("200"))
       writeConfigurationFile(AProcessClassPath, fileContent)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
       events.nextKeyed[OrderFinishedEvent](orderKey)
@@ -84,7 +84,7 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       events.next[TaskStartedEvent](_.jobPath == JavaJobPath)
       events.nextKeyed[OrderFinishedEvent](bOrderKey).state shouldBe OrderState("END")
     }
-    assert(job(JavaJobPath).state == JobState.running)
+    assert(jobOverview(JavaJobPath).state == JobState.running)
   }
 
   private def runOrder(orderKey: OrderKey): OrderFinishedEvent =

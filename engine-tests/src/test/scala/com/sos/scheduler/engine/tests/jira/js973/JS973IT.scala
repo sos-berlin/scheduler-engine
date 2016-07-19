@@ -14,8 +14,8 @@ import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
+import com.sos.scheduler.engine.kernel.order.{OrderSubsystemClient, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -169,12 +169,12 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     val eventPipe = controller.newEventPipe()
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
-      val firstJobPath = instance[OrderSubsystem].jobChain(jobChainPath).jobNodes.head.jobPath
-      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.pending
+      val firstJobPath = instance[OrderSubsystemClient].jobChain(jobChainPath).jobNodes.head.jobPath
+      instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
       eventPipe.nextAny[ErrorLogEvent].codeOption shouldEqual Some(expectedErrorCode)
       eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual KeepOrderStateTransition
-      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.stopped
+      instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.stopped
     }
   }
 

@@ -26,7 +26,7 @@ import scala.math.max
 @ForCpp
 final class ProcessClass private(
   protected[this] val cppProxy: Process_classC,
-  protected val subsystem: ProcessClassSubsystem,
+  protected[kernel] val subsystem: ProcessClassSubsystem,
   callQueue: SchedulerThreadCallQueue,
   newCppHttpRemoteApiProcessClient: CppHttpRemoteApiProcessClient.Factory,
   /** Verzögerung für nicht erreichbare Agents - erst nach Scheduler-Aktivierung (Settings::freeze) nutzbar. */
@@ -35,6 +35,7 @@ extends FileBased {
 
   type ThisPath = ProcessClassPath
 
+  @volatile
   private[this] var _config = Configuration(None, immutable.IndexedSeq())
   private[this] var _failableAgents: FailableCollection[Agent] = null
   private[this] val clients = mutable.HashSet[CppHttpRemoteApiProcessClient]()
@@ -48,12 +49,12 @@ extends FileBased {
   }
 
   @ForCpp
-  def processConfigurationDomElement(element: dom.Element): Unit = {
+  private def processConfigurationDomElement(element: dom.Element): Unit = {
     changeConfiguration(Configuration.parse(element))
   }
 
   @ForCpp
-  def replaceWith(other: ProcessClass): Unit = {
+  private def replaceWith(other: ProcessClass): Unit = {
     changeConfiguration(other.config)
   }
 
@@ -74,10 +75,10 @@ extends FileBased {
   }
 
   @ForCpp
-  def hasMoreAgents = config.moreAgents.nonEmpty
+  private def hasMoreAgents = config.moreAgents.nonEmpty
 
   @ForCpp
-  def startCppHttpRemoteApiProcessClient(
+  private def startCppHttpRemoteApiProcessClient(
     conf: Api_process_configurationC,
     schedulerApiTcpPort: Int,
     warningCall: CppCall,
@@ -90,12 +91,12 @@ extends FileBased {
   }
 
   @ForCpp
-  def removeCppHttpRemoteApiProcessClient(client: CppHttpRemoteApiProcessClient): Unit = {
+  private def removeCppHttpRemoteApiProcessClient(client: CppHttpRemoteApiProcessClient): Unit = {
     try client.close()
     finally clients -= client
   }
 
-  override def overview = ProcessClassOverview(path, fileBasedState,
+  private[kernel] override def overview = ProcessClassOverview(path, fileBasedState,
     processLimit = cppProxy.max_processes, usedProcessCount = cppProxy.used_process_count)
 
   def agents: immutable.Seq[Agent] = config.agents

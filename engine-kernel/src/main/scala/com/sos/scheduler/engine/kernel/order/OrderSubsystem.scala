@@ -22,64 +22,59 @@ import scala.collection.immutable
 
 @ForCpp
 @Singleton
-private[engine] final class OrderSubsystem @Inject private(
+private[kernel] final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   folderSubsystem: FolderSubsystem,
   protected val injector: Injector)
 extends FileBasedSubsystem {
 
+  type ThisSubsystemClient = OrderSubsystemClient
   type ThisSubsystem = OrderSubsystem
   type ThisFileBased = JobChain
   type ThisFile_basedC = Job_chainC
 
-  val description = OrderSubsystem
+  val companion = OrderSubsystem
 
   private implicit lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
   private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
 
   @ForCpp
-  def persistNodeState(node: Node): Unit = {
+  private def persistNodeState(node: Node): Unit = {
     transaction { implicit entityManager =>
       persistentStateStore.store(node.persistentState)
     }
   }
 
-  def tryRemoveOrder(k: OrderKey): Unit = {
-    inSchedulerThread {
-      for (o <- orderOption(k))
-        o.remove()
-    }
-  }
-
-  def orderOverviews: immutable.Seq[OrderOverview] = orderOverviews(OrderQuery.All)
-
-  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] =
+  private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] =
     ordersByQuery(query).toVector map { _.overview }
 
-  private def ordersByQuery(query: OrderQuery): Seq[Order] = {
+  private def ordersByQuery(query: OrderQuery) = {
     val q = query.copy(jobChainQuery = JobChainQuery.All)
     jobChainsByQuery(query.jobChainQuery) flatMap { _.orders } filter q.matches
   }
 
-  def orders: Seq[Order] = jobChains flatMap { _.orders }
-
   def order(orderKey: OrderKey): Order =
-    jobChain(orderKey.jobChainPath).order(orderKey.id)
+    inSchedulerThread {
+      jobChain(orderKey.jobChainPath).order(orderKey.id)
+    }
 
   def orderOption(orderKey: OrderKey): Option[Order] =
-    jobChain(orderKey.jobChainPath).orderOption(orderKey.id)
+    inSchedulerThread {
+      jobChain(orderKey.jobChainPath).orderOption(orderKey.id)
+    }
 
-  def removeJobChain(o: JobChainPath): Unit = {
-    jobChain(o).remove()
-  }
+  def removeJobChain(o: JobChainPath): Unit =
+    inSchedulerThread {
+      jobChain(o).remove()
+    }
 
   def jobChainsOfJob(job: Job): Iterable[JobChain] =
     inSchedulerThread {
       jobChains filter { _ refersToJob job }
     }
 
-  def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] =
+  private[kernel] def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] =
     query.reduce match {
       case JobChainQuery.All ⇒ visibleFileBaseds
       case jobChainPath: JobChainPath ⇒ List(jobChain(jobChainPath))
@@ -88,18 +83,23 @@ extends FileBasedSubsystem {
         visibleFileBaseds filter { o ⇒ query.matches(o.path) }
     }
 
-  def jobChains: Seq[JobChain] =
-    fileBaseds
+  private def jobChains: Vector[JobChain] = fileBaseds
 
   def jobChain(o: JobChainPath): JobChain =
-    fileBased(o)
+    inSchedulerThread {
+      fileBased(o)
+    }
 
   def jobChainOption(o: JobChainPath): Option[JobChain] =
-    fileBasedOption(o)
+    inSchedulerThread {
+      fileBasedOption(o)
+    }
 }
 
 
-object OrderSubsystem extends FileBasedSubsystem.AbstractDesription[OrderSubsystem, JobChainPath, JobChain] {
+object OrderSubsystem extends
+FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobChainPath, JobChain] {
+
   val fileBasedType = FileBasedType.jobChain
   val stringToPath = JobChainPath.apply _
 }

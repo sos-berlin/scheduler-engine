@@ -8,9 +8,9 @@ import com.sos.scheduler.engine.kernel.cppproxy.ScheduleC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
-final class Schedule private(
+private[kernel] final class Schedule private(
   protected[this] val cppProxy: ScheduleC,
-  protected val subsystem: ScheduleSubsystem)
+  protected[kernel] val subsystem: ScheduleSubsystem)
 extends FileBased {
 
   type ThisPath = SchedulePath

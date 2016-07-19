@@ -106,7 +106,7 @@ with HasCloser {
 
   @Provides @Singleton
   private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
-    databaseSubsystem.entityManagerFactory
+    databaseSubsystem.newEntityManagerFactory()
 
   @Provides @Singleton
   private def provideSchedulerClusterMemberKey(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId) =

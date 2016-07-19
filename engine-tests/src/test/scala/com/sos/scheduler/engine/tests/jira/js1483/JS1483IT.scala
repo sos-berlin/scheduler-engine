@@ -36,7 +36,7 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     awaitSuccess(firstRun.started)
     controller.toleratingErrorCodes(_ ⇒ true) {
       startJob(TestJobPath)
-      waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.stopped }
+      waitForCondition(TestTimeout, 100.ms) { jobOverview(TestJobPath).state == JobState.stopped }
       assert(job(TestJobPath).stateText startsWith classOf[LicenseKeyParameterIsMissingException].getSimpleName)
       assert(job(TestJobPath).stateText contains "No license key provided by master to execute jobs in parallel")
       scheduler executeXml <kill_task job="/test-sleep" id={firstRun.taskId.string} immediately="true"/>

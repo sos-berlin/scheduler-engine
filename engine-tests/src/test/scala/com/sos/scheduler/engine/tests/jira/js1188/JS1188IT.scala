@@ -57,7 +57,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "Job-API process_class.remote_scheduler can be changed only with (old) non-HTTP agents" in {
     runJob(JobPath("/test-api"))
-    job(JobPath("/test-api")).state should not equal JobState.stopped
+    jobOverview(JobPath("/test-api")).state should not equal JobState.stopped
   }
 
   "With unreachable agents, task waits 2 times agentConnectRetryDelay because no agent is reachable" in {
@@ -156,7 +156,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       }
       // Job should run fail with SCHEDULER-280 because the new process class has no longer remote scheduler
       assert(eventPipe.queued[ErrorLogEvent] exists { _.codeOption == Some(MessageCode("SCHEDULER-280")) })
-      assert(job(ReplaceTestJobPath).state == JobState.stopped)
+      assert(jobOverview(ReplaceTestJobPath).state == JobState.stopped)
     }
   }
 

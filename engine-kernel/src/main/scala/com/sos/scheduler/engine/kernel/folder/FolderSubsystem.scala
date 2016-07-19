@@ -17,11 +17,12 @@ final class FolderSubsystem @Inject private(
   protected val injector: Injector)
 extends FileBasedSubsystem {
 
+  type ThisSubsystemClient = FolderSubsystemClient
   type ThisSubsystem = FolderSubsystem
   type ThisFileBased = Folder
   type ThisFile_basedC = FolderC
 
-  val description = FolderSubsystem
+  val companion = FolderSubsystem
 
   def names(path: AbsolutePath, typ: FileBasedType): immutable.Seq[String] =
     immutable.Seq() ++ cppProxy.java_names(path.string, typ.cppName)
@@ -34,7 +35,9 @@ extends FileBasedSubsystem {
 }
 
 
-object FolderSubsystem extends FileBasedSubsystem.AbstractDesription[FolderSubsystem, FolderPath, Folder] {
+object FolderSubsystem
+extends FileBasedSubsystem.AbstractCompanion[FolderSubsystemClient, FolderSubsystem, FolderPath, Folder] {
+
   val fileBasedType = FileBasedType.folder
   val stringToPath = FolderPath.apply _
 }

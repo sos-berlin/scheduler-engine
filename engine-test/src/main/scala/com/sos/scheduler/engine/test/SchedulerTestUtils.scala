@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -11,22 +10,22 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXm
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderOverview, OrderState, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
+import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystemClient, Task, TaskSubsystemClient}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
-import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, UnmodifiableOrder}
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystemClient, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
+import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystemClient}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
@@ -70,7 +69,7 @@ object SchedulerTestUtils {
     }
     controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
       file.xml = xmlElem
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
     }
   }
 
@@ -80,29 +79,41 @@ object SchedulerTestUtils {
   def deleteConfigurationFile[A](path: TypedPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
     controller.eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](path) {
       Files.delete(controller.environment.fileFromPath(path))
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
     }
   }
 
+  def jobOverview(path: JobPath)(implicit hasInjector: HasInjector): JobOverview =
+    instance[JobSubsystemClient].jobOverview(path)
+
+  def jobDetails(path: JobPath)(implicit hasInjector: HasInjector): FileBasedDetails =
+    instance[JobSubsystemClient].fileBasedDetails(path)
+
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
-    instance[JobSubsystem].job(jobPath)
+    instance[JobSubsystemClient].job(jobPath)
 
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
-    instance[OrderSubsystem].jobChain(jobChainPath)
+    instance[OrderSubsystemClient].jobChain(jobChainPath)
+
+  def jobChainDetails(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainDetails =
+    instance[OrderSubsystemClient].fileBasedDetails(jobChainPath)
+
+  def orderOverview(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderOverview =
+    instance[OrderSubsystemClient].orderOverview(orderKey)
 
   def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
-    instance[OrderSubsystem].order(orderKey)
+    instance[OrderSubsystemClient].order(orderKey)
 
   def orderExists(orderKey: OrderKey)(implicit hasInjector: HasInjector): Boolean = orderOption(orderKey).isDefined
 
   def orderOption(orderKey: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
-    instance[OrderSubsystem].orderOption(orderKey)
+    instance[OrderSubsystemClient].orderOption(orderKey)
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
-    instance[TaskSubsystem].task(taskId)
+    instance[TaskSubsystemClient].task(taskId)
 
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
-    instance[ProcessClassSubsystem].processClass(path)
+    instance[ProcessClassSubsystemClient].processClass(path)
 
   def runJob(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult =
     runJob(StartJobCommand(jobPath, variables))

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.{noCache, schedulerTextPlainVariant, textPlainVariant}
 import javax.inject.Inject
@@ -13,7 +13,7 @@ import javax.ws.rs.core._
 
 @Path("job")
 class JobService @Inject private(
-    jobSubsystem: JobSubsystem,
+    jobSubsystem: JobSubsystemClient,
     schedulerInstanceId: SchedulerInstanceId,
     @QueryParam("job") @DefaultValue("") pathString: String)
 {

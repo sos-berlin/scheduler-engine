@@ -8,7 +8,9 @@ import com.sos.scheduler.engine.kernel.cppproxy.LockC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
-final class Lock private(protected[this] val cppProxy: LockC, protected val subsystem: LockSubsystem)
+private[kernel] final class Lock private(
+  protected[this] val cppProxy: LockC,
+  protected[kernel] val subsystem: LockSubsystem)
 extends FileBased {
 
   type ThisPath = LockPath

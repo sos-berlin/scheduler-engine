@@ -2,14 +2,13 @@ package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.jetty.utils.GetOnlyServlet
-import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @Singleton
-class OrderLogServlet @Inject private(orderSubsystem: OrderSubsystem) extends GetOnlyServlet {
+class OrderLogServlet @Inject private(orderSubsystem: OrderSubsystemClient) extends GetOnlyServlet {
   override def doGet(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val attributeName = classOf[OrderLogServlet].getName
     Option(request.getAttribute(attributeName).asInstanceOf[FileServletAsyncOperation]) match {

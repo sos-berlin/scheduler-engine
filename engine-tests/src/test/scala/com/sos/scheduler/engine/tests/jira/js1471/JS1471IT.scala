@@ -30,8 +30,8 @@ final class JS1471IT extends FreeSpec with ScalaSchedulerTest {
     val orderKey = jobChainPath orderKey "1"
     val jobPath = JobPath(s"/$name")
     scheduler executeXml OrderCommand(orderKey)
-    waitForCondition(TestTimeout, 100.ms) { job(jobPath).state == JobState.stopped }
-    assert(order(orderKey).state == OrderState("100"))
-    assert(order(orderKey).isSuspended)
+    waitForCondition(TestTimeout, 100.ms) { jobOverview(jobPath).state == JobState.stopped }
+    assert(orderOverview(orderKey).orderState == OrderState("100"))
+    assert(orderOverview(orderKey).isSuspended)
   }
 }

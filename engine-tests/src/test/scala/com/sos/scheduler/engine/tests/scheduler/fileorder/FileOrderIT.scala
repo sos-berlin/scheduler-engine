@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderTouchedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -81,7 +81,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         runUntilFileRemovedMessage(orderKey) {
           eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
             testEnvironment.fileFromPath(DeleteJobPath).append(" ")
-            instance[FolderSubsystem].updateFolders()
+            instance[FolderSubsystemClient].updateFolders()
             touch(matchingFile)
           }
         }

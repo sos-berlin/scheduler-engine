@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1040
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1040.JS1040IT._
 import org.junit.runner.RunWith
@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val orderSubsystem = instance[OrderSubsystem]
+  private lazy val orderSubsystem = instance[OrderSubsystemClient]
 
   "job_chain orders_recoverable=no should delete all orders in database when job chain is deleted and reread" - {
     addTests(removeBeforeReread = true)
@@ -46,7 +46,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     def readJobChain(ordersAreRecoverable: Boolean): Unit = {
-      if (removeBeforeReread && orderSubsystem.jobChainOption(testJobChainPath).isDefined)
+      if (removeBeforeReread && orderSubsystem.contains(testJobChainPath))
         removeJobChain()
       withEventPipe { eventPipe ⇒
         scheduler executeXml jobChainElem(ordersAreRecoverable)
@@ -56,7 +56,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
 
     def removeJobChain(): Unit = {
       withEventPipe { eventPipe ⇒
-        orderSubsystem.removeJobChain(testJobChainPath)
+        orderSubsystem.remove(testJobChainPath)
         eventBus.dispatchEvents()
         eventPipe.nextKeyed[FileBasedRemovedEvent](testJobChainPath)
       }

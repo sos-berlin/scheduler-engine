@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.webservice.services
 import com.google.inject.{AbstractModule, Guice}
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JerseyModule
 import com.sos.scheduler.engine.plugins.jetty.test.WebServiceTester
 import javax.ws.rs.core.MediaType._
@@ -18,7 +18,7 @@ import spray.json._
 @RunWith(classOf[JUnitRunner])
 final class JobsServiceTest extends FreeSpec with BeforeAndAfterAll with MockitoSugar {
 
-  private val mockedJobSubsystem = mock[JobSubsystem] sideEffect { o ⇒
+  private val mockedJobSubsystem = mock[JobSubsystemClient] sideEffect { o ⇒
     when(o.visiblePaths) thenReturn List(JobPath("/a"), JobPath("/b/c"), JobPath("/äöüßÄÖÜ"))
   }
 
@@ -27,7 +27,7 @@ final class JobsServiceTest extends FreeSpec with BeforeAndAfterAll with Mockito
     new AbstractModule {
       def configure(): Unit = {
         bind(classOf[JobsService])
-        bind(classOf[JobSubsystem]) toInstance mockedJobSubsystem
+        bind(classOf[JobSubsystemClient]) toInstance mockedJobSubsystem
       }
     })
   private lazy val tester = new WebServiceTester(injector)

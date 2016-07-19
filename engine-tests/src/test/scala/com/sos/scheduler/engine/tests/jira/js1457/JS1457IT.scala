@@ -50,7 +50,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
       }
     finally {
       stop = true
-      waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.pending }
+      waitForCondition(TestTimeout, 100.ms) { jobOverview(TestJobPath).state == JobState.pending }
     }
     logger.info(s"$count processes, ${count.get * 1000 / (currentTimeMillis() - t)} processes/s")
   }

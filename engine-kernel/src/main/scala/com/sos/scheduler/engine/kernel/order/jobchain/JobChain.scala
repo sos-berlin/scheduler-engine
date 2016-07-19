@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
@@ -19,16 +20,15 @@ import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.collection.{breakOut, immutable, mutable}
 
 @ForCpp
-final class JobChain(
+private[engine] final class JobChain(
   protected[this] val cppProxy: Job_chainC,
-  protected val subsystem: OrderSubsystem,
+  protected[kernel] val subsystem: OrderSubsystem,
   injector: Injector)
 extends FileBased
 with UnmodifiableJobChain {
@@ -54,7 +54,7 @@ with UnmodifiableJobChain {
     }
   }
 
-  override def overview = JobChainOverview(
+  private[kernel] override def overview = JobChainOverview(
     path = path,
     fileBasedState = fileBasedState)
 
@@ -110,7 +110,7 @@ with UnmodifiableJobChain {
   @ForCpp
   private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
-  override def details = {
+  private[kernel] override def details = {
     val d = super.details
     JobChainDetails(
       d.path.asInstanceOf[JobChainPath],
@@ -122,57 +122,62 @@ with UnmodifiableJobChain {
     )
   }
 
-  def refersToJob(job: Job): Boolean = nodes exists {
+  private[order] def refersToJob(job: Job): Boolean = nodes exists {
     case n: SimpleJobNode => n.getJob eq job
     case _ => false
   }
 
   def jobNodes: immutable.Seq[SimpleJobNode] =
-    nodes collect { case o: SimpleJobNode => o }
+    inSchedulerThread {
+      nodes collect { case o: SimpleJobNode => o }
+    }
 
   def node(o: OrderState): Node =
-    nodeMap(o)
+    inSchedulerThread {
+      nodeMap(o)
+    }
 
-  lazy val nodeMap: Map[OrderState, Node] =
+  private lazy val nodeMap: Map[OrderState, Node] =
     (nodes map { n ⇒ n.orderState → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
 
-  lazy val nodes: Vector[Node] =
+  private lazy val nodes: Vector[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector
 
   def order(id: OrderId) =
-    orderOption(id) getOrElse sys.error(s"$toString does not contain order '$id'")
+    inSchedulerThread {
+      orderOption(id) getOrElse sys.error(s"$toString does not contain order '$id'")
+    }
 
-  @Nullable def orderOrNull(id: OrderId): Order =
-    orderOption(id).orNull
-
-  def orderOption(id: OrderId): Option[Order] =
+  private[kernel] def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
 
-  def orders: Vector[Order] = cppProxy.java_orders.map { o ⇒ o.asInstanceOf[OrderC].getSister } (breakOut)
+  private[order] def orders: Vector[Order] = cppProxy.java_orders.map { o ⇒ o.asInstanceOf[OrderC].getSister } (breakOut)
 
-  def isStopped =
-    cppProxy.is_stopped
+  private def isStopped = cppProxy.is_stopped
 
-  def isStopped_=(o: Boolean): Unit = {
+  private def isStopped_=(o: Boolean): Unit = {
     cppProxy.set_stopped(o)
   }
 
-  def orderLimitOption: Option[Int] = someUnless(orderLimit, none = Int.MaxValue)
+  private def orderLimitOption: Option[Int] = someUnless(orderLimit, none = Int.MaxValue)
 
   /**
    * @return Int.MaxValue, when unlimited
    */
-  def orderLimit: Int = cppProxy.max_orders
+  def orderLimit: Int =
+    inSchedulerThread {
+      cppProxy.max_orders
+    }
 
   private[order] def remove(): Unit = {
     cppProxy.remove()
   }
 
-  def isDistributed: Boolean = cppProxy.is_distributed()
+  def isDistributed: Boolean = inSchedulerThread { cppProxy.is_distributed() }
 
-  def processClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+  private[kernel] def processClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
-  def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
+  private[kernel] def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
 }
 
 object JobChain {

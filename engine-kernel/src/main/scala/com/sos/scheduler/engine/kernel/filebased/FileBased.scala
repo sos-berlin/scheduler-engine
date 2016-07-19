@@ -24,23 +24,23 @@ with EventSource {
 
   private val fixedPath = new SetOnce[ThisPath]
 
-  protected def subsystem: FileBasedSubsystem
+  protected[kernel] def subsystem: FileBasedSubsystem
 
   protected implicit def schedulerThreadCallQueue: SchedulerThreadCallQueue = subsystem.schedulerThreadCallQueue
+
+  //private[kernel] val clientOnce = new SetOnce[FileBasedClient]
 
   /** Jedes Exemplar hat seine eigene UUID. */
   final val uuid = java.util.UUID.randomUUID
 
   protected[this] def cppProxy: File_basedC[_]
 
-  def overview: FileBasedOverview =
-    inSchedulerThread {
-      SimpleFileBasedOverview(
-        path = self.path,
-        fileBasedState = self.fileBasedState)
-    }
+  private[kernel] def overview: FileBasedOverview =
+    SimpleFileBasedOverview(
+      path = self.path,
+      fileBasedState = self.fileBasedState)
 
-  def details: FileBasedDetails =
+  private[kernel] def details: FileBasedDetails =
     inSchedulerThread {
       val overview = self.overview
       SimpleFileBasedDetails(
@@ -58,13 +58,9 @@ with EventSource {
 
   def fileBasedType: FileBasedType
 
-  def fileBasedState =
-    FileBasedState.values()(cppProxy.file_based_state)
+  private[kernel] def fileBasedState = FileBasedState.values()(cppProxy.file_based_state)
 
-  /** Für Java. */
-  def getPath: TypedPath = path
-
-  def path: ThisPath =
+  private[kernel] def path: ThisPath =
     fixedPath getOrElse {
       if (cppProxy.name_is_fixed) {
         fixedPath.trySet(stringToPath(cppProxy.path))
@@ -73,10 +69,9 @@ with EventSource {
         stringToPath(cppProxy.path)
     }
 
-  def name =
-    cppProxy.name
+  private[kernel] def name = cppProxy.name
 
-  def fileModificationInstantOption: Option[Instant] =
+  private def fileModificationInstantOption: Option[Instant] =
     cppProxy.file_modification_time_t match {
       case 0 ⇒ None
       case n ⇒ Some(Instant.ofEpochSecond(n))
@@ -103,7 +98,9 @@ with EventSource {
 
   /** @return true, wenn das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] nach einer Änderung erneut geladen worden ist. */
   def fileBasedIsReread =
-    cppProxy.is_file_based_reread
+    inSchedulerThread {
+      cppProxy.is_file_based_reread
+    }
 
   def isVisible: Boolean = cppProxy.is_visible
   def hasBaseFile: Boolean = cppProxy.has_base_file

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js856
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js856.JS856IT._
 import org.scalatest.FunSuite
@@ -62,7 +62,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
 
     final def orderParameters = order.parameters.toMap filterKeys { _ != suspendedParameterName }
 
-    final def order = instance[OrderSubsystem].order(orderKey)
+    final def order = instance[OrderSubsystemClient].order(orderKey)
   }
 
   class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(jobChainPath orderKey "1") {

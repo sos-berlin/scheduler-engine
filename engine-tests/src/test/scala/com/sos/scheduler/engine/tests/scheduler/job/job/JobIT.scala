@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.job
 
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.job.JobIT._
 import org.junit.runner.RunWith
@@ -12,14 +12,15 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class JobIT extends FunSuite with ScalaSchedulerTest {
 
-  private lazy val job = instance[JobSubsystem].job(jobPath)
+  private lazy val job = instance[JobSubsystemClient].job(jobPath)
+  private lazy val jobOverview = instance[JobSubsystemClient].jobOverview(jobPath)
 
   test("job.name") {
-    assert(job.name === "a")
+    assert(jobOverview.path.name === "a")
   }
 
   test("job.path") {
-    assert(job.path.string === "/a")
+    assert(jobOverview.path.string === "/a")
   }
 
   test("job.fileBasedIsReread") {
@@ -27,11 +28,11 @@ class JobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("jobSubsystem.visibleNames") {
-    instance[JobSubsystem].visiblePaths.toSet shouldEqual Set(JobPath("/a"), JobPath("/b"))
+    instance[JobSubsystemClient].visiblePaths.toSet shouldEqual Set(JobPath("/a"), JobPath("/b"))
   }
 
   test("jobSubsystem.names") {
-    instance[JobSubsystem].paths.toSet shouldEqual Set(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder"), JobPath("/a"), JobPath("/b"))
+    instance[JobSubsystemClient].paths.toSet shouldEqual Set(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder"), JobPath("/a"), JobPath("/b"))
   }
 }
 

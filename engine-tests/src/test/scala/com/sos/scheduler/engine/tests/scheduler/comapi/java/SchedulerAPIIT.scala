@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEv
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -71,7 +71,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   "sos.spooler.Job methods" in {
     val taskLog = runJob(JobObjectJobPath).logString
-    val job = instance[JobSubsystem].job(JobObjectJobPath)
+    val job = instance[JobSubsystemClient].job(JobObjectJobPath)
 
     for (mes <- JobObjectJob.UnwantedMessage.values) {
       taskLog should not include mes.toString

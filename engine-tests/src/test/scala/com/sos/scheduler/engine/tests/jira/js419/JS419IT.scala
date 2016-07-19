@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXm
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js419.JS419IT._
@@ -27,7 +27,7 @@ import scala.concurrent.Future
 final class JS419IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val testIncludeFile = testEnvironment.liveDirectory / "test-include.xml"
-  private lazy val jobSubsystem = instance[JobSubsystem]
+  private lazy val jobSubsystem = instance[JobSubsystemClient]
 
   "Changing includes holidays file should effect job" in {
     for (_ ← 1 to 3) {
@@ -63,7 +63,7 @@ final class JS419IT extends FreeSpec with ScalaSchedulerTest {
   private def startJobs(): List[TaskRun] =
     for (jobPath ← TestJobPaths) yield startJob(StartJobCommand(jobPath, at = Some(StartJobCommand.At.Period)))
 
-  private def updateFolders() = instance[FolderSubsystem].updateFolders()
+  private def updateFolders() = instance[FolderSubsystemClient].updateFolders()
 }
 
 private object JS419IT {

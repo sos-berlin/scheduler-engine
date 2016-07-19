@@ -5,9 +5,9 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.Action
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
-import com.sos.scheduler.engine.test.EventPipe
-import com.sos.scheduler.engine.test.SchedulerTestUtils.order
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
+import com.sos.scheduler.engine.test.{EventPipe, SchedulerTestUtils}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOverview}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1003.JS1003IT._
 import java.time.Instant
@@ -20,7 +20,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val orderSubsystem = instance[OrderSubsystem]
+  private lazy val orderSubsystem = instance[OrderSubsystemClient]
   private lazy val jobChain = orderSubsystem.jobChain(TestJobChainPath)
 
   "(prepare job chain)" in {
@@ -66,21 +66,21 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
       startOrder
       checkBehaviourUntilReset(orderKey)
       order(orderKey).nextInstantOption shouldEqual scheduledAt
-      order(orderKey).state shouldBe State200
+      orderOverview(orderKey).orderState shouldBe State200
       Thread.sleep(2000)
-      order(orderKey).state shouldBe State200
+      orderOverview(orderKey).orderState shouldBe State200
     }
   }
 
   private def checkBehaviourUntilReset(orderKey: OrderKey)(implicit eventPipe: EventPipe): Unit = {
     //Wird übersprungen: eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State100
     eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State200
-    def order = orderSubsystem.order(orderKey)
-    order.state shouldBe State300
+    def order = orderSubsystem.orderOverview(orderKey)
+    order.orderState shouldBe State300
     scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
-    order shouldBe 'suspended
+    assert(order.isSuspended)
     scheduler executeXml ModifyOrderCommand(orderKey, action = Some(Action.reset))
-    order should not be 'suspended
+    assert(!order.isSuspended)
     eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState shouldBe State300
   }
 }

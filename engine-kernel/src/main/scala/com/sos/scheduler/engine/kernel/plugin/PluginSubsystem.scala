@@ -29,12 +29,12 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   private lazy val typeToSourceChangingPlugins: Map[FileBasedType, immutable.Seq[XmlConfigurationChangingPlugin]] =
     (for (p ← plugins[XmlConfigurationChangingPlugin]; t ← p.fileBasedTypes) yield t → p).toSeqMultiMap withDefaultValue Nil
 
-  val commandHandlers = ImmutableList.of[CommandHandler](
+  private[kernel] val commandHandlers = ImmutableList.of[CommandHandler](
     new PluginCommandExecutor(this),
     new PluginCommandCommandXmlParser(this),
     new PluginCommandResultXmlizer(this))
 
-  def initialize(): Unit = {
+  private[kernel] def initialize(): Unit = {
     classToPluginAdapter = (pluginConfigurations map { o ⇒ o.pluginClass → new PluginAdapter(o) }).uniqueToMap
     for (p ← pluginAdapters) p.initialize(injector)
     plugins[EventHandlerAnnotated] foreach eventBus.registerAnnotated
@@ -47,13 +47,13 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
     for (p ← pluginAdapters) p.tryClose()
   }
 
-  def activate(): Unit =
+  private[kernel] def activate(): Unit =
     for (p ← pluginAdapters if !p.configuration.testInhibitsActivateOnStart) {
       p.activate()
     }
 
   @ForCpp
-  def changeObjectXmlBytes(typeName: String, pathString: String, xmlBytes: Array[Byte]): Array[Byte] = {
+  private[kernel] def changeObjectXmlBytes(typeName: String, pathString: String, xmlBytes: Array[Byte]): Array[Byte] = {
     val typ = FileBasedType.fromInternalCppName(typeName)
     val path = typ.toPath(pathString)
     var result = xmlBytes
@@ -71,9 +71,9 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   private[plugin] def classNameToPluginAdapter(className: String): PluginAdapter =
     classToPluginAdapter(classNameToConfiguration(className).pluginClass)
 
-  def xmlNamespaceToPlugins[A : ClassTag](namespace: String): Option[A] = namespaceToPlugin.get(namespace) collect assignableFrom[A]
+  private[kernel] def xmlNamespaceToPlugins[A : ClassTag](namespace: String): Option[A] = namespaceToPlugin.get(namespace) collect assignableFrom[A]
 
-  def plugins[A : ClassTag]: immutable.Iterable[A] =
+  private[plugin] def plugins[A : ClassTag]: immutable.Iterable[A] =
     (classToPluginAdapter.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable
 
   private def pluginAdapters = classToPluginAdapter.values
