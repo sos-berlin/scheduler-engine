@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, startJob, task}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, startJob, taskOverview}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1187.JS1187IT._
@@ -66,7 +66,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
   private def requireIsWaitingForAgent(taskId: TaskId, expected: Boolean = true): Unit = {
     (scheduler.executeXml(<show_task id={taskId.string}/>).answer \ "task" \@ "waiting_for_remote_scheduler").toString.toBoolean shouldEqual expected
-    task(taskId).state shouldEqual TaskState.waiting_for_process
+    taskOverview(taskId).state shouldEqual TaskState.waiting_for_process
   }
 }
 

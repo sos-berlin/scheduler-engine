@@ -30,13 +30,17 @@ extends FileBasedSubsystemClient {
 
   override def details(path: companion.Path): JobChainDetails = inSchedulerThread { subsystem.fileBased(path).details }
 
+  @deprecated("Avoid direct access to C++ near objects")
   def jobChain(path: JobChainPath): JobChain = fileBased(path)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def jobChainOption(path: JobChainPath): Option[ThisFileBased] = fileBasedOption(path)
 
   def orderOverview(orderKey: OrderKey): OrderOverview = inSchedulerThread { subsystem.order(orderKey).overview }
 
+  @deprecated("Avoid direct access to C++ near objects")
   def order(orderKey: OrderKey): Order = inSchedulerThread { subsystem.order(orderKey) }
 
+  @deprecated("Avoid direct access to C++ near objects")
   def orderOption(orderKey: OrderKey): Option[Order] = inSchedulerThread { subsystem.orderOption(orderKey) }
 }

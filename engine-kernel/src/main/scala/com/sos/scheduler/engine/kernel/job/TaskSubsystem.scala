@@ -2,11 +2,14 @@ package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-final class TaskSubsystem @Inject private(cppProxy: Task_subsystemC) {
+final class TaskSubsystem @Inject private(
+  cppProxy: Task_subsystemC,
+  private[job] implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue) {
 
   def task(id: TaskId): Task =
     Option(cppProxy.get_task_or_null(id.number)) map { _.getSister } getOrElse {

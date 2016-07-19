@@ -13,6 +13,7 @@ private trait FileBasedClient {
 
   protected implicit def schedulerThreadCallQueue: SchedulerThreadCallQueue
 
+  @deprecated("Avoid direct access to C++ near objects")
   /*protected*/ def fileBased: ThisFileBased
 
   def path = inSchedulerThread { fileBased.path }

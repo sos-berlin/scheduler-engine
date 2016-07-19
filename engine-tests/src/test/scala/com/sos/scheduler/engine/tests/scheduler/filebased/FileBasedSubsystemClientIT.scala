@@ -11,7 +11,6 @@ import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, JobSubsystemClient}
@@ -47,21 +46,15 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
     subsystemDescription.subsystemClass.getSimpleName - {
 
       "count" in {
-        inSchedulerThread {
-          subsystem.count shouldEqual paths.size
-        }
+        subsystem.count shouldEqual paths.size
       }
 
       "paths" in {
-        inSchedulerThread {
-          subsystem.paths.sorted shouldEqual paths.sorted
-        }
+        subsystem.paths.sorted shouldEqual paths.sorted
       }
 
       "visiblePaths" in {
-        inSchedulerThread {
-          subsystem.visiblePaths.sorted shouldEqual visiblePaths.sorted
-        }
+        subsystem.visiblePaths.sorted shouldEqual visiblePaths.sorted
       }
 
       "overview" in {
@@ -82,46 +75,34 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
           lazy val fileBasedDetails = subsystem.fileBasedDetails(path)
 
           "path" in {
-            inSchedulerThread {
-              fileBasedOverview.path shouldEqual path
-            }
+            fileBasedOverview.path shouldEqual path
           }
 
           "configurationXmlBytes" in {
-            inSchedulerThread {
-              if (pathDontHasXml(path))
-                assert(fileBasedDetails.sourceXml.isEmpty)
-              else
-                fileBasedDetails.sourceXml.get should include ("<" + subsystem.companion.fileBasedType.cppName + " ")
-            }
+            if (pathDontHasXml(path))
+              assert(fileBasedDetails.sourceXml.isEmpty)
+            else
+              fileBasedDetails.sourceXml.get should include ("<" + subsystem.companion.fileBasedType.cppName + " ")
           }
 
           "file" in {
-            inSchedulerThread {
-              if (pathDontHasXml(path))
-                assert(fileBasedDetails.file.isEmpty)
-              else
-                assert(fileBasedDetails.file == Some(testEnvironment.fileFromPath(path).toPath))
-            }
+            if (pathDontHasXml(path))
+              assert(fileBasedDetails.file.isEmpty)
+            else
+              assert(fileBasedDetails.file == Some(testEnvironment.fileFromPath(path).toPath))
           }
 
           "fileBasedState" in {
-            inSchedulerThread {
-              fileBasedOverview.fileBasedState shouldEqual expectedFileBasedState
-            }
+            fileBasedOverview.fileBasedState shouldEqual expectedFileBasedState
           }
 
           "stringToPath" in {
-            inSchedulerThread {
-              fileBased.stringToPath(path.string) shouldEqual path
-              fileBased.stringToPath(path.string).getClass shouldEqual path.getClass
-            }
+            fileBased.stringToPath(path.string) shouldEqual path
+            fileBased.stringToPath(path.string).getClass shouldEqual path.getClass
           }
 
           "isVisible" in {
-            inSchedulerThread {
-              fileBased.isVisible shouldEqual (!(predefinedPaths contains path) || predefinedIsVisible)
-            }
+            fileBased.isVisible shouldEqual (!(predefinedPaths contains path) || predefinedIsVisible)
           }
 
           "hasBaseFile" in {
@@ -133,48 +114,38 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
           }
 
           "overview" in {
-            inSchedulerThread {
-              fileBasedOverview should have (
-                'path (path),
-                'fileBasedState (expectedFileBasedState))
-            }
+            fileBasedOverview should have (
+              'path (path),
+              'fileBasedState (expectedFileBasedState))
           }
 
           "details" in {
-            inSchedulerThread {
-              fileBasedDetails should have (
-                'path (path),
-                'fileBasedState (expectedFileBasedState),
-                'file (Try(fileBased.file).toOption)) //,
-                //'sourceXml (emptyToNone(fileBased.sourceXmlBytes) map xmlBytesToString))
-              if (fileBased.hasBaseFile)
-                fileBasedDetails.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
-              else
-                fileBasedDetails.fileModifiedAt shouldBe None
-            }
+            fileBasedDetails should have (
+              'path (path),
+              'fileBasedState (expectedFileBasedState),
+              'file (Try(fileBased.file).toOption)) //,
+              //'sourceXml (emptyToNone(fileBased.sourceXmlBytes) map xmlBytesToString))
+            if (fileBased.hasBaseFile)
+              fileBasedDetails.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
+            else
+              fileBasedDetails.fileModifiedAt shouldBe None
           }
 
           "toString" in {
-            inSchedulerThread {
-              (fileBased, path) match {
-                case (o: Order, orderKey: OrderKey) ⇒ o.toString should include (orderKey.id.string)
-                case _ ⇒ fileBased.toString should include (path.string)
-              }
+            (fileBased, path) match {
+              case (o: Order, orderKey: OrderKey) ⇒ o.toString should include (orderKey.id.string)
+              case _ ⇒ fileBased.toString should include (path.string)
             }
           }
 
           subsystemDescription match {
             case ProcessClassSubsystem ⇒
               "stringToPath accepts empty string" in {
-                inSchedulerThread {
-                  fileBased.stringToPath("") shouldEqual ProcessClassPath("")  // There is the default process class named ""
-                }
+                fileBased.stringToPath("") shouldEqual ProcessClassPath("")  // There is the default process class named ""
               }
             case _ ⇒
               "stringToPath rejects empty string" in {
-                inSchedulerThread {
-                  intercept[RuntimeException] { fileBased.stringToPath("") }
-                }
+                intercept[RuntimeException] { fileBased.stringToPath("") }
               }
           }
         }
@@ -183,11 +154,9 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
   }
 
   "JobSubsystemOverview" in {
-    inSchedulerThread {
-      jobSubsystemClient.overview should have (
-        'jobStateCounts (Map(JobState.pending → jobSubsystemSetting.paths.size))
-      )
-    }
+    jobSubsystemClient.overview should have (
+      'jobStateCounts (Map(JobState.pending → jobSubsystemSetting.paths.size))
+    )
   }
 
   "JobChainDetails" - {

@@ -109,6 +109,9 @@ object SchedulerTestUtils {
   def orderOption(orderKey: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
     instance[OrderSubsystemClient].orderOption(orderKey)
 
+  def taskOverview(taskId: TaskId)(implicit hasInjector: HasInjector): TaskOverview =
+    instance[TaskSubsystemClient].taskOverview(taskId)
+
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystemClient].task(taskId)
 

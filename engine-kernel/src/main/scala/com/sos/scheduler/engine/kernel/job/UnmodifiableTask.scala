@@ -7,8 +7,10 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
 
 @ForCpp
 trait UnmodifiableTask extends EventSource {
-  def id: TaskId
-  def job: UnmodifiableJob
-  def orderOption: Option[UnmodifiableOrder]
-  def parameterValue(name: String): String
+
+  private[kernel] def job: UnmodifiableJob
+
+  private[kernel] def orderOption: Option[UnmodifiableOrder]
+
+  private[kernel] def parameterValue(name: String): String
 }

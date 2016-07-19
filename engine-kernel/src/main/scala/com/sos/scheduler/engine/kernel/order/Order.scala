@@ -76,6 +76,7 @@ with OrderPersistence {
       isSuspended = cppFastFlags.isSuspended(flags))
   }
 
+  // Public for QueryableOrder
   def isSetback = setbackUntil.isDefined
 
   def stringToPath(o: String) = OrderKey(o)

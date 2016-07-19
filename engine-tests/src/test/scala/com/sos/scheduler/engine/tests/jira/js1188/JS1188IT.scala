@@ -170,7 +170,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private def requireTaskIsWaitingForAgent(taskId: TaskId, expected: Boolean = true): Unit = {
     (scheduler.executeXml(<show_task id={taskId.string}/>).answer \ "task" \@ "waiting_for_remote_scheduler").toBoolean shouldEqual expected
-    task(taskId).state shouldEqual TaskState.waiting_for_process
+    taskOverview(taskId).state shouldEqual TaskState.waiting_for_process
   }
 
   private def newAgent(agentRef: AgentRef) =

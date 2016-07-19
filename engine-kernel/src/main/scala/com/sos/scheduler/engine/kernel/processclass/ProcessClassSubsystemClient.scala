@@ -14,7 +14,9 @@ final class ProcessClassSubsystemClient @Inject private(
   (implicit protected val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystemClient {
 
+  @deprecated("Avoid direct access to C++ near objects")
   def processClass(path: ProcessClassPath): ProcessClass = fileBased(path)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def processClassOption(path: ProcessClassPath): Option[ProcessClass] = fileBasedOption(path)
 }

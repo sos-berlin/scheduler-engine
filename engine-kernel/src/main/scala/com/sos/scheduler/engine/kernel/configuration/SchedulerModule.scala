@@ -4,7 +4,6 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
 import com.sos.scheduler.engine.common.async.StandardCallQueue
@@ -65,7 +64,6 @@ with HasCloser {
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
     bindInstance(controllerBridge.getEventBus: SchedulerEventBus)
-    bind(classOf[SchedulerConfiguration]) toProvider classOf[SchedulerConfiguration.InjectProvider]
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
     bindInstance(cppProxy.log.getSister: PrefixLog )
@@ -92,6 +90,10 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideSchedulerConfiguration(spoolerC: SpoolerC): SchedulerConfiguration =
+    new SchedulerConfiguration.Injectable(spoolerC)
 
   @Provides @Singleton
   private def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =

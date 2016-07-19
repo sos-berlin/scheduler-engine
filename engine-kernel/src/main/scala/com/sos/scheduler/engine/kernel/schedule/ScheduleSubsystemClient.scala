@@ -14,7 +14,9 @@ final class ScheduleSubsystemClient @Inject private(
   (implicit protected val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystemClient {
 
+  @deprecated("Avoid direct access to C++ near objects")
   def schedule(path: SchedulePath) = fileBased(path)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def scheduleOption(path: SchedulePath) = fileBasedOption(path)
 }

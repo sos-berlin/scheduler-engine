@@ -145,6 +145,7 @@ with HasCloser {
   }
 
   @ForCpp private def onLoad(): Unit = {
+    injector.instance[SchedulerConfiguration].initialize()
     pluginSubsystem.initialize()
     controllerBridge.onSchedulerStarted(this)
   }

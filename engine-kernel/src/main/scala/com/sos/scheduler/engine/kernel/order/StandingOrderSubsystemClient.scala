@@ -14,7 +14,9 @@ final class StandingOrderSubsystemClient @Inject private(
   (implicit protected val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystemClient {
 
+  @deprecated("Avoid direct access to C++ near objects")
   def order(orderKey: OrderKey) = fileBased(orderKey)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def orderOption(orderKey: OrderKey) = fileBasedOption(orderKey)
 }

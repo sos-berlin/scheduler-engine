@@ -1,54 +1,66 @@
 package com.sos.scheduler.engine.kernel.job
 
+import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.cplusplus.runtime.Sister
+import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.eventbus.EventSource
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.Order
-import java.io.File
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import java.nio.file.Paths
 
 @ForCpp
-private[engine] final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with EventSource {
+private[engine] final class Task(
+  cppProxy: TaskC,
+  taskSubsystem: TaskSubsystem)
+extends UnmodifiableTask with Sister with EventSource {
+
+  import taskSubsystem.schedulerThreadCallQueue
+  intelliJuseImports(schedulerThreadCallQueue)
 
   def onCppProxyInvalidated(): Unit = {}
 
-  def overview = TaskOverview(id, jobPath, state, processClassPath, agentAddress)
+  private[kernel] def overview = TaskOverview(id, jobPath, state, processClassPath, agentAddress)
 
-  def jobPath = JobPath(cppProxy.job_path)
+  private def jobPath = JobPath(cppProxy.job_path)
 
-  def job = cppProxy.job.getSister
+  private[kernel] def job = cppProxy.job.getSister
 
-  def agentAddress: Option[AgentAddress] = emptyToNone(cppProxy.remote_scheduler_address) map AgentAddress.apply
+  private[kernel] def agentAddress: Option[AgentAddress] = emptyToNone(cppProxy.remote_scheduler_address) map AgentAddress.apply
 
-  def orderOption: Option[Order] = Option(cppProxy.order.getSister)
+  private[kernel] def orderOption: Option[Order] = Option(cppProxy.order.getSister)
 
-  def id = new TaskId(cppProxy.id)
+  private[kernel] def id = new TaskId(cppProxy.id)
 
-  def processClassPath = ProcessClassPath(cppProxy.process_class_path)
+  private[kernel] def processClassPath = ProcessClassPath(cppProxy.process_class_path)
 
-  def agentAdress = AgentAddress(cppProxy.remote_scheduler_address)
-
-  def state: TaskState = TaskState.of(cppProxy.state_name)
+  private def state: TaskState = TaskState.of(cppProxy.state_name)
 
   def parameterValue(name: String): String =
-    cppProxy.params.get_string(name)
+    inSchedulerThread {
+      cppProxy.params.get_string(name)
+    }
 
-  def logString =
-    cppProxy.log_string
+  def stdoutFile = inSchedulerThread { Paths.get(cppProxy.stdout_path) }
 
-  def stdoutFile =
-    new File(cppProxy.stdout_path)
-
-  def stderrFile =
-    new File(cppProxy.stderr_path)
-
-  def log: PrefixLog = cppProxy.log.getSister
+  private[kernel] def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 
   override def toString =
     s"Task($id)"
+}
+
+object Task {
+  final class Type extends SisterType[Task, TaskC] {
+    def sister(proxy: TaskC, context: Sister) = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new Task(proxy, injector.instance[TaskSubsystem])
+    }
+  }
 }

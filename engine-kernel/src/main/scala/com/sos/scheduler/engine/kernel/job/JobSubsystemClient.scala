@@ -19,7 +19,9 @@ extends FileBasedSubsystemClient {
 
   def jobOverview(path: JobPath): JobOverview = inSchedulerThread { job(path).overview }
 
+  @deprecated("Avoid direct access to C++ near objects")
   def job(path: JobPath): Job = fileBased(path)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def jobOption(path: JobPath): Option[Job] = fileBasedOption(path)
 }

@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.someUnless
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.configutils.Configs
@@ -14,9 +13,10 @@ import com.typesafe.config.Config
 import java.io.File
 import java.net.{URI, URL}
 import java.nio.file.Files._
-import javax.inject.{Inject, Provider}
 
 trait SchedulerConfiguration {
+
+  private[kernel] def initialize(): Unit
 
   def clusterMemberId: ClusterMemberId
 
@@ -50,46 +50,55 @@ trait SchedulerConfiguration {
 object SchedulerConfiguration {
   lazy val DefaultConfig: Config = Configs.loadResource(JavaResource("com/sos/scheduler/engine/kernel/configuration/defaults.conf"))
 
-  final class InjectProvider @Inject private(spoolerC: SpoolerC) extends Provider[SchedulerConfiguration] {
+  private[kernel] final class Injectable (spoolerC: SpoolerC) extends SchedulerConfiguration {
     private lazy val settingsC = spoolerC.settings
 
-    private lazy val conf = new SchedulerConfiguration {
-      def clusterMemberId: ClusterMemberId =
-        ClusterMemberId(spoolerC.cluster_member_id)
-
-      def mainConfigurationDirectory: File =
-        Option(mainConfigurationFile.getParentFile) getOrElse new File(".")
-
-      def mainConfigurationFile: File =
-        new File(spoolerC.configuration_file_path)
-
-      /** Das Verzeichnis der Konfigurationsdatei scheduler.xml, Normalerweise "config" */
-      def localConfigurationDirectory: File =
-        new File(spoolerC.local_configuration_directory)
-
-      def logDirectory: File =
-        spoolerC.log_directory match {
-          case null | "" | "*stderr" ⇒ throw new SchedulerException("Scheduler runs without a log directory")
-          case o ⇒ new File(o)
-        }
-
-      def schedulerId: SchedulerId =
-        SchedulerId(spoolerC.id)
-
-      lazy val httpPortOption: Option[Int] = someUnless(settingsC._http_port, 0)
-
-      lazy val tcpPort: Int =
-        spoolerC.tcp_port
-
-      def udpPort: Option[Int] = someUnless(spoolerC.udp_port, 0)
-
-      lazy val webDirectoryUrlOption: Option[URL] =
-        settingsC._web_directory match {
-          case "" ⇒ None
-          case o ⇒ Some(new URI(o).toURL)
-        }
+    def initialize(): Unit = {
+      clusterMemberId
+      mainConfigurationDirectory
+      mainConfigurationFile
+      localConfigurationDirectory
+      logDirectory
+      schedulerId
+      httpPortOption
+      tcpPort
+      udpPort
+      webDirectoryUrlOption
     }
 
-    def get() = conf
+    lazy val clusterMemberId: ClusterMemberId =
+      ClusterMemberId(spoolerC.cluster_member_id)
+
+    lazy val mainConfigurationDirectory: File =
+      Option(mainConfigurationFile.getParentFile) getOrElse new File(".")
+
+    lazy val mainConfigurationFile: File =
+      new File(spoolerC.configuration_file_path)
+
+    /** Das Verzeichnis der Konfigurationsdatei scheduler.xml, Normalerweise "config" */
+    lazy val localConfigurationDirectory: File =
+      new File(spoolerC.local_configuration_directory)
+
+    lazy val logDirectory: File =
+      spoolerC.log_directory match {
+        case null | "" | "*stderr" ⇒ throw new SchedulerException("Scheduler runs without a log directory")
+        case o ⇒ new File(o)
+      }
+
+    lazy val schedulerId: SchedulerId =
+      SchedulerId(spoolerC.id)
+
+    lazy val httpPortOption: Option[Int] = someUnless(settingsC._http_port, 0)
+
+    lazy val tcpPort: Int =
+      spoolerC.tcp_port
+
+    lazy val udpPort: Option[Int] = someUnless(spoolerC.udp_port, 0)
+
+    lazy val webDirectoryUrlOption: Option[URL] =
+      settingsC._web_directory match {
+        case "" ⇒ None
+        case o ⇒ Some(new URI(o).toURL)
+      }
   }
 }

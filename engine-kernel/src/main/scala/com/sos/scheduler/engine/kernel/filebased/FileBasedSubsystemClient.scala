@@ -60,11 +60,13 @@ trait FileBasedSubsystemClient {
       subsystem.fileBased(path).details
     }
 
+  @deprecated("Avoid direct access to C++ near objects")
   def fileBased(path: ThisPath) =
     inSchedulerThread {
       subsystem.fileBased(path)
     }
 
+  @deprecated("Avoid direct access to C++ near objects")
   def fileBasedOption(path: ThisPath) =
     inSchedulerThread {
       subsystem.fileBasedOption(path)

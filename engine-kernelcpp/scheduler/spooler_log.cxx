@@ -540,6 +540,7 @@ Prefix_log::Prefix_log( int )
 
 Prefix_log::Prefix_log(Scheduler_object* o)
 :
+    javabridge::has_proxy<Prefix_log>(o->spooler()),
     _zero_(this+1),
     _object(o),
     _spooler(o->spooler()),
@@ -697,7 +698,7 @@ void Prefix_log::open()
             _spooler->_log_file_cache->cache(this);
         }
 
-        if (typed_java_sister()) typed_java_sister().onStarted();
+        if (typed_java_sister()) typed_java_sister().onStarted(_spooler->java_sister());
         _started = true;
     }
 }

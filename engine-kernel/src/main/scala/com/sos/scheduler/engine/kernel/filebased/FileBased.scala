@@ -77,22 +77,20 @@ with EventSource {
       case n ⇒ Some(Instant.ofEpochSecond(n))
     }
 
-  def sourceXmlBytes: Array[Byte] =
-    cppProxy.source_xml_bytes
+  private def sourceXmlBytes: Array[Byte] = cppProxy.source_xml_bytes
 
-  def configurationXmlBytes =
-    cppProxy.source_xml_bytes
+  def configurationXmlBytes = inSchedulerThread { cppProxy.source_xml_bytes }
 
-  def file: Path = fileOption getOrElse sys.error(s"$toString has no source file")
+  def file: Path = inSchedulerThread { fileOption } getOrElse sys.error(s"$toString has no source file")
 
-  def fileOption: Option[Path] =
+  private def fileOption: Option[Path] =
     cppProxy.file match {
       case "" ⇒ None
       case o ⇒ Some(Paths.get(o))
     }
 
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
-  def forceFileReread(): Unit = {
+  private[kernel] def forceFileReread(): Unit = {
     cppProxy.set_force_file_reread()
   }
 
@@ -102,14 +100,13 @@ with EventSource {
       cppProxy.is_file_based_reread
     }
 
-  def isVisible: Boolean = cppProxy.is_visible
-  def hasBaseFile: Boolean = cppProxy.has_base_file
-  def isToBeRemoved: Boolean = cppProxy.is_to_be_removed
+  def isVisible: Boolean = inSchedulerThread { cppProxy.is_visible }
 
-  def log: PrefixLog =
-    cppProxy.log.getSister
+  def hasBaseFile: Boolean = inSchedulerThread { cppProxy.has_base_file }
 
-  override def toString = path.toString
+  def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
+
+  override def toString = getClass.getName + (fixedPath.toOption map { o ⇒ s"('$o')" } getOrElse "")
 
   def stringToPath(o: String): ThisPath
 }

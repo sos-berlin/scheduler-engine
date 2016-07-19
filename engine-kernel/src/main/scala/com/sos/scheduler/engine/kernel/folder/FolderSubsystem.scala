@@ -25,10 +25,12 @@ extends FileBasedSubsystem {
   val companion = FolderSubsystem
 
   def names(path: AbsolutePath, typ: FileBasedType): immutable.Seq[String] =
-    immutable.Seq() ++ cppProxy.java_names(path.string, typ.cppName)
+    inSchedulerThread {
+      immutable.Seq() ++ cppProxy.java_names(path.string, typ.cppName)
+    }
 
   /** @return true, wenn ein [[com.sos.scheduler.engine.kernel.filebased.FileBased]] geladen worden ist. */
-  def updateFolders(): Boolean =
+  private[kernel] def updateFolders(): Boolean =
     inSchedulerThread {  // Im Scheduler-Thread, damit Events ordentlich verarbeitet werden
       cppProxy.update_folders_now()
     }

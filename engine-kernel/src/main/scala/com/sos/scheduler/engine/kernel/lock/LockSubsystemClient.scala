@@ -14,7 +14,9 @@ final class LockSubsystemClient @Inject private(
   (implicit protected val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystemClient {
 
+  @deprecated("Avoid direct access to C++ near objects")
   def lock(path: LockPath) = fileBased(path)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def lockOption(path: LockPath) = fileBasedOption(path)
 }

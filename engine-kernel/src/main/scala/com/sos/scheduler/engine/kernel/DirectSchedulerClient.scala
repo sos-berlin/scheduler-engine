@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainQuery}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._

@@ -4,6 +4,7 @@
 
 #include "com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
+#include "com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -16,7 +17,7 @@ struct PrefixLog__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Method const _onClosed____method;
     ::zschimmer::javabridge::Method const _onLogged____method;
-    ::zschimmer::javabridge::Method const _onStarted____method;
+    ::zschimmer::javabridge::Method const _onStarted__Lcom_sos_scheduler_engine_kernel_Scheduler_2__method;
 
     static const ::zschimmer::javabridge::class_factory< PrefixLog__class > class_factory;
 };
@@ -27,7 +28,7 @@ PrefixLog__class::PrefixLog__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_onClosed____method(this, "onClosed", "()V")
     ,_onLogged____method(this, "onLogged", "()V")
-    ,_onStarted____method(this, "onStarted", "()V"){}
+    ,_onStarted__Lcom_sos_scheduler_engine_kernel_Scheduler_2__method(this, "onStarted", "(Lcom/sos/scheduler/engine/kernel/Scheduler;)V"){}
 
 PrefixLog__class::~PrefixLog__class() {}
 
@@ -59,10 +60,11 @@ void PrefixLog::onLogged() const {
     cls->_onLogged____method.call(get_jobject(), parameter_list);
 }
 
-void PrefixLog::onStarted() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+void PrefixLog::onStarted(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
     PrefixLog__class* cls = _class.get();
-    cls->_onStarted____method.call(get_jobject(), parameter_list);
+    cls->_onStarted__Lcom_sos_scheduler_engine_kernel_Scheduler_2__method.call(get_jobject(), parameter_list);
 }
 
 

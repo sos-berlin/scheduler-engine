@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.job.Task;
 @CppClass(clas="sos::scheduler::Task", directory="scheduler", include="spooler.h")
 public interface TaskC extends CppProxyWithSister<Task> {
 
-    SisterType<Task, TaskC> sisterType = (proxy, context) -> new Task(proxy);
+    SisterType<Task, TaskC> sisterType = new Task.Type();
 
     int id();
     JobC job();
