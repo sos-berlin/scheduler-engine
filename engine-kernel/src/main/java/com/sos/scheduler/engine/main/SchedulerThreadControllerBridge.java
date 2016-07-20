@@ -62,6 +62,11 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
         return eventBus;
     }
 
+
+    @Override public boolean isCppThreadRequired() {
+        return false;
+    }
+
     @HotEventHandler public void handleEvent(SchedulerCloseEvent e) {
         stateBridge.setStateClosed();
     }

@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
 import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
+import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.currentThread;
 
@@ -18,15 +16,22 @@ public class ThreadLock {
     private static final int logTimeoutMillis = 15*1000;     // Wenn's länger dauert, Meldung loggen
     private static final Logger logger = LoggerFactory.getLogger(ThreadLock.class);
 
+    @Nullable private Thread requiredCppThread = null;
     private final SimpleLock myLock = new LoggingLock();
 //    private final AtomicInteger counter = new AtomicInteger(0);
 
     public final void lock() {
+        if (requiredCppThread != null && requiredCppThread != currentThread())
+            throw new IllegalStateException("Not in C++ thread");
         myLock.lock();
     }
 
     public final void unlock() {
         myLock.unlock();
+    }
+
+    public final void setCppThreadRequired(boolean b) {
+        requiredCppThread = b ? currentThread() : null;
     }
 
     public final void requireUnlocked() {

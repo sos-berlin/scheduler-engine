@@ -3,12 +3,10 @@ package com.sos.scheduler.engine.kernel;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.toArray;
 
@@ -16,7 +14,12 @@ import static com.google.common.collect.Iterables.toArray;
 public class CppScheduler {
     private static final Logger logger = LoggerFactory.getLogger(CppScheduler.class);
     private static final AtomicReference<CppScheduler> onlyInstance = new AtomicReference<CppScheduler>();
+    private final boolean isCppThreadRequired;
     private String name = null;
+
+    public CppScheduler(boolean isCppThreadRequired) {
+        this.isCppThreadRequired = isCppThreadRequired;
+    }
 
     public static void loadModuleFromPath() {
         System.loadLibrary("jobscheduler-engine");
@@ -48,6 +51,7 @@ public class CppScheduler {
     }
 
     private int run2(ImmutableList<String> arguments, String argumentLine, SchedulerControllerBridge controllerBridge) {
+        CppProxy.threadLock.setCppThreadRequired(isCppThreadRequired);
         CppProxy.threadLock.requireUnlocked();
         CppProxy.threadLock.lock();
         if (logger.isTraceEnabled()) logger.trace(this +" starts");
