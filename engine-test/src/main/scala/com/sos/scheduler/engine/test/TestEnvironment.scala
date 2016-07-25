@@ -56,7 +56,8 @@ extends HasCloser {
   }
 
   private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Seq[String] = {
-    val logCategoriesPrefix = logCategories.trim match {
+    val trimmedLogCategories = s"java.stackTrace ${logCategories.trim}"
+    val logCategoriesPrefix = trimmedLogCategories match {
       case "" ⇒ ""
       case o ⇒ s"$o>"
     }
