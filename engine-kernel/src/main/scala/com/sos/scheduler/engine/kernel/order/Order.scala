@@ -19,13 +19,12 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
-import com.sos.scheduler.engine.kernel.variable.VariableSet
 import java.time.Instant
 import scala.util.{Failure, Success}
 
 @ForCpp
 private[engine] final class Order private(
-  protected[this] val cppProxy: OrderC,
+  protected[order] val cppProxy: OrderC,
   protected[kernel] val subsystem: StandingOrderSubsystem)
 extends FileBased
 with QueryableOrder
@@ -49,7 +48,7 @@ with OrderPersistence {
   private def agentFileExists(cppCall: CppCall): Unit = {
     import subsystem.schedulerThreadCallQueue.implicits.executionContext
     val orderId = id
-    val p = parameters
+    val p = cppProxy.params.getSister
     val file = p("scheduler_file_path")
     require(file.nonEmpty, "Order variable scheduler_file_path must not be empty")
     val agentUri = p(FileOrderAgentUriVariableName)
@@ -67,7 +66,7 @@ with OrderPersistence {
     OrderOverview(
       path = orderKey,  // key because this.path is valid only for permanent orders
       cppFastFlags.fileBasedState(flags),
-      cppFastFlags.sourceType(flags),
+      sourceType,
       orderState = state,
       nextStepAt = nextStepAt,
       setbackUntil = if (cppFastFlags.isSetback(flags)) setbackUntil else None,
@@ -174,7 +173,7 @@ with OrderPersistence {
 
   //private def fileAgentUri: String = cppProxy.params.get_string(FileOrderAgentUriVariableName)
 
-  def parameters: VariableSet = inSchedulerThread { cppProxy.params.getSister }
+  def variables: Map[String, String] = inSchedulerThread { cppProxy.params.getSister.toMap }
 
   def nextInstantOption: Option[Instant] =
     inSchedulerThread { eternalCppMillisToNoneInstant(cppProxy.next_time_millis) }
@@ -201,13 +200,11 @@ object Order {
   private val logger = Logger(getClass)
 
   object cppFastFlags {
-    def hasBaseFile   (flags: Long) = (flags &  0x01) != 0
-    def isSuspended   (flags: Long) = (flags &  0x02) != 0
-    def isBlacklisted (flags: Long) = (flags &  0x04) != 0
-    def isFileOrder   (flags: Long) = (flags &  0x08) != 0
+    def hasBaseFile   (flags: Long) = (flags & 0x01) != 0
+    def isSuspended   (flags: Long) = (flags & 0x02) != 0
+    def isBlacklisted (flags: Long) = (flags & 0x04) != 0
+    def isSetback     (flags: Long) = (flags & 0x08) != 0
     def fileBasedState(flags: Long) = FileBasedState.values()(((flags & 0xf0) >> 4).toInt)
-    def isSetback     (flags: Long) = (flags & 0x100) != 0
-    def sourceType    (flags: Long) = toOrderSourceType(hasBaseFile = hasBaseFile(flags), isFileOrder = isFileOrder(flags))
   }
 
   private def toOrderSourceType(hasBaseFile: Boolean, isFileOrder: Boolean) =

@@ -3465,12 +3465,11 @@ void Order::remove_from_blacklist()
 
 jlong Order::java_fast_flags() const {
     return 
-        (has_base_file()? 0x01 : 0) |
-        (_suspended? 0x02 : 0) |
-        (_is_on_blacklist? 0x04 : 0) |
-        (is_file_order()? 0x08 : 0) |
-        (((jlong)file_based_state() << 4) & 0xf0) |
-        (_setback_count? 0x100 : 0);
+        (has_base_file()  ? 0x01 : 0) |
+        (_suspended       ? 0x02 : 0) |
+        (_is_on_blacklist ? 0x04 : 0) |
+        (_setback_count   ? 0x08 : 0) |
+        (((jlong)file_based_state() << 4) & 0xf0);
 }
 
 //-------------------------------------------------------------------------------Order::web_service
