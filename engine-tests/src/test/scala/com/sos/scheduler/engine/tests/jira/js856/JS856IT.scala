@@ -60,7 +60,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} action="reset"/>
     }
 
-    final def orderParameters = order.parameters.toMap filterKeys { _ != suspendedParameterName }
+    final def orderParameters = order.variables filterKeys { _ != suspendedParameterName }
 
     final def order = instance[OrderSubsystemClient].order(orderKey)
   }

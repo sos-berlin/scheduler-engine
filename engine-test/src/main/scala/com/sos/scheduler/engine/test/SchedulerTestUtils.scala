@@ -188,7 +188,7 @@ object SchedulerTestUtils {
         lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinishedEvent] {
           case (event: OrderFinishedEvent, order: UnmodifiableOrder) if event.orderKey == orderKey ⇒
             eventBus.unregisterHot(subscription)
-            promise.success((event, order.parameters.toMap))
+            promise.success((event, order.variables))
         }
         eventBus.registerHot(subscription)
         promise.future
@@ -265,14 +265,13 @@ object SchedulerTestUtils {
       }
     }
 
-
   def orderIsBlacklisted(orderKey: OrderKey)(implicit hasInjector: HasInjector, entityManagerFactory: EntityManagerFactory): Boolean =
     if (jobChain(orderKey.jobChainPath).isDistributed)
       transaction { implicit entityManager ⇒
         instance[HibernateOrderStore].fetch(orderKey).isBlacklisted
       }
     else
-      order(orderKey).isBlacklisted
+      orderOverview(orderKey).isBlacklisted
 
   final case class ResultAndEvent[A](result: A, event: ErrorLogEvent)
 }

@@ -33,7 +33,7 @@ extends AttachableNamespaceXmlPlugin {
         for (conf ← nodeConfigurations.get(order.nodeKey)) {
           val command = OrderCommand(
             OrderKey(conf.jobChainPath, order.id),
-            parameters = order.parameters.toMap)
+            parameters = order.variables)
           xmlCommandExecutor executeXml command.xmlString //TODO Fehlerbehandlung?
         }
     }

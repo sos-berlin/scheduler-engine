@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.log.{InfoLogEvent, LogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js806.JS806IT._
@@ -21,7 +21,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS806IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val liveDirectory = controller.environment.liveDirectory
-  private lazy val variableSet = instance[VariableSet]
+  private lazy val variableSet = instance[SchedulerVariableSet]
 
   "Change of order configuration file while order is set back should be effective when order has been reset" in {
     val myOrderKey = SetbackJobChainPath orderKey "A"

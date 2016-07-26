@@ -69,7 +69,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
           toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
             val orderKey = TestJobchainPath orderKey testGroupName
             eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
-              case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.trySuccess(order.parameters.toMap)
+              case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.trySuccess(order.variables)
             }
             eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
               scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))

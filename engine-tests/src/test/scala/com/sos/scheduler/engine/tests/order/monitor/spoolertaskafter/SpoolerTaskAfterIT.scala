@@ -23,7 +23,7 @@ final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
   }
 
   @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder): Unit = {
-    order.parameters(classOf[TestMonitor].getName) should equal ("exitCode=7")
+    order.variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
     controller.terminateScheduler()
   }
 }

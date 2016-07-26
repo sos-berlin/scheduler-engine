@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout_text
 
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.stdout_text.TaskStdoutTextIT._
 import org.junit.runner.RunWith
@@ -15,7 +15,7 @@ final class TaskStdoutTextIT extends FunSuite with ScalaSchedulerTest {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <start_job job={jobPath.string}/>
     eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == jobPath }
-    val v = scheduler.injector.getInstance(classOf[VariableSet])
+    val v = scheduler.injector.getInstance(classOf[SchedulerVariableSet])
     pendingUntilFixed { v("STDOUT") should include ("/STDOUT//") }    // Der Prozess (Windows?) puffert die Ausgabe?  TODO Fehler ist nicht behoben
   }
 }

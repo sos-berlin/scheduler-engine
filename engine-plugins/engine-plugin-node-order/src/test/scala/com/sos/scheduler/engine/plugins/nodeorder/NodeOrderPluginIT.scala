@@ -32,7 +32,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       val promiseMap = (OrderKeys map { _ → Promise[Map[String, String]]() }).toMap
       withCloser { implicit closer ⇒
         eventBus.onHotEventSourceEvent[OrderFinishedEvent] {
-          case EventSourceEvent(_, order: UnmodifiableOrder) ⇒ promiseMap(order.orderKey).success(order.parameters.toMap)
+          case EventSourceEvent(_, order: UnmodifiableOrder) ⇒ promiseMap(order.orderKey).success(order.variables)
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
         val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))

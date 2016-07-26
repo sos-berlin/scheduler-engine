@@ -6,10 +6,10 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
 import java.io.IOException;
-
+import org.junit.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -34,12 +34,12 @@ public class JS1026ShellOrderIT extends SchedulerTest {
 
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
-        ImmutableMap<String,String> map = order.parameters().toGuavaMap();
-        assertObject(map, "testvar1", "value1");
-        assertObject(map, "testvar2", "newvalue2");
-        assertObject(map, "testvar3", "value3");
-        assertObject(map, "testvar4", "newvalue4");
-        assertObject(map, "testvar5", "value5");
+        scala.collection.Map<String,String> map = order.variables();
+        assertThat(map.apply("testvar1"), equalTo("value1"));
+        assertThat(map.apply("testvar2"), equalTo("newvalue2"));
+        assertThat(map.apply("testvar3"), equalTo("value3"));
+        assertThat(map.apply("testvar4"), equalTo("newvalue4"));
+        assertThat(map.apply("testvar5"), equalTo("value5"));
         controller().terminateScheduler();
     }
 

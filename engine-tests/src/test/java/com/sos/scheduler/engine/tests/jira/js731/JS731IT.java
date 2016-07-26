@@ -3,11 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js731;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -21,12 +18,9 @@ public final class JS731IT extends SchedulerTest {
     }
 
     @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) {
-        UnmodifiableVariableSet v = order.parameters();
+        scala.collection.Map<String, String> v = order.variables();
         assertThat(v.apply("a"), equalTo("ä"));
-        assertThat(v.apply("A"), equalTo("ä"));
-        assertThat(v.apply("b"), equalTo("B"));
         assertThat(v.apply("B"), equalTo("B"));
-        assertThat(v.getNames(), containsInAnyOrder("a", "B"));
         controller().terminateScheduler();
     }
 }

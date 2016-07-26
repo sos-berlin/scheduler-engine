@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
@@ -125,7 +124,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
   private def publishMyFinishedEvent(order: UnmodifiableOrder): Unit = {
     eventBus.publishCold(MyFinishedEvent(
       order.orderKey, order.state,
-      emptyToNone(order.parameters(SpoolerProcessAfterNames.parameter)) map { _.toBoolean }))
+      order.variables.get(SpoolerProcessAfterNames.parameter) map { _.toBoolean }))
   }
 
   eventBus.on[LogEvent] { case e: LogEvent ⇒

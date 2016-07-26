@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.login
 
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.login.JobLoginIT._
 import java.util.regex.Pattern
@@ -43,8 +43,7 @@ final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
   private def jobPropertyMap(jobPath: JobPath) = {
     val namePrefix = jobPath.name +"."
     val NamePattern = new Regex(Pattern.quote(namePrefix) +"(.*)")
-    val result = instance[VariableSet] collect { case (NamePattern(propertyName), v) => propertyName -> v }
-    result.toMap
+    instance[SchedulerVariableSet].toMap collect { case (NamePattern(propertyName), v) => propertyName -> v }
   }
 }
 

@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -28,7 +28,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   "XML configuration files" - {
     "scheduler.xml in UTF-8" in {
-      instance[VariableSet].apply("Å") shouldEqual "å"
+      instance[SchedulerVariableSet].apply("Å") shouldEqual "å"
     }
 
     "job.xml in UTF-8" in {
@@ -62,7 +62,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
       intercept[Exception] { scheduler executeXml "<>" } .getMessage should include ("SAXParseException")
     }
   }
-  
+
   "Order.xml_payload" in {
     eventBus.awaitingKeyedEvent[OrderFinishedEvent](XmlPayloadOrderKey) {
       scheduler executeXml OrderCommand(XmlPayloadOrderKey)

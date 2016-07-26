@@ -6,16 +6,14 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
-import com.sos.scheduler.engine.kernel.variable.VariableSet;
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
-
+import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +41,7 @@ public final class JS498JavaApiJobIT extends SchedulerTest {
         for (String jobName : jobNames) {
             controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
         }
-        assertThat(instance(VariableSet.class).apply("scheduler_script"), equalTo("*(spooler_init)"));
+        assertThat(instance(SchedulerVariableSet.class).apply("scheduler_script"), equalTo("*(spooler_init)"));
         controller().waitForTermination();
         resultMap = getResultMap(resultFile);
         checkScriptOnlyJob();
