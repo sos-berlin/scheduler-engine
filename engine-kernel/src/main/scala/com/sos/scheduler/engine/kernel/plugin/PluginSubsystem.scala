@@ -68,6 +68,10 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   def pluginByClass[A <: Plugin](c: Class[A]): A = classNameToPluginAdapter(c.getName).pluginInstance.asInstanceOf[A]
 
+  def pluginOptionByClass[A <: Plugin](c: Class[A]): Option[A] =
+    for (pluginConfiguration ← classNameToConfiguration.get(c.getName)) yield
+      classToPluginAdapter(pluginConfiguration.pluginClass).pluginInstance.asInstanceOf[A]
+
   private[plugin] def classNameToPluginAdapter(className: String): PluginAdapter =
     classToPluginAdapter(classNameToConfiguration(className).pluginClass)
 
