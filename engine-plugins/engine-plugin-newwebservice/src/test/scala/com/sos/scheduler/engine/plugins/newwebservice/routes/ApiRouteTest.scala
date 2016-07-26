@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -33,6 +32,10 @@ final class ApiRouteTest extends org.scalatest.FreeSpec with ScalatestRouteTest 
   protected def disposableCppProxyRegister = throw new NotImplementedError
 
   protected def spoolerC = throw new NotImplementedError
+
+  protected def orderSubsystem = throw new NotImplementedError
+
+  protected def taskSubsystem = throw new NotImplementedError
 
   protected def prefixLog = null
 

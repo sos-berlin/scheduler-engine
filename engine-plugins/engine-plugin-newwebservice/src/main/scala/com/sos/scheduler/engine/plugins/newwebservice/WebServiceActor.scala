@@ -8,7 +8,9 @@ import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.WebServiceActor._
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
@@ -23,6 +25,8 @@ final class WebServiceActor @Inject private(
   protected val schedulerConfiguration: SchedulerConfiguration,
   protected val client: DirectSchedulerClient,
   protected val spoolerC: SpoolerC,
+  protected val orderSubsystem: OrderSubsystemClient,
+  protected val taskSubsystem: TaskSubsystemClient,
   protected val prefixLog: PrefixLog,
   protected val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val disposableCppProxyRegister: DisposableCppProxyRegister)

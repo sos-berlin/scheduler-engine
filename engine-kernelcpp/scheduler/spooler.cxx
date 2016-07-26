@@ -699,6 +699,7 @@ Spooler::Spooler(jobject java_main_context)
     _call_register(this),
     _reuse_addr(true)
 {
+    _base_log.set_corresponding_prefix_log(_log);
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
 
@@ -723,6 +724,7 @@ Spooler::~Spooler()
 {
     try
     {
+        _base_log.set_corresponding_prefix_log(NULL);
         close();
     }
     catch( exception& x )

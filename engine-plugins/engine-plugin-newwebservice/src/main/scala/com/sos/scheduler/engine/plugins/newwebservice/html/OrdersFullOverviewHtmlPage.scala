@@ -113,9 +113,15 @@ div.orderSelection {
         (orders.par map orderToTr).seq))
 
   private def orderToTr(order: OrderOverview) = {
-    val taskOption = for (t ← order.taskId) yield {
-      val job: Option[JobOverview] = taskIdToOverview.get(t) flatMap { task ⇒ jobPathToOverview.get(task.job) }
-      b(span(cls := "visible-lg-inline")("Task ", ((job map { _.path.string }) ++ Some(t.number)).mkString(":"))) :: Nil // "JobPath:TaskId"
+    val taskOption = for (taskId ← order.taskId) yield {
+      val job: Option[JobOverview] = taskIdToOverview.get(taskId) flatMap { task ⇒ jobPathToOverview.get(task.job) }
+      val jobPath = job map { _.path.toString } getOrElse "?"
+      List(
+        b(
+          span(cls := "visible-lg-inline")(
+            "Task ",
+            s"$jobPath:",
+            taskToA(taskId)(taskId.string))))
     }
     def nextStepEntry = order.nextStepAt map instantWithDurationToHtml
     tr(cls := orderToTrClass(order))(
@@ -133,6 +139,8 @@ div.orderSelection {
   private def queryToA(query: OrderQuery) = a(href := uris.order(query, returnType = None))
 
   private def jobChainPathToA(path: JobChainPath) = a(href := uris.jobChain.details(path))
+
+  private def taskToA(taskId: TaskId) = a(href := uris.task.overview(taskId))
 }
 
 object OrdersFullOverviewHtmlPage {

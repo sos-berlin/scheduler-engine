@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.client.web
 
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderQuery, OrderSourceType}
 import org.junit.runner.RunWith
@@ -62,6 +63,10 @@ final class SchedulerUrisTest extends FreeSpec {
 
   "jobChain.detail" in {
     assert(uris.jobChain.details(JobChainPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b")
+  }
+
+  "task.overview" in {
+    assert(uris.task.overview(TaskId(123)) == "http://0.0.0.0:1111/jobscheduler/master/api/task/123")
   }
 
   "resolveUri" in {

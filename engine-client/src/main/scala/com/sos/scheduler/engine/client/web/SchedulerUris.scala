@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp
 import com.sos.scheduler.engine.common.scalautil.Collections._
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.OrderQuery
 import spray.http.Uri
@@ -53,6 +54,10 @@ final class SchedulerUris private(schedulerUriString: String) {
       require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
       uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
     }
+  }
+
+  object task {
+    def overview(taskId: TaskId) = uriString(Uri(path = Uri.Path("api/task") / taskId.string))
   }
 
   /**

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
+import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
@@ -19,6 +20,14 @@ object HtmlDirectives {
   /**
     * If HTML is requested, path ends with slash and request has no query, then redirect to path without slash, in case of typo.
     */
+  def pathEndRedirectToSlash(webServiceContext: WebServiceContext): Route =
+    pathEnd {
+      redirectEmptyQueryBy(webServiceContext, path ⇒ Uri.Path(path.toString + "/"))
+    }
+
+  /**
+    * If HTML is requested, path ends with slash and request has no query, then redirect to path without slash, in case of typo.
+    */
   def pathEndElseRedirect(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒
       pathEnd {
@@ -26,15 +35,16 @@ object HtmlDirectives {
       } ~
       pathSingleSlash {
         htmlPreferred(webServiceContext) {
-          requestInstance { request ⇒
-            if (request.uri.query == Uri.Query.Empty) {
-              val withoutSlash = request.uri.copy(
-                scheme = "",
-                authority = Uri.Authority.Empty,
-                path = Uri.Path(request.uri.path.toString stripSuffix "/"))
-              redirect(withoutSlash, TemporaryRedirect)
-            } else
-              reject
+          get {
+            requestInstance { request ⇒
+              passIf(request.uri.query == Uri.Query.Empty) {
+                val withoutSlash = request.uri.copy(
+                  scheme = "",
+                  authority = Uri.Authority.Empty,
+                  path = Uri.Path(request.uri.path.toString stripSuffix "/"))
+                redirect(withoutSlash, TemporaryRedirect)
+              }
+            }
           }
         }
       }
@@ -48,18 +58,37 @@ object HtmlDirectives {
       pathEnd {
         htmlPreferred(webServiceContext) {  // The browser user may type "api/"
           requestInstance { request ⇒
-            if (request.uri.query == Uri.Query.Empty) {
+            passIf(request.uri.query == Uri.Query.Empty) {
               val withSlash = request.uri.copy(
                 scheme = "",
                 authority = Uri.Authority.Empty,
                 path = Uri.Path(request.uri.path.toString + "/"))
               redirect(withSlash, TemporaryRedirect)
-            } else
-              reject
+            }
           }
         }
       } ~
         route
+    }
+
+  /**
+    * If HTML is requested and request has no query, then redirect according to `changePath`, in case of user typo.
+    */
+  def redirectEmptyQueryBy(webServiceContext: WebServiceContext, changePath: Uri.Path ⇒ Uri.Path): Route =
+    htmlPreferred(webServiceContext) {
+      get {
+        requestInstance { request ⇒
+          if (request.uri.query == Uri.Query.Empty) {
+            redirect(
+              request.uri.copy(
+                scheme = "",
+                authority = Uri.Authority.Empty,
+                path = changePath(request.uri.path)),
+              TemporaryRedirect)
+          } else
+            reject
+        }
+      }
     }
 
   def completeTryHtml[A](resultFuture: ⇒ Future[A])(

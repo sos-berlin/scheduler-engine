@@ -50,7 +50,7 @@ extends UnmodifiableTask with Sister with EventSource {
 
   def stdoutFile = inSchedulerThread { Paths.get(cppProxy.stdout_path) }
 
-  private[kernel] def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
+  def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 
   override def toString =
     s"Task($id)"

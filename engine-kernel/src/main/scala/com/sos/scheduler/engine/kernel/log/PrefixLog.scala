@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.log
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
-import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
+import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashSet, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.log.{SchedulerLogLevel, SchedulerLogger}
@@ -29,7 +29,7 @@ extends Sister with SchedulerLogger {
   private implicit def schedulerThreadCallQueue = schedulerThreadCallQueueOnce getOrElse {
     throw new IllegalStateException("PrefixLog has not get a SchedulerThreadCallQueue") }
 
-  @volatile private var subscriptions = Set[LogSubscription]()
+  private val subscriptions = new ScalaConcurrentHashSet[LogSubscription]()
 
   def onCppProxyInvalidated() = {}
 
@@ -42,7 +42,7 @@ extends Sister with SchedulerLogger {
 
   @ForCpp private def onClosed(): Unit = {
     forAllSubscriptions { _.onClosed() }
-    subscriptions = Set()
+    subscriptions.clear()
   }
 
   @ForCpp private def onLogged(): Unit = forAllSubscriptions { _.onLogged() }
@@ -55,10 +55,8 @@ extends Sister with SchedulerLogger {
       }
     }
 
-  @deprecated("Not thread-safe")
   def subscribe(o: LogSubscription): Unit = subscriptions += o
 
-  @deprecated("Not thread-safe")
   def unsubscribe(o: LogSubscription): Unit = subscriptions -= o
 
   def log(level: SchedulerLogLevel, s: String): Unit = inSchedulerThread { cppProxy.java_log(level.cppNumber, s) }
@@ -68,7 +66,7 @@ extends Sister with SchedulerLogger {
 
   def isStarted: Boolean = inSchedulerThread { cppProxy.started }
 
-  def file: File = inSchedulerThread { new File(cppProxy.filename) }
+  def file: File = inSchedulerThread { new File(cppProxy.this_filename) }
 }
 
 object PrefixLog {

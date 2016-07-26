@@ -125,12 +125,13 @@ object ChunkingActor {
   private val RecommendedChunkSize = 1000*10
 
   private[cpp] class Notifier {
-    private var _callback: () ⇒ Unit = _
+    private val callbackOnce = new SetOnce[() ⇒ Unit]
+
     val schedulerHttpResponse = new SchedulerHttpResponse {
-      def onNextChunkIsReady() = _callback()
+      def onNextChunkIsReady() = for (callback ← callbackOnce) logException(logger.warn) { callback() }
     }
 
-    def onChunkIsReady(callback: ⇒ Unit) = _callback = () ⇒ callback
+    def onChunkIsReady(callback: ⇒ Unit) = callbackOnce := { () ⇒ callback }
   }
 
   private case object RequestChunk

@@ -110,7 +110,7 @@ object SchedulerTestUtils {
     instance[OrderSubsystemClient].orderOption(orderKey)
 
   def taskOverview(taskId: TaskId)(implicit hasInjector: HasInjector): TaskOverview =
-    instance[TaskSubsystemClient].taskOverview(taskId)
+    instance[TaskSubsystemClient].taskOverview(taskId) await TestTimeout
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystemClient].task(taskId)

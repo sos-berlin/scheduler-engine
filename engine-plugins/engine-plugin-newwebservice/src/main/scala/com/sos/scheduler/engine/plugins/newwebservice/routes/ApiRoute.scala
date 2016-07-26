@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import spray.http.CacheDirectives.{`max-age`, `min-fresh`, `no-cache`, `no-store`}
@@ -22,7 +23,7 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute with LogRoute {
+trait ApiRoute extends JobChainRoute with OrderRoute with TaskRoute with CommandRoute with LogRoute {
 
   protected def client: DirectSchedulerClient
   //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
@@ -59,9 +60,17 @@ trait ApiRoute extends JobChainRoute with OrderRoute with CommandRoute with LogR
         jobChainRoute
       }
     } ~
+    pathPrefix("task") {
+      eatSlash(webServiceContext) {
+        taskRoute
+      }
+    } ~
     pathPrefix("scheduler") {
-      path("log") {
-        logRoute(prefixLog)
+      pathEnd {
+        parameter("return") {
+          case "log" ⇒ logRoute(prefixLog)
+          case _ ⇒ reject
+        }
       }
     }
     /*~
