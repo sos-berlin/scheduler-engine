@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.kernel.DirectCommandClient._
 import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import scala.concurrent.ExecutionContext
+import spray.http.HttpEntity
 import spray.http.StatusCodes._
 import spray.routing.Directives._
 
@@ -37,6 +38,15 @@ trait CommandRoute {
             } else
               complete((Forbidden, "Only a read-only command is allowed"))
           }
+        }
+      }
+    }
+
+  def untypedPostCommandRoute =
+    pathEnd {
+      post {
+        entity(as[HttpEntity]) { entity ⇒
+          complete(client.uncheckedExecuteXml(entity.asString) map XmlString.apply)
         }
       }
     }
