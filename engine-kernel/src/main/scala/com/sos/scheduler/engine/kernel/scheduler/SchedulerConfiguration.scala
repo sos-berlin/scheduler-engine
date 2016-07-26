@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.base.utils.ScalaUtils.someUnless
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.configutils.Configs
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.utils.JavaResource
@@ -13,6 +14,7 @@ import com.typesafe.config.Config
 import java.io.File
 import java.net.{URI, URL}
 import java.nio.file.Files._
+import java.nio.file.{Path, Paths}
 
 trait SchedulerConfiguration {
 
@@ -37,6 +39,8 @@ trait SchedulerConfiguration {
   def udpPort: Option[Int]
 
   def webDirectoryUrlOption: Option[URL]
+
+  def htmlDirOption: Option[Path]
 
   lazy val keystoreReferenceOption = {
     val file = mainConfigurationDirectory / "agent-https.jks"
@@ -64,6 +68,7 @@ object SchedulerConfiguration {
       tcpPort
       udpPort
       webDirectoryUrlOption
+      htmlDirOption
     }
 
     lazy val clusterMemberId: ClusterMemberId =
@@ -100,5 +105,7 @@ object SchedulerConfiguration {
         case "" ⇒ None
         case o ⇒ Some(new URI(o).toURL)
       }
+
+    lazy val htmlDirOption = emptyToNone(settingsC._html_dir) map { o ⇒ Paths.get(o) }
   }
 }

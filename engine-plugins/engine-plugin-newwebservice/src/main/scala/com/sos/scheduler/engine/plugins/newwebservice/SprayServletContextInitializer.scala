@@ -17,7 +17,7 @@ final class SprayServletContextInitializer(injector: Injector) extends ServletCo
 
   private val started = new Switch
   private val actorSystem = injector.instance[ActorSystem]
-  private lazy val actor = actorSystem actorOf Props { injector.getInstance(classOf[WebServiceActor]) }
+  private lazy val actor = actorSystem actorOf WebServiceActor.props(injector)
 
   // TODO Bei ActorInitializationException Plugin abbrechen. Bisher wird die Exception nur protokolliert und der Scheduler setzt fort.
 

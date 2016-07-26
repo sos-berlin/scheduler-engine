@@ -36,7 +36,10 @@ object CommandService {
 
   def executeCommandWithSecurityLevel(xmlCommandExecutor: SchedulerXmlCommandExecutor, command: String, request: HttpServletRequest) = {
     val securityLevel = SchedulerSecurityRequest.securityLevel(request)
-    val clientHost = Option(request.getHeader("X-Forwarded-For")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost
+    val clientHost = Option(request.getHeader("X-Forwarded-For")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost match {
+      case "0:0:0:0:0:0:0:1" ⇒ "127.0.0.1"  // C++ code supports only IPv4
+      case o ⇒ o
+    }
     val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel, clientHost)
     Response.ok(resultXml).cacheControl(noCache).build()
   }

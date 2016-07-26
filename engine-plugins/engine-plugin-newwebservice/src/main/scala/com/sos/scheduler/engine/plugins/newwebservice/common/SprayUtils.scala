@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.common
 
+import shapeless._
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaType
 import spray.routing.Directives._
@@ -27,6 +28,24 @@ object SprayUtils {
         case _ ⇒ reject
       }
     }
+
+  def passSome[A](option: Option[A]): Directive1[A] =
+    new Directive1[A] {
+      def happly(inner: (A :: HNil) ⇒ Route) =
+        option match {
+          case Some(o) ⇒ inner(o :: HNil)
+          case None ⇒ reject
+        }
+    }
+
+  def passIf(condition: Boolean): Directive0 =
+    mapInnerRoute { inner ⇒
+      if (condition)
+        inner
+      else
+        reject
+    }
+
 /*
   private type ParameterMap = Map[String, String]
 
