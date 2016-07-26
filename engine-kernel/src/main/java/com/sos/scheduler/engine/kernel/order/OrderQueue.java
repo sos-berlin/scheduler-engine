@@ -13,12 +13,12 @@ public class OrderQueue implements Sister {  // Iterable<Order>
 
     @Override public final void onCppProxyInvalidated() {}
 
-    public final int size()  {
+    private int size()  {
         return cppProxy.java_order_count();
     }
 
     public static class Type implements SisterType<OrderQueue, Order_queueC> {
-        @Override public final OrderQueue sister(Order_queueC proxy, Sister context) { 
+        @Override public final OrderQueue sister(Order_queueC proxy, Sister context) {
             return new OrderQueue(proxy);
         }
     }

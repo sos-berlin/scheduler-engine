@@ -17,7 +17,7 @@ import scala.collection.immutable
  */
 private[jobchain] trait JobChainNodeParserAndHandler {
 
-  protected def orderState: OrderState
+  protected[kernel] def orderState: OrderState
 
   protected def nextState: OrderState
 

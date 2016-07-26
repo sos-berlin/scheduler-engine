@@ -17,9 +17,10 @@ import org.w3c.dom
  * @author Joacim Zschimmer
  */
 abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler {
+
   def jobPath: JobPath
 
-  override def processConfigurationDomElement(nodeElement: dom.Element) = {
+  override private[kernel] def processConfigurationDomElement(nodeElement: dom.Element) = {
     val namespaceToJobNodePlugins = injector.instance[PluginSubsystem].xmlNamespaceToPlugins[JobChainNodeNamespaceXmlPlugin] _
     initializeWithNodeXml(
       domElementToStaxSource(nodeElement),
@@ -28,7 +29,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
   }
 
   @ForCpp
-  final def onOrderStepEnded(order: Order, returnCode: Int): Unit = {
+  private final def onOrderStepEnded(order: Order, returnCode: Int): Unit = {
     logger.trace(s"$this onOrderStepEnded ${order.id} returnCode=$returnCode")
     require(order.jobChainPath == jobChainPath)
     for (orderFunction ← returnCodeToOrderFunctions(ReturnCode(returnCode))) {
@@ -38,7 +39,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
   }
 
   @ForCpp
-  def orderStateTransitionToState(cppInternalValue: Long): String =
+  private def orderStateTransitionToState(cppInternalValue: Long): String =
     orderStateTransitionToState(OrderStateTransition.ofCppInternalValue(cppInternalValue)).string
 
 }

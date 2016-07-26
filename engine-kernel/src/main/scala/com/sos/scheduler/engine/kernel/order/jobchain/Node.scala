@@ -8,6 +8,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeKey, NodeOverview}
 import com.sos.scheduler.engine.data.order.OrderState
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
 import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
 import org.w3c.dom
@@ -19,17 +21,18 @@ import org.w3c.dom
 abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   protected def injector: Injector
+  protected implicit def schedulerThreadCallQueue: SchedulerThreadCallQueue
 
-  def overview: NodeOverview
+  private[kernel] def overview: NodeOverview
 
-  protected val cppProxy: NodeCI
+  protected[kernel] val cppProxy: NodeCI
 
   private val orderStateOnce = new SetOnce[OrderState]
 
   def onCppProxyInvalidated() = close()
 
   @ForCpp
-  def processConfigurationDomElement(nodeElement: dom.Element): Unit = {
+  private[kernel] def processConfigurationDomElement(nodeElement: dom.Element): Unit = {
     val elementPluginOption = nodeListToSeq(nodeElement.getChildNodes) collect {
       case e: dom.Element ⇒ e → injector.instance[PluginSubsystem].xmlNamespaceToPlugins[AttachableNamespaceXmlPlugin](e.getNamespaceURI)
     }
@@ -38,19 +41,19 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
     }
   }
 
-  final def persistentState = new JobChainNodePersistentState(jobChainPath, orderState, action)
+  private[kernel] final def persistentState = new JobChainNodePersistentState(jobChainPath, orderState, action)
 
-  final def nodeKey = NodeKey(jobChainPath, orderState)
+  final def nodeKey = inSchedulerThread { NodeKey(jobChainPath, orderState) }
 
-  final def jobChainPath = JobChainPath(cppProxy.job_chain_path)
+  final def jobChainPath = inSchedulerThread { JobChainPath(cppProxy.job_chain_path) }
 
-  final def orderState = orderStateOnce getOrUpdate OrderState(cppProxy.string_order_state)
+  protected[kernel] final def orderState = orderStateOnce getOrUpdate OrderState(cppProxy.string_order_state)
 
-  final def nextState = OrderState(cppProxy.string_next_state)
+  protected[kernel] final def nextState = OrderState(cppProxy.string_next_state)
 
-  final def errorState = OrderState(cppProxy.string_error_state)
+  protected[kernel] final def errorState = OrderState(cppProxy.string_error_state)
 
-  final def action = JobChainNodeAction.ofCppName(cppProxy.string_action)
+  final def action = inSchedulerThread { JobChainNodeAction.ofCppName(cppProxy.string_action) }
 
-  final def action_=(o: JobChainNodeAction): Unit = cppProxy.set_action_string(o.toCppName)
+  final def action_=(o: JobChainNodeAction): Unit = inSchedulerThread { cppProxy.set_action_string(o.toCppName) }
 }

@@ -7,5 +7,5 @@ import org.w3c.dom
  * @author Joacim Zschimmer
  */
 trait PluginXmlConfigurable {
-  def processConfigurationDomElement(element: dom.Element): Unit
+  private[kernel] def processConfigurationDomElement(element: dom.Element): Unit
 }

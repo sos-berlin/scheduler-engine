@@ -51,11 +51,6 @@ extends ScalaAbstractModule
 with HasCloser {
 
   private val lateBoundCppSingletons = mutable.Buffer[Class[_]]()
-  private lazy val _zoneId = {
-    val state = cppProxy.state_name
-    if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
-    ZoneId of cppProxy.time_zone_name
-  }
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
@@ -71,6 +66,8 @@ with HasCloser {
     provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
+    lateBoundCppSingletons += classOf[MessageCodeHandler]
+    lateBoundCppSingletons += classOf[ZoneId]
     bindSubsystems()
     bindInstance(LateBoundCppSingletons(lateBoundCppSingletons.toVector))
   }
@@ -127,7 +124,11 @@ with HasCloser {
     Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
 
   @Provides @Singleton
-  private def zoneId: ZoneId = _zoneId
+  private def zoneId: ZoneId = {
+    val state = cppProxy.state_name
+    if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
+    ZoneId of cppProxy.time_zone_name
+  }
 
   @Provides @Singleton
   private def actorSystem(config: Config): ActorSystem = {

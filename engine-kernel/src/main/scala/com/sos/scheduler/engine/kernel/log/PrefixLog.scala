@@ -61,15 +61,14 @@ extends Sister with SchedulerLogger {
   @deprecated("Not thread-safe")
   def unsubscribe(o: LogSubscription): Unit = subscriptions -= o
 
-  def log(level: SchedulerLogLevel, s: String): Unit = inSchedulerThread { cppProxy.java_log(level.cppNumber, s)
-    }
+  def log(level: SchedulerLogLevel, s: String): Unit = inSchedulerThread { cppProxy.java_log(level.cppNumber, s) }
 
   /** @return "", wenn für den Level keine Meldung vorliegt. */
   def lastByLevel(level: SchedulerLogLevel): String = inSchedulerThread { cppProxy.java_last(level.cppName) }
 
   def isStarted: Boolean = inSchedulerThread { cppProxy.started }
 
-  def file: File = inSchedulerThread { new File(cppProxy.this_filename) }
+  def file: File = inSchedulerThread { new File(cppProxy.filename) }
 }
 
 object PrefixLog {

@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlElemSource}
@@ -69,9 +68,9 @@ private object JobChainNodeParserAndHandlerTest {
     </job_chain_node>
 
   private class X extends JobChainNodeParserAndHandler {
-    protected def orderState = CurrentState
-    protected def nextState = NextState
-    protected def errorState = ErrorState
+    def orderState = CurrentState
+    def nextState = NextState
+    def errorState = ErrorState
   }
 
   private def testNamespaceParse(xmlEventReader: XMLEventReader): OrderFunction =

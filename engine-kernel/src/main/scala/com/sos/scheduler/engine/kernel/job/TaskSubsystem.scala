@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.job
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC
 import javax.inject.{Inject, Singleton}
 
@@ -11,11 +12,16 @@ final class TaskSubsystem @Inject private(
   cppProxy: Task_subsystemC,
   private[job] implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue) {
 
-  def task(id: TaskId): Task =
+  private[kernel] def task(id: TaskId): Task =
     Option(cppProxy.get_task_or_null(id.number)) map { _.getSister } getOrElse {
       throw new NoSuchElementException(s"Unknown TaskID '${id.string}'") }
 
   def taskLog(taskId: TaskId): String =
-    try cppProxy.task_log(taskId.number)
-    catch { case e: CppException if e.getCode == "SOS-1251" => throw new TaskNotFoundException(taskId) }
+    try
+      inSchedulerThread {
+        cppProxy.task_log(taskId.number)
+      }
+    catch {
+      case e: CppException if e.getCode == "SOS-1251" ⇒ throw new TaskNotFoundException(taskId)
+    }
 }

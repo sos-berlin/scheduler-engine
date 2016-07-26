@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.kernel.order.OrderQueue
 
 abstract class OrderQueueNode extends Node {
 
-  def orderCount: Int
+  private[kernel] def orderCount: Int
 
-  def orderQueue: OrderQueue
+  private[kernel] def orderQueue: OrderQueue
 }

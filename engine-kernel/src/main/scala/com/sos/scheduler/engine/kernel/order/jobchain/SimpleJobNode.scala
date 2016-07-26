@@ -1,10 +1,13 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.SimpleJobNodeOverview
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.OrderQueue
@@ -12,15 +15,17 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
 @ForCpp
 final class SimpleJobNode(
-  protected val cppProxy: Job_nodeC,
+  protected[kernel] val cppProxy: Job_nodeC,
   protected val injector: Injector)
 extends JobNode {
 
-  def orderCount: Int = cppProxy.order_queue.java_order_count()
+  protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
 
-  def orderQueue: OrderQueue = cppProxy.order_queue.getSister
+  private[kernel] def orderCount: Int = cppProxy.order_queue.java_order_count()
 
-  override def toString = s"${getClass.getSimpleName} $nodeKey $jobPath"
+  private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
+
+  override def toString = s"${getClass.getSimpleName}"   //inSchedulerThread $nodeKey $jobPath"
 
   override def overview = SimpleJobNodeOverview(
     orderState = orderState,
@@ -30,9 +35,9 @@ extends JobNode {
     action = action,
     jobPath = jobPath)
 
-  def jobPath: JobPath = JobPath(cppProxy.job_path)
+  def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 
-  def getJob: Job = cppProxy.job.getSister
+  private[kernel] def getJob: Job = cppProxy.job.getSister
 }
 
 object SimpleJobNode {

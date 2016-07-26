@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel
 
 import com.google.common.base.MoreObjects.firstNonNull
+import com.google.inject
 import com.google.inject.Guice.createInjector
-import com.google.inject.Injector
 import com.google.inject.Stage.DEVELOPMENT
+import com.google.inject.{Injector, TypeLiteral}
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
@@ -13,6 +14,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.common.xml.NamedChildElements
@@ -25,7 +27,7 @@ import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOv
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.directOrSchedulerThreadFuture
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -51,6 +53,7 @@ import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -160,6 +163,8 @@ with HasCloser {
   private def initializeCppDependencySingletons(): Unit = {
     // Eagerly call all C++ providers now to avoid later deadlock (Scheduler lock and DI lock)
     for (o ← injector.instance[LateBoundCppSingletons].interfaces) injector.getInstance(o)
+    val t = new TypeLiteral[immutable.Iterable[LicenseKeyString]] {}
+    injector.getInstance(inject.Key.get(t))
   }
 
   @ForCpp private def onActivated(): Unit = {
@@ -174,7 +179,7 @@ with HasCloser {
     if (somethingDone) -nextTime else nextTime
   }
 
-  def executeCallQueue() = callRunner.executeMatureCalls()
+  def executeCallQueue() = inSchedulerThread { callRunner.executeMatureCalls() }
 
   /** Nur für C++, zur Ausführung eines Kommandos in Java */
   @ForCpp private def javaExecuteXml(xml: String): String = {
@@ -281,9 +286,7 @@ with HasCloser {
       _ stripSuffix "\u0000"  // Von C++ angehängtes '\0', siehe Command_response::end_standard_response()
     }
 
-  def callCppAndDoNothing(): Unit = {
-    cppProxy.tcp_port
-  }
+  def callCppAndDoNothing(): Unit = inSchedulerThread { cppProxy.tcp_port }
 
   def overview: Future[SchedulerOverview] =
     directOrSchedulerThreadFuture {
