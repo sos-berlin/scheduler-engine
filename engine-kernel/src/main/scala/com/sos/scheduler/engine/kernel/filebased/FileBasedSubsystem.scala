@@ -51,7 +51,7 @@ trait FileBasedSubsystem extends Subsystem {
       SimpleFileBasedSubsystemOverview(
         fileBasedType = self.fileBasedType,
         count = self.count,
-        fileBasedStateCounts = (fileBaseds map { _.fileBasedState }).countEquals)
+        fileBasedStateCounts = (fileBasedIterator map { _.fileBasedState }).countEquals)
     }
 
   private[kernel] final def count: Int =
@@ -65,16 +65,21 @@ trait FileBasedSubsystem extends Subsystem {
   private[kernel] def visiblePaths: Seq[Path] =
     cppProxy.file_based_paths(visibleOnly = true) map companion.stringToPath
 
-  private[kernel] def visibleFileBaseds: Vector[ThisFileBased] = fileBaseds filter { _.isVisible }
+  private[kernel] def visibleFileBasedIterator: Iterator[ThisFileBased] = fileBasedIterator filter { _.isVisible }
+
+  private[kernel] final def requireExistence(path: Path): Unit = fileBased(path)
 
   private[kernel] final def fileBased(path: Path): ThisFileBased =
     _pathToFileBased.getOrElse(path, {  throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string)) })
 
-  final def fileBasedOption(path: Path): Option[ThisFileBased] =
+  private[kernel] final def fileBasedOption(path: Path): Option[ThisFileBased] =
     Option(cppProxy.java_file_based_or_null(path.string)) map { _.getSister }
 
-  final def fileBaseds: Vector[ThisFileBased] =
+  private[kernel] final def fileBaseds: Vector[ThisFileBased] =
     _pathToFileBased.values.toVector
+
+  private[kernel] final def fileBasedIterator: Iterator[ThisFileBased] =
+    _pathToFileBased.values.iterator
 
   final def fileBasedType = companion.fileBasedType
 

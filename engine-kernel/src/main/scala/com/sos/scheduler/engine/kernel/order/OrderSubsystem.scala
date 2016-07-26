@@ -22,7 +22,7 @@ import scala.collection.immutable
 
 @ForCpp
 @Singleton
-private[kernel] final class OrderSubsystem @Inject private(
+final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   folderSubsystem: FolderSubsystem,
@@ -49,9 +49,9 @@ extends FileBasedSubsystem {
   private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] =
     ordersByQuery(query).toVector map { _.overview }
 
-  private def ordersByQuery(query: OrderQuery) = {
+  private[order] def ordersByQuery(query: OrderQuery): Iterator[Order] = {
     val q = query.copy(jobChainQuery = JobChainQuery.All)
-    jobChainsByQuery(query.jobChainQuery) flatMap { _.orders } filter q.matches
+    jobChainsByQuery(query.jobChainQuery) flatMap { _.orderIterator } filter q.matches
   }
 
   def order(orderKey: OrderKey): Order =
@@ -69,21 +69,19 @@ extends FileBasedSubsystem {
       jobChain(o).remove()
     }
 
-  def jobChainsOfJob(job: Job): Iterable[JobChain] =
+  def jobChainsOfJob(job: Job): Vector[JobChain] =
     inSchedulerThread {
-      jobChains filter { _ refersToJob job }
+      (fileBasedIterator filter { _ refersToJob job }).toVector
     }
 
-  private[kernel] def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] =
+  private[kernel] def jobChainsByQuery(query: JobChainQuery): Iterator[JobChain] =
     query.reduce match {
-      case JobChainQuery.All ⇒ visibleFileBaseds
-      case jobChainPath: JobChainPath ⇒ List(jobChain(jobChainPath))
+      case JobChainQuery.All ⇒ visibleFileBasedIterator
+      case jobChainPath: JobChainPath ⇒ Iterator(jobChain(jobChainPath))
       case folderPath: FolderPath ⇒
-        folderSubsystem.fileBased(folderPath)  // Fails if folders does not exists
-        visibleFileBaseds filter { o ⇒ query.matches(o.path) }
+        folderSubsystem.requireExistence(folderPath)
+        visibleFileBasedIterator filter { o ⇒ query.matches(o.path) }
     }
-
-  private def jobChains: Vector[JobChain] = fileBaseds
 
   def jobChain(o: JobChainPath): JobChain =
     inSchedulerThread {

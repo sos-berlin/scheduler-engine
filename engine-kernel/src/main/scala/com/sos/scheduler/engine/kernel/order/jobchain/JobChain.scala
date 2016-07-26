@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import javax.persistence.EntityManagerFactory
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.collection.{breakOut, immutable, mutable}
+import scala.collection.{immutable, mutable}
 
 @ForCpp
 private[engine] final class JobChain(
@@ -151,7 +151,7 @@ with UnmodifiableJobChain {
   private[kernel] def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
 
-  private[order] def orders: Vector[Order] = cppProxy.java_orders.map { o ⇒ o.asInstanceOf[OrderC].getSister } (breakOut)
+  private[order] def orderIterator: Iterator[Order] = cppProxy.java_orders.toIterator map { o ⇒ o.asInstanceOf[OrderC].getSister }
 
   private def isStopped = cppProxy.is_stopped
 
