@@ -64,7 +64,7 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
 
 
     @Override public boolean isCppThreadRequired() {
-        return false;
+        return true;
     }
 
     @HotEventHandler public void handleEvent(SchedulerCloseEvent e) {

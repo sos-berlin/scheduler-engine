@@ -20,17 +20,32 @@ public class ThreadLock {
     private final SimpleLock myLock = new LoggingLock();
 //    private final AtomicInteger counter = new AtomicInteger(0);
 
-    public final void lock() {
-        if (requiredCppThread != null && requiredCppThread != currentThread())
-            throw new IllegalStateException("Not in C++ thread");
+    public final void startLock() {
         myLock.lock();
     }
 
-    public final void unlock() {
+    public final void endLock() {
         myLock.unlock();
     }
 
+    public final void lock() {
+        if (requiredCppThread == null)   // In production
+            myLock.lock();
+        else
+        // requireCppThread is non-null only under test framework, see SchedulerThreadControllerBridge.
+        // This is to test the irrelevance of myLock. Under production, myLock is always used.
+        if (requiredCppThread != currentThread())
+            throw new IllegalStateException("Not in C++ thread");   // Not in production
+    }
+
+    public final void unlock() {
+        if (requiredCppThread == null) {
+            myLock.unlock();
+        }
+    }
+
     public final void setCppThreadRequired(boolean b) {
+        requireUnlocked();
         requiredCppThread = b ? currentThread() : null;
     }
 

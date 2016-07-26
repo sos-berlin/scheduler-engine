@@ -53,14 +53,14 @@ public class CppScheduler {
     private int run2(ImmutableList<String> arguments, String argumentLine, SchedulerControllerBridge controllerBridge) {
         CppProxy.threadLock.setCppThreadRequired(isCppThreadRequired);
         CppProxy.threadLock.requireUnlocked();
-        CppProxy.threadLock.lock();
+        CppProxy.threadLock.startLock();
         if (logger.isTraceEnabled()) logger.trace(this +" starts");
         try {
             return runNative(toArray(arguments, String.class), argumentLine, controllerBridge);
         }
         finally {
             if (logger.isTraceEnabled()) logger.trace(this +" has ended");
-            CppProxy.threadLock.unlock();
+            CppProxy.threadLock.endLock();
         }
     }
 
