@@ -5,7 +5,6 @@ import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.base.sprayjson.JsonRegexMatcher._
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -14,6 +13,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
@@ -23,9 +23,9 @@ import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
+import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
@@ -49,14 +49,14 @@ import spray.json._
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
-  private lazy val directSchedulerClient = instance[DirectSchedulerClient]
   private lazy val httpPort = findRandomFreeTcpPort()
   private lazy val schedulerUri = s"http://127.0.0.1:$httpPort"
-  private lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
+  protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
+  protected lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    //binariesDebugMode = Some(CppBinariesDebugMode.release),
+    binariesDebugMode = Some(CppBinariesDebugMode.release),
     mainArguments = List(s"-http-port=$httpPort"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
@@ -65,7 +65,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     lazy val file = testEnvironment.tmpDirectory / "TEST-BARRIER"
 
     def touchFile() = {
-      val variableSet = instance[VariableSet]
+      val variableSet = instance[SchedulerVariableSet]
       variableSet(TestJob.BarrierFileVariableName) = file.toString
       touch(file)
       onClose { deleteIfExists(file) }
@@ -379,54 +379,19 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  for (n ← sys.props.optionAs[Int]("JS1642IT")) {
-    "Speed test simple direct OrderOverview C++ access" in {
-      inSchedulerThread {
-        for (_ ← 1 to 5)
-        Stopwatch.measureTime(100000, "OrderOverview") {
-          directSchedulerClient.orderOverviews().successValue
-        }
-      }
-    }
-
-    "Speed test: OrdersFullOverview" - {
-      s"(Add $n orders)" in {
-        val stopwatch = new Stopwatch
-        for (orderKey ← 1 to n map { i ⇒ aJobChainPath orderKey s"adhoc-$i" })
-          controller.scheduler executeXml OrderCommand(orderKey)
-        logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
-      }
-      val m = 20
-
-      "OrdersFullOverview" in {
-        for (_ ← 1 to m) {
-          val stopwatch = new Stopwatch
-          webSchedulerClient.get[String](_.order.fullOverview(OrderQuery.All)) await TestTimeout
-          val s = stopwatch.itemsPerSecondString(n, "order")
-          logger.info(s"OrdersFullOverview $testName: $s")
-        }
-      }
-
-      "<show_state>" in {
-        for (_ ← 1 to m) {
-          val stopwatch = new Stopwatch
-          webSchedulerClient.uncheckedExecute(<s/>) await TestTimeout
-          val s = stopwatch.itemsPerSecondString(n, "order")
-          logger.info(s"<s/> $testName: $s")
-        }
-      }
-    }
-  }
+  addOptionalSpeedTests()
 }
 
-private object JS1642IT {
+private[js1642] object JS1642IT {
+  intelliJuseImports(JsObjectMarshaller)
+
   private val logger = Logger(getClass)
   private val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
 
   private val TestJobPath = JobPath("/test")
 
-  private val aJobChainPath = JobChainPath("/aJobChain")
-  private val a1OrderKey = aJobChainPath orderKey "1"
+  private[js1642] val aJobChainPath = JobChainPath("/aJobChain")
+  private[js1642] val a1OrderKey = aJobChainPath orderKey "1"
   private val a2OrderKey = aJobChainPath orderKey "2"
   private val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
 
