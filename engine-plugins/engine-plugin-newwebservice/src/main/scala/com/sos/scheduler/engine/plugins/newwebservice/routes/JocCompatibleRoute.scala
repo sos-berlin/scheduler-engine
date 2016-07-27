@@ -23,7 +23,7 @@ trait JocCompatibleRoute extends CommandRoute with CppHttpRoute {
       passSome(schedulerConfiguration.htmlDirOption)(jocRoute)
     } ~
     pathPrefix("engine") {
-      (pathPrefix("command") & pathSingleSlash) {  // For compatibility with JOC 1
+      (pathPrefix("command") & pathEndOrSingleSlash) {  // SingleSlash for compatibility with JOC 1
         untypedPostCommandRoute
       }
     } ~

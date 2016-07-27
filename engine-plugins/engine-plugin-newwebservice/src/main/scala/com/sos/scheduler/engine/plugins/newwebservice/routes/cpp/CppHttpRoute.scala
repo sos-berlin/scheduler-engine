@@ -67,20 +67,20 @@ trait CppHttpRoute {
   private def dispose(ref: CppReference[HttpResponseC]): Future[Unit] =
     try
       schedulerThreadFuture {
-      try {
-        ref.get.close()
-        disposableCppProxyRegister.dispose(ref)
-      } catch {
-        case NonFatal(t) ⇒
-          logger.warn(s"httpResponseC.close: $t")
-          throw t
+        try {
+          ref.get.close()
+          disposableCppProxyRegister.dispose(ref)
+        } catch {
+          case NonFatal(t) ⇒
+            logger.warn(s"httpResponseC.close: $t")
+            throw t
+        }
       }
+    catch {
+      case t: CallQueue.ClosedException ⇒
+        logger.debug(t.toString)
+        Future.successful(())
     }
-  catch {
-    case t: CallQueue.ClosedException ⇒
-      logger.debug(t.toString)
-      Future.successful(())
-  }
 }
 
 object CppHttpRoute {
