@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node, OrderQueueNode}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import javax.inject.{Inject, Singleton}
@@ -46,13 +46,23 @@ extends FileBasedSubsystem {
     }
   }
 
-  private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] =
-    ordersByQuery(query).toVector map { _.overview }
+  private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = {
+    val nonDistributed = ordersByQuery(query).toVector map { _.overview }
+    val distributed = distributedOrderOverviews(query)
+    nonDistributed ++ distributed
+  }
 
   private[order] def ordersByQuery(query: OrderQuery): Iterator[Order] = {
     val q = query.copy(jobChainQuery = JobChainQuery.All)
     jobChainsByQuery(query.jobChainQuery) flatMap { _.orderIterator } filter q.matches
   }
+
+  private def distributedOrderOverviews(query: OrderQuery): Iterator[OrderOverview] =
+    for (jobChain ← jobChainsByQuery(query.jobChainQuery) filter { _.isDistributed };
+         orderQueueNode ← jobChain.nodes collect { case o: OrderQueueNode ⇒ o };
+         orderQueue = orderQueueNode.orderQueue;
+         overview ← orderQueue.distributedOrderOverviews(query))
+      yield overview
 
   def order(orderKey: OrderKey): Order =
     inSchedulerThread {

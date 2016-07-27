@@ -4202,6 +4202,48 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
     return element;
 }
 
+void Order_queue::for_each_distributed_order(int limit, Order_callback callback, void* callback_context) {
+    int remaining = limit;
+    if (_job_chain->is_distributed()
+        &&  db()  &&  !db()->is_in_transaction() )
+    {
+        Read_transaction ta ( db() );
+
+        string w = db_where_expression();
+
+        S select_sql;
+        select_sql << "select %limit(" << remaining << ") " << order_select_database_columns << ", `job_chain`, `occupying_cluster_member_id` " << 
+                        "  from " << db()->_orders_tablename <<
+                        "  where " << w << 
+                        " and `distributed_next_time` is not null "
+                        " and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
+                                " `occupying_cluster_member_id` is null )"
+                    "  order by `distributed_next_time`, `priority`, `ordering`";
+
+        for (Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); 
+            remaining > 0 &&  !result_set.eof(); 
+            --remaining)
+        {
+            Record record = result_set.get_record();
+            //string occupying_cluster_member_id = record.as_string("occupying_cluster_member_id");
+            ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
+            Absolute_path job_chain_path(root_path, record.as_string("job_chain"));
+            order->load_record(job_chain_path, record);
+            order->load_order_xml_blob( &ta );
+            (this->*callback)(callback_context, order);
+        }
+    }
+}
+
+void Order_queue::java_for_each_distributed_order(int limit, OrderCallbackJ callbackJ) {
+    for_each_distributed_order(limit, &Order_queue::java_order_callback, &callbackJ);
+}
+
+void Order_queue::java_order_callback(void* callback_context, Order* order) {
+    OrderCallbackJ* callbackJ = (OrderCallbackJ*)callback_context;
+    callbackJ->apply(order->java_proxy_jobject());
+}
+
 //----------------------------------------------------------Order_queue_node::register_order_source
 
 void Order_queue_node::register_order_source( Order_source* order_source )

@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
@@ -25,7 +24,6 @@ import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderComma
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
-import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
@@ -56,8 +54,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
   protected lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    //binariesDebugMode = Some(CppBinariesDebugMode.release),
-    mainArguments = List(s"-http-port=$httpPort"))
+    //binariesDebugMode = Some(com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.release),
+    mainArguments = List(s"-http-port=$httpPort", "-distributed-orders"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
@@ -80,6 +78,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     super.onSchedulerActivated()
     barrier.touchFile()
     scheduler executeXml OrderCommand(aAdHocOrderKey, at = Some(OrderStartAt), suspended = Some(true))
+    scheduler executeXml OrderCommand(xbAdHocDistributedOrderKey, at = None)
     startOrderProcessing()
   }
 
@@ -151,7 +150,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/xFolder/"))
       val fullOverview = client.ordersFullOverview(orderQuery) await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview(orderQuery) await TestTimeout))
-      assert((fullOverview.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey))
+      assert((fullOverview.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
     }
 
     "ordersFullOverview query /xFolder throws SCHEDULER-161" in {
@@ -385,7 +384,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 private[js1642] object JS1642IT {
   intelliJuseImports(JsObjectMarshaller)
 
-  private val logger = Logger(getClass)
   private val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
 
   private val TestJobPath = JobPath("/test")
@@ -404,6 +402,7 @@ private[js1642] object JS1642IT {
 
   private val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
   private val xb1OrderKey = xbJobChainPath orderKey "1"
+  private val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
 
@@ -451,8 +450,14 @@ private[js1642] object JS1642IT {
       isSuspended = true),
     OrderOverview(
       xb1OrderKey,
-      FileBasedState.active,
+      FileBasedState.not_initialized,
       OrderSourceType.fileBased,
+      OrderState("100"),
+      nextStepAt = Some(EPOCH)),
+    OrderOverview(
+      xbAdHocDistributedOrderKey,
+      FileBasedState.not_initialized,
+      OrderSourceType.adHoc,
       OrderState("100"),
       nextStepAt = Some(EPOCH)))
 
@@ -529,8 +534,17 @@ private[js1642] object JS1642IT {
     },
     {
       "path": "/xFolder/x-bJobChain,1",
-      "fileBasedState": "active",
+      "fileBasedState": "not_initialized",
       "sourceType": "fileBased",
+      "orderState": "100",
+      "nextStepAt": "1970-01-01T00:00:00Z",
+      "isSuspended": false,
+      "isBlacklisted": false
+    },
+    {
+      "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
+      "fileBasedState": "not_initialized",
+      "sourceType": "adHoc",
       "orderState": "100",
       "nextStepAt": "1970-01-01T00:00:00Z",
       "isSuspended": false,

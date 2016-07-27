@@ -29,6 +29,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__SimpleJobNode.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__SinkNode.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderCallback.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__plugin__PluginSubsystem.h"
@@ -56,6 +57,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixL
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::Order OrderJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderSubsystem OrderSubsystemJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderCallback OrderCallbackJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::EndNode EndNodeJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobChain JobChainJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobNode JobNodeJ;

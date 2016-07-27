@@ -1110,7 +1110,8 @@ struct Order_queue : Com_order_queue,
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time& now);
-
+    void java_for_each_distributed_order(int limit, OrderCallbackJ);
+      
     job_chain::Order_queue_node* order_queue_node           () const                                { return _order_queue_node; }
     Job_chain*                  job_chain                   () const                                { return _job_chain; }
 
@@ -1155,6 +1156,9 @@ struct Order_queue : Com_order_queue,
 
   private:
     void check_orders_for_replacing_or_removing(File_based::When_to_act);
+    typedef void(Order_queue::*Order_callback)(void*, Order*);
+    void for_each_distributed_order(int limit, Order_callback, void*);
+    void java_order_callback(void*, Order*);
 
     ptr<Com_order_queue>       _com_order_queue;
     Job_chain*                 _job_chain;

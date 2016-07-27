@@ -54,15 +54,15 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -87,7 +87,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -109,11 +109,11 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__variable__VariableSet.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__main__SchedulerControllerBridge.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -183,27 +183,27 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     <ClCompile Include="scala__Option.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskId.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
+
+
+
     <ClCompile Include="org__joda__time__Duration.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -213,19 +213,19 @@
     <ClCompile Include="org__joda__time__base__BaseDuration.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__JobChain.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="org__joda__time__ReadableInstant.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
-    
+
+
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Timed_callC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -238,25 +238,25 @@
     <ClCompile Include="com__sos__scheduler__engine__newkernel__job__CppNewJob.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
+
+
+
+
+
     <ClCompile Include="java__lang__Class.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="scala__util__Try.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistentState.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Task_subsystemC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -287,12 +287,12 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Schedule_subsystemC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__Node.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -302,8 +302,8 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__End_nodeC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -325,13 +325,13 @@
     <ClCompile Include="com__google__inject__Injector.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
-    
+
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Api_process_configurationC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -344,8 +344,8 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__processclass__ProcessClass.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
-    
+
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__processclass__agent__CppHttpRemoteApiProcessClient.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -361,7 +361,7 @@
     <ClCompile Include="java__lang__Boolean.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
+
     <ClCompile Include="com__sos__scheduler__engine__kernel__job__internal__InternalModule.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -369,6 +369,10 @@
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__SimpleJobNode.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderCallback.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     </ItemGroup>
