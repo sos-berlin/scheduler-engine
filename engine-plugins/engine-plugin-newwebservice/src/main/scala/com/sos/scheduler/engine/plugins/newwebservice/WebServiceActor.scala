@@ -41,6 +41,7 @@ extends HttpServiceActor with AllRoutes {
     for (o ← extraRoutes) logger.info(s"Using ${o.getClass.getName}")
     var extras: Vector[Route] = extraRoutes.toVector map { _.route }
     val routes = route +: extras
+//sys.error("FEHLER")
     runRoute(routes reduce { _ ~ _ })
   }
 }

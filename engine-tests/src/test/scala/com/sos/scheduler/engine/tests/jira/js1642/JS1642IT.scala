@@ -56,7 +56,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
   protected lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    binariesDebugMode = Some(CppBinariesDebugMode.release),
+    //binariesDebugMode = Some(CppBinariesDebugMode.release),
     mainArguments = List(s"-http-port=$httpPort"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()

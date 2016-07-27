@@ -21,7 +21,7 @@ final class JS1631IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   override protected def newAgentConfiguration() = {
     PrivateHttpJksResource.copyToFile(testEnvironment.agent.dataDirectory / "config/private/private-https.jks")
     super.newAgentConfiguration(data = Some(testEnvironment.agent.dataDirectory)).copy(
-      httpAddress = None)
+      http = None)
       .withHttpsInetSocketAddress(new InetSocketAddress("127.0.0.1", findRandomFreeTcpPort()))
   }
 
