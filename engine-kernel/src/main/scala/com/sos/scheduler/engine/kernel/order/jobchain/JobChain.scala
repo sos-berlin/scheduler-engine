@@ -140,7 +140,7 @@ with UnmodifiableJobChain {
   private lazy val nodeMap: Map[OrderState, Node] =
     (nodes map { n ⇒ n.orderState → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
 
-  private lazy val nodes: Vector[Node] =
+  private[order] lazy val nodes: Vector[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector
 
   def order(id: OrderId) =

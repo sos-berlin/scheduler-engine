@@ -50,6 +50,22 @@ static jboolean JNICALL is_1distributed_1order_1requested__J(JNIEnv* jenv, jobje
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL java_1for_1each_1distributed_1order__ILcom_sos_scheduler_engine_kernel_order_OrderCallback_2(JNIEnv* jenv, jobject, jlong cppReference, jint p0, jobject p1)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_queue* o_ = has_proxy< ::sos::scheduler::order::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::java_for_each_distributed_order()");
+        (o_->java_for_each_distributed_order(p0, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderCallback(p1)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jint JNICALL java_1order_1count(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -68,6 +84,7 @@ static jint JNICALL java_1order_1count(JNIEnv* jenv, jobject, jlong cppReference
 const static JNINativeMethod native_methods[] = {
     { (char*)"close__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::close },
     { (char*)"is_distributed_order_requested__native", (char*)"(JJ)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1distributed_1order_1requested__J },
+    { (char*)"java_for_each_distributed_order__native", (char*)"(JILcom/sos/scheduler/engine/kernel/order/OrderCallback;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1for_1each_1distributed_1order__ILcom_sos_scheduler_engine_kernel_order_OrderCallback_2 },
     { (char*)"java_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1order_1count }
 };
 

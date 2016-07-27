@@ -42,6 +42,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
   private def orderStateTransitionToState(cppInternalValue: Long): String =
     orderStateTransitionToState(OrderStateTransition.ofCppInternalValue(cppInternalValue)).string
 
+  private[kernel] final def orderCount: Int = orderQueue.size
 }
 
 object JobNode {

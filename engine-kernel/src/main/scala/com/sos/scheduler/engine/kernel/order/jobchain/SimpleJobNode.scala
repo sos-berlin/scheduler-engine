@@ -21,8 +21,6 @@ extends JobNode {
 
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
 
-  private[kernel] def orderCount: Int = cppProxy.order_queue.java_order_count()
-
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 
   override def toString = s"${getClass.getSimpleName}"   //inSchedulerThread $nodeKey $jobPath"

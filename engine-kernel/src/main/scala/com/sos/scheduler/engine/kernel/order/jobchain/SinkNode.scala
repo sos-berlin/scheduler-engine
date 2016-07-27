@@ -24,8 +24,6 @@ extends JobNode {
 
   def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 
-  private[kernel] def orderCount: Int = cppProxy.order_queue.java_order_count()
-
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 
   private[kernel] def isDeletingFile: Boolean = cppProxy.file_order_sink_remove()
