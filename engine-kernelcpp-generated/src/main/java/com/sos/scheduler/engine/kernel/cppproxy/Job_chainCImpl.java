@@ -106,20 +106,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native java.lang.String file_watching_process_class_path__native(long cppReference);
 
 
-    @Override public boolean has_base_file() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return has_base_file__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native boolean has_base_file__native(long cppReference);
-
-
     @Override public boolean is_distributed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -132,6 +118,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     }
 
     private static native boolean is_distributed__native(long cppReference);
+
+
+    @Override public boolean is_file_based() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_file_based__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_file_based__native(long cppReference);
 
 
     @Override public boolean is_file_based_reread() {

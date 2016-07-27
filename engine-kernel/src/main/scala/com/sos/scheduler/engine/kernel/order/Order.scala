@@ -84,7 +84,7 @@ with OrderPersistence {
 
   // Public for QueryableOrder
   def sourceType: OrderSourceType =
-    sourceTypeOnce getOrUpdate toOrderSourceType(hasBaseFile = cppProxy.has_base_file, isFileOrder = cppProxy.is_file_order)
+    sourceTypeOnce getOrUpdate toOrderSourceType(isFileBased = cppProxy.is_file_based, isFileOrder = cppProxy.is_file_order)
 
   def orderKey: OrderKey = inSchedulerThread { jobChainPath orderKey id }
 
@@ -200,17 +200,17 @@ object Order {
   private val logger = Logger(getClass)
 
   object cppFastFlags {
-    def hasBaseFile   (flags: Long) = (flags & 0x01) != 0
+    def isFileBased   (flags: Long) = (flags & 0x01) != 0
     def isSuspended   (flags: Long) = (flags & 0x02) != 0
     def isBlacklisted (flags: Long) = (flags & 0x04) != 0
     def isSetback     (flags: Long) = (flags & 0x08) != 0
     def fileBasedState(flags: Long) = FileBasedState.values()(((flags & 0xf0) >> 4).toInt)
   }
 
-  private def toOrderSourceType(hasBaseFile: Boolean, isFileOrder: Boolean) =
+  private def toOrderSourceType(isFileBased: Boolean, isFileOrder: Boolean) =
     if (isFileOrder)
       OrderSourceType.fileOrderSource
-    else if (hasBaseFile)
+    else if (isFileBased)
       OrderSourceType.fileBased
     else
       OrderSourceType.adHoc

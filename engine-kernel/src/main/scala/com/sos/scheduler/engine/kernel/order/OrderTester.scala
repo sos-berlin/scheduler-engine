@@ -25,8 +25,8 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
       for (_ ← 1 to m) Stopwatch.measureTime(n, "is_file_order") {
         orderC.is_file_order
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "has_base_file") {
-        orderC.has_base_file
+      for (_ ← 1 to m) Stopwatch.measureTime(n, "is_file_based") {
+        orderC.is_file_based
       }
       for (_ ← 1 to m) Stopwatch.measureTime(n, "file_based_state") {
         orderC.file_based_state

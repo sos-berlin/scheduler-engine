@@ -74,10 +74,10 @@ implements com.sos.scheduler.engine.kernel.cppproxy.FolderC {
     private static native long file_modification_time_t__native(long cppReference);
 
 
-    @Override public boolean has_base_file() {
+    @Override public boolean is_file_based() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return has_base_file__native(cppReference());
+            return is_file_based__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
@@ -85,7 +85,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.FolderC {
         }
     }
 
-    private static native boolean has_base_file__native(long cppReference);
+    private static native boolean is_file_based__native(long cppReference);
 
 
     @Override public boolean is_file_based_reread() {

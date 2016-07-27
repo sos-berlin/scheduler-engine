@@ -105,11 +105,11 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
             fileBased.isVisible shouldEqual (!(predefinedPaths contains path) || predefinedIsVisible)
           }
 
-          "hasBaseFile" in {
-            fileBased.hasBaseFile shouldEqual !pathDontHasXml(path)
+          "isFileBased" in {
+            fileBased.isFileBased shouldEqual !pathDontHasXml(path)
 //            path match {
-//              case _: FolderPath ⇒ o.hasBaseFile shouldBe false
-//              case _ ⇒ o.hasBaseFile shouldEqual !(predefinedPaths contains path)
+//              case _: FolderPath ⇒ o.isFileBased shouldBe false
+//              case _ ⇒ o.isFileBased shouldEqual !(predefinedPaths contains path)
 //            }
           }
 
@@ -125,7 +125,7 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
               'fileBasedState (expectedFileBasedState),
               'file (Try(fileBased.file).toOption)) //,
               //'sourceXml (emptyToNone(fileBased.sourceXmlBytes) map xmlBytesToString))
-            if (fileBased.hasBaseFile)
+            if (fileBased.isFileBased)
               fileBasedDetails.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
             else
               fileBasedDetails.fileModifiedAt shouldBe None

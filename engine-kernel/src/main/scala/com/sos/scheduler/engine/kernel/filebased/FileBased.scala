@@ -102,7 +102,7 @@ with EventSource {
 
   def isVisible: Boolean = inSchedulerThread { cppProxy.is_visible }
 
-  def hasBaseFile: Boolean = inSchedulerThread { cppProxy.has_base_file }
+  def isFileBased: Boolean = inSchedulerThread { cppProxy.is_file_based }
 
   def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 

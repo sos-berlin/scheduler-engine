@@ -3465,7 +3465,7 @@ void Order::remove_from_blacklist()
 
 jlong Order::java_fast_flags() const {
     return 
-        (has_base_file()  ? 0x01 : 0) |
+        (is_file_based()  ? 0x01 : 0) |
         (_suspended       ? 0x02 : 0) |
         (_is_on_blacklist ? 0x04 : 0) |
         (_setback_count   ? 0x08 : 0) |
