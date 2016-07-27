@@ -89,12 +89,12 @@ object CppHttpRoute {
 
   private def toSchedulerHttpRequest(request: HttpRequest): SchedulerHttpRequest = {
     val parameters = request.uri.query.toMap
-    val rawUri = toRawUri(request)
+    val fullPathAndQ = toFullPathAndQuery(request)
     val prefixes = Set("/jobscheduler/master/cpp", "/jobscheduler/engine-cpp")
     val pathAndQuery = prefixes collectFirst {
-      case prefix if rawUri startsWith prefix ⇒ rawUri.substring(prefix.length)
+      case prefix if fullPathAndQ startsWith prefix ⇒ fullPathAndQ.substring(prefix.length)
     } getOrElse {
-      throw new RuntimeException(s"Missing one of prefixes $prefixes in path: $rawUri")
+      throw new RuntimeException(s"Missing one of prefixes $prefixes in path: $fullPathAndQ")
     }
     val headers = (request.headers map { o ⇒ o.lowercaseName → o.value }).toMap
     new SchedulerHttpRequest {
@@ -102,14 +102,17 @@ object CppHttpRoute {
       def parameter(key: String) = parameters.getOrElse(key, "")
       def header(key: String) = headers.getOrElse(key.toLowerCase, "")
       def protocol() = request.protocol.value
-      def urlPath = pathAndQuery
+      def urlPath = pathAndQuery indexOf '?' match {
+        case -1 ⇒ pathAndQuery
+        case i ⇒ pathAndQuery.substring(0, i + 1)
+      }
       def charsetName = request.headers collectFirst { case `Content-Type`(o) ⇒ o.charset.value } getOrElse ""
       def httpMethod = request.method.value
       val body = new String(request.entity.data.toByteArray, ByteCharset)
     }
   }
 
-  private def toRawUri(request: HttpRequest): String =
+  private def toFullPathAndQuery(request: HttpRequest): String =
     request.header[ServletRequestInfoHeader] map { h ⇒
       Some(nullToEmpty(h.hsRequest.getPathInfo)) ++ Option(h.hsRequest.getQueryString) mkString "?"
     } orElse {
