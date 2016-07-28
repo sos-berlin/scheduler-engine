@@ -52,7 +52,7 @@ final class HeartbeatService(implicit timerService: TimerService) {
         }
       }
     } ~
-      onSuccess(operation(None)) { response ⇒ complete(response) }
+      complete(operation(None): Future[A])
   }
 
   def continueHeartbeat(onClientHeartbeat: Duration ⇒ Unit)(implicit actorRefFactory: ActorRefFactory): Route =
