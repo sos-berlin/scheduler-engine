@@ -181,14 +181,12 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
           assert((results filterNot { _.returnCode.isSuccess }) == Nil)
         }
 
-        val shellTaskCount = 100
-        s"Start $shellTaskCount simultaneously running shell tasks" in {
-          runTasks(JobPath("/test-sleep"), shellTaskCount, taskMaximumDuration = 1.s)
+        s"Start $ShellTaskParallelCount simultaneously running shell tasks" in {
+          runTasks(JobPath("/test-sleep"), ShellTaskParallelCount, taskMaximumDuration = 1.s)
         }
 
-        val javaTaskCount = 10
-        s"Start $javaTaskCount simultaneously running API tasks" in {
-          runTasks(JobPath("/test-sleep-api"), javaTaskCount, taskMaximumDuration = 20.s)  // 1 (out of 8) processor thread Intel 3770K (2012): 6s per task
+        s"Start $JavaTaskParallelCount simultaneously running API tasks" in {
+          runTasks(JobPath("/test-sleep-api"), JavaTaskParallelCount, taskMaximumDuration = 20.s)  // 1 (out of 8) processor thread Intel 3770K (2012): 6s per task
         }
       }
     }
@@ -200,6 +198,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 }
 
 object JS1291AgentIT {
+  private val CpuIs64bit = sys.props("os.arch") contains "64"  // This is to detect low memory 32 bit operating system
+  private val ShellTaskParallelCount = if (CpuIs64bit) 100 else 20
+  private val JavaTaskParallelCount = if (CpuIs64bit) 10 else 3
   private val TestProcessClassPath = ProcessClassPath("/test")
   private val TestJobchainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
