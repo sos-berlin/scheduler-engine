@@ -38,7 +38,7 @@ private[js1642] trait SpeedTests {
         }
       }
 
-      "Speed test: OrdersFullOverview" - {
+      "Speed test: OrdersComplemented" - {
         s"(Add $n orders)" in {
           val stopwatch = new Stopwatch
           for (orderKey ← 1 to n map { i ⇒ aJobChainPath orderKey s"adhoc-$i" })
@@ -46,7 +46,7 @@ private[js1642] trait SpeedTests {
           logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
         }
 
-        "OrdersFullOverview" in {
+        "OrdersComplemented" in {
           for (_ ← 1 to 20) {
             val stopwatch = new Stopwatch
             implicit val fastUnmarshaller = Unmarshaller[HttpData](`application/json`) {
@@ -54,7 +54,7 @@ private[js1642] trait SpeedTests {
             }
             webSchedulerClient.get[HttpData](_.order.fullOverview(OrderQuery.All)) await TestTimeout
             val s = stopwatch.itemsPerSecondString(n, "order")
-            logger.info(s"OrdersFullOverview $testName: $s")
+            logger.info(s"OrdersComplemented $testName: $s")
           }
         }
 

@@ -2,14 +2,14 @@ package com.sos.scheduler.engine.plugins.newwebservice.html
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
-import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
+import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery, OrderSourceType}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersFullOverviewHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,9 +19,9 @@ import scalatags.text.Frag
 /**
   * @author Joacim Zschimmer
   */
-final class OrdersFullOverviewHtmlPage private(
+final class OrdersHtmlPage private(
   query: OrderQuery,
-  fullOverview: OrdersFullOverview,
+  fullOverview: OrdersComplemented,
   protected val webServiceContext: WebServiceContext,
   protected val schedulerOverview: SchedulerOverview)(
   implicit ec: ExecutionContext)
@@ -143,10 +143,10 @@ div.orderSelection {
   private def taskToA(taskId: TaskId) = a(href := uris.task.overview(taskId))
 }
 
-object OrdersFullOverviewHtmlPage {
+object OrdersHtmlPage {
 
-  def toHtml(query: OrderQuery)(fullOverview: OrdersFullOverview)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
-    for (schedulerOverview ← client.overview) yield new OrdersFullOverviewHtmlPage(query, fullOverview, context, schedulerOverview)
+  def toHtml(query: OrderQuery)(fullOverview: OrdersComplemented)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
+    for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, fullOverview, context, schedulerOverview)
 
   private def orderToTrClass(order: OrderOverview) =
     if (order.isSuspended || order.isBlacklisted) "warning"

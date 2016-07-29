@@ -30,7 +30,7 @@ final class SchedulerUris private(schedulerUriString: String) {
       apply(query, Some("OrderTreeComplemented"))
 
     def fullOverview(query: OrderQuery = OrderQuery.All): String =
-      apply(query, Some("OrdersFullOverview"))
+      apply(query, Some("OrdersComplemented"))
 
     def apply(orderQuery: OrderQuery, returnType: Option[String]): String = {
       val subpath = JobChainQueryHttp.toUriPath(orderQuery.jobChainQuery)

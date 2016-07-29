@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1642;
 
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient;
-import com.sos.scheduler.engine.data.compounds.OrdersFullOverview;
+import com.sos.scheduler.engine.data.compounds.OrdersComplemented;
 import com.sos.scheduler.engine.data.filebased.FileBasedState;
 import com.sos.scheduler.engine.data.job.JobOverview;
 import com.sos.scheduler.engine.data.job.JobPath;
@@ -67,7 +67,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
 
     private void testOrdersFullOverview() {
         try {
-            OrdersFullOverview fullOverview = asJavaFuture(client.ordersFullOverview()).get();
+            OrdersComplemented fullOverview = asJavaFuture(client.ordersComplemented()).get();
             testOrderOverviews(seqAsJavaList(fullOverview.orders()));
             List<TaskOverview> orderedTasks = seqAsJavaList(fullOverview.usedTasks()).stream()
                 .sorted(SchedulerClientJavaTester::compareTaskOverview)
@@ -97,7 +97,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                 .withJobChainQuery(new JobChainQuery("/xFolder/"))
                 .withIsSuspended(false)
                 .withSourceTypes(singletonList(OrderSourceType.fileBased));
-            OrdersFullOverview fullOverview = asJavaFuture(client.ordersFullOverview(query)).get();
+            OrdersComplemented fullOverview = asJavaFuture(client.ordersComplemented(query)).get();
             assertThat(
                 asJavaCollection(fullOverview.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
                 containsInAnyOrder(
