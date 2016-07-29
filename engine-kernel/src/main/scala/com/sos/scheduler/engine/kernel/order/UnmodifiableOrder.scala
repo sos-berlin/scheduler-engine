@@ -15,8 +15,6 @@ extends EventSource {
 
   def state: OrderState
 
-  def isSuspended: Boolean
-
   def title: String
 
   def variables: Map[String, String]

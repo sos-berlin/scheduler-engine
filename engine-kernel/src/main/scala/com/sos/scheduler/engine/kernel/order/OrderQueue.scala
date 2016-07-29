@@ -18,7 +18,7 @@ final class OrderQueue(cppProxy: Order_queueC) extends Sister {
       callback = new OrderCallback {
         def apply(orderC: OrderC) = {
           val order = orderC.getSister
-          if (query matches order) {
+          if (query matches order.queryable) {
             result += orderC.getSister.overview
           }
         }

@@ -27,7 +27,6 @@ private[engine] final class Order private(
   protected[order] val cppProxy: OrderC,
   protected[kernel] val subsystem: StandingOrderSubsystem)
 extends FileBased
-with QueryableOrder
 with UnmodifiableOrder
 with OrderPersistence {
 
@@ -37,6 +36,13 @@ with OrderPersistence {
 
   private val idOnce = new SetOnce[OrderId]
   private val sourceTypeOnce = new SetOnce[OrderSourceType]
+  private[kernel] val queryable = new QueryableOrder {
+    def isSuspended = Order.this.isSuspended
+    def isSetback = Order.this.isSetback
+    def sourceType = Order.this.sourceType
+    def orderKey = Order.this.orderKey
+    def isBlacklisted = Order.this.isBlacklisted
+  }
 
   def onCppProxyInvalidated(): Unit = {}
 
@@ -75,15 +81,13 @@ with OrderPersistence {
       isSuspended = cppFastFlags.isSuspended(flags))
   }
 
-  // Public for QueryableOrder
-  def isSetback = setbackUntil.isDefined
+  private def isSetback = setbackUntil.isDefined
 
   def stringToPath(o: String) = OrderKey(o)
 
   def fileBasedType = FileBasedType.order
 
-  // Public for QueryableOrder
-  def sourceType: OrderSourceType =
+  private[order] def sourceType: OrderSourceType =
     sourceTypeOnce getOrUpdate toOrderSourceType(isFileBased = cppProxy.is_file_based, isFileOrder = cppProxy.is_file_order)
 
   def orderKey: OrderKey = inSchedulerThread { jobChainPath orderKey id }
@@ -109,7 +113,7 @@ with OrderPersistence {
       }
     }
 
-  private[kernel] def initialState: OrderState =
+  private[order] def initialState: OrderState =
     OrderState(cppProxy.initial_state_string)
 
 //  def endState: OrderState =
@@ -133,23 +137,21 @@ with OrderPersistence {
       case o ⇒ Some(TaskId(o))
     }
 
-  private[kernel] def priority: Int =
+  private[order] def priority: Int =
     cppProxy.priority
 
 //  def priority_=(o: Int): Unit = {
 //    cppProxy.set_priority(o)
 //  }
 
-  // Public for QueryableOrder
-  def isSuspended: Boolean =
+  private[order] def isSuspended: Boolean =
     cppProxy.suspended
 
 //  def isSuspended_=(b: Boolean): Unit = {
 //    cppProxy.set_suspended(b)
 //  }
 
-  // Public for QueryableOrder
-  def isBlacklisted = cppProxy.is_on_blacklist
+  private def isBlacklisted = cppProxy.is_on_blacklist
 
   def title: String = inSchedulerThread { cppProxy.title }
 
@@ -178,11 +180,11 @@ with OrderPersistence {
   def nextInstantOption: Option[Instant] =
     inSchedulerThread { eternalCppMillisToNoneInstant(cppProxy.next_time_millis) }
 
-  private[kernel] def createdAtOption: Option[Instant] = throw new UnsupportedOperationException
+  private[order] def createdAtOption: Option[Instant] = throw new UnsupportedOperationException
 
   override def toString = getClass.getSimpleName + (idOnce.toOption map { o ⇒ s"('$o')" })
 
-  private[kernel] def blacklist(): Unit = cppProxy.set_on_blacklist()
+  private[kernel] def setOnBlacklist(): Unit = cppProxy.set_on_blacklist()
 
   private def throwNotInAJobChain() = throw new SchedulerException(s"Order is not in a job chain: $toString")
 

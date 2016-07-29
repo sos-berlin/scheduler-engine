@@ -54,7 +54,7 @@ extends FileBasedSubsystem {
 
   private[order] def ordersByQuery(query: OrderQuery): Iterator[Order] = {
     val q = query.copy(jobChainQuery = JobChainQuery.All)
-    jobChainsByQuery(query.jobChainQuery) flatMap { _.orderIterator } filter q.matches
+    jobChainsByQuery(query.jobChainQuery) flatMap { _.orderIterator } filter { o ⇒ q.matches(o.queryable) }
   }
 
   private def distributedOrderOverviews(query: OrderQuery): Iterator[OrderOverview] =
