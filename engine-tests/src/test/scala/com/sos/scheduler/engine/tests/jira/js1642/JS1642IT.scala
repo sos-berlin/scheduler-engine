@@ -120,7 +120,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "ordersComplemented" in {
       val ordersComplemented = client.ordersComplemented await TestTimeout
       assert(ordersComplemented == (directSchedulerClient.ordersComplemented await TestTimeout))
-      assert(sortOrdersOrdersComplemented(ordersComplemented) == ExpectedOrderOrdersComplemented)
+      assert(ordersComplemented == ExpectedOrderOrdersComplemented)
     }
 
     "orderTreeComplemented" in {
@@ -133,7 +133,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderQuery = OrderQuery(isSuspended = Some(true))
       val ordersComplemented = client.ordersComplementedBy(orderQuery) await TestTimeout
       assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(orderQuery) await TestTimeout))
-      assert(sortOrdersOrdersComplemented(ordersComplemented) == ExpectedOrderOrdersComplemented.copy(
+      assert(ordersComplemented == ExpectedOrderOrdersComplemented.copy(
         orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
         usedTasks = Nil,
         usedJobs = Nil,
@@ -203,12 +203,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
               orderState = OrderState("END")))))
       assert(jobChainDetails.sourceXml.get startsWith "<job_chain ")
     }
-
-    def sortOrdersOrdersComplemented(o: OrdersComplemented) = o.copy(
-      orders = o.orders.sorted,
-      usedTasks = o.usedTasks.sorted,
-      usedJobs = o.usedJobs.sorted,
-      usedProcessClasses = o.usedProcessClasses.sorted)
 
     "ordersComplemented speed" in {
       Stopwatch.measureTime(50, "ordersComplemented") {
@@ -320,17 +314,16 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "orderOverviews" in {
       val orderOverviews = webSchedulerClient.get[JsArray](_.order.overviews()) await TestTimeout
-      // The array's ordering is not assured.
-      assert(sortArray(orderOverviews, "path") == ExpectedOrderOverviewsJsArray)
+      assert(orderOverviews == ExpectedOrderOverviewsJsArray)
     }
 
     "ordersComplemented" in {
       val ordersComplemented = webSchedulerClient.get[JsObject](_.order.ordersComplemented()) await TestTimeout
       // The array's ordering is not assured.
       val orderedOrdersComplemented = JsObject(ordersComplemented.fields ++ Map(
-        sortArrayField(ordersComplemented, "orders", "path"),
-        sortArrayField(ordersComplemented, "usedTasks", "id"),
-        sortArrayField(ordersComplemented, "usedJobs", "path")))
+        "orders" → ordersComplemented.fields("orders").asInstanceOf[JsArray],
+        "usedTasks" → ordersComplemented.fields("usedTasks").asInstanceOf[JsArray],
+        "usedJobs" → ordersComplemented.fields("usedJobs").asInstanceOf[JsArray]))
       assert(orderedOrdersComplemented == ExpectedOrdersOrdersComplementedJsObject)
     }
 
@@ -338,13 +331,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented) await TestTimeout
       assert(tree == ExpectedOrderTreeComplementedJsObject)
     }
-
-    def sortArrayField(jsObject: JsObject, arrayKey: String, key: String) =
-      arrayKey → sortArray(jsObject.fields(arrayKey).asInstanceOf[JsArray], key)
-
-    def sortArray(jsArray: JsArray, key: String) = JsArray(jsArray.elements.sortBy(selectString(key)))
-
-    def selectString(key: String)(o: JsValue): String = o.asJsObject.fields(key).asInstanceOf[JsString].value
   }
 
   "Unknown Accept content type is rejected" - {
