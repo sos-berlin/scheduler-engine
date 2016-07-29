@@ -37,15 +37,15 @@ trait OrderRoute extends LogRoute {
           case returnType ⇒
             orderQuery(parameters - "return") { query ⇒
               returnType match {
-                case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplemented(query))
-                case Some("OrdersComplemented") ⇒ completeTryHtml(client.ordersComplemented(query))
-                case Some("OrderOverview") ⇒ completeTryHtml(client.orderOverviews(query))
+                case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplementedBy(query))
+                case Some("OrdersComplemented") ⇒ completeTryHtml(client.ordersComplementedBy(query))
+                case Some("OrderOverview") ⇒ completeTryHtml(client.orderOverviewsBy(query))
                 case Some(o) ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
                 case None ⇒
                   htmlPreferred(webServiceContext) {
-                    complete(client.ordersComplemented(query) flatMap OrdersHtmlPage.toHtml(query))
+                    complete(client.ordersComplementedBy(query) flatMap OrdersHtmlPage.toHtml(query))
                   } ~
-                    complete(client.orderTreeComplemented(query))
+                    complete(client.orderTreeComplementedBy(query))
               }
             }
         }

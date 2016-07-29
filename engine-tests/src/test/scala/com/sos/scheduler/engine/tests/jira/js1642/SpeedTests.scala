@@ -33,7 +33,7 @@ private[js1642] trait SpeedTests {
         instance[OrderTester].testSpeed(3, 10000)
         inSchedulerThread {
           for (_ ← 1 to 5) Stopwatch.measureTime(100000, "OrderOverview") {
-            directSchedulerClient.orderOverviews().successValue
+            directSchedulerClient.orderOverviews.successValue
           }
         }
       }
@@ -52,7 +52,7 @@ private[js1642] trait SpeedTests {
             implicit val fastUnmarshaller = Unmarshaller[HttpData](`application/json`) {
               case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
             }
-            webSchedulerClient.get[HttpData](_.order.fullOverview(OrderQuery.All)) await TestTimeout
+            webSchedulerClient.get[HttpData](_.order.ordersComplemented(OrderQuery.All)) await TestTimeout
             val s = stopwatch.itemsPerSecondString(n, "order")
             logger.info(s"OrdersComplemented $testName: $s")
           }

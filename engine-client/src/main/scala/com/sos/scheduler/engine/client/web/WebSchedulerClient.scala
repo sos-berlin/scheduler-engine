@@ -40,19 +40,19 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def overview: Future[SchedulerOverview] =
     get[SchedulerOverview](_.overview)
 
-  final def orderOverviews(query: OrderQuery): Future[immutable.Seq[OrderOverview]] =
+  final def orderOverviewsBy(query: OrderQuery): Future[immutable.Seq[OrderOverview]] =
     get[immutable.Seq[OrderOverview]](_.order.overviews(query))
 
-  final def orderTreeComplemented(query: OrderQuery) =
+  final def orderTreeComplementedBy(query: OrderQuery) =
     get[OrderTreeComplemented](_.order.treeComplemented(query))
 
-  final def ordersComplemented(query: OrderQuery = OrderQuery.All): Future[OrdersComplemented] =
-    get[OrdersComplemented](_.order.fullOverview(query))
+  final def ordersComplementedBy(query: OrderQuery): Future[OrdersComplemented] =
+    get[OrdersComplemented](_.order.ordersComplemented(query))
 
   final def jobChainOverview(jobChainPath: JobChainPath): Future[JobChainOverview] =
     get[JobChainOverview](_.jobChain.overviews(JobChainQuery(jobChainPath)))
 
-  final def jobChainOverviews(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]] = {
+  final def jobChainOverviewsBy(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]] = {
     query.reduce match {
       case jobChainPath: JobChainPath ⇒ get[JobChainOverview](_.jobChain.overview(jobChainPath)) map { o ⇒ Vector(o) }  // Web service return a single object (not an array), if path denotes a single job chain path
       case _ ⇒ get[immutable.Seq[JobChainOverview]](_.jobChain.overviews(query))

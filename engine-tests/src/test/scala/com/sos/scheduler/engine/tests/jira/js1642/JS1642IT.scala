@@ -106,72 +106,72 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "orderOverviews" in {
-      val orders = client.orderOverviews() await TestTimeout
-      assert(orders == (directSchedulerClient.orderOverviews() await TestTimeout))
+      val orders = client.orderOverviews await TestTimeout
+      assert(orders == (directSchedulerClient.orderOverviews await TestTimeout))
       assert(orders.toVector.sorted == ExpectedOrderOverviews)
     }
 
     "orderOverviews speed" in {
       Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
-        client.orderOverviews() await TestTimeout
+        client.orderOverviews await TestTimeout
       }
     }
 
     "ordersComplemented" in {
-      val fullOverview = client.ordersComplemented await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersComplemented() await TestTimeout))
-      assert(sortOrdersFullOverview(fullOverview) == ExpectedOrderFullOverview)
+      val ordersComplemented = client.ordersComplemented await TestTimeout
+      assert(ordersComplemented == (directSchedulerClient.ordersComplemented await TestTimeout))
+      assert(sortOrdersOrdersComplemented(ordersComplemented) == ExpectedOrderOrdersComplemented)
     }
 
     "orderTreeComplemented" in {
-      val treeOverview = client.orderTreeComplemented(OrderQuery.All) await TestTimeout
-      assert(treeOverview == (directSchedulerClient.orderTreeComplemented(OrderQuery.All) await TestTimeout))
+      val treeOverview = client.orderTreeComplementedBy(OrderQuery.All) await TestTimeout
+      assert(treeOverview == (directSchedulerClient.orderTreeComplementedBy(OrderQuery.All) await TestTimeout))
       assert(treeOverview == ExpectedOrderTreeComplemented)
     }
 
-    "ordersComplemented isSuspended" in {
+    "ordersComplementedBy isSuspended" in {
       val orderQuery = OrderQuery(isSuspended = Some(true))
-      val fullOverview = client.ordersComplemented(orderQuery) await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersComplemented(orderQuery) await TestTimeout))
-      assert(sortOrdersFullOverview(fullOverview) == ExpectedOrderFullOverview.copy(
-        orders = ExpectedOrderFullOverview.orders filter { _.isSuspended },
+      val ordersComplemented = client.ordersComplementedBy(orderQuery) await TestTimeout
+      assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(orderQuery) await TestTimeout))
+      assert(sortOrdersOrdersComplemented(ordersComplemented) == ExpectedOrderOrdersComplemented.copy(
+        orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
         usedTasks = Nil,
         usedJobs = Nil,
         usedProcessClasses = Nil))
     }
 
-    "ordersComplemented query /aJobChain" in {
+    "ordersComplementedBy query /aJobChain" in {
       val query = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain"))
-      val fullOverview = client.ordersComplemented(query) await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersComplemented(query) await TestTimeout))
-      assert((fullOverview.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
+      val ordersComplemented = client.ordersComplementedBy(query) await TestTimeout
+      assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(query) await TestTimeout))
+      assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
-    "ordersComplemented query /aJobChain/ throws SCHEDULER-161" in {
+    "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
       val query = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain/"))
       intercept[RuntimeException] {
-        client.ordersComplemented(query) await TestTimeout
+        client.ordersComplementedBy(query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
     }
 
-    "ordersComplemented query /xFolder/" in {
+    "ordersComplementedBy query /xFolder/" in {
       val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/xFolder/"))
-      val fullOverview = client.ordersComplemented(orderQuery) await TestTimeout
-      assert(fullOverview == (directSchedulerClient.ordersComplemented(orderQuery) await TestTimeout))
-      assert((fullOverview.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
+      val ordersComplemented = client.ordersComplementedBy(orderQuery) await TestTimeout
+      assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(orderQuery) await TestTimeout))
+      assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
     }
 
-    "ordersComplemented query /xFolder throws SCHEDULER-161" in {
+    "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
       val query = OrderQuery(jobChainQuery = JobChainQuery("/xFolder"))
       intercept[RuntimeException] {
-        client.ordersComplemented(query) await TestTimeout
+        client.ordersComplementedBy(query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
     }
 
     "jobChainOverview" in {
       val query = JobChainQuery("/xFolder/")
-      val jobChainOverviews: immutable.Seq[JobChainOverview] = client.jobChainOverviews(query) await TestTimeout
-      assert(jobChainOverviews == (directSchedulerClient.jobChainOverviews(query) await TestTimeout))
+      val jobChainOverviews: immutable.Seq[JobChainOverview] = client.jobChainOverviewsBy(query) await TestTimeout
+      assert(jobChainOverviews == (directSchedulerClient.jobChainOverviewsBy(query) await TestTimeout))
       assert(jobChainOverviews.toSet == Set(
         JobChainOverview(
           xaJobChainPath,
@@ -204,7 +204,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(jobChainDetails.sourceXml.get startsWith "<job_chain ")
     }
 
-    def sortOrdersFullOverview(o: OrdersComplemented) = o.copy(
+    def sortOrdersOrdersComplemented(o: OrdersComplemented) = o.copy(
       orders = o.orders.sorted,
       usedTasks = o.usedTasks.sorted,
       usedJobs = o.usedJobs.sorted,
@@ -217,7 +217,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "jobChainView" in {
-      assert((client.jobChainOverviews(JobChainQuery.All) await TestTimeout).toSet == Set(
+      assert((client.jobChainOverviewsBy(JobChainQuery.All) await TestTimeout).toSet == Set(
         JobChainOverview(aJobChainPath, FileBasedState.active),
         JobChainOverview(bJobChainPath, FileBasedState.active),
         JobChainOverview(xaJobChainPath, FileBasedState.active),
@@ -325,13 +325,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "ordersComplemented" in {
-      val fullOverview = webSchedulerClient.get[JsObject](_.order.fullOverview()) await TestTimeout
+      val ordersComplemented = webSchedulerClient.get[JsObject](_.order.ordersComplemented()) await TestTimeout
       // The array's ordering is not assured.
-      val orderedFullOverview = JsObject(fullOverview.fields ++ Map(
-        sortArrayField(fullOverview, "orders", "path"),
-        sortArrayField(fullOverview, "usedTasks", "id"),
-        sortArrayField(fullOverview, "usedJobs", "path")))
-      assert(orderedFullOverview == ExpectedOrdersFullOverviewJsObject)
+      val orderedOrdersComplemented = JsObject(ordersComplemented.fields ++ Map(
+        sortArrayField(ordersComplemented, "orders", "path"),
+        sortArrayField(ordersComplemented, "usedTasks", "id"),
+        sortArrayField(ordersComplemented, "usedJobs", "path")))
+      assert(orderedOrdersComplemented == ExpectedOrdersOrdersComplementedJsObject)
     }
 
     "orderTreeComplemented" in {
@@ -364,8 +364,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(html contains "Started at")
     }
 
-    "order.fullOverview" in {
-      val html = webSchedulerClient.get[String](_.order.fullOverview(), accept = `text/html`) await TestTimeout
+    "order.ordersComplemented" in {
+      val html = webSchedulerClient.get[String](_.order.ordersComplemented(), accept = `text/html`) await TestTimeout
       assert(html startsWith "<!DOCTYPE html")
       assert(html endsWith "</html>")
       assert(html contains "JobScheduler")
@@ -488,7 +488,7 @@ private[js1642] object JS1642IT {
     xb1OrderOverview,
     xbAdHocDistributedOrderOverview)
 
-  private val ExpectedOrderFullOverview = OrdersComplemented(
+  private val ExpectedOrderOrdersComplemented = OrdersComplemented(
     ExpectedOrderOverviews,
     Vector(
       TaskOverview(TaskId(3), TestJobPath, TaskState.running, ProcessClassPath.Default),
@@ -516,9 +516,9 @@ private[js1642] object JS1642IT {
             Leaf(xb1OrderKey.name, xb1OrderOverview),
             Leaf(xbAdHocDistributedOrderKey.name, xbAdHocDistributedOrderOverview)),
           Vector()))),
-    ExpectedOrderFullOverview.usedTasks,
-    ExpectedOrderFullOverview.usedJobs,
-    ExpectedOrderFullOverview.usedProcessClasses)
+    ExpectedOrderOrdersComplemented.usedTasks,
+    ExpectedOrderOrdersComplemented.usedJobs,
+    ExpectedOrderOrdersComplemented.usedProcessClasses)
 
   private val OrderCount = ExpectedOrderOverviews.size
 
@@ -600,7 +600,7 @@ private[js1642] object JS1642IT {
     }
   ]""".parseJson.asInstanceOf[JsArray]
 
-  private val ExpectedOrdersFullOverviewJsObject: JsObject = s"""{
+  private val ExpectedOrdersOrdersComplementedJsObject: JsObject = s"""{
     "orders": $ExpectedOrderOverviewsJsArray,
     "usedTasks": [
       {

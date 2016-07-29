@@ -14,20 +14,28 @@ trait SchedulerClient extends CommandClient {
 
   def overview: Future[SchedulerOverview]
 
-  final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
-    orderOverviews(OrderQuery.All)
+  def orderOverviewsBy(query: OrderQuery): Future[immutable.Seq[OrderOverview]]
 
-  def orderOverviews(query: OrderQuery = OrderQuery.All): Future[immutable.Seq[OrderOverview]]
+  def ordersComplementedBy(query: OrderQuery): Future[OrdersComplemented]
 
-  def orderTreeComplemented(query: OrderQuery): Future[OrderTreeComplemented]
-
-  final def ordersComplemented: Future[OrdersComplemented] = ordersComplemented(OrderQuery.All)
-
-  def ordersComplemented(query: OrderQuery = OrderQuery.All): Future[OrdersComplemented]
+  def orderTreeComplementedBy(query: OrderQuery): Future[OrderTreeComplemented]
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[JobChainOverview]
 
-  def jobChainOverviews(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]]
+  def jobChainOverviewsBy(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]]
 
   def jobChainDetails(jobChainPath: JobChainPath): Future[JobChainDetails]
+
+
+  final def orderOverviews: Future[immutable.Seq[OrderOverview]] =
+    orderOverviewsBy(OrderQuery.All)
+
+  final def ordersComplemented: Future[OrdersComplemented] =
+    ordersComplementedBy(OrderQuery.All)
+
+  final def orderTreeComplemented: Future[OrderTreeComplemented] =
+    orderTreeComplementedBy(OrderQuery.All)
+
+  final def jobChainOverviews: Future[immutable.Seq[JobChainOverview]] =
+    jobChainOverviewsBy(JobChainQuery.All)
 }

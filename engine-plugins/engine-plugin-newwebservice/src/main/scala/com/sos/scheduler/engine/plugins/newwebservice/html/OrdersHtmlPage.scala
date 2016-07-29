@@ -21,14 +21,14 @@ import scalatags.text.Frag
   */
 final class OrdersHtmlPage private(
   query: OrderQuery,
-  fullOverview: OrdersComplemented,
+  ordersComplemented: OrdersComplemented,
   protected val webServiceContext: WebServiceContext,
   protected val schedulerOverview: SchedulerOverview)(
   implicit ec: ExecutionContext)
 extends SchedulerHtmlPage {
 
-  private val taskIdToOverview: Map[TaskId, TaskOverview] = fullOverview.usedTasks toKeyedMap { _.id }
-  private val jobPathToOverview: Map[JobPath, JobOverview] = fullOverview.usedJobs toKeyedMap { _.path }
+  private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
+  private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
 
   protected def title = "Orders"
 
@@ -58,14 +58,14 @@ div.orderSelection {
       headline,
       ordersStatistics,
       query.jobChainQuery.reduce match {
-        case jobChainPath: JobChainPath ⇒ div(jobChainOrdersHtml(jobChainPath, fullOverview.orders))
-        case folderPath: FolderPath ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, fullOverview.orders)))
-        case _ ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(FolderPath.Root, fullOverview.orders)))
+        case jobChainPath: JobChainPath ⇒ div(jobChainOrdersHtml(jobChainPath, ordersComplemented.orders))
+        case folderPath: FolderPath ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
+        case _ ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
       })
   }
 
   private def ordersStatistics = {
-    val statistics = new OrderOverview.Statistics(fullOverview.orders)
+    val statistics = new OrderOverview.Statistics(ordersComplemented.orders)
     import statistics.{blacklistedCount, count, inProcessCount, suspendedCount}
     p(s"$count orders: $inProcessCount in process using ${jobPathToOverview.size} jobs, $suspendedCount suspended, $blacklistedCount blacklisted")
   }
@@ -145,8 +145,8 @@ div.orderSelection {
 
 object OrdersHtmlPage {
 
-  def toHtml(query: OrderQuery)(fullOverview: OrdersComplemented)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
-    for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, fullOverview, context, schedulerOverview)
+  def toHtml(query: OrderQuery)(ordersComplemented: OrdersComplemented)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
+    for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, ordersComplemented, context, schedulerOverview)
 
   private def orderToTrClass(order: OrderOverview) =
     if (order.isSuspended || order.isBlacklisted) "warning"

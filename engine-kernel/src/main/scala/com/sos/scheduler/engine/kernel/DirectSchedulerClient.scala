@@ -29,16 +29,16 @@ extends SchedulerClient with DirectCommandClient {
 
   def overview = scheduler.overview
 
-  def orderOverviews(query: OrderQuery): Future[immutable.Seq[OrderOverview]] =
+  def orderOverviewsBy(query: OrderQuery): Future[immutable.Seq[OrderOverview]] =
     directOrSchedulerThreadFuture {
       orderSubsystem.orderOverviews(query)
     }
 
-  def orderTreeComplemented(query: OrderQuery) =
-    for (o ← ordersComplemented(query)) yield
+  def orderTreeComplementedBy(query: OrderQuery) =
+    for (o ← ordersComplementedBy(query)) yield
       OrderTreeComplemented(FolderTree.fromHasPaths(query.folderPath, o.orders), o.usedTasks, o.usedJobs, o.usedProcessClasses)
 
-  def ordersComplemented(query: OrderQuery) =
+  def ordersComplementedBy(query: OrderQuery) =
     directOrSchedulerThreadFuture {
       val orderOverviews = orderSubsystem.orderOverviews(query)
       val tasks = orderOverviews flatMap { _.taskId } map taskSubsystem.task
@@ -57,7 +57,7 @@ extends SchedulerClient with DirectCommandClient {
       orderSubsystem.jobChain(jobChainPath).overview
     }
 
-  def jobChainOverviews(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]] =
+  def jobChainOverviewsBy(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]] =
     directOrSchedulerThreadFuture {
       (orderSubsystem.jobChainsByQuery(query) map { _.overview }).toVector
     }

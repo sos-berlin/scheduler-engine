@@ -55,8 +55,8 @@ final class SchedulerClientJavaTester implements AutoCloseable {
 
     private void run() {
         testOrderOverviews();
-        testOrdersFullOverview();
-        testOrdersFullOverviewWithQuery();
+        testOrdersOrdersComplemented();
+        testOrdersComplementedByQuery();
     }
 
     private void testOrderOverviews() {
@@ -65,18 +65,18 @@ final class SchedulerClientJavaTester implements AutoCloseable {
         } catch (InterruptedException | ExecutionException e) { throw propagate(e); }
     }
 
-    private void testOrdersFullOverview() {
+    private void testOrdersOrdersComplemented() {
         try {
-            OrdersComplemented fullOverview = asJavaFuture(client.ordersComplemented()).get();
-            testOrderOverviews(seqAsJavaList(fullOverview.orders()));
-            List<TaskOverview> orderedTasks = seqAsJavaList(fullOverview.usedTasks()).stream()
+            OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplemented()).get();
+            testOrderOverviews(seqAsJavaList(ordersComplemented.orders()));
+            List<TaskOverview> orderedTasks = seqAsJavaList(ordersComplemented.usedTasks()).stream()
                 .sorted(SchedulerClientJavaTester::compareTaskOverview)
                 .collect(Collectors.toList());
             assertEquals(orderedTasks, asList(
                 new TaskOverview(new TaskId(3), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.empty()),
                 new TaskOverview(new TaskId(4), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.empty()),
                 new TaskOverview(new TaskId(5), new JobPath("/test"), TaskState.running, ProcessClassPath.Default(), Option.empty())));
-            assertEquals(seqAsJavaList(fullOverview.usedJobs()),
+            assertEquals(seqAsJavaList(ordersComplemented.usedJobs()),
                 singletonList(
                     new JobOverview(
                         new JobPath("/test"),
@@ -86,26 +86,26 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                         true,  // isInPeriod
                         10,    // taskLimit
                         3)));  // usedTaskCount
-            assertEquals(seqAsJavaList(fullOverview.usedProcessClasses()), singletonList(
+            assertEquals(seqAsJavaList(ordersComplemented.usedProcessClasses()), singletonList(
                 new ProcessClassOverview(ProcessClassPath.Default(), FileBasedState.active, 30/*processLimit*/, 3/*usedProcessCount*/)));
         } catch (InterruptedException | ExecutionException e) { throw propagate(e); }
     }
 
-    private void testOrdersFullOverviewWithQuery() {
+    private void testOrdersComplementedByQuery() {
         try {
             OrderQuery query = OrderQuery.All()
                 .withJobChainQuery(new JobChainQuery("/xFolder/"))
                 .withIsSuspended(false)
                 .withSourceTypes(singletonList(OrderSourceType.fileBased));
-            OrdersComplemented fullOverview = asJavaFuture(client.ordersComplemented(query)).get();
+            OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplementedBy(query)).get();
             assertThat(
-                asJavaCollection(fullOverview.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
+                asJavaCollection(ordersComplemented.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
                 containsInAnyOrder(
                     new JobChainPath("/xFolder/x-aJobChain").orderKey("1"),
                     new JobChainPath("/xFolder/x-bJobChain").orderKey("1")));
-            assertTrue(fullOverview.usedTasks().isEmpty());
-            assertTrue(fullOverview.usedJobs().isEmpty());
-            assertTrue(fullOverview.usedProcessClasses().isEmpty());
+            assertTrue(ordersComplemented.usedTasks().isEmpty());
+            assertTrue(ordersComplemented.usedJobs().isEmpty());
+            assertTrue(ordersComplemented.usedProcessClasses().isEmpty());
         } catch (InterruptedException | ExecutionException e) { throw propagate(e); }
     }
 

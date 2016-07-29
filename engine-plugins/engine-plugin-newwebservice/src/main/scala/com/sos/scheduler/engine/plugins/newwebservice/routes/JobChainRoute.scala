@@ -54,7 +54,7 @@ trait JobChainRoute {
 
   private def multipleJobChainsRoute(query: JobChainQuery, returnType: Option[String]): Route =
     returnType match {
-      case Some("JobChainOverview") | None ⇒ completeTryHtml(client.jobChainOverviews(query))
+      case Some("JobChainOverview") | None ⇒ completeTryHtml(client.jobChainOverviewsBy(query))
       case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
     }
 }

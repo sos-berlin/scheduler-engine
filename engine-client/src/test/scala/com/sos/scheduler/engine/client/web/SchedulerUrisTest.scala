@@ -33,14 +33,14 @@ final class SchedulerUrisTest extends FreeSpec {
         "return" → "OrderOverview")).toString)
   }
 
-  "order.fullOverview" in {
-    assert(uris.order.fullOverview(OrderQuery.All) == "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrdersComplemented")
+  "order.ordersComplemented" in {
+    assert(uris.order.ordersComplemented(OrderQuery.All) == "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrdersComplemented")
     assert(
-      uris.order.fullOverview(OrderQuery(isSuspended = Some(true))) ==
+      uris.order.ordersComplemented(OrderQuery(isSuspended = Some(true))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
         "suspended" → "true",
         "return" → "OrdersComplemented")).toString)
-    assert(uris.order.fullOverview(OrderQuery(
+    assert(uris.order.ordersComplemented(OrderQuery(
         isSuspended = Some(true),
         isBlacklisted = Some(false),
         isSourceType = Some(Set(OrderSourceType.fileOrderSource, OrderSourceType.adHoc)))) ==
