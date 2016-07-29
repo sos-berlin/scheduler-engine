@@ -28,8 +28,8 @@ trait OrderRoute extends LogRoute {
     // unmatchedPath is eaten by orderQuery
     get {
       parameterMap { parameters ⇒
-        parameters.getOrElse("return", "OrdersFullOverview") match {
-          case "log" ⇒
+        parameters.get("return") match {
+          case Some("log") ⇒
             unmatchedPath { path ⇒
               val orderKey = OrderKey(path.toString)
               logRoute(orderSubsystem.order(orderKey).log)
@@ -37,20 +37,18 @@ trait OrderRoute extends LogRoute {
           case returnType ⇒
             orderQuery(parameters - "return") { query ⇒
               returnType match {
-                case "OrdersFullOverview" ⇒ ordersFullOverviewRoute(query)
-                case "OrderOverview" ⇒ completeTryHtml(client.orderOverviews(query))
-                case o ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
+                case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplemented(query))
+                case Some("OrdersFullOverview") ⇒ completeTryHtml(client.ordersFullOverview(query))
+                case Some("OrderOverview") ⇒ completeTryHtml(client.orderOverviews(query))
+                case Some(o) ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
+                case None ⇒
+                  htmlPreferred(webServiceContext) {
+                    complete(client.ordersFullOverview(query) flatMap OrdersFullOverviewHtmlPage.toHtml(query))
+                  } ~
+                    complete(client.orderTreeComplemented(query))
               }
             }
         }
       }
     }
-
-  private def ordersFullOverviewRoute(query: OrderQuery) = {
-    val future = client.ordersFullOverview(query)
-    htmlPreferred(webServiceContext) {
-      complete(future flatMap OrdersFullOverviewHtmlPage.toHtml(query))
-    } ~
-      complete(future)
-  }
 }

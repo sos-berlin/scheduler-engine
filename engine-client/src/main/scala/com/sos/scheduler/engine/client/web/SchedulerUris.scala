@@ -24,6 +24,11 @@ final class SchedulerUris private(schedulerUriString: String) {
     def overviews(query: OrderQuery = OrderQuery.All): String =
       apply(query, Some("OrderOverview"))
 
+    def treeComplemented: String = treeComplemented(OrderQuery.All)
+
+    def treeComplemented(query: OrderQuery): String =
+      apply(query, Some("OrderTreeComplemented"))
+
     def fullOverview(query: OrderQuery = OrderQuery.All): String =
       apply(query, Some("OrdersFullOverview"))
 

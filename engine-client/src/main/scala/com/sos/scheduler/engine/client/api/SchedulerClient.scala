@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersFullOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -18,6 +18,8 @@ trait SchedulerClient extends CommandClient {
     orderOverviews(OrderQuery.All)
 
   def orderOverviews(query: OrderQuery = OrderQuery.All): Future[immutable.Seq[OrderOverview]]
+
+  def orderTreeComplemented(query: OrderQuery): Future[OrderTreeComplemented]
 
   final def ordersFullOverview: Future[OrdersFullOverview] = ordersFullOverview(OrderQuery.All)
 

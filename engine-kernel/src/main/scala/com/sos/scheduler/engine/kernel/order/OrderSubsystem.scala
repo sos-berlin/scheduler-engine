@@ -86,11 +86,11 @@ extends FileBasedSubsystem {
 
   private[kernel] def jobChainsByQuery(query: JobChainQuery): Iterator[JobChain] =
     query.reduce match {
-      case JobChainQuery.All ⇒ visibleFileBasedIterator
+      case JobChainQuery.All ⇒ orderedVisibleFileBasedIterator
       case jobChainPath: JobChainPath ⇒ Iterator(jobChain(jobChainPath))
       case folderPath: FolderPath ⇒
         folderSubsystem.requireExistence(folderPath)
-        visibleFileBasedIterator filter { o ⇒ query.matches(o.path) }
+        orderedVisibleFileBasedIterator filter { o ⇒ query.matches(o.path) }
     }
 
   def jobChain(o: JobChainPath): JobChain =

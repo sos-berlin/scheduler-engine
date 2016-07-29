@@ -2442,7 +2442,7 @@ vector<javabridge::Has_proxy*> Job_chain::java_orders() {
     result.reserve(_order_map.size() + _blacklist_map.size());
     Z_FOR_EACH_CONST(Node_list, _node_list, n) {
         if (Order_queue_node* q = Order_queue_node::try_cast(*n)) {
-            Z_FOR_EACH_REVERSE_CONST(Order_queue::Queue, q->order_queue()->_queue, o) {
+            Z_FOR_EACH_CONST(Order_queue::Queue, q->order_queue()->_queue, o) {
                 result.push_back(*o);
             }
         }

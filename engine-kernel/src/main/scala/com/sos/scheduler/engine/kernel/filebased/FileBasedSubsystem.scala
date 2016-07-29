@@ -14,6 +14,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.{File_basedC, SubsystemC}
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import scala.collection.immutable
+import scala.collection.mutable
 import scala.reflect.ClassTag
 
 trait FileBasedSubsystem extends Subsystem {
@@ -29,7 +30,10 @@ trait FileBasedSubsystem extends Subsystem {
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue
 
   val companion: FileBasedSubsystem.AbstractCompanion[ThisSubsystemClient, ThisSubsystem, Path, ThisFileBased]
+  private val pathOrdering: Ordering[Path] = Ordering by { _.string }
+
   private val _pathToFileBased = new ScalaConcurrentHashMap[Path, ThisFileBased]
+  private val _orderedPaths = mutable.SortedSet[Path]()(pathOrdering)
 
   lazy val messageCodeHandler = injector.instance[MessageCodeHandler]
 
@@ -39,9 +43,14 @@ trait FileBasedSubsystem extends Subsystem {
     assert(fileBased.fileBasedType == fileBasedType)
     assert(path.getClass == companion.pathClass, s"${path.getClass} is not expected ${companion.getClass}")
     e match {
-      case e: FileBasedAddedEvent ⇒ _pathToFileBased += path → fileBased.asInstanceOf[ThisFileBased]
-      case e: FileBasedReplacedEvent ⇒ _pathToFileBased(path) = fileBased.asInstanceOf[ThisFileBased]
-      case e: FileBasedRemovedEvent ⇒ _pathToFileBased -= path
+      case e: FileBasedAddedEvent ⇒
+        _pathToFileBased += path → fileBased.asInstanceOf[ThisFileBased]
+        _orderedPaths += path
+      case e: FileBasedReplacedEvent ⇒
+        _pathToFileBased(path) = fileBased.asInstanceOf[ThisFileBased]
+      case e: FileBasedRemovedEvent ⇒
+        _pathToFileBased -= path
+        _orderedPaths -= path
       case _ ⇒
     }
   }
@@ -65,7 +74,12 @@ trait FileBasedSubsystem extends Subsystem {
   private[kernel] def visiblePaths: Seq[Path] =
     cppProxy.file_based_paths(visibleOnly = true) map companion.stringToPath
 
-  private[kernel] def visibleFileBasedIterator: Iterator[ThisFileBased] = fileBasedIterator filter { _.isVisible }
+  private[kernel] def orderedVisibleFileBasedIterator: Iterator[ThisFileBased] = orderedPaths map fileBased filter { _.isVisible }
+
+
+  //private[kernel] def visibleFileBasedIterator: Iterator[ThisFileBased] = fileBasedIterator filter { _.isVisible }
+
+  private[kernel] final def orderedPaths: Iterator[Path] = _orderedPaths.iterator
 
   private[kernel] final def requireExistence(path: Path): Unit = fileBased(path)
 
@@ -104,7 +118,11 @@ object FileBasedSubsystem {
     override def toString = subsystemClass.getSimpleName
   }
 
-  abstract class AbstractCompanion[C <: FileBasedSubsystemClient: ClassTag, S <: FileBasedSubsystem: ClassTag, P <: TypedPath: ClassTag, F <: FileBased]
+  abstract class AbstractCompanion[
+    C <: FileBasedSubsystemClient: ClassTag,
+    S <: FileBasedSubsystem: ClassTag,
+    P <: TypedPath: ClassTag,
+    F <: FileBased]
   extends Companion {
     type ThisFileBasedSubsystemClient = C
     type ThisFileBasedSubsystem = S

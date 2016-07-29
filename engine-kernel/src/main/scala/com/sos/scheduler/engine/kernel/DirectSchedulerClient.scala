@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
-import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersFullOverview}
+import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, JobChainQuery}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -33,6 +34,10 @@ extends SchedulerClient with DirectCommandClient {
       orderSubsystem.orderOverviews(query)
     }
 
+  def orderTreeComplemented(query: OrderQuery) =
+    for (o ← ordersFullOverview(query)) yield
+      OrderTreeComplemented(FolderTree.fromHasPaths(query.folderPath, o.orders), o.usedTasks, o.usedJobs, o.usedProcessClasses)
+
   def ordersFullOverview(query: OrderQuery) =
     directOrSchedulerThreadFuture {
       val orderOverviews = orderSubsystem.orderOverviews(query)
@@ -42,9 +47,9 @@ extends SchedulerClient with DirectCommandClient {
       val processClasses = (processClassPaths map processClassSubsystem.processClass).distinct
       OrdersFullOverview(
         orderOverviews,
-        tasks map { _.overview },
-        jobs map { _.overview },
-        processClasses map { _.overview })
+        (tasks map { _.overview }).sorted,
+        (jobs map { _.overview }).sorted,
+        (processClasses map { _.overview }).sorted)
     }
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[JobChainOverview] =

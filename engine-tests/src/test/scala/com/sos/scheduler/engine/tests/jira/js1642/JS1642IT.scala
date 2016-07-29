@@ -13,8 +13,10 @@ import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.scheduler.engine.data.compounds.OrdersFullOverview
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersFullOverview}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.folder.FolderTree.Leaf
+import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, JobChainQuery, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery, OrderSourceType, OrderState, OrderStepStartedEvent}
@@ -119,6 +121,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val fullOverview = client.ordersFullOverview await TestTimeout
       assert(fullOverview == (directSchedulerClient.ordersFullOverview() await TestTimeout))
       assert(sortOrdersFullOverview(fullOverview) == ExpectedOrderFullOverview)
+    }
+
+    "orderTreeComplemented" in {
+      val treeOverview = client.orderTreeComplemented(OrderQuery.All) await TestTimeout
+      assert(treeOverview == (directSchedulerClient.orderTreeComplemented(OrderQuery.All) await TestTimeout))
+      assert(treeOverview == ExpectedOrderTreeComplemented)
     }
 
     "ordersFullOverview isSuspended" in {
@@ -326,6 +334,11 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(orderedFullOverview == ExpectedOrdersFullOverviewJsObject)
     }
 
+    "orderTreeComplemented" in {
+      val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented) await TestTimeout
+      assert(tree == ExpectedOrderTreeComplementedJsObject)
+    }
+
     def sortArrayField(jsObject: JsObject, arrayKey: String, key: String) =
       arrayKey → sortArray(jsObject.fields(arrayKey).asInstanceOf[JsArray], key)
 
@@ -389,77 +402,91 @@ private[js1642] object JS1642IT {
   private val TestJobPath = JobPath("/test")
 
   private[js1642] val aJobChainPath = JobChainPath("/aJobChain")
+
   private[js1642] val a1OrderKey = aJobChainPath orderKey "1"
+  private val a1OrderOverview = OrderOverview(
+    a1OrderKey,
+    FileBasedState.active,
+    OrderSourceType.fileBased,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH),
+    taskId = Some(TaskId.First))
+
   private val a2OrderKey = aJobChainPath orderKey "2"
+  private val a2OrderOverview = OrderOverview(
+    a2OrderKey,
+    FileBasedState.active,
+    OrderSourceType.fileBased,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH),
+    taskId = Some(TaskId.First + 1))
+
   private val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
+  private val aAdHocOrderOverview = OrderOverview(
+    aAdHocOrderKey,
+    FileBasedState.not_initialized,
+    OrderSourceType.adHoc,
+    OrderState("100"),
+    nextStepAt = Some(OrderStartAt),
+    isSuspended = true)
 
   private val bJobChainPath = JobChainPath("/bJobChain")
   private val b1OrderKey = bJobChainPath orderKey "1"
+  private val b1OrderOverview = OrderOverview(
+    b1OrderKey,
+    FileBasedState.active,
+    OrderSourceType.fileBased,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH),
+    taskId = Some(TaskId.First + 2))
 
   private val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
   private val xa1OrderKey = xaJobChainPath orderKey "1"
+  private val xa1OrderOverview = OrderOverview(
+    xa1OrderKey,
+    FileBasedState.active,
+    OrderSourceType.fileBased,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH))
+
   private val xa2OrderKey = xaJobChainPath orderKey "2"
+  private val xa2OrderOverview = OrderOverview(
+    xa2OrderKey,
+    FileBasedState.active,
+    OrderSourceType.fileBased,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH),
+    isSuspended = true)
 
   private val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
+
   private val xb1OrderKey = xbJobChainPath orderKey "1"
+  private val xb1OrderOverview = OrderOverview(
+    xb1OrderKey,
+    FileBasedState.not_initialized,
+    OrderSourceType.fileBased,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH))
+
   private val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
+  private val xbAdHocDistributedOrderOverview = OrderOverview(
+    xbAdHocDistributedOrderKey,
+    FileBasedState.not_initialized,
+    OrderSourceType.adHoc,
+    OrderState("100"),
+    nextStepAt = Some(EPOCH))
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
 
   private val ExpectedOrderOverviews = Vector(
-    OrderOverview(
-      a1OrderKey,
-      FileBasedState.active,
-      OrderSourceType.fileBased,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH),
-      taskId = Some(TaskId.First)),
-    OrderOverview(
-      a2OrderKey,
-      FileBasedState.active,
-      OrderSourceType.fileBased,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH),
-      taskId = Some(TaskId.First + 1)),
-    OrderOverview(
-      aAdHocOrderKey,
-      FileBasedState.not_initialized,
-      OrderSourceType.adHoc,
-      OrderState("100"),
-      nextStepAt = Some(OrderStartAt),
-      isSuspended = true),
-    OrderOverview(
-      b1OrderKey,
-      FileBasedState.active,
-      OrderSourceType.fileBased,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH),
-      taskId = Some(TaskId.First + 2)),
-    OrderOverview(
-      xa1OrderKey,
-      FileBasedState.active,
-      OrderSourceType.fileBased,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH)),
-    OrderOverview(
-      xa2OrderKey,
-      FileBasedState.active,
-      OrderSourceType.fileBased,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH),
-      isSuspended = true),
-    OrderOverview(
-      xb1OrderKey,
-      FileBasedState.not_initialized,
-      OrderSourceType.fileBased,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH)),
-    OrderOverview(
-      xbAdHocDistributedOrderKey,
-      FileBasedState.not_initialized,
-      OrderSourceType.adHoc,
-      OrderState("100"),
-      nextStepAt = Some(EPOCH)))
+    a1OrderOverview,
+    a2OrderOverview,
+    aAdHocOrderOverview,
+    b1OrderOverview,
+    xa1OrderOverview,
+    xa2OrderOverview,
+    xb1OrderOverview,
+    xbAdHocDistributedOrderOverview)
 
   private val ExpectedOrderFullOverview = OrdersFullOverview(
     ExpectedOrderOverviews,
@@ -471,6 +498,27 @@ private[js1642] object JS1642IT {
       JobOverview(TestJobPath, FileBasedState.active, defaultProcessClass = None, JobState.running, isInPeriod = true, taskLimit = 10, usedTaskCount = 3)),
     Vector(
       ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3)))
+
+  private val ExpectedOrderTreeComplemented = OrderTreeComplemented(
+    FolderTree(
+      FolderPath.Root,
+      Vector(
+        Leaf(a1OrderKey.name, a1OrderOverview),
+        Leaf(a2OrderKey.name, a2OrderOverview),
+        Leaf(aAdHocOrderKey.name, aAdHocOrderOverview),
+        Leaf(b1OrderKey.name, b1OrderOverview)),
+      Vector(
+        FolderTree(
+          FolderPath("/xFolder"),
+          Vector(
+            Leaf(xa1OrderKey.name, xa1OrderOverview),
+            Leaf(xa2OrderKey.name, xa2OrderOverview),
+            Leaf(xb1OrderKey.name, xb1OrderOverview),
+            Leaf(xbAdHocDistributedOrderKey.name, xbAdHocDistributedOrderOverview)),
+          Vector()))),
+    ExpectedOrderFullOverview.usedTasks,
+    ExpectedOrderFullOverview.usedJobs,
+    ExpectedOrderFullOverview.usedProcessClasses)
 
   private val OrderCount = ExpectedOrderOverviews.size
 
@@ -582,6 +630,159 @@ private[js1642] object JS1642IT {
         "state": "running",
         "isInPeriod": true,
         "usedTaskCount": 3
+      }
+    ],
+    "usedProcessClasses": [
+      {
+        "path": "",
+        "fileBasedState": "active",
+        "processLimit": 30,
+        "usedProcessCount": 3
+      }
+    ]
+  }""".parseJson.asJsObject
+
+  private val ExpectedOrderTreeComplementedJsObject: JsObject = s"""{
+    "orderTree": {
+      "path": "/",
+      "leafs": [
+        {
+          "name": "aJobChain,1",
+          "value": {
+            "sourceType": "fileBased",
+            "path": "/aJobChain,1",
+            "orderState": "100",
+            "nextStepAt": "1970-01-01T00:00:00Z",
+            "fileBasedState": "active",
+            "isSuspended": false,
+            "taskId": "3",
+            "isBlacklisted": false
+          }
+        },
+        {
+          "name": "aJobChain,2",
+          "value": {
+            "sourceType": "fileBased",
+            "path": "/aJobChain,2",
+            "orderState": "100",
+            "nextStepAt": "1970-01-01T00:00:00Z",
+            "fileBasedState": "active",
+            "isSuspended": false,
+            "taskId": "4",
+            "isBlacklisted": false
+          }
+        },
+        {
+          "name": "aJobChain,AD-HOC",
+          "value": {
+            "sourceType": "adHoc",
+            "path": "/aJobChain,AD-HOC",
+            "orderState": "100",
+            "nextStepAt": "2038-01-01T11:22:33Z",
+            "fileBasedState": "not_initialized",
+            "isSuspended": true,
+            "isBlacklisted": false
+          }
+        },
+        {
+          "name": "bJobChain,1",
+          "value": {
+            "sourceType": "fileBased",
+            "path": "/bJobChain,1",
+            "orderState": "100",
+            "nextStepAt": "1970-01-01T00:00:00Z",
+            "fileBasedState": "active",
+            "isSuspended": false,
+            "taskId": "5",
+            "isBlacklisted": false
+          }
+        }
+      ],
+      "subfolders": [
+        {
+          "path": "/xFolder",
+          "leafs": [
+            {
+              "name": "x-aJobChain,1",
+              "value": {
+                "sourceType": "fileBased",
+                "path": "/xFolder/x-aJobChain,1",
+                "orderState": "100",
+                "nextStepAt": "1970-01-01T00:00:00Z",
+                "fileBasedState": "active",
+                "isSuspended": false,
+                "isBlacklisted": false
+              }
+            },
+            {
+              "name": "x-aJobChain,2",
+              "value": {
+                "sourceType": "fileBased",
+                "path": "/xFolder/x-aJobChain,2",
+                "orderState": "100",
+                "nextStepAt": "1970-01-01T00:00:00Z",
+                "fileBasedState": "active",
+                "isSuspended": true,
+                "isBlacklisted": false
+              }
+            },
+            {
+              "name": "x-bJobChain,1",
+              "value": {
+                "sourceType": "fileBased",
+                "path": "/xFolder/x-bJobChain,1",
+                "orderState": "100",
+                "nextStepAt": "1970-01-01T00:00:00Z",
+                "fileBasedState": "not_initialized",
+                "isSuspended": false,
+                "isBlacklisted": false
+              }
+            },
+            {
+              "name": "x-bJobChain,AD-HOC-DISTRIBUTED",
+              "value": {
+                "sourceType": "adHoc",
+                "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
+                "orderState": "100",
+                "nextStepAt": "1970-01-01T00:00:00Z",
+                "fileBasedState": "not_initialized",
+                "isSuspended": false,
+                "isBlacklisted": false
+              }
+            }
+          ],
+          "subfolders": []
+        }
+      ]
+    },
+    "usedTasks": [
+      {
+        "id": "3",
+        "job": "/test",
+        "state": "running",
+        "processClass": ""
+      },
+      {
+        "id": "4",
+        "job": "/test",
+        "state": "running",
+        "processClass": ""
+      },
+      {
+        "id": "5",
+        "job": "/test",
+        "state": "running",
+        "processClass": ""
+      }
+    ],
+    "usedJobs": [
+      {
+        "isInPeriod": true,
+        "usedTaskCount": 3,
+        "path": "/test",
+        "state": "running",
+        "fileBasedState": "active",
+        "taskLimit": 10
       }
     ],
     "usedProcessClasses": [

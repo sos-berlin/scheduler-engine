@@ -58,7 +58,7 @@ div.orderSelection {
       headline,
       ordersStatistics,
       query.jobChainQuery.reduce match {
-        case jobChainPath: JobChainPath ⇒ div(jobChainOrders(jobChainPath, fullOverview.orders))
+        case jobChainPath: JobChainPath ⇒ div(jobChainOrdersHtml(jobChainPath, fullOverview.orders))
         case folderPath: FolderPath ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, fullOverview.orders)))
         case _ ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(FolderPath.Root, fullOverview.orders)))
       })
@@ -70,25 +70,25 @@ div.orderSelection {
     p(s"$count orders: $inProcessCount in process using ${jobPathToOverview.size} jobs, $suspendedCount suspended, $blacklistedCount blacklisted")
   }
 
-  def folderTreeHtml(tree: FolderTree[OrderOverview]): Vector[Frag] =
+  def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
     Vector(h2("Folder ", folderPathToOrdersA(tree.path)(tree.path.string))) ++
-    folderOrders(tree.leafs map { _.obj }) ++
-    (for (folder ← tree.subfolders.sorted(FolderTree.nameOrdering); o ← folderTreeHtml(folder)) yield o)
+    folderOrdersHtml(tree.leafs map { _.value }) ++
+    (for (folder ← tree.subfolders; o ← folderTreeHtml(folder)) yield o)
 
-  private def folderOrders(orders: immutable.Seq[OrderOverview]): Vector[Frag] =
-    for ((jobChainPath, orders) ← (orders groupBy { _.orderKey.jobChainPath }).toVector.sortBy(_._1)(JobChainPath.NameOrdering);
-         o ← jobChainOrders(jobChainPath, orders))
+  private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
+    for ((jobChainPath, jobChainOrders) ← orders groupBy { _.orderKey.jobChainPath };
+         o ← jobChainOrdersHtml(jobChainPath, jobChainOrders))
       yield o
 
-  private def jobChainOrders(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
+  private def jobChainOrdersHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
     Vector(h3(
       s"JobChain ",
       jobChainPathToOrdersA(jobChainPath)(jobChainPath.string),
       span(paddingLeft := 10.px)(" "),
       jobChainPathToA(jobChainPath)("(definition)"))) ++
-    nodeOrders(orders)
+    nodeOrdersHtml(orders)
 
-  private def nodeOrders(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
+  private def nodeOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
     for ((node, orders) ← orders retainOrderGroupBy { _.orderState }) yield
       div(cls := "nodeOrders")(
         div(cls := "nodeHeadline")(s"Node ${node.string}"),
