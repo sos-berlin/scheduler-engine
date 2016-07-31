@@ -51,17 +51,17 @@ trait ApiRoute extends JobChainRoute with OrderRoute with TaskRoute with Command
       commandRoute
     } ~
     pathPrefix("order") {
-      eatSlash(webServiceContext) {
+      testSlash(webServiceContext) {
         orderRoute
       }
     } ~
     pathPrefix("jobChain") {
-      eatSlash(webServiceContext) {
+      testSlash(webServiceContext) {
         jobChainRoute
       }
     } ~
     pathPrefix("task") {
-      eatSlash(webServiceContext) {
+      testSlash(webServiceContext) {
         taskRoute
       }
     } ~

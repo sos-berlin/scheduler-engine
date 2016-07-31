@@ -53,22 +53,31 @@ object HtmlDirectives {
   /**
     * If HTML is requested, trailing slash is missing and request has no query, then redirect to trailing slash, in case of typo.
     */
-  def eatSlash(webServiceContext: WebServiceContext): Directive0 =
+  def testSlash(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒
-      pathEnd {
-        htmlPreferred(webServiceContext) {  // The browser user may type "api/"
-          requestInstance { request ⇒
-            passIf(request.uri.query == Uri.Query.Empty) {
-              val withSlash = request.uri.copy(
-                scheme = "",
-                authority = Uri.Authority.Empty,
-                path = Uri.Path(request.uri.path.toString + "/"))
-              redirect(withSlash, TemporaryRedirect)
-            }
+      redirectToSlash(webServiceContext) ~
+      unmatchedPath {
+        case path: Uri.Path.Slash ⇒ route
+        case _ ⇒ reject
+      }
+    }
+
+  /**
+    * If HTML is requested, trailing slash is missing and request has no query, then redirect to trailing slash, in case of typo.
+    */
+  def redirectToSlash(webServiceContext: WebServiceContext): Route =
+    pathEnd {
+      htmlPreferred(webServiceContext) {  // The browser user may type "api/"
+        requestInstance { request ⇒
+          passIf(request.uri.query == Uri.Query.Empty) {
+            val withSlash = request.uri.copy(
+              scheme = "",
+              authority = Uri.Authority.Empty,
+              path = Uri.Path(request.uri.path.toString + "/"))
+            redirect(withSlash, TemporaryRedirect)
           }
         }
-      } ~
-        route
+      }
     }
 
   /**

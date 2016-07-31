@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.common
 
-import shapeless._
+import shapeless.{::, HNil}
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaType
 import spray.routing.Directives._
@@ -63,7 +63,35 @@ object SprayUtils {
           case None ⇒ reject
         }
     }
+
+  def removeParameters(keys: Set[String]): Directive0 =
+    mapRequest { request ⇒
+      request.copy(uri = request.uri.copy(query = removeKeysFromQuery(keys, request.uri.query)))
+    }
+
+  private def removeKeysFromQuery(keys: Set[String], query: Uri.Query): Uri.Query = {
+    query match {
+      case Uri.Query.Empty ⇒ Uri.Query.Empty
+      case q @ Uri.Query.Cons(key, value, tail, keep) ⇒
+        if (keys contains key)
+          removeKeysFromQuery(keys, tail)
+        else
+          Uri.Query.Cons(key, value, removeKeysFromQuery(keys, tail), keep)
+      case q: Uri.Query.Raw ⇒ q
+    }
+  }
+
+  def noParameters(keys: Set[String]): Directive0 =
+    mapInnerRoute { inner ⇒
+      requestUri { uri ⇒
+        if (uri.query.isEmpty)
+          inner
+        else
+          reject(ValidationRejection(s"Invalid parameters: ${keys mkString ", "}"))
+      }
+    }
 */
+
   def emptyParameterMap(parameterMap: Map[String, String]) =
     mapInnerRoute { route ⇒
       if (parameterMap.isEmpty) route
