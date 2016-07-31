@@ -24,7 +24,7 @@ extends FileBasedSubsystem {
 
   val companion = FolderSubsystem
 
-  def names(path: AbsolutePath, typ: FileBasedType): immutable.Seq[String] =
+  def names(path: FolderPath, typ: FileBasedType): immutable.Seq[String] =
     inSchedulerThread {
       immutable.Seq() ++ cppProxy.java_names(path.string, typ.cppName)
     }
