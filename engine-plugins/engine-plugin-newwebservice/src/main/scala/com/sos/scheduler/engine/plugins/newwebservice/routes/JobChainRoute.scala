@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp.directives.jobChainQuery
+import com.sos.scheduler.engine.client.web.jobchain.PathQueryHttp.directives.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.queries.JobChainQuery
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.emptyParameterMap
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -26,16 +26,13 @@ trait JobChainRoute {
   protected implicit def executionContext: ExecutionContext
 
   final def jobChainRoute: Route =
-    // unmatchedPath is eaten by orderQuery
     get {
       parameterMap { parameterMap ⇒
         val returnType = parameterMap.get("return")
-        emptyParameterMap(parameterMap - "return") {
-          jobChainQuery { query ⇒
-            query.reduce match {
-              case jobChainPath: JobChainPath ⇒ singleJobChainRoute(jobChainPath, returnType)
-              case _ ⇒ multipleJobChainsRoute(query, returnType)
-            }
+        pathQuery { query ⇒
+          query.reduce[JobChainPath] match {
+            case jobChainPath: JobChainPath ⇒ singleJobChainRoute(jobChainPath, returnType)
+            case _ ⇒ multipleJobChainsRoute(JobChainQuery.Standard(query), returnType)
           }
         }
       }

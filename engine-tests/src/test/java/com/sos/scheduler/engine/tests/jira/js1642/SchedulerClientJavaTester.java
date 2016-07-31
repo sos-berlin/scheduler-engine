@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1642;
 
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient;
+import com.sos.scheduler.engine.data.queries.OrderQuery;
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented;
 import com.sos.scheduler.engine.data.filebased.FileBasedState;
+import com.sos.scheduler.engine.data.queries.PathQuery;
 import com.sos.scheduler.engine.data.job.JobOverview;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.job.JobState;
@@ -11,9 +13,7 @@ import com.sos.scheduler.engine.data.job.TaskId;
 import com.sos.scheduler.engine.data.job.TaskOverview;
 import com.sos.scheduler.engine.data.job.TaskState;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
-import com.sos.scheduler.engine.data.jobchain.JobChainQuery;
 import com.sos.scheduler.engine.data.order.OrderOverview;
-import com.sos.scheduler.engine.data.order.OrderQuery;
 import com.sos.scheduler.engine.data.order.OrderSourceType;
 import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath;
@@ -94,14 +94,14 @@ final class SchedulerClientJavaTester implements AutoCloseable {
     private void testOrdersComplementedByQuery() {
         try {
             OrderQuery query = OrderQuery.All()
-                .withJobChainQuery(new JobChainQuery("/xFolder/"))
+                .withJobChainPathQuery(PathQuery.apply("/xFolder/"))
+                .withIsDistributed(true)
                 .withIsSuspended(false)
-                .withSourceTypes(singletonList(OrderSourceType.fileBased));
+                .withOrderSourceTypes(singletonList(OrderSourceType.fileBased));
             OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplementedBy(query)).get();
             assertThat(
                 asJavaCollection(ordersComplemented.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
                 containsInAnyOrder(
-                    new JobChainPath("/xFolder/x-aJobChain").orderKey("1"),
                     new JobChainPath("/xFolder/x-bJobChain").orderKey("1")));
             assertTrue(ordersComplemented.usedTasks().isEmpty());
             assertTrue(ordersComplemented.usedJobs().isEmpty());

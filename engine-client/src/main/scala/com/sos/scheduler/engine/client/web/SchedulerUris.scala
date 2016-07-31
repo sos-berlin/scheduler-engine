@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.web.SchedulerUris._
-import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp
+import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQueryHttp}
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
-import com.sos.scheduler.engine.data.order.OrderQuery
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import spray.http.Uri
 
 /**
@@ -32,11 +32,11 @@ final class SchedulerUris private(schedulerUriString: String) {
     def ordersComplemented(query: OrderQuery = OrderQuery.All): String =
       apply(query, Some("OrdersComplemented"))
 
-    def apply(orderQuery: OrderQuery, returnType: Option[String]): String = {
-      val subpath = JobChainQueryHttp.toUriPath(orderQuery.jobChainQuery)
+    def apply(query: OrderQuery, returnType: Option[String]): String = {
+      val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
       resolvePathUri(Uri(
         path = Uri.Path(s"api/order$subpath"),
-        query = Uri.Query(OrderQueryHttp.toHttpQueryMap(orderQuery) ++ (returnType map { o ⇒ "return" → o }))))
+        query = Uri.Query(OrderQueryHttp.toUriQueryMap(query) ++ (returnType map { o ⇒ "return" → o }))))
       .toString
     }
   }
@@ -49,13 +49,13 @@ final class SchedulerUris private(schedulerUriString: String) {
     }
 
     def overview(jobChainPath: JobChainPath): String = {
-      val subpath = JobChainQueryHttp.toUriPath(jobChainPath)
+      val subpath = PathQueryHttp.toUriPath(PathQuery(jobChainPath))
       require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
       uriString(Uri(path = Uri.Path(s"api/jobChain$subpath"), query = Uri.Query("return" → "JobChainOverview")))
     }
 
     def details(jobChainPath: JobChainPath): String = {
-      val subpath = JobChainQueryHttp.toUriPath(jobChainPath)
+      val subpath = PathQueryHttp.toUriPath(PathQuery(jobChainPath))
       require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
       uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
     }

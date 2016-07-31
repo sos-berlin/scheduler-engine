@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
-import com.sos.scheduler.engine.data.compounds.{OrdersComplemented, OrderTreeComplemented}
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.folder.FolderTree
-import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, JobChainQuery}
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath}
+import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.job.TaskSubsystem
@@ -36,7 +37,7 @@ extends SchedulerClient with DirectCommandClient {
 
   def orderTreeComplementedBy(query: OrderQuery) =
     for (o ← ordersComplementedBy(query)) yield
-      OrderTreeComplemented(FolderTree.fromHasPaths(query.folderPath, o.orders), o.usedTasks, o.usedJobs, o.usedProcessClasses)
+      OrderTreeComplemented(FolderTree.fromHasPaths(query.jobChainPathQuery.folderPath, o.orders), o.usedTasks, o.usedJobs, o.usedProcessClasses)
 
   def ordersComplementedBy(query: OrderQuery) =
     directOrSchedulerThreadFuture {

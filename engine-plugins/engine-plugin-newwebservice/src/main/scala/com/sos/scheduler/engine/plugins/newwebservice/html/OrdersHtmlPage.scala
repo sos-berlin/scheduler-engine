@@ -5,8 +5,9 @@ import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTrave
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery, OrderSourceType}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderSourceType}
+import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersHtmlPage._
@@ -57,7 +58,7 @@ div.orderSelection {
       orderSelection.html,
       headline,
       ordersStatistics,
-      query.jobChainQuery.reduce match {
+      query.jobChainPathQuery.reduce[JobChainPath] match {
         case jobChainPath: JobChainPath ⇒ div(jobChainOrdersHtml(jobChainPath, ordersComplemented.orders))
         case folderPath: FolderPath ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
         case _ ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
@@ -132,9 +133,9 @@ div.orderSelection {
       td(if (order.sourceType == OrderSourceType.fileBased) fileBasedStateToHtml(order.fileBasedState) else EmptyFrag))
   }
 
-  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(jobChainQuery = JobChainQuery(path)))
+  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
 
-  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainQuery = JobChainQuery(path)))
+  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
 
   private def queryToA(query: OrderQuery) = a(href := uris.order(query, returnType = None))
 

@@ -18,9 +18,10 @@ import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.folder.FolderTree.Leaf
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, JobChainQuery, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery, OrderSourceType, OrderState, OrderStepStartedEvent}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -141,44 +142,46 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "ordersComplementedBy query /aJobChain" in {
-      val query = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain"))
+      val query = OrderQuery(jobChainPathQuery = PathQuery("/aJobChain"))
       val ordersComplemented = client.ordersComplementedBy(query) await TestTimeout
       assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(query) await TestTimeout))
       assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
     "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
-      val query = OrderQuery(jobChainQuery = JobChainQuery("/aJobChain/"))
+      val query = OrderQuery(jobChainPathQuery = PathQuery("/aJobChain/"))
       intercept[RuntimeException] {
         client.ordersComplementedBy(query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
     }
 
     "ordersComplementedBy query /xFolder/" in {
-      val orderQuery = OrderQuery(jobChainQuery = JobChainQuery("/xFolder/"))
+      val orderQuery = OrderQuery(jobChainPathQuery = PathQuery("/xFolder/"))
       val ordersComplemented = client.ordersComplementedBy(orderQuery) await TestTimeout
       assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(orderQuery) await TestTimeout))
       assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
     }
 
     "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
-      val query = OrderQuery(jobChainQuery = JobChainQuery("/xFolder"))
+      val query = OrderQuery(jobChainPathQuery = PathQuery("/xFolder"))
       intercept[RuntimeException] {
         client.ordersComplementedBy(query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
     }
 
     "jobChainOverview" in {
-      val query = JobChainQuery("/xFolder/")
+      val query = JobChainQuery.Standard(PathQuery("/xFolder/"))
       val jobChainOverviews: immutable.Seq[JobChainOverview] = client.jobChainOverviewsBy(query) await TestTimeout
       assert(jobChainOverviews == (directSchedulerClient.jobChainOverviewsBy(query) await TestTimeout))
       assert(jobChainOverviews.toSet == Set(
         JobChainOverview(
           xaJobChainPath,
-          FileBasedState.active),
+          FileBasedState.active,
+          isDistributed = false),
         JobChainOverview(
           xbJobChainPath,
-          FileBasedState.active)))
+          FileBasedState.active,
+          isDistributed = true)))
     }
 
     "jobChainOverviews" in {
@@ -212,10 +215,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "jobChainView" in {
       assert((client.jobChainOverviewsBy(JobChainQuery.All) await TestTimeout).toSet == Set(
-        JobChainOverview(aJobChainPath, FileBasedState.active),
-        JobChainOverview(bJobChainPath, FileBasedState.active),
-        JobChainOverview(xaJobChainPath, FileBasedState.active),
-        JobChainOverview(xbJobChainPath, FileBasedState.active)))
+        JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
+        JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
+        JobChainOverview(xaJobChainPath, FileBasedState.active, isDistributed = false),
+        JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)))
     }
 
     "command" - {

@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState, QueryableJobChain}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -54,9 +54,15 @@ with UnmodifiableJobChain {
     }
   }
 
+  private[kernel] val queryable = new QueryableJobChain {
+    def path = JobChain.this.path
+    def isDistributed = JobChain.this.isDistributed
+  }
+
   private[kernel] override def overview = JobChainOverview(
     path = path,
-    fileBasedState = fileBasedState)
+    fileBasedState = fileBasedState,
+    isDistributed = isDistributed)
 
   def stringToPath(o: String) =
     JobChainPath(o)

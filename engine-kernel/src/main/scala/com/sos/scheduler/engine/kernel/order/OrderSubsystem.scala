@@ -5,8 +5,9 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OnlyOrderQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
@@ -47,22 +48,20 @@ extends FileBasedSubsystem {
   }
 
   private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = {
-    val nonDistributed = ordersByQuery(query).toVector map { _.overview }
-    val distributed = distributedOrderOverviews(query)
-    nonDistributed ++ distributed
+    val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
+    val localOrders = localChains flatMap { _.orderIterator } filter { o ⇒ query matchesOrder o.queryable } map { _.overview }
+    val distriOrders = distriChains flatMap distributedOrderOverviews(query)
+    (localOrders ++ distriOrders).toVector
   }
 
-  private[order] def ordersByQuery(query: OrderQuery): Iterator[Order] = {
-    val q = query.copy(jobChainQuery = JobChainQuery.All)
-    jobChainsByQuery(query.jobChainQuery) flatMap { _.orderIterator } filter { o ⇒ q.matches(o.queryable) }
-  }
-
-  private def distributedOrderOverviews(query: OrderQuery): Iterator[OrderOverview] =
-    for (jobChain ← jobChainsByQuery(query.jobChainQuery) filter { _.isDistributed };
-         orderQueueNode ← jobChain.nodes collect { case o: OrderQueueNode ⇒ o };
+  private def distributedOrderOverviews(query: OnlyOrderQuery)(jobChain: JobChain): Iterator[OrderOverview] =
+    for (orderQueueNode ← jobChain.nodes.iterator collect { case o: OrderQueueNode ⇒ o };
          orderQueue = orderQueueNode.orderQueue;
          overview ← orderQueue.distributedOrderOverviews(query))
       yield overview
+
+  private[order] def localOrderIterator: Iterator[Order] =
+    jobChainsByQuery(JobChainQuery.All) flatMap { _.orderIterator }
 
   def order(orderKey: OrderKey): Order =
     inSchedulerThread {
@@ -85,12 +84,15 @@ extends FileBasedSubsystem {
     }
 
   private[kernel] def jobChainsByQuery(query: JobChainQuery): Iterator[JobChain] =
-    query.reduce match {
-      case JobChainQuery.All ⇒ orderedVisibleFileBasedIterator
-      case jobChainPath: JobChainPath ⇒ Iterator(jobChain(jobChainPath))
+    query.jobChainPathQuery.reduce[JobChainPath] match {
+      case PathQuery.All ⇒
+        val reducedQuery = query withJobChainPathQuery PathQuery.All
+        orderedVisibleFileBasedIterator filter { o ⇒ reducedQuery matchesJobChain o.queryable }
+      case jobChainPath: JobChainPath ⇒
+        Iterator(jobChain(jobChainPath)) filter { o ⇒ query matchesJobChain o.queryable }
       case folderPath: FolderPath ⇒
         folderSubsystem.requireExistence(folderPath)
-        orderedVisibleFileBasedIterator filter { o ⇒ query.matches(o.path) }
+        orderedVisibleFileBasedIterator filter { o ⇒ query.matchesJobChain(o.queryable) }
     }
 
   def jobChain(o: JobChainPath): JobChain =

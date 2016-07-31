@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
-import com.sos.scheduler.engine.data.order.{OrderQuery, OrderSourceType}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.order.OrderSourceType
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -40,10 +41,11 @@ final class SchedulerUrisTest extends FreeSpec {
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
         "suspended" → "true",
         "return" → "OrdersComplemented")).toString)
-    assert(uris.order.ordersComplemented(OrderQuery(
+    assert(uris.order.ordersComplemented(
+      OrderQuery(
         isSuspended = Some(true),
         isBlacklisted = Some(false),
-        isSourceType = Some(Set(OrderSourceType.fileOrderSource, OrderSourceType.adHoc)))) ==
+        isOrderSourceType = Some(Set(OrderSourceType.fileOrderSource, OrderSourceType.adHoc)))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/")
         .withQuery(Uri.Query(
           "suspended" → "true",
@@ -53,8 +55,8 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "jobChain.overviews" in {
-    assert(uris.jobChain.overviews(JobChainQuery("/a/")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/")
-    intercept[IllegalArgumentException] { uris.jobChain.overviews(JobChainQuery("/a")) }
+    assert(uris.jobChain.overviews(JobChainQuery.Standard(PathQuery("/a/"))) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/")
+    intercept[IllegalArgumentException] { uris.jobChain.overviews(JobChainQuery.Standard(PathQuery("/a"))) }
   }
 
   "jobChain.overview" in {

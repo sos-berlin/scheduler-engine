@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.data.order.OrderQuery
+import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import javax.inject.{Inject, Singleton}
@@ -13,9 +13,9 @@ import javax.inject.{Inject, Singleton}
 private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSubsystem)
   (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) {
 
-  def testSpeed(m: Int, n: Int): Unit = {
+  def testSpeed(orderKey: OrderKey, m: Int, n: Int): Unit = {
     inSchedulerThread {
-      val order = orderSubsystem.ordersByQuery(OrderQuery.All).next()
+      val order = orderSubsystem.order(orderKey)
       val orderC = order.cppProxy
       val m = 3
       val n = 10000
@@ -59,9 +59,9 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
         order.overview
       }
       for (_ ← 1 to m) Stopwatch.measureTime(n, "Order") {
-        orderSubsystem.ordersByQuery(OrderQuery.All).toVector
+        orderSubsystem.localOrderIterator.toVector
       }
-      val orders = orderSubsystem.ordersByQuery(OrderQuery.All).toVector
+      val orders = orderSubsystem.localOrderIterator.toVector
       for (_ ← 1 to m) Stopwatch.measureTime(n, "foreach-Order.overview") {
         for (o <- orders) o.overview
       }

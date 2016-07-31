@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderQuery}
+import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.queries.OnlyOrderQuery
 import com.sos.scheduler.engine.kernel.cppproxy.{OrderC, Order_queueC}
 import scala.collection.mutable
 
@@ -10,7 +11,7 @@ final class OrderQueue(cppProxy: Order_queueC) extends Sister {
 
   def size = cppProxy.java_order_count
 
-  private[order] def distributedOrderOverviews(query: OrderQuery): Seq[OrderOverview] = {
+  private[order] def distributedOrderOverviews(query: OnlyOrderQuery): Seq[OrderOverview] = {
     //val q = query.copy(jobChainQuery = JobChainQuery.All)
     val result = mutable.Buffer[OrderOverview]()
     cppProxy.java_for_each_distributed_order(
@@ -18,7 +19,7 @@ final class OrderQueue(cppProxy: Order_queueC) extends Sister {
       callback = new OrderCallback {
         def apply(orderC: OrderC) = {
           val order = orderC.getSister
-          if (query matches order.queryable) {
+          if (query matchesOrder order.queryable) {
             result += orderC.getSister.overview
           }
         }

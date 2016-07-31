@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.orderQuery
+import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderQuery}
+import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, htmlPreferred}
 import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
 import com.sos.scheduler.engine.plugins.newwebservice.html.{OrdersHtmlPage, WebServiceContext}
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import scala.concurrent.ExecutionContext
 import spray.routing.Directives._
@@ -25,17 +26,15 @@ trait OrderRoute extends LogRoute {
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    // unmatchedPath is eaten by orderQuery
     get {
       parameterMap { parameters ⇒
         parameters.get("return") match {
           case Some("log") ⇒
-            unmatchedPath { path ⇒
-              val orderKey = OrderKey(path.toString)
+            typedPath(OrderKey) { orderKey ⇒
               logRoute(orderSubsystem.order(orderKey).log)
             }
           case returnType ⇒
-            orderQuery(parameters - "return") { query ⇒
+            extendedOrderQuery { query ⇒
               returnType match {
                 case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplementedBy(query))
                 case Some("OrdersComplemented") ⇒ completeTryHtml(client.ordersComplementedBy(query))

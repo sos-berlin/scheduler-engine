@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.data.order.OrderQuery
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import scalatags.Text.all._
 import scalatags.Text.attrs
 
@@ -16,7 +16,8 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
       br,
       for ((key, valueOption) ← List("suspended" → query.isSuspended,
                                      "setback" → query.isSetback,
-                                     "blacklisted" → query.isBlacklisted))
+                                     "blacklisted" → query.isBlacklisted,
+                                     "distributed" → query.isDistributed))
         yield List(
           inputElement(key, valueOption, checkedMeans = true),
           StringFrag(" "),
@@ -50,6 +51,7 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
   private def toJavascript(query: OrderQuery) =
     ((for (o ← query.isSuspended) yield s"suspended:$o") ++
     (for (o ← query.isSetback) yield s"setback:$o") ++
-    (for (o ← query.isBlacklisted) yield s"blacklisted:$o"))
+    (for (o ← query.isBlacklisted) yield s"blacklisted:$o") ++
+    (for (o ← query.isDistributed) yield s"distributed:$o"))
       .mkString("{", ",", "}")
 }
