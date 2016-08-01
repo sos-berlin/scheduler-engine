@@ -87,7 +87,7 @@ h1.headLine {
   margin-top: 0;
 }
 h2 {
-  margin-top: 30px;
+  margin-top: 60px;
   font-size: 24px;
 }
 h3 {
