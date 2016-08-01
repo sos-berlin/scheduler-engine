@@ -9,7 +9,8 @@ import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.Eterna
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState, QueryableOrder}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState}
+import com.sos.scheduler.engine.data.queries.QueryableOrder
 import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
