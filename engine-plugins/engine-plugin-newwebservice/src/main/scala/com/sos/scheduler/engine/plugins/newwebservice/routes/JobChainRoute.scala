@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.web.jobchain.PathQueryHttp.directives.pat
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.queries.JobChainQuery
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
@@ -29,11 +29,9 @@ trait JobChainRoute {
     get {
       parameterMap { parameterMap ⇒
         val returnType = parameterMap.get("return")
-        pathQuery { query ⇒
-          query.reduce[JobChainPath] match {
-            case jobChainPath: JobChainPath ⇒ singleJobChainRoute(jobChainPath, returnType)
-            case _ ⇒ multipleJobChainsRoute(JobChainQuery.Standard(query), returnType)
-          }
+        pathQuery {
+          case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)
+          case query ⇒ multipleJobChainsRoute(JobChainQuery.Standard(query), returnType)
         }
       }
     }

@@ -21,7 +21,7 @@ object JobChainQueryHttp {
       jobChainPathQuery = PathQuery(path.toString),
       isDistributed = parameters.get(DistributedName) map { _.toBoolean })
 
-  def toUriPath(q: JobChainQuery) = q.jobChainPathQuery.string
+  def toUriPath(q: JobChainQuery): String = q.jobChainPathQuery.patternString
 
   def toHttpQueryMap(q: JobChainQuery) = Map() ++
     (q.isDistributed map { o ⇒ DistributedName → o.toString })

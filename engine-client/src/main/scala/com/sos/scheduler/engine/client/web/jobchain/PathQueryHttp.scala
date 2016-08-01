@@ -20,7 +20,7 @@ object PathQueryHttp {
       }
   }
 
-  def fromUriPath(path: Uri.Path) = new PathQuery(path.toString)
+  def fromUriPath(path: Uri.Path) = PathQuery(path.toString)
 
-  def toUriPath(query: PathQuery) = query.string
+  def toUriPath(query: PathQuery): String = query.patternString
 }

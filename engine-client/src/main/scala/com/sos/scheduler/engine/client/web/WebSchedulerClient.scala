@@ -54,8 +54,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     get[JobChainOverview](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))
 
   final def jobChainOverviewsBy(query: JobChainQuery): Future[immutable.Seq[JobChainOverview]] = {
-    query.jobChainPathQuery.reduce[JobChainPath] match {
-      case jobChainPath: JobChainPath ⇒ get[JobChainOverview](_.jobChain.overview(jobChainPath)) map { o ⇒ Vector(o) }  // Web service return a single object (not an array), if path denotes a single job chain path
+    query.jobChainPathQuery match {
+      case single: PathQuery.SinglePath ⇒ get[JobChainOverview](_.jobChain.overview(single.as[JobChainPath])) map { o ⇒ Vector(o) }  // Web service return a single object (not an array), if path denotes a single job chain path
       case _ ⇒ get[immutable.Seq[JobChainOverview]](_.jobChain.overviews(query))
     }
   }

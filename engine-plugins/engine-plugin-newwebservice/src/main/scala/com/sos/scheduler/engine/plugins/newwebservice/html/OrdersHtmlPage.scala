@@ -58,9 +58,9 @@ div.orderSelection {
       orderSelection.html,
       headline,
       ordersStatistics,
-      query.jobChainPathQuery.reduce[JobChainPath] match {
-        case jobChainPath: JobChainPath ⇒ div(jobChainOrdersHtml(jobChainPath, ordersComplemented.orders))
-        case folderPath: FolderPath ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
+      query.jobChainPathQuery match {
+        case single: PathQuery.SinglePath ⇒ div(jobChainOrdersHtml(single.as[JobChainPath], ordersComplemented.orders))
+        case PathQuery.Folder(folderPath) ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
         case _ ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
       })
   }

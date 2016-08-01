@@ -1,10 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1642;
 
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient;
-import com.sos.scheduler.engine.data.queries.OrderQuery;
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented;
 import com.sos.scheduler.engine.data.filebased.FileBasedState;
-import com.sos.scheduler.engine.data.queries.PathQuery;
 import com.sos.scheduler.engine.data.job.JobOverview;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.job.JobState;
@@ -17,6 +15,7 @@ import com.sos.scheduler.engine.data.order.OrderOverview;
 import com.sos.scheduler.engine.data.order.OrderSourceType;
 import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath;
+import com.sos.scheduler.engine.data.queries.OrderQuery;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +25,7 @@ import scala.Option;
 import static com.google.common.base.Throwables.propagate;
 import static com.sos.scheduler.engine.common.javautils.ScalaInJava.asJavaFuture;
 import static com.sos.scheduler.engine.common.javautils.ScalaInJava.toJavaOptional;
+import static com.sos.scheduler.engine.data.queries.PathQueries.toPathQuery;
 import static java.time.Instant.EPOCH;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -94,7 +94,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
     private void testOrdersComplementedByQuery() {
         try {
             OrderQuery query = OrderQuery.All()
-                .withJobChainPathQuery(PathQuery.apply("/xFolder/"))
+                .withJobChainPathQuery(toPathQuery("/xFolder/"))
                 .withIsDistributed(true)
                 .withIsSuspended(false)
                 .withOrderSourceTypes(singletonList(OrderSourceType.fileBased));

@@ -84,15 +84,15 @@ extends FileBasedSubsystem {
     }
 
   private[kernel] def jobChainsByQuery(query: JobChainQuery): Iterator[JobChain] =
-    query.jobChainPathQuery.reduce[JobChainPath] match {
+    query.jobChainPathQuery match {
       case PathQuery.All ⇒
         val reducedQuery = query withJobChainPathQuery PathQuery.All
         orderedVisibleFileBasedIterator filter { o ⇒ reducedQuery matchesJobChain o.queryable }
-      case jobChainPath: JobChainPath ⇒
-        Iterator(jobChain(jobChainPath)) filter { o ⇒ query matchesJobChain o.queryable }
-      case folderPath: FolderPath ⇒
+      case PathQuery.Folder(folderPath) ⇒
         folderSubsystem.requireExistence(folderPath)
-        orderedVisibleFileBasedIterator filter { o ⇒ query.matchesJobChain(o.queryable) }
+        orderedVisibleFileBasedIterator filter { o ⇒ query matchesJobChain o.queryable }
+      case single: PathQuery.SinglePath ⇒
+        Iterator(jobChain(single.as[JobChainPath])) filter { o ⇒ query matchesJobChain o.queryable }
     }
 
   def jobChain(o: JobChainPath): JobChain =

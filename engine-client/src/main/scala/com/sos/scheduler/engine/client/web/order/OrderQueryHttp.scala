@@ -35,7 +35,7 @@ object OrderQueryHttp {
         isBlacklisted = parameters.get(BlacklistedName) map { _.toBoolean },
         isOrderSourceType = parameters.get(SourceTypeName) map { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet })
 
-  def toUriPath(q: OrderQuery) = q.jobChainPathQuery.string
+  def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.patternString
 
   def toUriQueryMap(q: OrderQuery): Map[String, String] = Map() ++
     (q.isSuspended map { o ⇒ SuspendedName → o.toString }) ++
