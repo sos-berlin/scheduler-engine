@@ -73,7 +73,7 @@ div.orderSelection {
 
   def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
     Vector(h2("Folder ", folderPathToOrdersA(tree.path)(tree.path.string))) ++
-    folderOrdersHtml(tree.leafs map { _.value }) ++
+    folderOrdersHtml(tree.leafs) ++
     (for (folder ← tree.subfolders; o ← folderTreeHtml(folder)) yield o)
 
   private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
