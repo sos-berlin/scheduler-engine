@@ -1726,6 +1726,18 @@ xml::Element_ptr Standard_job::Task_queue::why_dom_element(const xml::Document_p
     return result;
 }
 
+jlong Standard_job::next_possible_start_millis() const { 
+    Time result = _period.begin();
+    Task_queue::iterator i = _task_queue->begin();
+    if (i != _task_queue->end()) {
+        Task* task = *i;
+        if (task->force()) {
+            result = min(result, task->at());
+        }
+    }
+    return result.millis();
+}
+
 //----------------------------------------------------------------Standard_job::get_task_from_queue
 
 ptr<Task> Standard_job::get_task_from_queue( const Time& now )

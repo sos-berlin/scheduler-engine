@@ -6,7 +6,7 @@ trait File_basedC[S <: Sister] {
   def path: String
   def name: String
   def file_based_state: Int
-  def file_based_state_name: String
+  def file_based_error_string: String
   def file: String
   def file_modification_time_t: Long
   def source_xml_bytes: Array[Byte]

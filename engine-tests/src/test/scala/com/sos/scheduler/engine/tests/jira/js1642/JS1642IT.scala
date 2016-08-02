@@ -56,7 +56,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
   protected lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    //binariesDebugMode = Some(com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.release),
+    binariesDebugMode = Some(com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.release),
     mainArguments = List(s"-http-port=$httpPort", "-distributed-orders"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
@@ -136,7 +136,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(ordersComplemented == ExpectedOrderOrdersComplemented.copy(
         orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
         usedTasks = Nil,
-        usedJobs = Nil,
+        usedJobs = ExpectedOrderOrdersComplemented.usedJobs,
         usedProcessClasses = Nil))
     }
 
@@ -388,6 +388,7 @@ private[js1642] object JS1642IT {
   private val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
 
   private val TestJobPath = JobPath("/test")
+  private val XFolderTestJobPath = JobPath("/xFolder/test")
 
   private[js1642] val aJobChainPath = JobChainPath("/aJobChain")
 
@@ -397,7 +398,8 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    OrderProcessingState.InTaskProcess(TaskId.First),
+    OrderProcessingState.InTaskProcess(TaskId(3)),
+    jobPath = Some(TestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val a2OrderKey = aJobChainPath orderKey "2"
@@ -406,7 +408,8 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    OrderProcessingState.InTaskProcess(TaskId.First + 1),
+    OrderProcessingState.InTaskProcess(TaskId(4)),
+    jobPath = Some(TestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
@@ -417,6 +420,7 @@ private[js1642] object JS1642IT {
     OrderState("100"),
     OrderProcessingState.Planned(OrderStartAt),
     Set(OrderObstacle.Suspended),
+    jobPath = Some(TestJobPath),
     nextStepAt = Some(OrderStartAt))
 
   private val bJobChainPath = JobChainPath("/bJobChain")
@@ -426,7 +430,8 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    OrderProcessingState.InTaskProcess(TaskId.First + 2),
+    OrderProcessingState.InTaskProcess(TaskId(5)),
+    jobPath = Some(TestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
@@ -437,6 +442,7 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
+    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xa2OrderKey = xaJobChainPath orderKey "2"
@@ -447,6 +453,7 @@ private[js1642] object JS1642IT {
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
     Set(OrderObstacle.Suspended),
+    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
@@ -458,6 +465,7 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
+    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
@@ -467,6 +475,7 @@ private[js1642] object JS1642IT {
     OrderSourceType.adHoc,
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
+    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
@@ -488,7 +497,8 @@ private[js1642] object JS1642IT {
       TaskOverview(TaskId(4), TestJobPath, TaskState.running, ProcessClassPath.Default),
       TaskOverview(TaskId(5), TestJobPath, TaskState.running, ProcessClassPath.Default)),
     Vector(
-      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClass = None, JobState.running, isInPeriod = true, taskLimit = 10, usedTaskCount = 3)),
+      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClass = None, JobState.running, isInPeriod = true,
+        taskLimit = 10, usedTaskCount = 3, obstacles = Set())),
     Vector(
       ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3)))
 
@@ -523,9 +533,10 @@ private[js1642] object JS1642IT {
       "orderState": "100",
       "processingState" : {
         "type": "InTaskProcess",
-        "taskId" : "3"
+        "taskId": "3"
       },
       "obstacles": [],
+      "jobPath": "/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -535,9 +546,10 @@ private[js1642] object JS1642IT {
       "orderState": "100",
       "processingState" : {
         "type": "InTaskProcess",
-        "taskId" : "4"
+        "taskId": "4"
       },
       "obstacles": [],
+      "jobPath": "/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -554,6 +566,7 @@ private[js1642] object JS1642IT {
           "type": "Suspended"
         }
       ],
+      "jobPath": "/test",
       "nextStepAt": "2038-01-01T11:22:33Z"
     },
     {
@@ -563,9 +576,10 @@ private[js1642] object JS1642IT {
       "sourceType": "fileBased",
       "processingState" : {
         "type": "InTaskProcess",
-        "taskId" : "5"
+        "taskId": "5"
       },
       "obstacles": [],
+      "jobPath": "/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -578,6 +592,7 @@ private[js1642] object JS1642IT {
         "at" : "1970-01-01T00:00:00Z"
       },
       "obstacles": [],
+      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -594,6 +609,7 @@ private[js1642] object JS1642IT {
           "type": "Suspended"
         }
       ],
+      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -606,6 +622,7 @@ private[js1642] object JS1642IT {
         "at" : "1970-01-01T00:00:00Z"
       },
       "obstacles": [],
+      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -618,50 +635,56 @@ private[js1642] object JS1642IT {
         "at" : "1970-01-01T00:00:00Z"
       },
       "obstacles": [],
+      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     }
   ]""".parseJson.asInstanceOf[JsArray]
 
+  private val UsedTasksJson = """[
+    {
+      "id": "3",
+      "jobPath": "/test",
+      "state": "running",
+      "processClass": ""
+    },
+    {
+      "id": "4",
+      "jobPath": "/test",
+      "state": "running",
+      "processClass": ""
+    },
+    {
+      "id": "5",
+      "jobPath": "/test",
+      "state": "running",
+      "processClass": ""
+    }
+  ]"""
+  private val UsedJobsJson = """[
+    {
+      "path": "/test",
+      "fileBasedState": "active",
+      "taskLimit": 10,
+      "state": "running",
+      "isInPeriod": true,
+      "usedTaskCount": 3,
+      "obstacles": []
+    }
+  ]"""
+  private val UsedProcessClassesJson = """[
+    {
+      "path": "",
+      "fileBasedState": "active",
+      "processLimit": 30,
+      "usedProcessCount": 3
+    }
+  ]"""
+
   private val ExpectedOrdersOrdersComplementedJsObject: JsObject = s"""{
     "orders": $ExpectedOrderOverviewsJsArray,
-    "usedTasks": [
-      {
-        "id": "3",
-        "job": "/test",
-        "state": "running",
-        "processClass": ""
-      },
-      {
-        "id": "4",
-        "job": "/test",
-        "state": "running",
-        "processClass": ""
-      },
-      {
-        "id": "5",
-        "job": "/test",
-        "state": "running",
-        "processClass": ""
-      }
-    ],
-    "usedJobs": [
-      {
-        "path": "/test",
-        "fileBasedState": "active",
-        "taskLimit": 10,
-        "state": "running",
-        "isInPeriod": true,
-        "usedTaskCount": 3
-      }
-    ],
-    "usedProcessClasses": [
-      {
-        "path": "",
-        "fileBasedState": "active",
-        "processLimit": 30,
-        "usedProcessCount": 3
-      }
-    ]
+    "usedTasks": $UsedTasksJson,
+    "usedJobs": $UsedJobsJson,
+    "usedProcessClasses": $UsedProcessClassesJson
   }""".parseJson.asJsObject
 
   private val ExpectedOrderTreeComplementedJsObject: JsObject = s"""{
@@ -674,10 +697,11 @@ private[js1642] object JS1642IT {
           "orderState": "100",
           "processingState" : {
             "type": "InTaskProcess",
-            "taskId" : "3"
+            "taskId": "3"
           },
           "obstacles": [],
           "nextStepAt": "1970-01-01T00:00:00Z",
+          "jobPath": "/test",
           "fileBasedState": "active"
         },
         {
@@ -686,9 +710,10 @@ private[js1642] object JS1642IT {
           "orderState": "100",
           "processingState" : {
             "type": "InTaskProcess",
-            "taskId" : "4"
+            "taskId": "4"
           },
           "obstacles": [],
+          "jobPath": "/test",
           "nextStepAt": "1970-01-01T00:00:00Z",
           "fileBasedState": "active"
         },
@@ -705,6 +730,7 @@ private[js1642] object JS1642IT {
               "type": "Suspended"
             }
           ],
+          "jobPath": "/test",
           "nextStepAt": "2038-01-01T11:22:33Z",
           "fileBasedState": "not_initialized"
         },
@@ -714,9 +740,10 @@ private[js1642] object JS1642IT {
           "orderState": "100",
           "processingState" : {
             "type": "InTaskProcess",
-            "taskId" : "5"
+            "taskId": "5"
           },
           "obstacles": [],
+          "jobPath": "/test",
           "nextStepAt": "1970-01-01T00:00:00Z",
           "fileBasedState": "active"
         }
@@ -735,6 +762,7 @@ private[js1642] object JS1642IT {
               },
               "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
+              "jobPath": "/xFolder/test",
               "fileBasedState": "active"
             },
             {
@@ -751,6 +779,7 @@ private[js1642] object JS1642IT {
                 }
               ],
               "nextStepAt": "1970-01-01T00:00:00Z",
+              "jobPath": "/xFolder/test",
               "fileBasedState": "active"
             },
             {
@@ -763,6 +792,7 @@ private[js1642] object JS1642IT {
               },
               "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
+              "jobPath": "/xFolder/test",
               "fileBasedState": "not_initialized"
             },
             {
@@ -775,6 +805,7 @@ private[js1642] object JS1642IT {
               },
               "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
+              "jobPath": "/xFolder/test",
               "fileBasedState": "not_initialized"
             }
           ],
@@ -782,43 +813,8 @@ private[js1642] object JS1642IT {
         }
       ]
     },
-    "usedTasks": [
-      {
-        "id": "3",
-        "job": "/test",
-        "state": "running",
-        "processClass": ""
-      },
-      {
-        "id": "4",
-        "job": "/test",
-        "state": "running",
-        "processClass": ""
-      },
-      {
-        "id": "5",
-        "job": "/test",
-        "state": "running",
-        "processClass": ""
-      }
-    ],
-    "usedJobs": [
-      {
-        "isInPeriod": true,
-        "usedTaskCount": 3,
-        "path": "/test",
-        "state": "running",
-        "fileBasedState": "active",
-        "taskLimit": 10
-      }
-    ],
-    "usedProcessClasses": [
-      {
-        "path": "",
-        "fileBasedState": "active",
-        "processLimit": 30,
-        "usedProcessCount": 3
-      }
-    ]
+    "usedTasks": $UsedTasksJson,
+    "usedJobs": $UsedJobsJson,
+    "usedProcessClasses": $UsedProcessClassesJson
   }""".parseJson.asJsObject
 }

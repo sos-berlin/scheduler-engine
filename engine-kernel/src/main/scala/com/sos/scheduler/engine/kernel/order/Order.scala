@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.base.utils.ScalazStyle._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
@@ -15,21 +14,22 @@ import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
-import com.sos.scheduler.engine.kernel.job.TaskSubsystem
+import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.Order._
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, JobNode, Node}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
 import java.lang.System.currentTimeMillis
 import java.time.Instant
-import scala.collection.mutable
 import scala.util.{Failure, Success}
 
 @ForCpp
 private[engine] final class Order private(
   protected[order] val cppProxy: OrderC,
   protected[kernel] val subsystem: StandingOrderSubsystem,
+  orderSubsystem: OrderSubsystem,
+  jobSubsystem: JobSubsystem,
   taskSubsystem: TaskSubsystem)
 extends FileBased
 with UnmodifiableOrder
@@ -73,34 +73,59 @@ with OrderPersistence {
   }
 
   private[kernel] override def overview: OrderOverview = {
+    val orderKey = this.orderKey
+    val state = this.state
     val flags = cppProxy.java_fast_flags
     val isTouched = cppFastFlags.isTouched(flags)
     val isSetback = cppFastFlags.isSetback(flags)
     val isSuspended = cppFastFlags.isSuspended(flags)
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val taskId = this.taskId
-    val nextStepAt = this.nextStepAt
+    val nodeOption: Option[Node] = this.nodeOption orElse {  // this.nodeOption is None for distributed order
+      for (jobChain ← orderSubsystem.jobChainOption(orderKey.jobChainPath);
+           node ← jobChain.nodeMap.get(state) collect { case o: JobNode ⇒ o })
+        yield node
+    }
+    val jobPathOption = taskId match {
+      case Some(taskId_) ⇒ Some(taskSubsystem.task(taskId_).job.path)  // Faster than node.jobPath
+      case None ⇒ nodeOption collect { case node: JobNode ⇒ node.jobPath }
+    }
     val processingState = {
       import OrderProcessingState._
-      if (!isTouched)
-        nextStepAt match {
-          case None ⇒ NotPlanned
-          case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
-          case Some(at) ⇒ Pending(at)
-        }
-      else
-        taskId match {
-          case Some(taskId_) ⇒
-            if (taskSubsystem.task(taskId_).processStarted)
-              InTaskProcess(taskId_)
-            else
-              WaitingInTask(taskId_)
-          case None ⇒
-            if (isSetback)
-              Setback(setbackUntil getOrElse Instant.MAX)
-            else
-              WaitingForOther
-        }
+      taskId match {
+        case Some(taskId_) ⇒
+          if (taskSubsystem.task(taskId_).processStarted)
+            InTaskProcess(taskId_)
+          else
+            WaitingInTask(taskId_)
+        case None ⇒
+          if (isBlacklisted)
+            Blacklisted
+          else if (!isTouched)
+            nextStepAt match {
+              case None ⇒ NotPlanned
+              case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
+              case Some(at) ⇒ Pending(at)
+            }
+          else if (isSetback)
+            Setback(setbackUntil getOrElse Instant.MAX)
+          else
+            WaitingForOther
+      }
+    }
+    val obstacles = {
+      import OrderObstacle._
+      val b = Set.newBuilder[OrderObstacle]
+      for (o ← emptyToNone(fileBasedObstacles)) {
+        b += FileBasedObstacles(o)
+      }
+      if (isSuspended) b += Suspended
+      if (isBlacklisted) b += Blacklisted
+      processingState match {
+        case OrderProcessingState.Setback(at) ⇒ b += Setback(at)
+        case _ ⇒
+      }
+      b.result
     }
     OrderOverview(
       path = orderKey,  // key because this.path is valid only for permanent orders
@@ -108,16 +133,8 @@ with OrderPersistence {
       sourceType,
       orderState = state,
       processingState = processingState,
-      obstacles = {
-        import OrderObstacle._
-        (Set.newBuilder[OrderObstacle]
-          ++= (isSuspended option Suspended)
-          ++= (isBlacklisted option Blacklisted)
-          ++= (Some(processingState) collect {
-            case OrderProcessingState.Setback(at) ⇒ Setback(at)
-          })
-        ).result
-      },
+      obstacles = obstacles,
+      jobPath = jobPathOption,
       nextStepAt = nextStepAt)
   }
 
@@ -152,6 +169,8 @@ with OrderPersistence {
         case node ⇒ node.orderState  // java_job_chain_node is somewhat faster then accessing string_state
       }
     }
+
+  private def nodeOption: Option[Node] = Option(cppProxy.java_job_chain_node)
 
   private[order] def initialState: OrderState =
     OrderState(cppProxy.initial_state_string)
@@ -231,7 +250,11 @@ object Order {
   object Type extends SisterType[Order, OrderC] {
     def sister(proxy: OrderC, context: Sister): Order = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Order(proxy, injector.instance[StandingOrderSubsystem], injector.instance[TaskSubsystem])
+      new Order(proxy,
+        injector.instance[StandingOrderSubsystem],
+        injector.instance[OrderSubsystem],
+        injector.instance[JobSubsystem],
+        injector.instance[TaskSubsystem])
     }
   }
 

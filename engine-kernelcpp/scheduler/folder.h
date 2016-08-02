@@ -228,6 +228,7 @@ struct File_based : Abstract_scheduler_object,
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
+    string                      file_based_error_string     () const                                { return _base_file_xc.what(); }
     bool                        is_file_based_reread        () const                                { return _reread; }
     bool                        is_loaded                   () const                                { return _state >= s_loaded  &&  _state < s_closed; }
 

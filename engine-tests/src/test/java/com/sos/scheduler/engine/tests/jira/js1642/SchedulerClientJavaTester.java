@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1642;
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient;
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented;
 import com.sos.scheduler.engine.data.filebased.FileBasedState;
+import com.sos.scheduler.engine.data.job.JobObstacle;
 import com.sos.scheduler.engine.data.job.JobOverview;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.job.JobState;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import scala.Option;
+import scala.collection.immutable.Set;
 import static com.google.common.base.Throwables.propagate;
 import static com.sos.scheduler.engine.common.javautils.ScalaInJava.asJavaFuture;
 import static com.sos.scheduler.engine.common.javautils.ScalaInJava.toJavaOptional;
@@ -85,7 +87,8 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                         JobState.running,
                         true,  // isInPeriod
                         10,    // taskLimit
-                        3)));  // usedTaskCount
+                        3,
+                        (Set<JobObstacle>)scala.collection.immutable.Set$.MODULE$.<JobObstacle>empty())));  // usedTaskCount
             assertEquals(seqAsJavaList(ordersComplemented.usedProcessClasses()), singletonList(
                 new ProcessClassOverview(ProcessClassPath.Default(), FileBasedState.active, 30/*processLimit*/, 3/*usedProcessCount*/)));
         } catch (InterruptedException | ExecutionException e) { throw propagate(e); }

@@ -84,6 +84,23 @@ static jstring JNICALL file(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL file_1based_1error_1string(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::file_based_error_string()");
+        return env.jstring_from_string(o_->file_based_error_string());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jint JNICALL file_1based_1state(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -94,23 +111,6 @@ static jint JNICALL file_1based_1state(JNIEnv* jenv, jobject, jlong cppReference
     catch(const exception& x) {
         env.set_java_exception(x);
         return jint();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static jstring JNICALL file_1based_1state_1name(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::file_based_state_name()");
-        return env.jstring_from_string(o_->file_based_state_name());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jstring();
     }
 }
 
@@ -298,6 +298,23 @@ static jboolean JNICALL name_1is_1fixed(JNIEnv* jenv, jobject, jlong cppReferenc
     catch(const exception& x) {
         env.set_java_exception(x);
         return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jlong JNICALL next_1possible_1start_1millis(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::next_possible_start_millis()");
+        return (o_->next_possible_start_millis());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jlong();
     }
 }
 
@@ -493,8 +510,8 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"description__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::description },
     { (char*)"enqueue_taskPersistentState__native", (char*)"(JLcom/sos/scheduler/engine/data/job/TaskPersistentState;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::enqueue_1taskPersistentState__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2 },
     { (char*)"file__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file },
+    { (char*)"file_based_error_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1error_1string },
     { (char*)"file_based_state__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state },
-    { (char*)"file_based_state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state_1name },
     { (char*)"file_modification_time_t__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1modification_1time_1t },
     { (char*)"is_file_based__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based },
     { (char*)"is_file_based_reread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based_1reread },
@@ -506,6 +523,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"max_tasks__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::max_1tasks },
     { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name },
     { (char*)"name_is_fixed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name_1is_1fixed },
+    { (char*)"next_possible_start_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1possible_1start_1millis },
     { (char*)"next_start_time_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1start_1time_1millis },
     { (char*)"path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::path },
     { (char*)"running_tasks_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::running_1tasks_1count },

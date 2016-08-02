@@ -30,6 +30,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.ScheduleC {
     private static native java.lang.String file__native(long cppReference);
 
 
+    @Override public java.lang.String file_based_error_string() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = file_based_error_string__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String file_based_error_string__native(long cppReference);
+
+
     @Override public int file_based_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -42,22 +58,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.ScheduleC {
     }
 
     private static native int file_based_state__native(long cppReference);
-
-
-    @Override public java.lang.String file_based_state_name() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            java.lang.String result = file_based_state_name__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native java.lang.String file_based_state_name__native(long cppReference);
 
 
     @Override public long file_modification_time_t() {

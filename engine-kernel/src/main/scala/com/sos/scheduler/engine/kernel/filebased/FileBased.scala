@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.SetOnce
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
@@ -55,6 +56,17 @@ with EventSource {
             catch { case NonFatal(t) ⇒ Some(<ERROR>{t.toString}</ERROR>.toString()) }
         })
     }
+
+  private[kernel] final def fileBasedObstacles: Set[FileBasedObstacle] = {
+    import FileBasedObstacle._
+    val b = Set.newBuilder[FileBasedObstacle]
+    fileBasedState match {
+      case FileBasedState.active ⇒
+      case FileBasedState.not_initialized ⇒  // ad-hoc objects
+      case o ⇒ b += BadState(o, message = emptyToNone(cppProxy.file_based_error_string))
+    }
+    b.result
+  }
 
   def fileBasedType: FileBasedType
 

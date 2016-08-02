@@ -144,7 +144,7 @@ with UnmodifiableJobChain {
       nodeMap(o)
     }
 
-  private lazy val nodeMap: Map[OrderState, Node] =
+  private[kernel] lazy val nodeMap: Map[OrderState, Node] =
     (nodes map { n ⇒ n.orderState → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
 
   private[order] lazy val nodes: Vector[Node] =

@@ -4,8 +4,8 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskPersistentState}
+import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState, FileBasedType}
+import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskPersistentState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
@@ -31,14 +31,43 @@ with JobPersistence {
 
   def stringToPath(o: String) = JobPath(o)
 
-  private[kernel] override def overview = JobOverview(path, fileBasedState, defaultProcessClassPathOption, state,
-    isInPeriod = isInPeriod, taskLimit = taskMaximum, usedTaskCount = runningTasksCount)
+  private[kernel] override def overview = {
+    val state = this.state
+    val isInPeriod = this.isInPeriod
+    val taskLimit = this.taskLimit
+    val runningTasksCount = this.runningTasksCount
+    val obstacles: Set[JobObstacle] = {
+      import JobObstacle._
+      val builder = Set.newBuilder[JobObstacle]
+      emptyToNone(fileBasedObstacles) match {
+        case Some(o) ⇒ builder += FileBasedObstacles(o)
+        case None ⇒
+        val isGoodState = Set(JobState.pending, JobState.running)
+        if (!isGoodState(state)) {
+          builder += BadState(state)
+        }
+        val taskLimit = this.taskLimit
+        if (runningTasksCount >= taskLimit) builder += TaskLimitReached(taskLimit)
+        if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
+      }
+      builder.result
+    }
+    JobOverview(
+      path,
+      fileBasedState,
+      defaultProcessClassPathOption,
+      state,
+      isInPeriod = isInPeriod,
+      taskLimit = taskLimit,
+      usedTaskCount = runningTasksCount,
+      obstacles)
+  }
 
   private[kernel] def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private def isInPeriod = cppProxy.is_in_period
 
-  private def taskMaximum = cppProxy.max_tasks
+  private def taskLimit = cppProxy.max_tasks
 
   private def runningTasksCount = cppProxy.running_tasks_count
 
@@ -53,6 +82,9 @@ with JobPersistence {
   def stateText = inSchedulerThread { cppProxy.state_text }
 
   def needsProcess: Boolean = inSchedulerThread { cppProxy.waiting_for_process }
+
+  protected def nextPossibleStartInstantOption: Option[Instant] =
+    eternalCppMillisToNoneInstant(cppProxy.next_possible_start_millis)
 
   protected def nextStartInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_start_time_millis)
@@ -69,7 +101,6 @@ with JobPersistence {
     cppProxy.enqueue_taskPersistentState(t)
   }
 }
-
 
 object Job {
   private[kernel] final class Type extends SisterType[Job, JobC] {

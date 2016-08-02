@@ -116,6 +116,10 @@ struct Java_job : Job {
         z::throw_xc(Z_FUNCTION);
     }
 
+    jlong next_possible_start_millis() const  {
+        z::throw_xc(Z_FUNCTION);
+    }
+
     xml::Element_ptr dom_element(const xml::Document_ptr& doc, const Show_what& w, Job_chain* job_chain_or_null) {
         return _cppNewJobJ.domElement(doc.ref(), job_chain_or_null? job_chain_or_null->java_sister() : NULL);
     }

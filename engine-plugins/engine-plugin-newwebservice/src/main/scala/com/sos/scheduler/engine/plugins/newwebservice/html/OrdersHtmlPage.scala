@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
@@ -29,8 +29,16 @@ final class OrdersHtmlPage private(
   implicit ec: ExecutionContext)
 extends SchedulerHtmlPage {
 
-  private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
+  //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
   private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
+  private val jobPathToObstacleHtml: Map[JobPath, List[Frag]] = ordersComplemented.usedJobs.toKeyedMap { _.path }
+    .mapValues { jobOverview ⇒
+      if (jobOverview.obstacles.nonEmpty)
+        List(stringFrag(s"${jobOverview.path}: " + jobOverview.obstacles.mkString(" ")))
+      else
+        Nil
+    }
+    .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
 
   protected def title = "Orders"
 
@@ -122,8 +130,7 @@ div.orderSelection {
         case OrderProcessingState.Setback(at) ⇒ "Set back until " :: instantWithDurationToHtml(at)
         case inTask: OrderProcessingState.InTask ⇒
           val taskId = inTask.taskId
-          val job: Option[JobOverview] = taskIdToOverview.get(taskId) flatMap { task ⇒ jobPathToOverview.get(task.job) }
-          val jobPath = job map { _.path.string} getOrElse "(unknown job)"
+          val jobPath = order.jobPath getOrElse "(unknown job)"
           val taskHtml = List(
             b(
               span(cls := "visible-lg-inline")(
@@ -136,11 +143,18 @@ div.orderSelection {
          }
         case o ⇒ List(stringFrag(o.toString))
       }
-    tr(cls := orderToTrClass(order))(
+    val jobObstaclesHtml: List[Frag] =
+      order.processingState match {
+        case _: OrderProcessingState.InTask ⇒ Nil
+        case _ ⇒ span(cls := "text-danger")(order.jobPath.toList flatMap jobPathToObstacleHtml) :: Nil
+      }
+    val obstaclesHtml: List[Frag] = List(List(stringFrag(order.obstacles mkString " ")), jobObstaclesHtml) reduce { _ ++ List(stringFrag(" ")) ++ _ }
+    val rowCssClass = orderToTrClass(order) getOrElse (if (jobObstaclesHtml.nonEmpty) "warning" else "")
+    tr(cls := rowCssClass)(
       td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
       td(processingStateHtml),
-      td(order.obstacles mkString " "),
+      td(obstaclesHtml),
       td(if (order.sourceType == OrderSourceType.fileBased) fileBasedStateToHtml(order.fileBasedState) else EmptyFrag))
   }
 
@@ -160,14 +174,14 @@ object OrdersHtmlPage {
   def toHtml(query: OrderQuery)(ordersComplemented: OrdersComplemented)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
     for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, ordersComplemented, context, schedulerOverview)
 
-  private def orderToTrClass(order: OrderOverview) =
+  private def orderToTrClass(order: OrderOverview): Option[String] =
     if (order.obstacles.nonEmpty)
-      "bg-warning"
+      Some("bg-warning")
     else
       order.processingState match {
-        case _: OrderProcessingState.InTaskProcess ⇒ "bg-success"
-        case _: OrderProcessingState.Pending ⇒ "bg-info"
-        case _ if !order.fileBasedState.isOkay ⇒ "bg-danger"
-        case _ ⇒ ""
+        case _: OrderProcessingState.InTaskProcess ⇒ Some("bg-primary")
+        case _: OrderProcessingState.Pending ⇒ Some("bg-info")
+        case _ if !order.fileBasedState.isOkay ⇒ Some("bg-danger")
+        case _ ⇒ None
       }
 }

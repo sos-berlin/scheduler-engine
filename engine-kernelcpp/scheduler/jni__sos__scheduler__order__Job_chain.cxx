@@ -51,6 +51,23 @@ static jstring JNICALL file(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL file_1based_1error_1string(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::file_based_error_string()");
+        return env.jstring_from_string(o_->file_based_error_string());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jint JNICALL file_1based_1state(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -61,23 +78,6 @@ static jint JNICALL file_1based_1state(JNIEnv* jenv, jobject, jlong cppReference
     catch(const exception& x) {
         env.set_java_exception(x);
         return jint();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static jstring JNICALL file_1based_1state_1name(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::file_based_state_name()");
-        return env.jstring_from_string(o_->file_based_state_name());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jstring();
     }
 }
 
@@ -440,8 +440,8 @@ static jobject JNICALL source_1xml_1bytes(JNIEnv* jenv, jobject, jlong cppRefere
 const static JNINativeMethod native_methods[] = {
     { (char*)"default_process_class_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::default_1process_1class_1path },
     { (char*)"file__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file },
+    { (char*)"file_based_error_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1error_1string },
     { (char*)"file_based_state__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state },
-    { (char*)"file_based_state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state_1name },
     { (char*)"file_modification_time_t__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1modification_1time_1t },
     { (char*)"file_watching_process_class_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1watching_1process_1class_1path },
     { (char*)"is_distributed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1distributed },
