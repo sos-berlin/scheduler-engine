@@ -128,7 +128,8 @@ object SchedulerHtmlPage {
   }
 
   def instantWithDurationToHtml(instant: Instant): List[Frag]  =
-    if (instant == Instant.EPOCH) StringFrag("immediately") :: Nil
+    if (instant == Instant.EPOCH)
+      StringFrag("immediately") :: Nil
     else
       localDateTimeToHtml(instant) ::
         span(cls := "time-extra")(s".${formatTime(LocalMillisFormatter, instant)} (${(now - instant).pretty})") ::

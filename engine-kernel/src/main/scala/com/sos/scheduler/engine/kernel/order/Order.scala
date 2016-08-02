@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
+import com.sos.scheduler.engine.base.utils.ScalazStyle._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
@@ -8,7 +9,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException,
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderOverview, OrderSourceType, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderState}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
 import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -22,6 +23,7 @@ import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerExceptio
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
 import java.lang.System.currentTimeMillis
 import java.time.Instant
+import scala.collection.mutable
 import scala.util.{Failure, Success}
 
 @ForCpp
@@ -78,39 +80,45 @@ with OrderPersistence {
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val taskId = this.taskId
     val nextStepAt = this.nextStepAt
+    val processingState = {
+      import OrderProcessingState._
+      if (!isTouched)
+        nextStepAt match {
+          case None ⇒ NotPlanned
+          case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
+          case Some(at) ⇒ Pending(at)
+        }
+      else
+        taskId match {
+          case Some(taskId_) ⇒
+            if (taskSubsystem.task(taskId_).processStarted)
+              InTaskProcess(taskId_)
+            else
+              WaitingInTask(taskId_)
+          case None ⇒
+            if (isSetback)
+              Setback(setbackUntil getOrElse Instant.MAX)
+            else
+              WaitingForOther
+        }
+    }
     OrderOverview(
       path = orderKey,  // key because this.path is valid only for permanent orders
       cppFastFlags.fileBasedState(flags),
       sourceType,
       orderState = state,
-      processingState = {
-        import com.sos.scheduler.engine.data.order.OrderProcessingState._
-        if (!isTouched)
-          nextStepAt match {
-            case None ⇒ NotPlanned
-            case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
-            case Some(at) ⇒ Late(at)
-          }
-        else
-          taskId match {
-            case Some(taskId_) ⇒
-              if (taskSubsystem.task(taskId_).processStarted)
-                InTaskProcess(taskId_)
-              else
-                WaitingInTask(taskId_)
-            case None ⇒
-              if (isSetback)
-                Setback(setbackUntil.get)
-              if (isSuspended)
-                Suspended
-              else if (isBlacklisted)
-                Blacklisted
-              else
-                WaitingForOther
-          }
+      processingState = processingState,
+      obstacles = {
+        import OrderObstacle._
+        (Set.newBuilder[OrderObstacle]
+          ++= (isSuspended option Suspended)
+          ++= (isBlacklisted option Blacklisted)
+          ++= (Some(processingState) collect {
+            case OrderProcessingState.Setback(at) ⇒ Setback(at)
+          })
+        ).result
       },
-      nextStepAt = nextStepAt,
-      isSuspended = isSuspended)
+      nextStepAt = nextStepAt)
   }
 
   private def isSetback = setbackUntil.isDefined

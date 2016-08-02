@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
+import java.time.Instant.EPOCH
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text.all._
@@ -108,7 +109,7 @@ div.orderSelection {
           th("OrderId"),
           th(div(cls := "visible-lg-block")("SourceType")),
           th("OrderProcessingState"),
-          th("Flags"),
+          th("Obstacles"),
           th(small("FileBasedState")))),
       tbody(
         (orders.par map orderToTr).seq))
@@ -117,7 +118,7 @@ div.orderSelection {
     val processingStateHtml: immutable.Seq[Frag] =
       order.processingState match {
         case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
-        case OrderProcessingState.Late(at) ⇒ instantWithDurationToHtml(at) ++ Vector(stringFrag(" late"))
+        case OrderProcessingState.Pending(at) ⇒ (at != EPOCH list instantWithDurationToHtml(at)) ++ List(List(stringFrag("pending"))) reduce { _ ++ List(stringFrag(" ")) ++ _ }
         case OrderProcessingState.Setback(at) ⇒ "Set back until " :: instantWithDurationToHtml(at)
         case inTask: OrderProcessingState.InTask ⇒
           val taskId = inTask.taskId
@@ -139,7 +140,7 @@ div.orderSelection {
       td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
       td(processingStateHtml),
-      td((order.isSuspended option "suspended") mkString " "),
+      td(order.obstacles mkString " "),
       td(if (order.sourceType == OrderSourceType.fileBased) fileBasedStateToHtml(order.fileBasedState) else EmptyFrag))
   }
 
@@ -160,12 +161,13 @@ object OrdersHtmlPage {
     for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, ordersComplemented, context, schedulerOverview)
 
   private def orderToTrClass(order: OrderOverview) =
-    order.processingState match {
-      case _: OrderProcessingState.InTaskProcess ⇒ "info"
-      case _: OrderProcessingState.Late ⇒ "warning"
-      case OrderProcessingState.Suspended ⇒ "warning"
-      case OrderProcessingState.Blacklisted ⇒ "warning"
-      case _ if !order.fileBasedState.isOkay ⇒ "danger"
-      case _ ⇒ ""
-    }
+    if (order.obstacles.nonEmpty)
+      "bg-warning"
+    else
+      order.processingState match {
+        case _: OrderProcessingState.InTaskProcess ⇒ "bg-success"
+        case _: OrderProcessingState.Pending ⇒ "bg-info"
+        case _ if !order.fileBasedState.isOkay ⇒ "bg-danger"
+        case _ ⇒ ""
+      }
 }

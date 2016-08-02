@@ -18,7 +18,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderState, OrderStepStartedEvent}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -416,8 +416,8 @@ private[js1642] object JS1642IT {
     OrderSourceType.adHoc,
     OrderState("100"),
     OrderProcessingState.Planned(OrderStartAt),
-    nextStepAt = Some(OrderStartAt),
-    isSuspended = true)
+    Set(OrderObstacle.Suspended),
+    nextStepAt = Some(OrderStartAt))
 
   private val bJobChainPath = JobChainPath("/bJobChain")
   private val b1OrderKey = bJobChainPath orderKey "1"
@@ -436,7 +436,7 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    OrderProcessingState.Late(EPOCH),
+    OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
 
   private val xa2OrderKey = xaJobChainPath orderKey "2"
@@ -445,9 +445,9 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    OrderProcessingState.Late(EPOCH),
-    nextStepAt = Some(EPOCH),
-    isSuspended = true)
+    OrderProcessingState.Pending(EPOCH),
+    Set(OrderObstacle.Suspended),
+    nextStepAt = Some(EPOCH))
 
   private val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
 
@@ -457,7 +457,7 @@ private[js1642] object JS1642IT {
     FileBasedState.not_initialized,
     OrderSourceType.fileBased,
     OrderState("100"),
-    OrderProcessingState.Late(EPOCH),
+    OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
 
   private val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
@@ -466,7 +466,7 @@ private[js1642] object JS1642IT {
     FileBasedState.not_initialized,
     OrderSourceType.adHoc,
     OrderState("100"),
-    OrderProcessingState.Late(EPOCH),
+    OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
@@ -525,8 +525,8 @@ private[js1642] object JS1642IT {
         "type": "InTaskProcess",
         "taskId" : "3"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false
+      "obstacles": [],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
       "path": "/aJobChain,2",
@@ -537,8 +537,8 @@ private[js1642] object JS1642IT {
         "type": "InTaskProcess",
         "taskId" : "4"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false
+      "obstacles": [],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
       "path": "/aJobChain,AD-HOC",
@@ -549,8 +549,12 @@ private[js1642] object JS1642IT {
         "type": "Planned",
         "at": "2038-01-01T11:22:33Z"
       },
-      "nextStepAt": "2038-01-01T11:22:33Z",
-      "isSuspended": true
+      "obstacles": [
+        {
+          "type": "Suspended"
+        }
+      ],
+      "nextStepAt": "2038-01-01T11:22:33Z"
     },
     {
       "path": "/bJobChain,1",
@@ -561,8 +565,8 @@ private[js1642] object JS1642IT {
         "type": "InTaskProcess",
         "taskId" : "5"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false
+      "obstacles": [],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
       "path": "/xFolder/x-aJobChain,1",
@@ -570,11 +574,11 @@ private[js1642] object JS1642IT {
       "sourceType": "fileBased",
       "orderState": "100",
       "processingState" : {
-        "type": "Late",
+        "type": "Pending",
         "at" : "1970-01-01T00:00:00Z"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false
+      "obstacles": [],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
       "path": "/xFolder/x-aJobChain,2",
@@ -582,11 +586,15 @@ private[js1642] object JS1642IT {
       "sourceType": "fileBased",
       "orderState": "100",
       "processingState" : {
-        "type": "Late",
+        "type": "Pending",
         "at" : "1970-01-01T00:00:00Z"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": true
+      "obstacles": [
+        {
+          "type": "Suspended"
+        }
+      ],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
       "path": "/xFolder/x-bJobChain,1",
@@ -594,11 +602,11 @@ private[js1642] object JS1642IT {
       "sourceType": "fileBased",
       "orderState": "100",
       "processingState" : {
-        "type": "Late",
+        "type": "Pending",
         "at" : "1970-01-01T00:00:00Z"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false
+      "obstacles": [],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
       "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
@@ -606,11 +614,11 @@ private[js1642] object JS1642IT {
       "sourceType": "adHoc",
       "orderState": "100",
       "processingState" : {
-        "type": "Late",
+        "type": "Pending",
         "at" : "1970-01-01T00:00:00Z"
       },
-      "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false
+      "obstacles": [],
+      "nextStepAt": "1970-01-01T00:00:00Z"
     }
   ]""".parseJson.asInstanceOf[JsArray]
 
@@ -668,9 +676,9 @@ private[js1642] object JS1642IT {
             "type": "InTaskProcess",
             "taskId" : "3"
           },
+          "obstacles": [],
           "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false
+          "fileBasedState": "active"
         },
         {
           "sourceType": "fileBased",
@@ -680,9 +688,9 @@ private[js1642] object JS1642IT {
             "type": "InTaskProcess",
             "taskId" : "4"
           },
+          "obstacles": [],
           "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false
+          "fileBasedState": "active"
         },
         {
           "sourceType": "adHoc",
@@ -692,9 +700,13 @@ private[js1642] object JS1642IT {
             "type": "Planned",
             "at" : "2038-01-01T11:22:33Z"
           },
+          "obstacles": [
+            {
+              "type": "Suspended"
+            }
+          ],
           "nextStepAt": "2038-01-01T11:22:33Z",
-          "fileBasedState": "not_initialized",
-          "isSuspended": true
+          "fileBasedState": "not_initialized"
         },
         {
           "sourceType": "fileBased",
@@ -704,9 +716,9 @@ private[js1642] object JS1642IT {
             "type": "InTaskProcess",
             "taskId" : "5"
           },
+          "obstacles": [],
           "nextStepAt": "1970-01-01T00:00:00Z",
-          "fileBasedState": "active",
-          "isSuspended": false
+          "fileBasedState": "active"
         }
       ],
       "subfolders": [
@@ -718,48 +730,52 @@ private[js1642] object JS1642IT {
               "path": "/xFolder/x-aJobChain,1",
               "orderState": "100",
               "processingState" : {
-                "type": "Late",
+                "type": "Pending",
                 "at" : "1970-01-01T00:00:00Z"
               },
+              "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "fileBasedState": "active",
-              "isSuspended": false
+              "fileBasedState": "active"
             },
             {
               "sourceType": "fileBased",
               "path": "/xFolder/x-aJobChain,2",
               "orderState": "100",
               "processingState" : {
-                "type": "Late",
+                "type": "Pending",
                 "at" : "1970-01-01T00:00:00Z"
               },
+              "obstacles": [
+                {
+                  "type": "Suspended"
+                }
+              ],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "fileBasedState": "active",
-              "isSuspended": true
+              "fileBasedState": "active"
             },
             {
               "sourceType": "fileBased",
               "path": "/xFolder/x-bJobChain,1",
               "orderState": "100",
               "processingState" : {
-                "type": "Late",
+                "type": "Pending",
                 "at" : "1970-01-01T00:00:00Z"
               },
+              "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "fileBasedState": "not_initialized",
-              "isSuspended": false
+              "fileBasedState": "not_initialized"
             },
             {
               "sourceType": "adHoc",
               "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
               "orderState": "100",
               "processingState" : {
-                "type": "Late",
+                "type": "Pending",
                 "at" : "1970-01-01T00:00:00Z"
               },
+              "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "fileBasedState": "not_initialized",
-              "isSuspended": false
+              "fileBasedState": "not_initialized"
             }
           ],
           "subfolders": []
