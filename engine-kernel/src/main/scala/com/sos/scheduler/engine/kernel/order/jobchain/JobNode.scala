@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
 import com.sos.scheduler.engine.data.order.OrderStateTransition
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode.logger
@@ -18,6 +19,7 @@ import org.w3c.dom
  */
 abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler {
 
+  private[kernel] def overview: JobNodeOverview
   def jobPath: JobPath
 
   override private[kernel] def processConfigurationDomElement(nodeElement: dom.Element) = {

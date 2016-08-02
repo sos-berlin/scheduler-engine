@@ -47,7 +47,7 @@ private[js1642] trait SpeedTests {
         }
 
         "OrdersComplemented" in {
-          for (_ ← 1 to 20) {
+          for (_ ← 1 to 40) {
             val stopwatch = new Stopwatch
             implicit val fastUnmarshaller = Unmarshaller[HttpData](`application/json`) {
               case HttpEntity.NonEmpty(contentType, entity) ⇒ entity

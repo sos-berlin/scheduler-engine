@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTrave
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -29,6 +29,7 @@ final class OrdersHtmlPage private(
   implicit ec: ExecutionContext)
 extends SchedulerHtmlPage {
 
+  private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
   private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
   private val jobPathToObstacleHtml: Map[JobPath, List[Frag]] = ordersComplemented.usedJobs.toKeyedMap { _.path }
@@ -123,6 +124,7 @@ div.orderSelection {
         (orders.par map orderToTr).seq))
 
   private def orderToTr(order: OrderOverview) = {
+    val jobPathOption = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath }
     val processingStateHtml: immutable.Seq[Frag] =
       order.processingState match {
         case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
@@ -130,7 +132,7 @@ div.orderSelection {
         case OrderProcessingState.Setback(at) ⇒ "Set back until " :: instantWithDurationToHtml(at)
         case inTask: OrderProcessingState.InTask ⇒
           val taskId = inTask.taskId
-          val jobPath = order.jobPath getOrElse "(unknown job)"
+          val jobPath = jobPathOption getOrElse "(unknown job)"
           val taskHtml = List(
             b(
               span(cls := "visible-lg-inline")(
@@ -146,9 +148,12 @@ div.orderSelection {
     val jobObstaclesHtml: List[Frag] =
       order.processingState match {
         case _: OrderProcessingState.InTask ⇒ Nil
-        case _ ⇒ span(cls := "text-danger")(order.jobPath.toList flatMap jobPathToObstacleHtml) :: Nil
+        case _ ⇒ jobPathOption.toList flatMap jobPathToObstacleHtml
       }
-    val obstaclesHtml: List[Frag] = List(List(stringFrag(order.obstacles mkString " ")), jobObstaclesHtml) reduce { _ ++ List(stringFrag(" ")) ++ _ }
+    val obstaclesHtml: List[Frag] = {
+      val inner = List(List(stringFrag(order.obstacles mkString " ")), jobObstaclesHtml) reduce { _ ++ List(stringFrag(" ")) ++ _ }
+      if (inner.isEmpty) Nil else span(cls := "text-danger")(inner) :: Nil
+    }
     val rowCssClass = orderToTrClass(order) getOrElse (if (jobObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
       td(order.orderKey.id.string),

@@ -15,10 +15,10 @@ final class EndNode(
   protected val injector: Injector)
 extends Node {
 
-  private[kernel] override def overview = EndNodeOverview(orderState)
+  private[kernel] override def overview = EndNodeOverview(nodeKey)
+
   protected val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
 }
-
 
 object EndNode {
   final class Type extends SisterType[EndNode, End_nodeC] {

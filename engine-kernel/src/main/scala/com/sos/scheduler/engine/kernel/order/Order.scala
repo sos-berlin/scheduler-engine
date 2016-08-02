@@ -16,7 +16,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.Order._
-import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, JobNode, Node}
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
@@ -81,15 +81,6 @@ with OrderPersistence {
     val isSuspended = cppFastFlags.isSuspended(flags)
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val taskId = this.taskId
-    val nodeOption: Option[Node] = this.nodeOption orElse {  // this.nodeOption is None for distributed order
-      for (jobChain ← orderSubsystem.jobChainOption(orderKey.jobChainPath);
-           node ← jobChain.nodeMap.get(state) collect { case o: JobNode ⇒ o })
-        yield node
-    }
-    val jobPathOption = taskId match {
-      case Some(taskId_) ⇒ Some(taskSubsystem.task(taskId_).job.path)  // Faster than node.jobPath
-      case None ⇒ nodeOption collect { case node: JobNode ⇒ node.jobPath }
-    }
     val processingState = {
       import OrderProcessingState._
       taskId match {
@@ -134,7 +125,6 @@ with OrderPersistence {
       orderState = state,
       processingState = processingState,
       obstacles = obstacles,
-      jobPath = jobPathOption,
       nextStepAt = nextStepAt)
   }
 

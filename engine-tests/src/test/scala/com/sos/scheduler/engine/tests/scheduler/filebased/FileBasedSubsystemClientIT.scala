@@ -161,30 +161,30 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
 
   "JobChainDetails" - {
     "normal job chain" in {
-      val details: JobChainDetails = jobChainDetails(JobChainPath("/test-jobChain"))
+      val details: JobChainDetails = jobChainDetails(testJobChainPath)
       details.nodes(0).asInstanceOf[SimpleJobNodeOverview] should have (
-        'orderState (OrderState("A")),
+        'nodeKey (NodeKey(testJobChainPath, OrderState("A"))),
         'nextState (OrderState("SINK")),
         'errorState (OrderState("ERROR")),
         'jobPath (JobPath("/test-job-a")))
       details.nodes(1).asInstanceOf[SinkNodeOverview] should have (
-        'orderState (OrderState("SINK")),
+        'nodeKey (NodeKey(testJobChainPath, OrderState("SINK"))),
         'nextState (OrderState("")),
         'errorState (OrderState("")),
         'jobPath (schedulerFileOrderSinkJobPath))
       details.nodes(2).asInstanceOf[EndNodeOverview] should have (
-        'orderState (OrderState("ERROR")))
+        'nodeKey (NodeKey(testJobChainPath, OrderState("ERROR"))))
     }
 
     "nested job chain" in {
-      val details: JobChainDetails = jobChainDetails(JobChainPath("/test-jobChain-nested"))
+      val details: JobChainDetails = jobChainDetails(nestedJobChainPath)
       details.nodes(0).asInstanceOf[NestedJobChainNodeOverview] should have (
-        'orderState (OrderState("NESTED")),
+        'nodeKey (NodeKey(nestedJobChainPath, OrderState("NESTED"))),
         'nextState (OrderState("END")),
         'errorState (OrderState("")),   // Warum nicht automatisch gleich nextState?
         'nestedJobChainPath (JobChainPath("/NESTED")))
       details.nodes(1).asInstanceOf[EndNodeOverview] should have (
-        'orderState (OrderState("END")))
+        'nodeKey (NodeKey(nestedJobChainPath, OrderState("END"))))
     }
   }
 }
@@ -201,6 +201,8 @@ private object FileBasedSubsystemClientIT {
     val visiblePaths = paths filterNot pathIsInvisible
   }
 
+  private val testJobChainPath = JobChainPath("/test-jobChain")
+  private val nestedJobChainPath = JobChainPath("/test-jobChain-nested")
   private val schedulerFileOrderSinkJobPath = JobPath("/scheduler_file_order_sink")
   private val schedulerServiceForwardingJobChainPath = JobChainPath("/scheduler_service_forwarding")
   private val schedulerServiceForwarderJobPath = JobPath("/scheduler_service_forwarder")

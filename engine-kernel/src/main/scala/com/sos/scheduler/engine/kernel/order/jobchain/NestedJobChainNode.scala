@@ -19,7 +19,7 @@ extends Node {
 
   private[kernel] override def overview =
     NestedJobChainNodeOverview(
-      orderState = orderState,
+      nodeKey,
       nextState = nextState,
       errorState = errorState,
       nestedJobChainPath = nestedJobChainPath)

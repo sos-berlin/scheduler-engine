@@ -4,7 +4,6 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OnlyOrderQuery, OrderQuery, PathQuery}

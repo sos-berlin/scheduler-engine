@@ -25,13 +25,13 @@ extends JobNode {
 
   override def toString = s"${getClass.getSimpleName}"   //inSchedulerThread $nodeKey $jobPath"
 
-  override def overview = SimpleJobNodeOverview(
-    orderState = orderState,
+  override private[kernel] def overview = SimpleJobNodeOverview(
+    nodeKey,
     nextState = nextState,
     errorState = errorState,
-    orderCount = orderCount,
     action = action,
-    jobPath = jobPath)
+    jobPath = jobPath,
+    orderCount = orderCount)
 
   def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 

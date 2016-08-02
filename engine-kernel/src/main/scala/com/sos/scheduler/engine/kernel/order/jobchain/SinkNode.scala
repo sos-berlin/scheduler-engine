@@ -20,7 +20,7 @@ extends JobNode {
 
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
 
-  private[kernel] def overview = SinkNodeOverview(orderState, nextState, errorState, action, jobPath, orderCount)
+  private[kernel] def overview = SinkNodeOverview(nodeKey, nextState, errorState, action, jobPath, orderCount)
 
   def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 

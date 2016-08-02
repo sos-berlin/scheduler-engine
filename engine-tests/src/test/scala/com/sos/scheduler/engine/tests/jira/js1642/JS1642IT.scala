@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, JobChainPath, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
@@ -137,7 +137,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
         usedTasks = Nil,
         usedJobs = ExpectedOrderOrdersComplemented.usedJobs,
-        usedProcessClasses = Nil))
+        usedProcessClasses = Nil,
+        usedNodes = Vector(
+          SimpleJobNodeOverview(NodeKey(aJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), TestJobPath, orderCount = 3),
+          SimpleJobNodeOverview(NodeKey(xaJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 2))))
     }
 
     "ordersComplementedBy query /aJobChain" in {
@@ -195,14 +198,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           sourceXml = None,
           List(
             SimpleJobNodeOverview(
-              orderState = OrderState("100"),
+              NodeKey(xaJobChainPath, OrderState("100")),
               nextState = OrderState("END"),
               errorState = OrderState(""),
-              JobChainNodeAction.process,
               JobPath("/xFolder/test"),
               orderCount = 2),
             EndNodeOverview(
-              orderState = OrderState("END")))))
+              NodeKey(xaJobChainPath, OrderState("END"))))))
       assert(jobChainDetails.sourceXml.get startsWith "<job_chain ")
     }
 
@@ -399,7 +401,6 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.InTaskProcess(TaskId(3)),
-    jobPath = Some(TestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val a2OrderKey = aJobChainPath orderKey "2"
@@ -409,7 +410,6 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.InTaskProcess(TaskId(4)),
-    jobPath = Some(TestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
@@ -420,7 +420,6 @@ private[js1642] object JS1642IT {
     OrderState("100"),
     OrderProcessingState.Planned(OrderStartAt),
     Set(OrderObstacle.Suspended),
-    jobPath = Some(TestJobPath),
     nextStepAt = Some(OrderStartAt))
 
   private val bJobChainPath = JobChainPath("/bJobChain")
@@ -431,7 +430,6 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.InTaskProcess(TaskId(5)),
-    jobPath = Some(TestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
@@ -442,7 +440,6 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
-    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xa2OrderKey = xaJobChainPath orderKey "2"
@@ -453,7 +450,6 @@ private[js1642] object JS1642IT {
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
     Set(OrderObstacle.Suspended),
-    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
@@ -465,7 +461,6 @@ private[js1642] object JS1642IT {
     OrderSourceType.fileBased,
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
-    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
@@ -475,7 +470,6 @@ private[js1642] object JS1642IT {
     OrderSourceType.adHoc,
     OrderState("100"),
     OrderProcessingState.Pending(EPOCH),
-    jobPath = Some(XFolderTestJobPath),
     nextStepAt = Some(EPOCH))
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
@@ -493,14 +487,20 @@ private[js1642] object JS1642IT {
   private val ExpectedOrderOrdersComplemented = OrdersComplemented(
     ExpectedOrderOverviews,
     Vector(
-      TaskOverview(TaskId(3), TestJobPath, TaskState.running, ProcessClassPath.Default),
-      TaskOverview(TaskId(4), TestJobPath, TaskState.running, ProcessClassPath.Default),
-      TaskOverview(TaskId(5), TestJobPath, TaskState.running, ProcessClassPath.Default)),
+      SimpleJobNodeOverview(NodeKey(aJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), TestJobPath, orderCount = 3),
+      SimpleJobNodeOverview(NodeKey(bJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), TestJobPath, orderCount = 1),
+      SimpleJobNodeOverview(NodeKey(xaJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 2),
+      SimpleJobNodeOverview(NodeKey(xbJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 0)),  // Distributed orders yet not counted
     Vector(
       JobOverview(TestJobPath, FileBasedState.active, defaultProcessClass = None, JobState.running, isInPeriod = true,
         taskLimit = 10, usedTaskCount = 3, obstacles = Set())),
     Vector(
-      ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3)))
+      TaskOverview(TaskId(3), TestJobPath, TaskState.running, ProcessClassPath.Default),
+      TaskOverview(TaskId(4), TestJobPath, TaskState.running, ProcessClassPath.Default),
+      TaskOverview(TaskId(5), TestJobPath, TaskState.running, ProcessClassPath.Default)),
+    Vector(
+      ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
+  )
 
   private val ExpectedOrderTreeComplemented = OrderTreeComplemented(
     FolderTree(
@@ -519,8 +519,9 @@ private[js1642] object JS1642IT {
             xb1OrderOverview,
             xbAdHocDistributedOrderOverview),
           Vector()))),
-    ExpectedOrderOrdersComplemented.usedTasks,
+    ExpectedOrderOrdersComplemented.usedNodes,
     ExpectedOrderOrdersComplemented.usedJobs,
+    ExpectedOrderOrdersComplemented.usedTasks,
     ExpectedOrderOrdersComplemented.usedProcessClasses)
 
   private val OrderCount = ExpectedOrderOverviews.size
@@ -536,7 +537,6 @@ private[js1642] object JS1642IT {
         "taskId": "3"
       },
       "obstacles": [],
-      "jobPath": "/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -549,7 +549,6 @@ private[js1642] object JS1642IT {
         "taskId": "4"
       },
       "obstacles": [],
-      "jobPath": "/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -566,7 +565,6 @@ private[js1642] object JS1642IT {
           "type": "Suspended"
         }
       ],
-      "jobPath": "/test",
       "nextStepAt": "2038-01-01T11:22:33Z"
     },
     {
@@ -579,7 +577,6 @@ private[js1642] object JS1642IT {
         "taskId": "5"
       },
       "obstacles": [],
-      "jobPath": "/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -592,7 +589,6 @@ private[js1642] object JS1642IT {
         "at" : "1970-01-01T00:00:00Z"
       },
       "obstacles": [],
-      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -609,7 +605,6 @@ private[js1642] object JS1642IT {
           "type": "Suspended"
         }
       ],
-      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -622,7 +617,6 @@ private[js1642] object JS1642IT {
         "at" : "1970-01-01T00:00:00Z"
       },
       "obstacles": [],
-      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     },
     {
@@ -635,7 +629,6 @@ private[js1642] object JS1642IT {
         "at" : "1970-01-01T00:00:00Z"
       },
       "obstacles": [],
-      "jobPath": "/xFolder/test",
       "nextStepAt": "1970-01-01T00:00:00Z"
     }
   ]""".parseJson.asInstanceOf[JsArray]
@@ -679,12 +672,62 @@ private[js1642] object JS1642IT {
       "usedProcessCount": 3
     }
   ]"""
+  private val UsedNodesJson = """[
+    {
+      "$TYPE": "SimpleJob",
+      "nodeKey": {
+        "jobChainPath": "/aJobChain",
+        "state": "100"
+      },
+      "nextState": "END",
+      "errorState": "",
+      "jobPath": "/test",
+      "action": "process",
+      "orderCount": 3
+    },
+    {
+      "$TYPE": "SimpleJob",
+      "nodeKey": {
+        "jobChainPath": "/bJobChain",
+        "state": "100"
+      },
+      "nextState": "END",
+      "errorState": "",
+      "jobPath": "/test",
+      "action": "process",
+      "orderCount": 1
+    },{
+      "$TYPE": "SimpleJob",
+      "nodeKey": {
+        "jobChainPath": "/xFolder/x-aJobChain",
+        "state": "100"
+      },
+      "nextState": "END",
+      "errorState": "",
+      "jobPath": "/xFolder/test",
+      "action": "process",
+      "orderCount": 2
+    },
+    {
+      "$TYPE": "SimpleJob",
+      "nodeKey": {
+        "jobChainPath": "/xFolder/x-bJobChain",
+        "state": "100"
+      },
+      "nextState": "END",
+      "errorState": "",
+      "jobPath": "/xFolder/test",
+      "action": "process",
+      "orderCount": 0
+    }
+  ]"""
 
   private val ExpectedOrdersOrdersComplementedJsObject: JsObject = s"""{
     "orders": $ExpectedOrderOverviewsJsArray,
     "usedTasks": $UsedTasksJson,
     "usedJobs": $UsedJobsJson,
-    "usedProcessClasses": $UsedProcessClassesJson
+    "usedProcessClasses": $UsedProcessClassesJson,
+    "usedNodes": $UsedNodesJson
   }""".parseJson.asJsObject
 
   private val ExpectedOrderTreeComplementedJsObject: JsObject = s"""{
@@ -701,7 +744,6 @@ private[js1642] object JS1642IT {
           },
           "obstacles": [],
           "nextStepAt": "1970-01-01T00:00:00Z",
-          "jobPath": "/test",
           "fileBasedState": "active"
         },
         {
@@ -713,7 +755,6 @@ private[js1642] object JS1642IT {
             "taskId": "4"
           },
           "obstacles": [],
-          "jobPath": "/test",
           "nextStepAt": "1970-01-01T00:00:00Z",
           "fileBasedState": "active"
         },
@@ -730,7 +771,6 @@ private[js1642] object JS1642IT {
               "type": "Suspended"
             }
           ],
-          "jobPath": "/test",
           "nextStepAt": "2038-01-01T11:22:33Z",
           "fileBasedState": "not_initialized"
         },
@@ -743,7 +783,6 @@ private[js1642] object JS1642IT {
             "taskId": "5"
           },
           "obstacles": [],
-          "jobPath": "/test",
           "nextStepAt": "1970-01-01T00:00:00Z",
           "fileBasedState": "active"
         }
@@ -762,7 +801,6 @@ private[js1642] object JS1642IT {
               },
               "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "jobPath": "/xFolder/test",
               "fileBasedState": "active"
             },
             {
@@ -779,7 +817,6 @@ private[js1642] object JS1642IT {
                 }
               ],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "jobPath": "/xFolder/test",
               "fileBasedState": "active"
             },
             {
@@ -792,7 +829,6 @@ private[js1642] object JS1642IT {
               },
               "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "jobPath": "/xFolder/test",
               "fileBasedState": "not_initialized"
             },
             {
@@ -805,7 +841,6 @@ private[js1642] object JS1642IT {
               },
               "obstacles": [],
               "nextStepAt": "1970-01-01T00:00:00Z",
-              "jobPath": "/xFolder/test",
               "fileBasedState": "not_initialized"
             }
           ],
@@ -815,6 +850,7 @@ private[js1642] object JS1642IT {
     },
     "usedTasks": $UsedTasksJson,
     "usedJobs": $UsedJobsJson,
-    "usedProcessClasses": $UsedProcessClassesJson
+    "usedProcessClasses": $UsedProcessClassesJson,
+    "usedNodes": $UsedNodesJson
   }""".parseJson.asJsObject
 }
