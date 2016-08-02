@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderSourceType, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType, OrderState}
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonSpeedTest._
 import java.time.Instant.now
 import org.junit.runner.RunWith
@@ -45,8 +45,8 @@ private object JsonSpeedTest {
       FileBasedState.active,
       OrderSourceType.adHoc,
       OrderState(numbers.next().toString),
-      nextStepAt = Some(now),
-      taskId = Some(TaskId(numbers.next())))
+      OrderProcessingState.InTaskProcess(TaskId(numbers.next())),
+      nextStepAt = Some(now))
     logger.info(stopwatch.itemsPerSecondString(n, "OrderOverview"))
     result
   }

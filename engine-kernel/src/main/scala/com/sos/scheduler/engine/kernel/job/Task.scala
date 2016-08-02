@@ -41,6 +41,8 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def processClassPath = ProcessClassPath(cppProxy.process_class_path)
 
+  private[kernel] def processStarted = state.ordinal >= TaskState.starting.ordinal
+
   private def state: TaskState = TaskState.of(cppProxy.state_name)
 
   def parameterValue(name: String): String =

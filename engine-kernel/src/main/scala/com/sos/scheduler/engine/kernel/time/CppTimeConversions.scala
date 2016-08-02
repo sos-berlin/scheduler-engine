@@ -6,7 +6,7 @@ import java.time.{Duration, Instant}
 object CppTimeConversions {
 
   def eternalCppMillisToNoneInstant(millis: Long): Option[Instant] = {
-    require(millis > 0, s"Timestamp from C++ is negative: $millis")
+    require(millis >= 0, s"Timestamp from C++ is negative: $millis")
     if (millis == EternalCppMillis)
       None
     else

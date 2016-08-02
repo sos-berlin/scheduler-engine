@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -107,29 +107,39 @@ div.orderSelection {
         tr(
           th("OrderId"),
           th(div(cls := "visible-lg-block")("SourceType")),
-          th("Task / Date"),
+          th("OrderProcessingState"),
           th("Flags"),
           th(small("FileBasedState")))),
       tbody(
         (orders.par map orderToTr).seq))
 
   private def orderToTr(order: OrderOverview) = {
-    val taskOption = for (taskId ← order.taskId) yield {
-      val job: Option[JobOverview] = taskIdToOverview.get(taskId) flatMap { task ⇒ jobPathToOverview.get(task.job) }
-      val jobPath = job map { _.path.toString } getOrElse "?"
-      List(
-        b(
-          span(cls := "visible-lg-inline")(
-            "Task ",
-            s"$jobPath:",
-            taskToA(taskId)(taskId.string))))
-    }
-    def nextStepEntry = order.nextStepAt map instantWithDurationToHtml
+    val processingStateHtml: immutable.Seq[Frag] =
+      order.processingState match {
+        case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
+        case OrderProcessingState.Late(at) ⇒ instantWithDurationToHtml(at) ++ Vector(stringFrag(" late"))
+        case OrderProcessingState.Setback(at) ⇒ "Set back until " :: instantWithDurationToHtml(at)
+        case inTask: OrderProcessingState.InTask ⇒
+          val taskId = inTask.taskId
+          val job: Option[JobOverview] = taskIdToOverview.get(taskId) flatMap { task ⇒ jobPathToOverview.get(task.job) }
+          val jobPath = job map { _.path.string} getOrElse "(unknown job)"
+          val taskHtml = List(
+            b(
+              span(cls := "visible-lg-inline")(
+                "Task ",
+                s"$jobPath:",
+                taskToA(taskId)(taskId.string))))
+          inTask match {
+            case OrderProcessingState.WaitingInTask(_) ⇒ taskHtml ++ List(stringFrag(" waiting for process"))
+            case OrderProcessingState.InTaskProcess(_) ⇒ taskHtml
+         }
+        case o ⇒ List(stringFrag(o.toString))
+      }
     tr(cls := orderToTrClass(order))(
       td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
-      td(taskOption orElse nextStepEntry getOrElse List(EmptyFrag): _*),
-      td((order.isSuspended option "suspended") ++ (order.isBlacklisted option "blacklisted") mkString " "),
+      td(processingStateHtml),
+      td((order.isSuspended option "suspended") mkString " "),
       td(if (order.sourceType == OrderSourceType.fileBased) fileBasedStateToHtml(order.fileBasedState) else EmptyFrag))
   }
 
@@ -150,8 +160,12 @@ object OrdersHtmlPage {
     for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, ordersComplemented, context, schedulerOverview)
 
   private def orderToTrClass(order: OrderOverview) =
-    if (order.isSuspended || order.isBlacklisted) "warning"
-    else if (order.taskId.isDefined) "info"
-    else if (!order.fileBasedState.isOkay) "danger"
-    else ""
+    order.processingState match {
+      case _: OrderProcessingState.InTaskProcess ⇒ "info"
+      case _: OrderProcessingState.Late ⇒ "warning"
+      case OrderProcessingState.Suspended ⇒ "warning"
+      case OrderProcessingState.Blacklisted ⇒ "warning"
+      case _ if !order.fileBasedState.isOkay ⇒ "danger"
+      case _ ⇒ ""
+    }
 }

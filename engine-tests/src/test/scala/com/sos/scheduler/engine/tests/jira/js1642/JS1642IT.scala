@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.data.folder.FolderTree.Leaf
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainNodeAction, JobChainOverview, JobChainPath, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderSourceType, OrderState, OrderStepStartedEvent}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderState, OrderStepStartedEvent}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -398,8 +398,8 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    nextStepAt = Some(EPOCH),
-    taskId = Some(TaskId.First))
+    OrderProcessingState.InTaskProcess(TaskId.First),
+    nextStepAt = Some(EPOCH))
 
   private val a2OrderKey = aJobChainPath orderKey "2"
   private val a2OrderOverview = OrderOverview(
@@ -407,8 +407,8 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    nextStepAt = Some(EPOCH),
-    taskId = Some(TaskId.First + 1))
+    OrderProcessingState.InTaskProcess(TaskId.First + 1),
+    nextStepAt = Some(EPOCH))
 
   private val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
   private val aAdHocOrderOverview = OrderOverview(
@@ -416,6 +416,7 @@ private[js1642] object JS1642IT {
     FileBasedState.not_initialized,
     OrderSourceType.adHoc,
     OrderState("100"),
+    OrderProcessingState.Planned(OrderStartAt),
     nextStepAt = Some(OrderStartAt),
     isSuspended = true)
 
@@ -426,8 +427,8 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
-    nextStepAt = Some(EPOCH),
-    taskId = Some(TaskId.First + 2))
+    OrderProcessingState.InTaskProcess(TaskId.First + 2),
+    nextStepAt = Some(EPOCH))
 
   private val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
   private val xa1OrderKey = xaJobChainPath orderKey "1"
@@ -436,6 +437,7 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
+    OrderProcessingState.Late(EPOCH),
     nextStepAt = Some(EPOCH))
 
   private val xa2OrderKey = xaJobChainPath orderKey "2"
@@ -444,6 +446,7 @@ private[js1642] object JS1642IT {
     FileBasedState.active,
     OrderSourceType.fileBased,
     OrderState("100"),
+    OrderProcessingState.Late(EPOCH),
     nextStepAt = Some(EPOCH),
     isSuspended = true)
 
@@ -455,6 +458,7 @@ private[js1642] object JS1642IT {
     FileBasedState.not_initialized,
     OrderSourceType.fileBased,
     OrderState("100"),
+    OrderProcessingState.Late(EPOCH),
     nextStepAt = Some(EPOCH))
 
   private val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
@@ -463,6 +467,7 @@ private[js1642] object JS1642IT {
     FileBasedState.not_initialized,
     OrderSourceType.adHoc,
     OrderState("100"),
+    OrderProcessingState.Late(EPOCH),
     nextStepAt = Some(EPOCH))
 
   private val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
@@ -517,75 +522,96 @@ private[js1642] object JS1642IT {
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",
+      "processingState" : {
+        "type": "InTaskProcess",
+        "taskId" : "3"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "taskId": "3",
-      "isSuspended": false,
-      "isBlacklisted": false
+      "isSuspended": false
     },
     {
       "path": "/aJobChain,2",
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",
+      "processingState" : {
+        "type": "InTaskProcess",
+        "taskId" : "4"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "taskId": "4",
-      "isSuspended": false,
-      "isBlacklisted": false
+      "isSuspended": false
     },
     {
       "path": "/aJobChain,AD-HOC",
       "fileBasedState": "not_initialized",
       "orderState": "100",
       "sourceType": "adHoc",
+      "processingState" : {
+        "type": "Planned",
+        "at": "2038-01-01T11:22:33Z"
+      },
       "nextStepAt": "2038-01-01T11:22:33Z",
-      "isSuspended": true,
-      "isBlacklisted": false
+      "isSuspended": true
     },
     {
       "path": "/bJobChain,1",
       "fileBasedState": "active",
       "orderState": "100",
       "sourceType": "fileBased",
+      "processingState" : {
+        "type": "InTaskProcess",
+        "taskId" : "5"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "taskId": "5",
-      "isSuspended": false,
-      "isBlacklisted": false
+      "isSuspended": false
     },
     {
       "path": "/xFolder/x-aJobChain,1",
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",
+      "processingState" : {
+        "type": "Late",
+        "at" : "1970-01-01T00:00:00Z"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false,
-      "isBlacklisted": false
+      "isSuspended": false
     },
     {
       "path": "/xFolder/x-aJobChain,2",
       "fileBasedState": "active",
       "sourceType": "fileBased",
       "orderState": "100",
+      "processingState" : {
+        "type": "Late",
+        "at" : "1970-01-01T00:00:00Z"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": true ,
-      "isBlacklisted": false
+      "isSuspended": true
     },
     {
       "path": "/xFolder/x-bJobChain,1",
       "fileBasedState": "not_initialized",
       "sourceType": "fileBased",
       "orderState": "100",
+      "processingState" : {
+        "type": "Late",
+        "at" : "1970-01-01T00:00:00Z"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false,
-      "isBlacklisted": false
+      "isSuspended": false
     },
     {
       "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
       "fileBasedState": "not_initialized",
       "sourceType": "adHoc",
       "orderState": "100",
+      "processingState" : {
+        "type": "Late",
+        "at" : "1970-01-01T00:00:00Z"
+      },
       "nextStepAt": "1970-01-01T00:00:00Z",
-      "isSuspended": false,
-      "isBlacklisted": false
+      "isSuspended": false
     }
   ]""".parseJson.asInstanceOf[JsArray]
 
@@ -641,11 +667,13 @@ private[js1642] object JS1642IT {
             "sourceType": "fileBased",
             "path": "/aJobChain,1",
             "orderState": "100",
+            "processingState" : {
+              "type": "InTaskProcess",
+              "taskId" : "3"
+            },
             "nextStepAt": "1970-01-01T00:00:00Z",
             "fileBasedState": "active",
-            "isSuspended": false,
-            "taskId": "3",
-            "isBlacklisted": false
+            "isSuspended": false
           }
         },
         {
@@ -654,11 +682,13 @@ private[js1642] object JS1642IT {
             "sourceType": "fileBased",
             "path": "/aJobChain,2",
             "orderState": "100",
+            "processingState" : {
+              "type": "InTaskProcess",
+              "taskId" : "4"
+            },
             "nextStepAt": "1970-01-01T00:00:00Z",
             "fileBasedState": "active",
-            "isSuspended": false,
-            "taskId": "4",
-            "isBlacklisted": false
+            "isSuspended": false
           }
         },
         {
@@ -667,10 +697,13 @@ private[js1642] object JS1642IT {
             "sourceType": "adHoc",
             "path": "/aJobChain,AD-HOC",
             "orderState": "100",
+            "processingState" : {
+              "type": "Planned",
+              "at" : "2038-01-01T11:22:33Z"
+            },
             "nextStepAt": "2038-01-01T11:22:33Z",
             "fileBasedState": "not_initialized",
-            "isSuspended": true,
-            "isBlacklisted": false
+            "isSuspended": true
           }
         },
         {
@@ -679,11 +712,13 @@ private[js1642] object JS1642IT {
             "sourceType": "fileBased",
             "path": "/bJobChain,1",
             "orderState": "100",
+            "processingState" : {
+              "type": "InTaskProcess",
+              "taskId" : "5"
+            },
             "nextStepAt": "1970-01-01T00:00:00Z",
             "fileBasedState": "active",
-            "isSuspended": false,
-            "taskId": "5",
-            "isBlacklisted": false
+            "isSuspended": false
           }
         }
       ],
@@ -697,10 +732,13 @@ private[js1642] object JS1642IT {
                 "sourceType": "fileBased",
                 "path": "/xFolder/x-aJobChain,1",
                 "orderState": "100",
+                "processingState" : {
+                  "type": "Late",
+                  "at" : "1970-01-01T00:00:00Z"
+                },
                 "nextStepAt": "1970-01-01T00:00:00Z",
                 "fileBasedState": "active",
-                "isSuspended": false,
-                "isBlacklisted": false
+                "isSuspended": false
               }
             },
             {
@@ -709,10 +747,13 @@ private[js1642] object JS1642IT {
                 "sourceType": "fileBased",
                 "path": "/xFolder/x-aJobChain,2",
                 "orderState": "100",
+                "processingState" : {
+                  "type": "Late",
+                  "at" : "1970-01-01T00:00:00Z"
+                },
                 "nextStepAt": "1970-01-01T00:00:00Z",
                 "fileBasedState": "active",
-                "isSuspended": true,
-                "isBlacklisted": false
+                "isSuspended": true
               }
             },
             {
@@ -721,10 +762,13 @@ private[js1642] object JS1642IT {
                 "sourceType": "fileBased",
                 "path": "/xFolder/x-bJobChain,1",
                 "orderState": "100",
+                "processingState" : {
+                  "type": "Late",
+                  "at" : "1970-01-01T00:00:00Z"
+                },
                 "nextStepAt": "1970-01-01T00:00:00Z",
                 "fileBasedState": "not_initialized",
-                "isSuspended": false,
-                "isBlacklisted": false
+                "isSuspended": false
               }
             },
             {
@@ -733,10 +777,13 @@ private[js1642] object JS1642IT {
                 "sourceType": "adHoc",
                 "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
                 "orderState": "100",
+                "processingState" : {
+                  "type": "Late",
+                  "at" : "1970-01-01T00:00:00Z"
+                },
                 "nextStepAt": "1970-01-01T00:00:00Z",
                 "fileBasedState": "not_initialized",
-                "isSuspended": false,
-                "isBlacklisted": false
+                "isSuspended": false
               }
             }
           ],

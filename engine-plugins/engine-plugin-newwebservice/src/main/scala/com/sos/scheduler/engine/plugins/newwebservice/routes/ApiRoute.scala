@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorRefFactory
-import com.sos.scheduler.engine.base.exceptions.PublicException
+import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.utils.JavaResource
@@ -134,15 +134,10 @@ object ApiRoute {
   private val ApiExceptionHandler = ExceptionHandler {
     // This is an internal API, so we expose internal error messages !!!
     case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
-    case e: IllegalArgumentException ⇒ complete((BadRequest, e.getMessage))
-    case e: RuntimeException ⇒ complete((BadRequest, e.getMessage))
+    case e: IllegalArgumentException ⇒ complete((BadRequest, e.toSimplifiedString))
+    case e: RuntimeException ⇒ complete((BadRequest, e.toSimplifiedString))
     case NonFatal(t) ⇒
       logger.debug(t.toString, t)
-      val message = t match {
-        case _: PublicException ⇒ t.getMessage
-        case _ if t.getMessage.nonEmpty ⇒ t.getMessage //.stripPrefix("java.lang.RuntimeException: ")
-        case _ ⇒ t.toString
-      }
-      complete((BadRequest, message))
+      complete((BadRequest, t.toSimplifiedString))
   }
 }

@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
-import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.EternalCppMillis
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
@@ -15,18 +14,21 @@ import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
+import com.sos.scheduler.engine.kernel.job.TaskSubsystem
 import com.sos.scheduler.engine.kernel.order.Order._
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
+import java.lang.System.currentTimeMillis
 import java.time.Instant
 import scala.util.{Failure, Success}
 
 @ForCpp
 private[engine] final class Order private(
   protected[order] val cppProxy: OrderC,
-  protected[kernel] val subsystem: StandingOrderSubsystem)
+  protected[kernel] val subsystem: StandingOrderSubsystem,
+  taskSubsystem: TaskSubsystem)
 extends FileBased
 with UnmodifiableOrder
 with OrderPersistence {
@@ -70,16 +72,45 @@ with OrderPersistence {
 
   private[kernel] override def overview: OrderOverview = {
     val flags = cppProxy.java_fast_flags
+    val isTouched = cppFastFlags.isTouched(flags)
+    val isSetback = cppFastFlags.isSetback(flags)
+    val isSuspended = cppFastFlags.isSuspended(flags)
+    val isBlacklisted = cppFastFlags.isBlacklisted(flags)
+    val taskId = this.taskId
+    val nextStepAt = this.nextStepAt
     OrderOverview(
       path = orderKey,  // key because this.path is valid only for permanent orders
       cppFastFlags.fileBasedState(flags),
       sourceType,
       orderState = state,
+      processingState = {
+        import com.sos.scheduler.engine.data.order.OrderProcessingState._
+        if (!isTouched)
+          nextStepAt match {
+            case None ⇒ NotPlanned
+            case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
+            case Some(at) ⇒ Late(at)
+          }
+        else
+          taskId match {
+            case Some(taskId_) ⇒
+              if (taskSubsystem.task(taskId_).processStarted)
+                InTaskProcess(taskId_)
+              else
+                WaitingInTask(taskId_)
+            case None ⇒
+              if (isSetback)
+                Setback(setbackUntil.get)
+              if (isSuspended)
+                Suspended
+              else if (isBlacklisted)
+                Blacklisted
+              else
+                WaitingForOther
+          }
+      },
       nextStepAt = nextStepAt,
-      setbackUntil = if (cppFastFlags.isSetback(flags)) setbackUntil else None,
-      taskId = taskId,
-      isBlacklisted = cppFastFlags.isBlacklisted(flags),
-      isSuspended = cppFastFlags.isSuspended(flags))
+      isSuspended = isSuspended)
   }
 
   private def isSetback = setbackUntil.isDefined
@@ -124,11 +155,7 @@ with OrderPersistence {
 //    cppProxy.set_end_state(s.string)
 //  }
 
-  private def nextStepAt: Option[Instant] =
-    cppProxy.next_step_at_millis match {
-      case EternalCppMillis ⇒ None
-      case millis ⇒ Some(Instant ofEpochMilli millis)
-    }
+  private def nextStepAt: Option[Instant] = eternalCppMillisToNoneInstant(cppProxy.next_step_at_millis)
 
   private def setbackUntil: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
 
@@ -196,7 +223,7 @@ object Order {
   object Type extends SisterType[Order, OrderC] {
     def sister(proxy: OrderC, context: Sister): Order = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Order(proxy, injector.instance[StandingOrderSubsystem])
+      new Order(proxy, injector.instance[StandingOrderSubsystem], injector.instance[TaskSubsystem])
     }
   }
 
@@ -208,6 +235,8 @@ object Order {
     def isBlacklisted (flags: Long) = (flags & 0x04) != 0
     def isSetback     (flags: Long) = (flags & 0x08) != 0
     def fileBasedState(flags: Long) = FileBasedState.values()(((flags & 0xf0) >> 4).toInt)
+    def isTouched     (flags: Long) = (flags & 0x100) != 0
+    def isInProcess   (flags: Long) = (flags & 0x200) != 0
   }
 
   private def toOrderSourceType(isFileBased: Boolean, isFileOrder: Boolean) =

@@ -3469,7 +3469,9 @@ jlong Order::java_fast_flags() const {
         (_suspended       ? 0x02 : 0) |
         (_is_on_blacklist ? 0x04 : 0) |
         (_setback_count   ? 0x08 : 0) |
-        (((jlong)file_based_state() << 4) & 0xf0);
+        (((jlong)file_based_state() << 4) & 0xf0) |
+        (_is_touched      ? 0x100 : 0) |
+        (_task && _task->state() > Task::s_waiting_for_process ? 0x200 : 0);
 }
 
 //-------------------------------------------------------------------------------Order::web_service

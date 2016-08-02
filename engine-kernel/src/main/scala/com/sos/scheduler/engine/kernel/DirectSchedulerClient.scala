@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -42,7 +42,9 @@ extends SchedulerClient with DirectCommandClient {
   def ordersComplementedBy(query: OrderQuery) =
     directOrSchedulerThreadFuture {
       val orderOverviews = orderSubsystem.orderOverviews(query)
-      val tasks = orderOverviews flatMap { _.taskId } map taskSubsystem.task
+      val tasks = orderOverviews map { _.processingState } collect {
+        case inTask: OrderProcessingState.InTask ⇒ taskSubsystem.task(inTask.taskId)
+      }
       val jobs = (tasks map { _.job }).distinct
       val processClassPaths = (tasks map { _.processClassPath }) ++ (jobs flatMap { _.defaultProcessClassPathOption })
       val processClasses = (processClassPaths map processClassSubsystem.processClass).distinct
