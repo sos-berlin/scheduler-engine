@@ -31,7 +31,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "fileBased",
     "orderState": "100",
     "processingState" : {
-      "type": "InTaskProcess",
+      "TYPE": "InTaskProcess",
       "taskId": "3",
       "processClassPath": "",
       "since": "${taskIdToStartedAt(TaskId(3))}"
@@ -53,7 +53,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "fileBased",
     "orderState": "100",
     "processingState" : {
-      "type": "InTaskProcess",
+      "TYPE": "InTaskProcess",
       "taskId": "4",
       "processClassPath": "",
       "since": "${taskIdToStartedAt(TaskId(4))}"
@@ -76,14 +76,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "orderState": "100",
     "sourceType": "adHoc",
     "processingState" : {
-      "type": "Planned",
+      "TYPE": "Planned",
       "at": "2038-01-01T11:22:33Z"
     },
-    "obstacles": [
-      {
-        "type": "Suspended"
-      }
-    ],
+    "obstacles": [ "Suspended" ],
     "nextStepAt": "2038-01-01T11:22:33Z"
   }"""
 
@@ -100,7 +96,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "orderState": "100",
     "sourceType": "fileBased",
     "processingState" : {
-      "type": "InTaskProcess",
+      "TYPE": "InTaskProcess",
       "taskId": "5",
       "processClassPath": "",
       "since": "${taskIdToStartedAt(TaskId(5))}"
@@ -122,7 +118,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "fileBased",
     "orderState": "100",
     "processingState" : {
-      "type": "Pending",
+      "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],
@@ -143,14 +139,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "fileBased",
     "orderState": "100",
     "processingState" : {
-      "type": "Pending",
+      "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
     },
-    "obstacles": [
-      {
-        "type": "Suspended"
-      }
-    ],
+    "obstacles": [ "Suspended" ],
     "nextStepAt": "1970-01-01T00:00:00Z"
   }"""
 
@@ -167,7 +159,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "fileBased",
     "orderState": "100",
     "processingState" : {
-      "type": "Pending",
+      "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],
@@ -187,7 +179,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "adHoc",
     "orderState": "100",
     "processingState" : {
-      "type": "Pending",
+      "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],
