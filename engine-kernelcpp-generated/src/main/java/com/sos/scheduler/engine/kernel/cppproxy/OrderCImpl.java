@@ -298,6 +298,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native com.sos.scheduler.engine.kernel.order.jobchain.Node java_job_chain_node__native(long cppReference);
 
 
+    @Override public java.lang.String java_occupying_cluster_member_id() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = java_occupying_cluster_member_id__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String java_occupying_cluster_member_id__native(long cppReference);
+
+
     @Override public void java_remove() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -2,23 +2,25 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OnlyOrderQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
+import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node, OrderQueueNode}
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 @ForCpp
 @Singleton
@@ -26,6 +28,7 @@ final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   folderSubsystem: FolderSubsystem,
+  ownClusterMemberIdProvider: Provider[ClusterMemberId],
   protected val injector: Injector)
 extends FileBasedSubsystem {
 
@@ -38,6 +41,7 @@ extends FileBasedSubsystem {
 
   private implicit lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
   private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
+  private lazy val ownClusterMemberId = ownClusterMemberIdProvider.get()
 
   @ForCpp
   private def persistNodeState(node: Node): Unit = {
@@ -49,15 +53,35 @@ extends FileBasedSubsystem {
   private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
     val localOrders = localChains flatMap { _.orderIterator } filter { o ⇒ query matchesOrder o.queryable } map { _.overview }
-    val distriOrders = distriChains flatMap distributedOrderOverviews(query)
+    val distriOrders =
+      for (o ← distributedOrderOverviews(distriChains, query)) yield
+        if (o.occupyingClusterMemberId contains ownClusterMemberId)
+          orderOption(o.orderKey) map { _.overview } getOrElse o
+        else
+          o
     (localOrders ++ distriOrders).toVector
   }
 
-  private def distributedOrderOverviews(query: OnlyOrderQuery)(jobChain: JobChain): Iterator[OrderOverview] =
-    for (orderQueueNode ← jobChain.nodes.iterator collect { case o: OrderQueueNode ⇒ o };
-         orderQueue = orderQueueNode.orderQueue;
-         overview ← orderQueue.distributedOrderOverviews(query))
-      yield overview
+  private def distributedOrderOverviews(jobChains: Iterator[JobChain], query: OrderQuery): Seq[OrderOverview] = {
+    val result = mutable.Buffer[OrderOverview]()
+    val jobChainPathArray = new java.util.ArrayList[AnyRef] sideEffect { a ⇒
+      for (jobChain ← jobChains) a.add(jobChain.path.withoutStartingSlash)
+    }
+    if (!jobChainPathArray.isEmpty) {
+      cppProxy.java_for_each_distributed_order(
+        jobChainPathArray,
+        perNodeLimit = Int.MaxValue,
+        callback = new OrderCallback {
+          def apply(orderC: OrderC) = {
+            val order = orderC.getSister
+            if (query matchesOrder order.queryable) {
+              result += orderC.getSister.overview
+            }
+          }
+        })
+    }
+    result
+  }
 
   private[order] def localOrderIterator: Iterator[Order] =
     jobChainsByQuery(JobChainQuery.All) flatMap { _.orderIterator }

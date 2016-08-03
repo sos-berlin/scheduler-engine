@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression}
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.Node
 
@@ -40,6 +40,8 @@ trait OrderC extends CppProxyWithSister[Order] with File_basedC[Order] {
   def id_locked: Boolean
   def java_job_chain_node: Node
   def java_fast_flags: Long
+  @CppExpression("$->_java_occupying_cluster_member_id")
+  def java_occupying_cluster_member_id: String;
 }
 
 object OrderC {

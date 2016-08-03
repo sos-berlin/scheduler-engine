@@ -42,20 +42,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_queueC {
     private static native boolean is_distributed_order_requested__native(long cppReference, long p0);
 
 
-    @Override public void java_for_each_distributed_order(int p0, com.sos.scheduler.engine.kernel.order.OrderCallback p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            java_for_each_distributed_order__native(cppReference(), p0, p1);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void java_for_each_distributed_order__native(long cppReference, int p0, com.sos.scheduler.engine.kernel.order.OrderCallback p1);
-
-
     @Override public int java_order_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

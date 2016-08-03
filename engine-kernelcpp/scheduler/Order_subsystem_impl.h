@@ -109,10 +109,15 @@ struct Order_subsystem_impl : Order_subsystem
     void                        request_order               ();
     ptr<Order>                  load_distributed_order_from_database(Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags, string* occupying_cluster_member_id = NULL);
     ptr<Order>              try_load_distributed_order_from_database( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags, string* occupying_cluster_member_id = NULL);
+    typedef void(Order_subsystem_impl::*Order_callback)(void*, Order*);
+    void                        java_for_each_distributed_order(const ArrayListJ& job_chain_paths, int limit, OrderCallbackJ);
+    void                        java_order_callback         (void* callback_context, Order*);
+    void                        for_each_distributed_order  (const vector<string>& job_chain_paths, int limit, Order_callback, void*);
 
     bool                        has_any_order               ();
     int                         order_count                 ( Read_transaction* ) const;
     string                      distributed_job_chains_db_where_condition() const;
+    string                      job_chains_in_clause        (const vector<string>& job_chains_paths) const;
     int                         processing_order_count      ( Read_transaction* ta ) const;
     xml::Element_ptr            state_statistic_element     (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const;
 

@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderState}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
@@ -126,7 +127,8 @@ with OrderPersistence {
       orderState = state,
       processingState = processingState,
       obstacles = obstacles,
-      nextStepAt = nextStepAt)
+      nextStepAt = nextStepAt,
+      occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
   }
 
   private def isSetback = setbackUntil.isDefined

@@ -122,5 +122,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     private static native java.util.ArrayList java_file_baseds__native(long cppReference);
 
 
+    @Override public void java_for_each_distributed_order(java.util.ArrayList p0, int p1, com.sos.scheduler.engine.kernel.order.OrderCallback p2) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java_for_each_distributed_order__native(cppReference(), p0, p1, p2);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void java_for_each_distributed_order__native(long cppReference, java.util.ArrayList p0, int p1, com.sos.scheduler.engine.kernel.order.OrderCallback p2);
+
+
     // </editor-fold>
 }

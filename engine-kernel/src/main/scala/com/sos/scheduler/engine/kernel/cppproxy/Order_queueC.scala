@@ -13,8 +13,6 @@ trait Order_queueC extends CppProxyWithSister[OrderQueue] {
   def java_order_count: Int
 
   def is_distributed_order_requested(now: Long): Boolean
-
-  def java_for_each_distributed_order(limit: Int, callback: OrderCallback): Unit
 }
 
 object Order_queueC {

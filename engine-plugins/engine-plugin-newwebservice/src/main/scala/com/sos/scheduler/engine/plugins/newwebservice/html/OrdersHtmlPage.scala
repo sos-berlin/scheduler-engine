@@ -153,7 +153,7 @@ div.NodeOrders {
         case OrderProcessingState.Setback(at) ⇒ "Set back until " :: instantWithDurationToHtml(at)
         case inTask: OrderProcessingState.InTask ⇒
           val taskId = inTask.taskId
-          val jobPath = jobPathOption getOrElse "(unknown job)"
+          val jobPath = jobPathOption map { _.string } getOrElse "(unknown job)"
           val taskHtml = List(
             b(
               span(cls := "visible-lg-inline")(
@@ -166,23 +166,24 @@ div.NodeOrders {
          }
         case o ⇒ List(stringFrag(o.toString))
       }
-    val jobObstaclesHtml: List[Frag] =
-      order.processingState match {
-        case _: OrderProcessingState.InTask ⇒ Nil
-        case _ ⇒ jobPathOption.toList flatMap jobPathToObstacleHtml
-      }
+    val occupyingMemberHtml = order.occupyingClusterMemberId map { o ⇒ stringFrag(s", occupied by $o") }
+    val jobObstaclesHtml: List[Frag] = order.processingState match {
+      case _: OrderProcessingState.InTask ⇒ Nil
+      case _ ⇒ jobPathOption.toList flatMap jobPathToObstacleHtml
+    }
+    val isWaiting = order.processingState.isInstanceOf[OrderProcessingState.Waiting]
     val obstaclesHtml: List[Frag] = {
       val inner = List(List(stringFrag(order.obstacles mkString " ")), jobObstaclesHtml) reduce { _ ++ List(stringFrag(" ")) ++ _ }
-      if (inner.isEmpty) Nil else span(cls := "text-danger")(inner) :: Nil
+      if (isWaiting && inner.nonEmpty)
+        span(cls := "text-danger")(inner) :: Nil
+      else
+        inner
     }
-    val rowCssClass = {
-      def isWarning = order.processingState.isInstanceOf[OrderProcessingState.Waiting] && jobObstaclesHtml.nonEmpty
-      orderToTrClass(order) getOrElse (if (isWarning) "warning" else "")
-    }
+    val rowCssClass = orderToTrClass(order) getOrElse (if (isWaiting && jobObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
       td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
-      td(processingStateHtml),
+      td(processingStateHtml, occupyingMemberHtml),
       td(obstaclesHtml),
       td(if (order.sourceType == OrderSourceType.fileBased) fileBasedStateToHtml(order.fileBasedState) else EmptyFrag))
   }
@@ -191,11 +192,11 @@ div.NodeOrders {
 
   private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
 
-  private def queryToA(query: OrderQuery) = a(href := uris.order(query, returnType = None))
+  private def queryToA(query: OrderQuery) = a(cls := "inherit-markup", href := uris.order(query, returnType = None))
 
-  private def jobChainPathToA(path: JobChainPath) = a(href := uris.jobChain.details(path))
+  private def jobChainPathToA(path: JobChainPath) = a(cls := "inherit-markup", href := uris.jobChain.details(path))
 
-  private def taskToA(taskId: TaskId) = a(href := uris.task.overview(taskId))
+  private def taskToA(taskId: TaskId) = a(cls := "inherit-markup", href := uris.task.overview(taskId))
 }
 
 object OrdersHtmlPage {

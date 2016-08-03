@@ -603,6 +603,50 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
     catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_job_chain_nodes_table.sql_name() + " or " + db()->_job_chains_table.sql_name(), x), Z_FUNCTION); }
 }
 
+void Order_subsystem_impl::java_for_each_distributed_order(const ArrayListJ& job_chain_paths_j, int limit, OrderCallbackJ callbackJ) {
+    int n = job_chain_paths_j.size();
+    vector<string> job_chain_paths;
+    job_chain_paths.reserve(n);
+    for (int i = 0; i < n; i++) {
+        javaproxy::java::lang::String s = (javaproxy::java::lang::String)job_chain_paths_j.get(i);
+        if (!s) z::throw_xc(Z_FUNCTION);
+        job_chain_paths.push_back((string)s);
+    }
+    for_each_distributed_order(job_chain_paths, limit, &Order_subsystem_impl::java_order_callback, &callbackJ);
+}
+
+void Order_subsystem_impl::java_order_callback(void* callback_context, Order* order) {
+    OrderCallbackJ* callbackJ = (OrderCallbackJ*)callback_context;
+    callbackJ->apply(order->java_proxy_jobject());
+}
+
+void Order_subsystem_impl::for_each_distributed_order(const vector<string>& job_chain_paths, int limit, Order_callback callback, void* callback_context) {
+    if (db() && !db()->is_in_transaction()) {
+        Read_transaction ta(db());
+        S select_sql;
+        select_sql << "select ";
+        if (limit < INT_MAX) select_sql << "%limit(" << limit << ") ";
+        select_sql << order_select_database_columns << ", `job_chain`, `occupying_cluster_member_id` " << 
+            "  from " << db()->_orders_tablename <<
+            "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
+              " and `distributed_next_time` is not null "
+              //" and (`occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or `occupying_cluster_member_id` is null)"
+              " and " << job_chains_in_clause(job_chain_paths);
+            "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
+
+        for (Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); !result_set.eof();) {
+            Record record = result_set.get_record();
+            ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
+            Absolute_path job_chain_path(root_path, record.as_string("job_chain"));
+            order->load_record(job_chain_path, record);
+            order->load_order_xml_blob( &ta );
+            order->_java_occupying_cluster_member_id = record.as_string("occupying_cluster_member_id");
+            (this->*callback)(callback_context, order);   // How to type correctly ?
+        }
+    }
+}
+
+
 //-----------------------------------------------Order_subsystem_impl::append_calendar_dom_elements
 
 void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
@@ -793,37 +837,32 @@ string Order_subsystem_impl::job_chain_db_where_condition( const Absolute_path& 
 
 string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  // JS-507
 {
-    list<string> job_chain_names;
+    vector<string> job_chain_paths;
+    job_chain_paths.reserve(_file_based_map.size());
     FOR_EACH_JOB_CHAIN(job_chain) {
         if (job_chain->is_distributed()) {
-            S s;
-            s << "'" << job_chain->path().without_slash() << "'";
-            job_chain_names.push_back( s );
+            job_chain_paths.push_back(job_chain->path().without_slash());
         }
     }
-
-    if( job_chain_names.empty() ) 
+    if( job_chain_paths.empty() ) 
         return "";
     else {
-        const int limit = 1000;
-        string job_chain_clause = "";
-        if ((db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin) && job_chain_names.size() > limit) {
-            list<string> chunks;
-            list<string>::iterator i = job_chain_names.begin();
-            while (i != job_chain_names.end()) {
-                list<string> next_job_chain_names;
-                while (i != job_chain_names.end() && next_job_chain_names.size() < limit) {
-                    next_job_chain_names.push_back(*i++);
-                }
-                chunks.push_back(S() << "`job_chain` in (" << join(",", next_job_chain_names) << ")");
-            }
-            job_chain_clause = S() << "(" << join(" or ", chunks) << ")";
-        } else {
-            job_chain_clause = S() << "`job_chain` in (" << join( ",", job_chain_names ) << ")";
-        }
-        return S() << db_where_condition() 
-                   << " and " << job_chain_clause;; 
+        return S() << db_where_condition() << " and " << job_chains_in_clause(job_chain_paths);
     }
+}
+
+string Order_subsystem_impl::job_chains_in_clause(const vector<string>& job_chain_paths) const {
+    const int limit = db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin ? 1000 : INT_MAX;
+    list<string> chunks;
+    vector<string>::const_iterator i = job_chain_paths.begin();
+    while (i != job_chain_paths.end()) {
+        list<string> next_job_chain_paths;
+        while (i != job_chain_paths.end() && next_job_chain_paths.size() < limit) {
+            next_job_chain_paths.push_back("'" + *i++ + "'");
+        }
+        chunks.push_back(S() << "`job_chain` in (" << join(",", next_job_chain_paths) << ")");
+    }
+    return S() << "(" << join(" or ", chunks) << ")";
 }
 
 //----------------------------------------------------------------Order_subsystem_impl::order_count
@@ -4122,6 +4161,7 @@ string Order_queue::obj_name() const
 
 xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
+    // See also Order_subsystem_impl::for_each_distributed_order
     Read_transaction ta ( db() );
 
     xml::Element_ptr element = document.createElement( "order_queue" );
@@ -4200,48 +4240,6 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
     }
 
     return element;
-}
-
-void Order_queue::for_each_distributed_order(int limit, Order_callback callback, void* callback_context) {
-    int remaining = limit;
-    if (_job_chain->is_distributed()
-        &&  db()  &&  !db()->is_in_transaction() )
-    {
-        Read_transaction ta ( db() );
-
-        string w = db_where_expression();
-
-        S select_sql;
-        select_sql << "select %limit(" << remaining << ") " << order_select_database_columns << ", `job_chain`, `occupying_cluster_member_id` " << 
-                        "  from " << db()->_orders_tablename <<
-                        "  where " << w << 
-                        " and `distributed_next_time` is not null "
-                        " and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
-                                " `occupying_cluster_member_id` is null )"
-                    "  order by `distributed_next_time`, `priority`, `ordering`";
-
-        for (Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); 
-            remaining > 0 &&  !result_set.eof(); 
-            --remaining)
-        {
-            Record record = result_set.get_record();
-            //string occupying_cluster_member_id = record.as_string("occupying_cluster_member_id");
-            ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
-            Absolute_path job_chain_path(root_path, record.as_string("job_chain"));
-            order->load_record(job_chain_path, record);
-            order->load_order_xml_blob( &ta );
-            (this->*callback)(callback_context, order);
-        }
-    }
-}
-
-void Order_queue::java_for_each_distributed_order(int limit, OrderCallbackJ callbackJ) {
-    for_each_distributed_order(limit, &Order_queue::java_order_callback, &callbackJ);
-}
-
-void Order_queue::java_order_callback(void* callback_context, Order* order) {
-    OrderCallbackJ* callbackJ = (OrderCallbackJ*)callback_context;
-    callbackJ->apply(order->java_proxy_jobject());
 }
 
 //----------------------------------------------------------Order_queue_node::register_order_source
