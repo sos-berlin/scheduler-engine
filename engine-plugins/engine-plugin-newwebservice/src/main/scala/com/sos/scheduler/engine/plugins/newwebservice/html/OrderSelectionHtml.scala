@@ -11,9 +11,8 @@ import scalatags.Text.attrs
 private[html] final class OrderSelectionHtml(query: OrderQuery) {
 
   def html =
-    div(cls := "orderSelection")(
-      "Show only",
-      br,
+    div(cls := "OrderSelection")(
+      div(paddingTop := 4.px, paddingBottom := 4.px)(i("Show only ...")),
       for ((key, valueOption) ← List("suspended" → query.isSuspended,
                                      "setback" → query.isSetback,
                                      "blacklisted" → query.isBlacklisted,

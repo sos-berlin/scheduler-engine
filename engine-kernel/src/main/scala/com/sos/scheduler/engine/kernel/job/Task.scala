@@ -14,7 +14,9 @@ import com.sos.scheduler.engine.kernel.cppproxy.TaskC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions
 import java.nio.file.Paths
+import java.time.Instant
 
 @ForCpp
 private[engine] final class Task(
@@ -41,7 +43,9 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def processClassPath = ProcessClassPath(cppProxy.process_class_path)
 
-  private[kernel] def processStarted = state.ordinal >= TaskState.starting.ordinal
+  def processStartedAt: Option[Instant] = inSchedulerThread { CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.processStartedAt) }
+
+  private[kernel] def stepOrProcessStartedAt = CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.stepOrProcessStartedAt)
 
   private def state: TaskState = TaskState.of(cppProxy.state_name)
 
@@ -59,7 +63,7 @@ extends UnmodifiableTask with Sister with EventSource {
 }
 
 object Task {
-  final class Type extends SisterType[Task, TaskC] {
+  private[kernel] object Type extends SisterType[Task, TaskC] {
     def sister(proxy: TaskC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
       new Task(proxy, injector.instance[TaskSubsystem])

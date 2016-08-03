@@ -11,7 +11,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private TaskCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.TaskC$.MODULE$.sisterType().sister(this, context));
     }
 
     @Override public int id() {
@@ -124,6 +124,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
 
 
+    @Override public long processStartedAt() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return processStartedAt__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long processStartedAt__native(long cppReference);
+
+
     @Override public java.lang.String process_class_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -202,6 +216,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native java.lang.String stdout_path__native(long cppReference);
+
+
+    @Override public long stepOrProcessStartedAt() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return stepOrProcessStartedAt__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long stepOrProcessStartedAt__native(long cppReference);
 
 
     // </editor-fold>

@@ -215,7 +215,9 @@ struct Task : Object,
     bool                        is_idle                     ()                                      { return _state == s_running_waiting_for_order  &&  !_end; }
 
     bool                        running_state_reached       () const                                { return _running_state_reached; }
-    Time                        last_process_start_time     ()                                      { return _last_process_start_time; }
+    Time                        process_started_at          () const                                { return _process_started_at; }
+    Time                        step_started_at             () const                                { return _step_started_at; }
+    Time                        step_or_process_started_at  () const                                { return _step_count ? _step_started_at : _process_started_at; }  // For Java
 
     void                        merge_params                ( const Com_variable_set* p )           { _params->merge( p ); }
     ptr<Com_variable_set>       params                      ()                                      { return _params; }
@@ -412,7 +414,8 @@ struct Task : Object,
     bool                       _force_start;                // Auch um _start_at starten, wenn gerade keine <run_time>-Periode vorliegt
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten. 
     Time                       _running_since;
-    Time                       _last_process_start_time;
+    Time                       _process_started_at;         // Für Java
+    Time                       _step_started_at;
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
     Duration                   _timeout;                    // Frist für eine Operation (oder INT_MAX)

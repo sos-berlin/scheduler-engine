@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.folder.FolderTree
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
@@ -89,5 +90,10 @@ extends SchedulerClient with DirectCommandClient {
   def jobChainDetails(jobChainPath: JobChainPath) =
     directOrSchedulerThreadFuture {
       orderSubsystem.jobChain(jobChainPath).details
+    }
+
+  def taskOverview(taskId: TaskId) =
+    directOrSchedulerThreadFuture {
+      taskSubsystem.task(taskId).overview
     }
 }

@@ -138,7 +138,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
     }
 
     private static int compareTaskOverview(TaskOverview a, TaskOverview b) {
-        return Integer.compare(a.id().number(), b.id().number());
+        return Integer.compare(a.taskId().number(), b.taskId().number());
     }
 
     static void run(String schedulerUri) {

@@ -44,19 +44,26 @@ extends SchedulerHtmlPage {
   protected def title = "Orders"
 
   override protected def css = s"""
-div.nodeHeadline {
+div.OrderStatistics {
+  background-color: white;
+  margin-right: 30px;
+  padding: 0 4px 4px 4px;
+  border: 1px solid #c0c0c0;
+}
+div.OrderSelection {
+  margin-right: 20px;
+  margin-bottom: 10px;
+  background-color: #f9d186;
+  line-height: 1em;
+  padding: 0 4px 4px 4px;
+  border: 1px solid #c0c0c0;
+}
+div.NodeHeadline {
   padding: 5px 0 0 5px;
   font-weight: bold;
 }
-div.nodeOrders {
-  background-color: #f5f5f5;
-  border-radius: 2px;
-}
-div.orderSelection {
-  float: right;
-  line-height: 1em;
-  background-color: #f5f5f5;
-  padding: 2px 4px;
+div.NodeOrders {
+  margin-bottom: 5px;
   border-radius: 2px;
 }
 """ + super.css
@@ -65,9 +72,11 @@ div.orderSelection {
     val orderSelection = new OrderSelectionHtml(query)
     htmlPage(
       raw(s"<script type='text/javascript'>${orderSelection.javascript}</script>"),
-      orderSelection.html,
+      div(float.right)(
+        ordersStatistics),
+      div(float.right)(
+        orderSelection.html),
       headline,
-      ordersStatistics,
       query.jobChainPathQuery match {
         case single: PathQuery.SinglePath ⇒ div(jobChainOrdersHtml(single.as[JobChainPath], ordersComplemented.orders))
         case PathQuery.Folder(folderPath) ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
@@ -78,13 +87,25 @@ div.orderSelection {
   private def ordersStatistics = {
     val statistics = new OrderOverview.Statistics(ordersComplemented.orders)
     import statistics.{blacklistedCount, count, inProcessCount, suspendedCount}
-    p(s"$count orders: $inProcessCount in process using ${jobPathToOverview.size} jobs, $suspendedCount suspended, $blacklistedCount blacklisted")
+    div(cls := "OrderStatistics")(
+      div(paddingTop := 4.px),
+      table(cls := "MiniTable")(
+        tbody(
+          tr(td(textAlign.right)(s"$count")                    , td(s" orders")),
+          tr(td(textAlign.right)(s"$inProcessCount")           , td(s"in process")),
+          tr(td(textAlign.right)(s"${ jobPathToOverview.size}"), td(s"jobs")),
+          tr(td(textAlign.right)(s"$suspendedCount")           , td(s"suspended")),
+          tr(td(textAlign.right)(s"$blacklistedCount")         , td(s"blacklisted")))))
   }
 
-  def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
-    Vector(h2("Folder ", folderPathToOrdersA(tree.path)(tree.path.string))) ++
-    folderOrdersHtml(tree.leafs) ++
+  private def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
+    Vector(folderHtml(tree.path, tree.leafs)) ++
     (for (folder ← tree.subfolders; o ← folderTreeHtml(folder)) yield o)
+
+  private def folderHtml(folderPath: FolderPath, orders: immutable.Seq[OrderOverview]) =
+    div(cls := "ContentBox")(
+      Vector(h2("Folder ", folderPathToOrdersA(folderPath)(folderPath.string))) ++
+      folderOrdersHtml(orders))
 
   private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
     for ((jobChainPath, jobChainOrders) ← orders groupBy { _.orderKey.jobChainPath };
@@ -101,19 +122,19 @@ div.orderSelection {
 
   private def nodeOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
     for ((node, orders) ← orders retainOrderGroupBy { _.orderState }) yield
-      div(cls := "nodeOrders")(
-        div(cls := "nodeHeadline")(s"Node ${node.string}"),
+      div(cls := "NodeOrders")(
+        div(cls := "NodeHeadline")(s"Node ${node.string}"),
         orderTable(orders))
 
   private def orderTable(orders: immutable.Seq[OrderOverview]): Frag =
     table(cls := "table table-condensed table-hover")(
+      colgroup(
+        col,
+        col,
+        col,
+        col,
+        col(cls := "small")),
       thead(
-        colgroup(
-          col,
-          col,
-          col,
-          col,
-          col(cls := "small")),
         tr(
           th("OrderId"),
           th(div(cls := "visible-lg-block")("SourceType")),
@@ -140,8 +161,8 @@ div.orderSelection {
                 s"$jobPath:",
                 taskToA(taskId)(taskId.string))))
           inTask match {
-            case OrderProcessingState.WaitingInTask(_) ⇒ taskHtml ++ List(stringFrag(" waiting for process"))
-            case OrderProcessingState.InTaskProcess(_) ⇒ taskHtml
+            case _: OrderProcessingState.WaitingInTask ⇒ taskHtml ++ List(stringFrag(" waiting for process"))
+            case _: OrderProcessingState.InTaskProcess ⇒ taskHtml
          }
         case o ⇒ List(stringFrag(o.toString))
       }
@@ -154,7 +175,10 @@ div.orderSelection {
       val inner = List(List(stringFrag(order.obstacles mkString " ")), jobObstaclesHtml) reduce { _ ++ List(stringFrag(" ")) ++ _ }
       if (inner.isEmpty) Nil else span(cls := "text-danger")(inner) :: Nil
     }
-    val rowCssClass = orderToTrClass(order) getOrElse (if (jobObstaclesHtml.nonEmpty) "warning" else "")
+    val rowCssClass = {
+      def isWarning = order.processingState.isInstanceOf[OrderProcessingState.Waiting] && jobObstaclesHtml.nonEmpty
+      orderToTrClass(order) getOrElse (if (isWarning) "warning" else "")
+    }
     tr(cls := rowCssClass)(
       td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),

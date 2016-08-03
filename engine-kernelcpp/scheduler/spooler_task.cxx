@@ -366,8 +366,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         if( _cause )
         task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
-        if( _state == s_running  &&  _last_process_start_time.not_zero() )
-        task_element.setAttribute( "in_process_since", _last_process_start_time.xml_value() );
+        if( _state == s_running  &&  _step_started_at.not_zero() )
+        task_element.setAttribute( "in_process_since", _step_started_at.xml_value() );
 
         task_element.setAttribute( "steps"           , _step_count );
 
@@ -1465,12 +1465,12 @@ bool Task::do_something()
                         case s_starting: {
                             _begin_called = true;
                             if( !_operation ) {
+                                _process_started_at = now;
                                 _operation = begin__start();
                                 if (!_operation->async_finished())
                                     _operation->on_async_finished_call(_call_register.new_async_call<Task_starting_completed_call>());
                             } else {
                                 ok = operation__end();
-
                                 if( _job->_history.min_steps() == 0 )  _history.start();
 
                                 _file_logger->add_file(_module_instance->stdout_path(), log_info         , _stderr_log_level == log_info? "stdout" : "");
@@ -1584,7 +1584,7 @@ bool Task::do_something()
                                         }
                                     }
                                     _running_state_reached = true;
-                                    _last_process_start_time = now;
+                                    _step_started_at = now;
                                     if( _step_count + 1 == _job->_history.min_steps() )
                                         _history.start();
                                     if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] ) {

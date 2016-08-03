@@ -85,10 +85,11 @@ with OrderPersistence {
       import OrderProcessingState._
       taskId match {
         case Some(taskId_) ⇒
-          if (taskSubsystem.task(taskId_).processStarted)
-            InTaskProcess(taskId_)
-          else
-            WaitingInTask(taskId_)
+          val task = taskSubsystem.task(taskId_)
+          task.stepOrProcessStartedAt match {
+            case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, task.agentAddress, at)
+            case None ⇒ WaitingInTask(taskId_, task.processClassPath, task.agentAddress)
+          }
         case None ⇒
           if (isBlacklisted)
             Blacklisted

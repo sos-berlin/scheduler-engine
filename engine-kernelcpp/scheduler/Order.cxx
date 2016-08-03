@@ -1661,7 +1661,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _task )
         {
             result.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
-            result.setAttribute( "in_process_since", _task->last_process_start_time().xml_value() );
+            result.setAttribute( "in_process_since", _task->step_started_at().xml_value() );
         }
 
         if( _state_text != "" )

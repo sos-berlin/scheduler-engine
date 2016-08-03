@@ -41,7 +41,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
       tags2.title(s"$title · ${schedulerOverview.schedulerId}"),
       raw(webServiceContext.toStylesheetLinkHtml(WebjarsRoute.BootstrapCss).toString),
-      tags2.style(`type` := "text/css")(css))
+      raw(s"<style type='text/css'>$css</style>"))
 
   protected def pageBody(innerBody: Frag*) =
     body(
@@ -51,7 +51,7 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   protected def pageHeader = {
     import schedulerOverview.{pid, state, version}
-    div(cls := "pageHeader")(
+    div(cls := "PageHeader")(
       div(float.right)(a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(localDateTimeWithZoneToHtml(now))),
       div(color.gray)(
         a(href := uris.overview, cls := "inherit-markup")(s"JobScheduler $version Master"),
@@ -74,29 +74,55 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   protected def css = """
 body {
+  background-color: #f8f8f8;
   color: black;
   font-size: 13px;
 }
-div.pageHeader {
+div.PageHeader {
   margin-bottom: 10px;
   padding: 1px 5px 0 5px;
-  border-radius = 2px;
-  background-color: #f5f5f5;
+}
+h1 {
+  font-size: 30px;
 }
 h1.headLine {
   margin-top: 0;
+  padding: 0px 5px;
 }
 h2 {
-  margin-top: 60px;
+  margin-top: 0;
+  padding: 0px 5px;
   font-size: 24px;
 }
 h3 {
   margin: 20px 0 10px 0;
-  font-size: 13px;
-  font-weight: bold;
+  padding: 0px 5px;
+  font-size: 18px;
 }
-th {
+.table {
+  margin-bottom: 0;
+}
+.table-condensed>tbody>tr>td,
+.table-condensed>tbody>tr>th,
+.table-condensed>tfoot>tr>td,
+.table-condensed>tfoot>tr>th,
+.table-condensed>thead>tr>td,
+.table-condensed>thead>tr>th {
+  border-top: 1px solid #eee;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.table>thead>tr>th {
+  border-top: 0;
   font-weight: normal;
+}
+.MiniTable>tbody>tr>td,
+.MiniTable>tbody>tr>th,
+.MiniTable>tfoot>tr>td,
+.MiniTable>tfoot>tr>th,
+.MiniTable>thead>tr>td,
+.MiniTable>thead>tr>th {
+  padding-right: 5px;
 }
 a.inherit-markup {
   color: inherit;
@@ -107,6 +133,13 @@ label {
 span.time-extra {
  font-size: 11px;
  color: #808080;
+}
+div.ContentBox {
+  margin-top: 40px;
+  border: 2px solid #eee;
+  border-top: 1px solid #eee;
+  background-color: white;
+  padding-top: 5px;
 }
 """
 }
