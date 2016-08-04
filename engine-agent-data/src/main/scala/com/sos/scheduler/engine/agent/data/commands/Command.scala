@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.agent.data.sprayjson.TypedJson._
-import spray.json._
+import com.sos.scheduler.engine.base.sprayjson.TypedJsonFormat
+import com.sos.scheduler.engine.base.sprayjson.TypedJsonFormat.Subtype
 
 /**
  * @author Joacim Zschimmer
@@ -19,33 +19,14 @@ trait Command {
 
 object Command {
 
-  implicit object MyJsonFormat extends RootJsonFormat[Command] {
-    def write(command: Command) =
-      command match {
-        case o: CloseTask ⇒ o.toJson.asJsObject withTypeField CloseTask.SerialTypeName
-        case o: DeleteFile ⇒ o.toJson.asJsObject withTypeField DeleteFile.SerialTypeName
-        case o: MoveFile ⇒ o.toJson.asJsObject withTypeField MoveFile.SerialTypeName
-        case o: RequestFileOrderSourceContent ⇒ o.toJson.asJsObject withTypeField RequestFileOrderSourceContent.SerialTypeName
-        case o: SendProcessSignal ⇒ o.toJson.asJsObject withTypeField SendProcessSignal.SerialTypeName
-        case o: StartApiTask ⇒ o.toJson.asJsObject withTypeField StartApiTask.SerialTypeName
-        case o: StartNonApiTask ⇒ o.toJson.asJsObject withTypeField StartNonApiTask.SerialTypeName
-        case o: Terminate ⇒ o.toJson.asJsObject withTypeField Terminate.SerialTypeName
-        case AbortImmediately ⇒ JsObject() withTypeField AbortImmediately.SerialTypeName
-        case o ⇒ throw new UnsupportedOperationException(s"Class ${o.getClass.getName} is not serializable to JSON")
-      }
-
-    def read(value: JsValue) =
-      splitTypeAndJsObject(value) match {
-        case (CloseTask.SerialTypeName, o) ⇒ o.convertTo[CloseTask]
-        case (DeleteFile.SerialTypeName, o) ⇒ o.convertTo[DeleteFile]
-        case (MoveFile.SerialTypeName, o) ⇒ o.convertTo[MoveFile]
-        case (RequestFileOrderSourceContent.SerialTypeName, o) ⇒ o.convertTo[RequestFileOrderSourceContent]
-        case (SendProcessSignal.SerialTypeName, o) ⇒ o.convertTo[SendProcessSignal]
-        case (StartApiTask.SerialTypeName, o) ⇒ o.convertTo[StartApiTask]
-        case (StartNonApiTask.SerialTypeName, o) ⇒ o.convertTo[StartNonApiTask]
-        case (Terminate.SerialTypeName, o) ⇒ o.convertTo[Terminate]
-        case (AbortImmediately.SerialTypeName, o) ⇒ o.convertTo[AbortImmediately.type]
-        case (typeName, _) ⇒ throw new IllegalArgumentException(s"Unknown JSON $$TYPE '$typeName'")
-      }
-  }
+  implicit val MyJsonFormat = TypedJsonFormat[Command](typeField = "$TYPE", shortenTypeOnlyValue = false)(
+    Subtype[CloseTask](CloseTask.SerialTypeName),
+    Subtype[DeleteFile](DeleteFile.SerialTypeName),
+    Subtype[MoveFile](MoveFile.SerialTypeName),
+    Subtype[RequestFileOrderSourceContent](RequestFileOrderSourceContent.SerialTypeName),
+    Subtype[SendProcessSignal](SendProcessSignal.SerialTypeName),
+    Subtype[StartApiTask](StartApiTask.SerialTypeName),
+    Subtype[StartNonApiTask](StartNonApiTask.SerialTypeName),
+    Subtype[Terminate](Terminate.SerialTypeName),
+    Subtype[AbortImmediately.type](AbortImmediately.SerialTypeName))
 }
