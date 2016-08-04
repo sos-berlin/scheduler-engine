@@ -51,13 +51,13 @@ h3.JobChain {
   margin-top: 0;
   padding-top: 10px;
 }
-div.OrderStatistics {
+.OrderStatistics {
   background-color: white;
   margin-right: 30px;
   padding: 0 4px 4px 4px;
   border: 1px solid #c0c0c0;
 }
-div.OrderSelection {
+.OrderSelection {
   margin-right: 20px;
   margin-bottom: 10px;
   background-color: #f9d186;
@@ -65,7 +65,7 @@ div.OrderSelection {
   padding: 0 4px 4px 4px;
   border: 1px solid #c0c0c0;
 }
-div.NodeHeadline {
+.NodeHeadline {
   margin: 2em 0 1em;
   font-weight: bold;
 }
