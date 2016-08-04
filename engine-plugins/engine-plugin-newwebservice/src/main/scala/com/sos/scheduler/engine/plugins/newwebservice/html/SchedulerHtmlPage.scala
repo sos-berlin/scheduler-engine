@@ -78,6 +78,9 @@ body {
   color: black;
   font-size: 13px;
 }
+.container {
+  padding: 0 7px 20px 7px;
+}
 div.PageHeader {
   margin-bottom: 10px;
   padding: 1px 5px 0 5px;
@@ -91,12 +94,10 @@ h1.headLine {
 }
 h2 {
   margin-top: 0;
-  padding: 0px 5px;
   font-size: 24px;
 }
 h3 {
   margin: 20px 0 10px 0;
-  padding: 0px 5px;
   font-size: 18px;
 }
 .table {
@@ -139,7 +140,9 @@ div.ContentBox {
   border: 2px solid #eee;
   border-top: 1px solid #eee;
   background-color: white;
-  padding-top: 5px;
+}
+.Padded {
+  padding: 0 5px;
 }
 """
 }

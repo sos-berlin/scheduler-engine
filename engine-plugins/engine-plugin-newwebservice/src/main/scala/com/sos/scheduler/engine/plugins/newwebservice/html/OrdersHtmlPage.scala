@@ -44,6 +44,13 @@ extends SchedulerHtmlPage {
   protected def title = "Orders"
 
   override protected def css = s"""
+h2.Folder {
+  margin-top: 3em;
+}
+h3.JobChain {
+  margin-top: 0;
+  padding-top: 10px;
+}
 div.OrderStatistics {
   background-color: white;
   margin-right: 30px;
@@ -59,12 +66,8 @@ div.OrderSelection {
   border: 1px solid #c0c0c0;
 }
 div.NodeHeadline {
-  padding: 5px 0 0 5px;
+  margin: 2em 0 1em;
   font-weight: bold;
-}
-div.NodeOrders {
-  margin-bottom: 5px;
-  border-radius: 2px;
 }
 """ + super.css
 
@@ -99,13 +102,12 @@ div.NodeOrders {
   }
 
   private def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
-    Vector(folderHtml(tree.path, tree.leafs)) ++
+    folderHtml(tree.path, tree.leafs) ++
     (for (folder ← tree.subfolders; o ← folderTreeHtml(folder)) yield o)
 
   private def folderHtml(folderPath: FolderPath, orders: immutable.Seq[OrderOverview]) =
-    div(cls := "ContentBox")(
-      Vector(h2("Folder ", folderPathToOrdersA(folderPath)(folderPath.string))) ++
-      folderOrdersHtml(orders))
+      Vector(h2(cls := "Folder Padded")(folderPathToOrdersA(folderPath)(s"Folder ${folderPath.string}"))) ++
+      folderOrdersHtml(orders)
 
   private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
     for ((jobChainPath, jobChainOrders) ← orders groupBy { _.orderKey.jobChainPath };
@@ -113,18 +115,24 @@ div.NodeOrders {
       yield o
 
   private def jobChainOrdersHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
-    Vector(h3(
-      s"JobChain ",
-      jobChainPathToOrdersA(jobChainPath)(jobChainPath.string),
-      span(paddingLeft := 10.px)(" "),
-      jobChainPathToA(jobChainPath)("(definition)"))) ++
-    nodeOrdersHtml(orders)
+    List(
+      div(cls := "ContentBox")(
+        div(cls := "Padded")(
+          div(float.right)(
+            jobChainPathToA(jobChainPath)("→definition")),
+          h3(cls := "JobChain")(
+            jobChainPathToOrdersA(jobChainPath)(s"JobChain ${jobChainPath.string}"),
+            span(paddingLeft := 10.px)(" "))),
+        nodeOrdersHtml(jobChainPath, orders)))
 
-  private def nodeOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
-    for ((node, orders) ← orders retainOrderGroupBy { _.orderState }) yield
+  private def nodeOrdersHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]): Vector[Frag] =
+    for ((nodeId, orders) ← orders retainOrderGroupBy { _.orderState }) yield {
+      val jobPath = nodeKeyToOverview(NodeKey(jobChainPath, nodeId)).jobPath
       div(cls := "NodeOrders")(
-        div(cls := "NodeHeadline")(s"Node ${node.string}"),
+        div(cls := "Padded")(
+          div(cls := "NodeHeadline")(s"Node ${nodeId.string} \u00a0 ${jobPath.string}")),
         orderTable(orders))
+    }
 
   private def orderTable(orders: immutable.Seq[OrderOverview]): Frag =
     table(cls := "table table-condensed table-hover")(
@@ -157,9 +165,7 @@ div.NodeOrders {
           val taskHtml = List(
             b(
               span(cls := "visible-lg-inline")(
-                "Task ",
-                s"$jobPath:",
-                taskToA(taskId)(taskId.string))))
+                taskToA(taskId)(s"Task $jobPath:${taskId.string}"))))
           inTask match {
             case _: OrderProcessingState.WaitingInTask ⇒ taskHtml ++ List(stringFrag(" waiting for process"))
             case _: OrderProcessingState.InTaskProcess ⇒ taskHtml
