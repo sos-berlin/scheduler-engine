@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQueryHttp}
-import com.sos.scheduler.engine.client.web.order.OrderQueryHttp
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -36,7 +35,7 @@ final class SchedulerUris private(schedulerUriString: String) {
       val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
       resolvePathUri(Uri(
         path = Uri.Path(s"api/order$subpath"),
-        query = Uri.Query(OrderQueryHttp.toUriQueryMap(query) ++ (returnType map { o ⇒ "return" → o }))))
+        query = Uri.Query(query.withoutPathToMap ++ (returnType map { o ⇒ "return" → o }))))
       .toString
     }
   }

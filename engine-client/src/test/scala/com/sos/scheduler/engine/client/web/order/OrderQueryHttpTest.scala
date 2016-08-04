@@ -57,17 +57,18 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
   }
 
-  "toUriQueryMap, fromHttpQueryMap" in {
+  "orderQueryToMap, fromHttpQueryMap" in {
     checkQuery(OrderQuery(), Map())
     checkQuery(OrderQuery(isSuspended = Some(true)), Map("suspended" → "true"))
     checkQuery(OrderQuery(isSuspended = Some(false)), Map("suspended" → "false"))
     checkQuery(
       OrderQuery(isSuspended = Some(false), isOrderSourceType = Some(Set(OrderSourceType.adHoc, OrderSourceType.fileBased))),
       Map("suspended" → "false", "sourceType" → "adHoc,fileBased"))  // Incidentally, Scala Set with two elements retains orders
+    checkQuery(OrderQuery(limitPerNode = Some(123)), Map("limitPerNode" → "123"))
   }
 
   private def checkQuery(orderQuery: OrderQuery, parameters: Map[String, String]) = {
-    assert(toUriQueryMap(orderQuery) == parameters)
+    assert(orderQuery.withoutPathToMap == parameters)
     assert(pathAndParametersToQuery(Uri.Path("/"), Map(parameters.toVector: _*)) == orderQuery)
   }
 }
