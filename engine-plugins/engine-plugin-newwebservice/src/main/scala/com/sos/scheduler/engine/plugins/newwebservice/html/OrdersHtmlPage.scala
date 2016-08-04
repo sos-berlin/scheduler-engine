@@ -102,7 +102,7 @@ h3.JobChain {
 
   private def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
     if (tree.isEmpty)
-      List(div(cls := "Padded")("Order selection is empty"))
+      List(div(cls := "Padded", paddingTop := 4.em)("No order meets selection criteria."))
     else
       folderTreeHtml2(tree)
 

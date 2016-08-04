@@ -46,7 +46,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
 
     "OrderQuery /a/ suspended but not blacklisted" in {
-      Get("/prefix/a/?suspended=true&blacklisted=false") ~>
+      Get("/prefix/a/?isSuspended=true&isBlacklisted=false") ~>
         route(OrderQuery(
           jobChainPathQuery = PathQuery("/a/"),
           isSuspended = Some(true),
@@ -59,11 +59,11 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
   "orderQueryToMap, fromHttpQueryMap" in {
     checkQuery(OrderQuery(), Map())
-    checkQuery(OrderQuery(isSuspended = Some(true)), Map("suspended" → "true"))
-    checkQuery(OrderQuery(isSuspended = Some(false)), Map("suspended" → "false"))
+    checkQuery(OrderQuery(isSuspended = Some(true)), Map("isSuspended" → "true"))
+    checkQuery(OrderQuery(isSuspended = Some(false)), Map("isSuspended" → "false"))
     checkQuery(
       OrderQuery(isSuspended = Some(false), isOrderSourceType = Some(Set(OrderSourceType.adHoc, OrderSourceType.fileBased))),
-      Map("suspended" → "false", "sourceType" → "adHoc,fileBased"))  // Incidentally, Scala Set with two elements retains orders
+      Map("isSuspended" → "false", "isOrderSourceType" → "adHoc,fileBased"))  // Incidentally, Scala Set with two elements retains orders
     checkQuery(OrderQuery(notInTaskLimitPerNode = Some(123)), Map("notInTaskLimitPerNode" → "123"))
   }
 

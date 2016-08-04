@@ -2,9 +2,10 @@ package com.sos.scheduler.engine.plugins.newwebservice.html
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.queries.OrderQuery
+import com.sos.scheduler.engine.plugins.newwebservice.html.OrderSelectionHtml._
 import scalatags.Text.all._
 import scalatags.Text.attrs
-import spray.json.{JsObject, JsString}
+import spray.json._
 
 /**
   * @author Joacim Zschimmer
@@ -20,10 +21,10 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
               "Show only ...")),
           tr(
             td(paddingRight := 6.px, rowspan := 2)(
-              for ((key, valueOption) ← List("suspended" → query.isSuspended,
-                                             "setback" → query.isSetback,
-                                             "blacklisted" → query.isBlacklisted,
-                                             "distributed" → query.isDistributed))
+              for ((key, valueOption) ← List(OrderQuery.IsSuspendedName → query.isSuspended,
+                                             OrderQuery.IsSetbackName → query.isSetback,
+                                             OrderQuery.IsBlacklistedName → query.isBlacklisted,
+                                             OrderQuery.IsDistributedName → query.isDistributed))
                 yield List(
                   labeledCheckbox(key, valueOption, checkedMeans = true),
                   StringFrag(" "),
@@ -32,7 +33,7 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
             td(
               verticalAlign := "top",
               paddingLeft := 6.px,
-              paddingTop := 6.px,
+              paddingTop := 4.px,
               borderLeft := "1px solid #aaa")(
                 limitPerNodeInput(query.notInTaskLimitPerNode))),
           tr(
@@ -46,14 +47,15 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
     val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? $checkedMeans : undefined})"
     label(
       input(attrs.name := name, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
-      if (checkedMeans) key else s"not")
+      span(position.relative, top := (-2).px)(
+        boldIf(checked)(if (checkedMeans) removePrefixIs(key) else s"not")))
   }
 
-  def limitPerNodeInput(limitPerNode: Option[Int]) =
+  private def limitPerNodeInput(limitPerNode: Option[Int]) =
     div(
       div(marginBottom := 2.px,
         span(title := "Per node limit of orders currently not being executed by a task")(
-          u("L"), StringFrag("imit orders not in task"))),  // "Limit orders not in task"
+          boldIf(limitPerNode.nonEmpty)(u("L"), StringFrag("imit orders not in task")))),  // "Limit orders not in task"
       div(
         input(
           attrs.name := "notInTaskLimitPerNode",
@@ -79,6 +81,16 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
       if (q.length) href += "?" + q.join('&');
       window.location.href = href;
     }"""
+}
+
+object OrderSelectionHtml {
+
+  private def removePrefixIs(string: String) = {
+    val (head, tail) = string stripPrefix "is" splitAt 2
+    head.toLowerCase + tail
+  }
+
+  private def boldIf(flag: Boolean)(frags: Frag*): Frag = if (flag) b(frags) else frags
 
   private def toJson(query: OrderQuery) = JsObject(query.withoutPathToMap mapValues JsString.apply)
 }

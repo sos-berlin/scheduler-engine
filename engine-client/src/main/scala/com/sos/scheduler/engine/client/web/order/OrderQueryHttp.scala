@@ -25,12 +25,12 @@ object OrderQueryHttp {
   def pathAndParametersToQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery =
     OrderQuery(
       jobChainPathQuery = PathQueryHttp.fromUriPath(path),
-      isDistributed = parameters.optionAs[Boolean](DistributedName),
-      isSuspended = parameters.optionAs[Boolean](SuspendedName),
-      isSetback = parameters.optionAs[Boolean](SetbackName),
-      isBlacklisted = parameters.optionAs[Boolean](BlacklistedName),
-      isOrderSourceType = parameters.optionAs(SourceTypeName)(As { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet }),
-      notInTaskLimitPerNode = parameters.optionAs[Int](LimitPerNodeName))
+      isDistributed = parameters.optionAs[Boolean](IsDistributedName),
+      isSuspended = parameters.optionAs[Boolean](IsSuspendedName),
+      isSetback = parameters.optionAs[Boolean](IsSetbackName),
+      isBlacklisted = parameters.optionAs[Boolean](IsBlacklistedName),
+      isOrderSourceType = parameters.optionAs(IsOrderSourceTypeName)(As { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet }),
+      notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode))
 
   def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.patternString
 }

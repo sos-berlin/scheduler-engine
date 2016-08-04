@@ -9,7 +9,7 @@ import spray.routing._
   */
 object JobChainQueryHttp {
 
-  private val DistributedName = "distributed"
+  private val DistributedName = "isDistributed"
   protected val parameterNames = Set(DistributedName)
 
   object directives {

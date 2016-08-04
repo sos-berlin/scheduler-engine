@@ -25,12 +25,12 @@ final class SchedulerUrisTest extends FreeSpec {
     assert(uris.order.overviews(OrderQuery.All) == "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrderOverview")
     assert(uris.order.overviews(OrderQuery(isSuspended = Some(true))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
-        "suspended" → "true",
+        "isSuspended" → "true",
         "return" → "OrderOverview")).toString)
     assert(uris.order.overviews(OrderQuery(isSuspended = Some(true), isBlacklisted = Some(false))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
-        "suspended" → "true",
-        "blacklisted" → "false",
+        "isSuspended" → "true",
+        "isBlacklisted" → "false",
         "return" → "OrderOverview")).toString)
   }
 
@@ -39,7 +39,7 @@ final class SchedulerUrisTest extends FreeSpec {
     assert(
       uris.order.ordersComplemented(OrderQuery(isSuspended = Some(true))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
-        "suspended" → "true",
+        "isSuspended" → "true",
         "return" → "OrdersComplemented")).toString)
     assert(uris.order.ordersComplemented(
       OrderQuery(
@@ -48,9 +48,9 @@ final class SchedulerUrisTest extends FreeSpec {
         isOrderSourceType = Some(Set(OrderSourceType.fileOrderSource, OrderSourceType.adHoc)))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/")
         .withQuery(Uri.Query(
-          "suspended" → "true",
-          "blacklisted" → "false",
-          "sourceType" → "fileOrderSource,adHoc",  // Incidentally, Scala Set with two elements retains orders
+          "isSuspended" → "true",
+          "isBlacklisted" → "false",
+          "isOrderSourceType" → "fileOrderSource,adHoc",  // Incidentally, Scala Set with two elements retains orders
           "return" → "OrdersComplemented")).toString)
   }
 
