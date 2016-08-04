@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.base.utils.PerKeyLimiter
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichIterator
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -61,7 +61,10 @@ extends FileBasedSubsystem {
         else
           o
     var iterator = localOrders ++ distriOrders
-    for (limit ← query.limitPerNode) iterator = iterator.limitPerKey(_.nodeKey)(limit)
+    for (limit ← query.notInTaskLimitPerNode) {
+      val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderOverview) ⇒ o.nodeKey)
+      iterator = iterator filter { o ⇒ o.processingState.isInTask || perKeyLimiter(o) }
+    }
     iterator.toVector
   }
 

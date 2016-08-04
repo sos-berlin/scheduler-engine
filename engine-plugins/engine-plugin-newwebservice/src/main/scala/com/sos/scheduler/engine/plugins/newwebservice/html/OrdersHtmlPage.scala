@@ -101,15 +101,26 @@ h3.JobChain {
   }
 
   private def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
+    if (tree.isEmpty)
+      List(div(cls := "Padded")("Order selection is empty"))
+    else
+      folderTreeHtml2(tree)
+
+  private def folderTreeHtml2(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
     folderHtml(tree.path, tree.leafs) ++
-    (for (folder ← tree.subfolders; o ← folderTreeHtml(folder)) yield o)
+    (for (folder ← tree.subfolders; o ← folderTreeHtml2(folder)) yield o)
 
   private def folderHtml(folderPath: FolderPath, orders: immutable.Seq[OrderOverview]) =
-      Vector(h2(cls := "Folder Padded")(folderPathToOrdersA(folderPath)(s"Folder ${folderPath.string}"))) ++
+    if (orders.isEmpty)
+      Nil
+    else
+      Vector(
+        h2(cls := "Folder Padded")(
+          folderPathToOrdersA(folderPath)(s"Folder ${folderPath.string}"))) ++
       folderOrdersHtml(orders)
 
-  private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): immutable.Iterable[Frag] =
-    for ((jobChainPath, jobChainOrders) ← orders groupBy { _.orderKey.jobChainPath };
+  private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): Vector[Frag] =
+    for ((jobChainPath, jobChainOrders) ← orders retainOrderGroupBy { _.orderKey.jobChainPath };
          o ← jobChainOrdersHtml(jobChainPath, jobChainOrders))
       yield o
 
@@ -167,7 +178,7 @@ h3.JobChain {
                 taskToA(taskId)(s"Task $jobPath:${taskId.string}"))))
           inTask match {
             case _: OrderProcessingState.WaitingInTask ⇒ taskHtml ++ List(stringFrag(" waiting for process"))
-            case _: OrderProcessingState.InTaskProcess ⇒ taskHtml
+            case o: OrderProcessingState.InTaskProcess ⇒ taskHtml ::: stringFrag(" since ") :: instantWithDurationToHtml(o.since)
          }
         case o ⇒ List(stringFrag(o.toString))
       }

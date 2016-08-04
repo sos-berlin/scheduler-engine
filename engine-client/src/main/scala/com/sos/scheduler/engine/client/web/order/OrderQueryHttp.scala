@@ -30,7 +30,7 @@ object OrderQueryHttp {
       isSetback = parameters.optionAs[Boolean](SetbackName),
       isBlacklisted = parameters.optionAs[Boolean](BlacklistedName),
       isOrderSourceType = parameters.optionAs(SourceTypeName)(As { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet }),
-      limitPerNode = parameters.optionAs[Int](LimitPerNodeName))
+      notInTaskLimitPerNode = parameters.optionAs[Int](LimitPerNodeName))
 
   def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.patternString
 }

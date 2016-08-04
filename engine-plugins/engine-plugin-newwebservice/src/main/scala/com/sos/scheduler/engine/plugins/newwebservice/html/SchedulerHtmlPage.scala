@@ -140,7 +140,7 @@ label {
 }
 span.time-extra {
  font-size: 11px;
- color: #808080;
+ //color: @text-muted;
 }
 .ContentBox {
   margin-top: 40px;

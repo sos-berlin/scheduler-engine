@@ -34,7 +34,7 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
               paddingLeft := 6.px,
               paddingTop := 6.px,
               borderLeft := "1px solid #aaa")(
-                limitPerNodeInput(query.limitPerNode))),
+                limitPerNodeInput(query.notInTaskLimitPerNode))),
           tr(
             td(verticalAlign := "bottom", textAlign.right)(
               button(`type` := "submit")(
@@ -52,14 +52,15 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
   def limitPerNodeInput(limitPerNode: Option[Int]) =
     div(
       div(marginBottom := 2.px,
-        u("L"), StringFrag("imit per node")),  // "Limit per node"
+        span(title := "Per node limit of orders currently not being executed by a task")(
+          u("L"), StringFrag("imit orders not in task"))),  // "Limit orders not in task"
       div(
         input(
-          attrs.name := "limitPerNode",
+          attrs.name := "notInTaskLimitPerNode",
           accesskey := "L",
           width := 9.ch,
           `type` := "number",
-          attrs.min := 1,
+          attrs.min := 0,
           attrs.value := limitPerNode map { _.toString } getOrElse "")))
 
   def javascript = s"""
@@ -71,8 +72,8 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
         v = change[key]
         if (typeof v == 'undefined') delete query[key]; else query[key] = v;
       }
-      var limitPerNode = document.getElementsByName('limitPerNode')[0].value;
-      if (typeof limitPerNode == 'undefined' || limitPerNode == '') delete query['limitPerNode']; else query.limitPerNode = limitPerNode;
+      var notInTaskLimitPerNode = document.getElementsByName('notInTaskLimitPerNode')[0].value;
+      if (typeof notInTaskLimitPerNode == 'undefined' || notInTaskLimitPerNode == '') delete query['notInTaskLimitPerNode']; else query.notInTaskLimitPerNode = notInTaskLimitPerNode;
       for (key in query) if (query.hasOwnProperty(key)) q.push(key + '=' + query[key].toString());
       var href = window.location.href.replace(/\\?.*/g, '');
       if (q.length) href += "?" + q.join('&');
