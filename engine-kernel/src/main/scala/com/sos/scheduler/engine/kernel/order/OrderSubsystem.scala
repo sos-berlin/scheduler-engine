@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichIterator
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -59,7 +60,9 @@ extends FileBasedSubsystem {
           orderOption(o.orderKey) map { _.overview } getOrElse o
         else
           o
-    (localOrders ++ distriOrders).toVector
+    var iterator = localOrders ++ distriOrders
+    for (limit ← query.limitPerNode) iterator = iterator.limitPerKey(_.nodeKey)(limit)
+    iterator.toVector
   }
 
   private def distributedOrderOverviews(jobChains: Iterator[JobChain], query: OrderQuery): Seq[OrderOverview] = {
