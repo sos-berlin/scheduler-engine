@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.web
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQueryHttp}
 import com.sos.scheduler.engine.common.scalautil.Collections._
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import spray.http.Uri
@@ -57,6 +57,27 @@ final class SchedulerUris private(schedulerUriString: String) {
       val subpath = PathQueryHttp.toUriPath(PathQuery(jobChainPath))
       require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
       uriString(Uri(path = Uri.Path(s"api/jobChain$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
+    }
+  }
+
+  object job {
+    def overviews(): String = uriString(Uri(path = Uri.Path(s"api/job/")))
+//    def overviews(query: JobQuery = JobQuery.All): String = {
+//      val subpath = JobQueryHttp.toUriPath(query)
+//      require(subpath endsWith "/", "JobQuery must denote folder, terminated by a slash")
+//      uriString(Uri(path = Uri.Path(s"api/job$subpath")))  // Default with trailing slash: query = Uri.Query("return" → "JobOverview")))
+//    }
+
+    def overview(jobPath: JobPath): String = {
+      val subpath = PathQueryHttp.toUriPath(PathQuery(jobPath))
+      require(!subpath.endsWith("/"), "Invalid JobPath has trailing slash")
+      uriString(Uri(path = Uri.Path(s"api/job$subpath"), query = Uri.Query("return" → "JobOverview")))
+    }
+
+    def details(jobPath: JobPath): String = {
+      val subpath = PathQueryHttp.toUriPath(PathQuery(jobPath))
+      require(!subpath.endsWith("/"), "Invalid JobPath has trailing slash")
+      uriString(Uri(path = Uri.Path(s"api/job$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
     }
   }
 

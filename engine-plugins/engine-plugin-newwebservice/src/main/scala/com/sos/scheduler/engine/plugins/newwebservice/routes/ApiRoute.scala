@@ -23,7 +23,14 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute extends JobChainRoute with OrderRoute with TaskRoute with CommandRoute with LogRoute {
+trait ApiRoute
+extends JobChainRoute
+with OrderRoute
+with JobRoute
+with ProcessClassRoute
+with TaskRoute
+with CommandRoute
+with LogRoute {
 
   protected def client: DirectSchedulerClient
   //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
@@ -42,42 +49,54 @@ trait ApiRoute extends JobChainRoute with OrderRoute with TaskRoute with Command
     }
 
   private def realApiRoute =
-    pathEndElseRedirect(webServiceContext) {
-      get {
-        completeTryHtml(client.overview)
-      }
-    } ~
-    (pathPrefix("command") & pathEnd) {
-      commandRoute
-    } ~
-    pathPrefix("order") {
-      testSlash(webServiceContext) {
-        orderRoute
-      }
-    } ~
-    pathPrefix("jobChain") {
-      testSlash(webServiceContext) {
-        jobChainRoute
-      }
-    } ~
-    pathPrefix("task") {
-      testSlash(webServiceContext) {
-        taskRoute
-      }
-    } ~
-    pathPrefix("scheduler") {
-      pathEnd {
-        parameter("return") {
-          case "log" ⇒ logRoute(prefixLog)
-          case _ ⇒ reject
+    handleExceptions(exceptionHandler) {
+      pathEndElseRedirect(webServiceContext) {
+        get {
+          completeTryHtml(client.overview)
+        }
+      } ~
+      (pathPrefix("command") & pathEnd) {
+        commandRoute
+      } ~
+      pathPrefix("order") {
+        testSlash(webServiceContext) {
+          orderRoute
+        }
+      } ~
+      pathPrefix("jobChain") {
+        testSlash(webServiceContext) {
+          jobChainRoute
+        }
+      } ~
+      pathPrefix("job") {
+        testSlash(webServiceContext) {
+          jobRoute
+        }
+      } ~
+      pathPrefix("processClass") {
+        testSlash(webServiceContext) {
+          processClassRoute
+        }
+      } ~
+      pathPrefix("task") {
+        testSlash(webServiceContext) {
+          taskRoute
+        }
+      } ~
+      pathPrefix("scheduler") {
+        pathEnd {
+          parameter("return") {
+            case "log" ⇒ logRoute(prefixLog)
+            case _ ⇒ reject
+          }
         }
       }
+      /*~
+      pathPrefix("subsystems") {
+        subsystemsRoute
+      }
+      */
     }
-    /*~
-    pathPrefix("subsystems") {
-      subsystemsRoute
-    }
-    */
 
   private def frontEndRoute =
     get {
@@ -125,6 +144,10 @@ trait ApiRoute extends JobChainRoute with OrderRoute with TaskRoute with Command
       }
     }
     */
+
+  private val exceptionHandler = ExceptionHandler {
+    case e: CppException if e.getMessage startsWith "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
+  }
 }
 
 object ApiRoute {

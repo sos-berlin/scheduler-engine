@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.web
 
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderSourceType
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
@@ -65,6 +65,21 @@ final class SchedulerUrisTest extends FreeSpec {
 
   "jobChain.detail" in {
     assert(uris.jobChain.details(JobChainPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b")
+  }
+
+  "job.overviews" in {
+    assert(uris.job.overviews() == "http://0.0.0.0:1111/jobscheduler/master/api/job/")
+    //intercept[IllegalArgumentException] { uris.job.overviews(JobQuery.Standard(PathQuery("/a"))) }
+//    assert(uris.job.overviews(JobQuery.Standard(PathQuery("/a/"))) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/")
+//    intercept[IllegalArgumentException] { uris.job.overviews(JobChainQuery.Standard(PathQuery("/a"))) }
+  }
+
+  "job.overview" in {
+    assert(uris.job.overview(JobPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b?return=JobOverview")
+  }
+
+  "job.detail" in {
+    assert(uris.job.details(JobPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b")
   }
 
   "task.overview" in {

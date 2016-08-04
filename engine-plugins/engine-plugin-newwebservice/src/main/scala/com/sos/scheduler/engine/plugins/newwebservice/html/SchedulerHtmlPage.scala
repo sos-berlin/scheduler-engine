@@ -75,7 +75,11 @@ trait SchedulerHtmlPage extends HtmlPage {
           li(role := "presentation", cls := (if (this.isInstanceOf[OrdersHtmlPage]) "active" else ""))(
             a(href := uris.resolvePathUri("api/order/").toString)("Orders")),
           li(role := "presentation")(
-            a(href := uris.resolvePathUri("api/jobChain/").toString)("Job chains")))))
+            a(href := uris.resolvePathUri("api/jobChain/").toString)("Job chains")),
+          li(role := "presentation")(
+            a(href := uris.resolvePathUri("api/job/").toString)("Jobs")),
+          li(role := "presentation")(
+            a(href := uris.resolvePathUri("api/processClass/").toString)("Process classes")))))
 
   //<link rel="stylesheet" href="/jobscheduler/master/webjars/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"/>
 

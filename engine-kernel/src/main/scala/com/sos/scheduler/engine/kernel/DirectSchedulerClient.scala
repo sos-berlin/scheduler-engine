@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.kernel
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.folder.FolderTree
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState}
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -92,7 +93,27 @@ extends SchedulerClient with DirectCommandClient {
       orderSubsystem.jobChain(jobChainPath).details
     }
 
-  def taskOverview(taskId: TaskId) =
+  def jobOverviews: Future[immutable.Seq[JobOverview]] =
+    directOrSchedulerThreadFuture {
+      jobSubsystem.fileBaseds map { _.overview }
+    }
+
+  def jobOverview(jobPath: JobPath): Future[JobOverview] =
+    directOrSchedulerThreadFuture {
+      jobSubsystem.job(jobPath).overview
+    }
+
+  def processClassOverviews: Future[immutable.Seq[ProcessClassOverview]] =
+    directOrSchedulerThreadFuture {
+      processClassSubsystem.fileBaseds map { _.overview }
+    }
+
+  def processClassOverview(processClassPath: ProcessClassPath): Future[ProcessClassOverview] =
+    directOrSchedulerThreadFuture {
+      processClassSubsystem.processClass(processClassPath).overview
+    }
+
+  def taskOverview(taskId: TaskId): Future[TaskOverview] =
     directOrSchedulerThreadFuture {
       taskSubsystem.task(taskId).overview
     }

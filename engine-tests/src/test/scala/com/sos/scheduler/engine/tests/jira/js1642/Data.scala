@@ -204,7 +204,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       SimpleJobNodeOverview(NodeKey(xaJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 2),
       SimpleJobNodeOverview(NodeKey(xbJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 0)),  // Distributed orders yet not counted
     Vector(
-      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClass = None, JobState.running, isInPeriod = true,
+      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
         taskLimit = 10, usedTaskCount = 3, obstacles = Set())),
     Vector(
       TaskOverview(TaskId(3), TestJobPath, TaskState.running, ProcessClassPath.Default),
@@ -254,19 +254,19 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "taskId": "3",
       "jobPath": "/test",
       "state": "running",
-      "processClass": ""
+      "processClassPath": ""
     },
     {
       "taskId": "4",
       "jobPath": "/test",
       "state": "running",
-      "processClass": ""
+      "processClassPath": ""
     },
     {
       "taskId": "5",
       "jobPath": "/test",
       "state": "running",
-      "processClass": ""
+      "processClassPath": ""
     }
   ]"""
   val UsedJobsJson = """[
