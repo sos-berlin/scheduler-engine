@@ -41,7 +41,7 @@ extends SchedulerHtmlPage {
     }
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
 
-  protected def title = "Orders"
+  override protected def title = "Orders"
 
   override protected def css = s"""
 h2.Folder {
@@ -79,7 +79,6 @@ h3.JobChain {
         ordersStatistics),
       div(float.right)(
         orderSelection.html),
-      headline,
       query.jobChainPathQuery match {
         case single: PathQuery.SinglePath ⇒ div(jobChainOrdersHtml(single.as[JobChainPath], ordersComplemented.orders))
         case PathQuery.Folder(folderPath) ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
@@ -116,7 +115,7 @@ h3.JobChain {
 
   private def jobChainOrdersHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
     List(
-      div(cls := "ContentBox")(
+      div(cls := "ContentBox", clear.both)(
         div(cls := "Padded")(
           div(float.right)(
             jobChainPathToA(jobChainPath)("→definition")),

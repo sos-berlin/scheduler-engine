@@ -16,7 +16,8 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
       table(
         tbody(
           tr(
-            td(colspan := 2, paddingTop := 4.px, paddingBottom := 4.px)("Show only ...")),
+            td(colspan := 2, paddingTop := 4.px, paddingBottom := 4.px)(
+              "Show only ...")),
           tr(
             td(paddingRight := 6.px, rowspan := 2)(
               for ((key, valueOption) ← List("suspended" → query.isSuspended,
@@ -32,8 +33,8 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
               verticalAlign := "top",
               paddingLeft := 6.px,
               paddingTop := 6.px,
-              borderLeft := "1px solid #aaa",
-              limitPerNodeInput(query.limitPerNode))),
+              borderLeft := "1px solid #aaa")(
+                limitPerNodeInput(query.limitPerNode))),
           tr(
             td(verticalAlign := "bottom", textAlign.right)(
               button(`type` := "submit")(
@@ -56,7 +57,7 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
         input(
           attrs.name := "limitPerNode",
           accesskey := "L",
-          width := 7.ch,
+          width := 9.ch,
           `type` := "number",
           attrs.min := 1,
           attrs.value := limitPerNode map { _.toString } getOrElse "")))

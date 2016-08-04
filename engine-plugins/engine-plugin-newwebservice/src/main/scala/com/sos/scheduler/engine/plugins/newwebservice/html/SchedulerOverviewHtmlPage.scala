@@ -15,12 +15,8 @@ extends SchedulerHtmlPage {
 
   import schedulerOverview._
 
-  protected def title = "JobScheduler"
-  override def headlineSuffix = ""
-
   def scalatag =
     htmlPage(
-      headline,
       p(marginBottom := "30px")(
         s"Started at ",
         instantWithDurationToHtml(startedAt),

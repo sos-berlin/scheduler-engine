@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -24,8 +23,7 @@ import scalatags.text.Frag
 trait SchedulerHtmlPage extends HtmlPage {
 
   protected val schedulerOverview: SchedulerOverview
-  protected def title: String
-  protected def headlineSuffix = title
+  protected def title: String = "JobScheduler"
   protected val webServiceContext: WebServiceContext
 
   protected final lazy val uris = SchedulerUris(webServiceContext.baseUri)
@@ -45,30 +43,39 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   protected def pageBody(innerBody: Frag*) =
     body(
-      pageHeader,
       div(cls := "container", width := "100%")(
+        pageHeader,
         innerBody))
 
   protected def pageHeader = {
     import schedulerOverview.{pid, state, version}
-    div(cls := "PageHeader")(
-      div(float.right)(a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(localDateTimeWithZoneToHtml(now))),
-      div(color.gray)(
-        a(href := uris.overview, cls := "inherit-markup")(s"JobScheduler $version Master"),
-        s" · PID $pid · $state"))
+    List(
+      div(cls := "PageHeader")(
+        div(float.right)(
+          a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
+            localDateTimeWithZoneToHtml(now))),
+        div(color.gray)(
+          a(href := uris.overview, cls := "inherit-markup")(
+            s"JobScheduler $version Master"),
+          s" · PID $pid · $state")),
+      navbar)
   }
 
-  protected def headline =
-    h1(cls := "headLine") {
-      val prefix = a(href := uris.overview, cls := "inherit-markup")(
-        img("width".attr := 40, "height".attr := 40, verticalAlign.`text-bottom`,
-          src := s"${uris.resolvePathUri("api/frontend/images/job_scheduler_rabbit_circle_60x60.gif")}"),
-        s" JobScheduler '${schedulerOverview.schedulerId.string}'")
-      emptyToNone(headlineSuffix) match {
-        case None ⇒ prefix
-        case Some(suffix) ⇒ prefix :: StringFrag(s" · $suffix") :: Nil
-      }
-    }
+  private def navbar =
+    nav(cls := "navbar navbar-default")(
+      div(cls := "container-fluid")(
+        div(cls := "navbar-header")(
+          a(cls := "navbar-brand", position.relative, top := (-9).px, href := uris.overview, whiteSpace.nowrap)(
+            span(img("width".attr := 40, "height".attr := 40,
+              src := s"${ uris.resolvePathUri("api/frontend/images/job_scheduler_rabbit_circle_60x60.gif") }")),
+            span(" JobScheduler"))),
+        ul(cls := "nav navbar-nav nav-pills")(
+          li(role := "presentation", cls := (if (this.isInstanceOf[SchedulerOverviewHtmlPage]) "active" else ""))(
+            a(href := uris.resolvePathUri("api/").toString)(s"'${schedulerOverview.schedulerId.string}'")),
+          li(role := "presentation", cls := (if (this.isInstanceOf[OrdersHtmlPage]) "active" else ""))(
+            a(href := uris.resolvePathUri("api/order/").toString)("Orders")),
+          li(role := "presentation")(
+            a(href := uris.resolvePathUri("api/jobChain/").toString)("Job chains")))))
 
   //<link rel="stylesheet" href="/jobscheduler/master/webjars/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"/>
 
@@ -82,7 +89,7 @@ body {
   padding: 0 7px 20px 7px;
 }
 div.PageHeader {
-  margin-bottom: 10px;
+  margin-bottom: 4px;
   padding: 1px 5px 0 5px;
 }
 h1 {
@@ -135,7 +142,7 @@ span.time-extra {
  font-size: 11px;
  color: #808080;
 }
-div.ContentBox {
+.ContentBox {
   margin-top: 40px;
   border: 2px solid #eee;
   border-top: 1px solid #eee;
@@ -144,10 +151,15 @@ div.ContentBox {
 .Padded {
   padding: 0 5px;
 }
+.container-fluid {
+  background-color: white;
+}
 """
 }
 
 object SchedulerHtmlPage {
+  private lazy val nav = "nav".tag[String]
+
   object EmptyFrag extends Frag {
     def writeTo(strb: StringBuilder) = {}
     def render = ""
