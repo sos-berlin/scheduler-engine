@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQuer
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import spray.http.Uri
 
@@ -81,13 +82,36 @@ final class SchedulerUris private(schedulerUriString: String) {
     }
   }
 
+  object processClass {
+    def overviews(): String = uriString(Uri(path = Uri.Path(s"api/processClass/")))
+//    def overviews(query: ProcessClassQuery = ProcessClassQuery.All): String = {
+//      val subpath = ProcessClassQueryHttp.toUriPath(query)
+//      require(subpath endsWith "/", "ProcessClassQuery must denote folder, terminated by a slash")
+//      uriString(Uri(path = Uri.Path(s"api/processClass$subpath")))  // Default with trailing slash: query = Uri.Query("return" → "ProcessClassOverview")))
+//    }
+
+    def overview(processClassPath: ProcessClassPath): String = {
+      val subpath = PathQueryHttp.toUriPath(PathQuery(processClassPath))
+      require(!subpath.endsWith("/"), "Invalid ProcessClassPath has trailing slash")
+      uriString(Uri(path = Uri.Path(s"api/processClass$subpath"), query = Uri.Query("return" → "ProcessClassOverview")))
+    }
+
+    def details(processClassPath: ProcessClassPath): String = {
+      val subpath = PathQueryHttp.toUriPath(PathQuery(processClassPath))
+      require(!subpath.endsWith("/"), "Invalid ProcessClassPath has trailing slash")
+      uriString(Uri(path = Uri.Path(s"api/processClass$subpath")))  // Default without trailing slash: query = Uri.Query("return" → "ProcessClassChainDetails")))
+    }
+  }
+
   object task {
     def overview(taskId: TaskId) = uriString(Uri(path = Uri.Path("api/task") / taskId.string))
   }
 
-  def uriString(uri: Uri): String = resolvePathUri(uri).toString
+  def uriString(relativeUri: Uri): String = resolvePathUri(relativeUri).toString
 
-  private def resolvePathUri(uri: Uri): Uri = resolveUri(uri, rootUri)
+  def /(relativeUri: Uri): Uri = resolvePathUri(relativeUri)
+
+  private def resolvePathUri(relativeUri: Uri): Uri = resolveUri(relativeUri, rootUri)
 
   override def toString = s"SchedulerUris($schedulerUriString)"
 }

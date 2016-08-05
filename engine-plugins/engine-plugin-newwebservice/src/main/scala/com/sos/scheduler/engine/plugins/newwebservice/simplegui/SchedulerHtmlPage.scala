@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
@@ -25,6 +26,7 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected val schedulerOverview: SchedulerOverview
   protected def title: String = "JobScheduler"
   protected val webServiceContext: WebServiceContext
+  protected def pageUri: Uri
 
   import webServiceContext.uris
 
@@ -74,18 +76,18 @@ trait SchedulerHtmlPage extends HtmlPage {
               src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
             span(" JobScheduler"))),
         ul(cls := "nav navbar-nav nav-pills")(
-          li(role := "presentation", cls := (if (this.isInstanceOf[SchedulerOverviewHtmlPage]) "active" else ""))(
-            a(href := uris.uriString("api/"))(s"'${schedulerOverview.schedulerId.string}'")),
-          li(role := "presentation", cls := (if (this.isInstanceOf[OrdersHtmlPage]) "active" else ""))(
-            a(href := uris.uriString("api/order/"))("Orders")),
-          li(role := "presentation")(
-            a(href := uris.uriString("api/jobChain/"))("Job chains")),
-          li(role := "presentation")(
-            a(href := uris.uriString("api/job/"))("Jobs")),
-          li(role := "presentation")(
-            a(href := uris.uriString("api/processClass/"))("Process classes")))))
+          navBarTab(schedulerOverview.schedulerId.string, uris.overview),
+          navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
+          navBarTab("Job chains"     , uris.jobChain.overviews()),
+          navBarTab("Jobs"           , uris.job.overviews()),
+          navBarTab("Process classes", uris.processClass.overviews()))))
 
-  //<link rel="stylesheet" href="/jobscheduler/master/webjars/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"/>
+  private def navBarTab(label: String, relativeUri: String) = {
+    val uri = uris / relativeUri
+    val isActive = pageUri.path == uri.path
+    li(role := "presentation", cls := (if (isActive) "active" else ""))(
+      a(href := uri.toString)(label))
+  }
 
   final def toCssLinkHtml(uri: Uri) = link(rel := "stylesheet", `type` := "text/css", href := uris.uriString(uri))
 

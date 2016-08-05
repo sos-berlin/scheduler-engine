@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
@@ -9,8 +10,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, No
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
@@ -24,11 +24,11 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class OrdersHtmlPage private(
-  query: OrderQuery,
   ordersComplemented: OrdersComplemented,
-  protected val webServiceContext: WebServiceContext,
-  protected val schedulerOverview: SchedulerOverview)(
-  implicit ec: ExecutionContext)
+  protected val pageUri: Uri,
+  query: OrderQuery,
+  protected val schedulerOverview: SchedulerOverview,
+  protected val webServiceContext: WebServiceContext)
 extends SchedulerHtmlPage {
 
   import webServiceContext.uris
@@ -194,10 +194,16 @@ extends SchedulerHtmlPage {
 
 object OrdersHtmlPage {
 
-  def toHtmlPage(query: OrderQuery)(ordersComplemented: OrdersComplemented)
-    (implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage]
+  def toHtmlPage(
+    ordersComplemented: OrdersComplemented,
+    pageUri: Uri,
+    query: OrderQuery,
+    client: SchedulerClient,
+    webServiceContext: WebServiceContext)
+    (implicit ec: ExecutionContext)
   =
-    for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, ordersComplemented, context, schedulerOverview)
+    for (schedulerOverview ← client.overview) yield
+      new OrdersHtmlPage(ordersComplemented, pageUri, query, schedulerOverview, webServiceContext)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =
     if (order.obstacles.nonEmpty)

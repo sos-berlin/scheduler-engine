@@ -1,16 +1,19 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.instantWithDurationToHtml
 import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text.all._
+import spray.http.Uri
 
 /**
   * @author Joacim Zschimmer
   */
 final class SchedulerOverviewHtmlPage private(
   protected val schedulerOverview: SchedulerOverview,
+  protected val pageUri: Uri,
   protected val webServiceContext: WebServiceContext)
 extends SchedulerHtmlPage {
 
@@ -46,6 +49,12 @@ extends SchedulerHtmlPage {
 object SchedulerOverviewHtmlPage {
   import scala.language.implicitConversions
 
-  implicit def toHtmlPage(overview: SchedulerOverview)(implicit webServiceContext: WebServiceContext, ec: ExecutionContext): Future[HtmlPage] =
-    Future.successful(new SchedulerOverviewHtmlPage(overview, webServiceContext))
+  object implicits {
+    implicit object schedulerOverviewToHtmlPage extends ToHtmlPage[SchedulerOverview] {
+      def apply(schedulerOverview: SchedulerOverview, pageUri: Uri, webServiceContext: WebServiceContext)
+        (implicit executionContext: ExecutionContext)
+      =
+        Future.successful(new SchedulerOverviewHtmlPage(schedulerOverview, pageUri, webServiceContext))
+    }
+  }
 }

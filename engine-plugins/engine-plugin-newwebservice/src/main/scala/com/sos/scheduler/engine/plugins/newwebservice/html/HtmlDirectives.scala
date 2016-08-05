@@ -100,15 +100,23 @@ object HtmlDirectives {
       }
     }
 
+  trait ToHtmlPage[A] {
+    def apply(a: A, pageUri: Uri, webServiceContext: WebServiceContext)(implicit executionContext: ExecutionContext): Future[HtmlPage]
+  }
+
   def completeTryHtml[A](resultFuture: ⇒ Future[A])(
     implicit
-      toHtmlPage: A ⇒ Future[HtmlPage],
+      toHtmlPage: ToHtmlPage[A],
+      toResponseMarshallable: A ⇒ ToResponseMarshallable,
       webServiceContext: WebServiceContext,
-      executionContext: ExecutionContext,
-      toResponseMarshallable: A ⇒ ToResponseMarshallable): Route
+      executionContext: ExecutionContext): Route
   =
     htmlPreferred(webServiceContext) {
-      complete(resultFuture flatMap toHtmlPage)
+      requestUri { uri ⇒
+        complete(
+          for (result ← resultFuture) yield
+            toHtmlPage(result, uri, webServiceContext))
+      }
     } ~
       complete(resultFuture map toResponseMarshallable)
 

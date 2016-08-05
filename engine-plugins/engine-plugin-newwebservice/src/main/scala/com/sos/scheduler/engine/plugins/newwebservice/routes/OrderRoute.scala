@@ -11,9 +11,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.TextHtmlPage.implicits._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toYamlHtmlPage
 import scala.concurrent.ExecutionContext
-import spray.http.HttpRequest
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
 
@@ -36,7 +35,7 @@ trait OrderRoute extends LogRoute {
               logRoute(orderSubsystem.order(orderKey).log)
             }
           case returnType ⇒
-            extendedOrderQuery { query ⇒
+            extendedOrderQuery { implicit query ⇒
               returnType match {
                 case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplementedBy(query))
                 case Some("OrdersComplemented") ⇒ completeTryHtml(client.ordersComplementedBy(query))
@@ -44,8 +43,10 @@ trait OrderRoute extends LogRoute {
                 case Some(o) ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
                 case None ⇒
                   htmlPreferred(webServiceContext) {
-                    requestInstance { implicit httpRequest: HttpRequest ⇒
-                      complete(client.ordersComplementedBy(query) flatMap OrdersHtmlPage.toHtmlPage(query))
+                    requestUri { uri ⇒
+                      complete(
+                        for (o ← client.ordersComplementedBy(query)) yield
+                          OrdersHtmlPage.toHtmlPage(o, uri, query, client, webServiceContext))
                     }
                   } ~
                     complete(client.orderTreeComplementedBy(query))

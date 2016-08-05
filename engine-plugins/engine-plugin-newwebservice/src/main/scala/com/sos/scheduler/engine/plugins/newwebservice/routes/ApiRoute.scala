@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.FrontEndRoute
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage.implicits.schedulerOverviewToHtmlPage
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
