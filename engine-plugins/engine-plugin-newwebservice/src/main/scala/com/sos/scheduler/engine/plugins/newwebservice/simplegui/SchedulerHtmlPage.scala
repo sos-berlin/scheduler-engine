@@ -1,12 +1,11 @@
-package com.sos.scheduler.engine.plugins.newwebservice.html
+package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
-import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
-import com.sos.scheduler.engine.plugins.newwebservice.routes.WebjarsRoute
+import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.now
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
@@ -16,6 +15,7 @@ import scala.language.implicitConversions
 import scalatags.Text.all._
 import scalatags.Text.{TypedTag, tags2}
 import scalatags.text.Frag
+import spray.http.Uri
 
 /**
   * @author Joacim Zschimmer
@@ -26,20 +26,24 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected def title: String = "JobScheduler"
   protected val webServiceContext: WebServiceContext
 
-  protected final lazy val uris = SchedulerUris(webServiceContext.baseUri)
+  import webServiceContext.uris
 
   protected def htmlPage(innerBody: Frag*): TypedTag[String] =
     html(lang := "en")(
-      pageHead,
+      head(htmlHeadFrags),
       pageBody(innerBody :_*))
 
-  protected def pageHead =
-    head(
+  protected def htmlHeadFrags: Vector[Frag] =
+    Vector(
       meta(httpEquiv := "X-UA-Compatible", content := "IE=edge"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
       tags2.title(s"$title · ${schedulerOverview.schedulerId}"),
-      raw(webServiceContext.toStylesheetLinkHtml(WebjarsRoute.BootstrapCss).toString),
-      raw(s"<style type='text/css'>$css</style>"))
+      link(rel := "stylesheet", href := uris.uriString("api/frontend/webjars/" + WebjarsRoute.BootstrapCss))) ++
+    (cssLinks map toCssLinkHtml) ++
+    (scriptLinks map toAsyncScriptHtml)
+
+  protected def cssLinks: Vector[Uri] = Vector("api/frontend/common/common.css")
+  protected def scriptLinks: Vector[Uri] = Vector()
 
   protected def pageBody(innerBody: Frag*) =
     body(
@@ -67,98 +71,25 @@ trait SchedulerHtmlPage extends HtmlPage {
         div(cls := "navbar-header")(
           a(cls := "navbar-brand", position.relative, top := (-9).px, href := uris.overview, whiteSpace.nowrap)(
             span(img("width".attr := 40, "height".attr := 40,
-              src := s"${ uris.resolvePathUri("api/frontend/images/job_scheduler_rabbit_circle_60x60.gif") }")),
+              src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
             span(" JobScheduler"))),
         ul(cls := "nav navbar-nav nav-pills")(
           li(role := "presentation", cls := (if (this.isInstanceOf[SchedulerOverviewHtmlPage]) "active" else ""))(
-            a(href := uris.resolvePathUri("api/").toString)(s"'${schedulerOverview.schedulerId.string}'")),
+            a(href := uris.uriString("api/"))(s"'${schedulerOverview.schedulerId.string}'")),
           li(role := "presentation", cls := (if (this.isInstanceOf[OrdersHtmlPage]) "active" else ""))(
-            a(href := uris.resolvePathUri("api/order/").toString)("Orders")),
+            a(href := uris.uriString("api/order/"))("Orders")),
           li(role := "presentation")(
-            a(href := uris.resolvePathUri("api/jobChain/").toString)("Job chains")),
+            a(href := uris.uriString("api/jobChain/"))("Job chains")),
           li(role := "presentation")(
-            a(href := uris.resolvePathUri("api/job/").toString)("Jobs")),
+            a(href := uris.uriString("api/job/"))("Jobs")),
           li(role := "presentation")(
-            a(href := uris.resolvePathUri("api/processClass/").toString)("Process classes")))))
+            a(href := uris.uriString("api/processClass/"))("Process classes")))))
 
   //<link rel="stylesheet" href="/jobscheduler/master/webjars/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"/>
 
-  protected def css = """
-body {
-  background-color: #f8f8f8;
-  color: black;
-  font-size: 13px;
-}
-.container {
-  padding: 0 7px 20px 7px;
-}
-div.PageHeader {
-  margin-bottom: 4px;
-  padding: 1px 5px 0 5px;
-}
-h1 {
-  font-size: 30px;
-}
-h1.headLine {
-  margin-top: 0;
-  padding: 0px 5px;
-}
-h2 {
-  margin-top: 0;
-  font-size: 24px;
-}
-h3 {
-  margin: 20px 0 10px 0;
-  font-size: 18px;
-}
-.table {
-  margin-bottom: 0;
-}
-.table-condensed>tbody>tr>td,
-.table-condensed>tbody>tr>th,
-.table-condensed>tfoot>tr>td,
-.table-condensed>tfoot>tr>th,
-.table-condensed>thead>tr>td,
-.table-condensed>thead>tr>th {
-  border-top: 1px solid #eee;
-  padding-top: 3px;
-  padding-bottom: 3px;
-}
-.table>thead>tr>th {
-  border-top: 0;
-  font-weight: normal;
-}
-.MiniTable>tbody>tr>td,
-.MiniTable>tbody>tr>th,
-.MiniTable>tfoot>tr>td,
-.MiniTable>tfoot>tr>th,
-.MiniTable>thead>tr>td,
-.MiniTable>thead>tr>th {
-  padding-right: 5px;
-}
-a.inherit-markup {
-  color: inherit;
-}
-label {
-  font-weight: inherit;
-}
-span.time-extra {
- font-size: 11px;
- //color: @text-muted;
-}
-.ContentBox {
-  margin-top: 40px;
-  border: 2px solid #eee;
-  border-top: 1px solid #eee;
-  background-color: white;
-}
-.Padded {
-  padding: 0 5px;
-}
-.container-fluid {
-  background-color: white;
-}
-"""
+  final def toCssLinkHtml(uri: Uri) = link(rel := "stylesheet", `type` := "text/css", href := uris.uriString(uri))
+
+  final def toAsyncScriptHtml(uri: Uri) = script(`type` := "text/javascript", src := uris.uriString(uri), "async".emptyAttr)
 }
 
 object SchedulerHtmlPage {

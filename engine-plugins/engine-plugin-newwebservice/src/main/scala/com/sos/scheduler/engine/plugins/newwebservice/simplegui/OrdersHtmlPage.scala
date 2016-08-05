@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.newwebservice.html
+package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
@@ -10,13 +10,15 @@ import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState,
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.OrdersHtmlPage._
-import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text.all._
 import scalatags.text.Frag
+import spray.http.Uri
 
 /**
   * @author Joacim Zschimmer
@@ -28,6 +30,8 @@ final class OrdersHtmlPage private(
   protected val schedulerOverview: SchedulerOverview)(
   implicit ec: ExecutionContext)
 extends SchedulerHtmlPage {
+
+  import webServiceContext.uris
 
   private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
@@ -42,47 +46,19 @@ extends SchedulerHtmlPage {
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
 
   override protected def title = "Orders"
+  override protected def cssLinks = super.cssLinks :+ Uri("api/frontend/order/order.css")
+  override protected def scriptLinks = super.scriptLinks :+ Uri("api/frontend/order/OrderSelectionWidget.js")
 
-  override protected def css = s"""
-h2.Folder {
-  margin-top: 3em;
-}
-h3.JobChain {
-  margin-top: 0;
-  padding-top: 10px;
-}
-.OrderStatistics {
-  background-color: white;
-  margin-right: 30px;
-  padding: 0 4px 4px 4px;
-  border: 1px solid #c0c0c0;
-}
-.OrderSelection {
-  margin-right: 20px;
-  margin-bottom: 10px;
-  background-color: #f9d186;
-  line-height: 1em;
-  padding: 0 4px 4px 4px;
-  border: 1px solid #c0c0c0;
-}
-.NodeHeadline {
-  margin: 2em 0 1em;
-  font-weight: bold;
-}
-""" + super.css
-
-  def scalatag = {
-    val orderSelection = new OrderSelectionHtml(query)
+  def wholePage = {
     htmlPage(
-      raw(s"<script type='text/javascript'>${orderSelection.javascript}</script>"),
       div(float.right)(
         ordersStatistics),
       div(float.right)(
-        orderSelection.html),
+        new OrderSelectionWidget(query).html),
       query.jobChainPathQuery match {
-        case single: PathQuery.SinglePath ⇒ div(jobChainOrdersHtml(single.as[JobChainPath], ordersComplemented.orders))
-        case PathQuery.Folder(folderPath) ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
-        case _ ⇒ div(folderTreeHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
+        case single: PathQuery.SinglePath ⇒ div(jobChainOrdersToHtml(single.as[JobChainPath], ordersComplemented.orders))
+        case PathQuery.Folder(folderPath) ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
+        case _ ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
       })
   }
 
@@ -100,31 +76,32 @@ h3.JobChain {
           tr(td(textAlign.right)(s"$blacklistedCount")         , td(s"blacklisted")))))
   }
 
-  private def folderTreeHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
+  private def wholeFolderTreeToHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
     if (tree.isEmpty)
-      List(div(cls := "Padded", paddingTop := 4.em)("No order meets selection criteria."))
+      List(div(cls := "Padded", paddingTop := 4.em)(
+        "No order meets selection criteria."))
     else
-      folderTreeHtml2(tree)
+      folderTreeToHtml(tree)
 
-  private def folderTreeHtml2(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
-    folderHtml(tree.path, tree.leafs) ++
-    (for (folder ← tree.subfolders; o ← folderTreeHtml2(folder)) yield o)
+  private def folderTreeToHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
+    folderToHtml(tree.path, tree.leafs) ++
+    (for (folder ← tree.subfolders; o ← folderTreeToHtml(folder)) yield o)
 
-  private def folderHtml(folderPath: FolderPath, orders: immutable.Seq[OrderOverview]) =
+  private def folderToHtml(folderPath: FolderPath, orders: immutable.Seq[OrderOverview]) =
     if (orders.isEmpty)
       Nil
     else
       Vector(
         h2(cls := "Folder Padded")(
           folderPathToOrdersA(folderPath)(s"Folder ${folderPath.string}"))) ++
-      folderOrdersHtml(orders)
+      folderOrdersToHtml(orders)
 
-  private def folderOrdersHtml(orders: immutable.Seq[OrderOverview]): Vector[Frag] =
+  private def folderOrdersToHtml(orders: immutable.Seq[OrderOverview]): Vector[Frag] =
     for ((jobChainPath, jobChainOrders) ← orders retainOrderGroupBy { _.orderKey.jobChainPath };
-         o ← jobChainOrdersHtml(jobChainPath, jobChainOrders))
+         o ← jobChainOrdersToHtml(jobChainPath, jobChainOrders))
       yield o
 
-  private def jobChainOrdersHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
+  private def jobChainOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
     List(
       div(cls := "ContentBox", clear.both)(
         div(cls := "Padded")(
@@ -133,18 +110,18 @@ h3.JobChain {
           h3(cls := "JobChain")(
             jobChainPathToOrdersA(jobChainPath)(s"JobChain ${jobChainPath.string}"),
             span(paddingLeft := 10.px)(" "))),
-        nodeOrdersHtml(jobChainPath, orders)))
+        nodeOrdersToHtml(jobChainPath, orders)))
 
-  private def nodeOrdersHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]): Vector[Frag] =
+  private def nodeOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]): Vector[Frag] =
     for ((nodeId, orders) ← orders retainOrderGroupBy { _.orderState }) yield {
       val jobPath = nodeKeyToOverview(NodeKey(jobChainPath, nodeId)).jobPath
       div(cls := "NodeOrders")(
         div(cls := "Padded")(
           div(cls := "NodeHeadline")(s"Node ${nodeId.string} \u00a0 ${jobPath.string}")),
-        orderTable(orders))
+        ordersToTable(orders))
     }
 
-  private def orderTable(orders: immutable.Seq[OrderOverview]): Frag =
+  private def ordersToTable(orders: immutable.Seq[OrderOverview]): Frag =
     table(cls := "table table-condensed table-hover")(
       colgroup(
         col,
@@ -217,7 +194,9 @@ h3.JobChain {
 
 object OrdersHtmlPage {
 
-  def toHtml(query: OrderQuery)(ordersComplemented: OrdersComplemented)(implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage] =
+  def toHtmlPage(query: OrderQuery)(ordersComplemented: OrdersComplemented)
+    (implicit context: WebServiceContext, client: DirectSchedulerClient, ec: ExecutionContext): Future[HtmlPage]
+  =
     for (schedulerOverview ← client.overview) yield new OrdersHtmlPage(query, ordersComplemented, context, schedulerOverview)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =

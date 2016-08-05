@@ -11,7 +11,7 @@ import spray.httpx.marshalling.Marshaller
   * @author Joacim Zschimmer
   */
 trait HtmlPage {
-  def scalatag: TypedTag[String]
+  def wholePage: TypedTag[String]
 }
 
 object HtmlPage {
@@ -21,7 +21,7 @@ object HtmlPage {
     try {
       val sb = new StringBuilder(10000)
       sb.append("<!DOCTYPE html>")
-      htmlPage.scalatag.writeTo(sb)
+      htmlPage.wholePage.writeTo(sb)
       ctx.marshalTo(HttpEntity(contentType, sb.toString))
     } catch {
       case e: OutOfMemoryError ⇒

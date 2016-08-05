@@ -85,12 +85,9 @@ final class SchedulerUris private(schedulerUriString: String) {
     def overview(taskId: TaskId) = uriString(Uri(path = Uri.Path("api/task") / taskId.string))
   }
 
-  /**
-    * Public for tests.
-    */
   def uriString(uri: Uri): String = resolvePathUri(uri).toString
 
-  def resolvePathUri(uri: Uri): Uri = resolveUri(uri, rootUri)
+  private def resolvePathUri(uri: Uri): Uri = resolveUri(uri, rootUri)
 
   override def toString = s"SchedulerUris($schedulerUriString)"
 }

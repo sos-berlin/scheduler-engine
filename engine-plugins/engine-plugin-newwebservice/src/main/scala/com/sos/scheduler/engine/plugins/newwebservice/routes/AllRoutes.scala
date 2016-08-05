@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.passIf
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.htmlPreferred
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute
 import spray.http.StatusCodes.TemporaryRedirect
 import spray.routing.Directives._
 import spray.routing.Route
@@ -37,9 +38,6 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
   private def masterRoute: Route =
     pathPrefix("api") {
       apiRoute
-    } ~
-    pathPrefix("webjars") {
-      webjarsRoute
     } ~
     (passIf(configuration.testMode) & pathPrefix("TEST")) {
       testRoute

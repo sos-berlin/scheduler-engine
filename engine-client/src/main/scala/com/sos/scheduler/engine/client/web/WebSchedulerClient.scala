@@ -65,7 +65,7 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
 
   final def getJson(pathUri: String): Future[String] =
-    get[String](_.resolvePathUri(pathUri).toString)
+    get[String](_.uriString(pathUri))
 
   final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`) =
     unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))

@@ -1,0 +1,73 @@
+body {
+  background-color: #f8f8f8;
+  color: black;
+  font-size: 13px;
+}
+.container {
+  padding: 0 7px 20px 7px;
+}
+div.PageHeader {
+  margin-bottom: 4px;
+  padding: 1px 5px 0 5px;
+}
+h1 {
+  font-size: 30px;
+}
+h1.headLine {
+  margin-top: 0;
+  padding: 0 5px;
+}
+h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+h3 {
+  margin: 20px 0 10px 0;
+  font-size: 18px;
+}
+.table {
+  margin-bottom: 0;
+}
+.table-condensed > tbody > tr > td,
+.table-condensed > tbody > tr > th,
+.table-condensed > tfoot > tr > td,
+.table-condensed > tfoot > tr > th,
+.table-condensed > thead > tr > td,
+.table-condensed > thead > tr > th {
+  border-top: 1px solid #eee;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.table > thead > tr > th {
+  border-top: 0;
+  font-weight: normal;
+}
+.MiniTable > tbody > tr > td,
+.MiniTable > tbody > tr > th,
+.MiniTable > tfoot > tr > td,
+.MiniTable > tfoot > tr > th,
+.MiniTable > thead > tr > td,
+.MiniTable > thead > tr > th {
+  padding-right: 5px;
+}
+a.inherit-markup {
+  color: inherit;
+}
+label {
+  font-weight: inherit;
+}
+span.time-extra {
+ font-size: 11px;
+}
+.ContentBox {
+  margin-top: 40px;
+  border: 2px solid #eee;
+  border-top: 1px solid #eee;
+  background-color: white;
+}
+.Padded {
+  padding: 0 5px;
+}
+.container-fluid {
+  background-color: white;
+}

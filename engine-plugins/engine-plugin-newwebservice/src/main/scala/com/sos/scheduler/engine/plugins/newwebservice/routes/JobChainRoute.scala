@@ -2,19 +2,17 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.web.jobchain.PathQueryHttp.directives.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
-import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.TextHtmlPage.implicits._
 import scala.concurrent._
-import spray.http.StatusCodes.NotFound
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
-import spray.routing.{ExceptionHandler, Route, ValidationRejection}
+import spray.routing.{Route, ValidationRejection}
 
 /**
   * @author Joacim Zschimmer

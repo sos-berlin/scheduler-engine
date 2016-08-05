@@ -1,10 +1,10 @@
-package com.sos.scheduler.engine.plugins.newwebservice.routes
+package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.plugins.newwebservice.routes.WebjarsRoute._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute._
 import scala.util.control.NonFatal
 import spray.http.CacheDirectives.`max-age`
 import spray.http.HttpHeaders.`Cache-Control`

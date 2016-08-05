@@ -104,7 +104,7 @@ object HtmlDirectives {
     implicit
       toHtmlPage: A ⇒ Future[HtmlPage],
       webServiceContext: WebServiceContext,
-      ec: ExecutionContext,
+      executionContext: ExecutionContext,
       toResponseMarshallable: A ⇒ ToResponseMarshallable): Route
   =
     htmlPreferred(webServiceContext) {

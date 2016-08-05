@@ -1,7 +1,8 @@
-package com.sos.scheduler.engine.plugins.newwebservice.html
+package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.instantWithDurationToHtml
 import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text.all._
 
@@ -15,7 +16,7 @@ extends SchedulerHtmlPage {
 
   import schedulerOverview._
 
-  def scalatag =
+  def wholePage =
     htmlPage(
       p(marginBottom := "30px")(
         s"Started at ",
@@ -45,6 +46,6 @@ extends SchedulerHtmlPage {
 object SchedulerOverviewHtmlPage {
   import scala.language.implicitConversions
 
-  implicit def toHtml(overview: SchedulerOverview)(implicit webServiceContext: WebServiceContext, ec: ExecutionContext): Future[HtmlPage] =
+  implicit def toHtmlPage(overview: SchedulerOverview)(implicit webServiceContext: WebServiceContext, ec: ExecutionContext): Future[HtmlPage] =
     Future.successful(new SchedulerOverviewHtmlPage(overview, webServiceContext))
 }

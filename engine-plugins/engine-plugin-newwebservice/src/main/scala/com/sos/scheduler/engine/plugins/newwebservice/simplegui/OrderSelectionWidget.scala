@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.plugins.newwebservice.html
+package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.queries.OrderQuery
-import com.sos.scheduler.engine.plugins.newwebservice.html.OrderSelectionHtml._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderSelectionWidget._
 import scalatags.Text.all._
 import scalatags.Text.attrs
 import spray.json._
@@ -10,9 +10,10 @@ import spray.json._
 /**
   * @author Joacim Zschimmer
   */
-private[html] final class OrderSelectionHtml(query: OrderQuery) {
+private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
 
-  def html =
+  def html = List(
+    raw(s"<script type='text/javascript'>$javascript</script>"),
     form(cls := "OrderSelection", onsubmit := "javascript:reloadPage({}); return false")(
       table(
         tbody(
@@ -39,7 +40,7 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
           tr(
             td(verticalAlign := "bottom", textAlign.right)(
               button(`type` := "submit")(
-                StringFrag("Show")))))))
+                StringFrag("Show"))))))))
 
   private def labeledCheckbox(key: String, value: Option[Boolean], checkedMeans: Boolean) = {
     val name = if (checkedMeans) key else s"not-$key"
@@ -65,25 +66,15 @@ private[html] final class OrderSelectionHtml(query: OrderQuery) {
           attrs.min := 0,
           attrs.value := limitPerNode map { _.toString } getOrElse "")))
 
-  def javascript = s"""
-    function reloadPage(change) {
-      var query = ${toJson(query)};
-      var key, v;
-      var q = [];
-      for (key in change) if (change.hasOwnProperty(key)) {
-        v = change[key]
-        if (typeof v == 'undefined') delete query[key]; else query[key] = v;
-      }
-      var notInTaskLimitPerNode = document.getElementsByName('notInTaskLimitPerNode')[0].value;
-      if (typeof notInTaskLimitPerNode == 'undefined' || notInTaskLimitPerNode == '') delete query['notInTaskLimitPerNode']; else query.notInTaskLimitPerNode = notInTaskLimitPerNode;
-      for (key in query) if (query.hasOwnProperty(key)) q.push(key + '=' + query[key].toString());
-      var href = window.location.href.replace(/\\?.*/g, '');
-      if (q.length) href += "?" + q.join('&');
-      window.location.href = href;
+  private def javascript = {
+    val orderJson = JsObject(query.withoutPathToMap mapValues JsString.apply).toString
+    s"""function reloadPage(change) {
+      window.location.href = orderQueryToUrl($orderJson, change);
     }"""
+  }
 }
 
-object OrderSelectionHtml {
+object OrderSelectionWidget {
 
   private def removePrefixIs(string: String) = {
     val (head, tail) = string stripPrefix "is" splitAt 2
@@ -91,6 +82,4 @@ object OrderSelectionHtml {
   }
 
   private def boldIf(flag: Boolean)(frags: Frag*): Frag = if (flag) b(frags) else frags
-
-  private def toJson(query: OrderQuery) = JsObject(query.withoutPathToMap mapValues JsString.apply)
 }

@@ -5,9 +5,9 @@ import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
-import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.TextHtmlPage.implicits._
 import scala.concurrent.ExecutionContext
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._

@@ -1,10 +1,10 @@
-package com.sos.scheduler.engine.plugins.newwebservice
+package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import spray.http.ContentType
 import spray.http.MediaTypes._
 import spray.routing.directives.ContentTypeResolver
 
-private[newwebservice] object OurContentTypeResolver extends ContentTypeResolver {
+private[routes] object OurContentTypeResolver extends ContentTypeResolver {
 
   private val ExtenstionToMediaType = Map(
     "xsl" → `text/xml`

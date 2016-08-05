@@ -188,7 +188,7 @@
     <dependencies>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-kernel</artifactId>
+            <artifactId>engine-jar</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

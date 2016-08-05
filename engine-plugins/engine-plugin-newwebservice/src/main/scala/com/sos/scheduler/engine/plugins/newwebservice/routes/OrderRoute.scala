@@ -6,12 +6,14 @@ import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, htmlPreferred}
-import com.sos.scheduler.engine.plugins.newwebservice.html.TextHtmlPage.implicits._
-import com.sos.scheduler.engine.plugins.newwebservice.html.{OrdersHtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.TextHtmlPage.implicits._
 import scala.concurrent.ExecutionContext
+import spray.http.HttpRequest
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
 
@@ -42,7 +44,9 @@ trait OrderRoute extends LogRoute {
                 case Some(o) ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
                 case None ⇒
                   htmlPreferred(webServiceContext) {
-                    complete(client.ordersComplementedBy(query) flatMap OrdersHtmlPage.toHtml(query))
+                    requestInstance { implicit httpRequest: HttpRequest ⇒
+                      complete(client.ordersComplementedBy(query) flatMap OrdersHtmlPage.toHtmlPage(query))
+                    }
                   } ~
                     complete(client.orderTreeComplementedBy(query))
               }
