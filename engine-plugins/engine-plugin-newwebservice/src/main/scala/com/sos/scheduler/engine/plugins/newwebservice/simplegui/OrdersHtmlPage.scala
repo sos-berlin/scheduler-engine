@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
 import scala.collection.immutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scalatags.Text.all._
 import scalatags.text.Frag
 import spray.http.Uri
@@ -127,15 +127,13 @@ extends SchedulerHtmlPage {
         col,
         col,
         col,
-        col,
-        col(cls := "small")),
+        col),
       thead(
         tr(
           th("OrderId"),
           th(div(cls := "visible-lg-block")("SourceType")),
           th("OrderProcessingState"),
-          th("Obstacles"),
-          th(small("FileBasedState")))),
+          th("Obstacles"))),
       tbody(
         (orders.par map orderToTr).seq))
 
@@ -166,7 +164,8 @@ extends SchedulerHtmlPage {
     }
     val isWaiting = order.processingState.isInstanceOf[OrderProcessingState.Waiting]
     val obstaclesHtml: List[Frag] = {
-      val inner = List(List(stringFrag(order.obstacles mkString " ")), jobObstaclesHtml) reduce { _ ++ List(stringFrag(" ")) ++ _ }
+      val orderObstaclesHtml = order.obstacles.toList map { o ⇒ stringFrag(o.toString) }
+      val inner = joinFrags(orderObstaclesHtml ++ jobObstaclesHtml, s" $Dot ")
       if (isWaiting && inner.nonEmpty)
         span(cls := "text-danger")(inner) :: Nil
       else
@@ -177,8 +176,7 @@ extends SchedulerHtmlPage {
       td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
       td(processingStateHtml, occupyingMemberHtml),
-      td(obstaclesHtml),
-      td(if (order.sourceType == OrderSourceType.fileBased) fileBasedStateToHtml(order.fileBasedState) else EmptyFrag))
+      td(obstaclesHtml))
   }
 
   private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
@@ -193,6 +191,8 @@ extends SchedulerHtmlPage {
 }
 
 object OrdersHtmlPage {
+
+  private val Dot = '\u00b7'
 
   def toHtmlPage(
     ordersComplemented: OrdersComplemented,
@@ -215,4 +215,15 @@ object OrdersHtmlPage {
         case _ if !order.fileBasedState.isOkay ⇒ Some("bg-danger")
         case _ ⇒ None
       }
+
+  private def joinFrags(frags: List[Frag], joiner: Frag) = {
+    if (frags.isEmpty)
+      Nil
+    else
+      frags.head :: (
+        for (o ← frags.tail;
+             x ← stringFrag(s" $Dot ") :: o :: Nil)
+          yield x)
+
+  }
 }

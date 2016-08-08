@@ -63,7 +63,10 @@ with EventSource {
     fileBasedState match {
       case FileBasedState.active ⇒
       case FileBasedState.not_initialized ⇒  // ad-hoc objects
-      case o ⇒ b += BadState(o, message = emptyToNone(cppProxy.file_based_error_string))
+      case o ⇒ b += BadState(o, message = emptyToNone(cppProxy.file_based_error_string
+        .stripPrefix("Z-JAVA-105  Java exception ")
+        .stripSuffix(", method=CallObjectMethodA []")
+        .trim))
     }
     b.result
   }
