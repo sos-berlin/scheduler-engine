@@ -6,7 +6,7 @@ import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}
 import spray.http.Uri
 import spray.routing.Directives._
-import spray.routing.{Directive1, Route, ValidationRejection}
+import spray.routing.{Directive1, Route}
 
 /**
   * @author Joacim Zschimmer
@@ -20,7 +20,7 @@ object SchedulerDirectives {
           case path: Uri.Path.Slash ⇒
             val toPath = implicitly[TypedPath.Companion[A]]
             Try(toPath(normalizePath(toPath, path.toString))) match {
-              case Failure(t) ⇒ reject(ValidationRejection(t.getMessage, Some(t)))
+              case Failure(t) ⇒ reject // Without message because the whole route is wrong and the next route should be tried (otherwise 404)
               case Success(aPath) ⇒ inner(aPath :: HNil)
             }
           case _ ⇒ reject

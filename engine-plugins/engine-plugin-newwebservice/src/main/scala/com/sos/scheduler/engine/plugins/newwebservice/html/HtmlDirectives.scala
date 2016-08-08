@@ -8,7 +8,8 @@ import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes._
 import spray.http.{HttpMethods, MediaRange, Uri}
-import spray.httpx.marshalling.ToResponseMarshallable
+import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
+import spray.httpx.marshalling.ToResponseMarshaller
 import spray.routing.Directives._
 import spray.routing._
 
@@ -101,24 +102,20 @@ object HtmlDirectives {
     }
 
   trait ToHtmlPage[A] {
-    def apply(a: A, pageUri: Uri, webServiceContext: WebServiceContext)(implicit executionContext: ExecutionContext): Future[HtmlPage]
+    def apply(pageUri: Uri, webServiceContext: WebServiceContext)(a: A)(implicit executionContext: ExecutionContext): Future[HtmlPage]
   }
 
-  def completeTryHtml[A](resultFuture: ⇒ Future[A])(
+  def completeTryHtml[A: ToResponseMarshaller: ToHtmlPage](resultFuture: ⇒ Future[A])(
     implicit
-      toHtmlPage: ToHtmlPage[A],
-      toResponseMarshallable: A ⇒ ToResponseMarshallable,
       webServiceContext: WebServiceContext,
       executionContext: ExecutionContext): Route
   =
     htmlPreferred(webServiceContext) {
       requestUri { uri ⇒
-        complete(
-          for (result ← resultFuture) yield
-            toHtmlPage(result, uri, webServiceContext))
+        complete(resultFuture map implicitly[ToHtmlPage[A]].apply(uri, webServiceContext))
       }
     } ~
-      complete(resultFuture map toResponseMarshallable)
+      complete(resultFuture)
 
   def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒

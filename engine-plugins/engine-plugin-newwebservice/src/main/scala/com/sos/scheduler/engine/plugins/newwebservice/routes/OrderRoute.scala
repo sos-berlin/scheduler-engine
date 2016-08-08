@@ -28,30 +28,27 @@ trait OrderRoute extends LogRoute {
 
   protected final def orderRoute: Route =
     get {
-      parameterMap { parameters ⇒
-        parameters.get("return") match {
-          case Some("log") ⇒
-            typedPath(OrderKey) { orderKey ⇒
-              logRoute(orderSubsystem.order(orderKey).log)
-            }
-          case returnType ⇒
-            extendedOrderQuery { implicit query ⇒
-              returnType match {
-                case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplementedBy(query))
-                case Some("OrdersComplemented") ⇒ completeTryHtml(client.ordersComplementedBy(query))
-                case Some("OrderOverview") ⇒ completeTryHtml(client.orderOverviewsBy(query))
-                case Some(o) ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
-                case None ⇒
-                  htmlPreferred(webServiceContext) {
-                    requestUri { uri ⇒
-                      complete(
-                        for (o ← client.ordersComplementedBy(query)) yield
-                          OrdersHtmlPage.toHtmlPage(o, uri, query, client, webServiceContext))
-                    }
-                  } ~
-                    complete(client.orderTreeComplementedBy(query))
+      typedPath(OrderKey) { orderKey ⇒
+        parameter("return") {
+          case "log" ⇒ logRoute(orderSubsystem.order(orderKey).log)
+          case o ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
+        }
+      } ~
+      extendedOrderQuery { implicit query ⇒
+        parameter("return".?) {
+          case Some("OrderTreeComplemented") ⇒ completeTryHtml(client.orderTreeComplementedBy(query))
+          case Some("OrdersComplemented") ⇒ completeTryHtml(client.ordersComplementedBy(query))
+          case Some("OrderOverview") ⇒ completeTryHtml(client.orderOverviewsBy(query))
+          case Some(o) ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
+          case None ⇒
+            htmlPreferred(webServiceContext) {
+              requestUri { uri ⇒
+                complete(
+                  for (o ← client.ordersComplementedBy(query)) yield
+                    OrdersHtmlPage.toHtmlPage(o, uri, query, client, webServiceContext))
               }
-            }
+            } ~
+              complete(client.orderTreeComplementedBy(query))
         }
       }
     }

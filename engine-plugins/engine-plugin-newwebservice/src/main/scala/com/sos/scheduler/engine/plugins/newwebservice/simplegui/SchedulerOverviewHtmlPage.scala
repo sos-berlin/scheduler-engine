@@ -51,7 +51,7 @@ object SchedulerOverviewHtmlPage {
 
   object implicits {
     implicit object schedulerOverviewToHtmlPage extends ToHtmlPage[SchedulerOverview] {
-      def apply(schedulerOverview: SchedulerOverview, pageUri: Uri, webServiceContext: WebServiceContext)
+      def apply(pageUri: Uri, webServiceContext: WebServiceContext)(schedulerOverview: SchedulerOverview)
         (implicit executionContext: ExecutionContext)
       =
         Future.successful(new SchedulerOverviewHtmlPage(schedulerOverview, pageUri, webServiceContext))

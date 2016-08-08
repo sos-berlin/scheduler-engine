@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.comple
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toYamlHtmlPage
 import scala.concurrent._
-import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
@@ -25,9 +24,8 @@ trait JobChainRoute {
 
   final def jobChainRoute: Route =
     get {
-      parameterMap { parameterMap ⇒
-        val returnType = parameterMap.get("return")
-        pathQuery {
+      parameter("return".?) { returnType ⇒
+        pathQuery(JobChainPath) {
           case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)
           case query ⇒ multipleJobChainsRoute(JobChainQuery.Standard(query), returnType)
         }

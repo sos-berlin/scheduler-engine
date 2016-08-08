@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.comple
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toYamlHtmlPage
 import scala.concurrent._
-import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
@@ -27,7 +26,7 @@ trait ProcessClassRoute {
     get {
       parameterMap { parameterMap ⇒
         val returnType = parameterMap.get("return")
-        pathQuery {
+        pathQuery(ProcessClassPath) {
           case single: PathQuery.SinglePath ⇒ singleProcessClassRoute(single.as[ProcessClassPath], returnType)
           case query ⇒ multipleProcessClasssRoute(/*ProcessClassQuery.Standard(query), */returnType)
         }
