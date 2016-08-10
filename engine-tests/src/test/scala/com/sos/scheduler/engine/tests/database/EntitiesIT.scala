@@ -4,8 +4,8 @@ import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosedEvent}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedRemoved}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
@@ -43,16 +43,16 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   override def onSchedulerActivated(): Unit = {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
-      eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
+      eventPipe.nextWithCondition[TaskClosed] { _.jobPath == orderJobPath }
       scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
       scheduler executeXml <start_job job={simpleJobPath.string} at={DaylightSavingTimeString}/>
       scheduler executeXml <start_job job={simpleJobPath.string} at={StandardTimeInstantString}><params><param name="myJobParameter" value="myValue"/></params></start_job>
       instance[JobSubsystemClient].forceFileReread(simpleJobPath)
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
+      eventPipe.nextKeyed[FileBasedActivated](simpleJobPath)
       instance[JobSubsystemClient].forceFileReread(simpleJobPath)
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
+      eventPipe.nextKeyed[FileBasedActivated](simpleJobPath)
     }
   }
 
@@ -201,7 +201,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       instance[OrderSubsystemClient].forceFileReread(jobChainPath)
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivatedEvent](jobChainPath)
+      eventPipe.nextKeyed[FileBasedActivated](jobChainPath)
     }
     val jobChain = instance[OrderSubsystemClient].jobChain(jobChainPath)
     pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
@@ -218,7 +218,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       deleteIfExists(instance[OrderSubsystemClient].jobChain(jobChainPath).file) || sys.error("JobChain configuration file could not be deleted")
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)
+      eventPipe.nextKeyed[FileBasedRemoved](jobChainPath)
       tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
       fetchJobChainNodeEntities(jobChainPath) shouldBe 'empty
     }

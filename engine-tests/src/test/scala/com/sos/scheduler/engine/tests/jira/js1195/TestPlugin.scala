@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.order.Order
@@ -28,8 +28,8 @@ extends AttachableNamespaceXmlPlugin {
   val xmlNamespace = "http://example.com/TestPlugin"
 
   override def onActivate(): Unit = {
-    eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
-      case EventSourceEvent(e: OrderStepEndedEvent, order: Order) ⇒
+    eventBus.onHotEventSourceEvent[OrderStepEnded] {
+      case EventSourceEvent(e: OrderStepEnded, order: Order) ⇒
         for (conf ← nodeConfigurations.get(order.nodeKey)) {
           val command = OrderCommand(
             OrderKey(conf.jobChainPath, order.id),

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js628;
 
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * js-628: Order successfull when a pre/postprocessing script is used
- * 
+ *
  * This test contain four jobchains for various combinations of the result from spooler_process and
  * spooler_process_before:
  *
@@ -50,7 +50,7 @@ public class JS628IT extends SchedulerTest {
     public void test() throws Exception {
         CommandBuilder commandBuilder = new CommandBuilder();
         controller().activateScheduler();
-        for(String jobChain : JOB_CHAINS) { 
+        for(String jobChain : JOB_CHAINS) {
         String cmd = commandBuilder.addOrder(jobChain).getCommand();
             controller().scheduler().executeXml(cmd);
         }
@@ -61,7 +61,7 @@ public class JS628IT extends SchedulerTest {
     }
 
     @HotEventHandler
-    public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) throws InterruptedException {
+    public void handleEvent(OrderFinished e, UnmodifiableOrder order) throws InterruptedException {
         String endState = order.state().string();
         if (endState.equals("error")) errorCount++;
         if (endState.equals("success")) successCount++;

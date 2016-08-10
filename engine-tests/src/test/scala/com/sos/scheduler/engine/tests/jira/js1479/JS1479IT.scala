@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1479
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderState, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderState, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -24,10 +24,10 @@ final class JS1479IT extends FreeSpec with ScalaSchedulerTest {
     val primaryOrderKey = JobChainPath("/test-a") orderKey "1"
     val eventPipe = controller.newEventPipe()
     writeConfigurationFile(primaryOrderKey, OrderCommand(primaryOrderKey, parameters = Map("A" → "TEST-A")))
-    assert(eventPipe.nextAny[OrderTouchedEvent].orderKey == primaryOrderKey)
+    assert(eventPipe.nextAny[OrderStarted].orderKey == primaryOrderKey)
     val addedOrderFinishedSeq = List.fill(2) {
-      val orderKey = eventPipe.nextAny[OrderTouchedEvent].orderKey
-      eventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
+      val orderKey = eventPipe.nextAny[OrderStarted].orderKey
+      eventBus.keyedEventFuture[OrderFinished](orderKey)
     }
     val endStates = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.state }
     intercept[Exception] {

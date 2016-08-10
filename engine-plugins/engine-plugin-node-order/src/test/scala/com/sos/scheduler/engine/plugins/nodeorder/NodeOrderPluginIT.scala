@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
@@ -31,7 +31,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
       val promiseMap = (OrderKeys map { _ → Promise[Map[String, String]]() }).toMap
       withCloser { implicit closer ⇒
-        eventBus.onHotEventSourceEvent[OrderFinishedEvent] {
+        eventBus.onHotEventSourceEvent[OrderFinished] {
           case EventSourceEvent(_, order: UnmodifiableOrder) ⇒ promiseMap(order.orderKey).success(order.variables)
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
@@ -43,7 +43,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   "Error when adding the new order is logged and ignored" in {
     controller.toleratingErrorCodes(Set(MissingJobchainCode, CommandFailedCode)) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](ErrorOrderKey) {
+      eventBus.awaitingKeyedEvent[OrderFinished](ErrorOrderKey) {
         withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
           eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(MissingJobchainCode) }

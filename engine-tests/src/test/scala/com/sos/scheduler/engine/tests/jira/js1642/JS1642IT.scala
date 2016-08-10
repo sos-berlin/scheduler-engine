@@ -18,7 +18,7 @@ import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderState, OrderStepStartedEvent}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderState, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
@@ -112,7 +112,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   private def startOrderProcessing() = {
     val expectedTaskIds = ProcessableOrderKeys.indices map { i ⇒ TaskId.First + i }
     for ((orderKey, expectedTaskId) ← ProcessableOrderKeys zip expectedTaskIds) {
-      val event = eventBus.awaitingKeyedEvent[OrderStepStartedEvent](orderKey) {
+      val event = eventBus.awaitingKeyedEvent[OrderStepStarted](orderKey) {
         scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
       }
       assert(event.taskId == expectedTaskId)

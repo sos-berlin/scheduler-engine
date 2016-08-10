@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1008
 
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEnded}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1008.JS1008IT._
@@ -23,7 +23,7 @@ final class JS1008IT extends FreeSpec with ScalaSchedulerTest {
     orderSubsystem.jobChain(testJobChainPath).node(OrderState("200")).action = JobChainNodeAction.stop
     val file = new File(directory, "test")
     touch(file)
-    eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == testJobChainPath.orderKey(file.getPath) }
+    eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == testJobChainPath.orderKey(file.getPath) }
   }
 }
 

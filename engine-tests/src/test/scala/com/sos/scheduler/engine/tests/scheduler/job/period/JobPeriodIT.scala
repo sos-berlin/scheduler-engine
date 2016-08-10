@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.period
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.period.JobPeriodIT._
 import org.joda.time.Instant.now
@@ -18,7 +18,7 @@ final class JobPeriodIT extends FreeSpec with ScalaSchedulerTest {
   private val counts = mutable.HashMap[JobPath, Int]() ++ (JobConfigs map { _.path → 0 })
   private val n = 3
 
-  eventBus.on[TaskStartedEvent] { case e ⇒
+  eventBus.on[TaskStarted] { case e ⇒
     counts(e.jobPath) += 1
   }
 

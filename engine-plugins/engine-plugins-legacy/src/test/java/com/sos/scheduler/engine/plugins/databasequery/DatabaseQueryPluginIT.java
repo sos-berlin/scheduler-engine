@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import java.time.Duration;
@@ -17,7 +17,7 @@ public final class DatabaseQueryPluginIT extends SchedulerTest {
         controller().waitForTermination(timeout);
     }
 
-    @EventHandler public void handleEvent(TaskEndedEvent e) {
+    @EventHandler public void handleEvent(TaskEnded e) {
         try {
             String result = execute("<showTaskHistory/>");
             assertThat(result, containsString("</myResult>"));

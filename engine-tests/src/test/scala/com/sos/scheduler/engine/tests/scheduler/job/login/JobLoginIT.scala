@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.login
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.login.JobLoginIT._
@@ -32,7 +32,7 @@ final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
   private def runJob(jobPath: JobPath) = {
     val eventPipe = controller.newEventPipe()
     startJob(jobPath)
-    eventPipe.nextWithCondition[TaskEndedEvent] { _.jobPath == jobPath }
+    eventPipe.nextWithCondition[TaskEnded] { _.jobPath == jobPath }
     jobPropertyMap(jobPath)
   }
 

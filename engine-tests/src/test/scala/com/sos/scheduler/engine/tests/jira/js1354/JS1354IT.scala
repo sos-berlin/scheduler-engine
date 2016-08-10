@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateVariableStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate.transaction
@@ -75,7 +75,7 @@ final class JS1354IT extends FreeSpec with ScalaSchedulerTest {
   private def runFiles(names: String*)(body: ⇒ Unit): Unit = {
     val preId = nextTaskId
     val files = names map { o ⇒ fileOrderDir / o }
-    val ordersFinished = Future.sequence(files map { f ⇒ eventBus.keyedEventFuture[OrderFinishedEvent](TestJobChainPath orderKey f.getPath) })
+    val ordersFinished = Future.sequence(files map { f ⇒ eventBus.keyedEventFuture[OrderFinished](TestJobChainPath orderKey f.getPath) })
     files foreach touch
     body
     awaitSuccess(ordersFinished)

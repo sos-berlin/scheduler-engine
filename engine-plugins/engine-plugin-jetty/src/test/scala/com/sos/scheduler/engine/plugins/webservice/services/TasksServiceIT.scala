@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosed, TaskId, TaskStarted}
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginJerseyTester
 import com.sos.scheduler.engine.plugins.webservice.services.TasksServiceIT._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
@@ -25,11 +25,11 @@ final class TasksServiceIT extends FreeSpec with ScalaSchedulerTest with JettyPl
   "Task log" in {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <start_job job={testJobPath.string}/>
-    val taskId = eventPipe.nextWithCondition[TaskStartedEvent](_.jobPath == testJobPath).taskId
+    val taskId = eventPipe.nextWithCondition[TaskStarted](_.jobPath == testJobPath).taskId
     val runningLog = getLog(taskId)
     runningLog should include (startMessage)
     runningLog should not include endMessage
-    eventPipe.nextKeyed[TaskClosedEvent](taskId)
+    eventPipe.nextKeyed[TaskClosed](taskId)
     getLog(taskId) should include (endMessage)   // Protokoll aus Datenbankarchiv
   }
 

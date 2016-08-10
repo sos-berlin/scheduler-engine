@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1029
 
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskId, TaskStarted}
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -34,7 +34,7 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
       try {
         delete(stdoutFile)
         killTask(taskId)
-        eventPipe.nextKeyed[TaskEndedEvent](taskId)
+        eventPipe.nextKeyed[TaskEnded](taskId)
       }
       finally
         killTask(taskId)
@@ -45,7 +45,7 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <kill_task job={testJobPath.string} id={taskId.string} immediately="yes"/>
   }
 
-  @HotEventHandler def handleEvent(e: TaskStartedEvent, task: Task): Unit = {
+  @HotEventHandler def handleEvent(e: TaskStarted, task: Task): Unit = {
     eventBus publishCold MyTaskStartedEvent(e.taskId, task.stdoutFile)
   }
 }

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js731;
 
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -17,7 +17,7 @@ public final class JS731IT extends SchedulerTest {
         controller().waitForTermination();
     }
 
-    @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) {
+    @HotEventHandler public void handleEvent(OrderFinished e, UnmodifiableOrder order) {
         scala.collection.Map<String, String> v = order.variables();
         assertThat(v.apply("a"), equalTo("ä"));
         assertThat(v.apply("B"), equalTo("B"));

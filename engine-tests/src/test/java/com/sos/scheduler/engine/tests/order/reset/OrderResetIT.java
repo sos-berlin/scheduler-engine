@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.reset;
 
-import com.sos.scheduler.engine.data.order.OrderResumedEvent;
-import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
+import com.sos.scheduler.engine.data.order.OrderResumed;
+import com.sos.scheduler.engine.data.order.OrderSuspended;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
@@ -28,14 +28,14 @@ public class OrderResetIT extends SchedulerTest {
 	}
 
     @EventHandler
-    public void handleSuspend(OrderSuspendedEvent e) throws InterruptedException {
+    public void handleSuspend(OrderSuspended e) throws InterruptedException {
         // reset the order via modify_order must trigger an OrderResumeEvent
         String cmd = "<modify_order job_chain='/chain' order='test' action='reset'/>";
         scheduler().executeXml(cmd);
     }
 
     @EventHandler
-    public void handleResume(OrderResumedEvent e) throws InterruptedException {
+    public void handleResume(OrderResumed e) throws InterruptedException {
         controller().terminateScheduler();
     }
 }

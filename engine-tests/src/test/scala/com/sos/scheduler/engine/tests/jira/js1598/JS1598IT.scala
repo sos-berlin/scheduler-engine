@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1598
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderSuspendedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderState, OrderSuspended, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -55,11 +55,11 @@ final class JS1598IT extends FreeSpec with ScalaSchedulerTest {
   private def checkRun(orderKey: OrderKey, continueState: Option[OrderState] = None)(body: OrderKey ⇒ Unit): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       body(orderKey)
-      eventPipe.nextKeyed[OrderTouchedEvent](orderKey)
-      eventPipe.nextKeyed[OrderSuspendedEvent](orderKey)
+      eventPipe.nextKeyed[OrderStarted](orderKey)
+      eventPipe.nextKeyed[OrderSuspended](orderKey)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false), state = continueState)
-      // Not for a distributed order: eventPipe.nextKeyed[OrderResumedEvent](orderKey)
-      eventPipe.nextKeyed[OrderFinishedEvent](orderKey)
+      // Not for a distributed order: eventPipe.nextKeyed[OrderResumed](orderKey)
+      eventPipe.nextKeyed[OrderFinished](orderKey)
     }
 }
 

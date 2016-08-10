@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tests.scheduler.job.temporary
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.filebased.FileBasedRemovedEvent
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.filebased.FileBasedRemoved
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -16,8 +16,8 @@ final class TemporaryJobIT extends FreeSpec with ScalaSchedulerTest {
     val eventPipe = controller.newEventPipe()
     val jobPath = JobPath("/TEMP")
     scheduler executeXml <job name={jobPath.name} temporary="yes"><script language="shell">exit 0</script><run_time once="yes"/></job>
-    eventPipe.nextWithCondition[TaskEndedEvent]( _.jobPath == jobPath )
-    eventPipe.nextKeyed[FileBasedRemovedEvent](jobPath)
+    eventPipe.nextWithCondition[TaskEnded]( _.jobPath == jobPath )
+    eventPipe.nextKeyed[FileBasedRemoved](jobPath)
     waitForCondition(3.s, 100.ms) { !instance[JobSubsystemClient].contains(jobPath) || fail("Temporary job has not been removed") }
   }
 }

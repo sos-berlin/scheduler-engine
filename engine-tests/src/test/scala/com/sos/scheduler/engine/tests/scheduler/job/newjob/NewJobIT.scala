@@ -40,7 +40,7 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
 //      ok should be (true)
 //    }
 //
-//  @EventHandler def handle(e: TaskEndedEvent): Unit = {
+//  @EventHandler def handle(e: TaskEnded): Unit = {
 //    if (e.jobPath == jobPath)
 //      blockingQueue.offer(true)
 //  }

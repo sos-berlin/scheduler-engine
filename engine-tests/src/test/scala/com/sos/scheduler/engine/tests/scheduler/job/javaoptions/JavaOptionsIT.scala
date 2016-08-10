@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.javaoptions
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosed}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -33,7 +33,7 @@ final class JavaOptionsIT extends FunSuite with ScalaSchedulerTest {
 
   private def runJob(j: JobPath): Unit = {
     scheduler executeXml <start_job job={j.string}/>
-    eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
+    eventPipe.nextWithCondition { e: TaskClosed ⇒ e.jobPath == j }
     instance[SchedulerVariableSet].apply(j.name +".myJavaOption") should equal ("TEST")
   }
 }

@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tests.jira.js655;
 
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.common.system.Files;
-import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.data.filebased.FileBasedRemovedEvent;
+import com.sos.scheduler.engine.data.filebased.FileBasedActivated;
+import com.sos.scheduler.engine.data.filebased.FileBasedRemoved;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -74,13 +74,13 @@ public final class JS655IT extends SchedulerTest {
         assertThat(response.getStatus(), equalTo(INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
-    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, JobChain jobChain) throws InterruptedException {
+    @HotEventHandler public void handleEvent(FileBasedActivated e, JobChain jobChain) throws InterruptedException {
         ignore(e);
         if (jobChain.overview().path().equals(rightJobChainPath))
             gate.put(jobChainActivated);
     }
 
-    @HotEventHandler public void handleEvent(FileBasedRemovedEvent e, JobChain jobChain) throws InterruptedException {
+    @HotEventHandler public void handleEvent(FileBasedRemoved e, JobChain jobChain) throws InterruptedException {
         ignore(e);
         if (jobChain.overview().path().equals(rightJobChainPath))
             gate.put(jobChainRemoved);

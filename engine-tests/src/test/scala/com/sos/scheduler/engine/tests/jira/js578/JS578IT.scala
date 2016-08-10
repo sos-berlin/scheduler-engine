@@ -18,27 +18,27 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
   test("<modify_order at='now'/>") {
     val eventPipe = controller.newEventPipe()
     startOrderAt("now")
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+    eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
   }
 
   test("<modify_order at='now'/> while order is running does nothing") {
     val eventPipe = controller.newEventPipe()
     setJobChainNodeStop(true)
     startOrderAt("now")
-    eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
+    eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey }
     orderSubsystem.orderOverview(orderKey).orderState should equal (OrderState("200"))
 
     startOrderAt("now")
     setJobChainNodeStop(false)
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
-    intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[OrderTouchedEvent](3.s)  { _.orderKey == orderKey }}
+    eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
+    intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[OrderStarted](3.s)  { _.orderKey == orderKey }}
   }
 
   ignore("<modify_order at='next'/> (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       startOrderAt("next")
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
     }
   }
 
@@ -47,14 +47,14 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
       val eventPipe = controller.newEventPipe()
       setJobChainNodeStop(true)
       startOrderAt("next")
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
+      eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey }
       orderSubsystem.orderOverview(orderKey).orderState should equal (OrderState("200"))
 
       startOrderAt("next")
       setJobChainNodeStop(false)
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
-      eventPipe.nextWithCondition[OrderTouchedEvent] { _.orderKey == orderKey }
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
+      eventPipe.nextWithCondition[OrderStarted] { _.orderKey == orderKey }
+      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
     }
   }
 

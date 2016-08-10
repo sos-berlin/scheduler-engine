@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, _}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, _}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.DatabaseOrderCheckPeriod
@@ -42,14 +42,14 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
       testNonDistributedAndDistributed { (isDistributed, aJobChainPath, bJobChainPath, cJobChainPath) ⇒
         val aOrderKey = aJobChainPath orderKey "1"
         val bOrderKey = bJobChainPath orderKey "1"
-        eventBus.awaitingKeyedEvent[OrderTouchedEvent](bOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderTouchedEvent](aOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderStarted](bOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderStarted](aOrderKey) {
             addOrder(aOrderKey, 1.s)
             addOrder(bOrderKey, 1.s)
           }
         }
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](bOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](aOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderFinished](bOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinished](aOrderKey) {
           } .state shouldBe EndState
         } .state shouldBe EndState
       }
@@ -60,16 +60,16 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         val a1OrderKey = aJobChainPath orderKey "1"
         val a2OrderKey = aJobChainPath orderKey "2"
         val bOrderKey  = bJobChainPath orderKey "1"
-        eventBus.awaitingKeyedEvent[OrderTouchedEvent](bOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderTouchedEvent](a1OrderKey) {
+        eventBus.awaitingKeyedEvent[OrderStarted](bOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderStarted](a1OrderKey) {
             addOrder(a1OrderKey, 2.s)
             addOrder(bOrderKey, 4.s)
           }
         }
         withEventPipe { eventPipe ⇒
           addOrder(a2OrderKey, 1.s)
-          eventPipe.nextKeyed[OrderFinishedEvent](a1OrderKey).state shouldBe EndState
-          eventPipe.nextKeyed[OrderTouchedEvent](a2OrderKey)
+          eventPipe.nextKeyed[OrderFinished](a1OrderKey).state shouldBe EndState
+          eventPipe.nextKeyed[OrderStarted](a2OrderKey)
           expectEndStateReached(eventPipe, a2OrderKey, bOrderKey)
         }
       }
@@ -80,17 +80,17 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         val aOrderKey = aJobChainPath orderKey "1"
         val bOrderKey = bJobChainPath orderKey "1"
         val cOrderKey = cJobChainPath orderKey "1"
-        eventBus.awaitingKeyedEvent[OrderTouchedEvent](bOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderTouchedEvent](aOrderKey) {
+        eventBus.awaitingKeyedEvent[OrderStarted](bOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderStarted](aOrderKey) {
             addOrder(aOrderKey, 2.s)
             addOrder(bOrderKey, 5.s + (if (isDistributed) DatabaseOrderCheckPeriod else 0.s))
           }
         }
         withEventPipe { eventPipe ⇒
           addOrder(cOrderKey, 0.s)
-          eventPipe.nextKeyed[OrderFinishedEvent](aOrderKey).state shouldBe EndState
+          eventPipe.nextKeyed[OrderFinished](aOrderKey).state shouldBe EndState
           eventPipe.nextWithCondition[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271"))
-          eventPipe.nextKeyed[OrderTouchedEvent](cOrderKey)
+          eventPipe.nextKeyed[OrderStarted](cOrderKey)
           expectEndStateReached(eventPipe, bOrderKey, cOrderKey)
         }
       }
@@ -113,19 +113,19 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       addOrder(a1OrderKey, 2.s)
       addOrder(b1OrderKey, 2.s)
-      eventPipe.nextKeyedEvents[OrderStepStartedEvent](Set(a1OrderKey, b1OrderKey))
+      eventPipe.nextKeyedEvents[OrderStepStarted](Set(a1OrderKey, b1OrderKey))
       eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271")) {   // "Task is being terminated in favour of ..."
-        eventBus.awaitingKeyedEvent[OrderFinishedEvent](a1OrderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](b1OrderKey) {
+        eventBus.awaitingKeyedEvent[OrderFinished](a1OrderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinished](b1OrderKey) {
             addOrder(a2OrderKey, 1.s)
             addOrder(b2OrderKey, 1.s)
           }
         }
       }
-      eventPipe.queued[OrderStepStartedEvent] shouldBe empty
+      eventPipe.queued[OrderStepStarted] shouldBe empty
       val eventPipe2 = controller.newEventPipe()
-      eventPipe.nextKeyedEvents[OrderFinishedEvent](Set(a2OrderKey, b2OrderKey))
-      eventPipe2.queued[OrderStepStartedEvent] filter { e ⇒ Set(a2OrderKey, b2OrderKey)(e.key) } map { _.state } shouldEqual
+      eventPipe.nextKeyedEvents[OrderFinished](Set(a2OrderKey, b2OrderKey))
+      eventPipe2.queued[OrderStepStarted] filter { e ⇒ Set(a2OrderKey, b2OrderKey)(e.key) } map { _.state } shouldEqual
         List(OrderState("100"), OrderState("100"))
     }
   }
@@ -145,7 +145,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
 
   private def expectEndStateReached(eventPipe: EventPipe, orderKeys: OrderKey*): Unit =
     assertResult((orderKeys map { _ → EndState }).toSet) {
-      (eventPipe.nextKeyedEvents[OrderFinishedEvent](orderKeys) map { e ⇒ e.key → e.state }).toSet
+      (eventPipe.nextKeyedEvents[OrderFinished](orderKeys) map { e ⇒ e.key → e.state }).toSet
     }
 }
 

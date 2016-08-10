@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js832
 
 import com.google.common.io.Files
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -22,7 +22,7 @@ final class JS832IT extends FunSuite with ScalaSchedulerTest {
     val firstLines = new mutable.HashSet[String]
     for (i <- 1 to 3) {
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at="now"/>
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
       val line = firstLine(logFile(orderKey))
       firstLines should not contain line    // Erste Zeile hat jedesmal einen neuen Zeitstempel
       firstLines += line

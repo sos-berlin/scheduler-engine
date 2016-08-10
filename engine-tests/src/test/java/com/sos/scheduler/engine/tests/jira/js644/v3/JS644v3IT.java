@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.data.filebased.TypedPath;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.job.JobPath;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -71,7 +71,7 @@ public final class JS644v3IT extends SchedulerTest {
         return ok;
     }
 
-    @EventHandler public void handleEvent(OrderFinishedEvent e) throws InterruptedException {
+    @EventHandler public void handleEvent(OrderFinished e) throws InterruptedException {
         (e.orderKey().jobChainPath().equals(lowerCaseJobChainPath)? lowerCaseGate : upperCaseGate).put(true);
     }
 

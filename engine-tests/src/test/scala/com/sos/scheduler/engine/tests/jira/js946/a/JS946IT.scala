@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -45,7 +45,7 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
     val orderKeys = 1 to jobChain(TestJobChainPath).orderLimit + 2 map { i ⇒ TestJobChainPath orderKey i.toString }
     val futures =
       for (orderKey <- orderKeys) yield {
-        val f = eventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
+        val f = eventBus.keyedEventFuture[OrderFinished](orderKey)
         scheduler executeXml OrderCommand(orderKey)
         sleep(500.ms)
         f

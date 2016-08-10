@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.newkernel.job
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.getCommonXMLInputFactory
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskStarted}
 import com.sos.scheduler.engine.eventbus.{EventHandler, EventHandlerAnnotated, SchedulerEventBus}
 import com.sos.scheduler.engine.newkernel.job.NewJobTest._
 import com.sos.scheduler.engine.newkernel.utils.Service.withService
@@ -41,11 +41,11 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
     }
   }
 
-  @EventHandler def handle(e: TaskStartedEvent): Unit = {
+  @EventHandler def handle(e: TaskStarted): Unit = {
     logger info e.toString
   }
 
-  @EventHandler def handle(e: TaskEndedEvent): Unit = {
+  @EventHandler def handle(e: TaskEnded): Unit = {
     logger info e.toString
     callRunner.end()
   }

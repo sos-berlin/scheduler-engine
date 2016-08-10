@@ -47,14 +47,14 @@ final class JS803IT extends SchedulerTest {
     scheduler.executeXml(command)
   }
 
-  @EventHandler def handleEvent(e: OrderTouchedEvent): Unit = {
+  @EventHandler def handleEvent(e: OrderStarted): Unit = {
     assertTrue(s"Order ${e.orderKey} has been started before expected time $startTime", !(new DateTime isBefore startTime))
   }
 
-  @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder): Unit =
+  @HotEventHandler def handleHotEvent(event: OrderFinished, order: UnmodifiableOrder): Unit =
     assertThat(s"Wrong end state of order ${event.orderKey}", order.state, equalTo(expectedEndState))
 
-  @EventHandler def handleEvent(event: OrderFinishedEvent): Unit = {
+  @EventHandler def handleEvent(event: OrderFinished): Unit = {
     terminatedOrders.add(event.orderKey.id)
     if (terminatedOrders == expectedOrders)  controller.terminateScheduler()
   }

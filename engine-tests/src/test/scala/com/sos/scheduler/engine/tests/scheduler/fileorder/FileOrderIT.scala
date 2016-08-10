@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
@@ -66,7 +66,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
           val matchingFile = newMatchingFile()
           val orderKey = TestJobChainPath orderKey matchingFile.toString
           runUntilFileRemovedMessage(orderKey) {
-            eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+            eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
               logger.info(s"touch $matchingFile")
               touch(matchingFile)
             }
@@ -79,7 +79,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         val matchingFile = newMatchingFile()
         val orderKey = TestJobChainPath orderKey matchingFile.toString
         runUntilFileRemovedMessage(orderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
             testEnvironment.fileFromPath(DeleteJobPath).append(" ")
             instance[FolderSubsystemClient].updateFolders()
             touch(matchingFile)
@@ -96,10 +96,10 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         val orderKey = TestJobChainPath orderKey file.toString
         controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
           runUntilFileRemovedMessage(orderKey) {
-            eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+            eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
               touch(file)
             }
-            val startedAgain = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
+            val startedAgain = eventBus.keyedEventFuture[OrderStarted](orderKey)
             assert(orderIsBlacklisted(orderKey))
             sleep(repeat + delay)
             assert(orderIsBlacklisted(orderKey))
@@ -111,8 +111,8 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         assert(!orderExists(orderKey))
         controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
           runUntilFileRemovedMessage(orderKey) {
-            eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-              val started = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
+            eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
+              val started = eventBus.keyedEventFuture[OrderStarted](orderKey)
               assert(!started.isCompleted)
               sleep(repeat + delay)
               assert(!started.isCompleted)
@@ -133,10 +133,10 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
       val ignoredFile = directory / "IGNORED-FILE"
       List(matchingFile, ignoredFile) foreach touch
       val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }
-      val ignoredStarted = eventBus.keyedEventFuture[OrderTouchedEvent](ignoredOrderKey)
+      val ignoredStarted = eventBus.keyedEventFuture[OrderStarted](ignoredOrderKey)
       controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
         runUntilFileRemovedMessage(matchingOrderKey) {
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](matchingOrderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinished](matchingOrderKey) {
             touch(matchingFile)
           }
         }

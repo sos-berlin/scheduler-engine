@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js653;
 
 import com.google.common.collect.ImmutableSet;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
+import com.sos.scheduler.engine.data.order.OrderStarted;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -51,11 +51,11 @@ public final class JS653IT extends SchedulerTest {
         }
     }
 
-    @HotEventHandler public void handleEvent(OrderTouchedEvent e, UnmodifiableOrder o) {
+    @HotEventHandler public void handleEvent(OrderStarted e, UnmodifiableOrder o) {
         orderStarts.add(new OrderIdAndState(e.orderKey().id(), o.state()));
     }
 
-    @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder o) {
+    @HotEventHandler public void handleEvent(OrderFinished e, UnmodifiableOrder o) {
         OrderKeyAndState a = new OrderKeyAndState(e.orderKey(), o.state());
         orderEnds.add(a);
         lastActivity = currentTimeMillis();

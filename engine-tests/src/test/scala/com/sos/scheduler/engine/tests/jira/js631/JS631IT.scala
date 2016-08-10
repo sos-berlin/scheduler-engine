@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js631
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderState, OrderStateChangedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderNestedFinished, OrderNestedStarted, OrderState, OrderNodeChanged, OrderStarted}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOverview}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js631.JS631IT._
@@ -23,17 +23,17 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
   "Without reset" in {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
-      eventPipe.nextKeyed[OrderTouchedEvent](AOrderKey)
-      eventPipe.nextKeyed[OrderNestedTouchedEvent](AOrderKey)
-      eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A1State
-      eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A2State
-      eventPipe.nextKeyed[OrderNestedFinishedEvent](AOrderKey)
-      eventPipe.nextKeyed[OrderNestedTouchedEvent](BOrderKey)
-      eventPipe.nextKeyed[OrderStateChangedEvent](BOrderKey).previousState shouldEqual B1State
-      eventPipe.nextKeyed[OrderStateChangedEvent](BOrderKey).previousState shouldEqual B2State
-      eventPipe.nextKeyed[OrderStateChangedEvent](BOrderKey).previousState shouldEqual B3State
-      eventPipe.nextKeyed[OrderNestedFinishedEvent](BOrderKey)
-      eventPipe.nextKeyed[OrderFinishedEvent](BOrderKey)
+      eventPipe.nextKeyed[OrderStarted](AOrderKey)
+      eventPipe.nextKeyed[OrderNestedStarted](AOrderKey)
+      eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).previousState shouldEqual A1State
+      eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).previousState shouldEqual A2State
+      eventPipe.nextKeyed[OrderNestedFinished](AOrderKey)
+      eventPipe.nextKeyed[OrderNestedStarted](BOrderKey)
+      eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).previousState shouldEqual B1State
+      eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).previousState shouldEqual B2State
+      eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).previousState shouldEqual B3State
+      eventPipe.nextKeyed[OrderNestedFinished](BOrderKey)
+      eventPipe.nextKeyed[OrderFinished](BOrderKey)
     }
   }
 
@@ -41,9 +41,9 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <job_chain_node.modify job_chain={BJobChainPath.string} state={B2State.string} action="stop"/>
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
-      eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A1State
-      eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A2State
-      eventPipe.nextKeyed[OrderStateChangedEvent](BOrderKey).previousState shouldEqual B1State
+      eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).previousState shouldEqual A1State
+      eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).previousState shouldEqual A2State
+      eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).previousState shouldEqual B1State
       order(BOrderKey).nextInstantOption shouldEqual None
       scheduler executeXml <job_chain_node.modify job_chain={AOrderKey.jobChainPath.string} state={A1State.string} action="next_state"/>
       scheduler executeXml <job_chain_node.modify job_chain={AOrderKey.jobChainPath.string} state={A2State.string} action="next_state"/>
@@ -69,7 +69,7 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={A2State.string} action="stop"/>
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
-      eventPipe.nextKeyed[OrderStateChangedEvent](AOrderKey).previousState shouldEqual A1State
+      eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).previousState shouldEqual A1State
       order(AOrderKey).nextInstantOption shouldEqual None
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} action="reset"/>
       order(AOrderKey).nextInstantOption shouldEqual None

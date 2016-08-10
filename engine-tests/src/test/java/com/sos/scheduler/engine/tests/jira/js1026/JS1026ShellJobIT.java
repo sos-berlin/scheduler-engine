@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1026;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -36,7 +36,7 @@ public final class JS1026ShellJobIT extends SchedulerTest {
     }
 
     @HotEventHandler
-    public void handleTaskEndedEvent(TaskEndedEvent e, UnmodifiableTask t) throws IOException {
+    public void handleTaskEnded(TaskEnded e, UnmodifiableTask t) throws IOException {
         taskCount++;
         // Job test2 is started by command start_job of job test1
         if (taskCount == jobNames.size() + 1) {

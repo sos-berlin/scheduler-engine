@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1107;
 
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -21,7 +21,7 @@ public final class JS1107IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(TaskEndedEvent e) {
+    public void handleEvent(TaskEnded e) {
         countEndedTasks++;
         if (countEndedTasks == 3) {
             controller().terminateScheduler();

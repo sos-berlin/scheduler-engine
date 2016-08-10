@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1026;
 
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -33,7 +33,7 @@ public class JS1026ShellOrderIT extends SchedulerTest {
     }
 
     @HotEventHandler
-    public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
+    public void handleOrderFinished(OrderFinished e, UnmodifiableOrder order) throws IOException, InterruptedException {
         scala.collection.Map<String,String> map = order.variables();
         assertThat(map.apply("testvar1"), equalTo("value1"));
         assertThat(map.apply("testvar2"), equalTo("newvalue2"));

@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.tests.scheduler.job.manyjobs
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
+import com.sos.scheduler.engine.data.filebased.FileBasedActivated
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -53,11 +53,11 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
     }
   }
 
-  @EventHandler def handle(e: FileBasedActivatedEvent): Unit = {
+  @EventHandler def handle(e: FileBasedActivated): Unit = {
     Some(e.typedPath) collect { case p: JobPath if jobStatistics.keySet contains p => activatedJobCount += 1 }
   }
 
-  @EventHandler def handle(e: TaskStartedEvent): Unit = {
+  @EventHandler def handle(e: TaskStarted): Unit = {
     taskCount += 1
     jobStatistics(e.jobPath).taskCount += 1
   }

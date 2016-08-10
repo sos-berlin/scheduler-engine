@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent, OrderSuspendedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEnded, OrderSuspended, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
@@ -31,14 +31,14 @@ final class JS1227IT extends FreeSpec with ClusterTest {
 
   "Suspend order running in some other scheduler" in {
     awaitSuccess(otherScheduler.postCommand(ModifyJobCommand(TestJobPath, cmd = Some(ModifyJobCommand.Cmd.Stop))))
-    eventBus.awaitingKeyedEvent[OrderTouchedEvent](AOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderStarted](AOrderKey) {
       scheduler executeXml OrderCommand(AOrderKey)
     }
-    eventBus.awaitingKeyedEvent[OrderSuspendedEvent](AOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderSuspended](AOrderKey) {
       awaitFailure(otherScheduler.postCommand(ModifyOrderCommand(AOrderKey, suspended = Some(true)))) match {
         case e: Exception if e.getMessage startsWith s"$OrderIsOccupiedMessageCode " ⇒
       }
-      eventBus.awaitingKeyedEvent[OrderStepEndedEvent](AOrderKey) {}
+      eventBus.awaitingKeyedEvent[OrderStepEnded](AOrderKey) {}
       transaction { implicit entityManager ⇒
         val entity = instance[HibernateOrderStore].fetch(AOrderKey)
         assert(entity.stateOption == Some(OrderState("200")))

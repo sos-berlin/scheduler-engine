@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderEvent, OrderFinishedEvent, OrderId, OrderKey, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderEvent, OrderFinished, OrderId, OrderKey, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -49,10 +49,10 @@ final class JS1103IT extends FreeSpec with ScalaSchedulerTest {
       val totalCounter = new MaximumCounter
       val ordinaryCounter = new MaximumCounter
       eventBus.onHot[OrderEvent] {
-        case OrderTouchedEvent(OrderKey(_, OrderId(idString))) ⇒
+        case OrderStarted(OrderKey(_, OrderId(idString))) ⇒
           if (!(idString endsWith "-extra")) ordinaryCounter += 1
           totalCounter += 1
-        case OrderFinishedEvent(OrderKey(_, OrderId(idString)), _) ⇒
+        case OrderFinished(OrderKey(_, OrderId(idString)), _) ⇒
           if (!(idString endsWith "-extra")) ordinaryCounter -= 1
           totalCounter -= 1
       }

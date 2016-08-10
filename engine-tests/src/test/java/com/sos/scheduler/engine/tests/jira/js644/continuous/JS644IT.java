@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
-import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.data.order.OrderNodeChanged;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -90,7 +90,7 @@ public final class JS644IT extends SchedulerTest {
         });
     }
 
-    @EventHandler public void handleEvent(OrderStateChangedEvent e) throws InterruptedException {
+    @EventHandler public void handleEvent(OrderNodeChanged e) throws InterruptedException {
         threadGate.put(true);
     }
 

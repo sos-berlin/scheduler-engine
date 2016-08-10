@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1470
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -17,7 +17,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1470IT extends FreeSpec with ScalaSchedulerTest {
 
   "sos.spooler.Spooler.start(jobPath)" in {
-    eventBus.awaitingEvent[TaskStartedEvent](_.jobPath == JobPath("/test-b")) {
+    eventBus.awaitingEvent[TaskStarted](_.jobPath == JobPath("/test-b")) {
       startJob(JobPath("/test-a"))
     }
   }

@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.{Stop, Unstop}
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
@@ -40,7 +40,7 @@ final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
   }
 
-  eventBus.onHotEventSourceEvent[TaskEndedEvent] { case EventSourceEvent(TaskEndedEvent(_, AJobPath, _), task: Task) ⇒
+  eventBus.onHotEventSourceEvent[TaskEnded] { case EventSourceEvent(TaskEnded(_, AJobPath, _), task: Task) ⇒
     val files = (Splitter on ";" split task.parameterValue(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
     eventBus publishCold TriggerEvent(files)
   }

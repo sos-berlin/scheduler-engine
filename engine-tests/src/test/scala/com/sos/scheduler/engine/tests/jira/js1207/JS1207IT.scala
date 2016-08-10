@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1207
 
 import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderId, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderStepEndedEvent, OrderStepStartedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderNestedFinished, OrderNestedStarted, OrderStepEnded, OrderStepStarted, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -51,27 +51,27 @@ final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
       val promise = Promise[Unit]()
       var promisedFinishedOrderCount = n
       val counters = mutable.Map[JobChainPath, Statistic]() ++ (jobchainLimits map { case (path, limit) ⇒ path → new Statistic(limit) })
-      eventBus.on[OrderTouchedEvent] { case e ⇒
+      eventBus.on[OrderStarted] { case e ⇒
         e.orderKey.jobChainPath shouldEqual AInnerJobChainPath // The first inner jobchain, not OutJobChainPath as one may expect
         counters(outerJobchainPath).onStarted()
       }
-      eventBus.on[OrderFinishedEvent] { case e ⇒
+      eventBus.on[OrderFinished] { case e ⇒
         e.orderKey.jobChainPath shouldEqual CInnerJobChainPath // The last inner jobchain, not OutJobChainPath as one may expect
         counters(outerJobchainPath).onFinished()
         promisedFinishedOrderCount -= 1
         if (promisedFinishedOrderCount == 0) promise.success(())
       }
-      eventBus.on[OrderNestedTouchedEvent] { case e ⇒
+      eventBus.on[OrderNestedStarted] { case e ⇒
         counters(e.orderKey.jobChainPath).onStarted()
       }
-      eventBus.on[OrderNestedFinishedEvent] { case e ⇒
+      eventBus.on[OrderNestedFinished] { case e ⇒
         counters(e.orderKey.jobChainPath).onFinished()
       }
-      eventBus.on[OrderStepStartedEvent] { case e ⇒
+      eventBus.on[OrderStepStarted] { case e ⇒
         counters(outerJobchainPath).onStepStarted()
         counters(e.orderKey.jobChainPath).onStepStarted()
       }
-      eventBus.on[OrderStepEndedEvent] { case e ⇒
+      eventBus.on[OrderStepEnded] { case e ⇒
         counters(e.orderKey.jobChainPath).onStepEnded()
         counters(outerJobchainPath).onStepEnded()
       }

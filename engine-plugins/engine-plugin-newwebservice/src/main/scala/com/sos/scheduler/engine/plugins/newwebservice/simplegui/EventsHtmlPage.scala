@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.event.{Event, IdAndEvent}
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderNestedFinishedEvent, OrderNestedTouchedEvent, OrderResumedEvent, OrderSetBackEvent, OrderState, OrderStateChangedEvent, OrderStepEndedEvent, OrderStepStartedEvent, OrderSuspendedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderNestedFinished, OrderNestedStarted, OrderNodeChanged, OrderResumed, OrderSetBack, OrderStarted, OrderState, OrderStepEnded, OrderStepStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -54,17 +54,17 @@ extends SchedulerHtmlPage {
     val name = event.getClass.getSimpleName
     td(name stripSuffix "Event") :: (
       event match {
-        case OrderFinishedEvent(orderKey, nodeId: OrderState)       ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
-        case OrderNestedFinishedEvent(orderKey)                     ⇒ td(orderKey) :: Nil
-        case OrderNestedTouchedEvent(orderKey)                      ⇒ td(orderKey) :: Nil
-        case OrderResumedEvent(orderKey)                            ⇒ td(orderKey) :: Nil
-        case OrderSetBackEvent(orderKey, nodeId)                    ⇒ td(orderKey) :: td(nodeId) :: Nil
-        case OrderStateChangedEvent(orderKey, fromNodeId, toNodeId) ⇒ td(orderKey) :: td(toNodeId) :: td("← ", fromNodeId) :: Nil
-        case OrderStepEndedEvent(orderKey, stateTransition)         ⇒ td(orderKey) :: td(stateTransition.toString) :: Nil
-        case OrderStepStartedEvent(orderKey, nodeId, taskId)        ⇒ td(orderKey) :: td(nodeId) :: td(taskId) :: Nil
-        case OrderSuspendedEvent(orderKey)                          ⇒ td(orderKey) :: Nil
-        case OrderTouchedEvent(orderKey)                            ⇒ td(orderKey) :: Nil
-        case _                                                      ⇒ td(event.toString stripPrefix s"$name(" stripSuffix ")") :: Nil
+        case OrderFinished(orderKey, nodeId: OrderState)       ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
+        case OrderNestedFinished(orderKey)                     ⇒ td(orderKey) :: Nil
+        case OrderNestedStarted(orderKey)                      ⇒ td(orderKey) :: Nil
+        case OrderResumed(orderKey)                            ⇒ td(orderKey) :: Nil
+        case OrderSetBack(orderKey, nodeId)                    ⇒ td(orderKey) :: td(nodeId) :: Nil
+        case OrderNodeChanged(orderKey, fromNodeId, toNodeId)  ⇒ td(orderKey) :: td(toNodeId) :: td("← ", fromNodeId) :: Nil
+        case OrderStepEnded(orderKey, stateTransition)         ⇒ td(orderKey) :: td(stateTransition.toString) :: Nil
+        case OrderStepStarted(orderKey, nodeId, taskId)        ⇒ td(orderKey) :: td(nodeId) :: td(taskId) :: Nil
+        case OrderSuspended(orderKey)                          ⇒ td(orderKey) :: Nil
+        case OrderStarted(orderKey)                            ⇒ td(orderKey) :: Nil
+        case _                                                 ⇒ td(event.toString stripPrefix s"$name(" stripSuffix ")") :: Nil
       })
   }
 }

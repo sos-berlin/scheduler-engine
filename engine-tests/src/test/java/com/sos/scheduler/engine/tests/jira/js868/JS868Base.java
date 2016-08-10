@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js868;
 
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
  * parameter values in a shell job.
  */
 public abstract class JS868Base extends SchedulerTest {
-    
+
 	protected HashMap<String,String> resultMap;
 
     protected HashMap<String,String> getResultMap(File resultFile) throws IOException {
@@ -36,7 +36,7 @@ public abstract class JS868Base extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
+    public void handleOrderEnd(OrderFinished e) throws IOException {
         controller().terminateScheduler();
     }
 
@@ -50,5 +50,5 @@ public abstract class JS868Base extends SchedulerTest {
         assertTrue("parameter " + varname + " is not set", value != null);
         assertTrue(varname + "=" + value + " is not valid - " + varname + "=" + expected + " expected", value.equals(expected));
     }
-    
+
 }

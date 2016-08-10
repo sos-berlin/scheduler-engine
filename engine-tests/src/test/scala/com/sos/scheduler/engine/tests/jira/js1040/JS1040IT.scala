@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1040
 
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedRemoved}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -50,7 +50,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
         removeJobChain()
       withEventPipe { eventPipe ⇒
         scheduler executeXml jobChainElem(ordersAreRecoverable)
-        eventPipe.nextKeyed[FileBasedActivatedEvent](testJobChainPath)
+        eventPipe.nextKeyed[FileBasedActivated](testJobChainPath)
       }
     }
 
@@ -58,7 +58,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
       withEventPipe { eventPipe ⇒
         orderSubsystem.remove(testJobChainPath)
         eventBus.dispatchEvents()
-        eventPipe.nextKeyed[FileBasedRemovedEvent](testJobChainPath)
+        eventPipe.nextKeyed[FileBasedRemoved](testJobChainPath)
       }
     }
   }

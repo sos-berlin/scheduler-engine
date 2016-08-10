@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.spoolerapi.job;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -48,7 +48,7 @@ public final class GetSourceCodeIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleTaskEnded(TaskEndedEvent e) {
+    public void handleTaskEnded(TaskEnded e) {
         String jobName = e.jobPath().name();
         String scriptCode = instance(SchedulerVariableSet.class).apply(jobName).trim().replace("\r\n", "\n");
         resultMap.put(jobName,scriptCode);

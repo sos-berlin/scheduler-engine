@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepEnded, SuccessOrderStateTransition}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
@@ -88,10 +88,10 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   "Run variables job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
-      eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
+      eventBus.onHotEventSourceEvent[OrderStepEnded] {
         case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.success(order.variables)
       }
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](VariablesOrderKey) {
+      eventBus.awaitingKeyedEvent[OrderFinished](VariablesOrderKey) {
         scheduler executeXml OrderCommand(VariablesOrderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
       }
       eventsPromise.success(eventPipe.queued[Event])
@@ -100,7 +100,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   "Variables job exit code" in {
     assertResult(List(SuccessOrderStateTransition)) {
-      eventsPromise.successValue collect { case OrderStepEndedEvent(VariablesOrderKey, stateTransition) ⇒ stateTransition }
+      eventsPromise.successValue collect { case OrderStepEnded(VariablesOrderKey, stateTransition) ⇒ stateTransition }
     }
   }
 

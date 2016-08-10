@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -30,7 +30,7 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
   List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>
     test("Job with "+logLevel+" should call some methods") {
       scheduler.executeXml(startJobElem(logLevel))
-      eventPipe.nextWithCondition[TaskEndedEvent] {_.jobPath == jobPath}
+      eventPipe.nextWithCondition[TaskEnded] {_.jobPath == jobPath}
       checkMethodCallCounters(logLevel)
     }
   }

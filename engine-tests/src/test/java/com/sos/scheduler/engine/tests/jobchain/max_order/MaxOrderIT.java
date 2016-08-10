@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jobchain.max_order;
 
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
+import com.sos.scheduler.engine.data.order.OrderStarted;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import java.time.Duration;
@@ -25,12 +25,12 @@ public final class MaxOrderIT extends SchedulerTest {
         controller().waitForTermination(Duration.ofSeconds(5*60));
     }
 
-    @EventHandler public void handleEvent(OrderTouchedEvent e) {
+    @EventHandler public void handleEvent(OrderStarted e) {
         runningOrderCount++;
         maxTouchedOrderCount = max(maxTouchedOrderCount, runningOrderCount);
     }
 
-    @EventHandler public void handleEvent(OrderFinishedEvent e) {
+    @EventHandler public void handleEvent(OrderFinished e) {
         runningOrderCount--;
         finishedOrderCount++;
         if (finishedOrderCount == addedOrderCount)

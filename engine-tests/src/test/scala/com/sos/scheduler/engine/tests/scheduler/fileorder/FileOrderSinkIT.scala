@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{ProcessClassConfiguration, RemoveOrderCommand}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -97,7 +97,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
         sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
         val orderKey = TestJobChainPath orderKey file.toString
         controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-340"))) {  // "File still exists. Order has been set on the blacklist"
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+          eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
             touch(file)
           }
         }

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js498.scriptapi;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -69,7 +69,7 @@ public final class JS498JobIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(TaskEndedEvent e) {
+    public void handleOrderEnd(TaskEnded e) {
         taskCount++;
         if (taskCount == jobs.size())
             controller().terminateScheduler();

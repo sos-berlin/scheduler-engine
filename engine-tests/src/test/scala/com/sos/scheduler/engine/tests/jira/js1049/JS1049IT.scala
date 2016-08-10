@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1049
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
@@ -64,7 +64,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Order.xml_payload" in {
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](XmlPayloadOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinished](XmlPayloadOrderKey) {
       scheduler executeXml OrderCommand(XmlPayloadOrderKey)
     }
   }

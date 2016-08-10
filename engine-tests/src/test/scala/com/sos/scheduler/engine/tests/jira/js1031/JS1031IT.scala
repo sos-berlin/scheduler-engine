@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1031
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStarted}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.test.SchedulerTestUtils.writeConfigurationFile
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -25,15 +25,15 @@ final class JS1031IT extends FreeSpec with ScalaSchedulerTest {
 
   "Missing test.schedule.xml prevents order start" in {
     logger.info(s"Time zone: ${instance[ZoneId]}")
-    assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
+    assert(eventPipe.queued[OrderStarted].isEmpty)
     val at = now() + 5.s `with` (MILLI_OF_SECOND, 0)
     val scheduleElem = <schedule><at at={ISO_LOCAL_DATE_TIME withZone instance[ZoneId] format at}/></schedule>
     logger.info(s"$scheduleElem")
     writeConfigurationFile(TestSchedulePath, scheduleElem)
     sleepUntil(at - 1.s)
     logger.info("Order should not yet be touched")
-    assert(eventPipe.queued[OrderTouchedEvent].isEmpty)
-    eventPipe.nextKeyed[OrderTouchedEvent](TestOrderKey, timeout = at + 1.s - now)
+    assert(eventPipe.queued[OrderStarted].isEmpty)
+    eventPipe.nextKeyed[OrderStarted](TestOrderKey, timeout = at + 1.s - now)
   }
 }
 

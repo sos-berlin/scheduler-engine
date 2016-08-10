@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js461;
 
 import com.sos.scheduler.engine.data.order.OrderEvent;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.data.order.OrderResumedEvent;
-import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
+import com.sos.scheduler.engine.data.order.OrderResumed;
+import com.sos.scheduler.engine.data.order.OrderSuspended;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * JS-461: modify order set state to endstate.
- * 
+ *
  * The sample configuration contains a jobchain with three nodes.
  * Running this test the chain starts and should be suspend at the second node
  * (job js-461-2), because the job ends with error. The test set the state of
@@ -46,13 +46,13 @@ public class JS461IT extends SchedulerTest {
 		controller().activateScheduler();
 		utils.addOrder(JOB_CHAIN);
 		controller().scheduler().executeXml(utils.getCommand());
-		while (numberOfEvents("OrderSuspendedEvent") == 0) { Thread.sleep(100); }
+		while (numberOfEvents("OrderSuspended") == 0) { Thread.sleep(100); }
 		controller().scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + JOB_CHAIN + "' state='success'/>");
 		controller().scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + JOB_CHAIN + "' suspended='no'/>");
 		controller().waitForTermination();
-		assertEvent("OrderSuspendedEvent", 1);
-		assertEvent("OrderResumedEvent", 1);
-		assertEvent("OrderFinishedEvent", 1);
+		assertEvent("OrderSuspended", 1);
+		assertEvent("OrderResumed", 1);
+		assertEvent("OrderFinished", 1);
 		assertEquals("total number of events", 3, resultQueue.size());
 	}
 
@@ -73,9 +73,9 @@ public class JS461IT extends SchedulerTest {
 
 	@HotEventHandler
 	public void handleEvent(OrderEvent e) throws InterruptedException {
-		if (e instanceof OrderResumedEvent || e instanceof OrderSuspendedEvent || e instanceof OrderFinishedEvent)
+		if (e instanceof OrderResumed || e instanceof OrderSuspended || e instanceof OrderFinished)
 			resultQueue.put(e.getClass().getSimpleName());
-		if (e instanceof OrderResumedEvent)
+		if (e instanceof OrderResumed)
 			controller().scheduler().terminate();
 	}
 }

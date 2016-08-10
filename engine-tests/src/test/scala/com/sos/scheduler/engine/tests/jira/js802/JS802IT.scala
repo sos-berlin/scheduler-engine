@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js802
 
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.job.TaskEnded
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStarted}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.tests.jira.js802.JS802IT._
@@ -37,14 +37,14 @@ class JS802IT extends SchedulerTest {
     controller.waitForTermination()
   }
 
-  @EventHandler def handleEvent(event: OrderTouchedEvent): Unit = {
+  @EventHandler def handleEvent(event: OrderStarted): Unit = {
     if (event.orderKey == orderKey) {
       assertTrue(s"Order ${event.orderKey} has been started before expected time $startTime", new DateTime() isAfter startTime)
       collector.add(event.orderKey)
     }
   }
 
-  @EventHandler def handleEvent(event: TaskEndedEvent): Unit = {
+  @EventHandler def handleEvent(event: TaskEnded): Unit = {
     assertTrue(s"Job ${event.jobPath} has been started before expected time $startTime", new DateTime() isAfter startTime)
     if (event.jobPath.name == jobName)
       collector.add(event.jobPath.name)

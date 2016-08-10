@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.tests.jira.js1221
 
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderState, OrderStepStartedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderState, OrderStepStarted}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1221.JS1221IT._
 import java.io.File
@@ -50,9 +50,9 @@ final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
     val orderKey = TestJobChainPath.orderKey(file.getPath)
     withEventPipe { eventPipe ⇒
       body
-      eventPipe.nextAny[TaskStartedEvent].jobPath shouldEqual BJobPath
-      eventPipe.nextKeyed[OrderStepStartedEvent](orderKey).state shouldEqual BOrderState
-      eventPipe.nextKeyed[OrderFinishedEvent](orderKey)
+      eventPipe.nextAny[TaskStarted].jobPath shouldEqual BJobPath
+      eventPipe.nextKeyed[OrderStepStarted](orderKey).state shouldEqual BOrderState
+      eventPipe.nextKeyed[OrderFinished](orderKey)
     }
   }
 }

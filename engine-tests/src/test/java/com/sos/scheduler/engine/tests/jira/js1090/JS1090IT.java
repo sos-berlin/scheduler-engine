@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1090;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.job.JobPath;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -39,7 +39,7 @@ public final class JS1090IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(OrderFinishedEvent e) {
+    public void handleEvent(OrderFinished e) {
         scheduler().terminate();
         logFileContent = controller().environment().taskLogFileString(jobPath);
     }

@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderOverview, OrderState, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderOverview, OrderState, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
@@ -67,7 +67,7 @@ object SchedulerTestUtils {
       logger.debug(s"Sleeping a second to get a different file time for $file")
       sleep(1.s)  // Assure different timestamp for configuration file, so JobScheduler can see a change
     }
-    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
+    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAdded] || e.isInstanceOf[FileBasedReplaced])) {
       file.xml = xmlElem
       instance[FolderSubsystemClient].updateFolders()
     }
@@ -77,7 +77,7 @@ object SchedulerTestUtils {
    * Delete the configuration file and awaits JobScheduler's acceptance.
    */
   def deleteConfigurationFile[A](path: TypedPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
-    controller.eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](path) {
+    controller.eventBus.awaitingKeyedEvent[FileBasedRemoved](path) {
       Files.delete(controller.environment.fileFromPath(path))
       instance[FolderSubsystemClient].updateFolders()
     }
@@ -134,11 +134,11 @@ object SchedulerTestUtils {
     inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
       val commandResult = controller.scheduler executeXml startJobCommand
       val taskId = TaskId((commandResult.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
-      val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
+      val started = controller.eventBus.keyedEventFuture[TaskStarted](taskId)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
-      val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
+      val ended = controller.eventBus.keyedEventFuture[TaskEnded](taskId)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
-      val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
+      val closed = controller.eventBus.keyedEventFuture[TaskClosed](taskId)
       val result = for (_ ← closed; s ← startedTime; end ← ended; e ← endedTime)
                    yield TaskResult(startJobCommand.jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
       TaskRun(startJobCommand.jobPath, taskId, started, ended, closed, result)
@@ -148,9 +148,9 @@ object SchedulerTestUtils {
   final case class TaskRun(
     jobPath: JobPath,
     taskId: TaskId,
-    started: Future[TaskStartedEvent],
-    ended: Future[TaskEndedEvent],
-    closed: Future[TaskClosedEvent],
+    started: Future[TaskStarted],
+    ended: Future[TaskEnded],
+    closed: Future[TaskClosed],
     result: Future[TaskResult])
   {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
@@ -175,18 +175,18 @@ object SchedulerTestUtils {
 
   final case class OrderRun(
     orderKey: OrderKey,
-    touched: Future[OrderTouchedEvent],
-    finished: Future[OrderFinishedEvent],
+    touched: Future[OrderStarted],
+    finished: Future[OrderFinished],
     result: Future[OrderRunResult])
 
   object OrderRun {
     def apply(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = {
       import controller.eventBus
-      val whenTouched = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
-      val whenFinished: Future[(OrderFinishedEvent, Map[String, String])] = {
-        val promise = Promise[(OrderFinishedEvent, Map[String, String])]()
-        lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinishedEvent] {
-          case (event: OrderFinishedEvent, order: UnmodifiableOrder) if event.orderKey == orderKey ⇒
+      val whenTouched = eventBus.keyedEventFuture[OrderStarted](orderKey)
+      val whenFinished: Future[(OrderFinished, Map[String, String])] = {
+        val promise = Promise[(OrderFinished, Map[String, String])]()
+        lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinished] {
+          case (event: OrderFinished, order: UnmodifiableOrder) if event.orderKey == orderKey ⇒
             eventBus.unregisterHot(subscription)
             promise.success((event, order.variables))
         }

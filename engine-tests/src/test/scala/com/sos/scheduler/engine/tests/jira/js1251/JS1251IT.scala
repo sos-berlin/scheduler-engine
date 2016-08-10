@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1251
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
+import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderState, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
@@ -31,7 +31,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
   private implicit lazy val orderStore = instance[HibernateOrderStore]
 
   "Permanent order in a distributed job chain" in {
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
     transaction { implicit entityManager ⇒
@@ -45,23 +45,23 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     transaction { implicit entityManager ⇒
       orderStore.fetch(TestOrderKey).title shouldEqual AChangedTitle
     }
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
   }
 
   "Changing the order configuration file while order is running takes effect when it is finished" in {
     scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderStepEndedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderStepEnded](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
-    eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[FileBasedActivated](TestOrderKey) {
       file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
       instance[FolderSubsystemClient].updateFolders()
       transaction { implicit entityManager ⇒
         orderStore.fetch(TestOrderKey) should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
       }
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](TestOrderKey) {
+      eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
         scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="process"/>
       }
     }
@@ -71,7 +71,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "JS-1298 Non-distributed job chain in a distributed JobScheduler" in {
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](NonDistributedOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinished](NonDistributedOrderKey) {
       scheduler executeXml ModifyOrderCommand(NonDistributedOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
   }

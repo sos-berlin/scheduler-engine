@@ -43,12 +43,12 @@ trait FileBasedSubsystem extends Subsystem {
     assert(fileBased.fileBasedType == fileBasedType)
     assert(path.getClass == companion.pathClass, s"${path.getClass} is not expected ${companion.getClass}")
     e match {
-      case e: FileBasedAddedEvent ⇒
+      case e: FileBasedAdded ⇒
         _pathToFileBased += path → fileBased.asInstanceOf[ThisFileBased]
         _orderedPaths += path
-      case e: FileBasedReplacedEvent ⇒
+      case e: FileBasedReplaced ⇒
         _pathToFileBased(path) = fileBased.asInstanceOf[ThisFileBased]
-      case e: FileBasedRemovedEvent ⇒
+      case e: FileBasedRemoved ⇒
         _pathToFileBased -= path
         _orderedPaths -= path
       case _ ⇒

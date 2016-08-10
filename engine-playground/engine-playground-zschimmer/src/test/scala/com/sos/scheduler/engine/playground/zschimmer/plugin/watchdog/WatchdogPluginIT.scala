@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.test.SchedulerTest
@@ -21,7 +21,7 @@ class WatchdogPluginIT extends SchedulerTest {
         controller.terminateScheduler()
     }
 
-    @HotEventHandler def handleEvent(e: OrderFinishedEvent): Unit = {
+    @HotEventHandler def handleEvent(e: OrderFinished): Unit = {
         sleep(sleepTime)   // Wir  blockieren den Scheduler
     }
 }

@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskId}
+import com.sos.scheduler.engine.data.job.{TaskClosed, TaskId}
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -87,8 +87,8 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       def cleanUpAfterExcecute(): Unit = {
         orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
         job.endTasks()   // Task kann schon beendet und Job schon gestoppt sein.
-        eventPipe.nextAny[TaskClosedEvent] match { case e ⇒
-          assert(e.taskId == expectedTaskId, "TaskClosedEvent not for expected task - probably a previous test failed")
+        eventPipe.nextAny[TaskClosed] match { case e ⇒
+          assert(e.taskId == expectedTaskId, "TaskClosed not for expected task - probably a previous test failed")
         }
         waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { jobState == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
       }
@@ -108,16 +108,16 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       }
     }
 
-  eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
-    case EventSourceEvent(e: OrderStepEndedEvent, order: UnmodifiableOrder) ⇒
+  eventBus.onHotEventSourceEvent[OrderStepEnded] {
+    case EventSourceEvent(e: OrderStepEnded, order: UnmodifiableOrder) ⇒
       if (e.stateTransition == KeepOrderStateTransition) {
-        // Es wird kein OrderFinishedEvent geben.
+        // Es wird kein OrderFinished geben.
         publishMyFinishedEvent(order)
       }
   }
 
-  eventBus.onHotEventSourceEvent[OrderFinishedEvent] {
-    case EventSourceEvent(e: OrderFinishedEvent, order: UnmodifiableOrder) ⇒
+  eventBus.onHotEventSourceEvent[OrderFinished] {
+    case EventSourceEvent(e: OrderFinished, order: UnmodifiableOrder) ⇒
     publishMyFinishedEvent(order)
   }
 

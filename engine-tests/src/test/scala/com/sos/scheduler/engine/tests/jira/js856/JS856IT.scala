@@ -42,14 +42,14 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
     final def runUntilEnd(): Unit = {
       val eventPipe = controller.newEventPipe()
       startOrder()
-      eventPipe.nextAny[OrderFinishedEvent]
+      eventPipe.nextAny[OrderFinished]
     }
 
     final def runUntilSuspendedThenReset(): Unit = {
       val eventPipe = controller.newEventPipe()
       startOrder(List(suspendedParameterName -> suspendedTrue))
-      eventPipe.nextAny[OrderStepEndedEvent]
-      eventPipe.nextAny[OrderSuspendedEvent]
+      eventPipe.nextAny[OrderStepEnded]
+      eventPipe.nextAny[OrderSuspended]
       orderParameters should equal (whenSuspendedExpectedParameters)
       resetOrder()
     }

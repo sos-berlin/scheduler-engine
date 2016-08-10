@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period.WakeWhenInPeriodIT._
@@ -45,7 +45,7 @@ final class WakeWhenInPeriodIT extends FunSuite with ScalaSchedulerTest {
     assert(a contains startTimes(1))
   }
 
-  @EventHandler def handle(e: TaskStartedEvent): Unit = {
+  @EventHandler def handle(e: TaskStarted): Unit = {
     if (e.jobPath == jobPath)
       startTimes += new LocalTime
   }

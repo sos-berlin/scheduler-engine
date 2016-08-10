@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1190
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, OrderStateChangedEvent, OrderStateTransition, OrderStepEndedEvent, ProceedingOrderStateTransition, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, OrderNodeChanged, OrderStateTransition, OrderStepEnded, ProceedingOrderStateTransition, SuccessOrderStateTransition}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1190.JS1190IT._
@@ -51,8 +51,8 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"), MessageCode("SCHEDULER-226"))) {
       withEventPipe { eventPipe ⇒
         scheduler executeXml orderCommand
-        eventPipe.nextKeyed[OrderStepEndedEvent](orderKey).stateTransition shouldEqual expectedTransition
-        eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).state shouldEqual expectedState
+        eventPipe.nextKeyed[OrderStepEnded](orderKey).stateTransition shouldEqual expectedTransition
+        eventPipe.nextKeyed[OrderNodeChanged](orderKey).state shouldEqual expectedState
       }
     }
   }

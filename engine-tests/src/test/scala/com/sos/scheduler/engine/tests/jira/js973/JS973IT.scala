@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -71,20 +71,20 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     withEventPipe { eventPipe ⇒
       testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, expectedResult = "**")
       eventPipe.nextWithTimeoutAndCondition[WarningLogEvent](0.s) { _.codeOption == Some(MessageCode("SCHEDULER-484")) }
-      eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
+      eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
     }
   }
 
 //  s"For an order, the API task running on right remote scheduler is selected" in {
 //    withEventPipe { eventPipe ⇒
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent)
-//      val aTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
+//      val aTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent)
-//      val bTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
+//      val bTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, aTaskId)
-//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath } }
+//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent, bTaskId)
-//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath } }
+//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
 //    }
 //  }
 
@@ -98,7 +98,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     orderFile.contentString = "test"
     val jobChainPath = JobChainPath("/test-file-order")
     val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+    eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
       scheduler executeXml
         <job_chain name={jobChainPath.name}>
           <file_order_source directory={fileOrdersDir.toString} regex="^test\.txt$"/>
@@ -173,13 +173,13 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
       instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
       eventPipe.nextAny[ErrorLogEvent].codeOption shouldEqual Some(expectedErrorCode)
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual KeepOrderStateTransition
+      eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey } .stateTransition shouldEqual KeepOrderStateTransition
       instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.stopped
     }
   }
 
   @HotEventHandler
-  def handle(e: OrderFinishedEvent, o: UnmodifiableOrder): Unit = {
+  def handle(e: OrderFinished, o: UnmodifiableOrder): Unit = {
     eventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.variables.getOrElse(ResultVariableName, "")))
   }
 

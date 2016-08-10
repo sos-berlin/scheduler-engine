@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
 import com.google.common.io.Files
-import com.sos.scheduler.engine.data.job.TaskStartedEvent
+import com.sos.scheduler.engine.data.job.TaskStarted
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServletIT._
 import com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests._
@@ -62,7 +62,7 @@ final class CppServletIT extends FreeSpec with ScalaSchedulerTest with JettyPlug
   "show_log?task=..." in {
     val eventPipe = controller.newEventPipe()
     scheduler.executeXml(<order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}/>)
-    val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == OrderJobPath } .taskId
+    val taskId = eventPipe.nextWithCondition[TaskStarted] { _.jobPath == OrderJobPath } .taskId
     val result = stringFromResponse(get[ClientResponse](s"/jobscheduler/engine-cpp/show_log?task=${taskId.string}", Accept = List(TEXT_HTML_TYPE)))
     result should include ("SCHEDULER-918  state=closed")
     result should include ("SCHEDULER-962") // "Protocol ends in ..."

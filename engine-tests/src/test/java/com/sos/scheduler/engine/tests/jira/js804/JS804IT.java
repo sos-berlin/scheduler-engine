@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js804;
 
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
@@ -20,10 +20,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * This test demonstrates the result attribute <i>setback</i> of the <i>show_calendar</i> command.
  * The order <i>js-804</i> goes to the setback state immediately after starting. The result of
- * <i>show_calendar</i> must contain <i>setback='true'</i> for it. 
+ * <i>show_calendar</i> must contain <i>setback='true'</i> for it.
  * In opposite is order <i>js-804-1</i>. It is a simple order (scheduled with the start of JS) with
  * no setback.  The result of <i>show_calendar</i> must not contain the <i>setback</i> because <i>false</i>
- * is the default for this attribute. 
+ * is the default for this attribute.
  */
 public final class JS804IT extends SchedulerTest {
 
@@ -31,7 +31,7 @@ public final class JS804IT extends SchedulerTest {
 	private static final String order_setback = "js804";		// to be started via the test
 	private static final String order_simple = "js804-1";		// not started but scheduled
 
-	private Document showCalendarAnswer;	
+	private Document showCalendarAnswer;
 	private final CommandBuilder util = new CommandBuilder();
 	private boolean result_setback = false;
 	private boolean result_simple = true;
@@ -39,7 +39,7 @@ public final class JS804IT extends SchedulerTest {
     public JS804IT() {
         super(new TestConfigurationBuilder(JS804IT.class).terminateOnError(false).build());
     }
-	
+
 	@Test
 	public void testSetback() {
 		controller().activateScheduler();
@@ -50,7 +50,7 @@ public final class JS804IT extends SchedulerTest {
 	}
 
 	@EventHandler
-	public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
+	public void handleTaskEnded(TaskEnded e) throws InterruptedException {
 		Thread.sleep(2000);			// wait until setback is active
 		showCalendar();
 		result_setback = isSetback(order_setback);

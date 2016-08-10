@@ -10,11 +10,11 @@ import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepEnded}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConfiguration}
@@ -68,10 +68,10 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         autoClosing(newEventPipe()) { eventPipe ⇒
           toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
             val orderKey = TestJobchainPath orderKey testGroupName
-            eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
+            eventBus.onHotEventSourceEvent[OrderStepEnded] {
               case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.trySuccess(order.variables)
             }
-            eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+            eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
               scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
             }
           }
@@ -81,7 +81,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
       "Shell script exit code" in {
         assertResult(List(TestReturnCode)) {
-          eventsPromise.successValue collect { case TaskEndedEvent(_, TestJobPath, returnCode) ⇒ returnCode }
+          eventsPromise.successValue collect { case TaskEnded(_, TestJobPath, returnCode) ⇒ returnCode }
         }
         eventBus.dispatchEvents()
       }

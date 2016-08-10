@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.newkernel.job
 
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskId, TaskStarted}
 import com.sos.scheduler.engine.eventbus.EventBus
 import com.sos.scheduler.engine.newkernel.job.NewJob._
 import com.sos.scheduler.engine.newkernel.job.commands.{SomeJobCommand, StopJobCommand}
@@ -40,7 +40,7 @@ final class NewJob(
   }
 
   def onTaskTerminated(task: ShellTask): Unit = {
-    eventBus publish new TaskEndedEvent(task.id, path, ReturnCode(0))
+    eventBus publish new TaskEnded(task.id, path, ReturnCode(0))
     startTaskAtNextStartTime()
   }
 
@@ -73,7 +73,7 @@ final class NewJob(
     }
     tasks += task.id -> task
     task.start()
-    eventBus publish new TaskStartedEvent(task.id, path)
+    eventBus publish new TaskStarted(task.id, path)
     task.id
   }
 

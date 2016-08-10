@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.data.job.JobPath;
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
@@ -61,7 +61,7 @@ public class JS948IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(TaskEndedEvent e) {
+    public void handleEvent(TaskEnded e) {
         tasksCompleted++;
         if (tasksCompleted == 1)
             assertEquals("repeat", e.jobPath().name());       // läuft beim Start des JobScheduler automatisch an
