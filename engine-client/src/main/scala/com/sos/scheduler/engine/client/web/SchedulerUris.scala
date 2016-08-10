@@ -107,6 +107,10 @@ final class SchedulerUris private(schedulerUriString: String) {
     def overview(taskId: TaskId) = uriString(Uri.Path("api/task") / taskId.string)
   }
 
+  def events =  uriString(Uri.Path("api/event/"))
+
+  def events(after: EventId) =  uriString(Uri.Path("api/event/"), "after" → after.toString)
+
   def uriString(path: Uri.Path, parameters: (String, String)*): String =
     resolvePathUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString
 

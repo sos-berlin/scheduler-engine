@@ -52,13 +52,25 @@ h3 {
   font-weight: normal;
 }
 
-.MiniTable > tbody > tr > td,
-.MiniTable > tbody > tr > th,
-.MiniTable > tfoot > tr > td,
-.MiniTable > tfoot > tr > th,
-.MiniTable > thead > tr > td,
-.MiniTable > thead > tr > th {
+table.MiniTable > thead > tr > td,
+table.MiniTable > thead > tr > th,
+table.MiniTable > tbody > tr > td,
+table.MiniTable > tfoot > tr > th,
+table.MiniTable > tfoot > tr > td {
   padding-right: 5px;
+}
+
+table.SimpleTable > thead > tr > td,
+table.SimpleTable > thead > tr > th,
+table.SimpleTable > tbody > tr > td,
+table.SimpleTable > tfoot > tr > th,
+table.SimpleTable > tfoot > tr > td {
+  padding: 0.25em 1em 0 0;
+}
+
+table.SimpleTable > thead > tr > th {
+  font-weight: normal;
+  border-bottom: #ccc solid 1px;
 }
 
 a.inherit-markup {

@@ -10,8 +10,11 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.{Stopwatch, WaitForCondition}
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.event.{Event, EventId}
+import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeKey, SimpleJobNodeOverview}
@@ -74,10 +77,36 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   override protected def onSchedulerActivated() = {
     super.onSchedulerActivated()
+    eventReader.start()
     barrier.touchFile()
     scheduler executeXml OrderCommand(aAdHocOrderKey, at = Some(OrderStartAt), suspended = Some(true))
     scheduler executeXml OrderCommand(xbAdHocDistributedOrderKey, at = None)
     startOrderProcessing()
+  }
+
+  private object eventReader {
+    val directEvents = mutable.Buffer[Event]()
+    val webEvents = mutable.Buffer[Event]()
+
+    def start(): Unit = {
+      eventBus.onHot[Event] {
+        case event if EventJsonFormat canSerialize event ⇒ directEvents += event
+      }
+      start(EventId.BeforeFirst)
+    }
+
+    private def start(after: EventId): Unit = {
+      for (events ← webSchedulerClient.events(after)) {
+        this.webEvents ++= events map { _.event }
+        start(after = if (events.isEmpty) after else events.last.eventId)
+      }
+    }
+
+    def check() = {
+      assert(webEvents.nonEmpty)
+      WaitForCondition.waitForCondition(5.s, 100.ms) { webEvents.size == directEvents.size }
+      assert(webEvents == directEvents)
+    }
   }
 
   private def startOrderProcessing() = {
@@ -372,6 +401,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString("TEST/UNKNOWN")) await TestTimeout }
         .response.status shouldEqual NotFound
     }
+  }
+
+  "events" in {
+    eventReader.check()
   }
 
   addOptionalSpeedTests()

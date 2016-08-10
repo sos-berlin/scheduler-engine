@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.WebServiceActor._
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventCollector
 import javax.inject.Inject
 import scala.collection.JavaConversions._
 import spray.routing._
@@ -29,7 +30,8 @@ final class WebServiceActor @Inject private(
   protected val taskSubsystem: TaskSubsystemClient,
   protected val prefixLog: PrefixLog,
   protected val schedulerThreadCallQueue: SchedulerThreadCallQueue,
-  protected val disposableCppProxyRegister: DisposableCppProxyRegister)
+  protected val disposableCppProxyRegister: DisposableCppProxyRegister,
+  protected val eventCollector: EventCollector)
 extends HttpServiceActor with AllRoutes {
 
   override def postStop() = {

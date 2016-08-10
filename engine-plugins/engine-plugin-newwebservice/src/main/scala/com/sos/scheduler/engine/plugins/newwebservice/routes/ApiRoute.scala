@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoute
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.FrontEndRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage.implicits.schedulerOverviewToHtmlPage
@@ -31,6 +32,7 @@ with ProcessClassRoute
 with TaskRoute
 with CommandRoute
 with LogRoute
+with EventRoute
 with FrontEndRoute {
 
   protected def client: DirectSchedulerClient
@@ -90,6 +92,11 @@ with FrontEndRoute {
             case "log" ⇒ logRoute(prefixLog)
             case _ ⇒ reject
           }
+        }
+      } ~
+      pathPrefix("event") {
+        testSlash(webServiceContext) {
+          eventRoute
         }
       }
       /*~

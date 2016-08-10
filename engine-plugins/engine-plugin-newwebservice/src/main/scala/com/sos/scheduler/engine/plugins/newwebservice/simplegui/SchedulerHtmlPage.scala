@@ -80,7 +80,8 @@ trait SchedulerHtmlPage extends HtmlPage {
           navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
           navBarTab("Job chains"     , uris.jobChain.overviews()),
           navBarTab("Jobs"           , uris.job.overviews()),
-          navBarTab("Process classes", uris.processClass.overviews()))))
+          navBarTab("Process classes", uris.processClass.overviews()),
+          navBarTab("Events"         , uris.events))))
 
   private def navBarTab(label: String, relativeUri: String) = {
     val uri = uris / relativeUri
@@ -112,12 +113,17 @@ object SchedulerHtmlPage {
     case _ ⇒ ""
   }
 
-  def instantWithDurationToHtml(instant: Instant): List[Frag]  =
+  def eventInstantToLocalHtml(instant: Instant): List[Frag] =
+    localDateTimeToHtml(instant) ::
+      span(cls := "time-extra")(s".${formatDateTime(LocalMillisFormatter, instant)}") ::
+      Nil
+
+  def instantWithDurationToHtml(instant: Instant): List[Frag] =
     if (instant == Instant.EPOCH)
       StringFrag("immediately") :: Nil
     else
       localDateTimeToHtml(instant) ::
-        span(cls := "time-extra")(s".${formatTime(LocalMillisFormatter, instant)} (${(now - instant).pretty})") ::
+        span(cls := "time-extra")(s".${formatDateTime(LocalMillisFormatter, instant)} (${(now - instant).pretty})") ::
         Nil
 
   private val LocalDateTimeFormatter = new DateTimeFormatterBuilder()
@@ -142,11 +148,11 @@ object SchedulerHtmlPage {
     .appendLiteral("</span>")
     .toFormatter
 
-  def localDateTimeToHtml(instant: Instant) = StringFrag(formatTime(LocalDateTimeFormatter, instant))
+  def localDateTimeToHtml(instant: Instant) = StringFrag(formatDateTime(LocalDateTimeFormatter, instant))
 
   def localDateTimeWithZoneToHtml(instant: Instant) =
-    raw(formatTime(LocalDateTimeWithZoneFormatter, instant))
+    raw(formatDateTime(LocalDateTimeWithZoneFormatter, instant))
 
-  private def formatTime(formatter: DateTimeFormatter, instant: Instant) =
+  private def formatDateTime(formatter: DateTimeFormatter, instant: Instant) =
     formatter.format(OffsetDateTime.ofInstant(instant, DefaultZoneId))
 }

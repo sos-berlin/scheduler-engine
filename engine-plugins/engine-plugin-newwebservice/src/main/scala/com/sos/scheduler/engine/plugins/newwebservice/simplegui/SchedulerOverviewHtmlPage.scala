@@ -47,9 +47,9 @@ extends SchedulerHtmlPage {
 }
 
 object SchedulerOverviewHtmlPage {
-  import scala.language.implicitConversions
-
   object implicits {
+    import scala.language.implicitConversions
+
     implicit object schedulerOverviewToHtmlPage extends ToHtmlPage[SchedulerOverview] {
       def apply(pageUri: Uri, webServiceContext: WebServiceContext)(schedulerOverview: SchedulerOverview)
         (implicit executionContext: ExecutionContext)
