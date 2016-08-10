@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import scala.concurrent.ExecutionContext
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toYamlHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.EventsHtmlPage.implicits.eventsToHtmlPage
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.Route

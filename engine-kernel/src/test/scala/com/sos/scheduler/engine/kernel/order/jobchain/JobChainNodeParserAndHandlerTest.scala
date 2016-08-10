@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlElemSource}
 import com.sos.scheduler.engine.data.job.ReturnCode
-import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.{OrderNodeTransition, OrderState}
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler.OrderFunction
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandlerTest._
@@ -24,10 +24,10 @@ final class JobChainNodeParserAndHandlerTest extends FreeSpec {
     System.err.println(JobchainNodeElem.toString)
     val x = new X
     x.initializeWithNodeXml(XmlElemSource(JobchainNodeElem), Map(TestNamespace → testNamespaceParse _).lift)
-    x.orderStateTransitionToState(SuccessOrderStateTransition) shouldEqual State0
-    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(1))) shouldEqual State1
-    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(7))) shouldEqual State7
-    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(99))) shouldEqual ErrorState
+    x.orderStateTransitionToState(OrderNodeTransition.Success) shouldEqual State0
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(1))) shouldEqual State1
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(7))) shouldEqual State7
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(99))) shouldEqual ErrorState
     x.returnCodeToOrderFunctions(ReturnCode(0)) shouldEqual Nil
     x.returnCodeToOrderFunctions(ReturnCode(1)) shouldEqual Nil
     x.returnCodeToOrderFunctions(ReturnCode(2)) shouldEqual Nil

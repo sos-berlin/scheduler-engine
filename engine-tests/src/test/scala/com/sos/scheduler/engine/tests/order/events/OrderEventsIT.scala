@@ -89,12 +89,12 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
       "OrderFinished UnmodifiableOrder"           → OrderFinished(orderKey, OrderState("end")),
       "OrderStepStarted UnmodifiableOrder state1" → OrderStepStarted(orderKey, OrderState("state1"), TaskId.Null),
       "OrderStepStarted Order state1"             → OrderStepStarted(orderKey, OrderState("state1"), TaskId.Null),
-      "OrderStepEnded UnmodifiableOrder state1"   → OrderStepEnded(orderKey, SuccessOrderStateTransition),
-      "OrderStepEnded Order state1"               → OrderStepEnded(orderKey, SuccessOrderStateTransition),
+      "OrderStepEnded UnmodifiableOrder state1"   → OrderStepEnded(orderKey, OrderNodeTransition.Success),
+      "OrderStepEnded Order state1"               → OrderStepEnded(orderKey, OrderNodeTransition.Success),
       "OrderStepStarted UnmodifiableOrder state2" → OrderStepStarted(orderKey, OrderState("state2"), TaskId.Null),
       "OrderStepStarted Order state2"             → OrderStepStarted(orderKey, OrderState("state2"), TaskId.Null),
-      "OrderStepEnded UnmodifiableOrder state2"   → OrderStepEnded(orderKey, SuccessOrderStateTransition),
-      "OrderStepEnded Order state2"               → OrderStepEnded(orderKey, SuccessOrderStateTransition),
+      "OrderStepEnded UnmodifiableOrder state2"   → OrderStepEnded(orderKey, OrderNodeTransition.Success),
+      "OrderStepEnded Order state2"               → OrderStepEnded(orderKey, OrderNodeTransition.Success),
       "OrderSuspended UnmodifiableOrder"          → OrderSuspended(orderKey),
       "OrderResumed UnmodifiableOrder"            → OrderResumed(orderKey))
   }

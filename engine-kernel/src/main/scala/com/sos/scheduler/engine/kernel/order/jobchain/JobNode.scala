@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
-import com.sos.scheduler.engine.data.order.OrderStateTransition
+import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode.logger
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
@@ -42,7 +42,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
 
   @ForCpp
   private def orderStateTransitionToState(cppInternalValue: Long): String =
-    orderStateTransitionToState(OrderStateTransition.ofCppInternalValue(cppInternalValue)).string
+    orderStateTransitionToState(OrderNodeTransition.ofCppInternalValue(cppInternalValue)).string
 
   private[kernel] final def orderCount: Int = orderQueue.size
 }

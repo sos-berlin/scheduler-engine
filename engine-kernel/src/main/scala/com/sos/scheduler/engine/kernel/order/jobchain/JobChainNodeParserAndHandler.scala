@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
 import com.sos.scheduler.engine.data.job.ReturnCode
-import com.sos.scheduler.engine.data.order.{KeepOrderStateTransition, OrderState, OrderStateTransition, ProceedingOrderStateTransition, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.{OrderNodeTransition, OrderState}
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler._
 import javax.xml.stream.XMLEventReader
@@ -36,13 +36,13 @@ private[jobchain] trait JobChainNodeParserAndHandler {
     returnCodeToOnReturnCode = parseNodeXml(xmlSource, namespaceToOnReturnCodeParser)
   }
 
-  def orderStateTransitionToState(t: OrderStateTransition): OrderState =
+  def orderStateTransitionToState(t: OrderNodeTransition): OrderState =
     t match {
-      case KeepOrderStateTransition ⇒ orderState
-      case ProceedingOrderStateTransition(returnCode) ⇒
+      case OrderNodeTransition.Keep ⇒ orderState
+      case OrderNodeTransition.Proceeding(returnCode) ⇒
         returnCodeToOnReturnCode.lift(returnCode) match {
           case Some(OnReturnCode(_, Some(state), _)) ⇒ state
-          case _ ⇒ if (t == SuccessOrderStateTransition) nextState else errorState
+          case _ ⇒ if (t == OrderNodeTransition.Success) nextState else errorState
         }
     }
 

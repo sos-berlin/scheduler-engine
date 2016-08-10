@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepEnded, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderNodeTransition, OrderStepEnded}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
@@ -99,7 +99,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
   }
 
   "Variables job exit code" in {
-    assertResult(List(SuccessOrderStateTransition)) {
+    assertResult(List(OrderNodeTransition.Success)) {
       eventsPromise.successValue collect { case OrderStepEnded(VariablesOrderKey, stateTransition) ⇒ stateTransition }
     }
   }

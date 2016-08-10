@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.event.{Event, IdAndEvent}
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderNestedFinished, OrderNestedStarted, OrderNodeChanged, OrderResumed, OrderSetBack, OrderStarted, OrderState, OrderStepEnded, OrderStepStarted, OrderSuspended}
+import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext

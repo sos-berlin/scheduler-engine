@@ -75,7 +75,7 @@ import com.sos.scheduler.engine.kernel.order.Order
     OrderNodeChanged(OrderKey(jobChainPath, orderId), previousState = OrderState(previousState), state = OrderState(state))
 
   @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Long): AbstractEvent =
-    OrderStepEnded(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppInternalValue(orderStateTransitionCpp))
+    OrderStepEnded(OrderKey(jobChainPath, orderId), OrderNodeTransition.ofCppInternalValue(orderStateTransitionCpp))
 
   @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AbstractEvent =
     TaskEnded(TaskId(taskId), JobPath(jobPath), ReturnCode(returnCode))

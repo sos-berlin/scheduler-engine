@@ -110,7 +110,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
   eventBus.onHotEventSourceEvent[OrderStepEnded] {
     case EventSourceEvent(e: OrderStepEnded, order: UnmodifiableOrder) ⇒
-      if (e.stateTransition == KeepOrderStateTransition) {
+      if (e.stateTransition == OrderNodeTransition.Keep) {
         // Es wird kein OrderFinished geben.
         publishMyFinishedEvent(order)
       }
