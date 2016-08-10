@@ -6,7 +6,9 @@ import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toAsyncScriptHtml, toCssLinkHtml}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute.NeededWebjars
 import java.time.Instant.now
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
@@ -35,16 +37,18 @@ trait SchedulerHtmlPage extends HtmlPage {
       head(htmlHeadFrags),
       pageBody(innerBody :_*))
 
-  protected def htmlHeadFrags: Vector[Frag] =
+  protected def htmlHeadFrags: Vector[Frag] = {
+    val includer = new HtmlIncluder(uris)
     Vector(
       meta(httpEquiv := "X-UA-Compatible", content := "IE=edge"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
-      tags2.title(s"$title · ${schedulerOverview.schedulerId}"),
-      link(rel := "stylesheet", href := uris.uriString("api/frontend/webjars/" + WebjarsRoute.BootstrapCss))) ++
+      tags2.title(s"$title · ${schedulerOverview.schedulerId}")) ++
+    (NeededWebjars flatMap includer.webjarsToHtml) ++
     (cssLinks map toCssLinkHtml) ++
     (scriptLinks map toAsyncScriptHtml)
+  }
 
-  protected def cssLinks: Vector[Uri] = Vector("api/frontend/common/common.css")
+  protected def cssLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.css")
   protected def scriptLinks: Vector[Uri] = Vector()
 
   protected def pageBody(innerBody: Frag*) =
@@ -89,10 +93,6 @@ trait SchedulerHtmlPage extends HtmlPage {
     li(role := "presentation", cls := (if (isActive) "active" else ""))(
       a(href := uri.toString)(label))
   }
-
-  final def toCssLinkHtml(uri: Uri) = link(rel := "stylesheet", `type` := "text/css", href := uris.uriString(uri))
-
-  final def toAsyncScriptHtml(uri: Uri) = script(`type` := "text/javascript", src := uris.uriString(uri), "async".emptyAttr)
 }
 
 object SchedulerHtmlPage {

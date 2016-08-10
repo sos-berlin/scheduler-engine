@@ -46,8 +46,8 @@ extends SchedulerHtmlPage {
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
 
   override protected def title = "Orders"
-  override protected def cssLinks = super.cssLinks :+ Uri("api/frontend/order/order.css")
-  override protected def scriptLinks = super.scriptLinks :+ Uri("api/frontend/order/OrderSelectionWidget.js")
+  override protected def cssLinks = super.cssLinks :+ uris / "api/frontend/order/order.css"
+  override protected def scriptLinks = super.scriptLinks :+ uris / "api/frontend/order/OrderSelectionWidget.js"
 
   def wholePage = {
     htmlPage(

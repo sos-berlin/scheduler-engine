@@ -17,16 +17,7 @@ import spray.routing._
 trait WebjarsRoute {
 
   protected implicit def actorRefFactory: ActorRefFactory
-  protected lazy val webjarsExists = {
-    var result = true
-    for (resource ← Needed map { o ⇒ WebjarsResourceDirectory / o })
-      try resource.url
-      catch { case NonFatal(t) ⇒
-        logger.debug(s"Missing JavaResource $resource: $t")
-        result = false
-      }
-    result
-  }
+  protected lazy val webjarsExists = checkWebjars(NeededWebjars)
 
   protected final def webjarsRoute: Route =
     get {
@@ -36,11 +27,24 @@ trait WebjarsRoute {
     }
 }
 
-object WebjarsRoute {
-  val BootstrapCss = "bootstrap/3.3.6/css/bootstrap.min.css"
-  private val Needed = List(BootstrapCss)
-  private val WebjarsResourceDirectory = JavaResource("META-INF/resources/webjars")
-
+private[simplegui] object WebjarsRoute {
   private val LongTimeCaching = `Cache-Control`(`max-age`((30 * 24.h).getSeconds))
+  private val WebjarsResourceDirectory = JavaResource("META-INF/resources/webjars")
   private val logger = Logger(getClass)
+
+  val Bootstrap = new Webjar(basePath = "bootstrap/3.3.6", css = "css/bootstrap.min.css" :: Nil)
+
+  val NeededWebjars = List(Bootstrap)
+
+  private def checkWebjars(webExternals: Iterable[Webjar]): Boolean = {
+    var result = true
+    for (webExternal ← webExternals; resource ← webExternal.allPaths map WebjarsResourceDirectory./) {
+      try resource.url
+      catch { case NonFatal(t) ⇒
+        logger.debug(s"Missing Webjar JavaResource $resource: $t")
+        result = false
+      }
+    }
+    result
+  }
 }
