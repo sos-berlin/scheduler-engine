@@ -7,8 +7,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.CppCall
@@ -75,7 +75,7 @@ with OrderPersistence {
 
   private[kernel] override def overview: OrderOverview = {
     val orderKey = this.orderKey
-    val state = this.state
+    val nodeId = this.nodeId
     val flags = cppProxy.java_fast_flags
     val isTouched = cppFastFlags.isTouched(flags)
     val isSetback = cppFastFlags.isSetback(flags)
@@ -124,7 +124,7 @@ with OrderPersistence {
       path = orderKey,  // key because this.path is valid only for permanent orders
       cppFastFlags.fileBasedState(flags),
       sourceType,
-      orderState = state,
+      nodeId = nodeId,
       processingState = processingState,
       obstacles = obstacles,
       nextStepAt = nextStepAt,
@@ -153,25 +153,25 @@ with OrderPersistence {
         }
     }
 
-  def nodeKey = inSchedulerThread { NodeKey(jobChainPath, state) }
+  def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }
 
-  def state: OrderState =
+  def nodeId: NodeId =
     inSchedulerThread {
       cppProxy.java_job_chain_node match {
-        case null ⇒ OrderState(cppProxy.string_state)
-        case node ⇒ node.orderState  // java_job_chain_node is somewhat faster then accessing string_state
+        case null ⇒ NodeId(cppProxy.string_state)
+        case node ⇒ node.nodeId  // java_job_chain_node is somewhat faster then accessing string_state
       }
     }
 
   private def nodeOption: Option[Node] = Option(cppProxy.java_job_chain_node)
 
-  private[order] def initialState: OrderState =
-    OrderState(cppProxy.initial_state_string)
+  private[order] def initialNodeId: NodeId =
+    NodeId(cppProxy.initial_state_string)
 
-//  def endState: OrderState =
-//    OrderState(cppProxy.end_state_string)
+//  def endNodeId: NodeId =
+//    NodeId(cppProxy.end_state_string)
 //
-//  def endState_=(s: OrderState): Unit = {
+//  def endNodeId_=(s: NodeId): Unit = {
 //    cppProxy.set_end_state(s.string)
 //  }
 

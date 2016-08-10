@@ -49,7 +49,7 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
       for (_ ← 1 to m) Stopwatch.measureTime(n, "OrderC") {
         orderC.java_fast_flags
         orderC.job_chain
-        orderC.java_job_chain_node.orderState
+        orderC.java_job_chain_node.nodeId
         orderC.task_id
       }
       for (_ ← 1 to m) Stopwatch.measureTime(n, "sourceType") {

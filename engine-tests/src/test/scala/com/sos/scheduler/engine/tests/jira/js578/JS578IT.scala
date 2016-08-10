@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js578
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.EventPipe
@@ -26,7 +27,7 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
     setJobChainNodeStop(true)
     startOrderAt("now")
     eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey }
-    orderSubsystem.orderOverview(orderKey).orderState should equal (OrderState("200"))
+    orderSubsystem.orderOverview(orderKey).nodeId should equal (NodeId("200"))
 
     startOrderAt("now")
     setJobChainNodeStop(false)
@@ -48,7 +49,7 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
       setJobChainNodeStop(true)
       startOrderAt("next")
       eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey }
-      orderSubsystem.orderOverview(orderKey).orderState should equal (OrderState("200"))
+      orderSubsystem.orderOverview(orderKey).nodeId should equal (NodeId("200"))
 
       startOrderAt("next")
       setJobChainNodeStop(false)

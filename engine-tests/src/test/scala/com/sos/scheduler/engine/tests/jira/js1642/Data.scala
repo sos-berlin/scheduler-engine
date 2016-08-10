@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.order.{OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import java.time.Instant
@@ -22,14 +22,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     a1OrderKey,
     FileBasedState.active,
     OrderSourceType.fileBased,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(3), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(3))),
     nextStepAt = Some(EPOCH))
   private val a1OrderOverviewJson = s"""{
     "path": "/aJobChain,1",
     "fileBasedState": "active",
     "sourceType": "fileBased",
-    "orderState": "100",
+    "nodeId": "100",
     "processingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "3",
@@ -44,14 +44,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     a2OrderKey,
     FileBasedState.active,
     OrderSourceType.fileBased,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(4), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(4))),
     nextStepAt = Some(EPOCH))
   private val a2OrderOverviewJson = s"""{
     "path": "/aJobChain,2",
     "fileBasedState": "active",
     "sourceType": "fileBased",
-    "orderState": "100",
+    "nodeId": "100",
     "processingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "4",
@@ -66,14 +66,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     aAdHocOrderKey,
     FileBasedState.not_initialized,
     OrderSourceType.adHoc,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.Planned(OrderStartAt),
     Set(OrderObstacle.Suspended),
     nextStepAt = Some(OrderStartAt))
   private val aAdHocOrderOverviewJson = """{
     "path": "/aJobChain,AD-HOC",
     "fileBasedState": "not_initialized",
-    "orderState": "100",
+    "nodeId": "100",
     "sourceType": "adHoc",
     "processingState" : {
       "TYPE": "Planned",
@@ -87,13 +87,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     b1OrderKey,
     FileBasedState.active,
     OrderSourceType.fileBased,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(5), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(5))),
     nextStepAt = Some(EPOCH))
   private val b1OrderOverviewJson = s"""{
     "path": "/bJobChain,1",
     "fileBasedState": "active",
-    "orderState": "100",
+    "nodeId": "100",
     "sourceType": "fileBased",
     "processingState" : {
       "TYPE": "InTaskProcess",
@@ -109,14 +109,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xa1OrderKey,
     FileBasedState.active,
     OrderSourceType.fileBased,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xa1OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,1",
     "fileBasedState": "active",
     "sourceType": "fileBased",
-    "orderState": "100",
+    "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
@@ -129,7 +129,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xa2OrderKey,
     FileBasedState.active,
     OrderSourceType.fileBased,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     Set(OrderObstacle.Suspended),
     nextStepAt = Some(EPOCH))
@@ -137,7 +137,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/xFolder/x-aJobChain,2",
     "fileBasedState": "active",
     "sourceType": "fileBased",
-    "orderState": "100",
+    "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
@@ -150,14 +150,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xb1OrderKey,
     FileBasedState.not_initialized,
     OrderSourceType.fileBased,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xb1OrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,1",
     "fileBasedState": "not_initialized",
     "sourceType": "fileBased",
-    "orderState": "100",
+    "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
@@ -170,14 +170,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xbAdHocDistributedOrderKey,
     FileBasedState.not_initialized,
     OrderSourceType.adHoc,
-    OrderState("100"),
+    NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xbAdHocDistributedOrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
     "fileBasedState": "not_initialized",
     "sourceType": "adHoc",
-    "orderState": "100",
+    "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
@@ -199,10 +199,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val ExpectedOrderOrdersComplemented = OrdersComplemented(
     ExpectedOrderOverviews,
     Vector(
-      SimpleJobNodeOverview(NodeKey(aJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), TestJobPath, orderCount = 3),
-      SimpleJobNodeOverview(NodeKey(bJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), TestJobPath, orderCount = 1),
-      SimpleJobNodeOverview(NodeKey(xaJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 2),
-      SimpleJobNodeOverview(NodeKey(xbJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 0)),  // Distributed orders yet not counted
+      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
+      SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1),
+      SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2),
+      SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 0)),  // Distributed orders yet not counted
     Vector(
       JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
         taskLimit = 10, usedTaskCount = 3, obstacles = Set())),
@@ -293,10 +293,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "SimpleJob",
       "nodeKey": {
         "jobChainPath": "/aJobChain",
-        "state": "100"
+        "nodeId": "100"
       },
-      "nextState": "END",
-      "errorState": "",
+      "nextNodeId": "END",
+      "errorNodeId": "",
       "jobPath": "/test",
       "action": "process",
       "orderCount": 3
@@ -305,10 +305,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "SimpleJob",
       "nodeKey": {
         "jobChainPath": "/bJobChain",
-        "state": "100"
+        "nodeId": "100"
       },
-      "nextState": "END",
-      "errorState": "",
+      "nextNodeId": "END",
+      "errorNodeId": "",
       "jobPath": "/test",
       "action": "process",
       "orderCount": 1
@@ -316,10 +316,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "SimpleJob",
       "nodeKey": {
         "jobChainPath": "/xFolder/x-aJobChain",
-        "state": "100"
+        "nodeId": "100"
       },
-      "nextState": "END",
-      "errorState": "",
+      "nextNodeId": "END",
+      "errorNodeId": "",
       "jobPath": "/xFolder/test",
       "action": "process",
       "orderCount": 2
@@ -328,10 +328,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "SimpleJob",
       "nodeKey": {
         "jobChainPath": "/xFolder/x-bJobChain",
-        "state": "100"
+        "nodeId": "100"
       },
-      "nextState": "END",
-      "errorState": "",
+      "nextNodeId": "END",
+      "errorNodeId": "",
       "jobPath": "/xFolder/test",
       "action": "process",
       "orderCount": 0

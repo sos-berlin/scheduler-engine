@@ -20,8 +20,8 @@ extends Node {
   private[kernel] override def overview =
     NestedJobChainNodeOverview(
       nodeKey,
-      nextState = nextState,
-      errorState = errorState,
+      nextNodeId = nextNodeId,
+      errorNodeId = errorNodeId,
       nestedJobChainPath = nestedJobChainPath)
 
   private[kernel] def nestedJobChainPath = JobChainPath(cppProxy.nested_job_chain_path)

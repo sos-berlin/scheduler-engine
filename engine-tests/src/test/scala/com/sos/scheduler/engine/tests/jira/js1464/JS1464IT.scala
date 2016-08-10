@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1464
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, _}
@@ -50,8 +50,8 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         }
         eventBus.awaitingKeyedEvent[OrderFinished](bOrderKey) {
           eventBus.awaitingKeyedEvent[OrderFinished](aOrderKey) {
-          } .state shouldBe EndState
-        } .state shouldBe EndState
+          } .nodeId shouldBe EndNodeId
+        } .nodeId shouldBe EndNodeId
       }
     }
 
@@ -68,7 +68,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         }
         withEventPipe { eventPipe ⇒
           addOrder(a2OrderKey, 1.s)
-          eventPipe.nextKeyed[OrderFinished](a1OrderKey).state shouldBe EndState
+          eventPipe.nextKeyed[OrderFinished](a1OrderKey).nodeId shouldBe EndNodeId
           eventPipe.nextKeyed[OrderStarted](a2OrderKey)
           expectEndStateReached(eventPipe, a2OrderKey, bOrderKey)
         }
@@ -88,7 +88,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         }
         withEventPipe { eventPipe ⇒
           addOrder(cOrderKey, 0.s)
-          eventPipe.nextKeyed[OrderFinished](aOrderKey).state shouldBe EndState
+          eventPipe.nextKeyed[OrderFinished](aOrderKey).nodeId shouldBe EndNodeId
           eventPipe.nextWithCondition[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271"))
           eventPipe.nextKeyed[OrderStarted](cOrderKey)
           expectEndStateReached(eventPipe, bOrderKey, cOrderKey)
@@ -125,8 +125,8 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
       eventPipe.queued[OrderStepStarted] shouldBe empty
       val eventPipe2 = controller.newEventPipe()
       eventPipe.nextKeyedEvents[OrderFinished](Set(a2OrderKey, b2OrderKey))
-      eventPipe2.queued[OrderStepStarted] filter { e ⇒ Set(a2OrderKey, b2OrderKey)(e.key) } map { _.state } shouldEqual
-        List(OrderState("100"), OrderState("100"))
+      eventPipe2.queued[OrderStepStarted] filter { e ⇒ Set(a2OrderKey, b2OrderKey)(e.key) } map { _.nodeId } shouldEqual
+        List(NodeId("100"), NodeId("100"))
     }
   }
 
@@ -144,11 +144,11 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def expectEndStateReached(eventPipe: EventPipe, orderKeys: OrderKey*): Unit =
-    assertResult((orderKeys map { _ → EndState }).toSet) {
-      (eventPipe.nextKeyedEvents[OrderFinished](orderKeys) map { e ⇒ e.key → e.state }).toSet
+    assertResult((orderKeys map { _ → EndNodeId }).toSet) {
+      (eventPipe.nextKeyedEvents[OrderFinished](orderKeys) map { e ⇒ e.key → e.nodeId }).toSet
     }
 }
 
 private object JS1464IT {
-  private val EndState = OrderState("END")
+  private val EndNodeId = NodeId("END")
 }

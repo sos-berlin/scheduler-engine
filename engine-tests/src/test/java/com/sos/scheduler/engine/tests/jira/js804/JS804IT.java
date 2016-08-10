@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * This test demonstrates the result attribute <i>setback</i> of the <i>show_calendar</i> command.
- * The order <i>js-804</i> goes to the setback state immediately after starting. The result of
+ * The order <i>js-804</i> goes to the setback NodeId immediately after starting. The result of
  * <i>show_calendar</i> must contain <i>setback='true'</i> for it.
  * In opposite is order <i>js-804-1</i>. It is a simple order (scheduled with the start of JS) with
  * no setback.  The result of <i>show_calendar</i> must not contain the <i>setback</i> because <i>false</i>

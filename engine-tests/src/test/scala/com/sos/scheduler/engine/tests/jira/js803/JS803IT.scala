@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
 import com.sos.scheduler.engine.kernel.order._
@@ -52,7 +52,7 @@ final class JS803IT extends SchedulerTest {
   }
 
   @HotEventHandler def handleHotEvent(event: OrderFinished, order: UnmodifiableOrder): Unit =
-    assertThat(s"Wrong end state of order ${event.orderKey}", order.state, equalTo(expectedEndState))
+    assertThat(s"Wrong end NodeId of order ${event.orderKey}", order.nodeId, equalTo(expectedEndNodeId))
 
   @EventHandler def handleEvent(event: OrderFinished): Unit = {
     terminatedOrders.add(event.orderKey.id)
@@ -64,7 +64,7 @@ object JS803IT {
   private val logger = Logger(getClass)
   private val orderDelay = 3+1
   private val jobChainPath = JobChainPath("/super")
-  private val expectedEndState = OrderState("state.nestedC.end")
+  private val expectedEndNodeId = NodeId("state.nestedC.end")
   private val hhmmssFormatter = DateTimeFormat.forPattern("HH:mm:ss")
   private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
 

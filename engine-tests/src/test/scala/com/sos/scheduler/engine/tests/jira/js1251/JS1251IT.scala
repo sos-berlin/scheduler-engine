@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.tests.jira.js1251
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderState, OrderStepEnded}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
@@ -51,7 +51,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Changing the order configuration file while order is running takes effect when it is finished" in {
-    scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="stop"/>
+    scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedNodeId.string} action="stop"/>
     eventBus.awaitingKeyedEvent[OrderStepEnded](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
@@ -59,14 +59,14 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
       file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
       instance[FolderSubsystemClient].updateFolders()
       transaction { implicit entityManager ⇒
-        orderStore.fetch(TestOrderKey) should have ('stateOption(Some(SuspendedState)), 'title(AChangedTitle))
+        orderStore.fetch(TestOrderKey) should have ('nodeIdOption(Some(SuspendedNodeId)), 'title(AChangedTitle))
       }
       eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
-        scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedState.string} action="process"/>
+        scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedNodeId.string} action="process"/>
       }
     }
     transaction { implicit entityManager ⇒
-      orderStore.fetch(TestOrderKey) should have ('stateOption(Some(FirstState)), 'title(BChangedTitle))
+      orderStore.fetch(TestOrderKey) should have ('nodeIdOption(Some(FirstNodeId)), 'title(BChangedTitle))
     }
   }
 
@@ -85,8 +85,8 @@ private object JS1251IT {
   private val OriginalTitle = "ORIGINAL TITLE"
   private val AChangedTitle = "CHANGED-A"
   private val BChangedTitle = "CHANGED-B"
-  private val FirstState = OrderState("100")
-  private val SuspendedState = OrderState("200")
+  private val FirstNodeId = NodeId("100")
+  private val SuspendedNodeId = NodeId("200")
   private val NonDistributedJobChainPath = JobChainPath("/test-non-distributed")
   private val NonDistributedOrderKey = JobChainPath("/test-non-distributed") orderKey "1"
 }

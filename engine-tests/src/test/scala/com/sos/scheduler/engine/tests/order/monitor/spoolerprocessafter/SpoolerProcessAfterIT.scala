@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{TaskClosed, TaskId}
+import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -95,7 +96,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
       def checkAssertions(event: MyFinishedEvent): Unit = {
         assert(event.orderKey == setting.orderKey)
-        assert(expected.orderStateExpectation matches event.state, s", expected OrderState=${expected.orderStateExpectation}, but was ${event.state}")
+        assert(expected.orderStateExpectation matches event.nodeId, s", expected NodeId=${expected.orderStateExpectation}, but was ${event.nodeId}")
         assert(event.spoolerProcessAfterParameterOption == expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
         assert(jobState == expected.jobState, ", Job.state is not as expected")
         expected.requireMandatoryMessageCodes(messageCodes)
@@ -110,7 +111,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
   eventBus.onHotEventSourceEvent[OrderStepEnded] {
     case EventSourceEvent(e: OrderStepEnded, order: UnmodifiableOrder) ⇒
-      if (e.stateTransition == OrderNodeTransition.Keep) {
+      if (e.nodeTransition == OrderNodeTransition.Keep) {
         // Es wird kein OrderFinished geben.
         publishMyFinishedEvent(order)
       }
@@ -123,7 +124,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
   private def publishMyFinishedEvent(order: UnmodifiableOrder): Unit = {
     eventBus.publishCold(MyFinishedEvent(
-      order.orderKey, order.state,
+      order.orderKey, order.nodeId,
       order.variables.get(SpoolerProcessAfterNames.parameter) map { _.toBoolean }))
   }
 
@@ -139,5 +140,5 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 private object SpoolerProcessAfterIT {
   private class MyMutableMultiMap[A, B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
-  private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
+  private case class MyFinishedEvent(orderKey: OrderKey, nodeId: NodeId, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
 }

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js806
 
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.{InfoLogEvent, LogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
@@ -29,7 +29,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       variableSet("TestJob.setback") = true.toString
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
-      eventPipe.nextKeyed[OrderSetBack](myOrderKey).state shouldEqual OrderState("200")
+      eventPipe.nextKeyed[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
       eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
 
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
@@ -48,7 +48,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
-      eventPipe.nextKeyed[OrderNodeChanged](myOrderKey).stateChange shouldEqual OrderState("100") -> OrderState("200")
+      eventPipe.nextKeyed[OrderNodeChanged](myOrderKey).nodeIdChange shouldEqual NodeId("100") -> NodeId("200")
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, suspended = Some(true))
       eventPipe.nextWithCondition[InfoLogEvent] { _.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
@@ -84,7 +84,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       variableSet("TestJob.setback") = true.toString
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
-      eventPipe.nextKeyed[OrderSetBack](myOrderKey).state shouldEqual OrderState("200")
+      eventPipe.nextKeyed[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
       eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       variableSet("TestJob.setback") = false.toString

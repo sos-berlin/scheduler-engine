@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1598
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderState, OrderSuspended, OrderStarted}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -40,24 +40,24 @@ final class JS1598IT extends FreeSpec with ScalaSchedulerTest {
 
   "B Job chain node with attribut on_error=suspend" - {
     "Permanent order" in {
-      checkRun(BOrderKey, continueState = Some(OrderState("continue"))) { orderKey ⇒
+      checkRun(BOrderKey, continueNodeId = Some(NodeId("continue"))) { orderKey ⇒
         scheduler executeXml ModifyOrderCommand(orderKey, at = Some(ModifyOrderCommand.NowAt))
       }
     }
 
     "Non-permanent order" in {
-      checkRun(BJobChainPath orderKey "1", continueState = Some(OrderState("continue"))) { orderKey ⇒
+      checkRun(BJobChainPath orderKey "1", continueNodeId = Some(NodeId("continue"))) { orderKey ⇒
         scheduler executeXml OrderCommand(orderKey)
       }
     }
   }
 
-  private def checkRun(orderKey: OrderKey, continueState: Option[OrderState] = None)(body: OrderKey ⇒ Unit): Unit =
+  private def checkRun(orderKey: OrderKey, continueNodeId: Option[NodeId] = None)(body: OrderKey ⇒ Unit): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       body(orderKey)
       eventPipe.nextKeyed[OrderStarted](orderKey)
       eventPipe.nextKeyed[OrderSuspended](orderKey)
-      scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false), state = continueState)
+      scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false), nodeId = continueNodeId)
       // Not for a distributed order: eventPipe.nextKeyed[OrderResumed](orderKey)
       eventPipe.nextKeyed[OrderFinished](orderKey)
     }

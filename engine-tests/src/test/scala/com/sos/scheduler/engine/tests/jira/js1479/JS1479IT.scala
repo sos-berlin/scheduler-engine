@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1479
 
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderState, OrderStarted}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -29,10 +29,10 @@ final class JS1479IT extends FreeSpec with ScalaSchedulerTest {
       val orderKey = eventPipe.nextAny[OrderStarted].orderKey
       eventBus.keyedEventFuture[OrderFinished](orderKey)
     }
-    val endStates = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.state }
+    val nodeIds = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.nodeId }
     intercept[Exception] {
-      endStates shouldEqual List(OrderState("OKAY"), OrderState("OKAY"))
+      nodeIds shouldEqual List(NodeId("OKAY"), NodeId("OKAY"))
     }
-    endStates shouldEqual List(OrderState("FAILED"), OrderState("FAILED"))  // Test fails with scheduler.order.keep_order_content_on_reschedule=false
+    nodeIds shouldEqual List(NodeId("FAILED"), NodeId("FAILED"))  // Test fails with scheduler.order.keep_order_content_on_reschedule=false
   }
 }

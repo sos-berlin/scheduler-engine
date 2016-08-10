@@ -17,8 +17,8 @@ import com.sos.scheduler.engine.data.event.{Event, EventId}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderState, OrderStepStarted}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
@@ -168,8 +168,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         usedJobs = ExpectedOrderOrdersComplemented.usedJobs,
         usedProcessClasses = Nil,
         usedNodes = Vector(
-          SimpleJobNodeOverview(NodeKey(aJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), TestJobPath, orderCount = 3),
-          SimpleJobNodeOverview(NodeKey(xaJobChainPath, OrderState("100")), OrderState("END"), OrderState(""), XFolderTestJobPath, orderCount = 2))))
+          SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
+          SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2))))
     }
 
     "ordersComplementedBy query /aJobChain" in {
@@ -229,13 +229,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           sourceXml = None,
           List(
             SimpleJobNodeOverview(
-              NodeKey(xaJobChainPath, OrderState("100")),
-              nextState = OrderState("END"),
-              errorState = OrderState(""),
+              NodeKey(xaJobChainPath, NodeId("100")),
+              nextNodeId = NodeId("END"),
+              errorNodeId = NodeId(""),
               JobPath("/xFolder/test"),
               orderCount = 2),
             EndNodeOverview(
-              NodeKey(xaJobChainPath, OrderState("END"))))))
+              NodeKey(xaJobChainPath, NodeId("END"))))))
       assert(jobChainDetails.sourceXml.get startsWith "<job_chain ")
     }
 

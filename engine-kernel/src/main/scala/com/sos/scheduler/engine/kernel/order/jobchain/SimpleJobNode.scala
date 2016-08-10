@@ -27,8 +27,8 @@ extends JobNode {
 
   override private[kernel] def overview = SimpleJobNodeOverview(
     nodeKey,
-    nextState = nextState,
-    errorState = errorState,
+    nextNodeId = nextNodeId,
+    errorNodeId = errorNodeId,
     action = action,
     jobPath = jobPath,
     orderCount = orderCount)

@@ -113,7 +113,7 @@ extends SchedulerHtmlPage {
         nodeOrdersToHtml(jobChainPath, orders)))
 
   private def nodeOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]): Vector[Frag] =
-    for ((nodeId, orders) ← orders retainOrderGroupBy { _.orderState }) yield {
+    for ((nodeId, orders) ← orders retainOrderGroupBy { _.nodeId }) yield {
       val jobPath = nodeKeyToOverview(NodeKey(jobChainPath, nodeId)).jobPath
       div(cls := "NodeOrders")(
         div(cls := "Padded")(

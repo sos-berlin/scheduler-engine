@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1190
 
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderNodeChanged, OrderNodeTransition, OrderState, OrderStepEnded}
+import com.sos.scheduler.engine.data.order.{OrderNodeChanged, OrderNodeTransition, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1190.JS1190IT._
@@ -23,7 +23,7 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
     "(add job)" in {
       scheduler executeXml SimpleShellJobElem
     }
-    for ((exitCode, expectedState) ← ExitCodeToState) {
+    for ((exitCode, expectedState) ← ExitCodeToNodeId) {
       s"Exit code $exitCode" in {
         runAndCheckOrder("SIMPLE", Map(), exitCode, OrderNodeTransition.Proceeding(ReturnCode(exitCode)), expectedState)
       }
@@ -34,7 +34,7 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
     "(replace job)" in {
       scheduler executeXml MonitorShellJobElem
     }
-    for (((beforeProcess, exitCode, afterProcess), (expectedTransition, expectedState)) ← MonitorExitCodeToState) {
+    for (((beforeProcess, exitCode, afterProcess), (expectedTransition, expectedState)) ← MonitorExitCodeToNodeId) {
       s"spooler_process_before=$beforeProcess, exit code $exitCode, spooler_process_after=$afterProcess" in {
         runAndCheckOrder("MONITOR",
           Map(BeforeProcessParam → beforeProcess.toString, AfterProcessParam → afterProcess.toString),
@@ -44,15 +44,15 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def runAndCheckOrder(prefix: String, parameters: Map[String, String], exitCode: Int,
-      expectedTransition: OrderNodeTransition, expectedState: OrderState): Unit =
+      expectedTransition: OrderNodeTransition, expectedState: NodeId): Unit =
   {
     val orderKey = TestJobchainPath orderKey s"$prefix-EXIT-$exitCode"
     val orderCommand = OrderCommand(orderKey, parameters = Map("EXIT_CODE" → s"$exitCode") ++ parameters)
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"), MessageCode("SCHEDULER-226"))) {
       withEventPipe { eventPipe ⇒
         scheduler executeXml orderCommand
-        eventPipe.nextKeyed[OrderStepEnded](orderKey).stateTransition shouldEqual expectedTransition
-        eventPipe.nextKeyed[OrderNodeChanged](orderKey).state shouldEqual expectedState
+        eventPipe.nextKeyed[OrderStepEnded](orderKey).nodeTransition shouldEqual expectedTransition
+        eventPipe.nextKeyed[OrderNodeChanged](orderKey).nodeId shouldEqual expectedState
       }
     }
   }
@@ -60,22 +60,22 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
 
 private object JS1190IT {
   private val TestJobchainPath = JobChainPath("/test")
-  private val ExitCodeToState = List(
-    0 → OrderState("STATE-0"),
-    1 → OrderState("STATE-1"),
-    99 → OrderState("STATE-99"),
-    100 → OrderState("ERROR"))
+  private val ExitCodeToNodeId = List(
+    0 → NodeId("STATE-0"),
+    1 → NodeId("STATE-1"),
+    99 → NodeId("STATE-99"),
+    100 → NodeId("ERROR"))
 
-  private val MonitorExitCodeToState = List[((Boolean, Int, Boolean), (OrderNodeTransition, OrderState))](
-    ((true, 0, true), (OrderNodeTransition.Success, OrderState("STATE-0"))),
-    ((true, 1, false), (OrderNodeTransition.Error(ReturnCode(1)), OrderState("STATE-1"))),
-    ((true, 99, false), (OrderNodeTransition.Error(ReturnCode(99)), OrderState("STATE-99"))),
-    ((true, 100, false), (OrderNodeTransition.Error(ReturnCode(100)), OrderState("ERROR"))),
-    ((true, 0, false), (OrderNodeTransition.Error.Standard, OrderState("STATE-1"))),
-    ((true, 1, true), (OrderNodeTransition.Success, OrderState("STATE-0"))),
-    ((true, 99, true), (OrderNodeTransition.Success, OrderState("STATE-0"))),
-    ((true, 100, true), (OrderNodeTransition.Success, OrderState("STATE-0"))),
-    ((false, 0, true), (OrderNodeTransition.Error.Standard, OrderState("STATE-1"))))
+  private val MonitorExitCodeToNodeId = List[((Boolean, Int, Boolean), (OrderNodeTransition, NodeId))](
+    ((true, 0, true), (OrderNodeTransition.Success, NodeId("STATE-0"))),
+    ((true, 1, false), (OrderNodeTransition.Error(ReturnCode(1)), NodeId("STATE-1"))),
+    ((true, 99, false), (OrderNodeTransition.Error(ReturnCode(99)), NodeId("STATE-99"))),
+    ((true, 100, false), (OrderNodeTransition.Error(ReturnCode(100)), NodeId("ERROR"))),
+    ((true, 0, false), (OrderNodeTransition.Error.Standard, NodeId("STATE-1"))),
+    ((true, 1, true), (OrderNodeTransition.Success, NodeId("STATE-0"))),
+    ((true, 99, true), (OrderNodeTransition.Success, NodeId("STATE-0"))),
+    ((true, 100, true), (OrderNodeTransition.Success, NodeId("STATE-0"))),
+    ((false, 0, true), (OrderNodeTransition.Error.Standard, NodeId("STATE-1"))))
 
   private val TestJobPath = JobPath("/test-a")
   private val JobScriptElem =

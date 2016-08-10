@@ -10,10 +10,10 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXm
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderOverview, OrderState, OrderStarted}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderOverview, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
@@ -193,13 +193,13 @@ object SchedulerTestUtils {
         eventBus.registerHot(subscription)
         promise.future
       }
-      val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.state, variables)
+      val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.nodeId, variables)
       val whenFinishedEvent = whenFinished map { _._1 }
       OrderRun(orderKey, whenTouched, whenFinishedEvent, result)
     }
   }
 
-  final case class OrderRunResult(orderKey: OrderKey, state: OrderState, variables: Map[String, String]) {
+  final case class OrderRunResult(orderKey: OrderKey, nodeId: NodeId, variables: Map[String, String]) {
     def logString(implicit controller: TestSchedulerController): String = orderLog(orderKey)
   }
 

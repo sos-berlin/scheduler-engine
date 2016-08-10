@@ -56,7 +56,7 @@ extends SchedulerClient with DirectCommandClient {
         for ((jobChainPath, nodeKeys) ← jobChainPathToNodeKeys.toVector.sortBy { _._1 };
              jobChain ← orderSubsystem.jobChainOption(jobChainPath).iterator;
              nodeKey ← nodeKeys;
-             node ← (jobChain.nodeMap.get(nodeKey.state) collect { case n: JobNode ⇒ n.overview }).toArray sortBy { _.nodeKey.state })  // sort just for determinism - not the original node order
+             node ← (jobChain.nodeMap.get(nodeKey.nodeId) collect { case n: JobNode ⇒ n.overview }).toArray sortBy { _.nodeKey.nodeId })  // sort just for determinism - not the original node order
           yield node
       }
       val jobs = {

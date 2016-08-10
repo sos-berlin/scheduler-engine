@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.persistence.entities
 import com.google.common.base.Strings
 import com.google.common.base.Strings.emptyToNull
 import com.sos.scheduler.engine.base.generic.IsString.stringOrNull
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderPersistentState, OrderState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderPersistentState}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.{instantToDatabase, _}
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
@@ -19,8 +19,8 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistentState, O
       occupyingClusterIdOption = Option(e.occupyingClusterMemberId) map ClusterMemberId.apply,
       priority = e.priority,
       ordering = e.ordering,
-      stateOption = Option(e.state) map OrderState.apply,
-      initialStateOption = Option(e.initialState) map OrderState.apply,
+      nodeIdOption = Option(e.state) map NodeId.apply,
+      initialNodeIdOption = Option(e.initialState) map NodeId.apply,
       title = Strings.nullToEmpty(e.title),
       creationTimestampOption = Option(e.creationTimestamp) map databaseToInstant,
       modificationTimestampOption = Option(e.modificationTimestamp) map databaseToInstant,
@@ -34,8 +34,8 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistentState, O
     e.occupyingClusterMemberId = stringOrNull(o.occupyingClusterIdOption)
     e.priority = o.priority
     e.ordering = o.ordering
-    e.state = stringOrNull(o.stateOption)
-    e.initialState = stringOrNull(o.initialStateOption)
+    e.state = stringOrNull(o.nodeIdOption)
+    e.initialState = stringOrNull(o.initialNodeIdOption)
     e.title = emptyToNull(o.title)
     e.creationTimestamp = (o.creationTimestampOption map instantToDatabase).orNull
     e.modificationTimestamp = (o.modificationTimestampOption map instantToDatabase).orNull

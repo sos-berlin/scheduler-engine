@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.data.job.TaskState;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderOverview;
 import com.sos.scheduler.engine.data.order.OrderSourceType;
-import com.sos.scheduler.engine.data.order.OrderState;
+import com.sos.scheduler.engine.data.jobchain.NodeId;
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath;
 import com.sos.scheduler.engine.data.queries.OrderQuery;
 import java.time.Instant;
@@ -121,7 +121,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
         OrderOverview orderOverview = orderOverviews.stream()
             .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("1")))
             .findFirst().get();
-        assertEquals(new OrderState("100"), orderOverview.orderState());
+        assertEquals(new NodeId("100"), orderOverview.nodeId());
         assertEquals(FileBasedState.active, orderOverview.fileBasedState());
         assertEquals(OrderSourceType.fileBased, orderOverview.sourceType());
         assertEquals(Optional.of(EPOCH), toJavaOptional(orderOverview.nextStepAt()));
@@ -131,7 +131,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
         OrderOverview orderOverview = orderOverviews.stream()
             .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("AD-HOC")))
             .findFirst().get();
-        assertEquals(new OrderState("100"), orderOverview.orderState());
+        assertEquals(new NodeId("100"), orderOverview.nodeId());
         assertEquals(FileBasedState.not_initialized, orderOverview.fileBasedState());
         assertEquals(OrderSourceType.adHoc, orderOverview.sourceType());
         assertEquals(Optional.of(Instant.parse("2038-01-01T11:22:33Z")), toJavaOptional(orderOverview.nextStepAt()));

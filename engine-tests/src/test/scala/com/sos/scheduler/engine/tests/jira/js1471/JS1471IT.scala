@@ -3,9 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1471
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -31,7 +30,7 @@ final class JS1471IT extends FreeSpec with ScalaSchedulerTest {
     val jobPath = JobPath(s"/$name")
     scheduler executeXml OrderCommand(orderKey)
     waitForCondition(TestTimeout, 100.ms) { jobOverview(jobPath).state == JobState.stopped }
-    assert(orderOverview(orderKey).orderState == OrderState("100"))
+    assert(orderOverview(orderKey).nodeId == NodeId("100"))
     assert(orderOverview(orderKey).isSuspended)
   }
 }

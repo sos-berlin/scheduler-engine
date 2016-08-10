@@ -6,8 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.{HasCloser, SetOnce}
 import com.sos.scheduler.engine.common.xml.XmlUtils.nodeListToSeq
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeKey, NodeOverview}
-import com.sos.scheduler.engine.data.order.OrderState
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeId, NodeKey, NodeOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
@@ -27,7 +26,7 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   protected[kernel] val cppProxy: NodeCI
 
-  private val orderStateOnce = new SetOnce[OrderState]
+  private val nodeIdOnce = new SetOnce[NodeId]
 
   def onCppProxyInvalidated() = close()
 
@@ -41,17 +40,17 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
     }
   }
 
-  private[kernel] final def persistentState = new JobChainNodePersistentState(jobChainPath, orderState, action)
+  private[kernel] final def persistentState = new JobChainNodePersistentState(jobChainPath, nodeId, action)
 
-  final def nodeKey = inSchedulerThread { NodeKey(jobChainPath, orderState) }
+  final def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }
 
   final def jobChainPath = inSchedulerThread { JobChainPath(cppProxy.job_chain_path) }
 
-  protected[kernel] final def orderState = orderStateOnce getOrUpdate OrderState(cppProxy.string_order_state)
+  protected[kernel] final def nodeId = nodeIdOnce getOrUpdate NodeId(cppProxy.string_order_state)
 
-  protected[kernel] final def nextState = OrderState(cppProxy.string_next_state)
+  protected[kernel] final def nextNodeId = NodeId(cppProxy.string_next_state)
 
-  protected[kernel] final def errorState = OrderState(cppProxy.string_error_state)
+  protected[kernel] final def errorNodeId = NodeId(cppProxy.string_error_state)
 
   final def action = inSchedulerThread { JobChainNodeAction.ofCppName(cppProxy.string_action) }
 

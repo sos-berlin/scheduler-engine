@@ -7,9 +7,9 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextState
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
+import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextNode
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
+import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.QueryableJobChain
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -37,13 +37,13 @@ with UnmodifiableJobChain {
   type ThisPath = JobChainPath
 
   private object cppPredecessors {
-    private var _edgeSet: Set[(OrderState, OrderState)] = null
-    private val predecessorsMap = mutable.Map[String, java.util.ArrayList[String]]() withDefault { orderStateString ⇒
+    private var _edgeSet: Set[(NodeId, NodeId)] = null
+    private val predecessorsMap = mutable.Map[String, java.util.ArrayList[String]]() withDefault { nodeIdString ⇒
       if (_edgeSet == null) {
-        _edgeSet = (nodeMap.values filter { _.action == nextState } map { o ⇒ o.orderState → o.nextState }).toSet
+        _edgeSet = (nodeMap.values filter { _.action == nextNode } map { o ⇒ o.nodeId → o.nextNodeId }).toSet
       }
       val result = new java.util.ArrayList[String]
-      result.addAll(allPredecessors(_edgeSet, OrderState(orderStateString)) map { _.string } )
+      result.addAll(allPredecessors(_edgeSet, NodeId(nodeIdString)) map { _.string } )
       result
     }
 
@@ -79,7 +79,7 @@ with UnmodifiableJobChain {
   @ForCpp
   private def loadPersistentState(): Unit = {
     transaction { implicit entityManager =>
-      for (persistentState <- nodeStore.fetchAll(path); node <- nodeMap.get(persistentState.state)) {
+      for (persistentState <- nodeStore.fetchAll(path); node <- nodeMap.get(persistentState.nodeId)) {
         node.action = persistentState.action
       }
       for (persistentState <- persistentStateStore.tryFetch(path)) {
@@ -113,7 +113,7 @@ with UnmodifiableJobChain {
   @ForCpp
   private def onNextStateActionChanged(): Unit = cppPredecessors.invalidate()
 
-  /** All OrderState, which are skipped to given orderStateString */
+  /** All NodeId, which are skipped to given orderStateString */
   @ForCpp
   private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
@@ -139,13 +139,13 @@ with UnmodifiableJobChain {
       nodes collect { case o: SimpleJobNode => o }
     }
 
-  def node(o: OrderState): Node =
+  def node(o: NodeId): Node =
     inSchedulerThread {
       nodeMap(o)
     }
 
-  private[kernel] lazy val nodeMap: Map[OrderState, Node] =
-    (nodes map { n ⇒ n.orderState → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
+  private[kernel] lazy val nodeMap: Map[NodeId, Node] =
+    (nodes map { n ⇒ n.nodeId → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
 
   private[order] lazy val nodes: Vector[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector

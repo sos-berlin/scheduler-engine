@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedRemoved
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskEnded, TaskStarted}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
@@ -34,9 +34,9 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   override protected def newAgentConfiguration() = super.newAgentConfiguration().copy(environment = Map("TEST_AGENT" → "*AGENT*"))
 
-  "Order changes to error state when job chain process class is missing" in {
+  "Order changes to error nodeId when job chain process class is missing" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-161"))) {
-      runOrder(AJobChainPath orderKey "1").state shouldEqual OrderState("ERROR")
+      runOrder(AJobChainPath orderKey "1").nodeId shouldEqual NodeId("ERROR")
     }
   }
 
@@ -44,7 +44,7 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     writeConfigurationFile(AProcessClassPath, ProcessClassConfiguration(agentUris = List(agentUri)))
     writeConfigurationFile(BProcessClassPath, ProcessClassConfiguration(agentUris = List(agentUri)))
     val orderKey = AJobChainPath orderKey "2"
-    runOrder(orderKey).state shouldEqual OrderState("END")
+    runOrder(orderKey).nodeId shouldEqual NodeId("END")
     orderLog(orderKey) should include ("API TEST_AGENT=/*AGENT*/")
     orderLog(orderKey) should include ("SHELL TEST_1_AGENT=/*AGENT*/")
     orderLog(orderKey) should include ("SHELL TEST_2_AGENT=//")
@@ -65,24 +65,24 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       }
       events.next[TaskEnded](_.jobPath == JavaJobPath, 10.s)
       events.nextKeyed[FileBasedRemoved](AProcessClassPath)
-      assert(orderOverview(orderKey).orderState == OrderState("200"))
+      assert(orderOverview(orderKey).nodeId == NodeId("200"))
       writeConfigurationFile(AProcessClassPath, fileContent)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
       events.nextKeyed[OrderFinished](orderKey)
     }
-    .state shouldEqual OrderState("END")
+    .nodeId shouldEqual NodeId("END")
   }
 
   "For a second order requiring a different process class, the running task is terminated" in {
     val aOrderKey = AJobChainPath orderKey "A-API"
     val bOrderKey = BJobChainPath orderKey "B-API"
-    runOrder(aOrderKey).state shouldEqual OrderState("END")
+    runOrder(aOrderKey).nodeId shouldEqual NodeId("END")
     withEventPipe { events ⇒
       scheduler executeXml OrderCommand(bOrderKey)
       events.next[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271"))   // "Task is being terminated in favour of ..."
       events.next[TaskEnded](_.jobPath == JavaJobPath)
       events.next[TaskStarted](_.jobPath == JavaJobPath)
-      events.nextKeyed[OrderFinished](bOrderKey).state shouldBe OrderState("END")
+      events.nextKeyed[OrderFinished](bOrderKey).nodeId shouldBe NodeId("END")
     }
     assert(jobOverview(JavaJobPath).state == JobState.running)
   }

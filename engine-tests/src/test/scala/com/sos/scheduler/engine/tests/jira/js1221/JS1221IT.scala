@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1221
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderState, OrderStepStarted}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepStarted}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1221.JS1221IT._
 import java.io.File
@@ -34,7 +34,7 @@ final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
 
   "Added file" in {
     scheduler executeXml jobChainElem(directory)
-    scheduler executeXml <job_chain_node.modify job_chain="/test" state={AOrderState.string} action="next_state"/>
+    scheduler executeXml <job_chain_node.modify job_chain="/test" state={AOrderNodeId.string} action="next_state"/>
     val file = fileGenerator.next()
     checkFirstJobChainNodeIsSkipped(file) {
       createFile(file)
@@ -51,7 +51,7 @@ final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       body
       eventPipe.nextAny[TaskStarted].jobPath shouldEqual BJobPath
-      eventPipe.nextKeyed[OrderStepStarted](orderKey).state shouldEqual BOrderState
+      eventPipe.nextKeyed[OrderStepStarted](orderKey).nodeId shouldEqual BOrderNodeId
       eventPipe.nextKeyed[OrderFinished](orderKey)
     }
   }
@@ -59,16 +59,16 @@ final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
 
 private object JS1221IT {
   private val TestJobChainPath = JobChainPath("/test")
-  private val AOrderState = OrderState("AAA")
-  private val BOrderState = OrderState("BBB")
+  private val AOrderNodeId = NodeId("AAA")
+  private val BOrderNodeId = NodeId("BBB")
   private val AJobPath = JobPath("/test-a")
   private val BJobPath = JobPath("/test-b")
 
   private def jobChainElem(directory: File) =
     <job_chain name="test">
       <file_order_source directory={directory.getPath}/>
-      <job_chain_node state={AOrderState.string} job={AJobPath.string}/>
-      <job_chain_node state={BOrderState.string} job={BJobPath.string}/>
+      <job_chain_node state={AOrderNodeId.string} job={AJobPath.string}/>
+      <job_chain_node state={BOrderNodeId.string} job={BJobPath.string}/>
       <file_order_sink state="SINK" remove="yes"/>
     </job_chain>
 }

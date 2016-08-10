@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.order.events
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.InsertableMutableMap
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
@@ -31,7 +31,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     eventPipe.nextAny[OrderEvent] match {
       case e: OrderNodeChanged ⇒
         e.orderKey shouldEqual PersistentOrderKey
-        assert(e.previousState == OrderState("end"))
+        assert(e.fromNodeId == NodeId("end"))
     }
   }
 
@@ -49,7 +49,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={orderKey.id.toString}/>)
     eventPipe.nextAny[OrderStarted].orderKey shouldEqual orderKey
     eventPipe.nextAny[OrderSuspended].orderKey shouldEqual orderKey
-    eventPipe.nextAny[OrderEvent] match { case e: OrderNodeChanged ⇒ e.orderKey shouldEqual orderKey; e.previousState shouldEqual OrderState("state1") }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderNodeChanged ⇒ e.orderKey shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state1") }
     scheduler.executeXml(<remove_order job_chain={TestJobChainPath.string} order={orderKey.id.toString}/>)
     //eventPipe.next[OrderEvent] match { case e: OrderFinished ⇒ e.getKey shouldEqual orderKey }
   }
@@ -61,15 +61,15 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
 
   private def expectOrderEventsAndResumeOrder(orderKey: OrderKey): Unit = {
     eventPipe.nextAny[OrderEvent] match { case e: OrderStarted ⇒ e.orderKey shouldEqual orderKey }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStarted ⇒ e.orderKey shouldEqual orderKey; e.state shouldEqual OrderState("state1") }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStarted ⇒ e.orderKey shouldEqual orderKey; e.nodeId shouldEqual NodeId("state1") }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEnded ⇒ e.orderKey shouldEqual orderKey }
     eventPipe.nextAny[OrderEvent] match { case e: OrderSuspended ⇒ e.orderKey shouldEqual orderKey }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderNodeChanged ⇒ e.orderKey shouldEqual orderKey; e.previousState shouldEqual OrderState("state1") }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderNodeChanged ⇒ e.orderKey shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state1") }
     scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
     eventPipe.nextAny[OrderEvent] match { case e: OrderResumed ⇒ e.orderKey shouldEqual orderKey }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStarted ⇒ e.orderKey shouldEqual orderKey; e.state shouldEqual OrderState("state2") }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStarted ⇒ e.orderKey shouldEqual orderKey; e.nodeId shouldEqual NodeId("state2") }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEnded ⇒ e.orderKey shouldEqual orderKey }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderNodeChanged ⇒ e.orderKey shouldEqual orderKey; e.previousState shouldEqual OrderState("state2") }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderNodeChanged ⇒ e.orderKey shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state2") }
     eventPipe.nextAny[OrderEvent] match { case e: OrderFinished ⇒ e.orderKey shouldEqual orderKey }
   }
 
@@ -79,20 +79,20 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     sleep(500)  // The last event can be late???
     coldEvents.toMap shouldEqual Map(
       "OrderStarted"   → OrderStarted(orderKey),
-      "OrderFinished"  → OrderFinished(orderKey, OrderState("end")),
+      "OrderFinished"  → OrderFinished(orderKey, NodeId("end")),
       "OrderSuspended" → OrderSuspended(orderKey),
       "OrderResumed"   → OrderResumed(orderKey)
     )
     hotEvents shouldEqual Map(
       "OrderStarted UnmodifiableOrder"            → OrderStarted(orderKey),
       "OrderStarted Order"                        → OrderStarted(orderKey),
-      "OrderFinished UnmodifiableOrder"           → OrderFinished(orderKey, OrderState("end")),
-      "OrderStepStarted UnmodifiableOrder state1" → OrderStepStarted(orderKey, OrderState("state1"), TaskId.Null),
-      "OrderStepStarted Order state1"             → OrderStepStarted(orderKey, OrderState("state1"), TaskId.Null),
+      "OrderFinished UnmodifiableOrder"           → OrderFinished(orderKey, NodeId("end")),
+      "OrderStepStarted UnmodifiableOrder state1" → OrderStepStarted(orderKey, NodeId("state1"), TaskId.Null),
+      "OrderStepStarted Order state1"             → OrderStepStarted(orderKey, NodeId("state1"), TaskId.Null),
       "OrderStepEnded UnmodifiableOrder state1"   → OrderStepEnded(orderKey, OrderNodeTransition.Success),
       "OrderStepEnded Order state1"               → OrderStepEnded(orderKey, OrderNodeTransition.Success),
-      "OrderStepStarted UnmodifiableOrder state2" → OrderStepStarted(orderKey, OrderState("state2"), TaskId.Null),
-      "OrderStepStarted Order state2"             → OrderStepStarted(orderKey, OrderState("state2"), TaskId.Null),
+      "OrderStepStarted UnmodifiableOrder state2" → OrderStepStarted(orderKey, NodeId("state2"), TaskId.Null),
+      "OrderStepStarted Order state2"             → OrderStepStarted(orderKey, NodeId("state2"), TaskId.Null),
       "OrderStepEnded UnmodifiableOrder state2"   → OrderStepEnded(orderKey, OrderNodeTransition.Success),
       "OrderStepEnded Order state2"               → OrderStepEnded(orderKey, OrderNodeTransition.Success),
       "OrderSuspended UnmodifiableOrder"          → OrderSuspended(orderKey),
@@ -115,16 +115,16 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     addEvent(hotEvents, "OrderFinished UnmodifiableOrder" → e)
 
   @HotEventHandler def handleHotEvent(e: OrderStepStarted, o: UnmodifiableOrder): Unit =
-    addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${o.state}" → e.copy(taskId = TaskId.Null))
+    addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${o.nodeId}" → e.copy(taskId = TaskId.Null))
 
   @HotEventHandler def handleHotEvent(e: OrderStepStarted, o: Order): Unit =
-    addEvent(hotEvents, s"OrderStepStarted Order ${o.state}" → e.copy(taskId = TaskId.Null))
+    addEvent(hotEvents, s"OrderStepStarted Order ${o.nodeId}" → e.copy(taskId = TaskId.Null))
 
   @HotEventHandler def handleHotEvent(e: OrderStepEnded, o: UnmodifiableOrder): Unit =
-    addEvent(hotEvents, s"OrderStepEnded UnmodifiableOrder ${o.state}" → e)
+    addEvent(hotEvents, s"OrderStepEnded UnmodifiableOrder ${o.nodeId}" → e)
 
   @HotEventHandler def handleHotEvent(e: OrderStepEnded, o: Order): Unit =
-    addEvent(hotEvents, s"OrderStepEnded Order ${o.state}" → e)
+    addEvent(hotEvents, s"OrderStepEnded Order ${o.nodeId}" → e)
 
   @EventHandler def handleEvent(e: OrderSuspended): Unit =
     addEvent(coldEvents, "OrderSuspended" → e)

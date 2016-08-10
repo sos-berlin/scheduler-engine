@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.event.{Event, IdAndEvent}
 import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
@@ -27,7 +28,7 @@ extends SchedulerHtmlPage {
 
   private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.details(orderKey))
 
-  private implicit def nodeIdToHtml(nodeId: OrderState): Frag = stringFrag(nodeId.toString)
+  private implicit def nodeIdToHtml(nodeId: NodeId): Frag = stringFrag(nodeId.toString)
 
   private implicit def taskIdToHtml(taskId: TaskId): Frag = a(cls := "inherit-markup", href := uris.task.overview(taskId))(taskId.toString)
 
@@ -54,7 +55,7 @@ extends SchedulerHtmlPage {
     val name = event.getClass.getSimpleName
     td(name stripSuffix "Event") :: (
       event match {
-        case OrderFinished(orderKey, nodeId: OrderState)       ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
+        case OrderFinished(orderKey, nodeId: NodeId)       ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
         case OrderNestedFinished(orderKey)                     ⇒ td(orderKey) :: Nil
         case OrderNestedStarted(orderKey)                      ⇒ td(orderKey) :: Nil
         case OrderResumed(orderKey)                            ⇒ td(orderKey) :: Nil

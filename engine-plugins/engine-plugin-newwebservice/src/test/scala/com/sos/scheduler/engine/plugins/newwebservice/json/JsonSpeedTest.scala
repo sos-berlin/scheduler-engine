@@ -5,8 +5,8 @@ import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.ToYamlStrin
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType, OrderState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonSpeedTest._
 import java.time.Instant
@@ -47,7 +47,7 @@ private object JsonSpeedTest {
       JobChainPath("/a") orderKey numbers.next().toString,
       FileBasedState.active,
       OrderSourceType.adHoc,
-      OrderState(numbers.next().toString),
+      NodeId(numbers.next().toString),
       OrderProcessingState.InTaskProcess(TaskId(numbers.next()), ProcessClassPath.Default, agentUri = None, inProcessSince),
       nextStepAt = Some(now))
     logger.info(stopwatch.itemsPerSecondString(n, "OrderOverview"))

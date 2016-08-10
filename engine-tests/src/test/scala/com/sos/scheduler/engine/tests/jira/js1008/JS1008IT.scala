@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1008
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEnded}
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.OrderStepEnded
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1008.JS1008IT._
@@ -20,7 +20,7 @@ final class JS1008IT extends FreeSpec with ScalaSchedulerTest {
     val orderSubsystem = instance[OrderSubsystemClient]
     val directory = testEnvironment.newFileOrderSourceDirectory()
     scheduler executeXml jobChainElem(directory)
-    orderSubsystem.jobChain(testJobChainPath).node(OrderState("200")).action = JobChainNodeAction.stop
+    orderSubsystem.jobChain(testJobChainPath).node(NodeId("200")).action = JobChainNodeAction.stop
     val file = new File(directory, "test")
     touch(file)
     eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == testJobChainPath.orderKey(file.getPath) }

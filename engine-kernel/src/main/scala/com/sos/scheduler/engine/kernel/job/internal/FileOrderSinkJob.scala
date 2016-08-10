@@ -47,7 +47,7 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
         case None ⇒ LocalFileOperator
       }
     }
-    val node = cast[SinkNode](order.jobChain.node(order.state))
+    val node = cast[SinkNode](order.jobChain.node(order.nodeId))
 
     val resultFuture: Future[Boolean] = catchInFuture {
       (node.moveFileTo, node.isDeletingFile) match {
@@ -74,7 +74,7 @@ extends StandardAsynchronousJob with OrderAsynchronousJob {
     val promise = Promise[Boolean]()
     resultFuture.onComplete { result: Try[Boolean] ⇒
       promise.completeWith {
-        schedulerThreadFuture { order.setEndStateReached() } map { _ ⇒ result.get }    // JS-1627 <file_order_sink> must not changed order state
+        schedulerThreadFuture { order.setEndStateReached() } map { _ ⇒ result.get }    // JS-1627 <file_order_sink> must not changed order nodeId
       }
     }
     promise.future

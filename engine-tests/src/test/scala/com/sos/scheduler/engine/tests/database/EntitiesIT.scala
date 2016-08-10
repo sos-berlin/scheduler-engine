@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedRemoved}
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
-import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -206,9 +206,9 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     val jobChain = instance[OrderSubsystemClient].jobChain(jobChainPath)
     pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
       jobChain shouldBe 'stopped
-      jobChain.node(OrderState("100")).action shouldEqual JobChainNodeAction.nextState
-      jobChain.node(OrderState("200")).action shouldEqual JobChainNodeAction.process
-      jobChain.node(OrderState("300")).action shouldEqual JobChainNodeAction.stop
+      jobChain.node(NodeId("100")).action shouldEqual JobChainNodeAction.nextNode
+      jobChain.node(NodeId("200")).action shouldEqual JobChainNodeAction.process
+      jobChain.node(NodeId("300")).action shouldEqual JobChainNodeAction.stop
     }
   }
 

@@ -19,19 +19,19 @@ import static java.lang.Thread.sleep;
  */
 public final class JS653IT extends SchedulerTest {
     private static final long idleTimeoutMs = 10*1000;
-    private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
-            OrderIdAndState.of("simpleShouldRun", "state.job1"),
-            OrderIdAndState.of("simpleWithStateShouldRun", "state.job1"),
-            OrderIdAndState.of("superShouldRun", "state.nestedA.job1"),
-            OrderIdAndState.of("superWithStateBShouldRun", "state.nestedB.job1"));
-    private static final ImmutableSet<OrderKeyAndState> expectedOrderEnds = ImmutableSet.of(
-            OrderKeyAndState.of("/simple", "simpleShouldRun", "end"),
-            OrderKeyAndState.of("/simple", "simpleWithStateShouldRun", "end"),
-            OrderKeyAndState.of("/b", "superShouldRun", "end"),
-            OrderKeyAndState.of("/b", "superWithStateBShouldRun", "end"));
+    private static final ImmutableSet<OrderIdAndNodeId> expectedOrderStarts = ImmutableSet.of(
+            OrderIdAndNodeId.of("simpleShouldRun", "state.job1"),
+            OrderIdAndNodeId.of("simpleWithStateShouldRun", "state.job1"),
+            OrderIdAndNodeId.of("superShouldRun", "state.nestedA.job1"),
+            OrderIdAndNodeId.of("superWithStateBShouldRun", "state.nestedB.job1"));
+    private static final ImmutableSet<OrderKeyAndNodeId> expectedOrderEnds = ImmutableSet.of(
+            OrderKeyAndNodeId.of("/simple", "simpleShouldRun", "end"),
+            OrderKeyAndNodeId.of("/simple", "simpleWithStateShouldRun", "end"),
+            OrderKeyAndNodeId.of("/b", "superShouldRun", "end"),
+            OrderKeyAndNodeId.of("/b", "superWithStateBShouldRun", "end"));
 
-    private final Set<OrderIdAndState> orderStarts = new HashSet<OrderIdAndState>();
-    private final Set<OrderKeyAndState> orderEnds = new HashSet<OrderKeyAndState>();
+    private final Set<OrderIdAndNodeId> orderStarts = new HashSet<OrderIdAndNodeId>();
+    private final Set<OrderKeyAndNodeId> orderEnds = new HashSet<OrderKeyAndNodeId>();
     private volatile long lastActivity;
 
     @Test public void test() throws InterruptedException {
@@ -52,11 +52,11 @@ public final class JS653IT extends SchedulerTest {
     }
 
     @HotEventHandler public void handleEvent(OrderStarted e, UnmodifiableOrder o) {
-        orderStarts.add(new OrderIdAndState(e.orderKey().id(), o.state()));
+        orderStarts.add(new OrderIdAndNodeId(e.orderKey().id(), o.nodeId()));
     }
 
     @HotEventHandler public void handleEvent(OrderFinished e, UnmodifiableOrder o) {
-        OrderKeyAndState a = new OrderKeyAndState(e.orderKey(), o.state());
+        OrderKeyAndNodeId a = new OrderKeyAndNodeId(e.orderKey(), o.nodeId());
         orderEnds.add(a);
         lastActivity = currentTimeMillis();
     }

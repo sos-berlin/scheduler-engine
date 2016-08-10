@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.data.jobchain._
 import com.sos.scheduler.engine.data.lock.LockPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
+import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
@@ -163,28 +163,28 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
     "normal job chain" in {
       val details: JobChainDetails = jobChainDetails(testJobChainPath)
       details.nodes(0).asInstanceOf[SimpleJobNodeOverview] should have (
-        'nodeKey (NodeKey(testJobChainPath, OrderState("A"))),
-        'nextState (OrderState("SINK")),
-        'errorState (OrderState("ERROR")),
+        'nodeKey (NodeKey(testJobChainPath, NodeId("A"))),
+        'nextNodeId (NodeId("SINK")),
+        'errorNodeId (NodeId("ERROR")),
         'jobPath (JobPath("/test-job-a")))
       details.nodes(1).asInstanceOf[SinkNodeOverview] should have (
-        'nodeKey (NodeKey(testJobChainPath, OrderState("SINK"))),
-        'nextState (OrderState("")),
-        'errorState (OrderState("")),
+        'nodeKey (NodeKey(testJobChainPath, NodeId("SINK"))),
+        'nextNodeId (NodeId("")),
+        'errorNodeId (NodeId("")),
         'jobPath (schedulerFileOrderSinkJobPath))
       details.nodes(2).asInstanceOf[EndNodeOverview] should have (
-        'nodeKey (NodeKey(testJobChainPath, OrderState("ERROR"))))
+        'nodeKey (NodeKey(testJobChainPath, NodeId("ERROR"))))
     }
 
     "nested job chain" in {
       val details: JobChainDetails = jobChainDetails(nestedJobChainPath)
       details.nodes(0).asInstanceOf[NestedJobChainNodeOverview] should have (
-        'nodeKey (NodeKey(nestedJobChainPath, OrderState("NESTED"))),
-        'nextState (OrderState("END")),
-        'errorState (OrderState("")),   // Warum nicht automatisch gleich nextState?
+        'nodeKey (NodeKey(nestedJobChainPath, NodeId("NESTED"))),
+        'nextNodeId (NodeId("END")),
+        'errorNodeId (NodeId("")),   // Warum nicht automatisch gleich nextNodeId?
         'nestedJobChainPath (JobChainPath("/NESTED")))
       details.nodes(1).asInstanceOf[EndNodeOverview] should have (
-        'nodeKey (NodeKey(nestedJobChainPath, OrderState("END"))))
+        'nodeKey (NodeKey(nestedJobChainPath, NodeId("END"))))
     }
   }
 }

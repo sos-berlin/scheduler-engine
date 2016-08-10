@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.{AbstractEvent, Event}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskStarted}
+import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.EventSource
@@ -41,7 +42,7 @@ import com.sos.scheduler.engine.kernel.order.Order
 
       case `orderFinishedEvent` =>
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderFinished(eventSource.asInstanceOf[Order].orderKey, order.state)
+        new OrderFinished(eventSource.asInstanceOf[Order].orderKey, order.nodeId)
 
       case `orderNestedTouchedEvent` =>
         new OrderNestedStarted(eventSource.asInstanceOf[Order].orderKey)
@@ -57,11 +58,11 @@ import com.sos.scheduler.engine.kernel.order.Order
 
       case `orderSetBackEvent` =>
         val order = eventSource.asInstanceOf[Order]
-        new OrderSetBack(order.orderKey, order.state)
+        new OrderSetBack(order.orderKey, order.nodeId)
 
       case `orderStepStartedEvent` =>
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderStepStarted(order.orderKey, order.state, order.taskId getOrElse TaskId.Null)
+        new OrderStepStarted(order.orderKey, order.nodeId, order.taskId getOrElse TaskId.Null)
 
       case o =>
         sys.error(s"Not implemented cppEventCode=$o")
@@ -71,11 +72,11 @@ import com.sos.scheduler.engine.kernel.order.Order
   @ForCpp def newLogEvent(cppLevel: Int, message: String): AbstractEvent =
     LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message)
 
-  @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousState: String, state: String): AbstractEvent =
-    OrderNodeChanged(OrderKey(jobChainPath, orderId), previousState = OrderState(previousState), state = OrderState(state))
+  @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AbstractEvent =
+    OrderNodeChanged(OrderKey(jobChainPath, orderId), fromNodeId = NodeId(previousNodeId), nodeId = NodeId(nodeId))
 
-  @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Long): AbstractEvent =
-    OrderStepEnded(OrderKey(jobChainPath, orderId), OrderNodeTransition.ofCppInternalValue(orderStateTransitionCpp))
+  @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, nodeTransitionCpp: Long): AbstractEvent =
+    OrderStepEnded(OrderKey(jobChainPath, orderId), OrderNodeTransition.ofCppInternalValue(nodeTransitionCpp))
 
   @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AbstractEvent =
     TaskEnded(TaskId(taskId), JobPath(jobPath), ReturnCode(returnCode))
