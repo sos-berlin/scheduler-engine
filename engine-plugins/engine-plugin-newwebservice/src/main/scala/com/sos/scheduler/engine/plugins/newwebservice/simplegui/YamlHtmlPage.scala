@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import scala.concurrent.{ExecutionContext, Future}
-import spray.http.Uri
 import spray.json._
 
 /**
@@ -18,13 +17,11 @@ object YamlHtmlPage {
     import scala.language.implicitConversions
 
     implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      new ToHtmlPage[SchedulerResponse[A]] {
-        def apply(response: SchedulerResponse[A], pageUri: Uri) = {
-          val yamlFuture = Future { response map { o ⇒ YamlPrinter(o.toJson) } }
-          for (SchedulerResponse(schedulerOverview) ← client.overview;
-               yaml ← yamlFuture) yield
-            new StringHtmlPage(yaml, pageUri, webServiceContext.uris, schedulerOverview)
-        }
+      ToHtmlPage[SchedulerResponse[A]] { (response, pageUri) ⇒
+        val yamlFuture = Future { response map { o ⇒ YamlPrinter(o.toJson) } }
+        for (SchedulerResponse(schedulerOverview) ← client.overview;
+             yaml ← yamlFuture) yield
+          new StringHtmlPage(yaml, pageUri, webServiceContext.uris, schedulerOverview)
       }
   }
 }

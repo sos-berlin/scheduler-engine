@@ -80,10 +80,9 @@ object EventsHtmlPage {
     import scala.language.implicitConversions
 
     implicit def eventsToHtmlPage(implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      new ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] {
-        def apply(response: SchedulerResponse[immutable.Seq[IdAndEvent]], pageUri: Uri) =
-          for (schedulerOverviewResponse ← client.overview) yield
-            new EventsHtmlPage(response, pageUri, webServiceContext.uris, schedulerOverviewResponse.content)
+      ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] { (response, pageUri) ⇒
+        for (schedulerOverviewResponse ← client.overview) yield
+          new EventsHtmlPage(response, pageUri, webServiceContext.uris, schedulerOverviewResponse.content)
       }
   }
 }

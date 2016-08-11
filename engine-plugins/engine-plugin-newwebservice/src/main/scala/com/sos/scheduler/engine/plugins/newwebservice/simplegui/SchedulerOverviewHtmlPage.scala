@@ -84,9 +84,8 @@ object SchedulerOverviewHtmlPage {
     import scala.language.implicitConversions
 
     implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: WebServiceContext) =
-      new ToHtmlPage[SchedulerResponse[SchedulerOverview]] {
-        def apply(response: SchedulerResponse[SchedulerOverview], pageUri: Uri) =
-          Future.successful(new SchedulerOverviewHtmlPage(response, pageUri, webServiceContext.uris))
+      ToHtmlPage[SchedulerResponse[SchedulerOverview]] { (response, pageUri) ⇒
+        Future.successful(new SchedulerOverviewHtmlPage(response, pageUri, webServiceContext.uris))
       }
   }
 }
