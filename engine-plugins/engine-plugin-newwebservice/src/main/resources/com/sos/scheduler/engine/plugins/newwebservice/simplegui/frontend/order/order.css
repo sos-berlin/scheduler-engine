@@ -12,7 +12,6 @@ h3.JobChain {
   background-color: white;
   margin-right: 30px;
   padding: 0 4px 4px 4px;
-  border: 1px solid #c0c0c0;
 }
 
 .OrderSelection {
@@ -21,7 +20,10 @@ h3.JobChain {
   background-color: #f9d186;
   line-height: 1em;
   padding: 0 4px 4px 4px;
-  border: 1px solid #c0c0c0;
+}
+
+.JobChain {
+  margin-top: 40px;
 }
 
 .NodeHeadline {

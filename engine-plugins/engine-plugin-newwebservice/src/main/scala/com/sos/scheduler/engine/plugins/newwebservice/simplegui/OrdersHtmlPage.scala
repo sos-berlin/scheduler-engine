@@ -66,7 +66,7 @@ extends SchedulerHtmlPage {
   private def ordersStatistics = {
     val statistics = new OrderOverview.Statistics(ordersComplemented.orders)
     import statistics.{blacklistedCount, count, inProcessCount, suspendedCount}
-    div(cls := "OrderStatistics")(
+    div(cls := "ContentBox OrderStatistics")(
       div(paddingTop := 4.px),
       table(cls := "MiniTable")(
         tbody(
@@ -104,7 +104,7 @@ extends SchedulerHtmlPage {
 
   private def jobChainOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
     List(
-      div(cls := "ContentBox", clear.both)(
+      div(cls := "ContentBox JobChain", clear.both)(
         div(cls := "Padded")(
           div(float.right)(
             jobChainPathToA(jobChainPath)("→definition")),

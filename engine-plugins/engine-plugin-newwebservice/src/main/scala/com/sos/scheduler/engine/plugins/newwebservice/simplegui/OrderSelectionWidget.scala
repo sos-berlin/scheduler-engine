@@ -14,7 +14,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
 
   def html = List(
     raw(s"<script type='text/javascript'>$javascript</script>"),
-    form(cls := "OrderSelection", onsubmit := "javascript:reloadPage({}); return false")(
+    form(cls := "ContentBox OrderSelection", onsubmit := "javascript:reloadPage({}); return false")(
       table(
         tbody(
           tr(

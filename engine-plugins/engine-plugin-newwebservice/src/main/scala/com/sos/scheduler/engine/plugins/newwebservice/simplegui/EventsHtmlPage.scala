@@ -37,7 +37,7 @@ extends SchedulerHtmlPage {
   private implicit def taskIdToHtml(taskId: TaskId): Frag = a(cls := "inherit-markup", href := uris.task.overview(taskId))(taskId.toString)
 
   def wholePage = htmlPage(
-    div(cls := "ContentBox")(
+    div(cls := "ContentBox ContentBox-single")(
       table(cls := "SimpleTable")(
         thead(
           tr(

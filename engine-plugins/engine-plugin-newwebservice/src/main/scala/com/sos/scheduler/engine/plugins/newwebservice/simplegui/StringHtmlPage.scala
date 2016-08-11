@@ -17,6 +17,6 @@ final class StringHtmlPage(
 extends SchedulerHtmlPage {
 
   def wholePage = htmlPage(
-    pre(cls := "ContentBox")(
+    pre(cls := "ContentBox ContentBox-single")(
       StringFrag(response.content)))
 }

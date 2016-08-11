@@ -32,20 +32,15 @@ extends SchedulerHtmlPage {
           Some(s"PID $pid") ++
           Some(state))
           .mkString(" · ")),
-      p(
-        a(href := "api/order/")("Orders"),
-        br,
-        a(href := "api/jobChain/")("Job chains"),
-        br,
-        form(action := "api/command", method := "get")(
-          span(cls := "input-group input-group-sm")(
-            span(cls := "input-group-addon")(
-              "XML command: "),
-            input(`type` := "text", autofocus, name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
-            " ",
-            span(cls := "input-group-btn")
-              (button(`type` := "submit", cls := "btn btn-primary")(
-                "Execute"))))))
+      form(action := "api/command", method := "get")(
+        span(cls := "input-group input-group-sm")(
+          span(cls := "input-group-addon")(
+            "XML command: "),
+          input(`type` := "text", autofocus, name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
+          " ",
+          span(cls := "input-group-btn")
+            (button(`type` := "submit", cls := "btn btn-primary")(
+              "Execute")))))
 }
 
 object SchedulerOverviewHtmlPage {

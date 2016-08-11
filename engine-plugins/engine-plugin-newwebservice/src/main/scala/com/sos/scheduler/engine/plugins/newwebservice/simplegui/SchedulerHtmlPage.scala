@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.event.EventId
@@ -71,8 +72,7 @@ trait SchedulerHtmlPage extends HtmlPage {
             span(cls := "time-extra")(DefaultZoneId.getId))),
         div(color.gray)(
           a(href := uris.overview, cls := "inherit-markup")(
-            s"JobScheduler $version Master"),
-          s" · PID $pid · $state")),
+            emptyToNone(schedulerOverview.schedulerId.string) ++ List(s"JobScheduler $version Master · PID $pid · $state") mkString " · "))),
       navbar)
   }
 
@@ -85,7 +85,6 @@ trait SchedulerHtmlPage extends HtmlPage {
               src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
             span(" JobScheduler"))),
         ul(cls := "nav navbar-nav nav-pills")(
-          navBarTab(schedulerOverview.schedulerId.string, uris.overview),
           navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
           navBarTab("Job chains"     , uris.jobChain.overviews()),
           navBarTab("Jobs"           , uris.job.overviews()),

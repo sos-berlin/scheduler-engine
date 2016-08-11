@@ -3,7 +3,7 @@ html {
 }
 
 body {
-  background-color: #f8f8f8;
+  background-color: #fafafa;
   color: black;
   font-size: 13px;
 }
@@ -90,10 +90,14 @@ span.time-extra {
 }
 
 .ContentBox {
-  margin-top: 40px;
-  border: 2px solid #eee;
-  border-top: 1px solid #eee;
+  box-shadow: 1px 1px 10px #ddd;
   background-color: white;
+  border: none;
+  border-radius: 0;
+}
+
+.ContentBox-single {
+  margin-top: 40px;
 }
 
 .Padded {

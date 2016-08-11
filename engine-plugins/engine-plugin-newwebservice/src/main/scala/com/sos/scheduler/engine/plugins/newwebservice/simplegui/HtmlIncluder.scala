@@ -15,7 +15,7 @@ final class HtmlIncluder(uris: SchedulerUris) {
   def webjarsToHtml(webjar: Webjar): immutable.Seq[Frag] =
     (webjar.cssPaths map toWebjarUri map toCssLinkHtml) ++
       (webjar.javascriptPaths map toWebjarUri map toScriptHtml) ++
-      (for (initialize ← webjar.initialize) yield script(`type` := "text/javascript")(initialize))
+      (for (initialize ← webjar.initialize) yield script(`type` := "text/javascript")(s"jQuery(function() { $initialize })"))
 
   private def toWebjarUri(path: String) = uris / s"api/frontend/webjars/$path"
 }
