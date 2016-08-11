@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -12,11 +13,12 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class SchedulerOverviewHtmlPage private(
-  protected val schedulerOverview: SchedulerOverview,
+  protected val response: SchedulerResponse[SchedulerOverview],
   protected val pageUri: Uri,
   protected val webServiceContext: WebServiceContext)
 extends SchedulerHtmlPage {
 
+  protected val schedulerOverview = response.content
   import schedulerOverview._
 
   def wholePage =
@@ -50,11 +52,11 @@ object SchedulerOverviewHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit object schedulerOverviewToHtmlPage extends ToHtmlPage[SchedulerOverview] {
-      def apply(pageUri: Uri, webServiceContext: WebServiceContext)(schedulerOverview: SchedulerOverview)
+    implicit object schedulerOverviewToHtmlPage extends ToHtmlPage[SchedulerResponse[SchedulerOverview]] {
+      def apply(pageUri: Uri, webServiceContext: WebServiceContext)(response: SchedulerResponse[SchedulerOverview])
         (implicit executionContext: ExecutionContext)
       =
-        Future.successful(new SchedulerOverviewHtmlPage(schedulerOverview, pageUri, webServiceContext))
+        Future.successful(new SchedulerOverviewHtmlPage(response, pageUri, webServiceContext))
     }
   }
 }

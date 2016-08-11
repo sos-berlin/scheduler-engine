@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.{Stopwatch, WaitForCondition}
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.event.{Event, EventId}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
@@ -96,7 +97,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     private def start(after: EventId): Unit = {
-      for (events ← webSchedulerClient.events(after)) {
+      for (SchedulerResponse(events) ← webSchedulerClient.events(after)) {
         this.webEvents ++= events map { _.event }
         start(after = if (events.isEmpty) after else events.last.eventId)
       }
@@ -128,15 +129,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     lazy val client = getClient()
 
     "overview" in {
-      val overview = client.overview await TestTimeout
-      assert(overview == (directSchedulerClient.overview await TestTimeout))
+      val overview = awaitContent(client.overview)
+      assert(overview == awaitContent(directSchedulerClient.overview))
       assert(overview.schedulerId == SchedulerId("test"))
       assert(overview.state == SchedulerState.running)
     }
 
     "orderOverviews" in {
-      val orders = client.orderOverviews await TestTimeout
-      assert(orders == (directSchedulerClient.orderOverviews await TestTimeout))
+      val orders = awaitContent(client.orderOverviews)
+      assert(orders == awaitContent(directSchedulerClient.orderOverviews))
       assert(orders.toVector.sorted == ExpectedOrderOverviews)
     }
 
@@ -147,21 +148,21 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "ordersComplemented" in {
-      val ordersComplemented = client.ordersComplemented await TestTimeout
-      assert(ordersComplemented == (directSchedulerClient.ordersComplemented await TestTimeout))
+      val ordersComplemented = awaitContent(client.ordersComplemented)
+      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplemented))
       assert(ordersComplemented == ExpectedOrderOrdersComplemented)
     }
 
     "orderTreeComplemented" in {
-      val treeOverview = client.orderTreeComplementedBy(OrderQuery.All) await TestTimeout
-      assert(treeOverview == (directSchedulerClient.orderTreeComplementedBy(OrderQuery.All) await TestTimeout))
+      val treeOverview = awaitContent(client.orderTreeComplementedBy(OrderQuery.All))
+      assert(treeOverview == awaitContent(directSchedulerClient.orderTreeComplementedBy(OrderQuery.All)))
       assert(treeOverview == ExpectedOrderTreeComplemented)
     }
 
     "ordersComplementedBy isSuspended" in {
       val orderQuery = OrderQuery(isSuspended = Some(true))
-      val ordersComplemented = client.ordersComplementedBy(orderQuery) await TestTimeout
-      assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(orderQuery) await TestTimeout))
+      val ordersComplemented = awaitContent(client.ordersComplementedBy(orderQuery))
+      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy(orderQuery)))
       assert(ordersComplemented == ExpectedOrderOrdersComplemented.copy(
         orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
         usedTasks = Nil,
@@ -174,8 +175,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "ordersComplementedBy query /aJobChain" in {
       val query = OrderQuery(jobChainPathQuery = PathQuery("/aJobChain"))
-      val ordersComplemented = client.ordersComplementedBy(query) await TestTimeout
-      assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(query) await TestTimeout))
+      val ordersComplemented = awaitContent(client.ordersComplementedBy(query))
+      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy(query)))
       assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
@@ -188,8 +189,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "ordersComplementedBy query /xFolder/" in {
       val orderQuery = OrderQuery(jobChainPathQuery = PathQuery("/xFolder/"))
-      val ordersComplemented = client.ordersComplementedBy(orderQuery) await TestTimeout
-      assert(ordersComplemented == (directSchedulerClient.ordersComplementedBy(orderQuery) await TestTimeout))
+      val ordersComplemented = awaitContent(client.ordersComplementedBy(orderQuery))
+      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy(orderQuery)))
       assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
     }
 
@@ -201,7 +202,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "jobChainOverview All" in {
-      assert((client.jobChainOverviewsBy(JobChainQuery.All) await TestTimeout).toSet == Set(
+      assert(awaitContent(client.jobChainOverviewsBy(JobChainQuery.All)).toSet == Set(
         JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
         JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
         JobChainOverview(xaJobChainPath, FileBasedState.active, isDistributed = false),
@@ -210,16 +211,16 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "jobChainOverview query" in {
       val query = JobChainQuery.Standard(PathQuery("/xFolder/"))
-      val jobChainOverviews: immutable.Seq[JobChainOverview] = client.jobChainOverviewsBy(query) await TestTimeout
-      assert(jobChainOverviews == (directSchedulerClient.jobChainOverviewsBy(query) await TestTimeout))
+      val jobChainOverviews: immutable.Seq[JobChainOverview] = awaitContent(client.jobChainOverviewsBy(query))
+      assert(jobChainOverviews == awaitContent(directSchedulerClient.jobChainOverviewsBy(query)))
       assert(jobChainOverviews.toSet == Set(
         JobChainOverview(xaJobChainPath, FileBasedState.active, isDistributed = false),
         JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)))
     }
 
     "jobChainDetails" in {
-      val jobChainDetails: JobChainDetails = client.jobChainDetails(xaJobChainPath) await TestTimeout
-      assert(jobChainDetails == (directSchedulerClient.jobChainDetails(xaJobChainPath) await TestTimeout))
+      val jobChainDetails: JobChainDetails = awaitContent(client.jobChainDetails(xaJobChainPath))
+      assert(jobChainDetails == awaitContent(directSchedulerClient.jobChainDetails(xaJobChainPath)))
       assert(jobChainDetails.copy(fileModifiedAt = None, sourceXml = None) ==
         JobChainDetails(
           xaJobChainPath,
@@ -330,6 +331,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       testRegexJson(
         json = overviewString,
         patternMap = Map(
+          "eventId" → AnyLong,
           "version" → """\d+\..+""".r,
           "version" → """.+""".r,
           "startedAt" → AnyIsoTimestamp,
@@ -340,13 +342,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "orderOverviews" in {
-      val orderOverviews = webSchedulerClient.get[JsArray](_.order.overviews()) await TestTimeout
-      assert(orderOverviews == ExpectedOrderOverviewsJsArray)
+      val orderOverviews = webSchedulerClient.get[JsObject](_.order.overviews()) await TestTimeout
+      assert(SchedulerResponse.unwrapJsArray(orderOverviews) == ExpectedOrderOverviewsJsArray)
     }
 
     "ordersComplemented" in {
       val ordersComplemented = webSchedulerClient.get[JsObject](_.order.ordersComplemented()) await TestTimeout
-      val orderedOrdersComplemented = JsObject(ordersComplemented.fields ++ Map(
+      val orderedOrdersComplemented = JsObject((ordersComplemented.fields - SchedulerResponse.EventIdJsonName) ++ Map(
         "orders" → ordersComplemented.fields("orders").asInstanceOf[JsArray],
         "usedTasks" → ordersComplemented.fields("usedTasks").asInstanceOf[JsArray],
         "usedJobs" → ordersComplemented.fields("usedJobs").asInstanceOf[JsArray]))
@@ -355,7 +357,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "orderTreeComplemented" in {
       val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented) await TestTimeout
-      assert(tree == ExpectedOrderTreeComplementedJsObject)
+      assert(JsObject(tree.fields - SchedulerResponse.EventIdJsonName) == ExpectedOrderTreeComplementedJsObject)
     }
   }
 
@@ -387,7 +389,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "WebSchedulerClient.getJson" in {
     val jsonString = webSchedulerClient.getJson("api") await TestTimeout
     val jsObject = jsonString.parseJson.asJsObject
-    val directOverview = directSchedulerClient.overview await TestTimeout
+    val SchedulerResponse(directOverview) = directSchedulerClient.overview await TestTimeout
     assert(jsObject.fields("version") == JsString(directOverview.version))
   }
 
@@ -408,4 +410,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   }
 
   addOptionalSpeedTests()
+
+  private def awaitContent[A](future: Future[SchedulerResponse[A]]): A =
+    (future await TestTimeout).content
 }

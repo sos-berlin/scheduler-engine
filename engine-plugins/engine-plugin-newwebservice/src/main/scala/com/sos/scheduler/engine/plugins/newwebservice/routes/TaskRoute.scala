@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toYamlHtmlPage
 import scala.concurrent.ExecutionContext
-import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._
 import spray.routing.Route
 
@@ -29,6 +28,6 @@ trait TaskRoute extends LogRoute {
       parameter("return") {
         case "log" ⇒ logRoute(taskSubsystem.task(taskId).log)
       } ~
-        completeTryHtml(taskSubsystem.taskOverview(taskId))
+        completeTryHtml(client.taskOverview(taskId))
     }
 }

@@ -1,13 +1,15 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
+import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import spray.http.HttpHeaders.Accept
+import spray.http.HttpMethods.GET
 import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes._
-import spray.http.{HttpMethods, MediaRange, Uri}
+import spray.http.{HttpRequest, MediaRange, Uri}
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.httpx.marshalling.ToResponseMarshaller
 import spray.routing.Directives._
@@ -105,33 +107,34 @@ object HtmlDirectives {
     def apply(pageUri: Uri, webServiceContext: WebServiceContext)(a: A)(implicit executionContext: ExecutionContext): Future[HtmlPage]
   }
 
-  def completeTryHtml[A: ToResponseMarshaller: ToHtmlPage](resultFuture: ⇒ Future[A])(
+  def completeTryHtml[A](responseFuture: ⇒ Future[SchedulerResponse[A]])(
     implicit
+      toHtmlPage: ToHtmlPage[SchedulerResponse[A]],
+      toResponseMarshaller: ToResponseMarshaller[SchedulerResponse[A]],
       webServiceContext: WebServiceContext,
       executionContext: ExecutionContext): Route
   =
     htmlPreferred(webServiceContext) {
       requestUri { uri ⇒
-        complete(resultFuture map implicitly[ToHtmlPage[A]].apply(uri, webServiceContext))
+        complete(responseFuture map toHtmlPage(uri, webServiceContext))
       }
-    } ~
-      complete(resultFuture)
+    } ~ {
+        complete(responseFuture)
+    }
 
   def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒
-      if (webServiceContext.htmlEnabled)
-        requestInstance { request ⇒
-          if (request.method == HttpMethods.GET &&
-             (request.header[Accept] exists { o ⇒ isHtmlPreferred(o.mediaRanges) }))
-            handleRejections(RejectionHandler.Default) {
-              route
-            }
-          else
-            reject
+      requestInstance { request ⇒
+        passIf(webServiceContext.htmlEnabled && request.method == GET && isHtmlPreferred(request)) {
+          handleRejections(RejectionHandler.Default) {
+            route
+          }
         }
-      else
-        reject
+      }
     }
+
+  private def isHtmlPreferred(request: HttpRequest): Boolean =
+    request.header[Accept] exists { o ⇒ isHtmlPreferred(o.mediaRanges) }
 
   /**
     * Workaround for Spray 1.3.3, which weights the MediaType ordering of the UnMarshaller over the (higher) weight of more specific MediaRange.

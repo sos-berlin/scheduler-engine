@@ -288,17 +288,15 @@ with HasCloser {
 
   def callCppAndDoNothing(): Unit = inSchedulerThread { cppProxy.tcp_port }
 
-  def overview: Future[SchedulerOverview] =
-    directOrSchedulerThreadFuture {
-      new SchedulerOverview(
-        version = mavenProperties.buildVersion,
-        startedAt = startedAt,
-        schedulerId = schedulerConfiguration.schedulerId,
-        httpPort = schedulerConfiguration.httpPortOption,
-        udpPort = schedulerConfiguration.udpPort,
-        pid = cppProxy.pid,
-        state = SchedulerState.ofCppName(cppProxy.state_name))
-    }
+  private[kernel] def overview: SchedulerOverview =
+    new SchedulerOverview(
+      version = mavenProperties.buildVersion,
+      startedAt = startedAt,
+      schedulerId = schedulerConfiguration.schedulerId,
+      httpPort = schedulerConfiguration.httpPortOption,
+      udpPort = schedulerConfiguration.udpPort,
+      pid = cppProxy.pid,
+      state = SchedulerState.ofCppName(cppProxy.state_name))
 
   def isClosed = closed
 }

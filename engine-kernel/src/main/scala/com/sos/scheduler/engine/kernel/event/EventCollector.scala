@@ -1,10 +1,12 @@
-package com.sos.scheduler.engine.plugins.newwebservice.routes.event
+package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent}
 import com.sos.scheduler.engine.data.order.OrderEvent
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventCollector._
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.isInSchedulerThread
+import com.sos.scheduler.engine.kernel.event.EventCollector._
 import java.lang.System.currentTimeMillis
 import java.util.NoSuchElementException
 import java.util.concurrent.atomic.AtomicLong
@@ -17,12 +19,14 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
   * @author Joacim Zschimmer
   */
 @Singleton
-final class EventCollector @Inject private(eventBus: SchedulerEventBus)(implicit ec: ExecutionContext)
+private[kernel] final class EventCollector @Inject private(eventBus: SchedulerEventBus)
+  (implicit stcq: SchedulerThreadCallQueue, ec: ExecutionContext)
 extends HasCloser {
 
   private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, IdAndEvent]
   private val ids = new UniqueTimestampedIdIterator
 
+  @volatile
   private var queueSize: Int = 0
   @volatile
   private var lastRemovedFirstId: EventId = 0
@@ -31,7 +35,7 @@ extends HasCloser {
   @volatile
   private var eventArrivedPromiseUsed = false
 
-  eventBus.onHot[OrderEvent] { case event ⇒
+  eventBus.onHot[OrderEvent] { case event if isInSchedulerThread/*just to be sure*/ ⇒
     if (queueSize >= EventQueueSizeLimit) {
       lastRemovedFirstId = queue.firstKey
       queue.remove(lastRemovedFirstId)
@@ -68,11 +72,13 @@ extends HasCloser {
       //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called
       value
   }
+
+  def newEventId(): EventId = ids.next()
 }
 
 
 object EventCollector {
-  private val EventQueueSizeLimit = 10000
+  private val EventQueueSizeLimit = 10000  // Not too much, as long as the needed heap size has not been clarified
 
   private final class UniqueTimestampedIdIterator extends Iterator[EventId] {
     // JavaScript kann nur die ganzen Zahlen bis 2**53 (9.007.199.254.740.992) lückenlos darstellen, also 11 Bits weniger als ein Long.

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.event.{Event, IdAndEvent}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
@@ -8,7 +9,8 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventInstantToLocalHtml
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 import scalatags.Text.all._
 import spray.http.Uri
@@ -17,7 +19,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class EventsHtmlPage private(
-  idAndEvents: Vector[IdAndEvent],
+  protected val response: SchedulerResponse[immutable.Seq[IdAndEvent]],
   protected val pageUri: Uri,
   implicit protected val webServiceContext: WebServiceContext,
   protected val schedulerOverview: SchedulerOverview)
@@ -25,6 +27,8 @@ extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
   import webServiceContext.uris
+
+  private val idAndEvents = response.content
 
   private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.details(orderKey))
 
@@ -48,19 +52,19 @@ extends SchedulerHtmlPage {
 
   private def eventToTr(idAndEvent: IdAndEvent): Frag =
     tr(
-      td(eventInstantToLocalHtml(idAndEvent.eventInstant)),
+      td(eventIdToLocalHtml(idAndEvent.eventId)),
       eventToTds(idAndEvent.event))
 
   private def eventToTds(event: Event): List[Frag] = {
     val name = event.getClass.getSimpleName
     td(name stripSuffix "Event") :: (
       event match {
-        case OrderFinished(orderKey, nodeId: NodeId)       ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
+        case OrderFinished(orderKey, nodeId: NodeId)           ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
         case OrderNestedFinished(orderKey)                     ⇒ td(orderKey) :: Nil
         case OrderNestedStarted(orderKey)                      ⇒ td(orderKey) :: Nil
+        case OrderNodeChanged(orderKey, fromNodeId, nodeId)    ⇒ td(orderKey) :: td(nodeId) :: td("← ", fromNodeId) :: Nil
         case OrderResumed(orderKey)                            ⇒ td(orderKey) :: Nil
         case OrderSetBack(orderKey, nodeId)                    ⇒ td(orderKey) :: td(nodeId) :: Nil
-        case OrderNodeChanged(orderKey, fromNodeId, toNodeId)  ⇒ td(orderKey) :: td(toNodeId) :: td("← ", fromNodeId) :: Nil
         case OrderStepEnded(orderKey, stateTransition)         ⇒ td(orderKey) :: td(stateTransition.toString) :: Nil
         case OrderStepStarted(orderKey, nodeId, taskId)        ⇒ td(orderKey) :: td(nodeId) :: td(taskId) :: Nil
         case OrderSuspended(orderKey)                          ⇒ td(orderKey) :: Nil
@@ -75,13 +79,13 @@ object EventsHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def eventsToHtmlPage(implicit client: SchedulerClient): ToHtmlPage[Vector[IdAndEvent]] =
-      new ToHtmlPage[Vector[IdAndEvent]] {
-        def apply(pageUri: Uri, webServiceContext: WebServiceContext)(events: Vector[IdAndEvent])
+    implicit def eventsToHtmlPage(implicit client: SchedulerClient): ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] =
+      new ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] {
+        def apply(pageUri: Uri, webServiceContext: WebServiceContext)(response: SchedulerResponse[immutable.Seq[IdAndEvent]])
           (implicit executionContext: ExecutionContext)
         =
-          for (schedulerOverview ← client.overview) yield
-            new EventsHtmlPage(events, pageUri, webServiceContext, schedulerOverview)
+          for (schedulerOverviewResponse ← client.overview) yield
+            new EventsHtmlPage(response, pageUri, webServiceContext, schedulerOverviewResponse.content)
       }
   }
 }

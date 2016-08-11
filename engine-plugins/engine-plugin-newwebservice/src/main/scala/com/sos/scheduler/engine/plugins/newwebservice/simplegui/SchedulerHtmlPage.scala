@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.compounds.SchedulerResponse
+import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -25,6 +27,7 @@ import spray.http.Uri
   */
 trait SchedulerHtmlPage extends HtmlPage {
 
+  protected def response: SchedulerResponse[Any]
   protected val schedulerOverview: SchedulerOverview
   protected def title: String = "JobScheduler"
   protected val webServiceContext: WebServiceContext
@@ -63,7 +66,9 @@ trait SchedulerHtmlPage extends HtmlPage {
       div(cls := "PageHeader")(
         div(float.right)(
           a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
-            localDateTimeWithZoneToHtml(now))),
+            eventIdToLocalHtml(response.eventId),
+            " ",
+            span(cls := "time-extra")(DefaultZoneId.getId))),
         div(color.gray)(
           a(href := uris.overview, cls := "inherit-markup")(
             s"JobScheduler $version Master"),
@@ -113,10 +118,12 @@ object SchedulerHtmlPage {
     case _ ⇒ ""
   }
 
-  def eventInstantToLocalHtml(instant: Instant): List[Frag] =
+  def eventIdToLocalHtml(eventId: EventId): List[Frag] = {
+    val instant = EventId.toInstant(eventId)
     localDateTimeToHtml(instant) ::
       span(cls := "time-extra")(s".${formatDateTime(LocalMillisFormatter, instant)}") ::
       Nil
+  }
 
   def instantWithDurationToHtml(instant: Instant): List[Frag] =
     if (instant == Instant.EPOCH)
