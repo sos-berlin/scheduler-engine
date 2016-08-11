@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent}
+import com.sos.scheduler.engine.data.event.{Event, EventId, Snapshot}
 import com.sos.scheduler.engine.data.order.OrderEvent
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -23,7 +23,7 @@ private[kernel] final class EventCollector @Inject private(eventBus: SchedulerEv
   (implicit stcq: SchedulerThreadCallQueue, ec: ExecutionContext)
 extends HasCloser {
 
-  private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, IdAndEvent]
+  private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, Snapshot[Event]]
   private val ids = new UniqueTimestampedIdIterator
 
   @volatile
@@ -43,7 +43,7 @@ extends HasCloser {
       // TODO Cancel iterator if not after queue.firstEvent
     }
     val id = ids.next()
-    queue.put(id, IdAndEvent(id, event))
+    queue.put(id, Snapshot(event)(id))
     queueSize += 1
     val p = eventArrivedPromise
     //if (eventArrivedPromiseUsed) {
@@ -52,7 +52,7 @@ extends HasCloser {
     p.success(())
   }
 
-  def iteratorFuture(after: EventId): Future[Iterator[IdAndEvent]] = {
+  def iteratorFuture(after: EventId): Future[Iterator[Snapshot[Event]]] = {
     if (queue.navigableKeySet.higher(after) != null)
       Future.successful(iterator(after))
     else {
@@ -62,11 +62,11 @@ extends HasCloser {
     }
   }
 
-  def iterator(after: EventId): Iterator[IdAndEvent] =
+  def iterator(after: EventId): Iterator[Snapshot[Event]] =
     queue.navigableKeySet.tailSet(after, false).iterator map { k ⇒
       val value = queue.get(k) match {
         case null ⇒ throw new NoSuchElementException("Event queue overflow while reading")
-        case v: IdAndEvent ⇒ v
+        case v: Snapshot[Event] ⇒ v
       }
       //if (after != 0 && after < queue.firstKey) ... events lost
       //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called

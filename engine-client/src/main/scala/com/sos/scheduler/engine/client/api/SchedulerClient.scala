@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{IdAndEvent, _}
+import com.sos.scheduler.engine.data.event.{Event, EventId, Snapshot}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
@@ -38,7 +38,7 @@ trait SchedulerClient extends CommandClient {
 //
 //  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]]
 
-  def events(after: EventId): Future[Snapshot[Seq[IdAndEvent]]]
+  def events(after: EventId): Future[Snapshot[Seq[Snapshot[Event]]]]
 
   final def orderOverviews: Future[Snapshot[Seq[OrderOverview]]] =
     orderOverviewsBy(OrderQuery.All)

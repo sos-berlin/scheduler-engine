@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.data.event.{Event, IdAndEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order._
@@ -19,7 +19,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class EventsHtmlPage private(
-  protected val snapshot: Snapshot[immutable.Seq[IdAndEvent]],
+  protected val snapshot: Snapshot[immutable.Seq[Snapshot[Event]]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -27,7 +27,7 @@ extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
 
-  private val idAndEvents = snapshot.value
+  private val eventSnapshot = snapshot.value
 
   private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.details(orderKey))
 
@@ -47,12 +47,12 @@ extends SchedulerHtmlPage {
           )
         ),
         tbody(
-          (idAndEvents map eventToTr).toVector))))
+          (eventSnapshot map eventToTr).toVector))))
 
-  private def eventToTr(idAndEvent: IdAndEvent): Frag =
+  private def eventToTr(eventSnapshot: Snapshot[Event]): Frag =
     tr(
-      td(eventIdToLocalHtml(idAndEvent.eventId)),
-      eventToTds(idAndEvent.event))
+      td(eventIdToLocalHtml(eventSnapshot.eventId)),
+      eventToTds(eventSnapshot.value))
 
   private def eventToTds(event: Event): List[Frag] = {
     val name = event.getClass.getSimpleName
@@ -79,7 +79,7 @@ object EventsHtmlPage {
     import scala.language.implicitConversions
 
     implicit def eventsToHtmlPage(implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      ToHtmlPage[Snapshot[immutable.Seq[IdAndEvent]]] { (snapshot, pageUri) ⇒
+      ToHtmlPage[Snapshot[immutable.Seq[Snapshot[Event]]]] { (snapshot, pageUri) ⇒
         for (schedulerOverviewSnapshot ← client.overview) yield
           new EventsHtmlPage(snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
       }

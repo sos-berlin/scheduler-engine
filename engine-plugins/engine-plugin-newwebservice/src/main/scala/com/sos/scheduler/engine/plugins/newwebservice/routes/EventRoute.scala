@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.comple
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.EventsHtmlPage.implicits.eventsToHtmlPage
 import scala.concurrent.ExecutionContext
+import com.sos.scheduler.engine.data.events.EventJsonFormat
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.Route

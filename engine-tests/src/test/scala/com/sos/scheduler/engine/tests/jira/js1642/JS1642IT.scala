@@ -98,7 +98,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     private def start(after: EventId): Unit = {
       for (Snapshot(events) ← webSchedulerClient.events(after)) {
-        this.webEvents ++= events map { _.event }
+        this.webEvents ++= events map { _.value }
         start(after = if (events.isEmpty) after else events.last.eventId)
       }
     }

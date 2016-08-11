@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel
 
+import com.sos.scheduler.engine.base.sprayjson.TypedJsonFormat
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
@@ -124,12 +125,14 @@ extends SchedulerClient with DirectCommandClient {
       taskSubsystem.task(taskId).overview
     }
 
-  def events(after: EventId): Future[Snapshot[Seq[IdAndEvent]]] =
+  def events(after: EventId): Future[Snapshot[Seq[Snapshot[Event]]]] = {
+    val canSerialize = implicitly[TypedJsonFormat[Event]].canSerialize _
     for (events ← eventCollector.iteratorFuture(after)) yield {
       val eventId = eventCollector.newEventId()  // This EventId is only to give the response a timestamp. To continue the event stream, use the last event's EventId.
-      val serializables = events filter IdAndEvent.canSerialize
+      val serializables = events filter { o ⇒ canSerialize(o.value) }
       Snapshot(serializables.toVector)(eventId)
     }
+  }
 
   private def respondWith[A](content: ⇒ A): Future[Snapshot[A]] =
     directOrSchedulerThreadFuture {
