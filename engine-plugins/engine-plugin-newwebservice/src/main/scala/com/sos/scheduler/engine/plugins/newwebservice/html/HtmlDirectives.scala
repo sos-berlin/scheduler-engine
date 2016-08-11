@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
-import com.sos.scheduler.engine.data.compounds.SchedulerResponse
+import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
@@ -114,22 +114,22 @@ object HtmlDirectives {
       }
   }
 
-  def completeTryHtml[A](responseFuture: ⇒ Future[SchedulerResponse[A]])(
+  def completeTryHtml[A](snapshotFuture: ⇒ Future[Snapshot[A]])(
     implicit
-      toHtmlPage: ToHtmlPage[SchedulerResponse[A]],
-      toResponseMarshaller: ToResponseMarshaller[SchedulerResponse[A]],
+      toHtmlPage: ToHtmlPage[Snapshot[A]],
+      toResponseMarshaller: ToResponseMarshaller[Snapshot[A]],
       webServiceContext: WebServiceContext,
       executionContext: ExecutionContext): Route
   =
     htmlPreferred(webServiceContext) {
       requestUri { uri ⇒
         complete {
-          for (response ← responseFuture) yield
-            toHtmlPage(response, uri)
+          for (snapshot ← snapshotFuture) yield
+            toHtmlPage(snapshot, uri)
         }
       }
     } ~
-      complete(responseFuture)
+      complete(snapshotFuture)
 
   def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒

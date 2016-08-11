@@ -14,8 +14,7 @@ import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.{Stopwatch, WaitForCondition}
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.compounds.SchedulerResponse
-import com.sos.scheduler.engine.data.event.{Event, EventId}
+import com.sos.scheduler.engine.data.event.{Event, EventId, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
@@ -98,7 +97,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     private def start(after: EventId): Unit = {
-      for (SchedulerResponse(events) ← webSchedulerClient.events(after)) {
+      for (Snapshot(events) ← webSchedulerClient.events(after)) {
         this.webEvents ++= events map { _.event }
         start(after = if (events.isEmpty) after else events.last.eventId)
       }
@@ -347,12 +346,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "orderOverviews" in {
       val orderOverviews = webSchedulerClient.get[JsObject](_.order.overviews()) await TestTimeout
-      assert(SchedulerResponse.unwrapJsArray(orderOverviews) == ExpectedOrderOverviewsJsArray)
+      assert(Snapshot.unwrapJsArray(orderOverviews) == ExpectedOrderOverviewsJsArray)
     }
 
     "ordersComplemented" in {
       val ordersComplemented = webSchedulerClient.get[JsObject](_.order.ordersComplemented()) await TestTimeout
-      val orderedOrdersComplemented = JsObject((ordersComplemented.fields - SchedulerResponse.EventIdJsonName) ++ Map(
+      val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Snapshot.EventIdJsonName) ++ Map(
         "orders" → ordersComplemented.fields("orders").asInstanceOf[JsArray],
         "usedTasks" → ordersComplemented.fields("usedTasks").asInstanceOf[JsArray],
         "usedJobs" → ordersComplemented.fields("usedJobs").asInstanceOf[JsArray]))
@@ -361,7 +360,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "orderTreeComplemented" in {
       val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented) await TestTimeout
-      assert(JsObject(tree.fields - SchedulerResponse.EventIdJsonName) == ExpectedOrderTreeComplementedJsObject)
+      assert(JsObject(tree.fields - Snapshot.EventIdJsonName) == ExpectedOrderTreeComplementedJsObject)
     }
   }
 
@@ -393,7 +392,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "WebSchedulerClient.getJson" in {
     val jsonString = webSchedulerClient.getJson("api") await TestTimeout
     val jsObject = jsonString.parseJson.asJsObject
-    val SchedulerResponse(directOverview) = directSchedulerClient.overview await TestTimeout
+    val Snapshot(directOverview) = directSchedulerClient.overview await TestTimeout
     assert(jsObject.fields("version") == JsString(directOverview.version))
   }
 
@@ -415,6 +414,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   addOptionalSpeedTests()
 
-  private def awaitContent[A](future: Future[SchedulerResponse[A]]): A =
-    (future await TestTimeout).content
+  private def awaitContent[A](future: Future[Snapshot[A]]): A =
+    (future await TestTimeout).value
 }

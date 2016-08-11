@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.data.compounds.SchedulerResponse
-import com.sos.scheduler.engine.data.event.{Event, IdAndEvent}
+import com.sos.scheduler.engine.data.event.{Event, IdAndEvent, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order._
@@ -20,7 +19,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class EventsHtmlPage private(
-  protected val response: SchedulerResponse[immutable.Seq[IdAndEvent]],
+  protected val snapshot: Snapshot[immutable.Seq[IdAndEvent]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -28,7 +27,7 @@ extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
 
-  private val idAndEvents = response.content
+  private val idAndEvents = snapshot.value
 
   private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.details(orderKey))
 
@@ -80,9 +79,9 @@ object EventsHtmlPage {
     import scala.language.implicitConversions
 
     implicit def eventsToHtmlPage(implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] { (response, pageUri) ⇒
-        for (schedulerOverviewResponse ← client.overview) yield
-          new EventsHtmlPage(response, pageUri, webServiceContext.uris, schedulerOverviewResponse.content)
+      ToHtmlPage[Snapshot[immutable.Seq[IdAndEvent]]] { (snapshot, pageUri) ⇒
+        for (schedulerOverviewSnapshot ← client.overview) yield
+          new EventsHtmlPage(snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
       }
   }
 }

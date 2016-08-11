@@ -63,13 +63,13 @@ final class SchedulerClientJavaTester implements AutoCloseable {
 
     private void testOrderOverviews() {
         try {
-            testOrderOverviews(seqAsJavaList(asJavaFuture(client.orderOverviews()).get().content()));
+            testOrderOverviews(seqAsJavaList(asJavaFuture(client.orderOverviews()).get().value()));
         } catch (InterruptedException | ExecutionException e) { throw propagate(e); }
     }
 
     private void testOrdersOrdersComplemented() {
         try {
-            OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplemented()).get().content();
+            OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplemented()).get().value();
             testOrderOverviews(seqAsJavaList(ordersComplemented.orders()));
             List<TaskOverview> orderedTasks = seqAsJavaList(ordersComplemented.usedTasks()).stream()
                 .sorted(SchedulerClientJavaTester::compareTaskOverview)
@@ -101,7 +101,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                 .withIsDistributed(true)
                 .withIsSuspended(false)
                 .withOrderSourceTypes(singletonList(OrderSourceType.fileBased));
-            OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplementedBy(query)).get().content();
+            OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplementedBy(query)).get().value();
             assertThat(
                 asJavaCollection(ordersComplemented.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
                 containsInAnyOrder(

@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.compounds.SchedulerResponse
-import com.sos.scheduler.engine.data.event.EventId
+import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -29,7 +28,7 @@ import spray.http.Uri
   */
 trait SchedulerHtmlPage extends HtmlPage {
 
-  protected def response: SchedulerResponse[Any]
+  protected def snapshot: Snapshot[Any]
   protected val schedulerOverview: SchedulerOverview
   protected def title: String = "JobScheduler"
   protected val uris: SchedulerUris
@@ -66,7 +65,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       div(cls := "PageHeader")(
         div(float.right)(
           a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
-            eventIdToLocalHtml(response.eventId),
+            eventIdToLocalHtml(snapshot.eventId),
             " ",
             span(cls := "time-extra")(DefaultZoneId.getId))),
         div(color.gray)(

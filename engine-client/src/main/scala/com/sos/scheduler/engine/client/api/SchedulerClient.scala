@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented, SchedulerResponse}
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{IdAndEvent, _}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderOverview
@@ -14,41 +14,41 @@ import scala.concurrent.Future
   */
 trait SchedulerClient extends CommandClient {
 
-  def overview: Future[SchedulerResponse[SchedulerOverview]]
+  def overview: Future[Snapshot[SchedulerOverview]]
 
-  def orderOverviewsBy(query: OrderQuery): Future[SchedulerResponse[Seq[OrderOverview]]]
+  def orderOverviewsBy(query: OrderQuery): Future[Snapshot[Seq[OrderOverview]]]
 
-  def ordersComplementedBy(query: OrderQuery): Future[SchedulerResponse[OrdersComplemented]]
+  def ordersComplementedBy(query: OrderQuery): Future[Snapshot[OrdersComplemented]]
 
-  def orderTreeComplementedBy(query: OrderQuery): Future[SchedulerResponse[OrderTreeComplemented]]
+  def orderTreeComplementedBy(query: OrderQuery): Future[Snapshot[OrderTreeComplemented]]
 
-  def jobChainOverview(jobChainPath: JobChainPath): Future[SchedulerResponse[JobChainOverview]]
+  def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]]
 
-  def jobChainOverviewsBy(query: JobChainQuery): Future[SchedulerResponse[Seq[JobChainOverview]]]
+  def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[Seq[JobChainOverview]]]
 
-  def jobChainDetails(jobChainPath: JobChainPath): Future[SchedulerResponse[JobChainDetails]]
+  def jobChainDetails(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetails]]
 
-//  def jobOverviews: Future[SchedulerResponse[Seq[JobOverview]]]
+//  def jobOverviews: Future[Snapshot[Seq[JobOverview]]]
 //
-//  def jobOverview(jobPath: JobPath): Future[SchedulerResponse[JobOverview]]
+//  def jobOverview(jobPath: JobPath): Future[Snapshot[JobOverview]]
 //
-//  def processClassOverviews: Future[SchedulerResponse[Seq[ProcessClassOverview]]]
+//  def processClassOverviews: Future[Snapshot[Seq[ProcessClassOverview]]]
 //
-//  def processClassOverview(processClassPath: ProcessClassPath): Future[SchedulerResponse[ProcessClassOverview]]
+//  def processClassOverview(processClassPath: ProcessClassPath): Future[Snapshot[ProcessClassOverview]]
 //
-//  def taskOverview(taskId: TaskId): Future[SchedulerResponse[TaskOverview]]
+//  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]]
 
-  def events(after: EventId): Future[SchedulerResponse[Seq[IdAndEvent]]]
+  def events(after: EventId): Future[Snapshot[Seq[IdAndEvent]]]
 
-  final def orderOverviews: Future[SchedulerResponse[Seq[OrderOverview]]] =
+  final def orderOverviews: Future[Snapshot[Seq[OrderOverview]]] =
     orderOverviewsBy(OrderQuery.All)
 
-  final def ordersComplemented: Future[SchedulerResponse[OrdersComplemented]] =
+  final def ordersComplemented: Future[Snapshot[OrdersComplemented]] =
     ordersComplementedBy(OrderQuery.All)
 
-  final def orderTreeComplemented: Future[SchedulerResponse[OrderTreeComplemented]] =
+  final def orderTreeComplemented: Future[Snapshot[OrderTreeComplemented]] =
     orderTreeComplementedBy(OrderQuery.All)
 
-  final def jobChainOverviews: Future[SchedulerResponse[Seq[JobChainOverview]]] =
+  final def jobChainOverviews: Future[Snapshot[Seq[JobChainOverview]]] =
     jobChainOverviewsBy(JobChainQuery.All)
 }

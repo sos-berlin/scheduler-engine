@@ -4,7 +4,8 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
-import com.sos.scheduler.engine.data.compounds.{OrdersComplemented, SchedulerResponse}
+import com.sos.scheduler.engine.data.compounds.OrdersComplemented
+import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey}
@@ -25,14 +26,14 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class OrdersHtmlPage private(
-  protected val response: SchedulerResponse[OrdersComplemented],
+  protected val snapshot: Snapshot[OrdersComplemented],
   protected val pageUri: Uri,
   query: OrderQuery,
   protected val schedulerOverview: SchedulerOverview,
   protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
 
-  private val ordersComplemented: OrdersComplemented = response.content
+  private val ordersComplemented: OrdersComplemented = snapshot.value
   private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
   private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
@@ -195,7 +196,7 @@ object OrdersHtmlPage {
   private val Dot = '\u00b7'
 
   def toHtmlPage(
-    response: SchedulerResponse[OrdersComplemented],
+    snapshot: Snapshot[OrdersComplemented],
     pageUri: Uri,
     query: OrderQuery,
     client: SchedulerClient,
@@ -203,7 +204,7 @@ object OrdersHtmlPage {
     (implicit ec: ExecutionContext)
   =
     for (schedulerOverviewResponse ← client.overview) yield
-      new OrdersHtmlPage(response, pageUri, query, schedulerOverviewResponse.content, webServiceContext.uris)
+      new OrdersHtmlPage(snapshot, pageUri, query, schedulerOverviewResponse.value, webServiceContext.uris)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =
     if (order.obstacles.nonEmpty)

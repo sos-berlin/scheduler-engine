@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
-import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented, SchedulerResponse}
-import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent}
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
+import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
@@ -38,15 +38,15 @@ final class DirectSchedulerClient @Inject private(
   eventCollector: EventCollector)
 extends SchedulerClient with DirectCommandClient {
 
-  def overview: Future[SchedulerResponse[SchedulerOverview]] =
+  def overview: Future[Snapshot[SchedulerOverview]] =
     respondWith { scheduler.overview }
 
-  def orderOverviewsBy(query: OrderQuery): Future[SchedulerResponse[immutable.Seq[OrderOverview]]] =
+  def orderOverviewsBy(query: OrderQuery): Future[Snapshot[immutable.Seq[OrderOverview]]] =
     respondWith { orderSubsystem.orderOverviews(query) }
 
   def orderTreeComplementedBy(query: OrderQuery) =
-    for (schedulerResponse ← ordersComplementedBy(query))
-      yield for (o ← schedulerResponse)
+    for (snapshot ← ordersComplementedBy(query))
+      yield for (o ← snapshot)
         yield OrderTreeComplemented(
           FolderTree.fromHasPaths(query.jobChainPathQuery.folderPath, o.orders),
           o.usedNodes,
@@ -84,57 +84,57 @@ extends SchedulerClient with DirectCommandClient {
         (processClasses map { _.overview }).sorted)
     }
 
-  def jobChainOverview(jobChainPath: JobChainPath): Future[SchedulerResponse[JobChainOverview]] =
+  def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]] =
     respondWith {
       orderSubsystem.jobChain(jobChainPath).overview
     }
 
-  def jobChainOverviewsBy(query: JobChainQuery): Future[SchedulerResponse[Seq[JobChainOverview]]] =
+  def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[Seq[JobChainOverview]]] =
     respondWith {
       (orderSubsystem.jobChainsByQuery(query) map { _.overview }).toVector
     }
 
-  def jobChainDetails(jobChainPath: JobChainPath): Future[SchedulerResponse[JobChainDetails]] =
+  def jobChainDetails(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetails]] =
     respondWith {
       orderSubsystem.jobChain(jobChainPath).details
     }
 
-  def jobOverviews: Future[SchedulerResponse[Vector[JobOverview]]] =
+  def jobOverviews: Future[Snapshot[Vector[JobOverview]]] =
     respondWith {
       jobSubsystem.fileBaseds map { _.overview }
     }
 
-  def jobOverview(jobPath: JobPath): Future[SchedulerResponse[JobOverview]] =
+  def jobOverview(jobPath: JobPath): Future[Snapshot[JobOverview]] =
     respondWith {
       jobSubsystem.job(jobPath).overview
     }
 
-  def processClassOverviews: Future[SchedulerResponse[Vector[ProcessClassOverview]]] =
+  def processClassOverviews: Future[Snapshot[Vector[ProcessClassOverview]]] =
     respondWith {
       processClassSubsystem.fileBaseds map { _.overview }
     }
 
-  def processClassOverview(processClassPath: ProcessClassPath): Future[SchedulerResponse[ProcessClassOverview]] =
+  def processClassOverview(processClassPath: ProcessClassPath): Future[Snapshot[ProcessClassOverview]] =
     respondWith {
       processClassSubsystem.processClass(processClassPath).overview
     }
 
-  def taskOverview(taskId: TaskId): Future[SchedulerResponse[TaskOverview]] =
+  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]] =
     respondWith {
       taskSubsystem.task(taskId).overview
     }
 
-  def events(after: EventId): Future[SchedulerResponse[Seq[IdAndEvent]]] =
+  def events(after: EventId): Future[Snapshot[Seq[IdAndEvent]]] =
     for (events ← eventCollector.iteratorFuture(after)) yield {
       val eventId = eventCollector.newEventId()  // This EventId is only to give the response a timestamp. To continue the event stream, use the last event's EventId.
       val serializables = events filter IdAndEvent.canSerialize
-      SchedulerResponse(serializables.toVector)(eventId)
+      Snapshot(serializables.toVector)(eventId)
     }
 
-  private def respondWith[A](content: ⇒ A): Future[SchedulerResponse[A]] =
+  private def respondWith[A](content: ⇒ A): Future[Snapshot[A]] =
     directOrSchedulerThreadFuture {
       // We are in control of the scheduler thread. No hot scheduler events may occur now.
       // eventCollector.newEventId returns a good EventId usable for the event web service.
-      SchedulerResponse(content)(eventCollector.newEventId())
+      Snapshot(content)(eventCollector.newEventId())
     }
 }

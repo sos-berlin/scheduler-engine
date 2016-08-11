@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
-import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented, SchedulerResponse}
-import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent}
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
+import com.sos.scheduler.engine.data.event.{EventId, IdAndEvent, Snapshot}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
@@ -40,36 +40,36 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     decode(Gzip)
 
   final def overview =
-    get[SchedulerResponse[SchedulerOverview]](_.overview)
+    get[Snapshot[SchedulerOverview]](_.overview)
 
   final def orderOverviewsBy(query: OrderQuery) =
-    get[SchedulerResponse[immutable.Seq[OrderOverview]]](_.order.overviews(query))
+    get[Snapshot[immutable.Seq[OrderOverview]]](_.order.overviews(query))
 
   final def orderTreeComplementedBy(query: OrderQuery) =
-    get[SchedulerResponse[OrderTreeComplemented]](_.order.treeComplemented(query))
+    get[Snapshot[OrderTreeComplemented]](_.order.treeComplemented(query))
 
   final def ordersComplementedBy(query: OrderQuery) =
-    get[SchedulerResponse[OrdersComplemented]](_.order.ordersComplemented(query))
+    get[Snapshot[OrdersComplemented]](_.order.ordersComplemented(query))
 
   final def jobChainOverview(jobChainPath: JobChainPath) =
-    get[SchedulerResponse[JobChainOverview]](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))
+    get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))
 
-  final def jobChainOverviewsBy(query: JobChainQuery): Future[SchedulerResponse[immutable.Seq[JobChainOverview]]] = {
+  final def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainOverview]]] = {
     query.jobChainPathQuery match {
       case single: PathQuery.SinglePath ⇒
-        for (schedulerResponse ← get[SchedulerResponse[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath])))
+        for (schedulerResponse ← get[Snapshot[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath])))
              yield for (o ← schedulerResponse)
           yield Vector(o) // Web service return a single object (not an array), if path denotes a single job chain path
       case _ ⇒
-        get[SchedulerResponse[immutable.Seq[JobChainOverview]]](_.jobChain.overviews(query))
+        get[Snapshot[immutable.Seq[JobChainOverview]]](_.jobChain.overviews(query))
     }
   }
 
   final def jobChainDetails(jobChainPath: JobChainPath) =
-    get[SchedulerResponse[JobChainDetails]](_.jobChain.details(jobChainPath))
+    get[Snapshot[JobChainDetails]](_.jobChain.details(jobChainPath))
 
-  final def events(after: EventId = EventId.BeforeFirst): Future[SchedulerResponse[immutable.Seq[IdAndEvent]]] =
-    get[SchedulerResponse[immutable.Seq[IdAndEvent]]](_.events(after))
+  final def events(after: EventId = EventId.BeforeFirst): Future[Snapshot[immutable.Seq[IdAndEvent]]] =
+    get[Snapshot[immutable.Seq[IdAndEvent]]](_.events(after))
 
   final def getJson(pathUri: String): Future[String] =
     get[String](_.uriString(pathUri))

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.data.compounds.SchedulerResponse
+import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -14,12 +14,12 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class SchedulerOverviewHtmlPage private(
-  protected val response: SchedulerResponse[SchedulerOverview],
+  protected val snapshot: Snapshot[SchedulerOverview],
   protected val pageUri: Uri,
   protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
 
-  protected val schedulerOverview = response.content
+  protected val schedulerOverview = snapshot.value
   import schedulerOverview._
 
   override protected def cssLinks = super.cssLinks :+ uris / "api/frontend/schedulerOverview/overview.css"
@@ -84,8 +84,8 @@ object SchedulerOverviewHtmlPage {
     import scala.language.implicitConversions
 
     implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: WebServiceContext) =
-      ToHtmlPage[SchedulerResponse[SchedulerOverview]] { (response, pageUri) ⇒
-        Future.successful(new SchedulerOverviewHtmlPage(response, pageUri, webServiceContext.uris))
+      ToHtmlPage[Snapshot[SchedulerOverview]] { (snapshot, pageUri) ⇒
+        Future.successful(new SchedulerOverviewHtmlPage(snapshot, pageUri, webServiceContext.uris))
       }
   }
 }
