@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toYamlHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent.ExecutionContext
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
