@@ -31,11 +31,21 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
         pathPrefix("master") {
           masterRoute
         } ~
+        pathEndOrSingleSlash {
+          htmlPreferred(webServiceContext) {
+            redirect("/jobscheduler/joc/", TemporaryRedirect)
+          }
+        } ~
         jocCompatibleRoute
       }
     }
 
   private def masterRoute: Route =
+    pathEndOrSingleSlash {
+      htmlPreferred(webServiceContext) {
+        redirect("/jobscheduler/master/api", TemporaryRedirect)
+      }
+    } ~
     pathPrefix("api") {
       apiRoute
     } ~
