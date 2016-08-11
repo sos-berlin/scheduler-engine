@@ -62,7 +62,7 @@ extends SchedulerHtmlPage {
         case OrderFinished(orderKey, nodeId: NodeId)           ⇒ td(orderKey) :: td(nodeId.toString) :: Nil
         case OrderNestedFinished(orderKey)                     ⇒ td(orderKey) :: Nil
         case OrderNestedStarted(orderKey)                      ⇒ td(orderKey) :: Nil
-        case OrderNodeChanged(orderKey, fromNodeId, nodeId)    ⇒ td(orderKey) :: td(nodeId) :: td("← ", fromNodeId) :: Nil
+        case OrderNodeChanged(orderKey, nodeId, fromNodeId)    ⇒ td(orderKey) :: td(nodeId) :: td("← ", fromNodeId) :: Nil
         case OrderResumed(orderKey)                            ⇒ td(orderKey) :: Nil
         case OrderSetBack(orderKey, nodeId)                    ⇒ td(orderKey) :: td(nodeId) :: Nil
         case OrderStepEnded(orderKey, stateTransition)         ⇒ td(orderKey) :: td(stateTransition.toString) :: Nil
