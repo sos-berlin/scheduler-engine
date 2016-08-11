@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.scheduler.engine.data.compounds.{OrdersComplemented, SchedulerResponse}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
@@ -28,10 +29,8 @@ final class OrdersHtmlPage private(
   protected val pageUri: Uri,
   query: OrderQuery,
   protected val schedulerOverview: SchedulerOverview,
-  protected val webServiceContext: WebServiceContext)
+  protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
-
-  import webServiceContext.uris
 
   private val ordersComplemented: OrdersComplemented = response.content
   private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
@@ -204,7 +203,7 @@ object OrdersHtmlPage {
     (implicit ec: ExecutionContext)
   =
     for (schedulerOverviewResponse ← client.overview) yield
-      new OrdersHtmlPage(response, pageUri, query, schedulerOverviewResponse.content, webServiceContext)
+      new OrdersHtmlPage(response, pageUri, query, schedulerOverviewResponse.content, webServiceContext.uris)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =
     if (order.obstacles.nonEmpty)

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.event.{Event, IdAndEvent}
 import com.sos.scheduler.engine.data.job.TaskId
@@ -21,12 +22,11 @@ import spray.http.Uri
 final class EventsHtmlPage private(
   protected val response: SchedulerResponse[immutable.Seq[IdAndEvent]],
   protected val pageUri: Uri,
-  implicit protected val webServiceContext: WebServiceContext,
+  implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
 extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
-  import webServiceContext.uris
 
   private val idAndEvents = response.content
 
@@ -79,13 +79,11 @@ object EventsHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def eventsToHtmlPage(implicit client: SchedulerClient): ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] =
+    implicit def eventsToHtmlPage(implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       new ToHtmlPage[SchedulerResponse[immutable.Seq[IdAndEvent]]] {
-        def apply(pageUri: Uri, webServiceContext: WebServiceContext)(response: SchedulerResponse[immutable.Seq[IdAndEvent]])
-          (implicit executionContext: ExecutionContext)
-        =
+        def apply(response: SchedulerResponse[immutable.Seq[IdAndEvent]], pageUri: Uri) =
           for (schedulerOverviewResponse ← client.overview) yield
-            new EventsHtmlPage(response, pageUri, webServiceContext, schedulerOverviewResponse.content)
+            new EventsHtmlPage(response, pageUri, webServiceContext.uris, schedulerOverviewResponse.content)
       }
   }
 }

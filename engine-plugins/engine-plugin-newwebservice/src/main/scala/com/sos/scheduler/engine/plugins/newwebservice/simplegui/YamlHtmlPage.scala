@@ -17,15 +17,13 @@ object YamlHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerClient): ToHtmlPage[SchedulerResponse[A]] =
+    implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       new ToHtmlPage[SchedulerResponse[A]] {
-        def apply(pageUri: Uri, webServiceContext: WebServiceContext)(response: SchedulerResponse[A])
-          (implicit ec: ExecutionContext) =
-        {
+        def apply(response: SchedulerResponse[A], pageUri: Uri) = {
           val yamlFuture = Future { response map { o ⇒ YamlPrinter(o.toJson) } }
           for (SchedulerResponse(schedulerOverview) ← client.overview;
                yaml ← yamlFuture) yield
-            new StringHtmlPage(yaml, pageUri, webServiceContext, schedulerOverview)
+            new StringHtmlPage(yaml, pageUri, webServiceContext.uris, schedulerOverview)
         }
       }
   }

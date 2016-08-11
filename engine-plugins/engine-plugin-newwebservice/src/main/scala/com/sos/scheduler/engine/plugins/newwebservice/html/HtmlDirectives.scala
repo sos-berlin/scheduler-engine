@@ -104,7 +104,14 @@ object HtmlDirectives {
     }
 
   trait ToHtmlPage[A] {
-    def apply(pageUri: Uri, webServiceContext: WebServiceContext)(a: A)(implicit executionContext: ExecutionContext): Future[HtmlPage]
+    def apply(a: A, pageUri: Uri): Future[HtmlPage]
+  }
+
+  object ToHtmlPage {
+    def apply[A](body: (A, Uri) ⇒ Future[HtmlPage]) =
+      new ToHtmlPage[A] {
+        def apply(a: A, uri: Uri) = body(a, uri)
+      }
   }
 
   def completeTryHtml[A](responseFuture: ⇒ Future[SchedulerResponse[A]])(
@@ -116,11 +123,13 @@ object HtmlDirectives {
   =
     htmlPreferred(webServiceContext) {
       requestUri { uri ⇒
-        complete(responseFuture map toHtmlPage(uri, webServiceContext))
+        complete {
+          for (response ← responseFuture) yield
+            toHtmlPage(response, uri)
+        }
       }
-    } ~ {
-        complete(responseFuture)
-    }
+    } ~
+      complete(responseFuture)
 
   def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒

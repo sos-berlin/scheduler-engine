@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.compounds.SchedulerResponse
@@ -31,10 +32,8 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected def response: SchedulerResponse[Any]
   protected val schedulerOverview: SchedulerOverview
   protected def title: String = "JobScheduler"
-  protected val webServiceContext: WebServiceContext
+  protected val uris: SchedulerUris
   protected def pageUri: Uri
-
-  import webServiceContext.uris
 
   protected def htmlPage(innerBody: Frag*): TypedTag[String] =
     html(lang := "en")(

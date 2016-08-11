@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import scalatags.Text.all._
 import spray.http.Uri
 
@@ -12,7 +12,7 @@ import spray.http.Uri
 final class StringHtmlPage(
   protected val response: SchedulerResponse[String],
   protected val pageUri: Uri,
-  implicit protected val webServiceContext: WebServiceContext,
+  implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
 extends SchedulerHtmlPage {
 

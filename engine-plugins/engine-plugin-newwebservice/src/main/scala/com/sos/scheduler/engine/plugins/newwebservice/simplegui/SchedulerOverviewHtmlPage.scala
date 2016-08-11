@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.compounds.SchedulerResponse
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.instantWithDurationToHtml
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scalatags.Text.all._
 import spray.http.Uri
 
@@ -15,11 +16,10 @@ import spray.http.Uri
 final class SchedulerOverviewHtmlPage private(
   protected val response: SchedulerResponse[SchedulerOverview],
   protected val pageUri: Uri,
-  protected val webServiceContext: WebServiceContext)
+  protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
 
   protected val schedulerOverview = response.content
-  import webServiceContext.uris
   import schedulerOverview._
 
   override protected def cssLinks = super.cssLinks :+ uris / "api/frontend/schedulerOverview/overview.css"
@@ -83,11 +83,10 @@ object SchedulerOverviewHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit object schedulerOverviewToHtmlPage extends ToHtmlPage[SchedulerResponse[SchedulerOverview]] {
-      def apply(pageUri: Uri, webServiceContext: WebServiceContext)(response: SchedulerResponse[SchedulerOverview])
-        (implicit executionContext: ExecutionContext)
-      =
-        Future.successful(new SchedulerOverviewHtmlPage(response, pageUri, webServiceContext))
-    }
+    implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: WebServiceContext) =
+      new ToHtmlPage[SchedulerResponse[SchedulerOverview]] {
+        def apply(response: SchedulerResponse[SchedulerOverview], pageUri: Uri) =
+          Future.successful(new SchedulerOverviewHtmlPage(response, pageUri, webServiceContext.uris))
+      }
   }
 }
