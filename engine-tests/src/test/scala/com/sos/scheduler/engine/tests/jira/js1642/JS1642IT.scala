@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1642
 import akka.util.ByteString
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.base.sprayjson.JsonRegexMatcher._
+import com.sos.scheduler.engine.base.system.SystemInformation
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
@@ -130,7 +131,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "overview" in {
       val overview = awaitContent(client.overview)
-      assert(overview == awaitContent(directSchedulerClient.overview))
+      assert(overview.copy(system = SystemInformation.ForTest) ==
+        awaitContent(directSchedulerClient.overview).copy(system = SystemInformation.ForTest))
       assert(overview.schedulerId == SchedulerId("test"))
       assert(overview.state == SchedulerState.running)
     }
@@ -338,7 +340,9 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           "schedulerId" → "test",
           "httpPort" → httpPort,
           "pid" → AnyInt,
-          "state" → "running"))
+          "state" → "running",
+          "system" → AnyRef,
+          "java" → AnyRef))
     }
 
     "orderOverviews" in {

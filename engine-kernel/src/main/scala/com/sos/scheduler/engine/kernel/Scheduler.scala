@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.system.SystemInformations.systemInformation
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.common.xml.NamedChildElements
@@ -24,6 +25,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidated
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOverview, SchedulerState}
+import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
@@ -296,7 +298,9 @@ with HasCloser {
       httpPort = schedulerConfiguration.httpPortOption,
       udpPort = schedulerConfiguration.udpPort,
       pid = cppProxy.pid,
-      state = SchedulerState.ofCppName(cppProxy.state_name))
+      state = SchedulerState.ofCppName(cppProxy.state_name),
+      system = systemInformation(),
+      java = JavaInformation())
 
   def isClosed = closed
 }
