@@ -100,11 +100,6 @@ trait SchedulerHtmlPage extends HtmlPage {
 object SchedulerHtmlPage {
   private lazy val nav = "nav".tag[String]
 
-  object EmptyFrag extends Frag {
-    def writeTo(strb: StringBuilder) = {}
-    def render = ""
-  }
-
   def fileBasedStateToHtml(fileBasedState: FileBasedState) =
     span(cls := fileBasedStateToBootstrapTextClass(fileBasedState))(fileBasedState.toString)
 

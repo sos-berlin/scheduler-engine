@@ -1,13 +1,20 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.web.SchedulerUris
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
+import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.instantWithDurationToHtml
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage._
+import java.util.Locale.US
 import scala.concurrent.Future
+import scala.math.round
+import scala.util.control.NonFatal
 import scalatags.Text.all._
+import scalatags.text.Frag
 import spray.http.Uri
 
 /**
@@ -20,66 +27,111 @@ final class SchedulerOverviewHtmlPage private(
 extends SchedulerHtmlPage {
 
   protected val schedulerOverview = snapshot.value
-  import schedulerOverview._
+  import schedulerOverview.{httpPort, java, pid, startedAt, state, system, udpPort}
 
   override protected def cssLinks = super.cssLinks :+ uris / "api/frontend/schedulerOverview/overview.css"
 
   def wholePage =
     htmlPage(
       systemInformationHtml,
-      p(marginBottom := "30px")(
-        s"Started at ",
-        instantWithDurationToHtml(startedAt),
-        " · ",
-        ( (httpPort map { o ⇒ s" HTTP port $o" }) ++
-          (udpPort map { o ⇒ s" UDP port $o" }) ++
-          Some(s"PID $pid") ++
-          Some(state))
-          .mkString(" · ")),
-      form(action := "api/command", method := "get")(
-        span(cls := "input-group input-group-sm")(
-          span(cls := "input-group-addon")(
-            "XML command: "),
-          input(`type` := "text", autofocus, name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
-          " ",
-          span(cls := "input-group-btn")
-            (button(`type` := "submit", cls := "btn btn-primary")(
-              "Execute")))))
-
-//  private def cpuAndRamGraphics =
-//    div(width := 170.px)(
-//      "progressbar".tag[String](cls := "progress-bar-info", "max".attr := 1, "animate".attr := false, margin := 0, fontSize := 11.px)(
-//        system.mxBeans.get("operatingSystem") flatMap { _.asInstanceOf[Map[String, Any]].get("systemCpuLoad") } getOrElse "")
-//        //span(color.white, whiteSpace.nowrap)(system.mxBeans.operatingSystem.systemCpuLoad | percentage:0 "CPU"),
-//      "progress".tag[String]("max".attr := 1, margin := "5px 0 0 0", fontSize := 11.px, "animate".attr := false)(
-//        "bar".tag[String](1 - freePhysicalMemoryRatio)(
-//          span(color.white)((totalPhysicalMemorySize - freePhysicalMemorySize) / (1024*1024*1024) | number:1 "GiB")()
-//        bar(`type` := 'info')(freePhysicalMemoryRatio)(
-//          span(color.black)((freePhysicalMemorySize / (1024*1024*1024) | number:1) "GiB"))),
-//      div(cls := "smallFont", margin := 0, color := 0xa0a0a0)(
-//        (totalPhysicalMemorySize / (1024*1024*1024) | number:1 " GiB RAM ∙ "),
-//        span(color := 0x08000)(freePhysicalMemorySize / (1024*1024*1024) | number:1 "GiB free")
+      schedulerInfoHtml,
+      commandInput)
 
   private def systemInformationHtml =
     div(cls := "ContentBox SystemInformation")(
-//      div(float.right, marginTop := 1.px, marginLeft := 10.px)(
-//        cpuAndRamGraphics),
-      div(/*float.right*/)(
-        div(cls := "Hostname")(
-          system.hostname),
-        for (o ← system.distribution) yield
-          div(o),
-        div(
-          java.systemProperties.getOrElse("os.name", "") + " " +
-            java.systemProperties.getOrElse("os.version", "") + " ∙ " +
-            java.systemProperties.getOrElse("os.arch", "")),
-        div(
-          "Java " + java.systemProperties.getOrElse("java.version", "") + " " +
-            java.systemProperties.getOrElse("java.vendor", ""))),
-      div(clear.both))
+      table(cls := "SystemInformation")(
+        tbody(
+          tr(
+            td(systemPropertiesHtml),
+            td(cpuAndRamGraphicsHtml)),
+          tr(
+            td(javaPropertiesHtml),
+            td(javaGraphicsHtml(java.memory))))))
+
+  private def systemPropertiesHtml: Frag =
+    div(cls := "SystemProperties")(
+      p(cls := "Hostname", paddingTop := 4.px)(
+        system.hostname),
+      for (o ← system.distribution) yield
+        div(o),
+      div(
+        java.systemProperties.getOrElse("os.name", "") + " " +
+          java.systemProperties.getOrElse("os.version", "")))
+
+  private def cpuAndRamGraphicsHtml: Option[Frag] =
+    try
+      for (os ← system.mxBeans.get("operatingSystem") map { _.asInstanceOf[Map[String, Any]] };
+           total ← os.get("totalPhysicalMemorySize") map { _.asInstanceOf[Number].longValue } if total > 1000*1000;  // Avoid division by zero
+           free ← os.get("freePhysicalMemorySize") map { _.asInstanceOf[Number].longValue };
+           ratio = free.toDouble / total) yield
+        div(cls := "SystemGraphics")(
+          for (systemCpuLoad ← os.get("systemCpuLoad") map { _.asInstanceOf[Number] };
+               processorCount ← os.get("availableProcessors") map { _.asInstanceOf[Number] }) yield
+            div(
+              div(
+                small(s"CPU $processorCount×"),
+                for (o ← java.systemProperties.get("os.arch")) yield small(s" $o")),
+              progress(
+                progressBar(systemCpuLoad.doubleValue)(
+                  round(systemCpuLoad.doubleValue * 100).toInt + "% CPU"))),
+          List(
+            small("System " + toMiB(total) + " RAM ∙ " + toMiB(free) + " free"),
+            progress(
+              progressBar(1 - ratio)(
+                toMiB(total - free)),
+              progressBar(ratio)(backgroundColor := "inherit")(
+                span(color.black)(toMiB(free))))))
+    catch {
+      case NonFatal(t) ⇒
+        logger.debug(s"cpuAndRamGraphicsHtml: $t")
+        None
+  }
+
+  private def javaPropertiesHtml =
+    div(
+      div("Java " + java.systemProperties.getOrElse("java.version", "")),
+      for (o ← java.systemProperties.get("java.vendor")) yield div(s"($o)"))
+
+
+  private def javaGraphicsHtml(memory: JavaInformation.Memory): Frag = {
+    import memory.{free, maximum, reserve, used}
+    div(cls := "SystemGraphics")(
+      small("Java " + toMiB(java.memory.total) + " Heap ∙ " + toMiB(java.memory.free) + " free"),
+      progress(
+        progressBar(used / maximum.toDouble)(
+          toMiB(used)),
+        progressBar(free / maximum.toDouble)(cls := "progress-bar progress-bar-success")(
+          toMiB(free)),
+        progressBar(reserve / maximum.toDouble)(backgroundColor := "inherit")(
+          span(color.black)(toMiB(reserve)))))
+  }
+
+  private def schedulerInfoHtml: Frag =
+    div(marginBottom := "30px")(
+      div(
+        "Started at ",
+        instantWithDurationToHtml(startedAt)),
+      for (o ← httpPort) yield
+        div(s" HTTP port $o"),
+      div(s"PID $pid"),
+      div(b(state.toString)))
+
+  private def commandInput: Frag =
+    form(action := "api/command", method := "get", clear.both)(
+      span(cls := "input-group input-group-sm")(
+        span(cls := "input-group-addon")(
+          "XML command: "),
+        input(`type` := "text", autofocus, name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
+        " ",
+        span(cls := "input-group-btn")(
+          button(`type` := "submit", cls := "btn btn-primary")(
+            "Execute"))))
 }
 
 object SchedulerOverviewHtmlPage {
+  private val logger = Logger(getClass)
+  private val ThinSpace = '\u2009'
+
   object implicits {
     import scala.language.implicitConversions
 
@@ -87,5 +139,23 @@ object SchedulerOverviewHtmlPage {
       ToHtmlPage[Snapshot[SchedulerOverview]] { (snapshot, pageUri) ⇒
         Future.successful(new SchedulerOverviewHtmlPage(snapshot, pageUri, webServiceContext.uris))
       }
+  }
+
+  private def progress = div(cls := "progress", marginBottom := 5.px)
+
+  private def progressBar(size: Double) = div(cls := "progress-bar", width := toPercent(size - 0.0001))  // Minor subtraction to be not greater than 100 %
+
+  private def toPercent(a: Double) = "%3.2f".formatLocal(US, 100 * a) + "%"
+
+  private def toMiB(n: Long) =
+    if (n < 1024*1024*1024)
+      toUnit(n, "MiB", 1024 * 1024)
+    else
+      toUnit(n, "GiB", 1024 * 1024 * 1024)
+
+  private def toUnit(n: Long, unit: String, factor: Int) = {
+    val nn = n / factor.toDouble
+    val fractionDigits = if (nn <= 2) 1 else 0
+    s"%.${fractionDigits}f".formatLocal(US, nn) + s"$ThinSpace$unit"
   }
 }

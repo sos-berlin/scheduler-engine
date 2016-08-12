@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails,
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
+import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
@@ -130,8 +131,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "overview" in {
       val overview = awaitContent(client.overview)
-      assert(overview.copy(system = SystemInformation.ForTest) ==
-        awaitContent(directSchedulerClient.overview).copy(system = SystemInformation.ForTest))
+      assert(overview.copy(system = SystemInformation.ForTest, java = JavaInformation.ForTest) ==
+        awaitContent(directSchedulerClient.overview).copy(system = SystemInformation.ForTest, java = JavaInformation.ForTest))
       assert(overview.schedulerId == SchedulerId("test"))
       assert(overview.state == SchedulerState.running)
     }

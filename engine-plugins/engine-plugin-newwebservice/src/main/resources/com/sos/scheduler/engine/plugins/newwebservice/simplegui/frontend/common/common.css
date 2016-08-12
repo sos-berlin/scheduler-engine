@@ -40,6 +40,15 @@ h3 {
   margin-bottom: 0;
 }
 
+table > tbody > tr > th,
+table > tbody > tr > td,
+table > tfoot > tr > th,
+table > tfoot > tr > td,
+table > thead > tr > th,
+table > thead > tr > td {
+  vertical-align: top;
+}
+
 .table-condensed > tbody > tr > td,
 .table-condensed > tbody > tr > th,
 .table-condensed > tfoot > tr > td,
