@@ -197,17 +197,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-kernelcpp</artifactId>
-            <classifier>${osArch}</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-kernelcpp-generated</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>
