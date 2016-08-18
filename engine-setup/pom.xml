@@ -31,7 +31,7 @@
             <properties>
                 <setup.platform>${engine.platform}</setup.platform>
             </properties>
-            
+
             <repositories>
                 <repository>
                     <id>sos</id>
@@ -129,7 +129,7 @@
                            <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
-          
+
                     <execution>
                         <id>unpack-resources</id>
                         <phase>process-resources</phase>
@@ -315,7 +315,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/setup.xml</descriptor>
+                                <descriptor>src/assembly/setup.xml</descriptor>
                             </descriptors>
                             <archive>
                                 <manifest>

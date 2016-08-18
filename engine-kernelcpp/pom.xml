@@ -215,7 +215,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
+                                <descriptor>src/assembly/os-${osFamily}.xml</descriptor>
                             </descriptors>
                             <archive>
                                 <manifest>
@@ -235,7 +235,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/os-${osFamily}-test.xml</descriptor>
+                                <descriptor>src/assembly/os-${osFamily}-test.xml</descriptor>
                             </descriptors>
                             <archive>
                                 <manifest>
@@ -323,7 +323,7 @@
                                 </goals>
                                 <configuration>
                                     <descriptors>
-                                        <descriptor>src/main/assembly/aggregate-sources.xml</descriptor>
+                                        <descriptor>src/assembly/aggregate-sources.xml</descriptor>
                                     </descriptors>
                                     <appendAssemblyId>true</appendAssemblyId>
                                 </configuration>
