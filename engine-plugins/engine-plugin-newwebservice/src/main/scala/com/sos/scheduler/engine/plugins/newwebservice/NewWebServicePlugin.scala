@@ -3,7 +3,9 @@ package com.sos.scheduler.engine.plugins.newwebservice
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Injector, Provides}
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, PluginSubsystem, Plugins, UseGuiceModule}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
@@ -55,6 +57,6 @@ extends Plugin {
     val httpAddress = new InetSocketAddress("0.0.0.0", httpPort)
     val webServer = new EngineWebServer(httpAddress, myInjector)
     closer.registerAutoCloseable(webServer)
-    webServer.start()
+    webServer.start() await 60.s
   }
 }
