@@ -157,10 +157,10 @@ object ApiRoute {
   private val ApiExceptionHandler = ExceptionHandler {
     // This is an internal API, so we expose internal error messages !!!
     case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
-    case e: IllegalArgumentException ⇒ complete((BadRequest, e.toSimplifiedString))
-    case e: RuntimeException ⇒ complete((BadRequest, e.toSimplifiedString))
+//    case e: IllegalArgumentException ⇒ complete((BadRequest, e.toSimplifiedString))
+//    case e: RuntimeException ⇒ complete((BadRequest, e.toSimplifiedString))
     case NonFatal(t) ⇒
-      logger.debug(t.toString, t)
+      logger.warn(t.toString, t)
       complete((BadRequest, t.toSimplifiedString))
   }
 }
