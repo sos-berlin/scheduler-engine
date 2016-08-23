@@ -27,7 +27,7 @@ extends FileBasedSubsystem {
 object ScheduleSubsystem extends
 FileBasedSubsystem.AbstractCompanion[ScheduleSubsystemClient, ScheduleSubsystem, SchedulePath, Schedule] {
 
-  val fileBasedType = FileBasedType.schedule
+  val fileBasedType = FileBasedType.Schedule
   val stringToPath = SchedulePath.apply _
 
 //  final class Type extends SisterType[ScheduleSubsystem, Schedule_subsystemC] {

@@ -42,7 +42,7 @@ extends FileBased {
 
   def stringToPath(o: String) = ProcessClassPath(o)
 
-  def fileBasedType = FileBasedType.processClass
+  def fileBasedType = FileBasedType.ProcessClass
 
   def onCppProxyInvalidated(): Unit = {
     for (c ← clients) logger.error(s"CppHttpRemoteApiProcessClient has not been removed: $c")

@@ -17,7 +17,7 @@ extends FileBased {
 
   def stringToPath(o: String) = SchedulePath(o)
 
-  def fileBasedType = FileBasedType.schedule
+  def fileBasedType = FileBasedType.Schedule
 
   def onCppProxyInvalidated() = {}
 }

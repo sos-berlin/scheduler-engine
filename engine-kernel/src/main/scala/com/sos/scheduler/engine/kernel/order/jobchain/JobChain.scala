@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.nextNode
+import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.next_state
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -40,7 +40,7 @@ with UnmodifiableJobChain {
     private var _edgeSet: Set[(NodeId, NodeId)] = null
     private val predecessorsMap = mutable.Map[String, java.util.ArrayList[String]]() withDefault { nodeIdString ⇒
       if (_edgeSet == null) {
-        _edgeSet = (nodeMap.values filter { _.action == nextNode } map { o ⇒ o.nodeId → o.nextNodeId }).toSet
+        _edgeSet = (nodeMap.values filter { _.action == next_state } map { o ⇒ o.nodeId → o.nextNodeId }).toSet
       }
       val result = new java.util.ArrayList[String]
       result.addAll(allPredecessors(_edgeSet, NodeId(nodeIdString)) map { _.string } )
@@ -69,7 +69,7 @@ with UnmodifiableJobChain {
     JobChainPath(o)
 
   def fileBasedType =
-    FileBasedType.jobChain
+    FileBasedType.JobChain
 
   def onCppProxyInvalidated(): Unit = {}
 

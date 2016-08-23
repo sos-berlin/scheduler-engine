@@ -40,6 +40,6 @@ extends FileBasedSubsystem {
 object FolderSubsystem
 extends FileBasedSubsystem.AbstractCompanion[FolderSubsystemClient, FolderSubsystem, FolderPath, Folder] {
 
-  val fileBasedType = FileBasedType.folder
+  val fileBasedType = FileBasedType.Folder
   val stringToPath = FolderPath.apply _
 }

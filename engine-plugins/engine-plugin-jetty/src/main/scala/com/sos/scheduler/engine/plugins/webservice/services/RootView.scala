@@ -14,7 +14,7 @@ trait RootView {
 object RootView {
   def apply(baseUri: URI) = {
     def newUri() = UriBuilder.fromUri(baseUri)
-    def folderUri(typeName: FileBasedType) = newUri().path("folder").queryParam("type", typeName.name()).build()
+    def folderUri(typeName: FileBasedType) = newUri().path("Folder").queryParam("type", typeName.name()).build()
 
     new RootView {
       val logUri = newUri().path("log").build()

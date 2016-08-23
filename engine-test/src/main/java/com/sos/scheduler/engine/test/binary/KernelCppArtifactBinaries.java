@@ -10,7 +10,7 @@ import java.io.File;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.common.system.OperatingSystemJava.cpuArchitecture;
 import static com.sos.scheduler.engine.common.system.OperatingSystemJava.isWindows;
-import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.debug;
+import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.Debug;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
@@ -21,7 +21,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
 
     KernelCppArtifactBinaries(CppBinariesDebugMode debugMode) {
         String bin = isWindows?
-                cpuArchitecture.visualStudioName() +"/"+ (debugMode == debug? "Debug" : "Release") :
+                cpuArchitecture.visualStudioName() +"/"+ (debugMode == Debug? "Debug" : "Release") :
                 cpuArchitecture.officialName() +"/Release";
         directory = new File(kernelCppDir(), bin);
         checkArgument(directory.isDirectory(), "%s does not exist or is not a directory", directory);

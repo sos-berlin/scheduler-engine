@@ -17,7 +17,7 @@ extends FileBased {
 
   def stringToPath(o: String) = LockPath(o)
 
-  def fileBasedType = FileBasedType.lock
+  def fileBasedType = FileBasedType.Lock
 
   def onCppProxyInvalidated(): Unit = {}
 }

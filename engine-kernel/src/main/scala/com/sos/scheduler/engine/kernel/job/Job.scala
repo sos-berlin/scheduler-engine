@@ -27,7 +27,7 @@ with JobPersistence {
 
   def onCppProxyInvalidated(): Unit = {}
 
-  def fileBasedType = FileBasedType.job
+  def fileBasedType = FileBasedType.Job
 
   def stringToPath(o: String) = JobPath(o)
 

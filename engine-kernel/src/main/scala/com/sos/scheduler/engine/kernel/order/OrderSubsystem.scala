@@ -139,6 +139,6 @@ extends FileBasedSubsystem {
 object OrderSubsystem extends
 FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobChainPath, JobChain] {
 
-  val fileBasedType = FileBasedType.jobChain
+  val fileBasedType = FileBasedType.JobChain
   val stringToPath = JobChainPath.apply _
 }

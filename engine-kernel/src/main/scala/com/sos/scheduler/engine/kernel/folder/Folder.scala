@@ -17,7 +17,7 @@ extends FileBased {
 
   def stringToPath(o: String) = FolderPath(o)
 
-  def fileBasedType = FileBasedType.folder
+  def fileBasedType = FileBasedType.Folder
 
   def onCppProxyInvalidated(): Unit = {}
 }

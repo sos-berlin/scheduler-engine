@@ -24,7 +24,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val jobChain = orderSubsystem.jobChain(TestJobChainPath)
 
   "(prepare job chain)" in {
-    jobChain.node(State100).action = JobChainNodeAction.nextNode
+    jobChain.node(State100).action = JobChainNodeAction.next_state
     jobChain.node(State300).action = JobChainNodeAction.stop
   }
 

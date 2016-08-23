@@ -40,7 +40,7 @@ with HasInjector {
 
   private val testName = testConfiguration.testClass.getName
   protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
-  private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
+  private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.Debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null

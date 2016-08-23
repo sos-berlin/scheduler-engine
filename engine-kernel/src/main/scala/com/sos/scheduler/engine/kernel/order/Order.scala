@@ -135,7 +135,7 @@ with OrderPersistence {
 
   def stringToPath(o: String) = OrderKey(o)
 
-  def fileBasedType = FileBasedType.order
+  def fileBasedType = FileBasedType.Order
 
   private[order] def sourceType: OrderSourceType =
     sourceTypeOnce getOrUpdate toOrderSourceType(isFileBased = cppProxy.is_file_based, isFileOrder = cppProxy.is_file_order)

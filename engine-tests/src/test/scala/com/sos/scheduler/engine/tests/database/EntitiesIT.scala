@@ -206,7 +206,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     val jobChain = instance[OrderSubsystemClient].jobChain(jobChainPath)
     pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
       jobChain shouldBe 'stopped
-      jobChain.node(NodeId("100")).action shouldEqual JobChainNodeAction.nextNode
+      jobChain.node(NodeId("100")).action shouldEqual JobChainNodeAction.next_state
       jobChain.node(NodeId("200")).action shouldEqual JobChainNodeAction.process
       jobChain.node(NodeId("300")).action shouldEqual JobChainNodeAction.stop
     }

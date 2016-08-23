@@ -31,6 +31,6 @@ extends FileBasedSubsystem {
 object JobSubsystem
 extends FileBasedSubsystem.AbstractCompanion[JobSubsystemClient, JobSubsystem, JobPath, Job] {
 
-  val fileBasedType = FileBasedType.job
+  val fileBasedType = FileBasedType.Job
   val stringToPath = JobPath.apply _
 }

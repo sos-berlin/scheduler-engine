@@ -37,6 +37,6 @@ extends FileBasedSubsystem {
 object StandingOrderSubsystem
 extends FileBasedSubsystem.AbstractCompanion[StandingOrderSubsystemClient, StandingOrderSubsystem, OrderKey, Order] {
 
-  val fileBasedType = FileBasedType.order
+  val fileBasedType = FileBasedType.Order
   val stringToPath = { o: String ⇒ OrderKey(o) }
 }

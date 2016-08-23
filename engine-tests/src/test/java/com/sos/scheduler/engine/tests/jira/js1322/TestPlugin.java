@@ -43,12 +43,12 @@ public final class TestPlugin extends AbstractPlugin implements XmlConfiguration
     }
 
     @Override public scala.collection.immutable.Set<FileBasedType> fileBasedTypes() {
-        return toScalaSet(FileBasedType.job);
+        return toScalaSet(FileBasedType.Job);
     }
 
     @Override public byte[] changeXmlConfiguration(FileBasedType typ, AbsolutePath path, byte[] xmlBytes) {
         // Code is for example only. It loads the job XML as a DOM tree and manipulates it.
-        assertEquals(typ, FileBasedType.job);
+        assertEquals(typ, FileBasedType.Job);
         if (path.equals(new JobPath("/error"))) throw new RuntimeException("TestPlugin does not like " + path);
         assertTrue(path.equals(new JobPath("/test")));
 

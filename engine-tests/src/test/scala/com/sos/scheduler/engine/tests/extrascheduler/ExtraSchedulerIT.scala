@@ -50,7 +50,7 @@ final class ExtraSchedulerIT extends FreeSpec with ProvidesTestDirectory {
       implicit val implicitTimeout = ImplicitTimeout(10.s)
       val List(masterHttpPort, agentHttpPort) = findRandomFreeTcpPorts(2)
       val args = List(
-        TestCppBinaries.cppBinaries(CppBinariesDebugMode.debug).file(CppBinary.exeFilename).getPath,
+        TestCppBinaries.cppBinaries(CppBinariesDebugMode.Debug).file(CppBinary.exeFilename).getPath,
         s"-sos.ini=${testEnvironment.sosIniFile}",
         s"-ini=${testEnvironment.iniFile}",
         s"-id=${TestEnvironment.TestSchedulerId}",

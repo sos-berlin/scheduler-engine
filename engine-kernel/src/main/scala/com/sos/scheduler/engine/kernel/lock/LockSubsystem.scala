@@ -26,6 +26,6 @@ extends FileBasedSubsystem {
 object LockSubsystem
 extends FileBasedSubsystem.AbstractCompanion[LockSubsystemClient, LockSubsystem, LockPath, Lock] {
 
-  val fileBasedType = FileBasedType.lock
+  val fileBasedType = FileBasedType.Lock
   val stringToPath = LockPath.apply _
 }

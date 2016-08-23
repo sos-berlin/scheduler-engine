@@ -23,7 +23,7 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    binariesDebugMode = if (n > 0) Some(CppBinariesDebugMode.release) else None)
+    binariesDebugMode = if (n > 0) Some(CppBinariesDebugMode.Release) else None)
 
   private var activatedJobCount = 0
   private var taskCount = 0

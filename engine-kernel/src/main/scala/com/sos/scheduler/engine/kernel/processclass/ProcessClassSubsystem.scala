@@ -28,6 +28,6 @@ extends FileBasedSubsystem{
 object ProcessClassSubsystem
 extends FileBasedSubsystem.AbstractCompanion[ProcessClassSubsystemClient, ProcessClassSubsystem, ProcessClassPath, ProcessClass] {
 
-  val fileBasedType = FileBasedType.processClass
+  val fileBasedType = FileBasedType.ProcessClass
   val stringToPath = ProcessClassPath.apply _
 }
