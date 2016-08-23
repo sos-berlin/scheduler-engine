@@ -46,7 +46,7 @@ private object JsonSpeedTest {
     val result = for (i ← 1 to n) yield OrderOverview(
       JobChainPath("/a") orderKey numbers.next().toString,
       FileBasedState.active,
-      OrderSourceType.adHoc,
+      OrderSourceType.AdHoc,
       NodeId(numbers.next().toString),
       OrderProcessingState.InTaskProcess(TaskId(numbers.next()), ProcessClassPath.Default, agentUri = None, inProcessSince),
       nextStepAt = Some(now))

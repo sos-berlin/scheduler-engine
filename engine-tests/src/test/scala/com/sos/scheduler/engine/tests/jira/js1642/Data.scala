@@ -21,14 +21,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val a1OrderOverview = OrderOverview(
     a1OrderKey,
     FileBasedState.active,
-    OrderSourceType.fileBased,
+    OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(3), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(3))),
     nextStepAt = Some(EPOCH))
   private val a1OrderOverviewJson = s"""{
     "path": "/aJobChain,1",
     "fileBasedState": "active",
-    "sourceType": "fileBased",
+    "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
       "TYPE": "InTaskProcess",
@@ -43,14 +43,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val a2OrderOverview = OrderOverview(
     a2OrderKey,
     FileBasedState.active,
-    OrderSourceType.fileBased,
+    OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(4), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(4))),
     nextStepAt = Some(EPOCH))
   private val a2OrderOverviewJson = s"""{
     "path": "/aJobChain,2",
     "fileBasedState": "active",
-    "sourceType": "fileBased",
+    "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
       "TYPE": "InTaskProcess",
@@ -65,7 +65,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val aAdHocOrderOverview = OrderOverview(
     aAdHocOrderKey,
     FileBasedState.not_initialized,
-    OrderSourceType.adHoc,
+    OrderSourceType.AdHoc,
     NodeId("100"),
     OrderProcessingState.Planned(OrderStartAt),
     Set(OrderObstacle.Suspended),
@@ -74,7 +74,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/aJobChain,AD-HOC",
     "fileBasedState": "not_initialized",
     "nodeId": "100",
-    "sourceType": "adHoc",
+    "sourceType": "AdHoc",
     "processingState" : {
       "TYPE": "Planned",
       "at": "2038-01-01T11:22:33Z"
@@ -86,7 +86,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val b1OrderOverview = OrderOverview(
     b1OrderKey,
     FileBasedState.active,
-    OrderSourceType.fileBased,
+    OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(5), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(5))),
     nextStepAt = Some(EPOCH))
@@ -94,7 +94,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/bJobChain,1",
     "fileBasedState": "active",
     "nodeId": "100",
-    "sourceType": "fileBased",
+    "sourceType": "Permanent",
     "processingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "5",
@@ -108,14 +108,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val xa1OrderOverview = OrderOverview(
     xa1OrderKey,
     FileBasedState.active,
-    OrderSourceType.fileBased,
+    OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xa1OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,1",
     "fileBasedState": "active",
-    "sourceType": "fileBased",
+    "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
@@ -128,7 +128,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val xa2OrderOverview = OrderOverview(
     xa2OrderKey,
     FileBasedState.active,
-    OrderSourceType.fileBased,
+    OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     Set(OrderObstacle.Suspended),
@@ -136,7 +136,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val xa2OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,2",
     "fileBasedState": "active",
-    "sourceType": "fileBased",
+    "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
@@ -149,14 +149,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val xb1OrderOverview = OrderOverview(
     xb1OrderKey,
     FileBasedState.not_initialized,
-    OrderSourceType.fileBased,
+    OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xb1OrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,1",
     "fileBasedState": "not_initialized",
-    "sourceType": "fileBased",
+    "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",
@@ -169,14 +169,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val xbAdHocDistributedOrderOverview = OrderOverview(
     xbAdHocDistributedOrderKey,
     FileBasedState.not_initialized,
-    OrderSourceType.adHoc,
+    OrderSourceType.AdHoc,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xbAdHocDistributedOrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
     "fileBasedState": "not_initialized",
-    "sourceType": "adHoc",
+    "sourceType": "AdHoc",
     "nodeId": "100",
     "processingState" : {
       "TYPE": "Pending",

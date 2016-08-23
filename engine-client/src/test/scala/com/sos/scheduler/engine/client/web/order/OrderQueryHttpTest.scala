@@ -62,8 +62,8 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     checkQuery(OrderQuery(isSuspended = Some(true)), Map("isSuspended" → "true"))
     checkQuery(OrderQuery(isSuspended = Some(false)), Map("isSuspended" → "false"))
     checkQuery(
-      OrderQuery(isSuspended = Some(false), isOrderSourceType = Some(Set(OrderSourceType.adHoc, OrderSourceType.fileBased))),
-      Map("isSuspended" → "false", "isOrderSourceType" → "adHoc,fileBased"))  // Incidentally, Scala Set with two elements retains orders
+      OrderQuery(isSuspended = Some(false), isOrderSourceType = Some(Set(OrderSourceType.AdHoc, OrderSourceType.Permanent))),
+      Map("isSuspended" → "false", "isOrderSourceType" → "AdHoc,Permanent"))  // Incidentally, Scala Set with two elements retains orders
     checkQuery(OrderQuery(notInTaskLimitPerNode = Some(123)), Map("notInTaskLimitPerNode" → "123"))
   }
 

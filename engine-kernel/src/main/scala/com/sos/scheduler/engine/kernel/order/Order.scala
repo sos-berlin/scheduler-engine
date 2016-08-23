@@ -265,9 +265,9 @@ object Order {
 
   private def toOrderSourceType(isFileBased: Boolean, isFileOrder: Boolean) =
     if (isFileOrder)
-      OrderSourceType.fileOrderSource
+      OrderSourceType.FileOrder
     else if (isFileBased)
-      OrderSourceType.fileBased
+      OrderSourceType.Permanent
     else
-      OrderSourceType.adHoc
+      OrderSourceType.AdHoc
 }

@@ -45,12 +45,12 @@ final class SchedulerUrisTest extends FreeSpec {
       OrderQuery(
         isSuspended = Some(true),
         isBlacklisted = Some(false),
-        isOrderSourceType = Some(Set(OrderSourceType.fileOrderSource, OrderSourceType.adHoc)))) ==
+        isOrderSourceType = Some(Set(OrderSourceType.FileOrder, OrderSourceType.AdHoc)))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/")
         .withQuery(Uri.Query(
           "isSuspended" → "true",
           "isBlacklisted" → "false",
-          "isOrderSourceType" → "fileOrderSource,adHoc",  // Incidentally, Scala Set with two elements retains orders
+          "isOrderSourceType" → "FileOrder,AdHoc",  // Incidentally, Scala Set with two elements retains orders
           "return" → "OrdersComplemented")).toString)
   }
 

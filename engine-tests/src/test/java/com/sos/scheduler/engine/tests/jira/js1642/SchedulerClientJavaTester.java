@@ -100,7 +100,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
                 .withJobChainPathQuery(toPathQuery("/xFolder/"))
                 .withIsDistributed(true)
                 .withIsSuspended(false)
-                .withOrderSourceTypes(singletonList(OrderSourceType.fileBased));
+                .withOrderSourceTypes(singletonList(OrderSourceType.Permanent));
             OrdersComplemented ordersComplemented = asJavaFuture(client.ordersComplementedBy(query)).get().value();
             assertThat(
                 asJavaCollection(ordersComplemented.orders()).stream().map(OrderOverview::orderKey).collect(Collectors.toList()),
@@ -123,7 +123,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
             .findFirst().get();
         assertEquals(new NodeId("100"), orderOverview.nodeId());
         assertEquals(FileBasedState.active, orderOverview.fileBasedState());
-        assertEquals(OrderSourceType.fileBased, orderOverview.sourceType());
+        assertEquals(OrderSourceType.Permanent, orderOverview.sourceType());
         assertEquals(Optional.of(EPOCH), toJavaOptional(orderOverview.nextStepAt()));
     }
 
@@ -133,7 +133,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
             .findFirst().get();
         assertEquals(new NodeId("100"), orderOverview.nodeId());
         assertEquals(FileBasedState.not_initialized, orderOverview.fileBasedState());
-        assertEquals(OrderSourceType.adHoc, orderOverview.sourceType());
+        assertEquals(OrderSourceType.AdHoc, orderOverview.sourceType());
         assertEquals(Optional.of(Instant.parse("2038-01-01T11:22:33Z")), toJavaOptional(orderOverview.nextStepAt()));
     }
 
