@@ -32,6 +32,7 @@
                                     <include>com.sos-berlin.jobscheduler.enginedoc:*</include>
                                 </includes>
                             </artifactSet>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>  <!-- True would not include the needed transitive dependencies -->
                         </configuration>
                     </execution>
                 </executions>
