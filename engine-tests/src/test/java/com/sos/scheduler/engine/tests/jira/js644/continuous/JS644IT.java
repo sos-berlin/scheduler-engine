@@ -1,18 +1,19 @@
 package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.common.sync.Gate;
-import com.sos.scheduler.engine.data.jobchain.JobChainPath;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.JobPath;
-import com.sos.scheduler.engine.data.log.ErrorLogEvent;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderNodeChanged;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.TestEnvironment;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
+import java.io.File;
 import java.time.Duration;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -20,9 +21,6 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
@@ -38,9 +36,6 @@ public final class JS644IT extends SchedulerTest {
     private static final JobChainPath jobChainPath = new JobChainPath("/A");
     private static final ImmutableList<String> jobPaths = ImmutableList.of("/a", "/b", "/c");
     private static final Duration orderTimeout = Duration.ofSeconds(60);
-    private static final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate = new Predicate<ErrorLogEvent>() {
-        @Override public boolean apply(ErrorLogEvent o) { return "SCHEDULER-226".equals(o.getCodeOrNull()); }
-    };
 
     private final Gate<Boolean> threadGate = new Gate<Boolean>();
 
@@ -90,11 +85,12 @@ public final class JS644IT extends SchedulerTest {
         });
     }
 
-    @EventHandler public void handleEvent(OrderNodeChanged e) throws InterruptedException {
-        threadGate.put(true);
-    }
-
-    @EventHandler public void handleEvent(TerminatedEvent e) throws InterruptedException {
-        threadGate.put(false);
+    @EventHandler public void handleEvent(KeyedEvent<Event> e) throws InterruptedException {
+        if (OrderNodeChanged.class.isAssignableFrom(e.event().getClass())) {
+            threadGate.put(true);
+        } else
+        if (TerminatedEvent.class.isAssignableFrom(e.event().getClass())) {
+            threadGate.put(false);
+        }
     }
 }

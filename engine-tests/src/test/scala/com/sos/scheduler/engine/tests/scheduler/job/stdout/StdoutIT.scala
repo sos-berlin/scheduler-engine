@@ -41,32 +41,32 @@ final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
         awaitSuccess(shellRun.started)
         sleep(firstPollAfter - now())
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "SIMPLE-SHELL-STDOUT-1" }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "SIMPLE-SHELL-STDERR-1" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "SIMPLE-SHELL-STDOUT-1" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "SIMPLE-SHELL-STDERR-1" }
 
         awaitSuccess(monitoredShellRun.started)
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestMonitor.StartStdoutMessage }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestMonitor.StartStderrMessage }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "MONITORED-SHELL-STDOUT-1" }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "MONITORED-SHELL-STDERR-1" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestMonitor.StartStdoutMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestMonitor.StartStderrMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "MONITORED-SHELL-STDOUT-1" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "MONITORED-SHELL-STDERR-1" }
 
         awaitSuccess(javaRun.started)
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestJob.StartStdoutMessage }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestJob.StartStderrMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestJob.StartStdoutMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestJob.StartStderrMessage }
 
         awaitSuccess(shellRun.closed)
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "SIMPLE-SHELL-STDOUT-2" }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "SIMPLE-SHELL-STDERR-2" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "SIMPLE-SHELL-STDOUT-2" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "SIMPLE-SHELL-STDERR-2" }
 
         awaitSuccess(monitoredShellRun.closed)
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "MONITORED-SHELL-STDOUT-2" }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains "MONITORED-SHELL-STDERR-2" }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestMonitor.AfterStdoutMessage }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestMonitor.AfterStderrMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "MONITORED-SHELL-STDOUT-2" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains "MONITORED-SHELL-STDERR-2" }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestMonitor.AfterStdoutMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestMonitor.AfterStderrMessage }
 
         awaitSuccess(javaRun.closed)
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestJob.StartStdoutMessage }
-        eventPipe.queued[InfoLogEvent] exists { _.message contains TestJob.StartStderrMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestJob.StartStdoutMessage }
+        eventPipe.queued[InfoLogEvent] exists { _.event.message contains TestJob.StartStderrMessage }
       }
     }
   }

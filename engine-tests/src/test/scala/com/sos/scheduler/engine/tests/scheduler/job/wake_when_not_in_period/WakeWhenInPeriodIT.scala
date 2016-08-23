@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
-import com.sos.scheduler.engine.eventbus.EventHandler
+import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period.WakeWhenInPeriodIT._
 import org.joda.time.DateTimeConstants.MILLIS_PER_DAY
@@ -31,13 +31,13 @@ final class WakeWhenInPeriodIT extends FunSuite with ScalaSchedulerTest {
     val b = SchedulerPeriod(t plusSeconds 8, t plusSeconds 10)
     scheduler executeXml jobElem(List(a, b))
 
-    scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Vor der Periode: unwirksam
+    scheduler executeXml <modify_job job={TestJobPath.string} cmd="wake_when_in_period"/>   // Vor der Periode: unwirksam
     sleepUntil(a.begin plusMillis 100)
-    scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
+    scheduler executeXml <modify_job job={TestJobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
     sleepUntil(a.begin plusMillis 2100)
-    scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
+    scheduler executeXml <modify_job job={TestJobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
     sleepUntil(a.end plusMillis 100)
-    scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Nach der Periode: unwirksam
+    scheduler executeXml <modify_job job={TestJobPath.string} cmd="wake_when_in_period"/>   // Nach der Periode: unwirksam
     sleepUntil(b.begin plusMillis 500)
 
     startTimes should have size 2
@@ -45,18 +45,18 @@ final class WakeWhenInPeriodIT extends FunSuite with ScalaSchedulerTest {
     assert(a contains startTimes(1))
   }
 
-  @EventHandler def handle(e: TaskStarted): Unit = {
-    if (e.jobPath == jobPath)
+  eventBus.on[TaskStarted.type] {
+    case KeyedEvent(TaskKey(jobPath, _), _) ⇒
       startTimes += new LocalTime
   }
 }
 
 private object WakeWhenInPeriodIT {
-  private val jobPath = JobPath("/a")
+  private val TestJobPath = JobPath("/a")
   private val hhmmssFormat = DateTimeFormat.forPattern("HH:mm:ss")
 
   private def jobElem(periods: Iterable[SchedulerPeriod]) =
-    <job name={jobPath.name}>
+    <job name={TestJobPath.name}>
       <script language="shell">exit 0</script>
       <run_time>{ periods map { o => <period begin={hhmmssFormat.print(o.begin)} end={hhmmssFormat.print(o.end)}/>} }</run_time>
     </job>

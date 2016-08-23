@@ -43,16 +43,16 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   override def onSchedulerActivated(): Unit = {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
-      eventPipe.nextWithCondition[TaskClosed] { _.jobPath == orderJobPath }
+      eventPipe.nextWithCondition[TaskClosed.type] { _.key.jobPath == orderJobPath }
       scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
       scheduler executeXml <start_job job={simpleJobPath.string} at={DaylightSavingTimeString}/>
       scheduler executeXml <start_job job={simpleJobPath.string} at={StandardTimeInstantString}><params><param name="myJobParameter" value="myValue"/></params></start_job>
       instance[JobSubsystemClient].forceFileReread(simpleJobPath)
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivated](simpleJobPath)
+      eventPipe.nextKeyed[FileBasedActivated.type](simpleJobPath)
       instance[JobSubsystemClient].forceFileReread(simpleJobPath)
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivated](simpleJobPath)
+      eventPipe.nextKeyed[FileBasedActivated.type](simpleJobPath)
     }
   }
 
@@ -201,7 +201,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       instance[OrderSubsystemClient].forceFileReread(jobChainPath)
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivated](jobChainPath)
+      eventPipe.nextKeyed[FileBasedActivated.type](jobChainPath)
     }
     val jobChain = instance[OrderSubsystemClient].jobChain(jobChainPath)
     pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
@@ -218,7 +218,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       deleteIfExists(instance[OrderSubsystemClient].jobChain(jobChainPath).file) || sys.error("JobChain configuration file could not be deleted")
       instance[FolderSubsystemClient].updateFolders()
-      eventPipe.nextKeyed[FileBasedRemoved](jobChainPath)
+      eventPipe.nextKeyed[FileBasedRemoved.type](jobChainPath)
       tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
       fetchJobChainNodeEntities(jobChainPath) shouldBe 'empty
     }

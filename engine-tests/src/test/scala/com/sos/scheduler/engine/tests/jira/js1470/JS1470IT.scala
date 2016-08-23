@@ -17,7 +17,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1470IT extends FreeSpec with ScalaSchedulerTest {
 
   "sos.spooler.Spooler.start(jobPath)" in {
-    eventBus.awaitingEvent[TaskStarted](_.jobPath == JobPath("/test-b")) {
+    eventBus.awaitingEvent[TaskStarted.type](_.key.jobPath == JobPath("/test-b")) {
       startJob(JobPath("/test-a"))
     }
   }

@@ -50,7 +50,7 @@ final class JS1221IT extends FreeSpec with ScalaSchedulerTest {
     val orderKey = TestJobChainPath.orderKey(file.getPath)
     withEventPipe { eventPipe ⇒
       body
-      eventPipe.nextAny[TaskStarted].jobPath shouldEqual BJobPath
+      eventPipe.nextAny[TaskStarted.type].key.jobPath shouldEqual BJobPath
       eventPipe.nextKeyed[OrderStepStarted](orderKey).nodeId shouldEqual BOrderNodeId
       eventPipe.nextKeyed[OrderFinished](orderKey)
     }

@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.Action
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
-import com.sos.scheduler.engine.test.{EventPipe, SchedulerTestUtils}
+import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOverview}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1003.JS1003IT._

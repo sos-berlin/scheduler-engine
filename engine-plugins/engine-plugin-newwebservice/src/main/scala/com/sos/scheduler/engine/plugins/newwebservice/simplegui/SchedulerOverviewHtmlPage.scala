@@ -43,28 +43,28 @@ extends SchedulerHtmlPage {
         tbody(
           tr(
             td(systemPropertiesHtml),
-            td(cpuAndRamGraphicsHtml)),
+            td(cpuAndRamBarsHtml)),
           tr(
             td(javaPropertiesHtml),
-            td(javaGraphicsHtml(java.memory))))))
+            td(javaBarsHtml(java.memory))))))
 
   private def systemPropertiesHtml: Frag =
     div(cls := "SystemProperties")(
-      p(cls := "Hostname", paddingTop := 4.px)(
-        system.hostname),
+      p(
+        "Host ", system.hostname),
       for (o ← system.distribution) yield
         div(o),
       div(
         java.systemProperties.getOrElse("os.name", "") + " " +
           java.systemProperties.getOrElse("os.version", "")))
 
-  private def cpuAndRamGraphicsHtml: Option[Frag] =
+  private def cpuAndRamBarsHtml: Option[Frag] =
     try
       for (os ← system.mxBeans.get("operatingSystem") map { _.asInstanceOf[Map[String, Any]] };
            total ← os.get("totalPhysicalMemorySize") map { _.asInstanceOf[Number].longValue } if total > 1000*1000;  // Avoid division by zero
            free ← os.get("freePhysicalMemorySize") map { _.asInstanceOf[Number].longValue };
            ratio = free.toDouble / total) yield
-        div(cls := "SystemGraphics")(
+        div(cls := "SystemBar")(
           for (systemCpuLoad ← os.get("systemCpuLoad") map { _.asInstanceOf[Number] };
                processorCount ← os.get("availableProcessors") map { _.asInstanceOf[Number] }) yield
             div(
@@ -75,7 +75,7 @@ extends SchedulerHtmlPage {
                 progressBar(systemCpuLoad.doubleValue)(
                   round(systemCpuLoad.doubleValue * 100).toInt + "% CPU"))),
           List(
-            small("System " + toMiB(total) + " RAM ∙ " + toMiB(free) + " free"),
+            small(toMiB(total) + " RAM ∙ " + toMiB(free) + " free"),
             progress(
               progressBar(1 - ratio)(
                 toMiB(total - free)),
@@ -83,7 +83,7 @@ extends SchedulerHtmlPage {
                 span(color.black)(toMiB(free))))))
     catch {
       case NonFatal(t) ⇒
-        logger.debug(s"cpuAndRamGraphicsHtml: $t")
+        logger.debug(s"cpuAndRamBarsHtml: $t")
         None
   }
 
@@ -93,10 +93,10 @@ extends SchedulerHtmlPage {
       for (o ← java.systemProperties.get("java.vendor")) yield div(s"($o)"))
 
 
-  private def javaGraphicsHtml(memory: JavaInformation.Memory): Frag = {
+  private def javaBarsHtml(memory: JavaInformation.Memory): Frag = {
     import memory.{free, maximum, reserve, used}
-    div(cls := "SystemGraphics")(
-      small("Java " + toMiB(java.memory.total) + " Heap ∙ " + toMiB(java.memory.free) + " free"),
+    div(cls := "SystemBar")(
+      small(toMiB(java.memory.total) + " Heap ∙ " + toMiB(java.memory.free) + " free"),
       progress(
         progressBar(used / maximum.toDouble)(
           toMiB(used)),
@@ -107,7 +107,7 @@ extends SchedulerHtmlPage {
   }
 
   private def schedulerInfoHtml: Frag =
-    div(marginBottom := "30px")(
+    div(cls := "SchedulerOverview")(
       div(
         "Started at ",
         instantWithDurationToHtml(startedAt)),

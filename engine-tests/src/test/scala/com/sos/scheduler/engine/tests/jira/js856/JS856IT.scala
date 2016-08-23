@@ -49,7 +49,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
       val eventPipe = controller.newEventPipe()
       startOrder(List(suspendedParameterName -> suspendedTrue))
       eventPipe.nextAny[OrderStepEnded]
-      eventPipe.nextAny[OrderSuspended]
+      eventPipe.nextAny[OrderSuspended.type]
       orderParameters should equal (whenSuspendedExpectedParameters)
       resetOrder()
     }

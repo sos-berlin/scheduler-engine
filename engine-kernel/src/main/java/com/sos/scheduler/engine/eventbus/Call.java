@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.eventbus;
 
 import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 
 public class Call {
-    private final Event event;
+    private final KeyedEvent<Event> event;
     private final EventSubscription subscription;
 
-    Call(Event event, EventSubscription subscription) {
+    Call(KeyedEvent<Event> event, EventSubscription subscription) {
         this.event = event;
         this.subscription = subscription;
     }
@@ -15,7 +16,7 @@ public class Call {
         subscription.handleEvent(event);
     }
 
-    public final Event getEvent() {
+    public final KeyedEvent<Event> getEvent() {
         return event;
     }
 

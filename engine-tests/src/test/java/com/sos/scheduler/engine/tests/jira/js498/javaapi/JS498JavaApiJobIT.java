@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js498.javaapi;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
@@ -69,10 +71,12 @@ public final class JS498JavaApiJobIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(TaskEnded e) {
-        taskCount++;
-        if (taskCount == jobNames.size())
-            controller().terminateScheduler();
+    public void handleEvent(KeyedEvent<Event> e) {
+        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
+            taskCount++;
+            if (taskCount == jobNames.size())
+                controller().terminateScheduler();
+        }
     }
     private void checkScriptOnlyJob() {
         assertObject("script_only", "script_only");

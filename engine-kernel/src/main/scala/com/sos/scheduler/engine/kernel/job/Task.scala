@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskKey, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -30,6 +30,8 @@ extends UnmodifiableTask with Sister with EventSource {
   def onCppProxyInvalidated(): Unit = {}
 
   private[kernel] def overview = TaskOverview(id, jobPath, state, processClassPath, agentAddress)
+
+  private[kernel] def taskKey = TaskKey(jobPath, id)
 
   private def jobPath = JobPath(cppProxy.job_path)
 

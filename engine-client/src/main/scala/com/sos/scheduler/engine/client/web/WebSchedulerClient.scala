@@ -2,13 +2,14 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{EventId, Event, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
+import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
@@ -69,8 +70,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def jobChainDetails(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetails]](_.jobChain.details(jobChainPath))
 
-  final def events(after: EventId = EventId.BeforeFirst): Future[Snapshot[immutable.Seq[Snapshot[Event]]]] =
-    get[Snapshot[immutable.Seq[Snapshot[Event]]]](_.events(after))
+  def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[AnyKeyedEvent]]]] =
+    get[Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]]](_.events(after = after, limit = limit, reverse = reverse))
 
   final def getJson(pathUri: String): Future[String] =
     get[String](_.uriString(pathUri))

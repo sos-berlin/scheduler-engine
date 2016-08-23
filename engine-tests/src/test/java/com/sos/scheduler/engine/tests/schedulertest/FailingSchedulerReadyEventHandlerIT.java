@@ -1,7 +1,9 @@
 package com.sos.scheduler.engine.tests.schedulertest;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
+import com.sos.scheduler.engine.main.event.SchedulerReadyEvent$;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
 
@@ -12,7 +14,8 @@ public final class FailingSchedulerReadyEventHandlerIT extends SchedulerTest {
         controller().close();
     }
 
-    @HotEventHandler public void handleEvent(SchedulerReadyEvent e) {
-        throw new TestError();
+    @HotEventHandler public void handleEvent(KeyedEvent<Event> e) {
+        if (e.event() == SchedulerReadyEvent$.MODULE$)
+            throw new TestError();
     }
 }

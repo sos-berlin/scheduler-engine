@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1195
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -28,11 +29,11 @@ extends AttachableNamespaceXmlPlugin {
   val xmlNamespace = "http://example.com/TestPlugin"
 
   override def onActivate(): Unit = {
-    eventBus.onHotEventSourceEvent[OrderStepEnded] {
-      case EventSourceEvent(e: OrderStepEnded, order: Order) ⇒
+    eventBus.onHotEventSourceEvent[Event] {
+      case KeyedEvent(orderKey: OrderKey, EventSourceEvent(e: OrderStepEnded, order: Order)) ⇒
         for (conf ← nodeConfigurations.get(order.nodeKey)) {
           val command = OrderCommand(
-            OrderKey(conf.jobChainPath, order.id),
+            OrderKey(conf.jobChainPath, orderKey.id),
             parameters = order.variables)
           xmlCommandExecutor executeXml command.xmlString //TODO Fehlerbehandlung?
         }

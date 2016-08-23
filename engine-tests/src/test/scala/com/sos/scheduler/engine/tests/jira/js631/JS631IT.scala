@@ -23,16 +23,16 @@ final class JS631IT extends FreeSpec with ScalaSchedulerTest {
   "Without reset" in {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <modify_order job_chain={AOrderKey.jobChainPath.string} order={AOrderKey.id.string} at="now"/>
-      eventPipe.nextKeyed[OrderStarted](AOrderKey)
-      eventPipe.nextKeyed[OrderNestedStarted](AOrderKey)
+      eventPipe.nextKeyed[OrderStarted.type](AOrderKey)
+      eventPipe.nextKeyed[OrderNestedStarted.type](AOrderKey)
       eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).fromNodeId shouldEqual A1NodeId
       eventPipe.nextKeyed[OrderNodeChanged](AOrderKey).fromNodeId shouldEqual A2NodeId
-      eventPipe.nextKeyed[OrderNestedFinished](AOrderKey)
-      eventPipe.nextKeyed[OrderNestedStarted](BOrderKey)
+      eventPipe.nextKeyed[OrderNestedFinished.type](AOrderKey)
+      eventPipe.nextKeyed[OrderNestedStarted.type](BOrderKey)
       eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).fromNodeId shouldEqual B1NodeId
       eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).fromNodeId shouldEqual B2NodeId
       eventPipe.nextKeyed[OrderNodeChanged](BOrderKey).fromNodeId shouldEqual B3NodeId
-      eventPipe.nextKeyed[OrderNestedFinished](BOrderKey)
+      eventPipe.nextKeyed[OrderNestedFinished.type](BOrderKey)
       eventPipe.nextKeyed[OrderFinished](BOrderKey)
     }
   }

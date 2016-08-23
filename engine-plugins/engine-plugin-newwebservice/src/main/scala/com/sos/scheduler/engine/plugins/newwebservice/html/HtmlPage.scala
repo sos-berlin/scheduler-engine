@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.html
 import com.sos.scheduler.engine.common.scalautil.Logger
 import scala.language.implicitConversions
 import scalatags.Text.TypedTag
+import scalatags.Text.all._
 import spray.http.HttpEntity
 import spray.http.MediaTypes.`text/html`
 import spray.httpx.marshalling.Marshaller
@@ -29,4 +30,7 @@ object HtmlPage {
         throw new RuntimeException(e.toString, e)  // Too avoid termination of Akka
     }
   }
+
+  def joinHtml(glue: Modifier)(elements: Modifier*): Modifier =
+    elements reduce { (a, b) ⇒ SeqNode(Vector(a, glue, b)) }
 }

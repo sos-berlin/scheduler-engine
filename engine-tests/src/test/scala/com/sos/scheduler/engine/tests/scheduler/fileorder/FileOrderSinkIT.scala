@@ -122,7 +122,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
   }
 
   private def runUntilFileRemovedMessage(orderKey: OrderKey)(body: ⇒ Unit): Unit =
-    eventBus.awaitingEvent[LogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
+    eventBus.awaitingEvent[LogEvent](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
       body
     }
 }

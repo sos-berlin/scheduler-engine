@@ -44,7 +44,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
         eventBus.awaitingEvent2[ErrorLogEvent](TestDuration, _ ⇒ true) {
           writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
           runJob(JobPath("/test"))   // Smoke test
-          eventBus.on[TaskClosed] { case _ ⇒ count.incrementAndGet() }
+          eventBus.on[TaskClosed.type] { case _ ⇒ count.incrementAndGet() }
           for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()
         }
       }

@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.eventbus;
 
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.annotated.HotMethodEventSubscriptionFactory;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
-import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,17 +13,17 @@ import java.util.Collection;
 public class HotEventBus extends AbstractEventBus {
     private static final Logger logger = LoggerFactory.getLogger(HotEventBus.class);
 
-    @Nullable private Event currentEvent = null;
+    @Nullable private KeyedEvent<Event> currentEvent = null;
 
     public HotEventBus() {
         super(HotMethodEventSubscriptionFactory.singleton);
     }
 
-    @Override public final void publish(Event e) {
+    @Override public final void publish(KeyedEvent<Event> e) {
         publish(e, calls(e));
     }
 
-    final void publish(Event e, Collection<Call> calls) {
+    final void publish(KeyedEvent<Event> e, Collection<Call> calls) {
         if (currentEvent != null)
             handleRecursiveEvent(e);
         else
@@ -31,7 +32,7 @@ public class HotEventBus extends AbstractEventBus {
 
     //@Override public final void dispatchEvents() {}
 
-    private void handleRecursiveEvent(Event e) {
+    private void handleRecursiveEvent(KeyedEvent<Event> e) {
         try {
             // Kein log().error(), sonst gibt es wieder eine Rekursion
             throw new Exception(EventSubsystem.class.getSimpleName() + ".publish("+e+"): ignoring the event triggered by handling the event '"+currentEvent+"'");
@@ -41,7 +42,7 @@ public class HotEventBus extends AbstractEventBus {
         }
     }
 
-    private void dispatchNonrecursiveEvent(Event e, Collection<Call> calls) {
+    private void dispatchNonrecursiveEvent(KeyedEvent<Event> e, Collection<Call> calls) {
         currentEvent = e;
         try {
             for (Call c: calls)

@@ -31,10 +31,10 @@ final class JS1227IT extends FreeSpec with ClusterTest {
 
   "Suspend order running in some other scheduler" in {
     awaitSuccess(otherScheduler.postCommand(ModifyJobCommand(TestJobPath, cmd = Some(ModifyJobCommand.Cmd.Stop))))
-    eventBus.awaitingKeyedEvent[OrderStarted](AOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderStarted.type](AOrderKey) {
       scheduler executeXml OrderCommand(AOrderKey)
     }
-    eventBus.awaitingKeyedEvent[OrderSuspended](AOrderKey) {
+    eventBus.awaitingKeyedEvent[OrderSuspended.type](AOrderKey) {
       awaitFailure(otherScheduler.postCommand(ModifyOrderCommand(AOrderKey, suspended = Some(true)))) match {
         case e: Exception if e.getMessage startsWith s"$OrderIsOccupiedMessageCode " ⇒
       }

@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.data.event.{Event, EventId, Snapshot}
-import com.sos.scheduler.engine.data.order.OrderEvent
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Snapshot}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.isInSchedulerThread
@@ -12,6 +11,7 @@ import java.util.NoSuchElementException
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.{Inject, Singleton}
 import scala.annotation.tailrec
+import scala.collection.AbstractIterator
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -23,7 +23,7 @@ private[kernel] final class EventCollector @Inject private(eventBus: SchedulerEv
   (implicit stcq: SchedulerThreadCallQueue, ec: ExecutionContext)
 extends HasCloser {
 
-  private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, Snapshot[Event]]
+  private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, Snapshot[AnyKeyedEvent]]
   private val ids = new UniqueTimestampedIdIterator
 
   @volatile
@@ -35,14 +35,14 @@ extends HasCloser {
   @volatile
   private var eventArrivedPromiseUsed = false
 
-  eventBus.onHot[OrderEvent] { case event if isInSchedulerThread/*just to be sure*/ ⇒
+  eventBus.onHot[Event] { case event if isInSchedulerThread/*just to be sure*/ ⇒
+    val id = ids.next()
     if (queueSize >= EventQueueSizeLimit) {
       lastRemovedFirstId = queue.firstKey
       queue.remove(lastRemovedFirstId)
       queueSize -= 1
       // TODO Cancel iterator if not after queue.firstEvent
     }
-    val id = ids.next()
     queue.put(id, Snapshot(event)(id))
     queueSize += 1
     val p = eventArrivedPromise
@@ -52,26 +52,40 @@ extends HasCloser {
     p.success(())
   }
 
-  def iteratorFuture(after: EventId): Future[Iterator[Snapshot[Event]]] = {
+  /**
+    * @param reverse, true may be slow
+    */
+  def iteratorFuture(after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[AnyKeyedEvent]]] = {
+    def i = if (reverse) reverseIterator(after) else iterator(after)
     if (queue.navigableKeySet.higher(after) != null)
-      Future.successful(iterator(after))
+      Future.successful(i)
     else {
       //eventArrivedPromiseUsed = true
       for (() ← eventArrivedPromise.future) yield
-        iterator(after)
+        i
     }
   }
 
-  def iterator(after: EventId): Iterator[Snapshot[Event]] =
+  def iterator(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
     queue.navigableKeySet.tailSet(after, false).iterator map { k ⇒
-      val value = queue.get(k) match {
-        case null ⇒ throw new NoSuchElementException("Event queue overflow while reading")
-        case v: Snapshot[Event] ⇒ v
-      }
       //if (after != 0 && after < queue.firstKey) ... events lost
       //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called
+      val value = queue.get(k)
+      if (value == null) throw new NoSuchElementException("Event queue overflow while reading")
       value
   }
+
+  /** May be slow */
+  def reverseIterator(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
+    new AbstractIterator[Snapshot[AnyKeyedEvent]] {
+      private val bufferedDelegate = (queue.navigableKeySet.descendingIterator takeWhile { _ > after } map queue.get).buffered
+      def hasNext = bufferedDelegate.hasNext && bufferedDelegate.head != null
+      def next() = {
+        val o = bufferedDelegate.next
+        if (o == null) throw new NoSuchElementException
+        o
+      }
+    }
 
   def newEventId(): EventId = ids.next()
 }

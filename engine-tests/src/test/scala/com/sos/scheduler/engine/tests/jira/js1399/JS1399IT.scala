@@ -38,7 +38,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
       intercept[TimeoutException] {
         implicit val implicitTimeout = ImplicitTimeout(10.s)
-        eventBus.awaitingKeyedEvent[OrderStarted](orderKey) {
+        eventBus.awaitingKeyedEvent[OrderStarted.type](orderKey) {
           assert(!exists(matchingFile))
           touch(matchingFile)
         }
@@ -55,7 +55,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
       intercept[TimeoutException] {
         implicit val implicitTimeout = ImplicitTimeout(10.s)
-        eventBus.awaitingKeyedEvent[OrderStarted](orderKey) {
+        eventBus.awaitingKeyedEvent[OrderStarted.type](orderKey) {
           assert(!exists(matchingFile))
           touch(matchingFile)
         }
@@ -75,7 +75,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         writeConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(s"http://127.0.0.1:$deadPort")))
         intercept[TimeoutException] {
           implicit val implicitTimeout = ImplicitTimeout(10.s)
-          eventBus.awaitingKeyedEvent[OrderStarted](orderKey) {
+          eventBus.awaitingKeyedEvent[OrderStarted.type](orderKey) {
             assert(!exists(matchingFile))
             touch(matchingFile)
           }

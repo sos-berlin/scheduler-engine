@@ -21,6 +21,6 @@ final class JS994twoIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("Sich einander referenzierende schedule sollen abgewiesen werden") {
-    eventPipe.nextAny[ErrorLogEvent].message should startWith("SCHEDULER-463")
+    eventPipe.nextAny[ErrorLogEvent].event.message should startWith("SCHEDULER-463")
   }
 }

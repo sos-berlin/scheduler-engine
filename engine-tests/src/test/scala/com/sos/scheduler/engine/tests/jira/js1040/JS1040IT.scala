@@ -50,7 +50,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
         removeJobChain()
       withEventPipe { eventPipe ⇒
         scheduler executeXml jobChainElem(ordersAreRecoverable)
-        eventPipe.nextKeyed[FileBasedActivated](testJobChainPath)
+        eventPipe.nextKeyed[FileBasedActivated.type](testJobChainPath)
       }
     }
 
@@ -58,7 +58,7 @@ final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
       withEventPipe { eventPipe ⇒
         orderSubsystem.remove(testJobChainPath)
         eventBus.dispatchEvents()
-        eventPipe.nextKeyed[FileBasedRemoved](testJobChainPath)
+        eventPipe.nextKeyed[FileBasedRemoved.type](testJobChainPath)
       }
     }
   }

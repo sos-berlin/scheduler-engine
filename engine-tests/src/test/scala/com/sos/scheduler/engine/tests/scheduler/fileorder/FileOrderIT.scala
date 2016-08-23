@@ -99,7 +99,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
             eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
               touch(file)
             }
-            val startedAgain = eventBus.keyedEventFuture[OrderStarted](orderKey)
+            val startedAgain = eventBus.keyedEventFuture[OrderStarted.type](orderKey)
             assert(orderIsBlacklisted(orderKey))
             sleep(repeat + delay)
             assert(orderIsBlacklisted(orderKey))
@@ -112,7 +112,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
         controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
           runUntilFileRemovedMessage(orderKey) {
             eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
-              val started = eventBus.keyedEventFuture[OrderStarted](orderKey)
+              val started = eventBus.keyedEventFuture[OrderStarted.type](orderKey)
               assert(!started.isCompleted)
               sleep(repeat + delay)
               assert(!started.isCompleted)
@@ -133,7 +133,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
       val ignoredFile = directory / "IGNORED-FILE"
       List(matchingFile, ignoredFile) foreach touch
       val List(matchingOrderKey, ignoredOrderKey) = List(matchingFile, ignoredFile) map { TestJobChainPath orderKey _.toString }
-      val ignoredStarted = eventBus.keyedEventFuture[OrderStarted](ignoredOrderKey)
+      val ignoredStarted = eventBus.keyedEventFuture[OrderStarted.type](ignoredOrderKey)
       controller.toleratingErrorCodes(orderBlacklistedErrorSet) {
         runUntilFileRemovedMessage(matchingOrderKey) {
           eventBus.awaitingKeyedEvent[OrderFinished](matchingOrderKey) {
@@ -151,7 +151,7 @@ final class FileOrderIT extends FreeSpec with ScalaSchedulerTest with AgentWithS
   }
 
   private def runUntilFileRemovedMessage(orderKey: OrderKey)(body: ⇒ Unit): Unit =
-    eventBus.awaitingEvent[LogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
+    eventBus.awaitingEvent[LogEvent](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
       body
     }
 }

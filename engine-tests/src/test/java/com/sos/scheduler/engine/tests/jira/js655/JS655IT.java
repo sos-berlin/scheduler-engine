@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.tests.jira.js655;
 
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.common.system.Files;
-import com.sos.scheduler.engine.data.filebased.FileBasedActivated;
-import com.sos.scheduler.engine.data.filebased.FileBasedRemoved;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.filebased.FileBasedActivated$;
+import com.sos.scheduler.engine.data.filebased.FileBasedRemoved$;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -17,8 +17,6 @@ import com.sun.jersey.api.client.WebResource;
 import java.io.File;
 import java.net.URI;
 import org.junit.Test;
-
-import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.jobChainActivated;
 import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.jobChainRemoved;
 import static com.sos.scheduler.engine.tests.jira.js655.JS655IT.M.terminated;
@@ -74,21 +72,17 @@ public final class JS655IT extends SchedulerTest {
         assertThat(response.getStatus(), equalTo(INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
-    @HotEventHandler public void handleEvent(FileBasedActivated e, JobChain jobChain) throws InterruptedException {
-        ignore(e);
-        if (jobChain.overview().path().equals(rightJobChainPath))
-            gate.put(jobChainActivated);
-    }
-
-    @HotEventHandler public void handleEvent(FileBasedRemoved e, JobChain jobChain) throws InterruptedException {
-        ignore(e);
-        if (jobChain.overview().path().equals(rightJobChainPath))
-            gate.put(jobChainRemoved);
-    }
-
-    @EventHandler public void handleEvent(TerminatedEvent e) throws InterruptedException {
-        // Nur für Fehlerfall
-        ignore(e);
-        gate.put(terminated);
+    @HotEventHandler public void handleEvent(KeyedEvent<Event> e) throws InterruptedException {
+        if (e.event().equals(FileBasedActivated$.MODULE$)) {
+            if (e.key().equals(rightJobChainPath)) {
+                gate.put(jobChainActivated);
+            }
+        } else if (e.event().equals(FileBasedRemoved$.MODULE$)) {
+            if (e.key().equals(rightJobChainPath)) {
+                gate.put(jobChainRemoved);
+            }
+        } else if (TerminatedEvent.class.isAssignableFrom(e.event().getClass())) {
+            gate.put(terminated);
+        }
     }
 }

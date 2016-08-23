@@ -2,10 +2,13 @@ package com.sos.scheduler.engine.tests.jira.js948;
 
 import static org.junit.Assert.assertEquals;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.job.TaskEnded;
+import com.sos.scheduler.engine.data.job.TaskKey;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.data.job.JobPath;
-import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
@@ -61,19 +64,22 @@ public class JS948IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(TaskEnded e) {
-        tasksCompleted++;
-        if (tasksCompleted == 1)
-            assertEquals("repeat", e.jobPath().name());       // läuft beim Start des JobScheduler automatisch an
+    public void handleEvent(KeyedEvent<Event> keyedEvent) {
+        if (TaskEnded.class.isAssignableFrom(keyedEvent.event().getClass())) {
+            TaskKey taskKey = (TaskKey)keyedEvent.key();
+            tasksCompleted++;
+            if (tasksCompleted == 1)
+                assertEquals("repeat", taskKey.jobPath().name());       // läuft beim Start des JobScheduler automatisch an
 
-        // Erneuter Start durch wake_when_in_period
-        if (modifyCommands < maxModifyCommands) {          // absolute_repeat.job wird beim Start des JobScheduler 1x ausgeführt
-            modifyCommands++;
-            scheduler().executeXml("<modify_job job=\"" + jobPath.string() + "\" cmd=\"wake_when_in_period\" />");
-        }
+            // Erneuter Start durch wake_when_in_period
+            if (modifyCommands < maxModifyCommands) {          // absolute_repeat.job wird beim Start des JobScheduler 1x ausgeführt
+                modifyCommands++;
+                scheduler().executeXml("<modify_job job=\"" + jobPath.string() + "\" cmd=\"wake_when_in_period\" />");
+            }
 
-        if (tasksCompleted == maxTasks) {
-            controller().terminateScheduler();
+            if (tasksCompleted == maxTasks) {
+                controller().terminateScheduler();
+            }
         }
     }
 }

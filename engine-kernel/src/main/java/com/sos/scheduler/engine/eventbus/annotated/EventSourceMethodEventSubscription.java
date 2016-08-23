@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
 import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.EventSourceEvent;
@@ -9,9 +10,9 @@ import java.lang.reflect.Method;
 
 /** Eine {@link com.sos.scheduler.engine.eventbus.EventSubscription} für eine mit
  * {@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit einem
- * Parameter für das {@link Event} und einem zweiten Parameter für {@link EventSource}
+ * Parameter für das {@link KeyedEvent} und einem zweiten Parameter für {@link EventSource}
  * mit dem auslösenden Objekt. Das auslösende Objekt (zum Beispiel eine Order) ist nur in einem
- * {@code HotEventHandler} gültig, weshalb es nicht ins {@code Event} aufgenommen wird. */
+ * {@code HotEventHandler} gültig, weshalb es nicht ins {@code AnyKeyedEvent} aufgenommen wird. */
 public class EventSourceMethodEventSubscription extends MethodEventSubscription {
     private final Class<? extends EventSource> eventSourceClass;
 
@@ -25,9 +26,10 @@ public class EventSourceMethodEventSubscription extends MethodEventSubscription 
         return eventSourceClass.isAssignableFrom(e.eventSource().getClass());
     }
 
-    @Override protected final void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException {
-        EventSourceEvent<?> e = (EventSourceEvent<?>)event;
-        getMethod().invoke(getAnnotatedObject(), e.event(), e.eventSource());
+    @Override protected final void invokeHandler(KeyedEvent<Event> keyedEvent) throws InvocationTargetException, IllegalAccessException {
+        EventSourceEvent<?> sourceEvent = (EventSourceEvent<?>)keyedEvent.event();
+        KeyedEvent<Event> cleanedKeyedEvent = new KeyedEvent<>(keyedEvent.key(), sourceEvent);
+        getMethod().invoke(getAnnotatedObject(), cleanedKeyedEvent, sourceEvent.eventSource());
     }
 
     @Override public String toString() {

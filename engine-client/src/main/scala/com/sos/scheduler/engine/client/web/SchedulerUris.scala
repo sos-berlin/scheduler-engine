@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.client.web
 
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQueryHttp}
 import com.sos.scheduler.engine.common.scalautil.Collections._
@@ -109,7 +110,13 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   def events =  uriString(Uri.Path("api/event/"))
 
-  def events(after: EventId) =  uriString(Uri.Path("api/event/"), "after" → after.toString)
+  def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, reverse: Boolean = false) = {
+    require(limit > 0, "Limit must not be below zero")
+    val lim = if (reverse) -limit else limit
+    uriString(Uri.Path("api/event/"),
+      (after != EventId.BeforeFirst list ("after" → s"$after")) :::
+      (lim != Int.MaxValue list ("limit" → s"$lim")): _*)
+  }
 
   def uriString(path: Uri.Path, parameters: (String, String)*): String =
     resolvePathUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString

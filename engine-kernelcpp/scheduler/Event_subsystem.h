@@ -15,8 +15,8 @@ struct Event_subsystem: Object, Subsystem
 {
                                 Event_subsystem             ( Scheduler* scheduler, Type_code t )  : Subsystem( scheduler, this, t ) {}
 
-    virtual void                report                      (const AbstractEventJ&)                         = 0;
-    virtual void                report                      (const AbstractEventJ&, const ObjectJ& event_source) = 0;
+    virtual void                report                      (const KeyedEventJ&)                         = 0;
+    virtual void                report                      (const KeyedEventJ&, const ObjectJ& event_source) = 0;
     virtual void                report_event_code           (Event_code, const ObjectJ& event_source) = 0;
 };
 

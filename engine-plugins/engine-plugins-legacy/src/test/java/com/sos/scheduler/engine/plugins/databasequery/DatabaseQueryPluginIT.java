@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -17,14 +19,17 @@ public final class DatabaseQueryPluginIT extends SchedulerTest {
         controller().waitForTermination(timeout);
     }
 
-    @EventHandler public void handleEvent(TaskEnded e) {
-        try {
-            String result = execute("<showTaskHistory/>");
-            assertThat(result, containsString("</myResult>"));
-            assertThat(result, containsString("<row "));
-            assertThat(result, containsString(" job="));
-        } finally {
-            controller().terminateScheduler();
+    @EventHandler
+    public void handleEvent(KeyedEvent<Event> e) {
+        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
+            try {
+                String result = execute("<showTaskHistory/>");
+                assertThat(result, containsString("</myResult>"));
+                assertThat(result, containsString("<row "));
+                assertThat(result, containsString(" job="));
+            } finally {
+                controller().terminateScheduler();
+            }
         }
     }
 

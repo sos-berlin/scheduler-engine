@@ -59,12 +59,12 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       events.nextKeyed[OrderStepStarted](orderKey)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
       sleep(2.s)
-      eventBus.awaitingEvent[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-989")) { // "Process_class cannot be removed now, it will be done later"
+      eventBus.awaitingEvent[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-989")) { // "Process_class cannot be removed now, it will be done later"
         delete(file)
         instance[FolderSubsystemClient].updateFolders()
       }
-      events.next[TaskEnded](_.jobPath == JavaJobPath, 10.s)
-      events.nextKeyed[FileBasedRemoved](AProcessClassPath)
+      events.nextWithTimeoutAndCondition[TaskEnded](_.key.jobPath == JavaJobPath, 10.s)
+      events.nextKeyed[FileBasedRemoved.type](AProcessClassPath)
       assert(orderOverview(orderKey).nodeId == NodeId("200"))
       writeConfigurationFile(AProcessClassPath, fileContent)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
@@ -79,9 +79,9 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     runOrder(aOrderKey).nodeId shouldEqual NodeId("END")
     withEventPipe { events ⇒
       scheduler executeXml OrderCommand(bOrderKey)
-      events.next[InfoLogEvent](_.codeOption contains MessageCode("SCHEDULER-271"))   // "Task is being terminated in favour of ..."
-      events.next[TaskEnded](_.jobPath == JavaJobPath)
-      events.next[TaskStarted](_.jobPath == JavaJobPath)
+      events.nextWithCondition[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-271"))   // "Task is being terminated in favour of ..."
+      events.nextWithCondition[TaskEnded](_.key.jobPath == JavaJobPath)
+      events.nextWithCondition[TaskStarted.type](_.key.jobPath == JavaJobPath)
       events.nextKeyed[OrderFinished](bOrderKey).nodeId shouldBe NodeId("END")
     }
     assert(jobOverview(JavaJobPath).state == JobState.running)

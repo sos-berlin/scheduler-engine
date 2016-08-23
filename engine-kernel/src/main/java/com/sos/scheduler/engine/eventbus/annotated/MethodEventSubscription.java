@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
-import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,12 +13,12 @@ import static com.google.common.base.Throwables.propagate;
 /** Eine {@link EventSubscription} für eine mit {@link com.sos.scheduler.engine.eventbus.EventHandler} oder
  * {@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode. */
 abstract class MethodEventSubscription implements EventSubscription {
-    private final Class<? extends Event> eventClass;
+    private final Class<? extends KeyedEvent<Event>> eventClass;
     private final EventHandlerAnnotated annotatedObject;
     private final Method method;
 
     MethodEventSubscription(EventHandlerAnnotated o, Method method) {
-        this.eventClass = checkedParameterClass(method, 0, Event.class);
+        this.eventClass = checkedParameterClass(method, 0, KeyedEvent.class);
         this.annotatedObject = o;
         checkReturnType(method);
         this.method = method;
@@ -51,7 +52,7 @@ abstract class MethodEventSubscription implements EventSubscription {
         return c == Void.class || c.getName().equals("void");
     }
 
-    @Override public final void handleEvent(Event event) {
+    @Override public final void handleEvent(KeyedEvent<Event> event) {
         try {
             invokeHandler(event);
         } catch (IllegalArgumentException x) { throw new Error("Method "+ method +" rejected argument '"+event+"'", x);
@@ -61,9 +62,9 @@ abstract class MethodEventSubscription implements EventSubscription {
         }
     }
 
-    protected abstract void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException;
+    protected abstract void invokeHandler(KeyedEvent<Event> event) throws InvocationTargetException, IllegalAccessException;
 
-    @Override public final Class<? extends Event> eventClass() {
+    @Override public final Class<? extends KeyedEvent<Event>> eventClass() {
         return eventClass;
     }
 

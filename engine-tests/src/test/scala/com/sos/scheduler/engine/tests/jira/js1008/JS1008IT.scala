@@ -23,7 +23,7 @@ final class JS1008IT extends FreeSpec with ScalaSchedulerTest {
     orderSubsystem.jobChain(testJobChainPath).node(NodeId("200")).action = JobChainNodeAction.stop
     val file = new File(directory, "test")
     touch(file)
-    eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == testJobChainPath.orderKey(file.getPath) }
+    eventPipe.nextKeyed[OrderStepEnded](testJobChainPath.orderKey(file.getPath))
   }
 }
 

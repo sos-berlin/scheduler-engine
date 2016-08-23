@@ -5,8 +5,8 @@
 
 #include "Event_code.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__data__event__AbstractEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent AbstractEventJ;
+#include "../javaproxy/com__sos__scheduler__engine__data__event__KeyedEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent KeyedEventJ;
 
 namespace sos {
 namespace scheduler {
@@ -100,8 +100,8 @@ struct Scheduler_object
     virtual Prefix_log*         log                         () const = 0;
 
     virtual void                close                       ()                                      {}
-    void                        report_event                (const AbstractEventJ&);
-    void                        report_event                (const AbstractEventJ&, const ObjectJ& eventSource);
+    void                        report_event                (const KeyedEventJ&);
+    void                        report_event                (const KeyedEventJ&, const ObjectJ& eventSource);
     void                        report_event_code           (Event_code event_code, const ObjectJ& eventSource);
     virtual string              obj_name                    () const                                { return name_of_type_code(scheduler_type_code()); }
 };

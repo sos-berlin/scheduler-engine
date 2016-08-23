@@ -2,10 +2,11 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.FrontEndRoute._
-import spray.http.CacheDirectives.`min-fresh`
+import spray.http.CacheDirectives.`max-age`
 import spray.http.HttpHeaders.`Cache-Control`
 import spray.routing.Directives._
 import spray.routing.Route
+import spray.routing.directives.CachingDirectives._
 
 /**
   * @author Joacim Zschimmer
@@ -13,16 +14,20 @@ import spray.routing.Route
 trait FrontEndRoute extends WebjarsRoute {
 
   final def frontEndRoute: Route =
-    pathPrefix("webjars") {
-      webjarsRoute
-    } ~
-    get {
-      respondWithHeader(`Cache-Control`(`min-fresh`(60))) {
-        getFromResourceDirectory(FrontendResourceDirectory.path)
+    cache(routeCache()) {  // Cache slow Jar reads
+      pathPrefix("webjars") {
+        webjarsRoute
+      } ~
+      get {
+        respondWithHeader(ShortTimeCaching) {
+          getFromResourceDirectory(FrontendResourceDirectory.path)
+        }
       }
     }
 }
 
 object FrontEndRoute {
+  /** For quicker response, we asume an installation of a changed JobScheduler version takes more than a minute. */
+  private val ShortTimeCaching = `Cache-Control`(`max-age`(60))
   private val FrontendResourceDirectory = JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend")
 }

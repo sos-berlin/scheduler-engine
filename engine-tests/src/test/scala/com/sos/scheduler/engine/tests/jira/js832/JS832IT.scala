@@ -22,7 +22,7 @@ final class JS832IT extends FunSuite with ScalaSchedulerTest {
     val firstLines = new mutable.HashSet[String]
     for (i <- 1 to 3) {
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at="now"/>
-      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
+      eventPipe.nextKeyed[OrderFinished](orderKey)
       val line = firstLine(logFile(orderKey))
       firstLines should not contain line    // Erste Zeile hat jedesmal einen neuen Zeitstempel
       firstLines += line

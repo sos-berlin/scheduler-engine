@@ -101,7 +101,7 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         result = body
         result.returnCode shouldEqual ReturnCode.StandardFailure
       }
-      events.queued[ErrorLogEvent] flatMap { _.codeOption } contains MessageCode("SCHEDULER-202")
+      events.queued[ErrorLogEvent] flatMap { _.event.codeOption } contains MessageCode("SCHEDULER-202")
       // How to check the process has actually being killed ??? EventBus!
     }
     result

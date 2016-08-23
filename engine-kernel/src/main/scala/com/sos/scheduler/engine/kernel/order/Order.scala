@@ -230,7 +230,7 @@ with OrderPersistence {
 
   private[order] def createdAtOption: Option[Instant] = throw new UnsupportedOperationException
 
-  override def toString = getClass.getSimpleName + (idOnce.toOption map { o ⇒ s"('$o')" })
+  override def toString = List(getClass.getSimpleName) ++ (idOnce.toOption map { o ⇒ s"('$o')" }) mkString " "
 
   private[kernel] def setOnBlacklist(): Unit = cppProxy.set_on_blacklist()
 

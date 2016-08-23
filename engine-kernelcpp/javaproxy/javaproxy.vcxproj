@@ -190,7 +190,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__cplusplus__runtime__Sister.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__data__event__AbstractEvent.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.cxx" />
@@ -293,6 +293,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__SimpleJobNode.cxx" />
     
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderCallback.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__data__event__KeyedEvent.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

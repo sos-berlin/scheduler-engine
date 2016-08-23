@@ -3,7 +3,7 @@
 #include "spooler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__event__AbstractEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__event__KeyedEvent.h"
 #include "../javaproxy/java__lang__String.h"
 
 using namespace std;
@@ -11,7 +11,7 @@ using namespace std;
 namespace sos {
 namespace scheduler {
 
-typedef javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent AbstractEventJ;
+typedef javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent KeyedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem EventSubsystemJ;
 
 //-------------------------------------------------------------------------------------------static
@@ -31,8 +31,8 @@ struct Event_subsystem_impl : Event_subsystem
     string                      name                        () const                                { return "event_subsystem"; }
 
     // Event_subsystem
-    void                        report                      (const AbstractEventJ&);
-    void                        report                      (const AbstractEventJ&, const ObjectJ&);
+    void                        report                      (const KeyedEventJ&);
+    void                        report                      (const KeyedEventJ&, const ObjectJ&);
     virtual void                report_event_code           (Event_code, const ObjectJ& event_source);
 
 private:
@@ -87,7 +87,7 @@ bool Event_subsystem_impl::subsystem_activate()
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
-void Event_subsystem_impl::report(const AbstractEventJ& eventJ)
+void Event_subsystem_impl::report(const KeyedEventJ& eventJ)
 {
     if (_eventSubsystemJ) 
         _eventSubsystemJ.report(eventJ);
@@ -95,7 +95,7 @@ void Event_subsystem_impl::report(const AbstractEventJ& eventJ)
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
-void Event_subsystem_impl::report(const AbstractEventJ& eventJ, const ObjectJ& eventSourceJ) {
+void Event_subsystem_impl::report(const KeyedEventJ& eventJ, const ObjectJ& eventSourceJ) {
     if (_eventSubsystemJ) 
         _eventSubsystemJ.report(eventJ, eventSourceJ);
 }

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.client.web
 
+import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderSourceType
@@ -84,6 +85,13 @@ final class SchedulerUrisTest extends FreeSpec {
 
   "task.overview" in {
     assert(uris.task.overview(TaskId(123)) == "http://0.0.0.0:1111/jobscheduler/master/api/task/123")
+  }
+
+  "event" in {
+    assert(uris.events == "http://0.0.0.0:1111/jobscheduler/master/api/event/")
+    assert(uris.events(after = EventId(7)) == "http://0.0.0.0:1111/jobscheduler/master/api/event/?after=7")
+    assert(uris.events(limit = 100) == "http://0.0.0.0:1111/jobscheduler/master/api/event/?limit=100")
+    assert(uris.events(limit = 100, reverse = true) == "http://0.0.0.0:1111/jobscheduler/master/api/event/?limit=-100")
   }
 
   "resolveUri" in {

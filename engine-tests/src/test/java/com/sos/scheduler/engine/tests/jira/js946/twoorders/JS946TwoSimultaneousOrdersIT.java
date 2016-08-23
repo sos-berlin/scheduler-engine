@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js946.twoorders;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.data.order.OrderStepStarted;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
@@ -45,16 +46,16 @@ public final class JS946TwoSimultaneousOrdersIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handle(OrderStepStarted e) {
-        numberOfStartedOrders++;
-    }
-
-    @EventHandler
-    public void handle(OrderFinished e) {
-        // Alle Aufträge müssen bereits gestartet worden sein, wenn ein Auftrag beendet wird.
-        assertEquals(maxOrderCount, numberOfStartedOrders);
-        finishedOrderCount += 1;
-        if (finishedOrderCount == maxOrderCount )
-            controller().terminateScheduler();
+    public void handle(KeyedEvent<Event> g) {
+        if (g.event() instanceof OrderStepStarted) {
+            numberOfStartedOrders++;
+        } else
+        if (g.event() instanceof OrderFinished) {
+            // Alle Aufträge müssen bereits gestartet worden sein, wenn ein Auftrag beendet wird.
+            assertEquals(maxOrderCount, numberOfStartedOrders);
+            finishedOrderCount += 1;
+            if (finishedOrderCount == maxOrderCount )
+                controller().terminateScheduler();
+        }
     }
 }

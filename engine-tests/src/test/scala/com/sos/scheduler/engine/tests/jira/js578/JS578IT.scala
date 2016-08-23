@@ -19,27 +19,29 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
   test("<modify_order at='now'/>") {
     val eventPipe = controller.newEventPipe()
     startOrderAt("now")
-    eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
+    eventPipe.nextKeyed[OrderFinished](orderKey)
   }
 
   test("<modify_order at='now'/> while order is running does nothing") {
     val eventPipe = controller.newEventPipe()
     setJobChainNodeStop(true)
     startOrderAt("now")
-    eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey }
+    eventPipe.nextKeyed[OrderStepEnded](orderKey)
     orderSubsystem.orderOverview(orderKey).nodeId should equal (NodeId("200"))
 
     startOrderAt("now")
     setJobChainNodeStop(false)
-    eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
-    intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[OrderStarted](3.s)  { _.orderKey == orderKey }}
+    eventPipe.nextKeyed[OrderFinished](orderKey)
+    intercept[EventPipe.TimeoutException] {
+      eventPipe.nextKeyed[OrderStarted.type](orderKey, 3.s)
+    }
   }
 
   ignore("<modify_order at='next'/> (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       startOrderAt("next")
-      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
+      eventPipe.nextKeyed[OrderFinished](orderKey)
     }
   }
 
@@ -48,14 +50,14 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
       val eventPipe = controller.newEventPipe()
       setJobChainNodeStop(true)
       startOrderAt("next")
-      eventPipe.nextWithCondition[OrderStepEnded] { _.orderKey == orderKey }
+      eventPipe.nextKeyed[OrderStepEnded](orderKey)
       orderSubsystem.orderOverview(orderKey).nodeId should equal (NodeId("200"))
 
       startOrderAt("next")
       setJobChainNodeStop(false)
-      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
-      eventPipe.nextWithCondition[OrderStarted] { _.orderKey == orderKey }
-      eventPipe.nextWithCondition[OrderFinished] { _.orderKey == orderKey }
+      eventPipe.nextKeyed[OrderFinished](orderKey)
+      eventPipe.nextKeyed[OrderStarted.type](orderKey)
+      eventPipe.nextKeyed[OrderFinished](orderKey)
     }
   }
 

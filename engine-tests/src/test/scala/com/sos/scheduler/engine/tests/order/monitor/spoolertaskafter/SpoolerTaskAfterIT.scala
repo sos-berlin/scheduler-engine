@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolertaskafter
 
+import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
 import com.sos.scheduler.engine.data.order.OrderFinished
-import com.sos.scheduler.engine.eventbus.HotEventHandler
+import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -22,8 +23,9 @@ final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
     controller.waitForTermination()
   }
 
-  @HotEventHandler def handleEvent(e: OrderFinished, order: UnmodifiableOrder): Unit = {
-    order.variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
-    controller.terminateScheduler()
+  controller.eventBus.onHotEventSourceEvent[Event] {
+    case KeyedEvent(_, EventSourceEvent(_: OrderFinished, order: UnmodifiableOrder)) ⇒
+      order.variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
+      controller.terminateScheduler()
   }
 }

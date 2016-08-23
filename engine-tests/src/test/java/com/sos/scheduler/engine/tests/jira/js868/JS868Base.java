@@ -1,18 +1,17 @@
 package com.sos.scheduler.engine.tests.jira.js868;
 
-
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
-
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -36,8 +35,10 @@ public abstract class JS868Base extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(OrderFinished e) throws IOException {
-        controller().terminateScheduler();
+    public void handleOrderFinished(KeyedEvent<Event> g) throws IOException {
+        if (g.event() instanceof OrderFinished) {
+            controller().terminateScheduler();
+        }
     }
 
     public abstract void testAssertions();

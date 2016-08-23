@@ -21,6 +21,6 @@ final class JS994oneIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("Ein sich selbst referenzierendes schedule soll abgewiesen werden") {
-    eventPipe.nextAny[ErrorLogEvent].message should (startWith ("SCHEDULER-428") and include ("SCHEDULER-486"))
+    eventPipe.nextAny[ErrorLogEvent].event.message should (startWith ("SCHEDULER-428") and include ("SCHEDULER-486"))
   }
 }

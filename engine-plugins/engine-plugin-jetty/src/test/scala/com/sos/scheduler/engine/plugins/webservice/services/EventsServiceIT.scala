@@ -44,7 +44,7 @@ final class EventsServiceIT extends FunSuite with ScalaSchedulerTest with JettyP
     }
     val result = thread.result.toString()
     for (i <- range) result should include (s"$testString $i")
-    // Das Event ist manchmal nicht drin: result should include (classOf[SchedulerCloseEvent].getSimpleName)
+    // Das Event ist manchmal nicht drin: result should include (classOf[SchedulerClosed].getSimpleName)
   }
 }
 

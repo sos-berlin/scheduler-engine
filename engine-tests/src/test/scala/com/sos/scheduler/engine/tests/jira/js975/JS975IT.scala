@@ -14,7 +14,7 @@ final class JS975IT extends FunSuite with ScalaSchedulerTest {
   test("JS-975 Answer of <show_history job='...' what='log'/> should contain the log element") {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <start_job job={jobPath.string}/>
-    eventPipe.nextWithCondition[TaskEnded] { _.jobPath == jobPath }
+    eventPipe.nextWithCondition[TaskEnded] { _.key.jobPath == jobPath }
     (scheduler executeXml <show_history job={jobPath.string} what="log"/>).string should include("+++ TEXT FOR LOG +++")
   }
 }

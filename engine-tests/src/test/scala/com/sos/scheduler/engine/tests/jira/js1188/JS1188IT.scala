@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -70,7 +71,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       requireTaskIsWaitingForAgent(waitingTaskRun.taskId)
       val expectedWarnings = fill(3)(fill(n)(InaccessibleAgentMessageCode) :+ WaitingForAgentMessageCode).flatten map Some.apply
       assertResult(expectedWarnings) {
-        val codeOptions = eventPipe.queued[WarningLogEvent].toVector map { _.codeOption }
+        val codeOptions = eventPipe.queued[WarningLogEvent].toVector map { _.event.codeOption }
         ignoreExtraWaitingForAgentMessageCode(expectedWarnings)(codeOptions)
       }
       waitingStopwatch.duration should be > 2*AgentConnectRetryDelay  // Process class is still waiting the 3rd time
@@ -114,7 +115,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       assert(taskAgentNames == (alternatingAgentNames drop 0 take 2*n + 1).toList ||  // B D B D B D B D B or
              taskAgentNames == (alternatingAgentNames drop 1 take 2*n + 1).toList)    // D B D B D B D B D
       stopwatch.duration should be < TestTimeout
-      eventPipe.queued[WarningLogEvent] map { _.codeOption } should contain (Some(InaccessibleAgentMessageCode))  // First Agent is still unreachable
+      eventPipe.queued[WarningLogEvent] map { _.event.codeOption } should contain (Some(InaccessibleAgentMessageCode))  // First Agent is still unreachable
     }
   }
 
@@ -124,7 +125,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       val taskRun = startJob(ReplaceTestJobPath)
-      eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
+      eventPipe.nextAny[WarningLogEvent].event.codeOption shouldEqual Some(InaccessibleAgentMessageCode)
       writeConfigurationFile(ReplaceProcessClassPath, ProcessClassConfiguration(agentUris = List(agentRefs(1).uri)))
       assertResult(List(agentRefs(1).uri)) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
@@ -143,7 +144,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         a.close()
       }
       val taskRun = startJob(ReplaceTestJobPath)
-      eventPipe.nextAny[WarningLogEvent].codeOption shouldEqual Some(InaccessibleAgentMessageCode)
+      eventPipe.nextAny[WarningLogEvent].event.codeOption shouldEqual Some(InaccessibleAgentMessageCode)
       def expectedErrorLogEvent(e: ErrorLogEvent) =
         e.codeOption == Some(MessageCode("SCHEDULER-280")) ||
         e.codeOption == Some(MessageCode("Z-JAVA-105")) && (e.message contains classOf[FailableSelector.CancelledException].getName)
@@ -155,7 +156,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         awaitSuccess(taskRun.closed)
       }
       // Job should run fail with SCHEDULER-280 because the new process class has no longer remote scheduler
-      assert(eventPipe.queued[ErrorLogEvent] exists { _.codeOption == Some(MessageCode("SCHEDULER-280")) })
+      assert(eventPipe.queued[ErrorLogEvent] exists { _.event.codeOption == Some(MessageCode("SCHEDULER-280")) })
       assert(jobOverview(ReplaceTestJobPath).state == JobState.stopped)
     }
   }

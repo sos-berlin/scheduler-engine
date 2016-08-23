@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.tests.jira.js887;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -75,7 +77,9 @@ public class BackupLogfileIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleTaskEnded(TaskEnded e) throws InterruptedException {
-        controller().terminateScheduler();
+    public void handleEvent(KeyedEvent<Event> e) {
+        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
+            controller().terminateScheduler();
+        }
     }
 }

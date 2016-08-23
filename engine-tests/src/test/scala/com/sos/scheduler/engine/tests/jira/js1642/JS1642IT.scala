@@ -9,16 +9,19 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.{Stopwatch, WaitForCondition}
+import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.event.{Event, EventId, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, KeyedEvent, Event, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -31,6 +34,7 @@ import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
+import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
 import java.nio.file.Files.deleteIfExists
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -38,6 +42,7 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
@@ -86,27 +91,50 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     startOrderProcessing()
   }
 
+  override def afterAll() = {
+    eventReader.stop()
+    super.afterAll()
+  }
+
   private object eventReader {
-    val directEvents = mutable.Buffer[Event]()
-    val webEvents = mutable.Buffer[Event]()
+    val directEvents = mutable.Buffer[AnyKeyedEvent]()
+    val webEvents = mutable.Buffer[AnyKeyedEvent]()
+    private var stopping = false
 
     def start(): Unit = {
       eventBus.onHot[Event] {
-        case event if EventJsonFormat canSerialize event ⇒ directEvents += event
+        case event if EventJsonFormat canSerialize event ⇒
+          if (isPermitted(event)) {
+            directEvents += event
+          }
       }
       start(EventId.BeforeFirst)
     }
 
+    def stop(): Unit = {
+      stopping = true
+    }
+
     private def start(after: EventId): Unit = {
-      for (Snapshot(events) ← webSchedulerClient.events(after)) {
-        this.webEvents ++= events map { _.value }
-        start(after = if (events.isEmpty) after else events.last.eventId)
+      webSchedulerClient.events(after).withThisStackTrace onComplete {
+        case _ if stopping ⇒
+        case Failure(t) ⇒
+          logger.error(s"webSchedulerClient.events: $t", t)
+          controller.terminateAfterException(t)
+        case Success(Snapshot(events)) ⇒
+          this.webEvents ++= events filter { snapshot ⇒ isPermitted(snapshot.value) } map { _.value }
+          start(after = if (events.isEmpty) after else events.last.eventId)
       }
     }
 
+    private def isPermitted(event: AnyKeyedEvent) = event match {
+      case KeyedEvent(_, e: LogEvent) ⇒ false
+      case _ ⇒ true
+    }
+
     def check() = {
-      assert(webEvents.nonEmpty)
-      WaitForCondition.waitForCondition(5.s, 100.ms) { webEvents.size == directEvents.size }
+      assert(directEvents.nonEmpty)
+      waitForCondition(5.s, 100.ms) { webEvents.size == directEvents.size }
       assert(webEvents == directEvents)
     }
   }
@@ -417,4 +445,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   private def awaitContent[A](future: Future[Snapshot[A]]): A =
     (future await TestTimeout).value
+}
+
+object JS1642IT {
+  private val logger = Logger(getClass)
 }

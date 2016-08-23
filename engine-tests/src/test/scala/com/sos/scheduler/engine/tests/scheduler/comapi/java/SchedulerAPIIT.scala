@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.java
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Event}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
@@ -41,9 +41,9 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
   import controller.newEventPipe
 
   private val finishedOrderParametersPromise = Promise[Map[String, String]]()
-  private val eventsPromise = Promise[immutable.Seq[Event]]()
+  private val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
   private lazy val testTextFile = testEnvironment.liveDirectory / TestTextFilename
-  private lazy val taskLogLines = eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message }
+  private lazy val taskLogLines = eventsPromise.successValue collect { case KeyedEvent(_, e: InfoLogEvent) ⇒ e.message }
 
   protected override def onSchedulerActivated() = {
     scheduler executeXml VariablesJobElem
@@ -88,8 +88,8 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   "Run variables job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
-      eventBus.onHotEventSourceEvent[OrderStepEnded] {
-        case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.success(order.variables)
+      eventBus.onHotEventSourceEvent[Event] {
+        case KeyedEvent(_, EventSourceEvent(_: OrderStepEnded, order: Order)) ⇒ finishedOrderParametersPromise.success(order.variables)
       }
       eventBus.awaitingKeyedEvent[OrderFinished](VariablesOrderKey) {
         scheduler executeXml OrderCommand(VariablesOrderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
@@ -100,7 +100,9 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   "Variables job exit code" in {
     assertResult(List(OrderNodeTransition.Success)) {
-      eventsPromise.successValue collect { case OrderStepEnded(VariablesOrderKey, stateTransition) ⇒ stateTransition }
+      eventsPromise.successValue collect {
+        case KeyedEvent(VariablesOrderKey, OrderStepEnded(stateTransition)) ⇒ stateTransition
+      }
     }
   }
 

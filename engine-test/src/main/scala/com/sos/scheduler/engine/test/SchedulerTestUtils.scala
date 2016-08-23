@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, NodeId}
@@ -67,7 +68,7 @@ object SchedulerTestUtils {
       logger.debug(s"Sleeping a second to get a different file time for $file")
       sleep(1.s)  // Assure different timestamp for configuration file, so JobScheduler can see a change
     }
-    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAdded] || e.isInstanceOf[FileBasedReplaced])) {
+    controller.eventBus.awaitingKeyedEvent[FileBasedAddedOrReplaced](path) {
       file.xml = xmlElem
       instance[FolderSubsystemClient].updateFolders()
     }
@@ -77,7 +78,7 @@ object SchedulerTestUtils {
    * Delete the configuration file and awaits JobScheduler's acceptance.
    */
   def deleteConfigurationFile[A](path: TypedPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
-    controller.eventBus.awaitingKeyedEvent[FileBasedRemoved](path) {
+    controller.eventBus.awaitingKeyedEvent[FileBasedRemoved.type](path) {
       Files.delete(controller.environment.fileFromPath(path))
       instance[FolderSubsystemClient].updateFolders()
     }
@@ -134,11 +135,12 @@ object SchedulerTestUtils {
     inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
       val commandResult = controller.scheduler executeXml startJobCommand
       val taskId = TaskId((commandResult.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
-      val started = controller.eventBus.keyedEventFuture[TaskStarted](taskId)
+      val taskKey = TaskKey(startJobCommand.jobPath, taskId)
+      val started = controller.eventBus.keyedEventFuture[TaskStarted.type](taskKey)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
-      val ended = controller.eventBus.keyedEventFuture[TaskEnded](taskId)
+      val ended = controller.eventBus.keyedEventFuture[TaskEnded](taskKey)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
-      val closed = controller.eventBus.keyedEventFuture[TaskClosed](taskId)
+      val closed = controller.eventBus.keyedEventFuture[TaskClosed.type](taskKey)
       val result = for (_ ← closed; s ← startedTime; end ← ended; e ← endedTime)
                    yield TaskResult(startJobCommand.jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
       TaskRun(startJobCommand.jobPath, taskId, started, ended, closed, result)
@@ -148,9 +150,9 @@ object SchedulerTestUtils {
   final case class TaskRun(
     jobPath: JobPath,
     taskId: TaskId,
-    started: Future[TaskStarted],
+    started: Future[TaskStarted.type],
     ended: Future[TaskEnded],
-    closed: Future[TaskClosed],
+    closed: Future[TaskClosed.type],
     result: Future[TaskResult])
   {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
@@ -175,18 +177,18 @@ object SchedulerTestUtils {
 
   final case class OrderRun(
     orderKey: OrderKey,
-    touched: Future[OrderStarted],
+    touched: Future[OrderStarted.type],
     finished: Future[OrderFinished],
     result: Future[OrderRunResult])
 
   object OrderRun {
     def apply(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = {
       import controller.eventBus
-      val whenTouched = eventBus.keyedEventFuture[OrderStarted](orderKey)
+      val whenTouched = eventBus.keyedEventFuture[OrderStarted.type](orderKey)
       val whenFinished: Future[(OrderFinished, Map[String, String])] = {
         val promise = Promise[(OrderFinished, Map[String, String])]()
         lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinished] {
-          case (event: OrderFinished, order: UnmodifiableOrder) if event.orderKey == orderKey ⇒
+          case (KeyedEvent(`orderKey`, event: OrderFinished), order: UnmodifiableOrder)  ⇒
             eventBus.unregisterHot(subscription)
             promise.success((event, order.variables))
         }
@@ -195,7 +197,7 @@ object SchedulerTestUtils {
       }
       val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.nodeId, variables)
       val whenFinishedEvent = whenFinished map { _._1 }
-      OrderRun(orderKey, whenTouched, whenFinishedEvent, result)
+      new OrderRun(orderKey, whenTouched, whenFinishedEvent, result)
     }
   }
 
@@ -248,7 +250,7 @@ object SchedulerTestUtils {
   }
 
   def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
-    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.codeOption contains errorCode }
+    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.event.codeOption contains errorCode }
     val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
     val event = try awaitResult(eventFuture, timeout.duration)
       catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
@@ -257,7 +259,7 @@ object SchedulerTestUtils {
 
   def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
     controller.toleratingErrorCodes(errorCodes) {
-      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.codeOption contains o) }
+      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.event.codeOption contains o) }
       body
       try awaitResults(futures)
       catch {

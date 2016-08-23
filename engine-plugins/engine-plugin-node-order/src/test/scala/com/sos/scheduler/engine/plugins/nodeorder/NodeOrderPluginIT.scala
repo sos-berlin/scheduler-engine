@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
 import com.sos.scheduler.engine.common.scalautil.Closers._
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -32,7 +33,8 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       val promiseMap = (OrderKeys map { _ → Promise[Map[String, String]]() }).toMap
       withCloser { implicit closer ⇒
         eventBus.onHotEventSourceEvent[OrderFinished] {
-          case EventSourceEvent(_, order: UnmodifiableOrder) ⇒ promiseMap(order.orderKey).success(order.variables)
+          case KeyedEvent(orderKey, EventSourceEvent(_, order: UnmodifiableOrder)) ⇒
+            promiseMap(orderKey).success(order.variables)
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
         val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))
@@ -46,8 +48,8 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       eventBus.awaitingKeyedEvent[OrderFinished](ErrorOrderKey) {
         withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
-          eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(MissingJobchainCode) }
-          eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(CommandFailedCode) }
+          eventPipe.nextWithTimeoutAndCondition[ErrorLogEvent] { _.event.codeOption == Some(MissingJobchainCode) }
+          eventPipe.nextWithTimeoutAndCondition[ErrorLogEvent] { _.event.codeOption == Some(CommandFailedCode) }
         }
       }
     }

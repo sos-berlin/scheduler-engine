@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.eventbus;
 
 import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ public class ColdEventBus extends AbstractEventBus implements Runnable {
         super(ColdMethodEventSubscriptionFactory.singleton);
     }
 
-    @Override public final void publish(Event e) {
+    @Override public final void publish(KeyedEvent<Event> e) {
         publish(calls(e));
     }
 

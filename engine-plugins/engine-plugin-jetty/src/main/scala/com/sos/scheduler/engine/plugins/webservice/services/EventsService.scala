@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.webservice.services
 import EventsService._
 import com.google.common.collect.AbstractIterator
 import com.sos.scheduler.engine.data.configuration.EngineJacksonConfiguration
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.event.AnyKeyedEvent
 import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventBus, EventHandler}
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
 import java.io.OutputStream
@@ -54,10 +54,10 @@ object EventsService {
   private val maxQueueSize = 100 // Klein halten, weil EventBus.unregisterAnnotated() nicht aufgerufen wird => Speicherleck
   private val logger = LoggerFactory.getLogger(classOf[EventsService])
 
-  private class EventCollector extends AbstractIterator[Event] with EventHandlerAnnotated {
-    val queue = new ArrayBlockingQueue[Event](maxQueueSize)//new mutable.SynchronizedQueue[Event]
+  private class EventCollector extends AbstractIterator[AnyKeyedEvent] with EventHandlerAnnotated {
+    val queue = new ArrayBlockingQueue[AnyKeyedEvent](maxQueueSize)//new mutable.SynchronizedQueue[AnyKeyedEvent]
 
-    @EventHandler def handle(e: Event): Unit = {
+    @EventHandler def handle(e: AnyKeyedEvent): Unit = {
       if (queue.size > maxQueueSize) queue.poll()
       queue.add(e)
     }

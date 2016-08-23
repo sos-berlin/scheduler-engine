@@ -17,7 +17,7 @@ final class JS986IT extends FunSuite with ScalaSchedulerTest {
   test("JS-986 Fix: order.nodeId=end should not suppress stdout in order log") {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml OrderCommand(testOrderKey)
-    eventPipe.nextWithCondition { e: OrderFinished => e.orderKey == testOrderKey }
+    eventPipe.nextKeyed[OrderFinished](testOrderKey)
     withClue("Task log") { controller.environment.taskLogFileString(testJobPath) should include (expectedJobOutput) }
     withClue("Order log") { orderLogString(testOrderKey) should include (expectedJobOutput) }
   }

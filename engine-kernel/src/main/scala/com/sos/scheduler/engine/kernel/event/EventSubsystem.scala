@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.AbstractEvent
+import com.sos.scheduler.engine.data.event.AnyKeyedEvent
 import com.sos.scheduler.engine.eventbus.{EventSource, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.event.EventSubsystem._
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
@@ -11,15 +11,15 @@ import javax.inject.{Inject, Singleton}
 @ForCpp @Singleton
 private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
 
-  /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event]],
-    *         weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AbstractEvent): Unit = {
+  /** @param e [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]] statt [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]],
+    *          weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+  @ForCpp private def report(e: AnyKeyedEvent): Unit = {
     eventBus.publish(e)
   }
 
-  /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtigt.]]
+  /** @param e [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]] statt [[com.sos.scheduler.engine.data.event.AnyKeyedEvent}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtigt.]]
     * @param eventSource { @link Object} statt { @link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AbstractEvent, eventSource: AnyRef): Unit = {
+  @ForCpp private def report(e: AnyKeyedEvent, eventSource: AnyRef): Unit = {
     eventBus.publish(e, eventSource.asInstanceOf[EventSource])
   }
 

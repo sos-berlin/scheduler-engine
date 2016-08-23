@@ -8,6 +8,8 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.{autoClosing, close
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
+import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.eventbus._
@@ -54,7 +56,7 @@ with HasInjector {
     }
 
   closeOnError(closer) {
-    eventBus.onHot[ErrorLogEvent] { case e =>
+    eventBus.onHot[ErrorLogEvent] { case KeyedEvent(NoKey, e) =>
       // Kann ein anderer Thread sein: C++ Heart_beat_watchdog_thread Abbruchmeldung SCHEDULER-386
       if (testConfiguration.terminateOnError &&
         !(e.codeOption exists testConfiguration.ignoreError) &&
@@ -64,10 +66,10 @@ with HasInjector {
       }
     }
 
-    eventBus.onHotAndCold[EventHandlerFailedEvent] { case e ⇒
+    eventBus.onHotAndCold[EventHandlerFailedEvent] { case KeyedEvent(NoKey, e) ⇒
       if (testConfiguration.terminateOnError) {
         logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
-        terminateAfterException(e.getThrowable)
+        terminateAfterException(e.throwable)
       }
     }
   }
@@ -79,7 +81,7 @@ with HasInjector {
   }
 
   onClose {
-    delegate.close()   // Possibly called twice, then checking for SchedulerCloseEvent handling error
+    delegate.close()   // Possibly called twice, then checking for SchedulerClosed handling error
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */

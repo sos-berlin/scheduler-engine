@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.stress.parallelorder;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -36,12 +38,14 @@ public final class OrderParallelIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(OrderFinished e) {
-        finishedOrdersCount++;
-        if (finishedOrdersCount > 1)
-            logger.info("Order " + (finishedOrdersCount-1) + " of " + testLimit + " finished");
-        if (finishedOrdersCount == total)
-            controller().terminateScheduler();
+    public void handleOrderEnd(KeyedEvent<Event> g) {
+        if (g.event() instanceof OrderFinished) {
+            finishedOrdersCount++;
+            if (finishedOrdersCount > 1)
+                logger.info("Order " + (finishedOrdersCount-1) + " of " + testLimit + " finished");
+            if (finishedOrdersCount == total)
+                controller().terminateScheduler();
+        }
     }
 
 }

@@ -30,7 +30,7 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
   List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>
     test("Job with "+logLevel+" should call some methods") {
       scheduler.executeXml(startJobElem(logLevel))
-      eventPipe.nextWithCondition[TaskEnded] {_.jobPath == jobPath}
+      eventPipe.nextWithCondition[TaskEnded] { _.key.jobPath == jobPath }
       checkMethodCallCounters(logLevel)
     }
   }

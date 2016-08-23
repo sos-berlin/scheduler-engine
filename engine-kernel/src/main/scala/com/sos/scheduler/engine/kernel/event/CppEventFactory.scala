@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.{AbstractEvent, Event}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
@@ -15,69 +15,69 @@ import com.sos.scheduler.engine.kernel.order.Order
 
 @ForCpp object CppEventFactory {
 
-  private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): Event = {
+  private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): AnyKeyedEvent = {
     cppEventCode match {
-      case `fileBasedActivatedEvent` =>
-        new FileBasedActivated(eventSource.asInstanceOf[FileBased].path)
+      case `fileBasedActivatedEvent` ⇒
+        KeyedEvent(FileBasedActivated)(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedAddedEvent` =>
-        new FileBasedAdded(eventSource.asInstanceOf[FileBased].path)
+        KeyedEvent(FileBasedAdded)(eventSource.asInstanceOf[FileBased].path)
 
-      case `fileBasedRemovedEvent` =>
-        new FileBasedRemoved(eventSource.asInstanceOf[FileBased].path)
+      case `fileBasedRemovedEvent` ⇒
+        KeyedEvent(FileBasedRemoved)(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedReplacedEvent` =>
-        new FileBasedReplaced(eventSource.asInstanceOf[FileBased].path)
+        KeyedEvent(FileBasedReplaced)(eventSource.asInstanceOf[FileBased].path)
 
-      case `taskStartedEvent` =>
+      case `taskStartedEvent` ⇒
         val task = eventSource.asInstanceOf[Task]
-        new TaskStarted(task.id, task.job.path)
+        KeyedEvent(TaskStarted)(task.taskKey)
 
       case `taskClosedEvent` =>
         val task = eventSource.asInstanceOf[Task]
-        new TaskClosed(task.id, task.job.path)
+        KeyedEvent(TaskClosed)(task.taskKey)
 
-      case `orderTouchedEvent` =>
-        new OrderStarted(eventSource.asInstanceOf[Order].orderKey)
+      case `orderTouchedEvent` ⇒
+        KeyedEvent(OrderStarted)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderFinishedEvent` =>
+      case `orderFinishedEvent` ⇒
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderFinished(eventSource.asInstanceOf[Order].orderKey, order.nodeId)
+        KeyedEvent(OrderFinished(order.nodeId))(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderNestedTouchedEvent` =>
-        new OrderNestedStarted(eventSource.asInstanceOf[Order].orderKey)
+      case `orderNestedTouchedEvent` ⇒
+        KeyedEvent(OrderNestedStarted)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderNestedFinishedEvent` =>
-        new OrderNestedFinished(eventSource.asInstanceOf[Order].orderKey)
+      case `orderNestedFinishedEvent` ⇒
+        KeyedEvent(OrderNestedFinished)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderSuspendedEvent` =>
-        new OrderSuspended(eventSource.asInstanceOf[Order].orderKey)
+      case `orderSuspendedEvent` ⇒
+        KeyedEvent(OrderSuspended)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderResumedEvent` =>
-        new OrderResumed(eventSource.asInstanceOf[Order].orderKey)
+      case `orderResumedEvent` ⇒
+        KeyedEvent(OrderResumed)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderSetBackEvent` =>
+      case `orderSetBackEvent` ⇒
         val order = eventSource.asInstanceOf[Order]
-        new OrderSetBack(order.orderKey, order.nodeId)
+        KeyedEvent(OrderSetBack(order.nodeId))(order.orderKey)
 
-      case `orderStepStartedEvent` =>
+      case `orderStepStartedEvent` ⇒
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderStepStarted(order.orderKey, order.nodeId, order.taskId getOrElse TaskId.Null)
+        KeyedEvent(OrderStepStarted(order.nodeId, order.taskId getOrElse TaskId.Null))(order.orderKey)
 
-      case o =>
+      case o ⇒
         sys.error(s"Not implemented cppEventCode=$o")
     }
   }
 
-  @ForCpp def newLogEvent(cppLevel: Int, message: String): AbstractEvent =
-    LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message)
+  @ForCpp def newLogEvent(cppLevel: Int, message: String): AnyKeyedEvent =
+    KeyedEvent(LogEvent(SchedulerLogLevel.ofCpp(cppLevel), message))
 
-  @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AbstractEvent =
-    OrderNodeChanged(OrderKey(jobChainPath, orderId), nodeId = NodeId(nodeId), fromNodeId = NodeId(previousNodeId))
+  @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AnyKeyedEvent =
+    KeyedEvent(OrderNodeChanged(nodeId = NodeId(nodeId), fromNodeId = NodeId(previousNodeId)))(OrderKey(jobChainPath, orderId))
 
-  @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, nodeTransitionCpp: Long): AbstractEvent =
-    OrderStepEnded(OrderKey(jobChainPath, orderId), OrderNodeTransition.ofCppInternalValue(nodeTransitionCpp))
+  @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, nodeTransitionCpp: Long): AnyKeyedEvent =
+    KeyedEvent(OrderStepEnded(OrderNodeTransition.ofCppInternalValue(nodeTransitionCpp)))(OrderKey(jobChainPath, orderId))
 
-  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AbstractEvent =
-    TaskEnded(TaskId(taskId), JobPath(jobPath), ReturnCode(returnCode))
+  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AnyKeyedEvent =
+    KeyedEvent(TaskEnded(ReturnCode(returnCode)))(TaskKey(JobPath(jobPath), TaskId(taskId)))
 }

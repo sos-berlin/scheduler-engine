@@ -1,20 +1,28 @@
+div.SystemProperties {
+  margin-right: 2em;
+}
+
 div.SystemInformation {
   float: right;
   padding: 10px;
-  margin: 0 0 20px 20px;
+  margin-bottom: 2em;
   /* font-family: "Trebuchet MS", Verdana, Arial, sans-serif;
   font-size: 13px;*/
 }
 
-.SystemProperties {
-  white-space: nowrap;
+table.SystemInformation > tbody > tr > td {
+  padding-bottom: 1.5em;
 }
 
-.Hostname {
-  font-weight: bold;
+table.SystemInformation > tbody > tr > td:first-child {
+  padding-top: 2px;
 }
 
-.SystemGraphics {
-  margin-left: 20px;
-  width: 200px;
+.SchedulerOverview {
+  margin-bottom: 30px;
+}
+
+.SystemBar {
+  margin-left: 1em;
+  width: 180px;
 }

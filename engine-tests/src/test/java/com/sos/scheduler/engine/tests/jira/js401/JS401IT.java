@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js401;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -21,10 +23,12 @@ public final class JS401IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(TaskEnded e) {
-        countEndedTasks++;
-        if (countEndedTasks == 3) {
-            controller().terminateScheduler();
+    public void handleEvent(KeyedEvent<Event> e) {
+        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
+            countEndedTasks++;
+            if (countEndedTasks == 3) {
+                controller().terminateScheduler();
+            }
         }
     }
 }

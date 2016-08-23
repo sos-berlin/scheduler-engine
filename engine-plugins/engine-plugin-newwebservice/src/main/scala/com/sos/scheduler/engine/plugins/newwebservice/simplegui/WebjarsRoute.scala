@@ -21,7 +21,7 @@ trait WebjarsRoute {
 
   protected final def webjarsRoute: Route =
     get {
-      respondWithHeader(LongTimeCaching) {
+      respondWithHeader(LongTimeCaching) {  // WebJar resources are immutable versioned and can be cached forever
         getFromResourceDirectory(WebjarsResourceDirectory.path)    // Artifacts of Maven groupId 'org.webjars'
       }
     }
@@ -32,9 +32,12 @@ private[simplegui] object WebjarsRoute {
   private val WebjarsResourceDirectory = JavaResource("META-INF/resources/webjars")
   private val logger = Logger(getClass)
 
-  val Bootstrap = new Webjar(basePath = "bootstrap/3.3.6", css = "css/bootstrap.min.css" :: Nil)
-
-  val NeededWebjars = List(Bootstrap)
+  val NeededWebjars = List(
+    new Webjar(basePath = "jquery/2.2.4",
+      javascripts = "jquery.min.js" :: Nil),
+    new Webjar(basePath = "bootstrap/3.3.6",
+      css         = "css/bootstrap.min.css" :: Nil,
+      javascripts = "js/bootstrap.min.js" :: Nil))
 
   private def checkWebjars(webExternals: Iterable[Webjar]): Boolean = {
     var result = true

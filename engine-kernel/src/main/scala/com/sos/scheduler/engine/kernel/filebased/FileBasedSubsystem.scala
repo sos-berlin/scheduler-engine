@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaConcurrentHashMap
 import com.sos.scheduler.engine.cplusplus.runtime.HasSister
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -37,18 +38,18 @@ trait FileBasedSubsystem extends Subsystem {
 
   lazy val messageCodeHandler = injector.instance[MessageCodeHandler]
 
-  private[kernel] def onFileBasedEvent(e: FileBasedEvent, fileBased: FileBased): Unit = {
-    val path = e.typedPath.asInstanceOf[Path]
-    assert(e.typedPath.fileBasedType == fileBasedType)
+  private[kernel] def onFileBasedEvent(e: KeyedEvent[FileBasedEvent], fileBased: FileBased): Unit = {
+    val path = e.key.asInstanceOf[Path]
+    assert(e.key.fileBasedType == fileBasedType)
     assert(fileBased.fileBasedType == fileBasedType)
     assert(path.getClass == companion.pathClass, s"${path.getClass} is not expected ${companion.getClass}")
-    e match {
-      case e: FileBasedAdded ⇒
+    e.event match {
+      case FileBasedAdded ⇒
         _pathToFileBased += path → fileBased.asInstanceOf[ThisFileBased]
         _orderedPaths += path
-      case e: FileBasedReplaced ⇒
+      case FileBasedReplaced ⇒
         _pathToFileBased(path) = fileBased.asInstanceOf[ThisFileBased]
-      case e: FileBasedRemoved ⇒
+      case FileBasedRemoved ⇒
         _pathToFileBased -= path
         _orderedPaths -= path
       case _ ⇒

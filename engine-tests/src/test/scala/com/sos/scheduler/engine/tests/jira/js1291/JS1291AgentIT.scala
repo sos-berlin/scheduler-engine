@@ -9,8 +9,8 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Event}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -54,8 +54,10 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)) })
   .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
     testGroupName - {
-      val eventsPromise = Promise[immutable.Seq[Event]]()
-      lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
+      val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
+      lazy val taskLogLines = (eventsPromise.successValue collect {
+        case KeyedEvent(_, e: InfoLogEvent) ⇒ e.message split "\r?\n"
+      }).flatten
       lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
@@ -68,8 +70,8 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         autoClosing(newEventPipe()) { eventPipe ⇒
           toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
             val orderKey = TestJobchainPath orderKey testGroupName
-            eventBus.onHotEventSourceEvent[OrderStepEnded] {
-              case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.trySuccess(order.variables)
+            eventBus.onHotEventSourceEvent[Event] {
+              case KeyedEvent(_, EventSourceEvent(_: OrderStepEnded, order: Order)) ⇒ finishedOrderParametersPromise.trySuccess(order.variables)
             }
             eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
               scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
@@ -81,7 +83,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
       "Shell script exit code" in {
         assertResult(List(TestReturnCode)) {
-          eventsPromise.successValue collect { case TaskEnded(_, TestJobPath, returnCode) ⇒ returnCode }
+          eventsPromise.successValue collect {
+            case KeyedEvent(TaskKey(TestJobPath, _), TaskEnded(returnCode)) ⇒ returnCode
+          }
         }
         eventBus.dispatchEvents()
       }

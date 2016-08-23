@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
+import com.sos.scheduler.engine.data.event.{KeyedEvent, NoKeyEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.{Stop, Unstop}
 import com.sos.scheduler.engine.eventbus.EventSourceEvent
@@ -40,34 +40,35 @@ final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
   }
 
-  eventBus.onHotEventSourceEvent[TaskEnded] { case EventSourceEvent(TaskEnded(_, AJobPath, _), task: Task) ⇒
-    val files = (Splitter on ";" split task.parameterValue(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
-    eventBus publishCold TriggerEvent(files)
+  eventBus.onHotEventSourceEvent[TaskEnded] {
+    case KeyedEvent(TaskKey(AJobPath, _), EventSourceEvent(_, task: Task)) ⇒
+      val files = (Splitter on ";" split task.parameterValue(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
+      eventBus publishCold TriggerEvent(files)
   }
 
   "Filename not matching the pattern" in {
     touch(file_)
     logger debug s"$file_ touched"
-    intercept[TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TriggerEvent](ResponseTime) { _ => true } }
+    intercept[TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TriggerEvent](_ ⇒ true, ResponseTime) }
   }
 
   "Matching filename (1)" in {
     move(file_, file1)
     logger debug s"$file1 moved"
-    eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file1))
+    eventPipe.nextAny[TriggerEvent].event shouldEqual TriggerEvent(Set(file1))
   }
 
   "Matching filename (2)" in {
     touch(file2)
     logger debug s"$file2 touched"
-    eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file1, file2))
+    eventPipe.nextAny[TriggerEvent].event shouldEqual TriggerEvent(Set(file1, file2))
   }
 
   if (isWindows) {   // Unter Unix wird Löschen nicht berücksichtigt
     "Matching filename deleted" in {
       delete(file1)
       logger debug s"$file1 deleted"
-      eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file2))
+      eventPipe.nextAny[TriggerEvent].event shouldEqual TriggerEvent(Set(file2))
     }
   }
 
@@ -77,7 +78,7 @@ final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest
     scheduler executeXml ModifyJobCommand(AJobPath, cmd=Some(Unstop))
     touch(file1)
     logger debug s"$file1 touched"
-    eventPipe.nextAny[TriggerEvent] shouldEqual TriggerEvent(Set(file1, file2))
+    eventPipe.nextAny[TriggerEvent].event shouldEqual TriggerEvent(Set(file1, file2))
   }
 }
 
@@ -94,5 +95,5 @@ object StartWhenDirectoryChangedIT {
       <start_when_directory_changed directory={directory.toString} regex={regex}/>
     </job>
 
-  private case class TriggerEvent(files: Set[Path]) extends Event
+  private case class TriggerEvent(files: Set[Path]) extends NoKeyEvent
 }

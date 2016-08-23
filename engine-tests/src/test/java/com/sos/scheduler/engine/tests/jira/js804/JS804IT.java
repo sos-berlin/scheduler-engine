@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js804;
 
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -50,12 +52,14 @@ public final class JS804IT extends SchedulerTest {
 	}
 
 	@EventHandler
-	public void handleTaskEnded(TaskEnded e) throws InterruptedException {
-		Thread.sleep(2000);			// wait until setback is active
-		showCalendar();
-		result_setback = isSetback(order_setback);
-		result_simple = isSetback(order_simple);
-		controller().terminateScheduler();
+    public void handleEvent(KeyedEvent<Event> e) throws InterruptedException {
+        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
+            Thread.sleep(2000);			// wait until setback is active
+            showCalendar();
+            result_setback = isSetback(order_setback);
+            result_simple = isSetback(order_simple);
+            controller().terminateScheduler();
+        }
 	}
 
     private void showCalendar() {

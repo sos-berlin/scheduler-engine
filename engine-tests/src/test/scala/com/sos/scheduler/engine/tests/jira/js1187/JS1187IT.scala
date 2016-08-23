@@ -16,6 +16,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * JS-1187 Job waits until agent is available.
@@ -33,7 +34,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
     mainArguments = List(s"-tcp-port=$tcpPort"))
 
   "With invalid remote_scheduler address, task does not start" in {
-    def ignorable(e: ErrorLogEvent) = (e.message contains "spray.http.IllegalUriException") || e.codeOption() == Some(MessageCode("SCHEDULER-280"))
+    def ignorable(e: ErrorLogEvent) = (e.message contains "spray.http.IllegalUriException") || (e.codeOption contains MessageCode("SCHEDULER-280"))
     controller.toleratingErrorLogEvent(ignorable) {  // Z-JAVA-105  Java exception spray.http.IllegalUriException: Invalid port 99999, method=CallObjectMethodA []
       awaitSuccess(startJob(InvalidRemoteJobPath).closed)
     }
@@ -45,7 +46,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "With unreachable remote_scheduler, the waiting task can be killed" in {
-    val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
+    val warningFuture = eventBus.eventFuture[WarningLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-488"))
     val taskRun = startJob(UnreachableRemoteJobPath)
     awaitResult(warningFuture, TestTimeout)
     requireIsWaitingForAgent(taskRun.taskId)
@@ -55,7 +56,7 @@ final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
   "With unreachable remote_scheduler, task waits until agent is reachable" in {
     autoClosing(Agent.forTest(agentHttpPort)) { agent ⇒
-      val warningFuture = eventBus.eventFuture[WarningLogEvent](_.codeOption == Some(MessageCode("SCHEDULER-488")))
+      val warningFuture = eventBus.eventFuture[WarningLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-488"))
       val taskRun = startJob(UnreachableRemoteJobPath)
       awaitResult(warningFuture, TestTimeout)
       requireIsWaitingForAgent(taskRun.taskId)

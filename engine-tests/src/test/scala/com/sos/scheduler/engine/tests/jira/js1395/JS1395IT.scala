@@ -24,8 +24,8 @@ final class JS1395IT extends FreeSpec with ScalaSchedulerTest {
     val orderKey = TestJobChainPath orderKey "1"
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
       eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
-        eventBus.awaitingEvent[TaskEnded](_.jobPath == ErrorJobPath) {
-          eventBus.awaitingEvent[TaskStarted](_.jobPath == ErrorJobPath) {
+        eventBus.awaitingEvent[TaskEnded](_.key.jobPath == ErrorJobPath) {
+          eventBus.awaitingEvent[TaskStarted.type](_.key.jobPath == ErrorJobPath) {
             scheduler executeXml OrderCommand(orderKey)
           }
           scheduler executeXml <job_chain_node.modify job_chain={TestJobChainPath.string} state="100" action="next_state"/>

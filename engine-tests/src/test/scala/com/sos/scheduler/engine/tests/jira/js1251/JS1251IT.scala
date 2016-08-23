@@ -55,7 +55,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     eventBus.awaitingKeyedEvent[OrderStepEnded](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
-    eventBus.awaitingKeyedEvent[FileBasedActivated](TestOrderKey) {
+    eventBus.awaitingKeyedEvent[FileBasedActivated.type](TestOrderKey) {
       file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
       instance[FolderSubsystemClient].updateFolders()
       transaction { implicit entityManager ⇒

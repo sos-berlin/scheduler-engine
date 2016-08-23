@@ -6,24 +6,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.eventbus.annotated.EventSourceMethodEventSubscription;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.Set;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
 public abstract class AbstractEventBus implements EventBus {
     private static final Logger logger = LoggerFactory.getLogger(AbstractEventBus.class);
 
-    private final Multimap<Class<? extends Event>, EventSubscription> subscribers = HashMultimap.create();
+    private final Multimap<Class<? extends KeyedEvent<Event>>, EventSubscription> subscribers = HashMultimap.create();
     private final AnnotatedHandlerFinder handlerFinder;
     private final Multimap<EventHandlerAnnotated,EventSubscription> annotatedEventSubscriberMap = HashMultimap.create();
-    private final Map<Class<? extends Event>, ImmutableSet<Class<? extends Event>>> cachedSuperEventClasses = newHashMap();
+    private final Map<Class<? extends KeyedEvent<Event>>, ImmutableSet<Class<? extends KeyedEvent<Event>>>> cachedSuperEventClasses = newHashMap();
 
     protected AbstractEventBus(MethodEventSubscriptionFactory factory) {
         this.handlerFinder = new AnnotatedHandlerFinder(factory);
@@ -67,10 +65,14 @@ public abstract class AbstractEventBus implements EventBus {
         return !subscribers.isEmpty();
     }
 
-    protected final synchronized ImmutableCollection<Call> calls(Event e) {
-        Class<? extends Event> realEventClass = (e instanceof EventSourceEvent<?>? ((EventSourceEvent<?>)e).event() : e).getClass();
+    protected final synchronized ImmutableCollection<Call> calls(KeyedEvent<Event> e) {
+//        Event realEvent = e.event() instanceof EventSourceEvent<?>
+//            ? ((EventSourceEvent<Event>)e.event()).event()
+//            : (Event)e.event();
+//        Class<? extends Event> realEventClass = realEvent.getClass();
+        Class<? extends KeyedEvent<Event>> realEventClass = (Class<? extends KeyedEvent<Event>>)e.getClass();
         ImmutableList.Builder<Call> result = null;
-        for (Class<? extends Event> c: allSuperEventClasses(realEventClass)) {
+        for (Class<? extends KeyedEvent<Event>> c: allSuperEventClasses(realEventClass)) {
             for (EventSubscription s: subscribers.get(c)) {
                 // matches() sollte nicht in einer Schleife aufgerufen werden. Das kann langsam werden. Stattdessen sollte die EventSource-Klasse direkt in einer Map abgelegt werden.
                 if (matches(s, e)) {
@@ -83,13 +85,14 @@ public abstract class AbstractEventBus implements EventBus {
         else return result.build();
     }
 
-    private static boolean matches(EventSubscription s, Event e) {
-        return !(s instanceof EventSourceMethodEventSubscription) ||
-                e instanceof EventSourceEvent &&
-                        ((EventSourceMethodEventSubscription)s).eventSourceMatches((EventSourceEvent<?>)e);
+    private static boolean matches(EventSubscription s, KeyedEvent<Event> e) {
+        return true;  // KeyEvent is the only event class
+//        return !(s instanceof EventSourceMethodEventSubscription) ||
+//                e instanceof EventSourceEvent &&
+//                        ((EventSourceMethodEventSubscription)s).eventSourceMatches((EventSourceEvent<?>)e);
     }
 
-    public final boolean publishNow(Event e) {
+    public final boolean publishNow(KeyedEvent<Event> e) {
         boolean published = false;
         for (Call call: calls(e)) {
             dispatchCall(call);
@@ -108,17 +111,17 @@ public abstract class AbstractEventBus implements EventBus {
             else
                 logger.error("{}", call, t);
             //Löst ein rekursives Event aus: log().error(s+": "+x);
-            if (call.getEvent().getClass() == EventHandlerFailedEvent.class) {
+            if (EventHandlerFailedEvent.class.isAssignableFrom(call.getEvent().event().getClass())) {
                 return false;
             } else
-                return publishNow(new EventHandlerFailedEvent(call, t));
+                return publishNow(KeyedEvent.of(new EventHandlerFailedEvent(call, t)));
         }
     }
 
-    private ImmutableSet<Class<? extends Event>> allSuperEventClasses(Class<? extends Event> eventClass) {
-        ImmutableSet<Class<? extends Event>> result = cachedSuperEventClasses.get(eventClass);
+    private ImmutableSet<Class<? extends KeyedEvent<Event>>> allSuperEventClasses(Class<? extends KeyedEvent<Event>> eventClass) {
+        ImmutableSet<Class<? extends KeyedEvent<Event>>> result = cachedSuperEventClasses.get(eventClass);
         if (result == null) {
-            Set<Class<? extends Event>> classes = newHashSet();
+            Set<Class<? extends KeyedEvent<Event>>> classes = newHashSet();
             collectAllSuperEventClasses(classes, eventClass);
             result = ImmutableSet.copyOf(classes);
             cachedSuperEventClasses.put(eventClass, result);
@@ -126,9 +129,9 @@ public abstract class AbstractEventBus implements EventBus {
         return result;
     }
 
-    private static void collectAllSuperEventClasses(Set<Class<? extends Event>> result, Class<?> clas) {
-        if (clas != null && Event.class.isAssignableFrom(clas)) {
-            @SuppressWarnings("unchecked") Class<? extends Event> eventClass = (Class<? extends Event>)clas;
+    private static void collectAllSuperEventClasses(Set<Class<? extends KeyedEvent<Event>>> result, Class<?> clas) {
+        if (clas != null && KeyedEvent.class.isAssignableFrom(clas)) {
+            @SuppressWarnings("unchecked") Class<? extends KeyedEvent<Event>> eventClass = (Class<? extends KeyedEvent<Event>>)clas;
             if (!result.contains(eventClass)) {
                 result.add(eventClass);
                 collectAllSuperEventClasses(result, clas.getSuperclass());

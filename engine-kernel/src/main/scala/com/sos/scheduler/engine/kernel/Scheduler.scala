@@ -22,9 +22,10 @@ import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOverview, SchedulerState}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
@@ -46,6 +47,7 @@ import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import com.sos.scheduler.engine.main.event.SchedulerClosed
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
 import java.time.Instant.now
@@ -123,9 +125,9 @@ with HasCloser {
     val subsystemMap: Map[FileBasedType, FileBasedSubsystem] =
       subsystemCompanions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
     eventBus.onHotEventSourceEvent[FileBasedEvent] {
-      case EventSourceEvent(event, fileBased: FileBased) ⇒
-        for (subsystem ← subsystemMap.get(event.typedPath.fileBasedType)) {
-          subsystem.onFileBasedEvent(event, fileBased)
+      case KeyedEvent(path, EventSourceEvent(event, fileBased: FileBased)) ⇒
+        for (subsystem ← subsystemMap.get(path.fileBasedType)) {
+          subsystem.onFileBasedEvent(KeyedEvent(event)(path), fileBased)
         }
     }
   }
@@ -136,7 +138,7 @@ with HasCloser {
     closed = true
     try {
       schedulerThreadCallQueue.close()
-      eventBus.publish(new SchedulerCloseEvent)
+      eventBus.publish(KeyedEvent(SchedulerClosed))
       eventBus.dispatchEvents()
       schedulerThreadCallQueue.close()
       try databaseSubsystem.close() catch { case NonFatal(x) ⇒ prefixLog.error(s"databaseSubsystem.close(): $x") }
