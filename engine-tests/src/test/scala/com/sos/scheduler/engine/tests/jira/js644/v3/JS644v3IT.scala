@@ -56,13 +56,13 @@ final class JS644v3IT extends FreeSpec with ScalaSchedulerTest {
     waitForFinishedOrder(upperCaseGate)
   }
 
-  controller.eventBus.on[OrderFinished] {
+  eventBus.on[OrderFinished] {
     case KeyedEvent(orderKey, e: OrderFinished) ⇒
       val gate = if (orderKey.jobChainPath.equals(LowerCaseJobChainPath)) lowerCaseGate else upperCaseGate
       gate.put(true)
   }
 
-  controller.eventBus.on[TerminatedEvent] { case _ ⇒
+  eventBus.on[TerminatedEvent] { case _ ⇒
     lowerCaseGate.put(false)
   }
 }

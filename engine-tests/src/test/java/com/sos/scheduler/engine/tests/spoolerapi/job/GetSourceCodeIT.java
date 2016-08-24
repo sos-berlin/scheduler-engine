@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.spoolerapi.job;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.data.job.TaskKey;
@@ -51,15 +50,13 @@ public final class GetSourceCodeIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleTaskEnded(KeyedEvent<Event> e) {
-        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
-            TaskKey taskKey = (TaskKey)e.key();
-            String jobName = taskKey.jobPath().name();
-            String scriptCode = instance(SchedulerVariableSet.class).apply(jobName).trim().replace("\r\n", "\n");
-            resultMap.put(jobName,scriptCode);
-            taskCount++;
-            if (taskCount == jobs.size())
-                controller().terminateScheduler();
-        }
+    public void handleTaskEnded(KeyedEvent<TaskEnded> e) {
+        TaskKey taskKey = (TaskKey)e.key();
+        String jobName = taskKey.jobPath().name();
+        String scriptCode = instance(SchedulerVariableSet.class).apply(jobName).trim().replace("\r\n", "\n");
+        resultMap.put(jobName,scriptCode);
+        taskCount++;
+        if (taskCount == jobs.size())
+            controller().terminateScheduler();
     }
 }

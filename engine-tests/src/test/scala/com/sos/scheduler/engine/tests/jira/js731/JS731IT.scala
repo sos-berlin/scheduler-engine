@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js731
 
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.order.OrderFinished
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertThat
@@ -21,9 +20,9 @@ final class JS731IT extends FreeSpec with ScalaSchedulerTest {
     controller.waitForTermination()
   }
 
-  eventBus.onHotEventSourceEvent[OrderFinished] {
-    case KeyedEvent(orderKey, EventSourceEvent(_, order: UnmodifiableOrder)) ⇒
-      val v = order.variables
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      val v = orderDetails(orderKey).variables
       assertThat(v("a"), equalTo("ä"))
       assertThat(v("B"), equalTo("B"))
       controller.terminateScheduler()

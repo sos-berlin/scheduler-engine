@@ -4,8 +4,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderKey, OrderStarted}
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js653.JS653IT._
 import java.lang.System.currentTimeMillis
@@ -42,12 +41,12 @@ final class JS653IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStarted.type] {
-    case KeyedEvent(orderKey, EventSourceEvent(OrderStarted, o: UnmodifiableOrder)) ⇒
-      orderStarts.add(orderKey.id → o.nodeId)
+  eventBus.onHot[OrderStarted.type] {
+    case KeyedEvent(orderKey, _) ⇒
+      orderStarts.add(orderKey.id → orderOverview(orderKey).nodeId)
   }
 
-  controller.eventBus.on[OrderFinished] {
+  eventBus.on[OrderFinished] {
     case KeyedEvent(orderKey, e) ⇒
       orderEnds.add(orderKey → e.nodeId)
       lastActivity = currentTimeMillis

@@ -118,16 +118,14 @@ with UnmodifiableJobChain {
   private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
   private[kernel] override def details = {
-    val d = super.details
+    val fileBasedDetails = super.details
     JobChainDetails(
-      d.path.asInstanceOf[JobChainPath],
-      d.fileBasedState,
-      d.file,
-      d.fileModifiedAt,
-      d.sourceXml,
-      nodes = nodes map { _.overview }
-    )
-  }
+      overview = overview,
+      file           = fileBasedDetails.file,
+      fileModifiedAt = fileBasedDetails.fileModifiedAt,
+      sourceXml      = fileBasedDetails.sourceXml,
+      nodes = nodes map { _.overview })
+    }
 
   private[order] def refersToJob(job: Job): Boolean = nodes exists {
     case n: SimpleJobNode => n.getJob eq job

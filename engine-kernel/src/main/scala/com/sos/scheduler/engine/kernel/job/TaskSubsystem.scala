@@ -13,8 +13,12 @@ final class TaskSubsystem @Inject private(
   private[job] implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue) {
 
   private[kernel] def task(id: TaskId): Task =
-    Option(cppProxy.get_task_or_null(id.number)) map { _.getSister } getOrElse {
-      throw new NoSuchElementException(s"Unknown TaskID '${id.string}'") }
+    taskOption(id) getOrElse {
+      throw new NoSuchElementException(s"Unknown TaskID '${id.string}'")
+    }
+
+  private[kernel] def taskOption(id: TaskId): Option[Task] =
+    Option(cppProxy.get_task_or_null(id.number)) map { _.getSister }
 
   def taskLog(taskId: TaskId): String =
     try

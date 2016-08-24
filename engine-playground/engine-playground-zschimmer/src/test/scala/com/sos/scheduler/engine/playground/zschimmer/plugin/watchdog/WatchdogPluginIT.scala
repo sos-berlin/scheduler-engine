@@ -22,7 +22,7 @@ final class WatchdogPluginIT extends FreeSpec with ScalaSchedulerTest {
     controller.terminateScheduler()
   }
 
-  controller.eventBus.onHot[OrderFinished] { case _ ⇒
+  eventBus.onHot[OrderFinished] { case _ ⇒
     sleep(sleepTime) // Wir blockieren den Scheduler
   }
 }

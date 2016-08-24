@@ -14,8 +14,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.cppproxy.{File_basedC, SubsystemC}
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
-import scala.collection.immutable
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
 
 trait FileBasedSubsystem extends Subsystem {
@@ -38,17 +37,16 @@ trait FileBasedSubsystem extends Subsystem {
 
   lazy val messageCodeHandler = injector.instance[MessageCodeHandler]
 
-  private[kernel] def onFileBasedEvent(e: KeyedEvent[FileBasedEvent], fileBased: FileBased): Unit = {
+  private[kernel] def onFileBasedEvent(e: KeyedEvent[FileBasedEvent]): Unit = {
     val path = e.key.asInstanceOf[Path]
     assert(e.key.fileBasedType == fileBasedType)
-    assert(fileBased.fileBasedType == fileBasedType)
     assert(path.getClass == companion.pathClass, s"${path.getClass} is not expected ${companion.getClass}")
     e.event match {
       case FileBasedAdded ⇒
-        _pathToFileBased += path → fileBased.asInstanceOf[ThisFileBased]
+        _pathToFileBased += path → noCacheFileBased(path)
         _orderedPaths += path
       case FileBasedReplaced ⇒
-        _pathToFileBased(path) = fileBased.asInstanceOf[ThisFileBased]
+        _pathToFileBased(path) = noCacheFileBased(path)
       case FileBasedRemoved ⇒
         _pathToFileBased -= path
         _orderedPaths -= path
@@ -77,7 +75,6 @@ trait FileBasedSubsystem extends Subsystem {
 
   private[kernel] def orderedVisibleFileBasedIterator: Iterator[ThisFileBased] = orderedPaths map fileBased filter { _.isVisible }
 
-
   //private[kernel] def visibleFileBasedIterator: Iterator[ThisFileBased] = fileBasedIterator filter { _.isVisible }
 
   private[kernel] final def orderedPaths: Iterator[Path] = _orderedPaths.iterator
@@ -86,6 +83,9 @@ trait FileBasedSubsystem extends Subsystem {
 
   private[kernel] final def fileBased(path: Path): ThisFileBased =
     _pathToFileBased.getOrElse(path, {  throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string)) })
+
+  private final def noCacheFileBased(path: Path): ThisFileBased =
+    fileBasedOption(path) getOrElse { throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string))}
 
   private[kernel] final def fileBasedOption(path: Path): Option[ThisFileBased] =
     Option(cppProxy.java_file_based_or_null(path.string)) map { _.getSister }

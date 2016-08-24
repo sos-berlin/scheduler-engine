@@ -6,8 +6,7 @@ import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order._
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.order.events.OrderEventsIT._
 import java.lang.Thread.sleep
@@ -60,17 +59,17 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def expectOrderEventsAndResumeOrder(orderKey: OrderKey): Unit = {
-    eventPipe.nextAny[OrderStarted.type] match { case KeyedEvent(k, e: OrderStarted.type) ⇒ k shouldEqual orderKey }
-    eventPipe.nextAny[OrderStepStarted] match { case KeyedEvent(k, e: OrderStepStarted) ⇒ k shouldEqual orderKey; e.nodeId shouldEqual NodeId("state1") }
-    eventPipe.nextAny[OrderStepEnded] match { case KeyedEvent(k, e: OrderStepEnded) ⇒ k shouldEqual orderKey }
-    eventPipe.nextAny[OrderSuspended.type] match { case KeyedEvent(k, e: OrderSuspended.type) ⇒ k shouldEqual orderKey }
-    eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e: OrderNodeChanged) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state1") }
+    eventPipe.nextAny[OrderStarted.type] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderStepStarted] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.nodeId shouldEqual NodeId("state1") }
+    eventPipe.nextAny[OrderStepEnded] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderSuspended.type] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state1") }
     scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
-    eventPipe.nextAny[OrderResumed.type] match { case KeyedEvent(k, e: OrderResumed.type) ⇒ k shouldEqual orderKey }
-    eventPipe.nextAny[OrderStepStarted] match { case KeyedEvent(k, e: OrderStepStarted) ⇒ k shouldEqual orderKey; e.nodeId shouldEqual NodeId("state2") }
-    eventPipe.nextAny[OrderStepEnded] match { case KeyedEvent(k, e: OrderStepEnded) ⇒ k shouldEqual orderKey }
-    eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e: OrderNodeChanged) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state2") }
-    eventPipe.nextAny[OrderFinished] match { case KeyedEvent(k, e: OrderFinished) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderResumed.type] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderStepStarted] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.nodeId shouldEqual NodeId("state2") }
+    eventPipe.nextAny[OrderStepEnded] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state2") }
+    eventPipe.nextAny[OrderFinished] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey }
   }
 
   private def checkCollectedOrderEvents(orderKey: OrderKey): Unit = {
@@ -78,88 +77,88 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     eventBus.dispatchEvents()  // Das letzte OrderFinished kann sonst verloren gehen.
     sleep(500)  // The last event can be late???
     coldEvents.toMap shouldEqual Map(
-      "OrderStarted"   → KeyedEvent[OrderEvent](orderKey, OrderStarted),
-      "OrderFinished"  → KeyedEvent[OrderEvent](orderKey, OrderFinished(NodeId("end"))),
-      "OrderSuspended" → KeyedEvent[OrderEvent](orderKey, OrderSuspended),
-      "OrderResumed"   → KeyedEvent[OrderEvent](orderKey, OrderResumed))
+      "OrderStarted"   → KeyedEvent(OrderStarted)(orderKey),
+      "OrderFinished"  → KeyedEvent(OrderFinished(NodeId("end")))(orderKey),
+      "OrderSuspended" → KeyedEvent(OrderSuspended)(orderKey),
+      "OrderResumed"   → KeyedEvent(OrderResumed)(orderKey))
     hotEvents shouldEqual Map(
-      "OrderStarted UnmodifiableOrder"            → KeyedEvent[OrderEvent](orderKey, OrderStarted),
-      "OrderStarted Order"                        → KeyedEvent[OrderEvent](orderKey, OrderStarted),
-      "OrderFinished UnmodifiableOrder"           → KeyedEvent[OrderEvent](orderKey, OrderFinished(NodeId("end"))),
-      "OrderStepStarted UnmodifiableOrder state1" → KeyedEvent[OrderEvent](orderKey, OrderStepStarted(NodeId("state1"), TaskId.Null)),
-      "OrderStepStarted Order state1"             → KeyedEvent[OrderEvent](orderKey, OrderStepStarted(NodeId("state1"), TaskId.Null)),
-      "OrderStepEnded UnmodifiableOrder state1"   → KeyedEvent[OrderEvent](orderKey, OrderStepEnded(OrderNodeTransition.Success)),
-      "OrderStepEnded Order state1"               → KeyedEvent[OrderEvent](orderKey, OrderStepEnded(OrderNodeTransition.Success)),
-      "OrderStepStarted UnmodifiableOrder state2" → KeyedEvent[OrderEvent](orderKey, OrderStepStarted(NodeId("state2"), TaskId.Null)),
-      "OrderStepStarted Order state2"             → KeyedEvent[OrderEvent](orderKey, OrderStepStarted(NodeId("state2"), TaskId.Null)),
-      "OrderStepEnded UnmodifiableOrder state2"   → KeyedEvent[OrderEvent](orderKey, OrderStepEnded(OrderNodeTransition.Success)),
-      "OrderStepEnded Order state2"               → KeyedEvent[OrderEvent](orderKey, OrderStepEnded(OrderNodeTransition.Success)),
-      "OrderSuspended UnmodifiableOrder"          → KeyedEvent[OrderEvent](orderKey, OrderSuspended),
-      "OrderResumed UnmodifiableOrder"            → KeyedEvent[OrderEvent](orderKey, OrderResumed))
+      "OrderStarted UnmodifiableOrder"            → KeyedEvent(OrderStarted)(orderKey),
+      "OrderStarted Order"                        → KeyedEvent(OrderStarted)(orderKey),
+      "OrderFinished UnmodifiableOrder"           → KeyedEvent(OrderFinished(NodeId("end")))(orderKey),
+      "OrderStepStarted UnmodifiableOrder state1" → KeyedEvent(OrderStepStarted(NodeId("state1"), TaskId.Null))(orderKey),
+      "OrderStepStarted Order state1"             → KeyedEvent(OrderStepStarted(NodeId("state1"), TaskId.Null))(orderKey),
+      "OrderStepEnded UnmodifiableOrder state1"   → KeyedEvent(OrderStepEnded(OrderNodeTransition.Success))(orderKey),
+      "OrderStepEnded Order state1"               → KeyedEvent(OrderStepEnded(OrderNodeTransition.Success))(orderKey),
+      "OrderStepStarted UnmodifiableOrder state2" → KeyedEvent(OrderStepStarted(NodeId("state2"), TaskId.Null))(orderKey),
+      "OrderStepStarted Order state2"             → KeyedEvent(OrderStepStarted(NodeId("state2"), TaskId.Null))(orderKey),
+      "OrderStepEnded UnmodifiableOrder state2"   → KeyedEvent(OrderStepEnded(OrderNodeTransition.Success))(orderKey),
+      "OrderStepEnded Order state2"               → KeyedEvent(OrderStepEnded(OrderNodeTransition.Success))(orderKey),
+      "OrderSuspended UnmodifiableOrder"          → KeyedEvent(OrderSuspended)(orderKey),
+      "OrderResumed UnmodifiableOrder"            → KeyedEvent(OrderResumed)(orderKey))
   }
 
-  controller.eventBus.on[OrderStarted.type] {
+  eventBus.on[OrderStarted.type] {
     case e @ KeyedEvent(orderKey, _) ⇒
       addEvent(coldEvents, "OrderStarted" → e)
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStarted.type] {
-    case KeyedEvent(k, EventSourceEvent(e, o: UnmodifiableOrder)) ⇒
+  eventBus.onHot[OrderStarted.type] {
+    case KeyedEvent(k, e) ⇒
       addEvent(hotEvents, "OrderStarted UnmodifiableOrder" → KeyedEvent(e)(k))
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStarted.type] {
-    case KeyedEvent(k, EventSourceEvent(e, o: Order)) ⇒
+  eventBus.onHot[OrderStarted.type] {
+    case KeyedEvent(k, e) ⇒
       addEvent(hotEvents, "OrderStarted Order" → KeyedEvent(e)(k))
   }
 
-  controller.eventBus.on[OrderFinished] {
+  eventBus.on[OrderFinished] {
     case e @ KeyedEvent(orderKey, _) =>
       addEvent(coldEvents, "OrderFinished" → e)
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderFinished] {
-    case KeyedEvent(k, EventSourceEvent(e, o: UnmodifiableOrder)) ⇒
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(k, e) ⇒
       addEvent(hotEvents, "OrderFinished UnmodifiableOrder" → KeyedEvent(e)(k))
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStepStarted] {
-    case KeyedEvent(k, EventSourceEvent(e, o: UnmodifiableOrder)) ⇒
-      addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${o.nodeId}" → KeyedEvent[OrderEvent](k, e.copy(taskId = TaskId.Null)))
+  eventBus.onHot[OrderStepStarted] {
+    case KeyedEvent(orderKey, e) ⇒
+      addEvent(hotEvents, s"OrderStepStarted UnmodifiableOrder ${orderOverview(orderKey).nodeId}" → KeyedEvent(e.copy(taskId = TaskId.Null))(orderKey))
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStepStarted] {
-    case KeyedEvent(k, EventSourceEvent(e, o: Order)) ⇒
-      addEvent(hotEvents, s"OrderStepStarted Order ${o.nodeId}" → KeyedEvent[OrderEvent](k, e.copy(taskId = TaskId.Null)))
+  eventBus.onHot[OrderStepStarted] {
+    case KeyedEvent(orderKey, e) ⇒
+      addEvent(hotEvents, s"OrderStepStarted Order ${orderOverview(orderKey).nodeId}" → KeyedEvent(e.copy(taskId = TaskId.Null))(orderKey))
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStepEnded] {
-    case KeyedEvent(k, EventSourceEvent(e, o: UnmodifiableOrder)) ⇒
-      addEvent(hotEvents, s"OrderStepEnded UnmodifiableOrder ${o.nodeId}" → KeyedEvent(e)(k))
+  eventBus.onHot[OrderStepEnded] {
+    case KeyedEvent(orderKey, e) ⇒
+      addEvent(hotEvents, s"OrderStepEnded UnmodifiableOrder ${orderOverview(orderKey).nodeId}" → KeyedEvent(e)(orderKey))
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderStepEnded] {
-    case KeyedEvent(k, EventSourceEvent(e, o: Order)) ⇒
-      addEvent(hotEvents, s"OrderStepEnded Order ${o.nodeId}" → KeyedEvent(e)(k))
+  eventBus.onHot[OrderStepEnded] {
+    case KeyedEvent(orderKey, e) ⇒
+      addEvent(hotEvents, s"OrderStepEnded Order ${orderOverview(orderKey).nodeId}" → KeyedEvent(e)(orderKey))
   }
 
-  controller.eventBus.on[OrderSuspended.type] {
+  eventBus.on[OrderSuspended.type] {
     case e @ KeyedEvent(orderKey, _) ⇒
       addEvent(coldEvents, "OrderSuspended" → e)
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderSuspended.type] {
-    case KeyedEvent(k, EventSourceEvent(e, o: UnmodifiableOrder)) ⇒
+  eventBus.onHot[OrderSuspended.type] {
+    case KeyedEvent(k, e) ⇒
       addEvent(hotEvents, "OrderSuspended UnmodifiableOrder" → KeyedEvent(e)(k))
   }
 
-  controller.eventBus.on[OrderResumed.type] {
+  eventBus.on[OrderResumed.type] {
     case e @ KeyedEvent(orderKey, _) =>
       addEvent(coldEvents, "OrderResumed" → e)
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderResumed.type] {
-    case KeyedEvent(k, EventSourceEvent(e, o: UnmodifiableOrder)) ⇒
+  eventBus.onHot[OrderResumed.type] {
+    case KeyedEvent(k, e) ⇒
       addEvent(hotEvents, "OrderResumed UnmodifiableOrder" → KeyedEvent(e)(k))
   }
 

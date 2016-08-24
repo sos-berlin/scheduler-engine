@@ -4,7 +4,8 @@ import com.google.common.io.Closer
 import com.sos.scheduler.engine.base.utils.ScalaUtils.{RichUnitPartialFunction, implicitClass}
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent, NoKeyEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus._
 import scala.reflect.ClassTag
 
@@ -28,9 +29,9 @@ final class SchedulerEventBus extends EventBus with Runnable {
    * `eventHandler` will be called twice: synchronously at the event and later asynchronously.
    * @param eventHandler Events not in the function's domain are ignored.
    */
-  def onHotAndCold[E <: Event](eventHandler: PartialFunction[KeyedEvent[E], Unit])(implicit closer: Closer, e: ClassTag[E]): Unit = {
-    onHot[E](eventHandler)(closer, e)
-    on[E](eventHandler)(closer, e)
+  def onHotAndCold[E <: Event: ClassTag](eventHandler: PartialFunction[KeyedEvent[E], Unit])(implicit closer: Closer): Unit = {
+    onHot[E](eventHandler)
+    on[E](eventHandler)
   }
 
   /**
@@ -46,40 +47,17 @@ final class SchedulerEventBus extends EventBus with Runnable {
    * The event handler is synchronous.
    * @param eventHandler Events not in the function's domain are ignored.
    */
-  def onHot[E <: Event](eventHandler: PartialFunction[KeyedEvent[E], Unit])(implicit closer: Closer, e: ClassTag[E]): Unit =
+  def onHot[E <: Event: ClassTag](eventHandler: PartialFunction[KeyedEvent[E], Unit])(implicit closer: Closer): Unit =
     subscribeKeyedClosable[E](hotEventBus, eventHandler)
 
-  /**
-   * Subscribes events of class [[EventSourceEvent]][E] for `eventHandler` and registers this in [[Closer]] for automatic unsubscription with Closer.closer().
-   * The event handler is synchronous.
-   * @param eventHandler Events not in the function's domain are ignored.
-   */
-  def onHotEventSourceEvent[E <: Event: ClassTag](eventHandler: PartialFunction[KeyedEvent[EventSourceEvent[E]], Unit])
-    (implicit closer: Closer, e: ClassTag[E]): Unit
-  = {
-    val subscription = new EventSubscription {
-      val eventClass = classOf[AnyKeyedEvent]
-      def handleEvent(e: AnyKeyedEvent) =
-        e match {
-          case keyedEvent @ KeyedEvent(_, e: EventSourceEvent[E @unchecked]) ⇒
-            if (implicitClass[E] isAssignableFrom e.event.getClass) {
-              eventHandler.callIfDefined(keyedEvent.asInstanceOf[KeyedEvent[EventSourceEvent[E]]])
-            }
-          case _ ⇒
-        }
-    }
-    subscribeClosable[AnyKeyedEvent](hotEventBus, subscription)
-  }
-
   private def subscribeKeyedClosable[E <: Event: ClassTag](whichEventBus: EventBus, handleEvent: PartialFunction[KeyedEvent[E], Unit])
-    (implicit closer: Closer, e: ClassTag[E]): Unit
+    (implicit closer: Closer): Unit
   =
-    subscribeClosable[AnyKeyedEvent](whichEventBus, EventSubscription[KeyedEvent[E]] {
-      case e: KeyedEvent[E @unchecked] if implicitClass[E] isAssignableFrom e.event.getClass ⇒
-        handleEvent.callIfDefined(e)
+    subscribeClosable[E](whichEventBus, EventSubscription[E] {
+      case e ⇒ handleEvent.callIfDefined(e)
     })
 
-  private def subscribeClosable[E <: AnyKeyedEvent](whichEventBus: EventBus, subscription: EventSubscription)(implicit closer: Closer, e: ClassTag[E]): Unit = {
+  private def subscribeClosable[E <: Event: ClassTag](whichEventBus: EventBus, subscription: EventSubscription)(implicit closer: Closer): Unit = {
     whichEventBus.register(subscription)
     closer.onClose {
       whichEventBus.unregister(subscription)
@@ -95,11 +73,7 @@ final class SchedulerEventBus extends EventBus with Runnable {
 
   def isSubscribed = hotEventBus.isSubscribed || coldEventBus.isSubscribed
 
-  def publish[E <: AnyKeyedEvent](e: E, source: EventSource): Unit = {
-    logger.trace(s"Publish $e")
-    hotEventBus.publish(KeyedEvent(new EventSourceEvent(e.event, source))(e.key))
-    coldEventBus.publish(e)
-  }
+  def publish(e: NoKeyEvent): Unit = publish(KeyedEvent(e))
 
   def publish(e: AnyKeyedEvent): Unit = {
     logger.trace(s"Publish $e")

@@ -3,16 +3,14 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.java
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.InfoLogEvent
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderNodeTransition, OrderStepEnded}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
-import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -88,8 +86,9 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
 
   "Run variables job via order" in {
     autoClosing(newEventPipe()) { eventPipe ⇒
-      eventBus.onHotEventSourceEvent[Event] {
-        case KeyedEvent(_, EventSourceEvent(_: OrderStepEnded, order: Order)) ⇒ finishedOrderParametersPromise.success(order.variables)
+      eventBus.onHot[OrderStepEnded] {
+        case KeyedEvent(orderKey, _) ⇒
+          finishedOrderParametersPromise.success(orderDetails(orderKey).variables)
       }
       eventBus.awaitingKeyedEvent[OrderFinished](VariablesOrderKey) {
         scheduler executeXml OrderCommand(VariablesOrderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))

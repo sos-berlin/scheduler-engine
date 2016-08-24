@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolertaskafter
 
-import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.order.OrderFinished
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -23,9 +22,10 @@ final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
     controller.waitForTermination()
   }
 
-  controller.eventBus.onHotEventSourceEvent[Event] {
-    case KeyedEvent(_, EventSourceEvent(_: OrderFinished, order: UnmodifiableOrder)) ⇒
-      order.variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      orderDetails(orderKey).variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
       controller.terminateScheduler()
   }
 }
+

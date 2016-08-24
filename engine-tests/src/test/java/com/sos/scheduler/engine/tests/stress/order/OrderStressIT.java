@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.stress.order;
 
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderStarted$;
 import com.sos.scheduler.engine.eventbus.EventHandler;
@@ -19,13 +18,11 @@ public final class OrderStressIT extends SchedulerTest {
         controller().waitForTermination(Duration.ofHours(1));
     }
 
-    @EventHandler public void handleEvent(KeyedEvent<Event> g) {
-        if (g.event().equals(OrderStarted$.MODULE$)) {
-            // OrderFinished wird nicht ausgelöst, weil der Auftrag vorher mit add_or_replace() ersetzt wird.
-            touchedOrderCount++;
-            if (touchedOrderCount > testLimit)
-                controller().terminateScheduler();
-        }
+    @EventHandler public void handleEvent(KeyedEvent<OrderStarted$> g) {
+        // OrderFinished wird nicht ausgelöst, weil der Auftrag vorher mit add_or_replace() ersetzt wird.
+        touchedOrderCount++;
+        if (touchedOrderCount > testLimit)
+            controller().terminateScheduler();
     }
 
 //    public void main(String[] args) throws Exception {

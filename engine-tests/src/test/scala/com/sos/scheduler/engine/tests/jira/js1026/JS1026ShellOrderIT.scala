@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1026
 
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.order.OrderFinished
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.test.SchedulerTestUtils.orderDetails
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.util.CommandBuilder
 import org.junit.runner.RunWith
@@ -26,9 +25,9 @@ final class JS1026ShellOrderIT extends FreeSpec with ScalaSchedulerTest {
     controller.scheduler.executeXml(util.addOrder(JS1026ShellOrderIT.jobchain).getCommand)
   }
 
-  controller.eventBus.onHotEventSourceEvent[OrderFinished] {
-    case KeyedEvent(_, EventSourceEvent(_: OrderFinished, order: UnmodifiableOrder)) ⇒
-      val variables = order.variables
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      val variables = orderDetails(orderKey).variables
       assert(variables("testvar1") == "value1")
       assert(variables("testvar2") == "newvalue2")
       assert(variables("testvar3") == "value3")

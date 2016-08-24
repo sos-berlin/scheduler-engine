@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
@@ -44,11 +43,9 @@ public final class JS611IT extends SchedulerTest {
         //TODO  Jetzt die close_file-Zeilen pro Auftrag zählen. Sollte ab 51 Logs mehr als eine pro Auftrag sein. Aber 25 Tasks brauchen mehrere Gigabyte Adressraum ...
     }
 
-    @EventHandler public void handle(KeyedEvent<Event> g) {
-        if (g.event() instanceof OrderFinished) {
-            finishedOrderCount += 1;
-            if (finishedOrderCount == maxOrderCount)
-                controller().terminateScheduler();
-        }
+    @EventHandler public void handle(KeyedEvent<OrderFinished> g) {
+        finishedOrderCount += 1;
+        if (finishedOrderCount == maxOrderCount)
+            controller().terminateScheduler();
     }
 }

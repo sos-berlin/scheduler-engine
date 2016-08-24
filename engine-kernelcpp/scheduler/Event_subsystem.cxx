@@ -93,13 +93,6 @@ void Event_subsystem_impl::report(const KeyedEventJ& eventJ)
         _eventSubsystemJ.report(eventJ);
 }
 
-//---------------------------------------------------------------------Event_subsystem_impl::report
-
-void Event_subsystem_impl::report(const KeyedEventJ& eventJ, const ObjectJ& eventSourceJ) {
-    if (_eventSubsystemJ) 
-        _eventSubsystemJ.report(eventJ, eventSourceJ);
-}
-
 //----------------------------------------------------------Event_subsystem_impl::report_event_code
 
 void Event_subsystem_impl::report_event_code(Event_code event_code, const ObjectJ& eventSourceJ) {

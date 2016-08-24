@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js606;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -36,15 +35,13 @@ public abstract class JS606Base extends SchedulerTest {
 	}
 
 	@HotEventHandler
-	public void handleOrderFinished(KeyedEvent<Event> g) throws IOException {
-        if (g.event() instanceof OrderFinished) {
-            String lines = Files.toString(resultfile, Charset.defaultCharset());
-            logger.debug("resultfile is " + resultfile.getName() + "\n"+ lines);
-            assertParameter(lines, "RESULT_FILE", resultfile.getAbsolutePath() );
-            assertParameter(lines, "ORDER_PARAM", "ORDER_PARAM" );
-            assertParameter(lines, "JOB_PARAM", "JOB_PARAM" );
-            controller().terminateScheduler();
-        }
+	public void handleOrderFinished(KeyedEvent<OrderFinished> g) throws IOException {
+        String lines = Files.toString(resultfile, Charset.defaultCharset());
+        logger.debug("resultfile is " + resultfile.getName() + "\n"+ lines);
+        assertParameter(lines, "RESULT_FILE", resultfile.getAbsolutePath() );
+        assertParameter(lines, "ORDER_PARAM", "ORDER_PARAM" );
+        assertParameter(lines, "JOB_PARAM", "JOB_PARAM" );
+        controller().terminateScheduler();
 	}
 
 	private void assertParameter(String content, String paramName, String expectedValue) {

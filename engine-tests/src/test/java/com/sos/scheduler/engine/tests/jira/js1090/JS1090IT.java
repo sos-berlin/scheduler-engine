@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1090;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
@@ -39,10 +38,8 @@ public final class JS1090IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(KeyedEvent<Event> g) {
-        if (g.event() instanceof OrderFinished) {
-            controller().terminateScheduler();
-            logFileContent = controller().environment().taskLogFileString(jobPath);
-        }
+    public void handleEvent(KeyedEvent<OrderFinished> g) {
+        controller().terminateScheduler();
+        logFileContent = controller().environment().taskLogFileString(jobPath);
     }
 }

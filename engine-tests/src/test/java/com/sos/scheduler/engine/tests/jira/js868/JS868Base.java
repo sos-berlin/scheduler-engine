@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js868;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
@@ -35,10 +34,8 @@ public abstract class JS868Base extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderFinished(KeyedEvent<Event> g) throws IOException {
-        if (g.event() instanceof OrderFinished) {
-            controller().terminateScheduler();
-        }
+    public void handleOrderFinished(KeyedEvent<OrderFinished> g) throws IOException {
+        controller().terminateScheduler();
     }
 
     public abstract void testAssertions();

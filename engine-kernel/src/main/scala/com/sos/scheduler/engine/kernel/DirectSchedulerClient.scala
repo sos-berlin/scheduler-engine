@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.log.LogEvent
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState}
+import com.sos.scheduler.engine.data.order.{OrderDetails, OrderKey, OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -45,6 +45,9 @@ extends SchedulerClient with DirectCommandClient {
 
   def orderOverviewsBy(query: OrderQuery): Future[Snapshot[immutable.Seq[OrderOverview]]] =
     respondWith { orderSubsystem.orderOverviews(query) }
+
+  def orderDetails(orderKey: OrderKey): Future[Snapshot[OrderDetails]] =
+    respondWith { orderSubsystem.orderDetails(orderKey)}
 
   def orderTreeComplementedBy(query: OrderQuery) =
     for (snapshot ← ordersComplementedBy(query))

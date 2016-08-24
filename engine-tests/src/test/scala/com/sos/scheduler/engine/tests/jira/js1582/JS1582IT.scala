@@ -16,8 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @RunWith(classOf[JUnitRunner])
 final class JS1582IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val apiStarted = controller.eventBus.eventFuture[TaskStarted.type](_.key.jobPath == JobPath("/test-api"))
-  private lazy val shellStarted = controller.eventBus.eventFuture[TaskStarted.type](_.key.jobPath == JobPath("/test-shell"))
+  private lazy val apiStarted = eventBus.eventFuture[TaskStarted.type](_.key.jobPath == JobPath("/test-api"))
+  private lazy val shellStarted = eventBus.eventFuture[TaskStarted.type](_.key.jobPath == JobPath("/test-shell"))
 
   override protected def onBeforeSchedulerActivation() = {
     apiStarted

@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1029
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskId, TaskKey, TaskStarted}
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.job.Task
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1029.JS1029IT._
@@ -45,9 +44,9 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <kill_task job={testJobPath.string} id={taskId.string} immediately="yes"/>
   }
 
-  eventBus.onHotEventSourceEvent[TaskStarted.type] {
-    case KeyedEvent(TaskKey(_, taskId), EventSourceEvent(_, task: Task)) ⇒
-    eventBus publishCold KeyedEvent(MyTaskStartedEvent(task.stdoutFile))(taskId)
+  eventBus.onHot[TaskStarted.type] {
+    case KeyedEvent(TaskKey(_, taskId), _) ⇒
+    eventBus publishCold KeyedEvent(MyTaskStartedEvent(taskDetails(taskId).stdoutFile))(taskId)
   }
 }
 

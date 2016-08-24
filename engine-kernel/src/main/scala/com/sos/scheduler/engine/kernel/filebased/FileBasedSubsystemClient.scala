@@ -30,7 +30,7 @@ trait FileBasedSubsystemClient {
 
   def details(path: ThisPath): FileBasedDetails =
     inSchedulerThread {
-      subsystem.fileBased(path).details
+      fileBasedDetails(path)
     }
 
   def count = inSchedulerThread { subsystem.count }

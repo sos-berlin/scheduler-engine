@@ -49,11 +49,13 @@ final class JS1103IT extends FreeSpec with ScalaSchedulerTest {
     withCloser { implicit closer ⇒
       val totalCounter = new MaximumCounter
       val ordinaryCounter = new MaximumCounter
-      eventBus.onHot[Event] {
-        case KeyedEvent(OrderKey(_, OrderId(idString)), OrderStarted) ⇒
+      eventBus.onHot[OrderStarted.type] {
+        case KeyedEvent(OrderKey(_, OrderId(idString)), _) ⇒
           if (!(idString endsWith "-extra")) ordinaryCounter += 1
           totalCounter += 1
-        case KeyedEvent(OrderKey(_, OrderId(idString)), _: OrderFinished) ⇒
+      }
+      eventBus.onHot[OrderFinished] {
+        case KeyedEvent(OrderKey(_, OrderId(idString)), _) ⇒
           if (!(idString endsWith "-extra")) ordinaryCounter -= 1
           totalCounter -= 1
       }

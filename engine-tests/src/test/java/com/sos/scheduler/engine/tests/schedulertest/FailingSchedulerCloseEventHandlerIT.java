@@ -14,8 +14,7 @@ public final class FailingSchedulerCloseEventHandlerIT extends SchedulerTest {
         controller().close();
     }
 
-    @HotEventHandler public void handleEvent(KeyedEvent<Event> e) {
-        if (e.event() == SchedulerClosed$.MODULE$)
-            throw new TestError();
+    @HotEventHandler public void handleEvent(KeyedEvent<SchedulerClosed$> e) {
+        throw new TestError();
     }
 }

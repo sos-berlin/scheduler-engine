@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException,
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderDetails, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.CppCall
@@ -84,14 +84,13 @@ with OrderPersistence {
     val taskId = this.taskId
     val processingState = {
       import OrderProcessingState._
-      taskId match {
-        case Some(taskId_) ⇒
-          val task = taskSubsystem.task(taskId_)
+      (taskId, taskId flatMap taskSubsystem.taskOption) match {
+        case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
           task.stepOrProcessStartedAt match {
             case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, task.agentAddress, at)
             case None ⇒ WaitingInTask(taskId_, task.processClassPath, task.agentAddress)
           }
-        case None ⇒
+        case (_, _) ⇒
           if (isBlacklisted)
             Blacklisted
           else if (!isTouched)
@@ -131,6 +130,17 @@ with OrderPersistence {
       occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
   }
 
+  override private[kernel] def details: OrderDetails = {
+    val overview = this.overview
+    val fileBasedDetails = super.details
+    OrderDetails(
+      overview = overview,
+      file = fileBasedDetails.file,
+      fileModifiedAt = fileBasedDetails.fileModifiedAt,
+      sourceXml = fileBasedDetails.sourceXml,
+      variables = variables)
+  }
+
   private def isSetback = setbackUntil.isDefined
 
   def stringToPath(o: String) = OrderKey(o)
@@ -139,6 +149,8 @@ with OrderPersistence {
 
   private[order] def sourceType: OrderSourceType =
     sourceTypeOnce getOrUpdate toOrderSourceType(isFileBased = cppProxy.is_file_based, isFileOrder = cppProxy.is_file_order)
+
+  override protected def pathOrKey = if (hasBaseFile) path else orderKey
 
   def orderKey: OrderKey = inSchedulerThread { jobChainPath orderKey id }
 
@@ -209,7 +221,8 @@ with OrderPersistence {
 
   private[kernel] def jobChainPath: JobChainPath =
     cppProxy.job_chain match {
-      case null ⇒ emptyToNone(cppProxy.job_chain_path_string) map JobChainPath.apply getOrElse throwNotInAJobChain()
+      case null ⇒
+        emptyToNone(cppProxy.job_chain_path_string) map JobChainPath.apply getOrElse throwNotInAJobChain()
       case o ⇒ o.getSister.path   // Faster
     }
 

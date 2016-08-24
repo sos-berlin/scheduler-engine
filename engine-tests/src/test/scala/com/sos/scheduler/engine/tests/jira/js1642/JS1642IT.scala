@@ -16,12 +16,12 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, KeyedEvent, Event, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeId, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -253,8 +253,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(jobChainDetails == awaitContent(directSchedulerClient.jobChainDetails(xaJobChainPath)))
       assert(jobChainDetails.copy(fileModifiedAt = None, sourceXml = None) ==
         JobChainDetails(
-          xaJobChainPath,
-          FileBasedState.active,
+          JobChainOverview(
+            xaJobChainPath,
+            FileBasedState.active,
+            isDistributed = false),
           Some(testEnvironment.fileFromPath(xaJobChainPath)),
           fileModifiedAt = None,
           sourceXml = None,

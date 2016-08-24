@@ -254,8 +254,8 @@ struct Task : Object,
     bool                        force                       () const                                { return _force_start; }
     const Time&                 at                          () const                                { return _start_at; }
     const string                log_string                  ()                                      { return log()->as_string(); }
-    const File_path             stdout_path                 () const                                { return _module_instance->stdout_path(); }
-    const File_path             stderr_path                 () const                                { return _module_instance->stderr_path(); }    
+    const File_path             stdout_path                 () const                                { return _module_instance? _module_instance->stdout_path() : File_path(); }
+    const File_path             stderr_path                 () const                                { return _module_instance? _module_instance->stderr_path() : File_path(); }    
 
     public: Absolute_path process_class_path() const {
         return _process_class ? _process_class->path() : Absolute_path("");

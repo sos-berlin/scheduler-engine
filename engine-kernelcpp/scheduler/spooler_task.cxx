@@ -1817,7 +1817,7 @@ bool Task::do_something()
                                     }
                                 }
 
-                                report_event(CppEventFactoryJ::newTaskEndedEvent(_id, _job->path(), _exit_code), java_sister());
+                                report_event(CppEventFactoryJ::newTaskEndedEvent(_id, _job->path(), _exit_code));
                                 set_state_direct( s_deleting_files );
                                 loop = true;
                             }
@@ -2232,7 +2232,7 @@ void Task::postprocess_order(const Order_state_transition& state_transition, boo
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
 
         if (!_order->job_chain_path().empty())
-            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()), _order->java_sister());
+            report_event(CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()));
         _order->postprocessing(state_transition, _error);
 
         if( due_to_exception && !_order->setback_called() )
@@ -2252,7 +2252,7 @@ void Task::detach_order_after_error(const Order_state_transition& transition)
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
             if (!_order->job_chain_path().empty())
-                report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order_state_transition::keep.internal_value()), _order->java_sister());
+                report_event(CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order_state_transition::keep.internal_value()));
             _order->processing_error();
             detach_order();
         } else {

@@ -45,20 +45,20 @@ final class JS803IT extends FreeSpec with ScalaSchedulerTest {
     scheduler.executeXml(command)
   }
 
-  controller.eventBus.on[OrderStarted.type] {
-    case KeyedEvent(orderKey, OrderStarted) ⇒
+  eventBus.on[OrderStarted.type] {
+    case KeyedEvent(orderKey, _) ⇒
       withClue(s"Order $orderKey has been started before expected time $startTime: ") {
         assert(!(new DateTime isBefore startTime))
       }
   }
 
-  controller.eventBus.on[OrderFinished] {
-    case KeyedEvent(orderKey, event: OrderFinished) ⇒
+  eventBus.on[OrderFinished] {
+    case KeyedEvent(orderKey, event) ⇒
       assert(event.nodeId == expectedEndNodeId)
   }
 
-  controller.eventBus.on[OrderFinished] {
-    case KeyedEvent(orderKey, _: OrderFinished) ⇒
+  eventBus.on[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
       terminatedOrders.add(orderKey.id)
       if (terminatedOrders == expectedOrders)  controller.terminateScheduler()
   }

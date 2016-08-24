@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js801;
 
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.data.order.OrderId;
@@ -41,8 +40,7 @@ public class JS801IT extends SchedulerTest {
         controller().waitForTermination();
     }
 
-    @EventHandler public void handleEvent(KeyedEvent<Event> g) {
-        if (g.event() instanceof OrderFinished)
-            controller().terminateScheduler();
+    @EventHandler public void handleEvent(KeyedEvent<OrderFinished> g) {
+        controller().terminateScheduler();
     }
 }

@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js498.scriptapi;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
@@ -68,10 +67,8 @@ public final class JS498OrderIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderFinished(KeyedEvent<Event> g) {
-        if (g.event() instanceof OrderFinished) {
-            controller().terminateScheduler();
-        }
+    public void handleOrderFinished(KeyedEvent<OrderFinished> g) {
+        controller().terminateScheduler();
     }
 
     private void checkJobObjects() {

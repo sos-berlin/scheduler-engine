@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js628
 
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.order.OrderFinished
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.util.CommandBuilder
 import com.sos.scheduler.engine.tests.jira.js628.JS628IT.{TestJobChains, expectedErrorCount, expectedSuccessCount}
@@ -48,8 +47,9 @@ final class JS628IT extends FreeSpec with ScalaSchedulerTest {
     assertEquals("unsuccessfull orders", expectedErrorCount, errorCount)
   }
 
-  eventBus.onHotEventSourceEvent[OrderFinished] {
-    case KeyedEvent(orderKey, EventSourceEvent(_, order: UnmodifiableOrder)) ⇒
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      val order = orderOverview(orderKey)
       val endState = order.nodeId.string
       if (endState == "error") { errorCount += 1; errorCount - 1 }
       if (endState == "success") { successCount += 1; successCount - 1 }

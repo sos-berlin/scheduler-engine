@@ -7,12 +7,10 @@ import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPluginIT._
-import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError}
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError, orderDetails}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -32,9 +30,9 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
       val promiseMap = (OrderKeys map { _ → Promise[Map[String, String]]() }).toMap
       withCloser { implicit closer ⇒
-        eventBus.onHotEventSourceEvent[OrderFinished] {
-          case KeyedEvent(orderKey, EventSourceEvent(_, order: UnmodifiableOrder)) ⇒
-            promiseMap(orderKey).success(order.variables)
+        eventBus.onHot[OrderFinished] {
+          case KeyedEvent(orderKey, _) ⇒
+            promiseMap(orderKey).success(orderDetails(orderKey).variables)
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
         val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))
@@ -48,8 +46,8 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       eventBus.awaitingKeyedEvent[OrderFinished](ErrorOrderKey) {
         withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
-          eventPipe.nextWithTimeoutAndCondition[ErrorLogEvent] { _.event.codeOption == Some(MissingJobchainCode) }
-          eventPipe.nextWithTimeoutAndCondition[ErrorLogEvent] { _.event.codeOption == Some(CommandFailedCode) }
+          eventPipe.nextWithCondition[ErrorLogEvent] { _.event.codeOption == Some(MissingJobchainCode) }
+          eventPipe.nextWithCondition[ErrorLogEvent] { _.event.codeOption == Some(CommandFailedCode) }
         }
       }
     }

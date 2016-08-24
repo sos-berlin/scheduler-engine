@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.order.{OrderDetails, OrderKey, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -50,6 +50,9 @@ extends FileBasedSubsystem {
       persistentStateStore.store(node.persistentState)
     }
   }
+
+  private[kernel] def orderDetails(orderKey: OrderKey): OrderDetails =
+   order(orderKey).details
 
   private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }

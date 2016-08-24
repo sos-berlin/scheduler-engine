@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.eventbus.annotated;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
-import com.sos.scheduler.engine.eventbus.EventSourceEvent;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,10 +16,7 @@ public class SimpleMethodEventSubscription extends MethodEventSubscription {
     }
 
     @Override protected final void invokeHandler(KeyedEvent<Event> keyedEvent) throws InvocationTargetException, IllegalAccessException {
-        KeyedEvent<Event> e = keyedEvent.event() instanceof EventSourceEvent<?>
-            ? new KeyedEvent<Event>(keyedEvent.key(), (Event)((EventSourceEvent<?>)keyedEvent.event()).event())
-            : keyedEvent;
-        getMethod().invoke(getAnnotatedObject(), e);
+        getMethod().invoke(getAnnotatedObject(), keyedEvent);
     }
 
     @Override public String toString() {

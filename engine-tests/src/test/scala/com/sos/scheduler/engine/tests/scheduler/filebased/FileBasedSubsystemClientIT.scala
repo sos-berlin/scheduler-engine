@@ -120,9 +120,9 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
           }
 
           "details" in {
+            assert(fileBasedDetails.overview.fileBasedState == expectedFileBasedState)
             fileBasedDetails should have (
               'path (path),
-              'fileBasedState (expectedFileBasedState),
               'file (Try(fileBased.file).toOption)) //,
               //'sourceXml (emptyToNone(fileBased.sourceXmlBytes) map xmlBytesToString))
             if (fileBased.isFileBased)

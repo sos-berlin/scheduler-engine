@@ -28,7 +28,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.{SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
-import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.Scheduler._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -38,7 +38,7 @@ import com.sos.scheduler.engine.kernel.configuration.SchedulerModule.LateBoundCp
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
-import com.sos.scheduler.engine.kernel.filebased.{FileBased, FileBasedSubsystem}
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.log.{CppLogger, PrefixLog}
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
@@ -124,10 +124,10 @@ with HasCloser {
     val subsystemCompanions = injector.instance[FileBasedSubsystem.Register].companions
     val subsystemMap: Map[FileBasedType, FileBasedSubsystem] =
       subsystemCompanions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
-    eventBus.onHotEventSourceEvent[FileBasedEvent] {
-      case KeyedEvent(path, EventSourceEvent(event, fileBased: FileBased)) ⇒
+    eventBus.onHot[FileBasedEvent] {
+      case KeyedEvent(path, event) ⇒
         for (subsystem ← subsystemMap.get(path.fileBasedType)) {
-          subsystem.onFileBasedEvent(KeyedEvent(event)(path), fileBased)
+          subsystem.onFileBasedEvent(KeyedEvent(event)(path))
         }
     }
   }

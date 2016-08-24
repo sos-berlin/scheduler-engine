@@ -39,13 +39,13 @@ final class JS802IT extends FreeSpec with ScalaSchedulerTest {
     controller.waitForTermination()
   }
 
-  controller.eventBus.on[OrderStarted.type] {
+  eventBus.on[OrderStarted.type] {
     case KeyedEvent(key, OrderStarted) ⇒
       assertTrue(s"Order $key has been started before expected time $startTime", new DateTime() isAfter startTime)
       collector.add(key)
   }
 
-  controller.eventBus.on[TaskEnded] {
+  eventBus.on[TaskEnded] {
     case KeyedEvent(TaskKey(jobPath, _), _: TaskEnded) if jobPath.name == jobName ⇒
       assertTrue(s"$jobPath has been started before expected time $startTime", new DateTime() isAfter startTime)
       collector.add(jobPath.name)

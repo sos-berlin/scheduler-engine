@@ -51,9 +51,9 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       eventPipe.nextKeyed[OrderNodeChanged](myOrderKey).nodeIdTransition shouldEqual NodeId("100") -> NodeId("200")
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, suspended = Some(true))
-      eventPipe.nextWithTimeoutAndCondition[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
+      eventPipe.nextWithCondition[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
-      eventPipe.nextWithTimeoutAndCondition[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-992")) }    // "Order ist not longer suspended"
+      eventPipe.nextWithCondition[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-992")) }    // "Order ist not longer suspended"
       eventPipe.nextKeyed[FileBasedActivated.type](myOrderKey)
       order(myOrderKey).title shouldEqual ChangedTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
@@ -69,7 +69,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
-      eventPipe.nextWithTimeoutAndCondition[LogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
+      eventPipe.nextWithCondition[LogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
       eventPipe.nextKeyed[OrderFinished](myOrderKey)
       eventPipe.nextKeyed[FileBasedActivated.type](myOrderKey)

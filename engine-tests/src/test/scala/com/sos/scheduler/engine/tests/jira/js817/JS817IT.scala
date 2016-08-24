@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js817
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderKey}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
+import com.sos.scheduler.engine.tests.jira.js817.JS817IT.TestOrderId
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -20,15 +21,15 @@ final class JS817IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def runSchedulerWithJobChain(jobChainName: String) {
-    scheduler.executeXml(<order job_chain={jobChainName} id={JS817IT.orderId}/>)
+    scheduler.executeXml(<order job_chain={jobChainName} id={TestOrderId}/>)
   }
 
-  controller.eventBus.on[OrderFinished] {
-    case KeyedEvent(orderKey: OrderKey, _) if orderKey.id == JS817IT.orderId ⇒
+  eventBus.on[OrderFinished] {
+    case KeyedEvent(OrderKey(_, TestOrderId), _)  ⇒
       controller.terminateScheduler()
   }
 }
 
 private object JS817IT {
-  private val orderId = OrderId("test")
+  private val TestOrderId = OrderId("test")
 }

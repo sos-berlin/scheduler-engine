@@ -101,7 +101,6 @@ struct Scheduler_object
 
     virtual void                close                       ()                                      {}
     void                        report_event                (const KeyedEventJ&);
-    void                        report_event                (const KeyedEventJ&, const ObjectJ& eventSource);
     void                        report_event_code           (Event_code event_code, const ObjectJ& eventSource);
     virtual string              obj_name                    () const                                { return name_of_type_code(scheduler_type_code()); }
 };

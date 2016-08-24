@@ -10,9 +10,8 @@ import com.sos.scheduler.engine.data.event.{KeyedEvent, NoKeyEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.{Stop, Unstop}
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.EventPipe.TimeoutException
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{logger ⇒ _, _}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.StartWhenDirectoryChangedIT._
 import java.nio.file.Files.{delete, exists, move}
@@ -40,9 +39,9 @@ final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
   }
 
-  eventBus.onHotEventSourceEvent[TaskEnded] {
-    case KeyedEvent(TaskKey(AJobPath, _), EventSourceEvent(_, task: Task)) ⇒
-      val files = (Splitter on ";" split task.parameterValue(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
+  eventBus.onHot[TaskEnded] {
+    case KeyedEvent(TaskKey(AJobPath, taskId), _) ⇒
+      val files = (Splitter on ";" split taskDetails(taskId).variables(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
       eventBus publishCold TriggerEvent(files)
   }
 

@@ -1,17 +1,18 @@
 package com.sos.scheduler.engine.tests.jira.js1195
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
-import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.eventbus.{EventSourceEvent, SchedulerEventBus}
-import com.sos.scheduler.engine.kernel.order.Order
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
 import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginXmlConfigurable}
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor
+import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerXmlCommandExecutor}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.orderDetails
 import com.sos.scheduler.engine.tests.jira.js1195.TestPlugin._
 import javax.inject.Inject
 import org.scalactic.Requirements._
@@ -21,17 +22,22 @@ import scala.collection.mutable
 /**
  * @author Joacim Zschimmer
  */
-final class TestPlugin @Inject private(eventBus: SchedulerEventBus, xmlCommandExecutor: SchedulerXmlCommandExecutor)
+final class TestPlugin @Inject private(
+  eventBus: SchedulerEventBus,
+  xmlCommandExecutor: SchedulerXmlCommandExecutor,
+  injector: Injector)
 extends AttachableNamespaceXmlPlugin {
 
+  private implicit val hasInjector = HasInjector(injector)
   private val nodeConfigurations = mutable.Map[NodeKey, NodeConfiguration]()
 
   val xmlNamespace = "http://example.com/TestPlugin"
 
   override def onActivate(): Unit = {
-    eventBus.onHotEventSourceEvent[Event] {
-      case KeyedEvent(orderKey: OrderKey, EventSourceEvent(e: OrderStepEnded, order: Order)) ⇒
-        for (conf ← nodeConfigurations.get(order.nodeKey)) {
+    eventBus.onHot[OrderStepEnded] {
+      case KeyedEvent(orderKey: OrderKey, _) ⇒
+        val order = orderDetails(orderKey)
+        for (conf ← nodeConfigurations.get(order.overview.nodeKey)) {
           val command = OrderCommand(
             OrderKey(conf.jobChainPath, orderKey.id),
             parameters = order.variables)

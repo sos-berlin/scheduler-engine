@@ -21,7 +21,7 @@ final class SchedulerTestIT extends FreeSpec with ScalaSchedulerTest {
   private implicit val unusedCloser = Closer.create()
   private val receivedEvents = mutable.Buffer[MainEvent]()
 
-  controller.eventBus.on[MainEvent] {
+  eventBus.on[MainEvent] {
     case KeyedEvent(NoKey, e) ⇒ receivedEvents += e
   }
 

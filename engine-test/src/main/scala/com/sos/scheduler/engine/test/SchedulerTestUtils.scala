@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderOverview, OrderStarted}
+import com.sos.scheduler.engine.data.order.{OrderDetails, OrderFinished, OrderKey, OrderOverview, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystemClient, Task, TaskSubsystemClient}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
-import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystemClient, UnmodifiableOrder}
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystemClient}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystemClient}
@@ -102,16 +102,23 @@ object SchedulerTestUtils {
   def orderOverview(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderOverview =
     instance[OrderSubsystemClient].orderOverview(orderKey)
 
+  def orderDetails(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetails =
+    instance[OrderSubsystemClient].orderDetails(orderKey)
+
   def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
     instance[OrderSubsystemClient].order(orderKey)
 
   def orderExists(orderKey: OrderKey)(implicit hasInjector: HasInjector): Boolean = orderOption(orderKey).isDefined
 
+  @Deprecated
   def orderOption(orderKey: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
     instance[OrderSubsystemClient].orderOption(orderKey)
 
   def taskOverview(taskId: TaskId)(implicit hasInjector: HasInjector): TaskOverview =
     instance[TaskSubsystemClient].taskOverview(taskId) await TestTimeout
+
+  def taskDetails(taskId: TaskId)(implicit hasInjector: HasInjector): TaskDetails =
+    instance[TaskSubsystemClient].taskDetails(taskId) await TestTimeout
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystemClient].task(taskId)
@@ -187,10 +194,10 @@ object SchedulerTestUtils {
       val whenTouched = eventBus.keyedEventFuture[OrderStarted.type](orderKey)
       val whenFinished: Future[(OrderFinished, Map[String, String])] = {
         val promise = Promise[(OrderFinished, Map[String, String])]()
-        lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinished] {
-          case (KeyedEvent(`orderKey`, event: OrderFinished), order: UnmodifiableOrder)  ⇒
+        lazy val subscription: EventSubscription = EventSubscription[OrderFinished] {
+          case KeyedEvent(`orderKey`, event) ⇒
             eventBus.unregisterHot(subscription)
-            promise.success((event, order.variables))
+            promise.success((event, orderDetails(orderKey).variables))
         }
         eventBus.registerHot(subscription)
         promise.future

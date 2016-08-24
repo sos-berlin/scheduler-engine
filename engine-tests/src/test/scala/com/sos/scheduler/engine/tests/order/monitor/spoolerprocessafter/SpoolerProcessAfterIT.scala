@@ -8,16 +8,15 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
-import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{TaskClosed, TaskId, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
-import com.sos.scheduler.engine.kernel.order.{OrderSubsystemClient, UnmodifiableOrder}
-import com.sos.scheduler.engine.test.SchedulerTestUtils.deleteAndWriteConfigurationFile
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT._
@@ -110,23 +109,21 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       }
     }
 
-  eventBus.onHotEventSourceEvent[OrderStepEnded] {
-    case KeyedEvent(k, EventSourceEvent(e, order: UnmodifiableOrder)) ⇒
-      if (e.nodeTransition == OrderNodeTransition.Keep) {
-        // Es wird kein OrderFinished geben.
-        publishMyFinishedEvent(order)
-      }
+  eventBus.onHot[OrderStepEnded] {
+    case KeyedEvent(orderKey, e) if e.nodeTransition == OrderNodeTransition.Keep ⇒
+      // Es wird kein OrderFinished geben.
+      publishMyFinishedEvent(orderDetails(orderKey))
   }
 
-  eventBus.onHotEventSourceEvent[OrderFinished] {
-    case KeyedEvent(k, EventSourceEvent(e, order: UnmodifiableOrder)) ⇒
-      publishMyFinishedEvent(order)
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      publishMyFinishedEvent(orderDetails(orderKey))
   }
 
-  private def publishMyFinishedEvent(order: UnmodifiableOrder): Unit = {
+  private def publishMyFinishedEvent(order: OrderDetails): Unit = {
     eventBus.publishCold(KeyedEvent(
       MyFinishedEvent(
-        order.nodeId,
+        order.overview.nodeId,
         order.variables.get(SpoolerProcessAfterNames.parameter) map { _.toBoolean }))
       (order.orderKey))
   }

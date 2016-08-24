@@ -17,12 +17,6 @@ private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEv
     eventBus.publish(e)
   }
 
-  /** @param e [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]] statt [[com.sos.scheduler.engine.data.event.AnyKeyedEvent}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtigt.]]
-    * @param eventSource { @link Object} statt { @link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AnyKeyedEvent, eventSource: AnyRef): Unit = {
-    eventBus.publish(e, eventSource.asInstanceOf[EventSource])
-  }
-
   @ForCpp private def checkNumberOfEventCodes(count: Int): Unit = {
     require(count == CppEventCode.values.length, "C++-Event_code does not match CppEventCode")
   }
@@ -31,7 +25,7 @@ private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEv
     try {
       val o = eventSource.asInstanceOf[EventSource]
       val e = CppEventFactory.newInstance(CppEventCode.values()(cppEventCode), o)
-      eventBus.publish(e, o)
+      eventBus.publish(e)
     }
     catch {
       case x: Exception => logger.error(s"EventSubsystem.reportEventClass($cppEventCode):", x)

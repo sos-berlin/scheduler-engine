@@ -19,7 +19,6 @@ import scala.util.control.NonFatal
 trait FileBased
 extends Sister
 with EventSource {
-  self ⇒
 
   type ThisPath <: TypedPath
 
@@ -36,26 +35,31 @@ with EventSource {
 
   protected[this] def cppProxy: File_basedC[_]
 
-  private[kernel] def overview: FileBasedOverview =
-    SimpleFileBasedOverview(
-      path = self.path,
-      fileBasedState = self.fileBasedState)
-
-  private[kernel] def details: FileBasedDetails =
-    inSchedulerThread {
-      val overview = self.overview
-      SimpleFileBasedDetails(
-        path = overview.path,
-        fileBasedState = overview.fileBasedState,
-        file = fileOption,
-        fileModifiedAt = fileModificationInstantOption,
-        sourceXml = sourceXmlBytes match {
-          case o if o.isEmpty ⇒ None
-          case o ⇒
-            try Some(xmlBytesToString(o))
-            catch { case NonFatal(t) ⇒ Some(<ERROR>{t.toString}</ERROR>.toString()) }
-        })
+  private[kernel] def details: FileBasedDetails = {
+    val overview = this.simpleOverview
+    SimpleFileBasedDetails(
+      overview = overview,
+      file = fileOption,
+      fileModifiedAt = fileModificationInstantOption,
+      sourceXml = sourceXmlBytes match {
+        case o if o.isEmpty ⇒ None
+        case o ⇒
+          try Some(xmlBytesToString(o))
+          catch { case NonFatal(t) ⇒ Some(<ERROR>{t.toString}</ERROR>.toString()) }
+      })
     }
+
+  private[kernel] def overview: FileBasedOverview =
+    inSchedulerThread {
+      SimpleFileBasedOverview(
+        path = pathOrKey,
+        fileBasedState = fileBasedState)
+    }
+
+  private def simpleOverview: SimpleFileBasedOverview =
+    SimpleFileBasedOverview(
+      path = pathOrKey,
+      fileBasedState = fileBasedState)
 
   private[kernel] final def fileBasedObstacles: Set[FileBasedObstacle] = {
     import FileBasedObstacle._
@@ -75,7 +79,9 @@ with EventSource {
 
   private[kernel] def fileBasedState = FileBasedState.values()(cppProxy.file_based_state)
 
-  private[kernel] def path: ThisPath =
+  protected def pathOrKey: ThisPath = path
+
+  private[kernel] final def path: ThisPath =
     fixedPath getOrElse {
       if (cppProxy.name_is_fixed) {
         fixedPath.trySet(stringToPath(cppProxy.path))
@@ -118,6 +124,8 @@ with EventSource {
   def isVisible: Boolean = inSchedulerThread { cppProxy.is_visible }
 
   def isFileBased: Boolean = inSchedulerThread { cppProxy.is_file_based }
+
+  protected def hasBaseFile: Boolean = fixedPath.isDefined || cppProxy.has_base_file
 
   def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 

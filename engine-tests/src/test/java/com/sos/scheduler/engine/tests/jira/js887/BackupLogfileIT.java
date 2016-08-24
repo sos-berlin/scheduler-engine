@@ -77,9 +77,7 @@ public class BackupLogfileIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(KeyedEvent<Event> e) {
-        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
-            controller().terminateScheduler();
-        }
+    public void handleEvent(KeyedEvent<TaskEnded> e) {
+        controller().terminateScheduler();
     }
 }
