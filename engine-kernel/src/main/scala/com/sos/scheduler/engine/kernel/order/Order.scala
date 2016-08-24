@@ -38,6 +38,7 @@ with OrderPersistence {
 
   import subsystem.agentClientFactory
 
+  protected type Self = Order
   type ThisPath = OrderKey
 
   private val idOnce = new SetOnce[OrderId]
@@ -74,7 +75,7 @@ with OrderPersistence {
   }
 
   private[kernel] override def overview: OrderOverview = {
-    val orderKey = this.orderKey
+    val orderKey = this.pathOrKey
     val nodeId = this.nodeId
     val flags = cppProxy.java_fast_flags
     val isTouched = cppFastFlags.isTouched(flags)
@@ -127,7 +128,14 @@ with OrderPersistence {
       processingState = processingState,
       obstacles = obstacles,
       nextStepAt = nextStepAt,
-      occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
+      occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply,
+      liveChanged = replacementOption match {
+        case Some(replacement) ⇒
+          Some(OrderOverview.Replaced(replacement.overview.copy(obstacles = Set(), nextStepAt = None)))
+        case None if configurationFileRemoved ⇒
+          Some(OrderOverview.Removed)
+        case _ ⇒ None
+      })
   }
 
   override private[kernel] def details: OrderDetails = {

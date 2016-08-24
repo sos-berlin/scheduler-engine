@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, NodeId}
@@ -68,11 +68,17 @@ object SchedulerTestUtils {
       logger.debug(s"Sleeping a second to get a different file time for $file")
       sleep(1.s)  // Assure different timestamp for configuration file, so JobScheduler can see a change
     }
-    controller.eventBus.awaitingKeyedEvent[FileBasedAddedOrReplaced](path) {
+    updateFoldersWith(path) {
       file.xml = xmlElem
       instance[FolderSubsystemClient].updateFolders()
     }
   }
+
+  def updateFoldersWith(path: TypedPath)(body: ⇒ Unit)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
+    controller.eventBus.awaitingKeyedEvent[FileBasedAddedOrReplaced](path) {
+      body
+      instance[FolderSubsystemClient].updateFolders()
+    }
 
   /**
    * Delete the configuration file and awaits JobScheduler's acceptance.

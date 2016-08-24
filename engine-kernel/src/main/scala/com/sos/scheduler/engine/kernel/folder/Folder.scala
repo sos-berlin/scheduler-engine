@@ -13,6 +13,7 @@ private[kernel] final class Folder(
   protected[kernel] val subsystem: FolderSubsystem)
 extends FileBased {
 
+  protected type Self = Folder
   type ThisPath = FolderPath
 
   def stringToPath(o: String) = FolderPath(o)

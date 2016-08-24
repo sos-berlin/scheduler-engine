@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
+import com.sos.scheduler.engine.kernel.filebased.FileBased
+import javax.annotation.Nullable
 
 trait File_basedC[S <: Sister] {
   def path: String
@@ -18,4 +20,5 @@ trait File_basedC[S <: Sister] {
   def has_base_file: Boolean
   def is_to_be_removed: Boolean
   def name_is_fixed: Boolean
+  @Nullable def replacement_java: FileBased
 }

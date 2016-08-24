@@ -33,6 +33,7 @@ final class ProcessClass private(
   val agentConnectRetryDelayLazy: () ⇒ Duration)
 extends FileBased {
 
+  protected type Self = ProcessClass
   type ThisPath = ProcessClassPath
 
   @volatile

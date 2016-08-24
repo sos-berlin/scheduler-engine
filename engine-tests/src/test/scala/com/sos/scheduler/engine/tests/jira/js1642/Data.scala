@@ -89,7 +89,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(5), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(5))),
-    nextStepAt = Some(EPOCH))
+    nextStepAt = Some(EPOCH),
+    liveChanged = Some(OrderOverview.Replaced(OrderOverview(
+      b1OrderKey,
+      FileBasedState.initialized,
+      OrderSourceType.Permanent,
+      NodeId(""),
+      OrderProcessingState.Pending(Instant.ofEpochMilli(0))))))
   private val b1OrderOverviewJson = s"""{
     "path": "/bJobChain,1",
     "fileBasedState": "active",
@@ -102,7 +108,21 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "since": "${taskIdToStartedAt(TaskId(5))}"
     },
     "obstacles": [],
-    "nextStepAt": "1970-01-01T00:00:00Z"
+    "nextStepAt": "1970-01-01T00:00:00Z",
+    "liveChanged": {
+      "TYPE": "Replaced",
+      "overview": {
+        "sourceType": "Permanent",
+        "path": "/bJobChain,1",
+        "processingState": {
+          "at": "1970-01-01T00:00:00Z",
+          "TYPE": "Pending"
+        },
+        "fileBasedState": "initialized",
+        "obstacles": [],
+        "nodeId":""
+      }
+    }
   }"""
 
   val xa1OrderOverview = OrderOverview(

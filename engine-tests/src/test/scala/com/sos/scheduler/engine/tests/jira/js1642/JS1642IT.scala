@@ -16,6 +16,8 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.common.utils.IntelliJUtils
+import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
@@ -28,6 +30,7 @@ import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -61,7 +64,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
   protected lazy val webSchedulerClient = new StandardWebSchedulerClient(schedulerUri).closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    //binariesDebugMode = Some(com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.Release),
     mainArguments = List(s"-http-port=$httpPort", "-distributed-orders"))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private lazy val taskSubsystem = controller.instance[TaskSubsystemClient]
@@ -89,6 +91,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     scheduler executeXml OrderCommand(aAdHocOrderKey, at = Some(OrderStartAt), suspended = Some(true))
     scheduler executeXml OrderCommand(xbAdHocDistributedOrderKey, at = None)
     startOrderProcessing()
+    testEnvironment.fileFromPath(b1OrderKey).append(" ")
+    instance[FolderSubsystemClient].updateFolders()   // Replacement is pending
   }
 
   override def afterAll() = {
@@ -450,5 +454,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 }
 
 object JS1642IT {
+  intelliJuseImports(JsObjectMarshaller)
   private val logger = Logger(getClass)
 }

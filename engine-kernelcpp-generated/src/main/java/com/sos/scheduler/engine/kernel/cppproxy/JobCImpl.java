@@ -322,6 +322,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.lang.String path__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.filebased.FileBased replacement_java() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.filebased.FileBased result = replacement_java__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.filebased.FileBased.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.filebased.FileBased replacement_java__native(long cppReference);
+
+
     @Override public int running_tasks_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

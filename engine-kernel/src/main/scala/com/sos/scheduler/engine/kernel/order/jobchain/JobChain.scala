@@ -34,6 +34,7 @@ private[engine] final class JobChain(
 extends FileBased
 with UnmodifiableJobChain {
 
+  protected type Self = JobChain
   type ThisPath = JobChainPath
 
   private object cppPredecessors {

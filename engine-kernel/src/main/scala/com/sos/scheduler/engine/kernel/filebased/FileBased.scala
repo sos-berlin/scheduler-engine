@@ -20,6 +20,7 @@ trait FileBased
 extends Sister
 with EventSource {
 
+  protected type Self <: FileBased
   type ThisPath <: TypedPath
 
   private val fixedPath = new SetOnce[ThisPath]
@@ -132,4 +133,8 @@ with EventSource {
   override def toString = getClass.getName + (fixedPath.toOption map { o ⇒ s"('$o')" } getOrElse "")
 
   def stringToPath(o: String): ThisPath
+
+  private[kernel] final def configurationFileRemoved = cppProxy.is_to_be_removed
+
+  private[kernel] final def replacementOption: Option[Self] = Option(cppProxy.replacement_java.asInstanceOf[Self])
 }

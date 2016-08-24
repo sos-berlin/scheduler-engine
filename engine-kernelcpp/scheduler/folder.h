@@ -240,6 +240,9 @@ struct File_based : Abstract_scheduler_object,
 
     void                    set_replacement                 ( File_based* );
     File_based*                 replacement                 () const                                { return _replacement; }
+    javabridge::Lightweight_jobject replacement_java() {
+        return _replacement ? _replacement->java_sister() : NULL;
+    }
 
     void                    set_typed_folder                ( Typed_folder* );                      // Nur für Typed_folder!
     void                    set_folder_path                 ( const Absolute_path& );

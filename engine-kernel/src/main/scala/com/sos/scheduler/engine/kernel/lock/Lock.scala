@@ -13,6 +13,7 @@ private[kernel] final class Lock private(
   protected[kernel] val subsystem: LockSubsystem)
 extends FileBased {
 
+  protected type Self = Lock
   type ThisPath = LockPath
 
   def stringToPath(o: String) = LockPath(o)
