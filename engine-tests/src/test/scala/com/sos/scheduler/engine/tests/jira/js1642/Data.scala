@@ -71,7 +71,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     Set(OrderObstacle.Suspended),
     nextStepAt = Some(OrderStartAt))
   private val aAdHocOrderOverviewJson = """{
-    "path": "/aJobChain,AD-HOC",
+    "path": "/aJobChain,ÅD-HÖC",
     "fileBasedState": "not_initialized",
     "nodeId": "100",
     "sourceType": "AdHoc",
@@ -410,7 +410,7 @@ private[js1642] object Data {
 
   val a1OrderKey = aJobChainPath orderKey "1"
   val a2OrderKey = aJobChainPath orderKey "2"
-  val aAdHocOrderKey = aJobChainPath orderKey "AD-HOC"
+  val aAdHocOrderKey = aJobChainPath orderKey "ÅD-HÖC"
   val bJobChainPath = JobChainPath("/bJobChain")
   val b1OrderKey = bJobChainPath orderKey "1"
   val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")

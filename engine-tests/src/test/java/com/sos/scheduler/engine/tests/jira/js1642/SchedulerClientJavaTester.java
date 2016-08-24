@@ -129,7 +129,7 @@ final class SchedulerClientJavaTester implements AutoCloseable {
 
     private static void testAdHocOrderOverview(List<OrderOverview> orderOverviews) {
         OrderOverview orderOverview = orderOverviews.stream()
-            .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("AD-HOC")))
+            .filter(o -> o.orderKey().equals(aJobChainPath.orderKey("ÅD-HÖC")))
             .findFirst().get();
         assertEquals(new NodeId("100"), orderOverview.nodeId());
         assertEquals(FileBasedState.not_initialized, orderOverview.fileBasedState());
