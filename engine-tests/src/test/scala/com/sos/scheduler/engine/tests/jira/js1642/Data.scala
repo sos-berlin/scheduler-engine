@@ -79,7 +79,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "Planned",
       "at": "2038-01-01T11:22:33Z"
     },
-    "obstacles": [ "Suspended" ],
+    "obstacles": [
+      {
+        "TYPE": "Suspended"
+      }
+    ],
     "nextStepAt": "2038-01-01T11:22:33Z"
   }"""
 
@@ -162,7 +166,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
     },
-    "obstacles": [ "Suspended" ],
+    "obstacles": [
+      {
+        "TYPE": "Suspended"
+      }
+    ],
     "nextStepAt": "1970-01-01T00:00:00Z"
   }"""
 
