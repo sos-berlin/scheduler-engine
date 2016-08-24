@@ -46,7 +46,7 @@ final class JS653IT extends FreeSpec with ScalaSchedulerTest {
       orderStarts.add(orderKey.id → orderOverview(orderKey).nodeId)
   }
 
-  eventBus.on[OrderFinished] {
+  eventBus.onHot[OrderFinished] {
     case KeyedEvent(orderKey, e) ⇒
       orderEnds.add(orderKey → e.nodeId)
       lastActivity = currentTimeMillis

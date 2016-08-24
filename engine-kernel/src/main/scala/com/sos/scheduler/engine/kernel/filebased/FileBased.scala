@@ -23,7 +23,7 @@ with EventSource {
   protected type Self <: FileBased
   type ThisPath <: TypedPath
 
-  private val fixedPath = new SetOnce[ThisPath]
+  private val _fixedPath = new SetOnce[ThisPath]
 
   protected[kernel] def subsystem: FileBasedSubsystem
 
@@ -83,10 +83,10 @@ with EventSource {
   protected def pathOrKey: ThisPath = path
 
   private[kernel] final def path: ThisPath =
-    fixedPath getOrElse {
+    _fixedPath getOrElse {
       if (cppProxy.name_is_fixed) {
-        fixedPath.trySet(stringToPath(cppProxy.path))
-        fixedPath()
+        _fixedPath.trySet(stringToPath(cppProxy.path))
+        _fixedPath()
       } else
         stringToPath(cppProxy.path)
     }
@@ -126,15 +126,17 @@ with EventSource {
 
   def isFileBased: Boolean = inSchedulerThread { cppProxy.is_file_based }
 
-  protected def hasBaseFile: Boolean = fixedPath.isDefined || cppProxy.has_base_file
+  protected def hasBaseFile: Boolean = _fixedPath.isDefined || cppProxy.has_base_file
 
   def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 
-  override def toString = getClass.getName + (fixedPath.toOption map { o ⇒ s"('$o')" } getOrElse "")
+  override def toString = getClass.getName + (_fixedPath.toOption map { o ⇒ s"('$o')" } getOrElse "")
 
   def stringToPath(o: String): ThisPath
 
   private[kernel] final def configurationFileRemoved = cppProxy.is_to_be_removed
 
   private[kernel] final def replacementOption: Option[Self] = Option(cppProxy.replacement_java.asInstanceOf[Self])
+
+  protected def fixedPathOption = _fixedPath.toOption
 }

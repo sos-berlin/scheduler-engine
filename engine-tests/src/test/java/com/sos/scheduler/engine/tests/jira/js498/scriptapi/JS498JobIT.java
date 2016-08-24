@@ -2,22 +2,19 @@ package com.sos.scheduler.engine.tests.jira.js498.scriptapi;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import java.util.Map;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -71,12 +68,10 @@ public final class JS498JobIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(KeyedEvent<Event> e) {
-        if (TaskEnded.class.isAssignableFrom(e.event().getClass())) {
-            taskCount++;
-            if (taskCount == jobs.size())
-                controller().terminateScheduler();
-        }
+    public void handleEvent(KeyedEvent<TaskEnded> e) {
+        taskCount++;
+        if (taskCount == jobs.size())
+            controller().terminateScheduler();
     }
 
     private void checkScriptOnlyJob() {
