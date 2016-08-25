@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.eventbus
 
 import com.google.common.io.Closer
-import com.sos.scheduler.engine.base.utils.ScalaUtils.{RichUnitPartialFunction, implicitClass}
+import com.sos.scheduler.engine.base.utils.ScalaUtils.RichUnitPartialFunction
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent, NoKeyEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus._
 import scala.reflect.ClassTag

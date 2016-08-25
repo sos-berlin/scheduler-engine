@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.Impli
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.data.order.OrderOverview
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -33,7 +34,7 @@ private[js1642] trait SpeedTests {
         instance[OrderTester].testSpeed(a1OrderKey, 3, 10000)
         inSchedulerThread {
           for (_ ← 1 to 5) Stopwatch.measureTime(100000, "OrderOverview") {
-            directSchedulerClient.orderOverviewsBy(OrderQuery(isDistributed = Some(false))).successValue
+            directSchedulerClient.ordersBy[OrderOverview](OrderQuery(isDistributed = Some(false))).successValue
           }
         }
       }
@@ -52,7 +53,7 @@ private[js1642] trait SpeedTests {
             implicit val fastUnmarshaller = Unmarshaller[HttpData](`application/json`) {
               case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
             }
-            webSchedulerClient.get[HttpData](_.order.ordersComplemented(OrderQuery(isDistributed = Some(false)))) await TestTimeout
+            webSchedulerClient.get[HttpData](_.order.complemented[OrderOverview](OrderQuery(isDistributed = Some(false)))) await TestTimeout
             val s = stopwatch.itemsPerSecondString(n, "order")
             logger.info(s"OrdersComplemented $testName: $s")
           }

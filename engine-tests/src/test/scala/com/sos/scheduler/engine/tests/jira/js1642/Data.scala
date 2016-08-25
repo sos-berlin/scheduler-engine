@@ -242,7 +242,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
   )
 
-  val ExpectedOrderTreeComplemented = OrderTreeComplemented(
+  val ExpectedOrderTreeComplemented = OrderTreeComplemented[OrderOverview](
     FolderTree(
       FolderPath.Root,
       Vector(

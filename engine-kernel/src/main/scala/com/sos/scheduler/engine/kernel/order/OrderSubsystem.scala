@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderDetails, OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -51,28 +51,31 @@ extends FileBasedSubsystem {
     }
   }
 
-  private[kernel] def orderDetails(orderKey: OrderKey): OrderDetails =
+  private[kernel] def orderOverview[V <: OrderView: OrderView.Companion](orderKey: OrderKey): V =
+   order(orderKey).view[V]
+
+  private[kernel] def orderDetails(orderKey: OrderKey): OrderDetailed =
    order(orderKey).details
 
-  private[kernel] def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] = {
+  private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
-    val localOrders = localChains flatMap { _.orderIterator } filter { o ⇒ query matchesOrder o.queryable } map { _.overview }
+    val localOrders = localChains flatMap { _.orderIterator } filter { o ⇒ query matchesOrder o.queryable } map { _.view[V] }
     val distriOrders =
-      for (o ← distributedOrderOverviews(distriChains, query)) yield
+      for (o ← distributedOrderViews[V](distriChains, query)) yield
         if (o.occupyingClusterMemberId contains ownClusterMemberId)
-          orderOption(o.orderKey) map { _.overview } getOrElse o
+          orderOption(o.orderKey) map { _.view[V] } getOrElse o
         else
           o
     var iterator = localOrders ++ distriOrders
     for (limit ← query.notInTaskLimitPerNode) {
-      val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderOverview) ⇒ o.nodeKey)
+      val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderView) ⇒ o.nodeKey)
       iterator = iterator filter { o ⇒ o.processingState.isInTask || perKeyLimiter(o) }
     }
     iterator.toVector
   }
 
-  private def distributedOrderOverviews(jobChains: Iterator[JobChain], query: OrderQuery): Seq[OrderOverview] = {
-    val result = mutable.Buffer[OrderOverview]()
+  private def distributedOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Seq[V] = {
+    val result = mutable.Buffer[V]()
     val jobChainPathArray = new java.util.ArrayList[AnyRef] sideEffect { a ⇒
       for (jobChain ← jobChains) a.add(jobChain.path.withoutStartingSlash)
     }
@@ -84,7 +87,7 @@ extends FileBasedSubsystem {
           def apply(orderC: OrderC) = {
             val order = orderC.getSister
             if (query matchesOrder order.queryable) {
-              result += orderC.getSister.overview
+              result += orderC.getSister.view[V]
             }
           }
         })

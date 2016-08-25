@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
@@ -26,14 +26,14 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class OrdersHtmlPage private(
-  protected val snapshot: Snapshot[OrdersComplemented],
+  protected val snapshot: Snapshot[OrdersComplemented[OrderOverview]],
   protected val pageUri: Uri,
   query: OrderQuery,
   protected val schedulerOverview: SchedulerOverview,
   protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
 
-  private val ordersComplemented: OrdersComplemented = snapshot.value
+  private val ordersComplemented: OrdersComplemented[OrderOverview] = snapshot.value
   private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
   private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
@@ -196,10 +196,10 @@ object OrdersHtmlPage {
   private val Dot = '\u00b7'
 
   def toHtmlPage(
-    snapshot: Snapshot[OrdersComplemented],
+    snapshot: Snapshot[OrdersComplemented[OrderOverview]],
     pageUri: Uri,
     query: OrderQuery,
-    client: SchedulerClient,
+    client: SchedulerOverviewClient,
     webServiceContext: WebServiceContext)
     (implicit ec: ExecutionContext)
   =
@@ -225,6 +225,5 @@ object OrdersHtmlPage {
         for (o ← frags.tail;
              x ← stringFrag(s" $Dot ") :: o :: Nil)
           yield x)
-
   }
 }

@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.log.LogEvent
-import com.sos.scheduler.engine.data.order.{OrderDetails, OrderKey, OrderOverview, OrderProcessingState}
+import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -43,14 +43,11 @@ extends SchedulerClient with DirectCommandClient {
   def overview: Future[Snapshot[SchedulerOverview]] =
     respondWith { scheduler.overview }
 
-  def orderOverviewsBy(query: OrderQuery): Future[Snapshot[immutable.Seq[OrderOverview]]] =
-    respondWith { orderSubsystem.orderOverviews(query) }
+  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
+    respondWith { orderSubsystem.orderViews[V](query) }
 
-  def orderDetails(orderKey: OrderKey): Future[Snapshot[OrderDetails]] =
-    respondWith { orderSubsystem.orderDetails(orderKey)}
-
-  def orderTreeComplementedBy(query: OrderQuery) =
-    for (snapshot ← ordersComplementedBy(query))
+  def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
+    for (snapshot ← ordersComplementedBy[V](query))
       yield for (o ← snapshot)
         yield OrderTreeComplemented(
           FolderTree.fromHasPaths(query.jobChainPathQuery.folderPath, o.orders),
@@ -59,9 +56,9 @@ extends SchedulerClient with DirectCommandClient {
           o.usedTasks,
           o.usedProcessClasses)
 
-  def ordersComplementedBy(query: OrderQuery) =
+  def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     respondWith {
-      val orderOverviews = orderSubsystem.orderOverviews(query)
+      val orderOverviews = orderSubsystem.orderViews[V](query)
       val nodeOverviews = {
         val jobChainPathToNodeKeys = (orderOverviews map { _.nodeKey }).distinct groupBy { _.jobChainPath }
         for ((jobChainPath, nodeKeys) ← jobChainPathToNodeKeys.toVector.sortBy { _._1 };

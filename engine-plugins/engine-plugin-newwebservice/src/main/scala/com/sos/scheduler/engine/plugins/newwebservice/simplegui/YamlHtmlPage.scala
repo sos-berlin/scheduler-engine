@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.common.sprayutils.YamlPrinter
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
@@ -16,7 +16,7 @@ object YamlHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+    implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       ToHtmlPage[Snapshot[A]] { (snapshot, pageUri) ⇒
         val yamlFuture = Future { snapshot map { o ⇒ YamlPrinter(o.toJson) } }
         for (Snapshot(schedulerOverview) ← client.overview;

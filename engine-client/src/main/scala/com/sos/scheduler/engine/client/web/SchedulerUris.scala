@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import spray.http.Uri
@@ -26,15 +27,28 @@ final class SchedulerUris private(schedulerUriString: String) {
     def overviews(query: OrderQuery = OrderQuery.All): String =
       apply(query, Some("OrderOverview"))
 
-    def treeComplemented: String = treeComplemented(OrderQuery.All)
+    def treeComplemented[V <: OrderView: OrderView.Companion]: String = treeComplemented[V](OrderQuery.All)
 
-    def treeComplemented(query: OrderQuery): String =
-      apply(query, Some("OrderTreeComplemented"))
+    def treeComplemented[V <: OrderView: OrderView.Companion](query: OrderQuery): String = {
+      val view = implicitly[OrderView.Companion[V]].name
+      apply(query, Some(s"OrderTreeComplemented/$view"))
+    }
 
-    def ordersComplemented(query: OrderQuery = OrderQuery.All): String =
-      apply(query, Some("OrdersComplemented"))
+    def complemented[V <: OrderView: OrderView.Companion](query: OrderQuery = OrderQuery.All): String = {
+      val view = implicitly[OrderView.Companion[V]].name
+      apply(query, Some(s"OrdersComplemented/$view"))
+    }
 
-    def apply(query: OrderQuery, returnType: Option[String]): String = {
+    def apply[V <: OrderView: OrderView.Companion](query: OrderQuery): String = orders[V](query)
+
+    def apply(query: OrderQuery, returnType: Option[String]): String = orders(query, returnType)
+
+    def orders[V <: OrderView: OrderView.Companion](query: OrderQuery): String = {
+      val view = implicitly[OrderView.Companion[V]]
+      apply(query, returnType = Some(view.name))
+    }
+
+    def orders(query: OrderQuery, returnType: Option[String]): String = {
       val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
       uriString(Uri(
         path = Uri.Path(s"api/order$subpath"),
@@ -58,7 +72,7 @@ final class SchedulerUris private(schedulerUriString: String) {
     def details(jobChainPath: JobChainPath): String = {
       val subpath = PathQueryHttp.toUriPath(PathQuery(jobChainPath))
       require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
-      uriString(Uri.Path(s"api/jobChain$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
+      uriString(Uri.Path(s"api/jobChain$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetailed")))
     }
   }
 
@@ -79,7 +93,7 @@ final class SchedulerUris private(schedulerUriString: String) {
     def details(jobPath: JobPath): String = {
       val subpath = PathQueryHttp.toUriPath(PathQuery(jobPath))
       require(!subpath.endsWith("/"), "Invalid JobPath has trailing slash")
-      uriString(Uri.Path(s"api/job$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetails")))
+      uriString(Uri.Path(s"api/job$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetailed")))
     }
   }
 
@@ -100,7 +114,7 @@ final class SchedulerUris private(schedulerUriString: String) {
     def details(processClassPath: ProcessClassPath): String = {
       val subpath = PathQueryHttp.toUriPath(PathQuery(processClassPath))
       require(!subpath.endsWith("/"), "Invalid ProcessClassPath has trailing slash")
-      uriString(Uri.Path(s"api/processClass$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "ProcessClassChainDetails")))
+      uriString(Uri.Path(s"api/processClass$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "ProcessClassDetailed")))
     }
   }
 

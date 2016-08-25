@@ -3,24 +3,15 @@ package com.sos.scheduler.engine.client.api
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
-import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 
 /**
   * @author Joacim Zschimmer
   */
-trait SchedulerClient extends CommandClient {
-
-  def overview: Future[Snapshot[SchedulerOverview]]
-
-  def orderOverviewsBy(query: OrderQuery): Future[Snapshot[Seq[OrderOverview]]]
-
-  def ordersComplementedBy(query: OrderQuery): Future[Snapshot[OrdersComplemented]]
-
-  def orderTreeComplementedBy(query: OrderQuery): Future[Snapshot[OrderTreeComplemented]]
+trait SchedulerClient extends SchedulerOverviewClient with CommandClient with OrderClient {
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]]
 
@@ -40,14 +31,11 @@ trait SchedulerClient extends CommandClient {
 
   def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[AnyKeyedEvent]]]]
 
-  final def orderOverviews: Future[Snapshot[Seq[OrderOverview]]] =
-    orderOverviewsBy(OrderQuery.All)
+  final def ordersComplemented[V <: OrderView: OrderView.Companion]: Future[Snapshot[OrdersComplemented[V]]] =
+    ordersComplementedBy[V](OrderQuery.All)
 
-  final def ordersComplemented: Future[Snapshot[OrdersComplemented]] =
-    ordersComplementedBy(OrderQuery.All)
-
-  final def orderTreeComplemented: Future[Snapshot[OrderTreeComplemented]] =
-    orderTreeComplementedBy(OrderQuery.All)
+  final def orderTreeComplemented[V <: OrderView: OrderView.Companion]: Future[Snapshot[OrderTreeComplemented[V]]] =
+    orderTreeComplementedBy[V](OrderQuery.All)
 
   final def jobChainOverviews: Future[Snapshot[Seq[JobChainOverview]]] =
     jobChainOverviewsBy(JobChainQuery.All)

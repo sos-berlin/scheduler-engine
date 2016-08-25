@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.order.OrderOverview
+import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
@@ -44,14 +44,14 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def overview =
     get[Snapshot[SchedulerOverview]](_.overview)
 
-  final def orderOverviewsBy(query: OrderQuery) =
-    get[Snapshot[immutable.Seq[OrderOverview]]](_.order.overviews(query))
+  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
+    get[Snapshot[immutable.Seq[V]]](_.order[V](query))
 
-  final def orderTreeComplementedBy(query: OrderQuery) =
-    get[Snapshot[OrderTreeComplemented]](_.order.treeComplemented(query))
+  final def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
+    get[Snapshot[OrderTreeComplemented[V]]](_.order.treeComplemented[V](query))
 
-  final def ordersComplementedBy(query: OrderQuery) =
-    get[Snapshot[OrdersComplemented]](_.order.ordersComplemented(query))
+  final def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
+    get[Snapshot[OrdersComplemented[V]]](_.order.complemented[V](query))
 
   final def jobChainOverview(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))

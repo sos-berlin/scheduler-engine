@@ -120,7 +120,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       publishMyFinishedEvent(orderDetails(orderKey))
   }
 
-  private def publishMyFinishedEvent(order: OrderDetails): Unit = {
+  private def publishMyFinishedEvent(order: OrderDetailed): Unit = {
     eventBus.publishCold(KeyedEvent(
       MyFinishedEvent(
         order.overview.nodeId,

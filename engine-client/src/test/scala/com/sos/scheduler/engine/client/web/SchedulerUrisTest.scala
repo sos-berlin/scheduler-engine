@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.web
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderSourceType
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -35,14 +35,17 @@ final class SchedulerUrisTest extends FreeSpec {
         "return" → "OrderOverview")).toString)
   }
 
-  "order.ordersComplemented" in {
-    assert(uris.order.ordersComplemented(OrderQuery.All) == "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrdersComplemented")
+  "order.orders" in {
+    assert(uris.order.orders[OrderOverview](OrderQuery.All) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrderOverview")
+    assert(uris.order.orders[OrderDetailed](OrderQuery.All) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrderDetailed")
     assert(
-      uris.order.ordersComplemented(OrderQuery(isSuspended = Some(true))) ==
+      uris.order.orders[OrderOverview](OrderQuery(isSuspended = Some(true))) ==
       Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
         "isSuspended" → "true",
-        "return" → "OrdersComplemented")).toString)
-    assert(uris.order.ordersComplemented(
+        "return" → "OrderOverview")).toString)
+    assert(uris.order.orders[OrderOverview](
       OrderQuery(
         isSuspended = Some(true),
         isBlacklisted = Some(false),
@@ -52,7 +55,31 @@ final class SchedulerUrisTest extends FreeSpec {
           "isSuspended" → "true",
           "isBlacklisted" → "false",
           "isOrderSourceType" → "FileOrder,AdHoc",  // Incidentally, Scala Set with two elements retains orders
-          "return" → "OrdersComplemented")).toString)
+          "return" → "OrderOverview")).toString)
+  }
+
+  "order.ordersComplemented" in {
+    assert(uris.order.complemented[OrderOverview](OrderQuery.All) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrdersComplemented/OrderOverview")
+    assert(uris.order.complemented[OrderDetailed](OrderQuery.All) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrdersComplemented/OrderDetailed")
+    assert(
+      uris.order.complemented[OrderOverview](OrderQuery(isSuspended = Some(true))) ==
+      Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
+        "isSuspended" → "true",
+        "return" → "OrdersComplemented/OrderOverview")).toString)
+  }
+
+  "order.orderTreeComplemented" in {
+    assert(uris.order.treeComplemented[OrderOverview](OrderQuery.All) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrderTreeComplemented/OrderOverview")
+    assert(uris.order.treeComplemented[OrderDetailed](OrderQuery.All) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/?return=OrderTreeComplemented/OrderDetailed")
+    assert(
+      uris.order.treeComplemented[OrderOverview](OrderQuery(isSuspended = Some(true))) ==
+      Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/").withQuery(Uri.Query(
+        "isSuspended" → "true",
+        "return" → "OrderTreeComplemented/OrderOverview")).toString)
   }
 
   "jobChain.overviews" in {

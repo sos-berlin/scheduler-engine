@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderDetails, OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystemClient
@@ -38,7 +38,7 @@ extends FileBasedSubsystemClient {
 
   def orderOverview(orderKey: OrderKey): OrderOverview = inSchedulerThread { subsystem.order(orderKey).overview }
 
-  def orderDetails(orderKey: OrderKey): OrderDetails = inSchedulerThread { subsystem.order(orderKey).details }
+  def orderDetails(orderKey: OrderKey): OrderDetailed = inSchedulerThread { subsystem.order(orderKey).details }
 
   @deprecated("Avoid direct access to C++ near objects")
   def order(orderKey: OrderKey): Order = inSchedulerThread { subsystem.order(orderKey) }

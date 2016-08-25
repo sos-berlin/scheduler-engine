@@ -1,0 +1,24 @@
+package com.sos.scheduler.engine.client.api
+
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
+import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.scheduler.engine.data.order.OrderView
+import com.sos.scheduler.engine.data.queries.OrderQuery
+import scala.collection.immutable
+import scala.collection.immutable.Seq
+import scala.concurrent.Future
+
+/**
+  * @author Joacim Zschimmer
+  */
+trait OrderClient {
+
+  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]]
+
+  def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrdersComplemented[V]]]
+
+  def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrderTreeComplemented[V]]]
+
+  final def orders[V <: OrderView: OrderView.Companion]: Future[Snapshot[Seq[V]]] =
+    ordersBy(OrderQuery.All)
+}

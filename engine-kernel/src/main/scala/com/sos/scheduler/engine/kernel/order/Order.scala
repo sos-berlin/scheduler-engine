@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException,
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderDetails, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderView}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.CppCall
@@ -74,6 +74,12 @@ with OrderPersistence {
     }
   }
 
+  private[kernel] def view[V <: OrderView: OrderView.Companion]: V =
+    implicitly[OrderView.Companion[V]] match {
+      case OrderOverview ⇒ overview.asInstanceOf[V]
+      case OrderDetailed ⇒ details.asInstanceOf[V]
+    }
+
   private[kernel] override def overview: OrderOverview = {
     val orderKey = this.pathOrKey
     val nodeId = this.nodeId
@@ -138,10 +144,10 @@ with OrderPersistence {
       })
   }
 
-  override private[kernel] def details: OrderDetails = {
+  override private[kernel] def details: OrderDetailed = {
     val overview = this.overview
     val fileBasedDetails = super.details
-    OrderDetails(
+    OrderDetailed(
       overview = overview,
       file = fileBasedDetails.file,
       fileModifiedAt = fileBasedDetails.fileModifiedAt,

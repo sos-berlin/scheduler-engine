@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderDetails, OrderFinished, OrderKey, OrderOverview, OrderStarted}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderKey, OrderOverview, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
@@ -108,7 +108,7 @@ object SchedulerTestUtils {
   def orderOverview(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderOverview =
     instance[OrderSubsystemClient].orderOverview(orderKey)
 
-  def orderDetails(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetails =
+  def orderDetails(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetailed =
     instance[OrderSubsystemClient].orderDetails(orderKey)
 
   def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
