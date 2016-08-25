@@ -45,7 +45,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 
     def orders[V <: OrderView: OrderView.Companion](query: OrderQuery): String = {
       val view = implicitly[OrderView.Companion[V]]
-      apply(query, returnType = Some(view.name))
+      orders(query, returnType = Some(view.name))
     }
 
     def orders(query: OrderQuery, returnType: Option[String]): String = {

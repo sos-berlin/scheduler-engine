@@ -56,6 +56,14 @@ final class SchedulerUrisTest extends FreeSpec {
           "isBlacklisted" → "false",
           "isOrderSourceType" → "FileOrder,AdHoc",  // Incidentally, Scala Set with two elements retains orders
           "return" → "OrderOverview")).toString)
+    assert(uris.order.orders[OrderDetailed](OrderQuery(isSuspended = Some(true)).withOrderKey(JobChainPath("/FOLDER/TEST") orderKey "ID/1-Ä")) ==
+      Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST")
+        .withQuery(Uri.Query(
+          "orderId" → "ID/1-Ä",
+          "isSuspended" → "true",
+          "return" → "OrderDetailed")).toString)
+    assert(uris.order.orders(OrderQuery.All.withOrderKey(JobChainPath("/FOLDER/TEST") orderKey "ID/1:Ä?"), returnType = None) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST?orderId=ID/1:%C3%84?")
   }
 
   "order.ordersComplemented" in {

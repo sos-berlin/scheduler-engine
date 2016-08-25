@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.client.web.order
 
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp._
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderSourceType
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import org.junit.runner.RunWith
@@ -43,6 +44,14 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
       Get("/prefix/a/b") ~> route(OrderQuery(jobChainPathQuery = PathQuery("/a/b"))) ~> check {
         assert(status == OK)
       }
+    }
+
+    "OrderQuery /a?orderId=1" in {
+      Get("/prefix/a?orderId=1") ~>
+        route(OrderQuery.All.withOrderKey(JobChainPath("/a") orderKey "1")) ~>
+        check {
+          assert(status == OK)
+        }
     }
 
     "OrderQuery /a/ suspended but not blacklisted" in {

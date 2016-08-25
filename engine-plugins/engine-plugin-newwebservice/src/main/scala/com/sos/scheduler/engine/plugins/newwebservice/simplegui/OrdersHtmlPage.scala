@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -174,7 +174,7 @@ extends SchedulerHtmlPage {
     }
     val rowCssClass = orderToTrClass(order) getOrElse (if (isWaiting && jobObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
-      td(order.orderKey.id.string),
+      td(orderKeyToA(order.orderKey)(order.orderKey.id.string)),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
       td(processingStateHtml, occupyingMemberHtml),
       td(obstaclesHtml))
@@ -184,11 +184,15 @@ extends SchedulerHtmlPage {
 
   private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
 
-  private def queryToA(query: OrderQuery) = a(cls := "inherit-markup", href := uris.order(query, returnType = None))
+  private def queryToA(query: OrderQuery) = hiddenA(uris.order(query, returnType = None))
 
-  private def jobChainPathToA(path: JobChainPath) = a(cls := "inherit-markup", href := uris.jobChain.details(path))
+  private def jobChainPathToA(path: JobChainPath) = hiddenA(uris.jobChain.details(path))
 
-  private def taskToA(taskId: TaskId) = a(cls := "inherit-markup", href := uris.task.overview(taskId))
+  private def orderKeyToA(orderKey: OrderKey) = hiddenA(uris.order.orders[OrderDetailed](OrderQuery.All.withOrderKey(orderKey)))
+
+  private def taskToA(taskId: TaskId) = hiddenA(uris.task.overview(taskId))
+
+  private def hiddenA(url: String) = a(cls := "inherit-markup", href := url)
 }
 
 object OrdersHtmlPage {
