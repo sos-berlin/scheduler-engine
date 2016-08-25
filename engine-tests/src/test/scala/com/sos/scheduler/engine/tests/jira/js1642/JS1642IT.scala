@@ -356,10 +356,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
-  "StandardWebSchedulerClient in Java" in {
-    SchedulerClientJavaTester.run(schedulerUri)
-  }
-
   "JSON" - {
     "overview" in {
       val overviewString = webSchedulerClient.get[String](_.overview) await TestTimeout
