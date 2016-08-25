@@ -36,9 +36,9 @@ with EventSource {
 
   protected[this] def cppProxy: File_basedC[_]
 
-  private[kernel] def details: FileBasedDetails = {
+  private[kernel] def details: FileBasedDetailed = {
     val overview = this.simpleOverview
-    SimpleFileBasedDetails(
+    SimpleFileBasedDetailed(
       overview = overview,
       file = fileOption,
       fileModifiedAt = fileModificationInstantOption,

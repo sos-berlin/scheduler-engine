@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetails, FileBasedOverview}
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import scala.collection.immutable
@@ -28,9 +28,9 @@ trait FileBasedSubsystemClient {
       subsystem.overview
     }
 
-  def details(path: ThisPath): FileBasedDetails =
+  def detailed(path: ThisPath): FileBasedDetailed =
     inSchedulerThread {
-      fileBasedDetails(path)
+      fileBasedDetailed(path)
     }
 
   def count = inSchedulerThread { subsystem.count }
@@ -55,7 +55,7 @@ trait FileBasedSubsystemClient {
       subsystem.fileBased(path).overview
     }
 
-  def fileBasedDetails(path: ThisPath): FileBasedDetails =
+  def fileBasedDetailed(path: ThisPath): FileBasedDetailed =
     inSchedulerThread {
       subsystem.fileBased(path).details
     }

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderKey, OrderOverview, OrderStarted}
@@ -93,8 +93,8 @@ object SchedulerTestUtils {
   def jobOverview(path: JobPath)(implicit hasInjector: HasInjector): JobOverview =
     instance[JobSubsystemClient].jobOverview(path)
 
-  def jobDetails(path: JobPath)(implicit hasInjector: HasInjector): FileBasedDetails =
-    instance[JobSubsystemClient].fileBasedDetails(path)
+  def jobDetailed(path: JobPath)(implicit hasInjector: HasInjector): FileBasedDetailed =
+    instance[JobSubsystemClient].fileBasedDetailed(path)
 
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
     instance[JobSubsystemClient].job(jobPath)
@@ -102,14 +102,14 @@ object SchedulerTestUtils {
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
     instance[OrderSubsystemClient].jobChain(jobChainPath)
 
-  def jobChainDetails(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainDetails =
-    instance[OrderSubsystemClient].fileBasedDetails(jobChainPath)
+  def jobChainDetailed(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainDetailed =
+    instance[OrderSubsystemClient].fileBasedDetailed(jobChainPath)
 
   def orderOverview(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderOverview =
     instance[OrderSubsystemClient].orderOverview(orderKey)
 
-  def orderDetails(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetailed =
-    instance[OrderSubsystemClient].orderDetails(orderKey)
+  def orderDetailed(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetailed =
+    instance[OrderSubsystemClient].orderDetailed(orderKey)
 
   def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
     instance[OrderSubsystemClient].order(orderKey)
@@ -123,8 +123,8 @@ object SchedulerTestUtils {
   def taskOverview(taskId: TaskId)(implicit hasInjector: HasInjector): TaskOverview =
     instance[TaskSubsystemClient].taskOverview(taskId) await TestTimeout
 
-  def taskDetails(taskId: TaskId)(implicit hasInjector: HasInjector): TaskDetails =
-    instance[TaskSubsystemClient].taskDetails(taskId) await TestTimeout
+  def taskDetailed(taskId: TaskId)(implicit hasInjector: HasInjector): TaskDetailed =
+    instance[TaskSubsystemClient].taskDetailed(taskId) await TestTimeout
 
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystemClient].task(taskId)
@@ -203,7 +203,7 @@ object SchedulerTestUtils {
         lazy val subscription: EventSubscription = EventSubscription[OrderFinished] {
           case KeyedEvent(`orderKey`, event) ⇒
             eventBus.unregisterHot(subscription)
-            promise.success((event, orderDetails(orderKey).variables))
+            promise.success((event, orderDetailed(orderKey).variables))
         }
         eventBus.registerHot(subscription)
         promise.future

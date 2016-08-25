@@ -31,7 +31,7 @@ extends SchedulerHtmlPage {
 
   private val eventSnapshot = snapshot.value
 
-  private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.details(orderKey))
+  private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.detailed(orderKey))
 
   private implicit def nodeIdToHtml(nodeId: NodeId): Frag = stringFrag(nodeId.toString)
 

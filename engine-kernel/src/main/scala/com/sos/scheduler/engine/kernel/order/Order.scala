@@ -146,12 +146,12 @@ with OrderPersistence {
 
   override private[kernel] def details: OrderDetailed = {
     val overview = this.overview
-    val fileBasedDetails = super.details
+    val fileBasedDetailed = super.details
     OrderDetailed(
       overview = overview,
-      file = fileBasedDetails.file,
-      fileModifiedAt = fileBasedDetails.fileModifiedAt,
-      sourceXml = fileBasedDetails.sourceXml,
+      file = fileBasedDetailed.file,
+      fileModifiedAt = fileBasedDetailed.fileModifiedAt,
+      sourceXml = fileBasedDetailed.sourceXml,
       variables = variables)
   }
 

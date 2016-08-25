@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPluginIT._
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError, orderDetails}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError, orderDetailed}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -32,7 +32,7 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       withCloser { implicit closer ⇒
         eventBus.onHot[OrderFinished] {
           case KeyedEvent(orderKey, _) ⇒
-            promiseMap(orderKey).success(orderDetails(orderKey).variables)
+            promiseMap(orderKey).success(orderDetailed(orderKey).variables)
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
         val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))

@@ -22,7 +22,7 @@ final class JS731IT extends FreeSpec with ScalaSchedulerTest {
 
   eventBus.onHot[OrderFinished] {
     case KeyedEvent(orderKey, _) ⇒
-      val v = orderDetails(orderKey).variables
+      val v = orderDetailed(orderKey).variables
       assertThat(v("a"), equalTo("ä"))
       assertThat(v("B"), equalTo("B"))
       controller.terminateScheduler()

@@ -72,7 +72,7 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
         s"fileBased $path" - {
           lazy val fileBased = subsystem.fileBased(path)
           lazy val fileBasedOverview = subsystem.fileBasedOverview(path)
-          lazy val fileBasedDetails = subsystem.fileBasedDetails(path)
+          lazy val fileBasedDetailed = subsystem.fileBasedDetailed(path)
 
           "path" in {
             fileBasedOverview.path shouldEqual path
@@ -80,16 +80,16 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
 
           "configurationXmlBytes" in {
             if (pathDontHasXml(path))
-              assert(fileBasedDetails.sourceXml.isEmpty)
+              assert(fileBasedDetailed.sourceXml.isEmpty)
             else
-              fileBasedDetails.sourceXml.get should include ("<" + subsystem.companion.fileBasedType.cppName + " ")
+              fileBasedDetailed.sourceXml.get should include ("<" + subsystem.companion.fileBasedType.cppName + " ")
           }
 
           "file" in {
             if (pathDontHasXml(path))
-              assert(fileBasedDetails.file.isEmpty)
+              assert(fileBasedDetailed.file.isEmpty)
             else
-              assert(fileBasedDetails.file == Some(testEnvironment.fileFromPath(path).toPath))
+              assert(fileBasedDetailed.file == Some(testEnvironment.fileFromPath(path).toPath))
           }
 
           "fileBasedState" in {
@@ -119,16 +119,16 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
               'fileBasedState (expectedFileBasedState))
           }
 
-          "details" in {
-            assert(fileBasedDetails.overview.fileBasedState == expectedFileBasedState)
-            fileBasedDetails should have (
+          "detailed" in {
+            assert(fileBasedDetailed.overview.fileBasedState == expectedFileBasedState)
+            fileBasedDetailed should have (
               'path (path),
               'file (Try(fileBased.file).toOption)) //,
               //'sourceXml (emptyToNone(fileBased.sourceXmlBytes) map xmlBytesToString))
             if (fileBased.isFileBased)
-              fileBasedDetails.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
+              fileBasedDetailed.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
             else
-              fileBasedDetails.fileModifiedAt shouldBe None
+              fileBasedDetailed.fileModifiedAt shouldBe None
           }
 
           "toString" in {
@@ -159,9 +159,9 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
     )
   }
 
-  "JobChainDetails" - {
+  "JobChainDetailed" - {
     "normal job chain" in {
-      val details: JobChainDetails = jobChainDetails(testJobChainPath)
+      val details: JobChainDetailed = jobChainDetailed(testJobChainPath)
       details.nodes(0).asInstanceOf[SimpleJobNodeOverview] should have (
         'nodeKey (NodeKey(testJobChainPath, NodeId("A"))),
         'nextNodeId (NodeId("SINK")),
@@ -177,7 +177,7 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
     }
 
     "nested job chain" in {
-      val details: JobChainDetails = jobChainDetails(nestedJobChainPath)
+      val details: JobChainDetailed = jobChainDetailed(nestedJobChainPath)
       details.nodes(0).asInstanceOf[NestedJobChainNodeOverview] should have (
         'nodeKey (NodeKey(nestedJobChainPath, NodeId("NESTED"))),
         'nextNodeId (NodeId("END")),

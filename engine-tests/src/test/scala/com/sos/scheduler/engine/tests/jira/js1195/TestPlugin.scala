@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
 import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginXmlConfigurable}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerXmlCommandExecutor}
-import com.sos.scheduler.engine.test.SchedulerTestUtils.orderDetails
+import com.sos.scheduler.engine.test.SchedulerTestUtils.orderDetailed
 import com.sos.scheduler.engine.tests.jira.js1195.TestPlugin._
 import javax.inject.Inject
 import org.scalactic.Requirements._
@@ -36,7 +36,7 @@ extends AttachableNamespaceXmlPlugin {
   override def onActivate(): Unit = {
     eventBus.onHot[OrderStepEnded] {
       case KeyedEvent(orderKey: OrderKey, _) ⇒
-        val order = orderDetails(orderKey)
+        val order = orderDetailed(orderKey)
         for (conf ← nodeConfigurations.get(order.overview.nodeKey)) {
           val command = OrderCommand(
             OrderKey(conf.jobChainPath, orderKey.id),

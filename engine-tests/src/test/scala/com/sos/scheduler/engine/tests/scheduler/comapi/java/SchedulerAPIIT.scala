@@ -88,7 +88,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
     autoClosing(newEventPipe()) { eventPipe ⇒
       eventBus.onHot[OrderStepEnded] {
         case KeyedEvent(orderKey, _) ⇒
-          finishedOrderParametersPromise.success(orderDetails(orderKey).variables)
+          finishedOrderParametersPromise.success(orderDetailed(orderKey).variables)
       }
       eventBus.awaitingKeyedEvent[OrderFinished](VariablesOrderKey) {
         scheduler executeXml OrderCommand(VariablesOrderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))

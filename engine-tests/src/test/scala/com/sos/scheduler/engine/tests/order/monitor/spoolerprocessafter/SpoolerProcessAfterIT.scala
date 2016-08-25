@@ -112,12 +112,12 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
   eventBus.onHot[OrderStepEnded] {
     case KeyedEvent(orderKey, e) if e.nodeTransition == OrderNodeTransition.Keep ⇒
       // Es wird kein OrderFinished geben.
-      publishMyFinishedEvent(orderDetails(orderKey))
+      publishMyFinishedEvent(orderDetailed(orderKey))
   }
 
   eventBus.onHot[OrderFinished] {
     case KeyedEvent(orderKey, _) ⇒
-      publishMyFinishedEvent(orderDetails(orderKey))
+      publishMyFinishedEvent(orderDetailed(orderKey))
   }
 
   private def publishMyFinishedEvent(order: OrderDetailed): Unit = {

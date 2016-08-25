@@ -47,7 +47,7 @@ trait OrderRoute extends LogRoute {
           case Some(ReturnTypeRegex("OrderTreeComplemented", OrderDetailed.name)) ⇒
             completeTryHtml(client.orderTreeComplementedBy[OrderDetailed](query))
 
-          case Some(ReturnTypeRegex("OrdersComplemented", OrderOverview.name)) ⇒
+          case Some(ReturnTypeRegex("OrdersComplemented", OrderOverview.name | "")) ⇒
             completeTryHtml(client.ordersComplementedBy[OrderOverview](query))
 
           case Some(ReturnTypeRegex("OrdersComplemented", OrderDetailed.name)) ⇒

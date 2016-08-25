@@ -21,7 +21,7 @@ import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Keyed
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetails, JobChainOverview, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
@@ -251,11 +251,11 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)))
     }
 
-    "jobChainDetails" in {
-      val jobChainDetails: JobChainDetails = awaitContent(client.jobChainDetails(xaJobChainPath))
-      assert(jobChainDetails == awaitContent(directSchedulerClient.jobChainDetails(xaJobChainPath)))
-      assert(jobChainDetails.copy(fileModifiedAt = None, sourceXml = None) ==
-        JobChainDetails(
+    "jobChainDetailed" in {
+      val jobChainDetailed: JobChainDetailed = awaitContent(client.jobChainDetailed(xaJobChainPath))
+      assert(jobChainDetailed == awaitContent(directSchedulerClient.jobChainDetailed(xaJobChainPath)))
+      assert(jobChainDetailed.copy(fileModifiedAt = None, sourceXml = None) ==
+        JobChainDetailed(
           JobChainOverview(
             xaJobChainPath,
             FileBasedState.active,
@@ -272,7 +272,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
               orderCount = 2),
             EndNodeOverview(
               NodeKey(xaJobChainPath, NodeId("END"))))))
-      assert(jobChainDetails.sourceXml.get startsWith "<job_chain ")
+      assert(jobChainDetailed.sourceXml.get startsWith "<job_chain ")
     }
 
     "ordersComplemented speed" in {

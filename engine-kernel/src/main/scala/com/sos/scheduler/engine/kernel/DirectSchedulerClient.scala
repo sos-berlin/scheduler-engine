@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Keyed
 import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -96,7 +96,7 @@ extends SchedulerClient with DirectCommandClient {
       (orderSubsystem.jobChainsByQuery(query) map { _.overview }).toVector
     }
 
-  def jobChainDetails(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetails]] =
+  def jobChainDetailed(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetailed]] =
     respondWith {
       orderSubsystem.jobChain(jobChainPath).details
     }

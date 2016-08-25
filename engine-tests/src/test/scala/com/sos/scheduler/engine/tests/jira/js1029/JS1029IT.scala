@@ -46,7 +46,7 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
 
   eventBus.onHot[TaskStarted.type] {
     case KeyedEvent(TaskKey(_, taskId), _) ⇒
-    eventBus publishCold KeyedEvent(MyTaskStartedEvent(taskDetails(taskId).stdoutFile))(taskId)
+    eventBus publishCold KeyedEvent(MyTaskStartedEvent(taskDetailed(taskId).stdoutFile))(taskId)
   }
 }
 

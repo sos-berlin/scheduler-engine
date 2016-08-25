@@ -36,7 +36,7 @@ trait JobRoute {
   private def singleJobRoute(jobPath: JobPath, returnType: Option[String]): Route =
     returnType match {
       case Some("JobOverview") | None ⇒ completeTryHtml(client.jobOverview(jobPath))
-      //case Some("JobDetails") | None ⇒ completeTryHtml(client.jobDetails(jobPath))
+      //case Some("JobDetailed") | None ⇒ completeTryHtml(client.jobDetailed(jobPath))
       case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
     }
 

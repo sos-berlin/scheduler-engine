@@ -134,11 +134,11 @@ with FrontEndRoute {
           }
         }
       } ~
-      path("fileBased" / "details") {
+      path("fileBased" / "detailed") {
         parameter("path") { fileBasedPath ⇒
           detach(()) {
             complete {
-              subsystem.fileBased(subsystem.companion.stringToPath(fileBasedPath)).details
+              subsystem.fileBased(subsystem.companion.stringToPath(fileBasedPath)).detailed
             }
           }
         }

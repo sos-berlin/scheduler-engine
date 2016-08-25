@@ -24,7 +24,7 @@ final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
 
   eventBus.onHot[OrderFinished] {
     case KeyedEvent(orderKey, _) ⇒
-      orderDetails(orderKey).variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
+      orderDetailed(orderKey).variables(classOf[TestMonitor].getName) should equal ("exitCode=7")
       controller.terminateScheduler()
   }
 }

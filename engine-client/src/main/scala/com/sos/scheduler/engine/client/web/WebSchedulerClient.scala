@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
 import com.sos.scheduler.engine.data.events.EventJsonFormat
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -67,8 +67,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     }
   }
 
-  final def jobChainDetails(jobChainPath: JobChainPath) =
-    get[Snapshot[JobChainDetails]](_.jobChain.details(jobChainPath))
+  final def jobChainDetailed(jobChainPath: JobChainPath) =
+    get[Snapshot[JobChainDetailed]](_.jobChain.details(jobChainPath))
 
   def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[AnyKeyedEvent]]]] =
     get[Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]]](_.events(after = after, limit = limit, reverse = reverse))

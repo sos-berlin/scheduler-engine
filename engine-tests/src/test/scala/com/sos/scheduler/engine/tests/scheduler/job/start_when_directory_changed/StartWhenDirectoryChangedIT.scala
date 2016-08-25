@@ -41,7 +41,7 @@ final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest
 
   eventBus.onHot[TaskEnded] {
     case KeyedEvent(TaskKey(AJobPath, taskId), _) ⇒
-      val files = (Splitter on ";" split taskDetails(taskId).variables(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
+      val files = (Splitter on ";" split taskDetailed(taskId).variables(TriggeredFilesName) map { o ⇒ Paths.get(o) }).toSet
       eventBus publishCold TriggerEvent(files)
   }
 

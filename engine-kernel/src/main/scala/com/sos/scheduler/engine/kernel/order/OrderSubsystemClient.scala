@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -17,7 +17,7 @@ final class OrderSubsystemClient @Inject private(
   (implicit protected val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystemClient {
 
-  override def fileBasedDetails(path: JobChainPath): JobChainDetails =
+  override def fileBasedDetailed(path: JobChainPath): JobChainDetailed =
     inSchedulerThread {
       subsystem.jobChain(path).details
     }
@@ -28,7 +28,7 @@ extends FileBasedSubsystemClient {
 
   def remove(path: JobChainPath): Unit = inSchedulerThread { subsystem.removeJobChain(path) }
 
-  override def details(path: companion.Path): JobChainDetails = inSchedulerThread { subsystem.fileBased(path).details }
+  override def detailed(path: companion.Path): JobChainDetailed = inSchedulerThread { subsystem.fileBased(path).details }
 
   @deprecated("Avoid direct access to C++ near objects")
   def jobChain(path: JobChainPath): JobChain = fileBased(path)
@@ -38,7 +38,7 @@ extends FileBasedSubsystemClient {
 
   def orderOverview(orderKey: OrderKey): OrderOverview = inSchedulerThread { subsystem.order(orderKey).overview }
 
-  def orderDetails(orderKey: OrderKey): OrderDetailed = inSchedulerThread { subsystem.order(orderKey).details }
+  def orderDetailed(orderKey: OrderKey): OrderDetailed = inSchedulerThread { subsystem.order(orderKey).details }
 
   @deprecated("Avoid direct access to C++ near objects")
   def order(orderKey: OrderKey): Order = inSchedulerThread { subsystem.order(orderKey) }

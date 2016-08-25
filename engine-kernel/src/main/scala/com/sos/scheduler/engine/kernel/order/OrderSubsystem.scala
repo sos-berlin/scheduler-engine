@@ -54,7 +54,7 @@ extends FileBasedSubsystem {
   private[kernel] def orderOverview[V <: OrderView: OrderView.Companion](orderKey: OrderKey): V =
    order(orderKey).view[V]
 
-  private[kernel] def orderDetails(orderKey: OrderKey): OrderDetailed =
+  private[kernel] def orderDetailed(orderKey: OrderKey): OrderDetailed =
    order(orderKey).details
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {

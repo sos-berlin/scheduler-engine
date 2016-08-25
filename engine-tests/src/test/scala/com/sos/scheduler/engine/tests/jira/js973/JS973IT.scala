@@ -181,7 +181,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
 
   eventBus.onHot[OrderFinished] {
     case KeyedEvent(orderKey, _) ⇒
-      eventBus.publishCold(KeyedEvent(OrderFinishedWithResultEvent(orderDetails(orderKey).variables.getOrElse(ResultVariableName, "")))(orderKey))
+      eventBus.publishCold(KeyedEvent(OrderFinishedWithResultEvent(orderDetailed(orderKey).variables.getOrElse(ResultVariableName, "")))(orderKey))
   }
 
   private val orderIdGenerator = (1 to Int.MaxValue).iterator map { i => new OrderId(i.toString) }

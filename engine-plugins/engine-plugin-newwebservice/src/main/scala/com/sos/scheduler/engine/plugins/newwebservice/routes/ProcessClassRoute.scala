@@ -36,7 +36,7 @@ trait ProcessClassRoute {
   private def singleProcessClassRoute(processClassPath: ProcessClassPath, returnType: Option[String]): Route =
     returnType match {
       case Some("ProcessClassOverview") | None ⇒ completeTryHtml(client.processClassOverview(processClassPath))
-    //case Some("ProcessClassDetails") | None ⇒ completeTryHtml(client.processClassDetails(processClassPath))
+    //case Some("ProcessClassDetailed") | None ⇒ completeTryHtml(client.processClassDetails(processClassPath))
       case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
     }
 

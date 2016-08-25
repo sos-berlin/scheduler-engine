@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import scala.collection.immutable.Seq
@@ -17,7 +17,7 @@ trait SchedulerClient extends SchedulerOverviewClient with CommandClient with Or
 
   def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[Seq[JobChainOverview]]]
 
-  def jobChainDetails(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetails]]
+  def jobChainDetailed(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetailed]]
 
 //  def jobOverviews: Future[Snapshot[Seq[JobOverview]]]
 //

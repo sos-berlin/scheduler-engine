@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.next_state
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.QueryableJobChain
@@ -119,12 +119,12 @@ with UnmodifiableJobChain {
   private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
   private[kernel] override def details = {
-    val fileBasedDetails = super.details
-    JobChainDetails(
+    val fileBasedDetailed = super.details
+    JobChainDetailed(
       overview = overview,
-      file           = fileBasedDetails.file,
-      fileModifiedAt = fileBasedDetails.fileModifiedAt,
-      sourceXml      = fileBasedDetails.sourceXml,
+      file           = fileBasedDetailed.file,
+      fileModifiedAt = fileBasedDetailed.fileModifiedAt,
+      sourceXml      = fileBasedDetailed.sourceXml,
       nodes = nodes map { _.overview })
     }
 
