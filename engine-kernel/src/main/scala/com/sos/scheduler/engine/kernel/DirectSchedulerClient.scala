@@ -49,12 +49,7 @@ extends SchedulerClient with DirectCommandClient {
   def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     for (snapshot ← ordersComplementedBy[V](query))
       yield for (o ← snapshot)
-        yield OrderTreeComplemented(
-          FolderTree.fromHasPaths(query.jobChainPathQuery.folderPath, o.orders),
-          o.usedNodes,
-          o.usedJobs,
-          o.usedTasks,
-          o.usedProcessClasses)
+        yield OrderTreeComplemented.fromOrderComplemented(query.jobChainPathQuery.folderPath, o)
 
   def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     respondWith {

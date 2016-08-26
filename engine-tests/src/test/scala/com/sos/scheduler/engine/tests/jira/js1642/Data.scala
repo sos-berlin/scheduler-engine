@@ -277,45 +277,6 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     $xbAdHocDistributedOrderOverviewJson
   ]""".parseJson.asInstanceOf[JsArray]
 
-  val UsedTasksJson = """[
-    {
-      "taskId": "3",
-      "jobPath": "/test",
-      "state": "running",
-      "processClassPath": ""
-    },
-    {
-      "taskId": "4",
-      "jobPath": "/test",
-      "state": "running",
-      "processClassPath": ""
-    },
-    {
-      "taskId": "5",
-      "jobPath": "/test",
-      "state": "running",
-      "processClassPath": ""
-    }
-  ]"""
-  val UsedJobsJson = """[
-    {
-      "path": "/test",
-      "fileBasedState": "active",
-      "taskLimit": 10,
-      "state": "running",
-      "isInPeriod": true,
-      "usedTaskCount": 3,
-      "obstacles": []
-    }
-  ]"""
-  val UsedProcessClassesJson = """[
-    {
-      "path": "",
-      "fileBasedState": "active",
-      "processLimit": 30,
-      "usedProcessCount": 3
-    }
-  ]"""
   val UsedNodesJson = """[
     {
       "TYPE": "SimpleJob",
@@ -365,6 +326,45 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "orderCount": 0
     }
   ]"""
+  val UsedJobsJson = """[
+    {
+      "path": "/test",
+      "fileBasedState": "active",
+      "taskLimit": 10,
+      "state": "running",
+      "isInPeriod": true,
+      "usedTaskCount": 3,
+      "obstacles": []
+    }
+  ]"""
+  val UsedTasksJson = """[
+    {
+      "taskId": "3",
+      "jobPath": "/test",
+      "state": "running",
+      "processClassPath": ""
+    },
+    {
+      "taskId": "4",
+      "jobPath": "/test",
+      "state": "running",
+      "processClassPath": ""
+    },
+    {
+      "taskId": "5",
+      "jobPath": "/test",
+      "state": "running",
+      "processClassPath": ""
+    }
+  ]"""
+  val UsedProcessClassesJson = """[
+    {
+      "path": "",
+      "fileBasedState": "active",
+      "processLimit": 30,
+      "usedProcessCount": 3
+    }
+  ]"""
 
   val ExpectedOrdersOrdersComplementedJsObject: JsObject = s"""{
     "orders": $ExpectedOrderOverviewsJsArray,
@@ -396,10 +396,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
         }
       ]
     },
-    "usedTasks": $UsedTasksJson,
+    "usedNodes": $UsedNodesJson,
     "usedJobs": $UsedJobsJson,
-    "usedProcessClasses": $UsedProcessClassesJson,
-    "usedNodes": $UsedNodesJson
+    "usedTasks": $UsedTasksJson,
+    "usedProcessClasses": $UsedProcessClassesJson
   }""".parseJson.asJsObject
 }
 

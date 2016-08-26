@@ -38,19 +38,16 @@ trait OrderRoute extends LogRoute {
       extendedOrderQuery { implicit query ⇒
         parameter("return".?) {
 
-          case Some("OrderTreeComplemented") ⇒
+          case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderOverview.name) | OrderTreeComplementedName) ⇒
             completeTryHtml(client.orderTreeComplementedBy[OrderOverview](query))
 
-          case Some(ReturnTypeRegex("OrderTreeComplemented", OrderOverview.name | "")) ⇒
-            completeTryHtml(client.orderTreeComplementedBy[OrderOverview](query))
-
-          case Some(ReturnTypeRegex("OrderTreeComplemented", OrderDetailed.name)) ⇒
+          case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderDetailed.name)) ⇒
             completeTryHtml(client.orderTreeComplementedBy[OrderDetailed](query))
 
-          case Some(ReturnTypeRegex("OrdersComplemented", OrderOverview.name | "")) ⇒
+          case Some(ReturnTypeRegex(OrdersComplementedName, OrderOverview.name) | OrdersComplementedName)  ⇒
             completeTryHtml(client.ordersComplementedBy[OrderOverview](query))
 
-          case Some(ReturnTypeRegex("OrdersComplemented", OrderDetailed.name)) ⇒
+          case Some(ReturnTypeRegex(OrdersComplementedName, OrderDetailed.name)) ⇒
             completeTryHtml(client.ordersComplementedBy[OrderDetailed](query))
 
           case Some(OrderOverview.name) ⇒
@@ -60,7 +57,7 @@ trait OrderRoute extends LogRoute {
             completeTryHtml(client.ordersBy[OrderDetailed](query))
 
           case Some(o) ⇒
-            reject(ValidationRejection(s"Invalid parameter return=$o"))
+            reject(ValidationRejection(s"Unknown value for parameter return=$o"))
 
           case None ⇒
             htmlPreferred(webServiceContext) {
@@ -77,7 +74,12 @@ trait OrderRoute extends LogRoute {
 }
 
 object OrderRoute {
-  private val ReturnTypeRegex = "([A-Za-z]+)(?:/([A-Za-z]*))".r
+  private val OrderTreeComplementedName = "OrderTreeComplemented"
+  private val OrdersComplementedName = "OrdersComplemented"
+  private val ReturnTypeRegex = {
+    val word = "([A-Za-z]+)"
+    s"$word(?:/$word)?".r
+  }
 
 //  private def toOrderViewCompanion(string: String) =
 //    string match {
