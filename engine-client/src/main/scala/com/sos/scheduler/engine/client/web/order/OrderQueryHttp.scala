@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.convert.As
 import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.{OrderIdQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.queries.OrderQuery._
 import scala.collection.JavaConversions._
 import spray.http.Uri
@@ -26,7 +26,7 @@ object OrderQueryHttp {
   def pathAndParametersToQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery =
     OrderQuery(
       jobChainPathQuery = PathQueryHttp.fromUriPath[JobChainPath](path),
-      orderIdQuery = OrderIdQuery(parameters.optionAs[String](OrderIdName) map OrderId.apply),
+      orderId = parameters.optionAs[String](OrderIdName) map OrderId.apply,
       isDistributed = parameters.optionAs[Boolean](IsDistributedName),
       isSuspended = parameters.optionAs[Boolean](IsSuspendedName),
       isSetback = parameters.optionAs[Boolean](IsSetbackName),
