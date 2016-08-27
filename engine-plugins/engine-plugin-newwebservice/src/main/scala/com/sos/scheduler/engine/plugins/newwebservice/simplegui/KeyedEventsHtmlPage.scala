@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
@@ -20,7 +20,7 @@ import spray.http.Uri
 /**
   * @author Joacim Zschimmer
   */
-final class EventsHtmlPage private(
+final class KeyedEventsHtmlPage private(
   protected val snapshot: Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
@@ -58,15 +58,12 @@ extends SchedulerHtmlPage {
       td(whiteSpace.nowrap)(eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
       eventToTds(eventSnapshot.value))
 
-  private def eventToTds(event: AnyKeyedEvent): List[Frag] = {
-    val eventName = event match {
-      case KeyedEvent(_, e) ⇒ e.getClass.getSimpleName stripSuffix "$"
-      case _ ⇒ event.getClass.getSimpleName stripSuffix "Event"
-    }
-    event match {
-      case KeyedEvent(orderKey: OrderKey, e: OrderEvent) ⇒
+  private def eventToTds(keyedEvent: AnyKeyedEvent): List[Frag] = {
+    val eventName = keyedEvent.event.getClass.getSimpleName stripSuffix "$"
+    keyedEvent match {
+      case KeyedEvent(orderKey: OrderKey, event: OrderEvent) ⇒
         td(orderKey.string) :: td(eventName) :: (
-          e match {
+          event match {
             case OrderFinished(nodeId: NodeId) ⇒ td(nodeId) :: Nil
             case OrderNestedFinished ⇒ Nil
             case OrderNestedStarted ⇒ Nil
@@ -77,27 +74,27 @@ extends SchedulerHtmlPage {
             case OrderStepStarted(nodeId, taskId) ⇒ td(nodeId) :: td(taskId) :: Nil
             case OrderSuspended ⇒ Nil
             case OrderStarted ⇒ Nil
-            case _ ⇒ td(colspan := 3, e.toString) :: Nil
+            case _ ⇒ td(colspan := 3, event.toString) :: Nil
           })
       case KeyedEvent(_, e: LogEvent) ⇒
         td() :: td(e.level.toString) :: td(colspan := 4)(e.message) :: Nil
       case KeyedEvent(key, e) ⇒
-        td(key.toString) :: td(eventName) :: td(colspan := 4, event.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil
+        td(key.toString) :: td(eventName) :: td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil
       case _ ⇒
-        td() :: td(eventName) :: td(colspan := 4, event.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil
+        td() :: td(eventName) :: td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil
     }
   }
 }
 
-object EventsHtmlPage {
+object KeyedEventsHtmlPage {
 
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def eventsToHtmlPage(implicit client: SchedulerClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+    implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       ToHtmlPage[Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]]] { (snapshot, pageUri) ⇒
         for (schedulerOverviewSnapshot ← client.overview) yield
-          new EventsHtmlPage(snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
+          new KeyedEventsHtmlPage(snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
       }
   }
 }

@@ -91,8 +91,8 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "jobChain.overviews" in {
-    assert(uris.jobChain.overviews(JobChainQuery.Standard(PathQuery("/a/"))) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/")
-    intercept[IllegalArgumentException] { uris.jobChain.overviews(JobChainQuery.Standard(PathQuery("/a"))) }
+    assert(uris.jobChain.overviews(JobChainQuery.Standard(PathQuery[JobChainPath]("/a/"))) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/")
+    intercept[IllegalArgumentException] { uris.jobChain.overviews(JobChainQuery.Standard(PathQuery[JobChainPath]("/a"))) }
   }
 
   "jobChain.overview" in {

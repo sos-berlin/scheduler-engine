@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.kernel.event
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.isInSchedulerThread
 import com.sos.scheduler.engine.kernel.event.EventCollector._
 import java.lang.System.currentTimeMillis
 import java.util.NoSuchElementException
@@ -14,13 +13,15 @@ import scala.annotation.tailrec
 import scala.collection.AbstractIterator
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.reflect.ClassTag
 
 /**
   * @author Joacim Zschimmer
   */
 @Singleton
-private[kernel] final class EventCollector @Inject private(eventBus: SchedulerEventBus)
-  (implicit stcq: SchedulerThreadCallQueue, ec: ExecutionContext)
+final class EventCollector @Inject()(
+  eventBus: SchedulerEventBus)
+  (implicit ec: ExecutionContext)
 extends HasCloser {
 
   private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, Snapshot[AnyKeyedEvent]]
@@ -35,7 +36,7 @@ extends HasCloser {
   @volatile
   private var eventArrivedPromiseUsed = false
 
-  eventBus.onHot[Event] { case event if isInSchedulerThread/*just to be sure*/ ⇒
+  eventBus.onHot[Event] { case event ⇒
     val id = ids.next()
     if (queueSize >= EventQueueSizeLimit) {
       lastRemovedFirstId = queue.firstKey
@@ -55,18 +56,28 @@ extends HasCloser {
   /**
     * @param reverse, true may be slow
     */
-  def iteratorFuture(after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[AnyKeyedEvent]]] = {
-    def i = if (reverse) reverseIterator(after) else iterator(after)
+  def whenEvents(after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[AnyKeyedEvent]]] =
+    onEventAvailable(after, events(after, reverse = reverse))
+
+  def whenEventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[E]]] =
+    onEventAvailable(after, events(after, reverse = reverse) collect {
+      case snapshot @ Snapshot(KeyedEvent(k, event: E @unchecked))
+        if (implicitClass[E] isAssignableFrom event.getClass) && key == k ⇒
+          Snapshot(event)(snapshot.eventId)
+    })
+
+  private def onEventAvailable[A](after: EventId, body: ⇒ A): Future[A] =
     if (queue.navigableKeySet.higher(after) != null)
-      Future.successful(i)
+      Future.successful(body)
     else {
       //eventArrivedPromiseUsed = true
-      for (() ← eventArrivedPromise.future) yield
-        i
+      for (() ← eventArrivedPromise.future) yield body
     }
-  }
 
-  def iterator(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
+  private def events(after: EventId, reverse: Boolean): Iterator[Snapshot[AnyKeyedEvent]] =
+    if (reverse) reverseEvents(after) else events(after)
+
+  def events(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
     queue.navigableKeySet.tailSet(after, false).iterator map { k ⇒
       //if (after != 0 && after < queue.firstKey) ... events lost
       //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called
@@ -76,7 +87,7 @@ extends HasCloser {
   }
 
   /** May be slow */
-  def reverseIterator(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
+  private def reverseEvents(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
     new AbstractIterator[Snapshot[AnyKeyedEvent]] {
       private val bufferedDelegate = (queue.navigableKeySet.descendingIterator takeWhile { _ > after } map queue.get).buffered
       def hasNext = bufferedDelegate.hasNext && bufferedDelegate.head != null
@@ -89,7 +100,6 @@ extends HasCloser {
 
   def newEventId(): EventId = ids.next()
 }
-
 
 object EventCollector {
   private val EventQueueSizeLimit = 10000  // Not too much, as long as the needed heap size has not been clarified

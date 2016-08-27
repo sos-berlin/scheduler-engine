@@ -3,7 +3,10 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.event.EventId
+import com.sos.scheduler.engine.data.events.{AnyEvent, AnyEventJsonFormat}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview}
+import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, htmlPreferred}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -11,9 +14,10 @@ import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent.ExecutionContext
+import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
 
@@ -23,28 +27,57 @@ import spray.routing.{Route, ValidationRejection}
 trait OrderRoute extends LogRoute {
 
   protected def orderSubsystem: OrderSubsystemClient
-  protected implicit def client: OrderClient with SchedulerOverviewClient
+  protected implicit def client: OrderClient with SchedulerOverviewClient with DirectEventClient
   protected implicit def webServiceContext: WebServiceContext
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
+    singleOrder ~ queriedOrders
+
+  private def singleOrder: Route =
     get {
       typedPath(OrderKey) { orderKey ⇒
-        parameter("return") {
-          case "log" ⇒ logRoute(orderSubsystem.order(orderKey).log)
-          case o ⇒ reject(ValidationRejection(s"Invalid parameter return=$o"))
+        parameter("return" ? "OrderDetailed") {
+          case "log" ⇒
+            logRoute(orderSubsystem.order(orderKey).log)
+
+          case "OrderOverview" ⇒
+            completeTryHtml(client.order[OrderOverview](orderKey))
+
+          case "OrderDetailed" ⇒
+            completeTryHtml(client.order[OrderDetailed](orderKey))
+
+          case "Event" ⇒
+            parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
+              implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage(orderKey)
+              completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId))
+            }
+
+          case "OrderEvent" ⇒
+            parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
+              completeTryHtml(client.eventsForKey[OrderEvent](orderKey, after = afterEventId))
+            }
+
+          case o ⇒
+            reject(ValidationRejection(s"Invalid parameter return=$o"))
         }
-      } ~
+      }
+    }
+
+  private def queriedOrders: Route =
+    get {
       extendedOrderQuery { implicit query ⇒
         parameter("return".?) {
 
-          case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderOverview.name) | OrderTreeComplementedName) ⇒
+          case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderOverview.name)
+                    | OrderTreeComplementedName) ⇒
             completeTryHtml(client.orderTreeComplementedBy[OrderOverview](query))
 
           case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderDetailed.name)) ⇒
             completeTryHtml(client.orderTreeComplementedBy[OrderDetailed](query))
 
-          case Some(ReturnTypeRegex(OrdersComplementedName, OrderOverview.name) | OrdersComplementedName)  ⇒
+          case Some(ReturnTypeRegex(OrdersComplementedName, OrderOverview.name)
+                    | OrdersComplementedName)  ⇒
             completeTryHtml(client.ordersComplementedBy[OrderOverview](query))
 
           case Some(ReturnTypeRegex(OrdersComplementedName, OrderDetailed.name)) ⇒

@@ -21,11 +21,9 @@ object PathQueryHttp {
       }
   }
 
-  def fromUriPath[A <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery = {
-    val pathString = path.toString
-    //implicitly[TypedPath.Companion[A]].apply(pathString)  // Check path name
-    PathQuery(pathString)
-  }
+  def fromUriPath[A <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery =
+    PathQuery[A](path.toString)
+
 
   def toUriPath(query: PathQuery): String = query.patternString
 }

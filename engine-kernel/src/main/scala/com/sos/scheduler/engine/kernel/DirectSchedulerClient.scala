@@ -2,14 +2,10 @@ package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.KeyedEvent.KeyedTypedEventJsonFormat
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
-import com.sos.scheduler.engine.data.events.EventJsonFormat
-import com.sos.scheduler.engine.data.folder.FolderTree
+import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.log.LogEvent
-import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -37,11 +33,14 @@ final class DirectSchedulerClient @Inject private(
   processClassSubsystem: ProcessClassSubsystem)(
   implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val executionContext: ExecutionContext,
-  eventCollector: EventCollector)
+  protected val eventCollector: EventCollector)
 extends SchedulerClient with DirectCommandClient {
 
   def overview: Future[Snapshot[SchedulerOverview]] =
     respondWith { scheduler.overview }
+
+  def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey) =
+    respondWith { orderSubsystem.order(orderKey).view[V] }
 
   def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
     respondWith { orderSubsystem.orderViews[V](query) }
@@ -119,25 +118,6 @@ extends SchedulerClient with DirectCommandClient {
   def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]] =
     respondWith {
       taskSubsystem.task(taskId).overview
-    }
-
-  def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[AnyKeyedEvent]]]] = {
-    val eventJsonFormat = implicitly[KeyedTypedEventJsonFormat[Event]]
-    for (iterator ← eventCollector.iteratorFuture(after, reverse = reverse)) yield {
-      val eventId = eventCollector.newEventId()  // This EventId is only to give the response a timestamp. To continue the event stream, use the last event's EventId.
-      val serializables = iterator filter { o ⇒ eventIsSelected(o.value) && (eventJsonFormat canSerialize o.value) } take limit
-      //if (serializables.isEmpty)
-        // TODO Restart in case no Event can be serialized: case Vector() ⇒ this.events(after)
-      //else
-        Snapshot(serializables.toVector)(eventId)
-    }
-  }
-
-  private def eventIsSelected(event: AnyKeyedEvent): Boolean =
-    event match {
-      //case KeyedEvent(_, e: InfoOrHigherLogged) ⇒ true
-      case KeyedEvent(_, e: LogEvent) ⇒ false
-      case _ ⇒ true
     }
 
   private def respondWith[A](content: ⇒ A): Future[Snapshot[A]] =

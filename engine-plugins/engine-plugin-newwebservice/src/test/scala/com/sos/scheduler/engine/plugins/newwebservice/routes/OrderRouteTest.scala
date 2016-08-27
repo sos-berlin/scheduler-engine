@@ -3,14 +3,17 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
-import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.event._
+import com.sos.scheduler.engine.data.events.XXXEventJsonFormat
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedState}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview, OrderProcessingState, OrderSourceType, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.OrderQuery
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.kernel.event.{DirectEventClient, EventCollector}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
 import java.time.Instant
@@ -18,7 +21,6 @@ import java.time.Instant._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes.`application/json`
@@ -35,10 +37,30 @@ import spray.testkit.ScalatestRouteTest
 final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with ScalatestRouteTest with OrderRoute {
 
   private lazy val actorSystem = ActorSystem("OrderRoute")
+  private val eventBus = new SchedulerEventBus
 
   protected def orderSubsystem = throw new NotImplementedError()
 
-  protected implicit def client = new OrderClient with SchedulerOverviewClient {
+  protected def webServiceContext = new WebServiceContext()
+
+  protected implicit def executionContext = ExecutionContext.global
+
+  protected def schedulerThreadCallQueue = throw new NotImplementedError
+
+  protected def actorRefFactory = actorSystem
+
+  protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
+    protected val eventCollector = new EventCollector(eventBus)
+
+    protected def executionContext = OrderRouteTest.this.executionContext
+
+    def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]] =
+      respondWith(
+        implicitly[OrderView.Companion[V]] match {
+          case OrderOverview ⇒ A1OrderOverview
+          case OrderDetailed ⇒ A1OrderDetailed
+        })
+
     def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
       respondWith(
         implicitly[OrderView.Companion[V]] match {
@@ -63,14 +85,6 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
     private def respondWith[A](a: A) = Future.successful(Snapshot(a)(TestEventId))
   }
-
-  protected def webServiceContext = new WebServiceContext()
-
-  protected implicit def executionContext = ExecutionContext.global
-
-  protected def schedulerThreadCallQueue = throw new NotImplementedError
-
-  protected def actorRefFactory = actorSystem
 
   override protected def afterAll() = {
     actorSystem.shutdown()
@@ -151,6 +165,35 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       }
     }
   }
+
+  for (path ← List(
+      "/api/order/aJobChain,1?return=OrderOverview")) {
+    s"$path" in {
+      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+        assert(responseAs[Snapshot[OrderOverview]].value == A1OrderOverview)
+      }
+    }
+  }
+
+  for (path ← List(
+      "/api/order/aJobChain,1",
+      "/api/order/aJobChain,1?return=OrderDetailed")) {
+    s"$path" in {
+      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+        assert(responseAs[Snapshot[OrderDetailed]].value == A1OrderDetailed)
+      }
+    }
+  }
+
+  for (path ← List(
+      "/api/order/aJobChain,1?return=Event")) {
+    s"$path" in {
+      for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
+      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+        assert((responseAs[Snapshot[Vector[Snapshot[Event]]]].value map { _.value }) == OrderEvents)
+      }
+    }
+  }
 }
 
 object OrderRouteTest {
@@ -195,4 +238,10 @@ object OrderRouteTest {
     TestOrdersComplemented.usedJobs,
     TestOrdersComplemented.usedTasks,
     TestOrdersComplemented.usedProcessClasses)
+
+  private val OrderEvents = Vector(
+    FileBasedAdded,
+    FileBasedActivated,
+    OrderStarted,
+    OrderStepStarted(NodeId("100"), TaskId(3)))
 }

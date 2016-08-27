@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.client.web.jobchain
 
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import spray.http.Uri.Path
 import spray.routing._
@@ -18,7 +19,7 @@ object JobChainQueryHttp {
 
   protected def pathAndParametersToQuery(path: Path, parameters: Map[String, String]) =
     JobChainQuery.Standard(
-      jobChainPathQuery = PathQuery(path.toString),
+      jobChainPathQuery = PathQuery[JobChainPath](path.toString),
       isDistributed = parameters.get(DistributedName) map { _.toBoolean })
 
   def toUriPath(q: JobChainQuery): String = q.jobChainPathQuery.patternString

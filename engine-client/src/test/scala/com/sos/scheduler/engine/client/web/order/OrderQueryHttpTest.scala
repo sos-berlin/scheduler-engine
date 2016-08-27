@@ -20,7 +20,7 @@ import spray.testkit.ScalatestRouteTest
 final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
   "OrderQuery" - {
-    def route(expected: OrderQuery) =
+    def route(expected: ⇒ OrderQuery) =
       pathPrefix("prefix") {
         extendedOrderQuery { query: OrderQuery ⇒
           assert(query == expected)
@@ -41,7 +41,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
 
     "OrderQuery /a/b" in {
-      Get("/prefix/a/b") ~> route(OrderQuery(jobChainPathQuery = PathQuery("/a/b"))) ~> check {
+      Get("/prefix/a/b") ~> route(OrderQuery(jobChainPathQuery = PathQuery[JobChainPath]("/a/b"))) ~> check {
         assert(status == OK)
       }
     }
@@ -54,10 +54,19 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
         }
     }
 
+    "OrderQuery /a,1" in {
+      Get("/prefix/a,1") ~>
+        route(sys.error("SHOULD BE REJECTED")) ~>
+        check {
+          assert(!handled)
+          assert(rejection.toString contains "must not contain a comma")
+        }
+    }
+
     "OrderQuery /a/ suspended but not blacklisted" in {
       Get("/prefix/a/?isSuspended=true&isBlacklisted=false") ~>
         route(OrderQuery(
-          jobChainPathQuery = PathQuery("/a/"),
+          jobChainPathQuery = PathQuery[JobChainPath]("/a/"),
           isSuspended = Some(true),
           isBlacklisted = Some(false))) ~>
         check {

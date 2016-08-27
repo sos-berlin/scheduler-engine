@@ -1,12 +1,15 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.CommandClient
+import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import scala.concurrent.ExecutionContext
 
 /**
   * @author Joacim Zschimmer
   */
-trait DirectCommandClient extends CommandClient with CommandClient.Defaults {
+trait DirectCommandClient
+extends CommandClient with CommandClient.Defaults
+with DirectEventClient {
 
   protected def scheduler: Scheduler
   protected implicit def executionContext: ExecutionContext

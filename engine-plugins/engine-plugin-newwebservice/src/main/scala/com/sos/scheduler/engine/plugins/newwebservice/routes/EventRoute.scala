@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.events.EventJsonFormat
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.EventsHtmlPage.implicits.eventsToHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.keyedEventsToHtmlPage
 import scala.concurrent.ExecutionContext
 import scala.math.abs
 import spray.json.DefaultJsonProtocol._
@@ -25,9 +25,8 @@ trait EventRoute extends HasCloser {
 
   def eventRoute: Route =
     pathSingleSlash {
-      parameter("after".?) { afterEventIdOption ⇒
+      parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
         parameter("limit" ? Int.MaxValue) { limit ⇒
-          val afterEventId = afterEventIdOption map EventId.apply getOrElse EventId.BeforeFirst
           completeTryHtml(client.events(after = afterEventId, limit = abs(limit), reverse = limit < 0))
         }
       }

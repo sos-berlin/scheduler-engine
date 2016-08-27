@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderView
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import spray.http.Uri
@@ -25,28 +25,28 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   object order {
     def overviews(query: OrderQuery = OrderQuery.All): String =
-      apply(query, Some("OrderOverview"))
+      orders(query, Some("OrderOverview"))
 
-    def treeComplemented[V <: OrderView: OrderView.Companion]: String = treeComplemented[V](OrderQuery.All)
+    def treeComplemented[V <: OrderView: OrderView.Companion]: String =
+      treeComplemented[V](OrderQuery.All)
 
-    def treeComplemented[V <: OrderView: OrderView.Companion](query: OrderQuery): String = {
-      val view = implicitly[OrderView.Companion[V]].name
-      apply(query, Some(s"OrderTreeComplemented/$view"))
-    }
+    def treeComplemented[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
+      orders(query, Some(s"OrderTreeComplemented/${orderView[V].name}"))
 
-    def complemented[V <: OrderView: OrderView.Companion](query: OrderQuery = OrderQuery.All): String = {
-      val view = implicitly[OrderView.Companion[V]].name
-      apply(query, Some(s"OrdersComplemented/$view"))
-    }
+    def complemented[V <: OrderView: OrderView.Companion](query: OrderQuery = OrderQuery.All): String =
+      orders(query, Some(s"OrdersComplemented/${orderView.name}"))
 
-    def apply[V <: OrderView: OrderView.Companion](query: OrderQuery): String = orders[V](query)
+    def apply[V <: OrderView: OrderView.Companion](orderKey: OrderKey): String =
+      uriString(Uri.Path("api/order" + orderKey.string), "return" → orderView[V].name)
 
-    def apply(query: OrderQuery, returnType: Option[String]): String = orders(query, returnType)
+    def apply[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
+      orders[V](query)
 
-    def orders[V <: OrderView: OrderView.Companion](query: OrderQuery): String = {
-      val view = implicitly[OrderView.Companion[V]]
-      orders(query, returnType = Some(view.name))
-    }
+    def apply(query: OrderQuery, returnType: Option[String]): String =
+      orders(query, returnType)
+
+    def orders[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
+      orders(query, returnType = Some(orderView[V].name))
 
     def orders(query: OrderQuery, returnType: Option[String]): String = {
       val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
@@ -54,6 +54,12 @@ final class SchedulerUris private(schedulerUriString: String) {
         path = Uri.Path(s"api/order$subpath"),
         query = Uri.Query(query.withoutPathToMap ++ (returnType map { o ⇒ "return" → o }))))
     }
+
+    def events(orderKey: OrderKey) =
+      uriString(Uri.Path("api/order" + orderKey.string), "return" → "Event")
+
+    private def orderView[V <: OrderView: OrderView.Companion] =
+      implicitly[OrderView.Companion[V]]
   }
 
   object jobChain {
