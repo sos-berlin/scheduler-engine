@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.EventId
-import com.sos.scheduler.engine.data.events.EventJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext

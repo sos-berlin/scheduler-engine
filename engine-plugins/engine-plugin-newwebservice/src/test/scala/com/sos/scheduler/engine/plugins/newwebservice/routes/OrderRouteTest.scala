@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event._
-import com.sos.scheduler.engine.data.events.XXXEventJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedState}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}

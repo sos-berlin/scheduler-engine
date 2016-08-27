@@ -59,7 +59,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
         route(sys.error("SHOULD BE REJECTED")) ~>
         check {
           assert(!handled)
-          assert(rejection.toString contains "must not contain a comma")
+          assert(rejection.toString contains "Comma not allowed")
         }
     }
 

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.web
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
-import com.sos.scheduler.engine.data.events.EventJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}

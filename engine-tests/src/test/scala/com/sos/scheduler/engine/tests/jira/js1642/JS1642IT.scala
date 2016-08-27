@@ -18,8 +18,8 @@ import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
-import com.sos.scheduler.engine.data.events.EventJsonFormat
-import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.log.LogEvent
@@ -29,6 +29,7 @@ import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
+import com.sos.scheduler.engine.kernel.event.EventCollector
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
@@ -65,7 +66,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected override lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-http-port=$httpPort", "-distributed-orders"))
   private implicit lazy val executionContext = instance[ExecutionContext]
-  private lazy val taskSubsystem = controller.instance[TaskSubsystemClient]
+  private lazy val taskSubsystem = instance[TaskSubsystemClient]
+  private lazy val eventCollector = instance[EventCollector]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
   private object barrier {
@@ -103,10 +105,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     val directEvents = mutable.Buffer[AnyKeyedEvent]()
     val webEvents = mutable.Buffer[AnyKeyedEvent]()
     private var stopping = false
+    private var activatedEventId = EventId.BeforeFirst
 
     def start(): Unit = {
+      activatedEventId = eventCollector.lastEventId  // Web events before Scheduler activation are ignored
       eventBus.onHot[Event] {
-        case event if EventJsonFormat canSerialize event ⇒
+        case event if SchedulerKeyedEventJsonFormat canSerialize event ⇒
           if (isPermitted(event)) {
             directEvents += event
           }
@@ -130,15 +134,22 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       }
     }
 
-    private def isPermitted(event: AnyKeyedEvent) = event match {
-      case KeyedEvent(_, e: LogEvent) ⇒ false
-      case _ ⇒ true
-    }
+    private def isPermitted(event: AnyKeyedEvent) =
+      (eventCollector.lastEventId > activatedEventId) && (event match {
+        case KeyedEvent(_, FileBasedActivated) ⇒ this.webEvents.nonEmpty   // directEvents miss activation events at start
+        case KeyedEvent(_, e: LogEvent) ⇒ false
+        case _ ⇒ true
+      })
 
     def check() = {
       assert(directEvents.nonEmpty)
       waitForCondition(5.s, 100.ms) { webEvents.size == directEvents.size }
       assert(webEvents == directEvents)
+//      val untypedPathDirectEvents = directEvents map {
+//        case KeyedEvent(key: TypedPath, e: FileBasedEvent) ⇒ KeyedEvent(e)(key.asTyped[UnknownTypedPath])  // Trait TypedPath is not properly deserializable
+//        case o ⇒ o
+//      }
+//      assert(webEvents == untypedPathDirectEvents)
     }
   }
 

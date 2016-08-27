@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.data.event.{Event, Snapshot}
-import com.sos.scheduler.engine.data.events.AnyEvent
+import com.sos.scheduler.engine.data.event.{AnyEvent, Event, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.LogEvent

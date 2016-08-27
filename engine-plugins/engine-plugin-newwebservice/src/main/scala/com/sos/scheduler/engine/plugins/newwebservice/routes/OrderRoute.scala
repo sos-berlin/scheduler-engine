@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.event.EventId
-import com.sos.scheduler.engine.data.events.{AnyEvent, AnyEventJsonFormat}
+import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
+import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview}
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -14,8 +14,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
 import scala.concurrent.ExecutionContext
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._

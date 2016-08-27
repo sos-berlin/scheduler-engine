@@ -98,6 +98,8 @@ extends HasCloser {
       }
     }
 
+  def lastEventId: EventId = ids.last
+
   def newEventId(): EventId = ids.next()
 }
 
@@ -108,6 +110,8 @@ object EventCollector {
     // JavaScript kann nur die ganzen Zahlen bis 2**53 (9.007.199.254.740.992) lückenlos darstellen, also 11 Bits weniger als ein Long.
     // 2 ** 53 = 9.007.199.254.740.992µs = 285 Jahre. Das reicht bis zum Jahr 1970 + 285 = 2255, bei einer Million Events/s
     private val lastResult = new AtomicLong(0)
+
+    def last: EventId = lastResult.get
 
     def hasNext = true
 

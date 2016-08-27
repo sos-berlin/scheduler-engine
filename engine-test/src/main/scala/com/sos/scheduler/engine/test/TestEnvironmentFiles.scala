@@ -11,7 +11,6 @@ import java.net.URL
 import java.nio.file.Files._
 import java.nio.file.Path
 import java.time.Instant.now
-import scala.collection.immutable
 
 private class TestEnvironmentFiles(
     configPackageResource: JavaResource,
