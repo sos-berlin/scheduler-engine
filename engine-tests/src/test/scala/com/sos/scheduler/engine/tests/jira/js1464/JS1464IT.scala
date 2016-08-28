@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1464
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, _}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -89,7 +89,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
         withEventPipe { eventPipe ⇒
           addOrder(cOrderKey, 0.s)
           eventPipe.next[OrderFinished](aOrderKey).nodeId shouldBe EndNodeId
-          eventPipe.nextWhen[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-271"))
+          eventPipe.nextWhen[InfoLogged](_.event.codeOption contains MessageCode("SCHEDULER-271"))
           eventPipe.next[OrderStarted.type](cOrderKey)
           expectEndStateReached(eventPipe, bOrderKey, cOrderKey)
         }
@@ -114,7 +114,7 @@ final class JS1464IT extends FreeSpec with ScalaSchedulerTest {
       addOrder(a1OrderKey, 2.s)
       addOrder(b1OrderKey, 2.s)
       eventPipe.next[OrderStepStarted](Set(a1OrderKey, b1OrderKey))
-      eventBus.awaitingWhen[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-271")) {   // "Task is being terminated in favour of ..."
+      eventBus.awaitingWhen[InfoLogged](_.event.codeOption contains MessageCode("SCHEDULER-271")) {   // "Task is being terminated in favour of ..."
         eventBus.awaiting[OrderFinished](a1OrderKey) {
           eventBus.awaiting[OrderFinished](b1OrderKey) {
             addOrder(a2OrderKey, 1.s)

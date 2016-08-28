@@ -68,7 +68,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "file_order_source handles change of process_class" in {
     val matchingFile = directory / "X-MATCHING-FILE-3"
     val orderKey = TestJobChainPath orderKey matchingFile.toString
-    controller.toleratingErrorLogEvent(_.message contains "spray.can.Http$ConnectionException") {
+    controller.toleratingErrorLogged(_.message contains "spray.can.Http$ConnectionException") {
       autoClosing(new ServerSocket()) { socket ⇒
         socket.bind(new InetSocketAddress("127.0.0.1", 0))
         val deadPort = socket.getLocalPort

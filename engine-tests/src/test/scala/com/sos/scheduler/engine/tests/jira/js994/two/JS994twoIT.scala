@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js994.two
 
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -21,6 +21,6 @@ final class JS994twoIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("Sich einander referenzierende schedule sollen abgewiesen werden") {
-    eventPipe.nextAny[ErrorLogEvent].event.message should startWith("SCHEDULER-463")
+    eventPipe.nextAny[ErrorLogged].event.message should startWith("SCHEDULER-463")
   }
 }

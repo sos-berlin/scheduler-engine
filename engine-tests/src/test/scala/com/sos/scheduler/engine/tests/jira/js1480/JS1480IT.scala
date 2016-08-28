@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -24,7 +24,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   "Agent web services" in {
-    eventBus.awaitingWhen[InfoLogEvent](_.event.message contains TestJob.LogLine) {
+    eventBus.awaitingWhen[InfoLogged](_.event.message contains TestJob.LogLine) {
       startJob(TestJobPath)
     }
     val agentClient = instance[SchedulerAgentClientFactory].apply(agentUri)

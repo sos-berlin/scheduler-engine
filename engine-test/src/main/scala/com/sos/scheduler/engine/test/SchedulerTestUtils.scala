@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderKey, OrderOverview, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -245,7 +245,7 @@ object SchedulerTestUtils {
 //    * @param errorCode Code der im Hauptprokoll zu tolerierenden Fehlermeldung.
 //    * @param testException: Test-Code, der bei einer falschen CppException eine Exception wirft, zum Bespiel mit ScalaTest. */
 //  def interceptLoggedSchedulerError(errorCode: MessageCode, testException: SchedulerException ⇒ Unit = _ ⇒ ())(body: ⇒ Unit)(implicit controller: TestSchedulerController) {
-//    controller.toleratingErrorLogEvent(errorCode) {
+//    controller.toleratingErrorLogged(errorCode) {
 //      val e = intercept[SchedulerException](body)
 //      s"${e.getMessage} " should startWith (s"$errorCode ")
 //      testException(e)
@@ -262,17 +262,17 @@ object SchedulerTestUtils {
     result
   }
 
-  def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
-    val errorLoggedFuture = controller.eventBus.futureWhen[ErrorLogEvent] { _.event.codeOption contains errorCode }
+  def interceptErrorLogged[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
+    val errorLoggedFuture = controller.eventBus.futureWhen[ErrorLogged] { _.event.codeOption contains errorCode }
     val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
     val errorLogged = try awaitResult(errorLoggedFuture, timeout.duration)
       catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
     ResultAndEvent(result, errorLogged)
   }
 
-  def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
+  def interceptErrorLoggeds[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
     controller.toleratingErrorCodes(errorCodes) {
-      val futures = errorCodes map { o ⇒ controller.eventBus.futureWhen[ErrorLogEvent](_.event.codeOption contains o) }
+      val futures = errorCodes map { o ⇒ controller.eventBus.futureWhen[ErrorLogged](_.event.codeOption contains o) }
       body
       try awaitResults(futures)
       catch {
@@ -288,5 +288,5 @@ object SchedulerTestUtils {
     else
       orderOverview(orderKey).isBlacklisted
 
-  final case class ResultAndEvent[A](result: A, event: ErrorLogEvent)
+  final case class ResultAndEvent[A](result: A, event: ErrorLogged)
 }

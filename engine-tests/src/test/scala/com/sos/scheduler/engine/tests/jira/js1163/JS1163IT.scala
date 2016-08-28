@@ -157,7 +157,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          controller.toleratingErrorLogEvent(_ ⇒ true) {
+          controller.toleratingErrorLogged(_ ⇒ true) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
               TrapJobPath, TrapMonitorJobPath,

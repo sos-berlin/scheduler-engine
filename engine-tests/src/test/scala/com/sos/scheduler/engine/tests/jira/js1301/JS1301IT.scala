@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedRemoved
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskEnded, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -59,7 +59,7 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       events.next[OrderStepStarted](orderKey)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
       sleep(2.s)
-      eventBus.awaitingWhen[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-989")) { // "Process_class cannot be removed now, it will be done later"
+      eventBus.awaitingWhen[InfoLogged](_.event.codeOption contains MessageCode("SCHEDULER-989")) { // "Process_class cannot be removed now, it will be done later"
         delete(file)
         instance[FolderSubsystemClient].updateFolders()
       }
@@ -79,7 +79,7 @@ final class JS1301IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     runOrder(aOrderKey).nodeId shouldEqual NodeId("END")
     withEventPipe { events ⇒
       scheduler executeXml OrderCommand(bOrderKey)
-      events.nextWhen[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-271"))   // "Task is being terminated in favour of ..."
+      events.nextWhen[InfoLogged](_.event.codeOption contains MessageCode("SCHEDULER-271"))   // "Task is being terminated in favour of ..."
       events.nextWhen[TaskEnded](_.key.jobPath == JavaJobPath)
       events.nextWhen[TaskStarted.type](_.key.jobPath == JavaJobPath)
       events.next[OrderFinished](bOrderKey).nodeId shouldBe NodeId("END")

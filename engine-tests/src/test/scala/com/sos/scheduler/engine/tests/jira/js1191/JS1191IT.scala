@@ -16,7 +16,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1191IT extends FreeSpec with ScalaSchedulerTest {
 
   "Order.last_error" in {
-    controller.toleratingErrorLogEvent(_ ⇒ true) {
+    controller.toleratingErrorLogged(_ ⇒ true) {
       val result = runOrder(JobChainPath("/test") orderKey "1")
       assert(result.nodeId == NodeId("END"))
     }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.scheduler.comapi.javascript
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
@@ -24,7 +24,7 @@ final class SchedulerAPIJavascriptIT extends FreeSpec with ScalaSchedulerTest wi
 
   private val finishedOrderParametersPromise = Promise[Map[String, String]]()
   private val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
-  private lazy val taskLogLines = eventsPromise.successValue collect { case KeyedEvent(_, e: InfoLogEvent) ⇒ e.message }
+  private lazy val taskLogLines = eventsPromise.successValue collect { case KeyedEvent(_, e: InfoLogged) ⇒ e.message }
 
   "javascript job" - {
     for ((name, jobPath) ← List("Without Agent" → JavascriptJobPath, "With Agent" -> JavascriptJobPath.asAgent)) {

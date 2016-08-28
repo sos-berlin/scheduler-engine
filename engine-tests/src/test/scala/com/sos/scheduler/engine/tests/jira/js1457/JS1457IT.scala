@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -41,7 +41,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
     val count = new AtomicInteger
     try
       intercept[TimeoutException] {
-        eventBus.awaitingInTimeWhen[ErrorLogEvent](TestDuration, _ ⇒ true) {
+        eventBus.awaitingInTimeWhen[ErrorLogged](TestDuration, _ ⇒ true) {
           writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
           runJob(JobPath("/test"))   // Smoke test
           eventBus.on[TaskClosed.type] { case _ ⇒ count.incrementAndGet() }

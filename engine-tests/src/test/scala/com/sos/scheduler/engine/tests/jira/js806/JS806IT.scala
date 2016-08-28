@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js806
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.{InfoLogEvent, LogEvent}
+import com.sos.scheduler.engine.data.log.{InfoLogged, LogEvent}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
@@ -51,9 +51,9 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       eventPipe.next[OrderNodeChanged](myOrderKey).nodeIdTransition shouldEqual NodeId("100") -> NodeId("200")
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, suspended = Some(true))
-      eventPipe.nextWhen[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
+      eventPipe.nextWhen[InfoLogged] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
-      eventPipe.nextWhen[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-992")) }    // "Order ist not longer suspended"
+      eventPipe.nextWhen[InfoLogged] { _.event.codeOption == Some(MessageCode("SCHEDULER-992")) }    // "Order ist not longer suspended"
       eventPipe.next[FileBasedActivated.type](myOrderKey)
       order(myOrderKey).title shouldEqual ChangedTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>

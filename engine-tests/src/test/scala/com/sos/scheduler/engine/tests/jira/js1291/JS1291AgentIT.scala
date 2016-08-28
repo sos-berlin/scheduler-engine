@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepEnded}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -42,7 +42,7 @@ import scala.concurrent.Promise
 @RunWith(classOf[JUnitRunner])
 final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogEvent}
+  import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogged}
   private lazy val List(tcpPort, httpPort) = findRandomFreeTcpPorts(2)
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
@@ -54,7 +54,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
       lazy val taskLogLines = (eventsPromise.successValue collect {
-        case KeyedEvent(_, e: InfoLogEvent) ⇒ e.message split "\r?\n"
+        case KeyedEvent(_, e: InfoLogged) ⇒ e.message split "\r?\n"
       }).flatten
       lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
@@ -164,8 +164,8 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       }
 
       "Exception in Monitor" in {
-        toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
-        //toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
+        toleratingErrorLogged({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
+        //toleratingErrorLogged({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
           runJob(JobPath("/throwing-monitor"))
         }
       }

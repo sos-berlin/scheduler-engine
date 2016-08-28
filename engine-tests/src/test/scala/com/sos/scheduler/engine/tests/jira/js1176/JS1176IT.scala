@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.log.{InfoLogEvent, WarningLogEvent}
+import com.sos.scheduler.engine.data.log.{InfoLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -54,7 +54,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
   "Modifying a job while waiting for database should not crash" in {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-303"))) {
       val waitingForDatabase = Promise[Unit]()
-      eventBus.onHot[WarningLogEvent] {
+      eventBus.onHot[WarningLogged] {
         case KeyedEvent(NoKey, e) if e.codeOption == Some(MessageCode("SCHEDULER-958")) ⇒ // "Waiting 20 seconds before reopening the database"
           waitingForDatabase.trySuccess(())
       }
@@ -67,7 +67,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
       }
       assert(!databaseStart.isCompleted)
       awaitFailure(checkFolders()).getMessage should startWith ("SCHEDULER-184")  // "Scheduler database cannot be accessed due to a database problem"
-      eventBus.awaitingInTimeWhen[InfoLogEvent](LostDatabaseRetryTimeout + TestTimeout, _.event.codeOption == Some(MessageCode("SCHEDULER-807"))) {
+      eventBus.awaitingInTimeWhen[InfoLogged](LostDatabaseRetryTimeout + TestTimeout, _.event.codeOption == Some(MessageCode("SCHEDULER-807"))) {
         awaitSuccess(databaseStart)
       }
       awaitSuccess(checkFolders())

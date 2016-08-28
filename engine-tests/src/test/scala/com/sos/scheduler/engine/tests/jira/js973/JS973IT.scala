@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
+import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
@@ -71,7 +71,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   "An API task ignores scheduer.remote_scheduler" in {
     withEventPipe { eventPipe ⇒
       testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, expectedResult = "**")
-      eventPipe.nextWhen[WarningLogEvent](_.event.codeOption == Some(MessageCode("SCHEDULER-484")), 0.s )
+      eventPipe.nextWhen[WarningLogged](_.event.codeOption == Some(MessageCode("SCHEDULER-484")), 0.s )
       eventPipe.nextWhen[TaskStarted.type](_.key.jobPath == ApiJobPath, 0.s).key.taskId
     }
   }
@@ -173,7 +173,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
       val firstJobPath = instance[OrderSubsystemClient].jobChain(jobChainPath).jobNodes.head.jobPath
       instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
-      eventPipe.nextAny[ErrorLogEvent].event.codeOption shouldEqual Some(expectedErrorCode)
+      eventPipe.nextAny[ErrorLogged].event.codeOption shouldEqual Some(expectedErrorCode)
       eventPipe.next[OrderStepEnded](orderKey).nodeTransition shouldEqual OrderNodeTransition.Keep
       instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.stopped
     }

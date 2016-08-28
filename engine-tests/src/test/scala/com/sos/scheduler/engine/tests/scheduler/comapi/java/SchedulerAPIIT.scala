@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderNodeTransition, OrderStepEnded}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -41,7 +41,7 @@ final class SchedulerAPIIT extends FreeSpec with ScalaSchedulerTest with AgentWi
   private val finishedOrderParametersPromise = Promise[Map[String, String]]()
   private val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
   private lazy val testTextFile = testEnvironment.liveDirectory / TestTextFilename
-  private lazy val taskLogLines = eventsPromise.successValue collect { case KeyedEvent(_, e: InfoLogEvent) ⇒ e.message }
+  private lazy val taskLogLines = eventsPromise.successValue collect { case KeyedEvent(_, e: InfoLogged) ⇒ e.message }
 
   protected override def onSchedulerActivated() = {
     scheduler executeXml VariablesJobElem

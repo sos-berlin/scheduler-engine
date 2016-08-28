@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.nodeorder
 import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -46,8 +46,8 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
       eventBus.awaiting[OrderFinished](ErrorOrderKey) {
         withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
-          eventPipe.nextWhen[ErrorLogEvent] { _.event.codeOption == Some(MissingJobchainCode) }
-          eventPipe.nextWhen[ErrorLogEvent] { _.event.codeOption == Some(CommandFailedCode) }
+          eventPipe.nextWhen[ErrorLogged] { _.event.codeOption == Some(MissingJobchainCode) }
+          eventPipe.nextWhen[ErrorLogged] { _.event.codeOption == Some(CommandFailedCode) }
         }
       }
     }
