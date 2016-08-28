@@ -24,35 +24,47 @@ final class SchedulerUris private(schedulerUriString: String) {
   lazy val overview = uriString("api")
 
   object order {
-    def overviews(query: OrderQuery = OrderQuery.All): String =
-      orders(query, Some("OrderOverview"))
+    def apply[V <: OrderView: OrderView.Companion](orderKey: OrderKey): String =
+      uriString(Uri.Path("api/order" + orderKey.string), "return" → orderView[V].name)
+
+    def apply[V <: OrderView: OrderView.Companion]: String =
+      apply[V](OrderQuery.All)
+
+    def apply[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
+      forGet(query, returnType = Some(orderView[V].name))
+
+    def apply(query: OrderQuery, returnType: Option[String]): String =
+      forGet(query, returnType)
 
     def treeComplemented[V <: OrderView: OrderView.Companion]: String =
       treeComplemented[V](OrderQuery.All)
 
     def treeComplemented[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
-      orders(query, Some(s"OrderTreeComplemented/${orderView[V].name}"))
+      forGet(query, Some(s"OrderTreeComplemented/${orderView[V].name}"))
+
+    def treeComplementedForPost[V <: OrderView: OrderView.Companion]: String =
+      forPost(returnType = Some(s"OrderTreeComplemented/${orderView[V].name}"))
 
     def complemented[V <: OrderView: OrderView.Companion](query: OrderQuery = OrderQuery.All): String =
-      orders(query, Some(s"OrdersComplemented/${orderView.name}"))
+      forGet(query, Some(s"OrdersComplemented/${orderView.name}"))
 
-    def apply[V <: OrderView: OrderView.Companion](orderKey: OrderKey): String =
-      uriString(Uri.Path("api/order" + orderKey.string), "return" → orderView[V].name)
+    def complementedForPost[V <: OrderView: OrderView.Companion]: String =
+      forPost(returnType = Some(s"OrdersComplemented/${orderView.name}"))
 
-    def apply[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
-      orders[V](query)
-
-    def apply(query: OrderQuery, returnType: Option[String]): String =
-      orders(query, returnType)
-
-    def orders[V <: OrderView: OrderView.Companion](query: OrderQuery): String =
-      orders(query, returnType = Some(orderView[V].name))
-
-    def orders(query: OrderQuery, returnType: Option[String]): String = {
+    private def forGet(query: OrderQuery, returnType: Option[String]): String = {
       val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
       uriString(Uri(
         path = Uri.Path(s"api/order$subpath"),
         query = Uri.Query(query.withoutPathToMap ++ (returnType map { o ⇒ "return" → o }))))
+    }
+
+    def forPost[V <: OrderView: OrderView.Companion]: String =
+      forPost(returnType = Some(orderView[V].name))
+
+    private def forPost(returnType: Option[String]): String = {
+      uriString(Uri(
+        path = Uri.Path(s"api/order"),
+        query = Uri.Query((returnType map { o ⇒ "return" → o }).toMap)))
     }
 
     def events(orderKey: OrderKey) =

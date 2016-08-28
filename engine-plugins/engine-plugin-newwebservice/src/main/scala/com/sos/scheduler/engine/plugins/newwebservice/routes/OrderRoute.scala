@@ -6,9 +6,10 @@ import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.{completeTryHtml, htmlPreferred}
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
@@ -32,77 +33,82 @@ trait OrderRoute extends LogRoute {
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    singleOrder ~ queriedOrders
-
-  private def singleOrder: Route =
-    get {
-      typedPath(OrderKey) { orderKey ⇒
-        parameter("return" ? "OrderDetailed") {
-          case "log" ⇒
-            logRoute(orderSubsystem.order(orderKey).log)
-
-          case "OrderOverview" ⇒
-            completeTryHtml(client.order[OrderOverview](orderKey))
-
-          case "OrderDetailed" ⇒
-            completeTryHtml(client.order[OrderDetailed](orderKey))
-
-          case "Event" ⇒
-            parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-              implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage(orderKey)
-              completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId))
-            }
-
-          case "OrderEvent" ⇒
-            parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-              completeTryHtml(client.eventsForKey[OrderEvent](orderKey, after = afterEventId))
-            }
-
-          case o ⇒
-            reject(ValidationRejection(s"Invalid parameter return=$o"))
+    (pathEnd & post) {
+      entity(as[OrderQuery]) { query ⇒
+        queriedOrders(query)
+      }
+    } ~
+    testSlash(webServiceContext) {
+      get {
+        singleOrder ~
+        extendedOrderQuery { query ⇒
+          queriedOrders(query)
         }
       }
     }
 
-  private def queriedOrders: Route =
-    get {
-      extendedOrderQuery { implicit query ⇒
-        parameter("return".?) {
+  private def singleOrder: Route =
+    typedPath(OrderKey) { orderKey ⇒
+      parameter("return" ? "OrderDetailed") {
+        case "log" ⇒
+          logRoute(orderSubsystem.order(orderKey).log)
 
-          case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderOverview.name)
-                    | OrderTreeComplementedName) ⇒
-            completeTryHtml(client.orderTreeComplementedBy[OrderOverview](query))
+        case "OrderOverview" ⇒
+          completeTryHtml(client.order[OrderOverview](orderKey))
 
-          case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderDetailed.name)) ⇒
-            completeTryHtml(client.orderTreeComplementedBy[OrderDetailed](query))
+        case "OrderDetailed" ⇒
+          completeTryHtml(client.order[OrderDetailed](orderKey))
 
-          case Some(ReturnTypeRegex(OrdersComplementedName, OrderOverview.name)
-                    | OrdersComplementedName)  ⇒
-            completeTryHtml(client.ordersComplementedBy[OrderOverview](query))
+        case "Event" ⇒
+          parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
+            implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage(orderKey)
+            completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId))
+          }
 
-          case Some(ReturnTypeRegex(OrdersComplementedName, OrderDetailed.name)) ⇒
-            completeTryHtml(client.ordersComplementedBy[OrderDetailed](query))
+        case "OrderEvent" ⇒
+          parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
+            completeTryHtml(client.eventsForKey[OrderEvent](orderKey, after = afterEventId))
+          }
 
-          case Some(OrderOverview.name) ⇒
-            completeTryHtml(client.ordersBy[OrderOverview](query))
-
-          case Some(OrderDetailed.name) ⇒
-            completeTryHtml(client.ordersBy[OrderDetailed](query))
-
-          case Some(o) ⇒
-            reject(ValidationRejection(s"Unknown value for parameter return=$o"))
-
-          case None ⇒
-            htmlPreferred(webServiceContext) {
-              requestUri { uri ⇒
-                complete(
-                  for (o ← client.ordersComplementedBy[OrderOverview](query)) yield
-                    OrdersHtmlPage.toHtmlPage(o, uri, query, client, webServiceContext))
-              }
-            } ~
-              complete(client.orderTreeComplementedBy[OrderOverview](query))
-        }
+        case o ⇒
+          reject(ValidationRejection(s"Invalid parameter return=$o"))
       }
+    }
+
+  private def queriedOrders(implicit query: OrderQuery): Route =
+    parameter("return".?) {
+      case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderOverview.name)
+                | OrderTreeComplementedName) ⇒
+        completeTryHtml(client.orderTreeComplementedBy[OrderOverview](query))
+
+      case Some(ReturnTypeRegex(OrderTreeComplementedName, OrderDetailed.name)) ⇒
+        completeTryHtml(client.orderTreeComplementedBy[OrderDetailed](query))
+
+      case Some(ReturnTypeRegex(OrdersComplementedName, OrderOverview.name)
+                | OrdersComplementedName)  ⇒
+        completeTryHtml(client.ordersComplementedBy[OrderOverview](query))
+
+      case Some(ReturnTypeRegex(OrdersComplementedName, OrderDetailed.name)) ⇒
+        completeTryHtml(client.ordersComplementedBy[OrderDetailed](query))
+
+      case Some(OrderOverview.name) ⇒
+        completeTryHtml(client.ordersBy[OrderOverview](query))
+
+      case Some(OrderDetailed.name) ⇒
+        completeTryHtml(client.ordersBy[OrderDetailed](query))
+
+      case Some(o) ⇒
+        reject(ValidationRejection(s"Unknown value for parameter return=$o"))
+
+      case None ⇒
+        htmlPreferred(webServiceContext) {
+          requestUri { uri ⇒
+            complete(
+              for (o ← client.ordersComplementedBy[OrderOverview](query)) yield
+                OrdersHtmlPage.toHtmlPage(o, uri, query, client, webServiceContext))
+          }
+        } ~
+          complete(client.orderTreeComplementedBy[OrderOverview](query))
     }
 }
 

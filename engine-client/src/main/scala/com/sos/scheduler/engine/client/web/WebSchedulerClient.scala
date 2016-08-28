@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
-import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
@@ -18,6 +17,7 @@ import spray.http.MediaTypes._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding.Gzip
+import spray.httpx.marshalling.Marshaller
 import spray.httpx.unmarshalling._
 import spray.json.DefaultJsonProtocol._
 
@@ -41,25 +41,42 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     sendReceive ~>
     decode(Gzip)
 
+  private lazy val jsonNonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+    addHeader(Accept(`application/json`)) ~>
+    nonCachingHttpResponsePipeline
+
   final def overview =
     get[Snapshot[SchedulerOverview]](_.overview)
+
+  // Order
 
   def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]] =
     get[Snapshot[V]](_.order[V](orderKey))
 
   def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
+    post[OrderQuery, Snapshot[immutable.Seq[V]]](_.order.forPost[V], query)
+
+  def getOrdersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
     get[Snapshot[immutable.Seq[V]]](_.order[V](query))
 
   final def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
+    post[OrderQuery, Snapshot[OrderTreeComplemented[V]]](_.order.treeComplementedForPost[V], query)
+
+  final def getOrderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     get[Snapshot[OrderTreeComplemented[V]]](_.order.treeComplemented[V](query))
 
   final def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
+    post[OrderQuery, Snapshot[OrdersComplemented[V]]](_.order.complementedForPost[V], query)
+
+  final def getOrdersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     get[Snapshot[OrdersComplemented[V]]](_.order.complemented[V](query))
+
+  // JobChain
 
   final def jobChainOverview(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))
 
-  final def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainOverview]]] = {
+  final def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainOverview]]] =
     query.jobChainPathQuery match {
       case single: PathQuery.SinglePath ⇒
         for (schedulerResponse ← get[Snapshot[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath])))
@@ -68,22 +85,34 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
       case _ ⇒
         get[Snapshot[immutable.Seq[JobChainOverview]]](_.jobChain.overviews(query))
     }
-  }
 
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.details(jobChainPath))
 
-  def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[AnyKeyedEvent]]]] =
+  // Event
+
+  def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]]] =
     get[Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]]](_.events(after = after, limit = limit, reverse = reverse))
+
+  // Basic
 
   final def getJson(pathUri: String): Future[String] =
     get[String](_.uriString(pathUri))
 
-  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`): Future[A] =
+  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String): Future[A] =
+    jsonUnmarshallingPipeline[A].apply(Get(uri(uris)))
+
+  final def get2[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType): Future[A] =
     unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
 
   private def unmarshallingPipeline[A: FromResponseUnmarshaller](accept: MediaType) =
     addHeader(Accept(accept)) ~> nonCachingHttpResponsePipeline ~> unmarshal[A]
+
+  private final def post[A: Marshaller, B: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, data: A): Future[B] =
+    jsonUnmarshallingPipeline[B].apply(Post(uri(uris), data))
+
+  private def jsonUnmarshallingPipeline[A: FromResponseUnmarshaller] =
+    jsonNonCachingHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"WebSchedulerClient($uris)"
 }

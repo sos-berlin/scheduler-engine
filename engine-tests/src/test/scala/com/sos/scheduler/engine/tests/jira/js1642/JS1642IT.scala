@@ -179,13 +179,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(overview.state == SchedulerState.running)
     }
 
-    "orderOverviews" in {
+    "orders[OrderOverview]" in {
       val orders = awaitContent(client.orders[OrderOverview])
       assert(orders == awaitContent(directSchedulerClient.orders[OrderOverview]))
       assert(orders.toVector.sorted == ExpectedOrderOverviews)
     }
 
-    "orderOverviews speed" in {
+    "orders[OrderOverview] speed" in {
       Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
         client.orders[OrderOverview] await TestTimeout
       }
@@ -207,14 +207,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderQuery = OrderQuery(isSuspended = Some(true))
       val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](orderQuery))
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
-      assert(ordersComplemented == ExpectedOrderOrdersComplemented.copy(
-        orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
-        usedTasks = Nil,
-        usedJobs = ExpectedOrderOrdersComplemented.usedJobs,
-        usedProcessClasses = Nil,
-        usedNodes = Vector(
-          SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
-          SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2))))
+      assert(ordersComplemented == ExpectedSuspendedOrderOrdersComplemented)
     }
 
     "ordersComplementedBy query /aJobChain" in {
@@ -367,6 +360,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
+  "GET" - {
+    "getOrdersComplementedBy isSuspended" in {
+      val orderQuery = OrderQuery(isSuspended = Some(true))
+      val ordersComplemented = awaitContent(webSchedulerClient.getOrdersComplementedBy[OrderOverview](orderQuery))
+      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
+      assert(ordersComplemented == ExpectedSuspendedOrderOrdersComplemented)
+    }
+  }
+
   "JSON" - {
     "overview" in {
       val overviewString = webSchedulerClient.get[String](_.overview) await TestTimeout
@@ -386,7 +388,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "orderOverviews" in {
-      val orderOverviews = webSchedulerClient.get[JsObject](_.order.overviews()) await TestTimeout
+      val orderOverviews = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
       assert(Snapshot.unwrapJsArray(orderOverviews) == ExpectedOrderOverviewsJsArray)
     }
 
@@ -408,14 +410,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "Unknown Accept content type is rejected" - {
     "overview" in {
       intercept[UnsuccessfulResponseException] {
-        webSchedulerClient.get[String](_.overview, accept = `text/richtext`) await TestTimeout
+        webSchedulerClient.get2[String](_.overview, accept = `text/richtext`) await TestTimeout
       }.response.status shouldEqual NotAcceptable
     }
   }
 
   "text/html" - {  // Inofficial
     "overview" in {
-      val html = webSchedulerClient.get[String](_.overview, accept = `text/html`) await TestTimeout
+      val html = webSchedulerClient.get2[String](_.overview, accept = `text/html`) await TestTimeout
       assert(html startsWith "<!DOCTYPE html")
       assert(html endsWith "</html>")
       assert(html contains "JobScheduler")
@@ -423,7 +425,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "order.ordersComplemented" in {
-      val html = webSchedulerClient.get[String](_.order.complemented[OrderOverview](), accept = `text/html`) await TestTimeout
+      val html = webSchedulerClient.get2[String](_.order.complemented[OrderOverview](), accept = `text/html`) await TestTimeout
       assert(html startsWith "<!DOCTYPE html")
       assert(html endsWith "</html>")
       assert(html contains "JobScheduler")

@@ -61,9 +61,7 @@ with FrontEndRoute {
         commandRoute
       } ~
       pathPrefix("order") {
-        testSlash(webServiceContext) {
-          orderRoute
-        }
+        orderRoute
       } ~
       pathPrefix("jobChain") {
         testSlash(webServiceContext) {

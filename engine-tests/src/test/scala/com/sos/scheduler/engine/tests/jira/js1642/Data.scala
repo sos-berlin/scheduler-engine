@@ -242,6 +242,15 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
   )
 
+  val ExpectedSuspendedOrderOrdersComplemented = ExpectedOrderOrdersComplemented.copy(
+    orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
+    usedTasks = Nil,
+    usedJobs = ExpectedOrderOrdersComplemented.usedJobs,
+    usedProcessClasses = Nil,
+    usedNodes = Vector(
+      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
+      SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2)))
+
   val ExpectedOrderTreeComplemented = OrderTreeComplemented[OrderOverview](
     FolderTree(
       FolderPath.Root,
