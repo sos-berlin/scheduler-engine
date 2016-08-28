@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.log.Logged
+import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag

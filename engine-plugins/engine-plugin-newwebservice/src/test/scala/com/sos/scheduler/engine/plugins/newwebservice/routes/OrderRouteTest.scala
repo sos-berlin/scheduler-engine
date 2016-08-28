@@ -13,7 +13,8 @@ import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOvervi
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.kernel.event.{DirectEventClient, EventCollector}
+import com.sos.scheduler.engine.kernel.event.DirectEventClient
+import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
 import java.time.Instant
