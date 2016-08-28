@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.data.event.KeyedEvent.KeyedTypedEventJsonFormat
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat.eventTypedJsonFormat
-import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.log.Logged
 import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -31,7 +31,7 @@ trait DirectEventClient {
   private def eventIsSelected(event: AnyKeyedEvent): Boolean =
     event match {
       //case KeyedEvent(_, e: InfoOrHigherLogged) ⇒ true
-      case KeyedEvent(_, e: LogEvent) ⇒ false
+      case KeyedEvent(_, e: Logged) ⇒ false
       case _ ⇒ true
     }
 

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js806
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.{InfoLogged, LogEvent}
+import com.sos.scheduler.engine.data.log.{InfoLogged, Logged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
@@ -69,7 +69,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.next[OrderStepEnded](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
-      eventPipe.nextWhen[LogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
+      eventPipe.nextWhen[Logged] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
       eventPipe.next[OrderFinished](myOrderKey)
       eventPipe.next[FileBasedActivated.type](myOrderKey)

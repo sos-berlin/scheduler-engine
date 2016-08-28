@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
@@ -76,7 +76,7 @@ extends SchedulerHtmlPage {
             case OrderStarted ⇒ Nil
             case _ ⇒ td(colspan := 3, event.toString) :: Nil
           })
-      case KeyedEvent(_, e: LogEvent) ⇒
+      case KeyedEvent(_, e: Logged) ⇒
         td() :: td(e.level.toString) :: td(colspan := 4)(e.message) :: Nil
       case KeyedEvent(key, e) ⇒
         td(key.toString) :: td(eventName) :: td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil

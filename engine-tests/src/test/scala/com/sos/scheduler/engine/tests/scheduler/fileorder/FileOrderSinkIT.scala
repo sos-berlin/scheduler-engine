@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -122,7 +122,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
   }
 
   private def runUntilFileRemovedMessage(orderKey: OrderKey)(body: ⇒ Unit): Unit =
-    eventBus.awaitingWhen[LogEvent](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
+    eventBus.awaitingWhen[Logged](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
       body
     }
 }

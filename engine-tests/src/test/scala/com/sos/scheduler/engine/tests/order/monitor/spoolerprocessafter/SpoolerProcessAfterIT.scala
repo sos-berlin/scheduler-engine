@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{TaskClosed, TaskId, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
@@ -128,7 +128,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       (order.orderKey))
   }
 
-  eventBus.onHot[LogEvent] { case KeyedEvent(_, e: LogEvent) ⇒
+  eventBus.onHot[Logged] { case KeyedEvent(_, e: Logged) ⇒
     if (Expected.LogLevels contains e.level) {
       for (code ← e.codeOption)
         messageCodes.addBinding(e.level, code.string)

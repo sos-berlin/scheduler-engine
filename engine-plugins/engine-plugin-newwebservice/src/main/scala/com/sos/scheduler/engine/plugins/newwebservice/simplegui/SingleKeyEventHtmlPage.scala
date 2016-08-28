@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.event.{AnyEvent, Event, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
@@ -79,7 +79,7 @@ extends SchedulerHtmlPage {
             case OrderStepStarted(nodeId, taskId)     ⇒ td(nodeId) :: td(taskId) :: Nil
             case _ ⇒ unknownEventToTds(event)
           })
-      case event: LogEvent ⇒
+      case event: Logged ⇒
         td() :: td(event.level.toString) :: td(colspan := 4)(event.message) :: Nil
       case _ ⇒
         td(eventName) :: unknownEventToTds(event)

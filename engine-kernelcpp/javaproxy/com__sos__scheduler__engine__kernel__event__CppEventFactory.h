@@ -50,7 +50,7 @@ struct CppEventFactory : ::zschimmer::javabridge::proxy_jobject< CppEventFactory
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newLogEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
+    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newLoggedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
     static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3);
     static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jlong p2);
     static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newTaskEndedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2);

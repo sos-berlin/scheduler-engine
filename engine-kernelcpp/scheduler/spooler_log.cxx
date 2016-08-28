@@ -1105,7 +1105,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     }
 
     if (_object  &&  javabridge::Vm::is_active())
-        _object->report_event(CppEventFactoryJ::newLogEvent(level, line) );
+        _object->report_event(CppEventFactoryJ::newLoggedEvent(level, line) );
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event

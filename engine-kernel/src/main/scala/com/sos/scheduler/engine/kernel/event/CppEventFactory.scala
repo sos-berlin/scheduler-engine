@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.event.CppEventCode._
@@ -69,8 +69,8 @@ import com.sos.scheduler.engine.kernel.order.Order
     }
   }
 
-  @ForCpp def newLogEvent(cppLevel: Int, message: String): AnyKeyedEvent =
-    KeyedEvent(LogEvent(SchedulerLogLevel.ofCpp(cppLevel), message))
+  @ForCpp def newLoggedEvent(cppLevel: Int, message: String): AnyKeyedEvent =
+    KeyedEvent(Logged(SchedulerLogLevel.ofCpp(cppLevel), message))
 
   @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AnyKeyedEvent =
     KeyedEvent(OrderNodeChanged(nodeId = NodeId(nodeId), fromNodeId = NodeId(previousNodeId)))(OrderKey(jobChainPath, orderId))

@@ -22,7 +22,7 @@ import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
@@ -137,7 +137,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     private def isPermitted(event: AnyKeyedEvent) =
       (eventCollector.lastEventId > activatedEventId) && (event match {
         case KeyedEvent(_, FileBasedActivated) ⇒ this.webEvents.nonEmpty   // directEvents miss activation events at start
-        case KeyedEvent(_, e: LogEvent) ⇒ false
+        case KeyedEvent(_, e: Logged) ⇒ false
         case _ ⇒ true
       })
 

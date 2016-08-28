@@ -39,11 +39,6 @@ public final class JS644IT extends SchedulerTest {
 
     private final Gate<Boolean> threadGate = new Gate<Boolean>();
 
-//    public JS644IT() {
-//        super(TestSchedulerController.builder(JS644IT.class)
-//                //.expectedErrorLogEventPredicate(expectedErrorLogEventPredicate).build());
-//    }
-
     @Test public void test() throws InterruptedException {
         controller().activateScheduler(asList("-e"));
         runModifierThreadAndCheckOrderChanges();
