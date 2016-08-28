@@ -54,7 +54,7 @@ final class JS653IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS653IT {
-  private val IdleTimeout = 10.s
+  private val IdleTimeout = 5.s
   private val ExpectedOrderStarts = Set(
     OrderId("simpleShouldRun")          → NodeId("state.job1"),
     OrderId("simpleWithStateShouldRun") → NodeId("state.job1"),
