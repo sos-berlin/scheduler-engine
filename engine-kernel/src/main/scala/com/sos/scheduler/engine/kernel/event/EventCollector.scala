@@ -24,28 +24,59 @@ final class EventCollector @Inject()(
   (implicit ec: ExecutionContext)
 extends HasCloser {
 
-  private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, Snapshot[AnyKeyedEvent]]
   private val ids = new UniqueTimestampedIdIterator
 
-  @volatile
-  private var queueSize: Int = 0
-  @volatile
-  private var lastRemovedFirstId: EventId = 0
   @volatile
   private var eventArrivedPromise = Promise[Unit]()
   @volatile
   private var eventArrivedPromiseUsed = false
 
+  private object keyEventQueue {
+    private val queue = new java.util.concurrent.ConcurrentSkipListMap[java.lang.Long, Snapshot[AnyKeyedEvent]]
+    @volatile
+    var queueSize: Int = 0
+    @volatile
+    var lastRemovedFirstId: EventId = 0
+
+    def add(snapshot: Snapshot[AnyKeyedEvent]): Unit = {
+      if (queueSize >= KeyEventQueueSizeLimit) {
+        lastRemovedFirstId = queue.firstKey
+        queue.remove(lastRemovedFirstId)
+        queueSize -= 1
+        // TODO Cancel iterator if not after queue.firstEvent
+      }
+      queue.put(snapshot.eventId, snapshot)
+      queueSize += 1
+    }
+
+    def hasAfter(after: EventId) = queue.navigableKeySet.higher(after) != null
+
+    def after(after: EventId) = Option(queue.navigableKeySet.tailSet(after, false))
+
+    def events(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
+      queue.navigableKeySet.tailSet(after, false).iterator map { k ⇒
+        //if (after != 0 && after < queue.firstKey) ... events lost
+        //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called
+        val value = queue.get(k)
+        if (value == null) throw new NoSuchElementException("Event queue overflow while reading")
+        value
+    }
+
+    def reverseEvents(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
+      new AbstractIterator[Snapshot[AnyKeyedEvent]] {
+        private val bufferedDelegate = (queue.navigableKeySet.descendingIterator takeWhile { _ > after } map queue.get).buffered
+        def hasNext = bufferedDelegate.hasNext && bufferedDelegate.head != null
+        def next() = {
+          val o = bufferedDelegate.next
+          if (o == null) throw new NoSuchElementException
+          o
+        }
+      }
+  }
+
   eventBus.onHot[Event] { case event ⇒
     val id = ids.next()
-    if (queueSize >= EventQueueSizeLimit) {
-      lastRemovedFirstId = queue.firstKey
-      queue.remove(lastRemovedFirstId)
-      queueSize -= 1
-      // TODO Cancel iterator if not after queue.firstEvent
-    }
-    queue.put(id, Snapshot(event)(id))
-    queueSize += 1
+    keyEventQueue.add(Snapshot(event)(id))
     val p = eventArrivedPromise
     //if (eventArrivedPromiseUsed) {
       eventArrivedPromise = Promise[Unit]()
@@ -67,7 +98,7 @@ extends HasCloser {
     })
 
   private def onEventAvailable[A](after: EventId, body: ⇒ A): Future[A] =
-    if (queue.navigableKeySet.higher(after) != null)
+    if (keyEventQueue.hasAfter(after))
       Future.successful(body)
     else {
       //eventArrivedPromiseUsed = true
@@ -78,25 +109,11 @@ extends HasCloser {
     if (reverse) reverseEvents(after) else events(after)
 
   def events(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
-    queue.navigableKeySet.tailSet(after, false).iterator map { k ⇒
-      //if (after != 0 && after < queue.firstKey) ... events lost
-      //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called
-      val value = queue.get(k)
-      if (value == null) throw new NoSuchElementException("Event queue overflow while reading")
-      value
-  }
+    keyEventQueue.events(after)
 
   /** May be slow */
   private def reverseEvents(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
-    new AbstractIterator[Snapshot[AnyKeyedEvent]] {
-      private val bufferedDelegate = (queue.navigableKeySet.descendingIterator takeWhile { _ > after } map queue.get).buffered
-      def hasNext = bufferedDelegate.hasNext && bufferedDelegate.head != null
-      def next() = {
-        val o = bufferedDelegate.next
-        if (o == null) throw new NoSuchElementException
-        o
-      }
-    }
+    keyEventQueue.reverseEvents(after)
 
   def lastEventId: EventId = ids.last
 
@@ -104,7 +121,7 @@ extends HasCloser {
 }
 
 object EventCollector {
-  private val EventQueueSizeLimit = 10000  // Not too much, as long as the needed heap size has not been clarified
+  private val KeyEventQueueSizeLimit = 10000  // Not too much, as long as the needed heap size has not been clarified
 
   private final class UniqueTimestampedIdIterator extends Iterator[EventId] {
     // JavaScript kann nur die ganzen Zahlen bis 2**53 (9.007.199.254.740.992) lückenlos darstellen, also 11 Bits weniger als ein Long.
