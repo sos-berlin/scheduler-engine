@@ -22,8 +22,8 @@ final class JS1435IT extends FreeSpec with ScalaSchedulerTest {
   "JS-1435IT" in {
     runJob(JobPath("/test"))
     val orderKey = JobChainPath("/test") orderKey "1"
-    val event = eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
-      val e = eventBus.awaitingKeyedEvent[OrderNodeChanged](orderKey) {
+    val event = eventBus.awaiting[OrderFinished](orderKey) {
+      val e = eventBus.awaiting[OrderNodeChanged](orderKey) {
         scheduler executeXml OrderCommand(orderKey)
       }
       assert(e.fromNodeId == NodeId("100"))

@@ -31,7 +31,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
   private implicit lazy val orderStore = instance[HibernateOrderStore]
 
   "Permanent order in a distributed job chain" in {
-    eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
+    eventBus.awaiting[OrderFinished](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
     transaction { implicit entityManager ⇒
@@ -45,23 +45,23 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
     transaction { implicit entityManager ⇒
       orderStore.fetch(TestOrderKey).title shouldEqual AChangedTitle
     }
-    eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
+    eventBus.awaiting[OrderFinished](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
   }
 
   "Changing the order configuration file while order is running takes effect when it is finished" in {
     scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedNodeId.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderStepEnded](TestOrderKey) {
+    eventBus.awaiting[OrderStepEnded](TestOrderKey) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
-    eventBus.awaitingKeyedEvent[FileBasedActivated.type](TestOrderKey) {
+    eventBus.awaiting[FileBasedActivated.type](TestOrderKey) {
       file(TestOrderKey).contentString = file(TestOrderKey).contentString.replace(AChangedTitle, BChangedTitle)
       instance[FolderSubsystemClient].updateFolders()
       transaction { implicit entityManager ⇒
         orderStore.fetch(TestOrderKey) should have ('nodeIdOption(Some(SuspendedNodeId)), 'title(AChangedTitle))
       }
-      eventBus.awaitingKeyedEvent[OrderFinished](TestOrderKey) {
+      eventBus.awaiting[OrderFinished](TestOrderKey) {
         scheduler executeXml <job_chain_node.modify job_chain={TestOrderKey.jobChainPath.string} state={SuspendedNodeId.string} action="process"/>
       }
     }
@@ -71,7 +71,7 @@ final class JS1251IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "JS-1298 Non-distributed job chain in a distributed JobScheduler" in {
-    eventBus.awaitingKeyedEvent[OrderFinished](NonDistributedOrderKey) {
+    eventBus.awaiting[OrderFinished](NonDistributedOrderKey) {
       scheduler executeXml ModifyOrderCommand(NonDistributedOrderKey, at = Some(ModifyOrderCommand.NowAt))
     }
   }

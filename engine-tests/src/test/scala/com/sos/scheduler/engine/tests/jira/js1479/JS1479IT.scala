@@ -27,7 +27,7 @@ final class JS1479IT extends FreeSpec with ScalaSchedulerTest {
     assert(eventPipe.nextAny[OrderStarted.type].key == primaryOrderKey)
     val addedOrderFinishedSeq = List.fill(2) {
       val orderKey = eventPipe.nextAny[OrderStarted.type].key
-      eventBus.keyedEventFuture[OrderFinished](orderKey)
+      eventBus.eventFuture[OrderFinished](orderKey)
     }
     val nodeIds = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.nodeId }
     intercept[Exception] {

@@ -45,7 +45,7 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
     val orderKeys = 1 to jobChain(TestJobChainPath).orderLimit + 2 map { i ⇒ TestJobChainPath orderKey i.toString }
     val futures =
       for (orderKey <- orderKeys) yield {
-        val f = eventBus.keyedEventFuture[OrderFinished](orderKey)
+        val f = eventBus.eventFuture[OrderFinished](orderKey)
         scheduler executeXml OrderCommand(orderKey)
         sleep(500.ms)
         f

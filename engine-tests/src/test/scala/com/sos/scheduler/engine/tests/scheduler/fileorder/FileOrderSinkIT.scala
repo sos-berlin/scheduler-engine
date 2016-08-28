@@ -97,7 +97,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
         sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
         val orderKey = TestJobChainPath orderKey file.toString
         controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-340"))) {  // "File still exists. Order has been set on the blacklist"
-          eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
+          eventBus.awaiting[OrderFinished](orderKey) {
             touch(file)
           }
         }
@@ -122,7 +122,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
   }
 
   private def runUntilFileRemovedMessage(orderKey: OrderKey)(body: ⇒ Unit): Unit =
-    eventBus.awaitingEvent[LogEvent](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
+    eventBus.awaitingWhen[LogEvent](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
       body
     }
 }

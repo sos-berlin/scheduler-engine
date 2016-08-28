@@ -72,7 +72,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
               case KeyedEvent(`orderKey`, _) ⇒
                 finishedOrderParametersPromise.trySuccess(orderDetailed(orderKey).variables)
             }
-            eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
+            eventBus.awaiting[OrderFinished](orderKey) {
               scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
             }
           }

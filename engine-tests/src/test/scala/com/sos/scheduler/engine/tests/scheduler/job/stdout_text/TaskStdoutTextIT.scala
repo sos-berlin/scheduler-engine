@@ -14,7 +14,7 @@ final class TaskStdoutTextIT extends FunSuite with ScalaSchedulerTest {
   test("spooler_task_after() should have access to stdout with spooler_task.stdout_text") {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <start_job job={jobPath.string}/>
-    eventPipe.nextWithCondition[TaskClosed.type] { _.key.jobPath == jobPath }
+    eventPipe.nextWhen[TaskClosed.type] { _.key.jobPath == jobPath }
     val v = scheduler.injector.getInstance(classOf[SchedulerVariableSet])
     pendingUntilFixed { v("STDOUT") should include ("/STDOUT//") }    // Der Prozess (Windows?) puffert die Ausgabe?  TODO Fehler ist nicht behoben
   }

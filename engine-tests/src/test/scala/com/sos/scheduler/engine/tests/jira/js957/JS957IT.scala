@@ -31,8 +31,8 @@ final class JS957IT extends FreeSpec {
           controller.instance[OrderSubsystemClient].order(RepeatOrderKey)
           controller.scheduler executeXml ModifyOrderCommand(RepeatOrderKey, title = Some(AlteredTitle))
           repeatOrder.title shouldEqual AlteredTitle
-          eventPipe.nextKeyed[OrderFinished](RepeatOrderKey)
-          eventPipe.nextKeyed[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
           executeShowOrder().toString should include ("<source")
           simulateAbort()
         }
@@ -40,9 +40,9 @@ final class JS957IT extends FreeSpec {
       envProvider.runScheduler() { implicit controller ⇒
         autoClosing(controller.newEventPipe()) { eventPipe ⇒
           repeatOrder.title shouldEqual AlteredTitle
-          eventPipe.nextKeyed[OrderFinished](RepeatOrderKey)
-          eventPipe.nextKeyed[OrderFinished](RepeatOrderKey)
-          eventPipe.nextKeyed[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
           executeShowOrder().toString should include ("<source")   // JS-956: Nach Wiederherstellung des Auftrags aus der Datenbank wird weiterhin der Text der Konfigurationsdatei geliefert
           controller.terminateScheduler()
         }

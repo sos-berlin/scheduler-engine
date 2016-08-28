@@ -23,7 +23,7 @@ final class JS616IT extends FunSuite with ScalaSchedulerTest {
             <at at={ISODateTimeFormat.dateHourMinuteSecond.withZone(DateTimeZone.getDefault).print(t)}/>
           </run_time>
         </job>
-      eventPipe.nextKeyed[OrderFinished](shellOrderKey)
+      eventPipe.next[OrderFinished](shellOrderKey)
     }
   }
 }

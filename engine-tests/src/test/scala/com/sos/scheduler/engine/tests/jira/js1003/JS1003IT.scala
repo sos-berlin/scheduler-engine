@@ -57,7 +57,7 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
       val runtime = <run_time><period repeat="01:00:00"/></run_time>
       scheduler executeXml OrderCommand(orderKey, xmlChildren = runtime)
       checkBehaviourUntilReset(orderKey)
-      eventPipe.nextKeyed[OrderNodeChanged](orderKey).fromNodeId shouldBe State200
+      eventPipe.next[OrderNodeChanged](orderKey).fromNodeId shouldBe State200
     }
   }
 
@@ -73,15 +73,15 @@ final class JS1003IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def checkBehaviourUntilReset(orderKey: OrderKey)(implicit eventPipe: EventPipe): Unit = {
-    //Wird übersprungen: eventPipe.nextKeyed[OrderNodeChanged](orderKey).fromNodeId shouldBe State100
-    eventPipe.nextKeyed[OrderNodeChanged](orderKey).fromNodeId shouldBe State200
+    //Wird übersprungen: eventPipe.next[OrderNodeChanged](orderKey).fromNodeId shouldBe State100
+    eventPipe.next[OrderNodeChanged](orderKey).fromNodeId shouldBe State200
     def order = orderSubsystem.orderOverview(orderKey)
     order.nodeId shouldBe State300
     scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(true))
     assert(order.isSuspended)
     scheduler executeXml ModifyOrderCommand(orderKey, action = Some(Action.reset))
     assert(!order.isSuspended)
-    eventPipe.nextKeyed[OrderNodeChanged](orderKey).fromNodeId shouldBe State300
+    eventPipe.next[OrderNodeChanged](orderKey).fromNodeId shouldBe State300
   }
 }
 

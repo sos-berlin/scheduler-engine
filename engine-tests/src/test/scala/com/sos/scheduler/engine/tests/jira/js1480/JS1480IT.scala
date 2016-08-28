@@ -24,7 +24,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1480IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   "Agent web services" in {
-    eventBus.awaitingEvent[InfoLogEvent](_.event.message contains TestJob.LogLine) {
+    eventBus.awaitingWhen[InfoLogEvent](_.event.message contains TestJob.LogLine) {
       startJob(TestJobPath)
     }
     val agentClient = instance[SchedulerAgentClientFactory].apply(agentUri)

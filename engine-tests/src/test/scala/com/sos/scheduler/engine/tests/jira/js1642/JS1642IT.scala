@@ -156,7 +156,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   private def startOrderProcessing() = {
     val expectedTaskIds = ProcessableOrderKeys.indices map { i ⇒ TaskId.First + i }
     for ((orderKey, expectedTaskId) ← ProcessableOrderKeys zip expectedTaskIds) {
-      val event = eventBus.awaitingKeyedEvent[OrderStepStarted](orderKey) {
+      val event = eventBus.awaiting[OrderStepStarted](orderKey) {
         scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
       }
       assert(event.taskId == expectedTaskId)

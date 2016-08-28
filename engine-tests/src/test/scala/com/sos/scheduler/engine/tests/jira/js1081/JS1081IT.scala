@@ -26,7 +26,7 @@ final class JS1081IT extends FreeSpec with ScalaSchedulerTest {
       for (i ← 0 to 2) {
         withClue(s"Instant $i, $myOrderElem") {
           assert(order(AOrderKey).nextInstantOption contains asJavaInstant(instants(i)))
-          eventPipe.nextKeyed[OrderFinished](AOrderKey)
+          eventPipe.next[OrderFinished](AOrderKey)
         }
       }
     }

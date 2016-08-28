@@ -48,7 +48,7 @@ final class StartWhenDirectoryChangedIT extends FreeSpec with ScalaSchedulerTest
   "Filename not matching the pattern" in {
     touch(file_)
     logger debug s"$file_ touched"
-    intercept[TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TriggerEvent](_ ⇒ true, ResponseTime) }
+    intercept[TimeoutException] { eventPipe.nextWhen[TriggerEvent](_ ⇒ true, ResponseTime) }
   }
 
   "Matching filename (1)" in {

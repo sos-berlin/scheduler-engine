@@ -23,9 +23,9 @@ final class JS1395IT extends FreeSpec with ScalaSchedulerTest {
   "action=next_state does work properly even when the node has just executed the order" in {
     val orderKey = TestJobChainPath orderKey "1"
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
-      eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
-        eventBus.awaitingEvent[TaskEnded](_.key.jobPath == ErrorJobPath) {
-          eventBus.awaitingEvent[TaskStarted.type](_.key.jobPath == ErrorJobPath) {
+      eventBus.awaiting[OrderFinished](orderKey) {
+        eventBus.awaitingWhen[TaskEnded](_.key.jobPath == ErrorJobPath) {
+          eventBus.awaitingWhen[TaskStarted.type](_.key.jobPath == ErrorJobPath) {
             scheduler executeXml OrderCommand(orderKey)
           }
           scheduler executeXml <job_chain_node.modify job_chain={TestJobChainPath.string} state="100" action="next_state"/>

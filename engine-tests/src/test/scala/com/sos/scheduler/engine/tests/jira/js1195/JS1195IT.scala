@@ -14,8 +14,8 @@ import org.scalatest.junit.JUnitRunner
 final class JS1195IT extends FreeSpec with ScalaSchedulerTest  {
 
   "JS1195IT" in {
-    eventBus.awaitingKeyedEvent[OrderFinished](ClonedOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderFinished](OriginalOrderKey) {
+    eventBus.awaiting[OrderFinished](ClonedOrderKey) {
+      eventBus.awaiting[OrderFinished](OriginalOrderKey) {
         scheduler executeXml OrderCommand(OriginalOrderKey)
       }
     }

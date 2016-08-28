@@ -32,7 +32,7 @@ final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
   private def runJob(jobPath: JobPath) = {
     val eventPipe = controller.newEventPipe()
     startJob(jobPath)
-    eventPipe.nextWithCondition[TaskEnded] { _.key.jobPath == jobPath }
+    eventPipe.nextWhen[TaskEnded] { _.key.jobPath == jobPath }
     jobPropertyMap(jobPath)
   }
 

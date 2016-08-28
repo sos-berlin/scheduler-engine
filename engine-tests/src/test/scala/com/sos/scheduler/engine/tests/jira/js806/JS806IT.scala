@@ -29,13 +29,13 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       variableSet("TestJob.setback") = true.toString
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
-      eventPipe.nextKeyed[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
-      eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
+      eventPipe.next[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
+      eventPipe.next[OrderStepEnded](myOrderKey)
 
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
 
-      eventPipe.nextKeyed[FileBasedActivated.type](myOrderKey)
+      eventPipe.next[FileBasedActivated.type](myOrderKey)
       order(myOrderKey).title shouldEqual ChangedTitle
     }
   }
@@ -47,14 +47,14 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
-      eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
-      eventPipe.nextKeyed[OrderNodeChanged](myOrderKey).nodeIdTransition shouldEqual NodeId("100") -> NodeId("200")
+      eventPipe.next[OrderStepEnded](myOrderKey)
+      eventPipe.next[OrderNodeChanged](myOrderKey).nodeIdTransition shouldEqual NodeId("100") -> NodeId("200")
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, suspended = Some(true))
-      eventPipe.nextWithCondition[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
+      eventPipe.nextWhen[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
-      eventPipe.nextWithCondition[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-992")) }    // "Order ist not longer suspended"
-      eventPipe.nextKeyed[FileBasedActivated.type](myOrderKey)
+      eventPipe.nextWhen[InfoLogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-992")) }    // "Order ist not longer suspended"
+      eventPipe.next[FileBasedActivated.type](myOrderKey)
       order(myOrderKey).title shouldEqual ChangedTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
     }
@@ -67,12 +67,12 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
-      eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
+      eventPipe.next[OrderStepEnded](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
-      eventPipe.nextWithCondition[LogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
+      eventPipe.nextWhen[LogEvent] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
-      eventPipe.nextKeyed[OrderFinished](myOrderKey)
-      eventPipe.nextKeyed[FileBasedActivated.type](myOrderKey)
+      eventPipe.next[OrderFinished](myOrderKey)
+      eventPipe.next[FileBasedActivated.type](myOrderKey)
       order(myOrderKey).title shouldEqual ChangedTitle
     }
   }
@@ -84,12 +84,12 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       variableSet("TestJob.setback") = true.toString
       order(myOrderKey).title shouldEqual OriginalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
-      eventPipe.nextKeyed[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
-      eventPipe.nextKeyed[OrderStepEnded](myOrderKey)
+      eventPipe.next[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
+      eventPipe.next[OrderStepEnded](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
       variableSet("TestJob.setback") = false.toString
-      eventPipe.nextKeyed[OrderFinished](myOrderKey)
-      eventPipe.nextKeyed[FileBasedActivated.type](myOrderKey)
+      eventPipe.next[OrderFinished](myOrderKey)
+      eventPipe.next[FileBasedActivated.type](myOrderKey)
       order(myOrderKey).title shouldEqual ChangedTitle
     }
   }

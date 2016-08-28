@@ -30,8 +30,8 @@ final class SchedulerTestIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "controller.terminate, .close()" in {
-    eventBus.awaitingKeyedEvent[SchedulerClosed.type](NoKey) {
-      eventBus.awaitingKeyedEvent[TerminatedEvent](NoKey) {
+    eventBus.awaiting[SchedulerClosed.type](NoKey) {
+      eventBus.awaiting[TerminatedEvent](NoKey) {
         controller.terminateScheduler()
         controller.close()
       }

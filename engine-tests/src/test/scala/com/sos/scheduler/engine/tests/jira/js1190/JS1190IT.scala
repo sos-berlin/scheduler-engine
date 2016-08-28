@@ -51,8 +51,8 @@ final class JS1190IT extends FreeSpec with ScalaSchedulerTest {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"), MessageCode("SCHEDULER-226"))) {
       withEventPipe { eventPipe ⇒
         scheduler executeXml orderCommand
-        eventPipe.nextKeyed[OrderStepEnded](orderKey).nodeTransition shouldEqual expectedTransition
-        eventPipe.nextKeyed[OrderNodeChanged](orderKey).nodeId shouldEqual expectedState
+        eventPipe.next[OrderStepEnded](orderKey).nodeTransition shouldEqual expectedTransition
+        eventPipe.next[OrderNodeChanged](orderKey).nodeId shouldEqual expectedState
       }
     }
   }

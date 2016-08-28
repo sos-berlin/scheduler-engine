@@ -75,7 +75,7 @@ final class JS1354IT extends FreeSpec with ScalaSchedulerTest {
   private def runFiles(names: String*)(body: ⇒ Unit): Unit = {
     val preId = nextTaskId
     val files = names map { o ⇒ fileOrderDir / o }
-    val ordersFinished = Future.sequence(files map { f ⇒ eventBus.keyedEventFuture[OrderFinished](TestJobChainPath orderKey f.getPath) })
+    val ordersFinished = Future.sequence(files map { f ⇒ eventBus.eventFuture[OrderFinished](TestJobChainPath orderKey f.getPath) })
     files foreach touch
     body
     awaitSuccess(ordersFinished)

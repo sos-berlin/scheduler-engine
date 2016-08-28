@@ -28,14 +28,14 @@ final class JS461IT extends FreeSpec with ScalaSchedulerTest {
 
   "test" in  {
     controller.toleratingErrorCodes(_ ⇒ true) {
-      eventBus.awaitingKeyedEvent[OrderSuspended.type](testOrderKey) {
+      eventBus.awaiting[OrderSuspended.type](testOrderKey) {
         scheduler executeXml OrderCommand(testOrderKey)
       }
-      eventBus.awaitingKeyedEvent[OrderFinished](testOrderKey) {
+      eventBus.awaiting[OrderFinished](testOrderKey) {
         scheduler executeXml ModifyOrderCommand(testOrderKey, nodeId = Some(NodeId("END")))
       }
       // Funny, the order, being blacklisted, is resumed after it has been finished
-      eventBus.awaitingKeyedEvent[OrderResumed.type](testOrderKey) {
+      eventBus.awaiting[OrderResumed.type](testOrderKey) {
         scheduler executeXml ModifyOrderCommand(testOrderKey, suspended = Some(false))
       }
     }

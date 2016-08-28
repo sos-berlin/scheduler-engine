@@ -41,7 +41,7 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
     val count = new AtomicInteger
     try
       intercept[TimeoutException] {
-        eventBus.awaitingEvent2[ErrorLogEvent](TestDuration, _ ⇒ true) {
+        eventBus.awaitingInTimeWhen[ErrorLogEvent](TestDuration, _ ⇒ true) {
           writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
           runJob(JobPath("/test"))   // Smoke test
           eventBus.on[TaskClosed.type] { case _ ⇒ count.incrementAndGet() }

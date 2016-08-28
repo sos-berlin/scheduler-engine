@@ -26,7 +26,7 @@ final class JS1256IT extends FreeSpec with ScalaSchedulerTest {
       allocateFile(bigFile, FileSize)
       withEventPipe { eventPipe ⇒
         scheduler executeXml JobChainElem(directory)
-        eventPipe.nextKeyed[OrderFinished](TestJobChainPath.orderKey(bigFile.getPath))
+        eventPipe.next[OrderFinished](TestJobChainPath.orderKey(bigFile.getPath))
         bigFile should not be 'exists
       }
     }

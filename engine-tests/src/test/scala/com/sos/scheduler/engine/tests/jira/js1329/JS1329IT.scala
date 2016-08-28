@@ -45,13 +45,13 @@ final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private def testOutput(jobPath: JobPath): TaskResult = {
     var result: TaskResult = null
-    eventBus.awaitingEvent[InfoLogEvent](_.event.message contains "TEST-STDOUT") {
-      eventBus.awaitingEvent[ErrorLogEvent](_.event.message contains "TEST-STDERR") {
+    eventBus.awaitingWhen[InfoLogEvent](_.event.message contains "TEST-STDOUT") {
+      eventBus.awaitingWhen[ErrorLogEvent](_.event.message contains "TEST-STDERR") {
         result = controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
           runJob(jobPath)
         }
-      } .message should not include "[stderr]"
-    } .message should not include "[stdout]"
+      } .event.message should not include "[stderr]"
+    } .event.message should not include "[stdout]"
     result
   }
 }

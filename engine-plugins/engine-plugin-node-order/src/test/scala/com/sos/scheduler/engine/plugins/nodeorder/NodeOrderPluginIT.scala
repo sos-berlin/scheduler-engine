@@ -43,11 +43,11 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   "Error when adding the new order is logged and ignored" in {
     controller.toleratingErrorCodes(Set(MissingJobchainCode, CommandFailedCode)) {
-      eventBus.awaitingKeyedEvent[OrderFinished](ErrorOrderKey) {
+      eventBus.awaiting[OrderFinished](ErrorOrderKey) {
         withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
-          eventPipe.nextWithCondition[ErrorLogEvent] { _.event.codeOption == Some(MissingJobchainCode) }
-          eventPipe.nextWithCondition[ErrorLogEvent] { _.event.codeOption == Some(CommandFailedCode) }
+          eventPipe.nextWhen[ErrorLogEvent] { _.event.codeOption == Some(MissingJobchainCode) }
+          eventPipe.nextWhen[ErrorLogEvent] { _.event.codeOption == Some(CommandFailedCode) }
         }
       }
     }

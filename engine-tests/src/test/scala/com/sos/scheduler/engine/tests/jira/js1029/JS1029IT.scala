@@ -33,7 +33,7 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
       try {
         delete(stdoutFile)
         killTask(taskId)
-        eventPipe.nextKeyed[TaskEnded](TaskKey(testJobPath, taskId))
+        eventPipe.next[TaskEnded](TaskKey(testJobPath, taskId))
       }
       finally
         killTask(taskId)

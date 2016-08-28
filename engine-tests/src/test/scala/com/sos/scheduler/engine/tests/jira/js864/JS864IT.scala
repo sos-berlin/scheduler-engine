@@ -95,7 +95,7 @@ final class JS864IT extends FreeSpec with ScalaSchedulerTest {
     assert(e.nodeId == orderState)
   }
   private def nextOrderEvent(orderKey: OrderKey): OrderEvent =
-    eventPipe.nextWithCondition[OrderEvent] {
+    eventPipe.nextWhen[OrderEvent] {
       case KeyedEvent(`orderKey`, OrderStarted | _: OrderStepStarted | _: OrderFinished) ⇒ true
       case _ ⇒ false
     }.event

@@ -33,7 +33,7 @@ final class JS1031IT extends FreeSpec with ScalaSchedulerTest {
     sleepUntil(at - 1.s)
     logger.info("Order should not yet be touched")
     assert(eventPipe.queued[OrderStarted.type].isEmpty)
-    eventPipe.nextKeyed[OrderStarted.type](TestOrderKey, timeout = at + 1.s - now)
+    eventPipe.next[OrderStarted.type](TestOrderKey, timeout = at + 1.s - now)
   }
 }
 

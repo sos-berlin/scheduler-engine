@@ -29,8 +29,8 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     val cOrderKey = JobChainPath("/test-nested-c") orderKey superOrderKey.id
     val stoppedNodeId = NodeId("NESTED-C-2")
     scheduler executeXml <job_chain_node.modify job_chain={CJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderNodeChanged](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](cOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
       } .nodeId shouldEqual stoppedNodeId
       scheduler executeXml <job_chain_node.modify job_chain={CJobChainPath.string} state="NESTED-C-3" action="next_state"/> // Last node
@@ -44,8 +44,8 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     val aOrderKey = AJobChainPath orderKey superOrderKey.id
     val stoppedNodeId = NodeId("NESTED-A-2")
     scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderFinished](aOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderNodeChanged](aOrderKey) {
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](aOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
       } .nodeId shouldEqual stoppedNodeId
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-2" action="process"/>
@@ -58,8 +58,8 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     val aOrderKey = AJobChainPath orderKey superOrderKey.id
     val stoppedNodeId = NodeId("NESTED-A-2")
     scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderFinished](aOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderNodeChanged](aOrderKey) {
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](aOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
       } .nodeId shouldEqual stoppedNodeId
       scheduler executeXml OrderCommand(aOrderKey, suspended = Some(true))
@@ -81,7 +81,7 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     setSkippingNodes(AOrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml OrderCommand(superOrderKey)
     }
   }
@@ -90,7 +90,7 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     setSkippingNodes(BOrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml OrderCommand(superOrderKey)
     }
   }
@@ -99,11 +99,11 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       writeConfigurationFile(superOrderKey, <order/>)
     }
     requireOrderIsVisible(cOrderKey)
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
     requireOrderIsVisible(cOrderKey)
@@ -118,11 +118,11 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds)
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
     requireOrderIsVisible(cOrderKey)
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
     requireOrderIsVisible(cOrderKey)
-    eventBus.awaitingKeyedEvent[OrderFinished](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
     requireOrderIsVisible(cOrderKey)

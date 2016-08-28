@@ -17,7 +17,7 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
       val eventPipe = controller.newEventPipe()
       val longTitle = "x" * titleLength
       scheduler executeXml <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string} title={longTitle}/>
-      eventPipe.nextKeyed[OrderFinished](orderKey)
+      eventPipe.next[OrderFinished](orderKey)
     }
   }
 
@@ -25,7 +25,7 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
     val orderKey = jobChainPath.orderKey("1")
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} suspended="false"/>
-    eventPipe.nextKeyed[OrderFinished](orderKey)
+    eventPipe.next[OrderFinished](orderKey)
   }
 }
 

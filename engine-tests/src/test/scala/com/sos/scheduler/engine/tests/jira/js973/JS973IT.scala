@@ -71,21 +71,21 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   "An API task ignores scheduer.remote_scheduler" in {
     withEventPipe { eventPipe ⇒
       testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, expectedResult = "**")
-      eventPipe.nextWithTimeoutAndCondition[WarningLogEvent](_.event.codeOption == Some(MessageCode("SCHEDULER-484")), 0.s )
-      eventPipe.nextWithTimeoutAndCondition[TaskStarted.type](_.key.jobPath == ApiJobPath, 0.s).key.taskId
+      eventPipe.nextWhen[WarningLogEvent](_.event.codeOption == Some(MessageCode("SCHEDULER-484")), 0.s )
+      eventPipe.nextWhen[TaskStarted.type](_.key.jobPath == ApiJobPath, 0.s).key.taskId
     }
   }
 
 //  s"For an order, the API task running on right remote scheduler is selected" in {
 //    withEventPipe { eventPipe ⇒
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent)
-//      val aTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
+//      val aTaskId = eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent)
-//      val bTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
+//      val bTaskId = eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, aTaskId)
-//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
+//      intercept[EventPipe.TimeoutException] { eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent, bTaskId)
-//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
+//      intercept[EventPipe.TimeoutException] { eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
 //    }
 //  }
 
@@ -99,7 +99,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     orderFile.contentString = "test"
     val jobChainPath = JobChainPath("/test-file-order")
     val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
-    eventBus.awaitingKeyedEvent[OrderFinished](orderKey) {
+    eventBus.awaiting[OrderFinished](orderKey) {
       scheduler executeXml
         <job_chain name={jobChainPath.name}>
           <file_order_source directory={fileOrdersDir.toString} regex="^test\.txt$"/>
@@ -162,7 +162,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddressString], expectedResult: String): Unit = {
     withEventPipe { eventPipe ⇒
       scheduler executeXml newOrder(orderKey, remoteScheduler)
-      eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.key == orderKey }.event.result should startWith(expectedResult)
+      eventPipe.nextWhen[OrderFinishedWithResultEvent] { _.key == orderKey }.event.result should startWith(expectedResult)
     }
   }
 
@@ -174,7 +174,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
       instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
       eventPipe.nextAny[ErrorLogEvent].event.codeOption shouldEqual Some(expectedErrorCode)
-      eventPipe.nextKeyed[OrderStepEnded](orderKey).nodeTransition shouldEqual OrderNodeTransition.Keep
+      eventPipe.next[OrderStepEnded](orderKey).nodeTransition shouldEqual OrderNodeTransition.Keep
       instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.stopped
     }
   }

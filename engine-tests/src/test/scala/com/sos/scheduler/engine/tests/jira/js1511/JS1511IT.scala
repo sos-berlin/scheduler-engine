@@ -28,9 +28,9 @@ final class JS1511IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Pause" in {
-    eventBus.awaitingEvent[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-902")) {
+    eventBus.awaitingWhen[InfoLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-902")) {
       scheduler executeXml <modify_spooler cmd='pause'/>
-    } .message should include ("state=paused")
+    } .event.message should include ("state=paused")
     val taskRun = startJob(ShellJobPath)
     val orderRun = startOrder(TestJobChainPath orderKey "2")
     sleep(1.s)

@@ -25,7 +25,7 @@ final class JS1635IT extends FreeSpec with ScalaSchedulerTest {
     val jobPaths = List(JobPath("/shell"), JobPath("/shell-with-monitor"), JobPath("/api"))
     var runs: List[TaskRun] = null
     val t = now
-    eventBus.awaitingEvent[WarningLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-712")) {
+    eventBus.awaitingWhen[WarningLogEvent](_.event.codeOption contains MessageCode("SCHEDULER-712")) {
       runs = for (jobPath ← jobPaths) yield startJob(jobPath)
     }
     val duration = now - t

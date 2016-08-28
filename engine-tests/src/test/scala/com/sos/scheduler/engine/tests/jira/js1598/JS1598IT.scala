@@ -55,11 +55,11 @@ final class JS1598IT extends FreeSpec with ScalaSchedulerTest {
   private def checkRun(orderKey: OrderKey, continueNodeId: Option[NodeId] = None)(body: OrderKey ⇒ Unit): Unit =
     autoClosing(controller.newEventPipe()) { eventPipe ⇒
       body(orderKey)
-      eventPipe.nextKeyed[OrderStarted.type](orderKey)
-      eventPipe.nextKeyed[OrderSuspended.type](orderKey)
+      eventPipe.next[OrderStarted.type](orderKey)
+      eventPipe.next[OrderSuspended.type](orderKey)
       scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false), nodeId = continueNodeId)
-      // Not for a distributed order: eventPipe.nextKeyed[OrderResumed](orderKey)
-      eventPipe.nextKeyed[OrderFinished](orderKey)
+      // Not for a distributed order: eventPipe.next[OrderResumed](orderKey)
+      eventPipe.next[OrderFinished](orderKey)
     }
 }
 

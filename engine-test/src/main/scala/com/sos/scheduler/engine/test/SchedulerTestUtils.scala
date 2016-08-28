@@ -75,7 +75,7 @@ object SchedulerTestUtils {
   }
 
   def updateFoldersWith(path: TypedPath)(body: ⇒ Unit)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
-    controller.eventBus.awaitingKeyedEvent[FileBasedAddedOrReplaced](path) {
+    controller.eventBus.awaiting[FileBasedAddedOrReplaced](path) {
       body
       instance[FolderSubsystemClient].updateFolders()
     }
@@ -84,7 +84,7 @@ object SchedulerTestUtils {
    * Delete the configuration file and awaits JobScheduler's acceptance.
    */
   def deleteConfigurationFile[A](path: TypedPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
-    controller.eventBus.awaitingKeyedEvent[FileBasedRemoved.type](path) {
+    controller.eventBus.awaiting[FileBasedRemoved.type](path) {
       Files.delete(controller.environment.fileFromPath(path))
       instance[FolderSubsystemClient].updateFolders()
     }
@@ -149,11 +149,11 @@ object SchedulerTestUtils {
       val commandResult = controller.scheduler executeXml startJobCommand
       val taskId = TaskId((commandResult.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
       val taskKey = TaskKey(startJobCommand.jobPath, taskId)
-      val started = controller.eventBus.keyedEventFuture[TaskStarted.type](taskKey)
+      val started = controller.eventBus.eventFuture[TaskStarted.type](taskKey)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
-      val ended = controller.eventBus.keyedEventFuture[TaskEnded](taskKey)
+      val ended = controller.eventBus.eventFuture[TaskEnded](taskKey)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
-      val closed = controller.eventBus.keyedEventFuture[TaskClosed.type](taskKey)
+      val closed = controller.eventBus.eventFuture[TaskClosed.type](taskKey)
       val result = for (_ ← closed; s ← startedTime; end ← ended; e ← endedTime)
                    yield TaskResult(startJobCommand.jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
       TaskRun(startJobCommand.jobPath, taskId, started, ended, closed, result)
@@ -197,7 +197,7 @@ object SchedulerTestUtils {
   object OrderRun {
     def apply(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = {
       import controller.eventBus
-      val whenTouched = eventBus.keyedEventFuture[OrderStarted.type](orderKey)
+      val whenTouched = eventBus.eventFuture[OrderStarted.type](orderKey)
       val whenFinished: Future[(OrderFinished, Map[String, String])] = {
         val promise = Promise[(OrderFinished, Map[String, String])]()
         lazy val subscription: EventSubscription = EventSubscription[OrderFinished] {
@@ -263,16 +263,16 @@ object SchedulerTestUtils {
   }
 
   def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
-    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.event.codeOption contains errorCode }
+    val errorLoggedFuture = controller.eventBus.futureWhen[ErrorLogEvent] { _.event.codeOption contains errorCode }
     val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
-    val event = try awaitResult(eventFuture, timeout.duration)
+    val errorLogged = try awaitResult(errorLoggedFuture, timeout.duration)
       catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
-    ResultAndEvent(result, event)
+    ResultAndEvent(result, errorLogged)
   }
 
   def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
     controller.toleratingErrorCodes(errorCodes) {
-      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.event.codeOption contains o) }
+      val futures = errorCodes map { o ⇒ controller.eventBus.futureWhen[ErrorLogEvent](_.event.codeOption contains o) }
       body
       try awaitResults(futures)
       catch {

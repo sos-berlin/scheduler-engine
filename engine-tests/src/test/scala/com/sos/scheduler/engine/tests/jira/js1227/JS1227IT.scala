@@ -31,14 +31,14 @@ final class JS1227IT extends FreeSpec with ClusterTest {
 
   "Suspend order running in some other scheduler" in {
     awaitSuccess(otherScheduler.postCommand(ModifyJobCommand(TestJobPath, cmd = Some(ModifyJobCommand.Cmd.Stop))))
-    eventBus.awaitingKeyedEvent[OrderStarted.type](AOrderKey) {
+    eventBus.awaiting[OrderStarted.type](AOrderKey) {
       scheduler executeXml OrderCommand(AOrderKey)
     }
-    eventBus.awaitingKeyedEvent[OrderSuspended.type](AOrderKey) {
+    eventBus.awaiting[OrderSuspended.type](AOrderKey) {
       awaitFailure(otherScheduler.postCommand(ModifyOrderCommand(AOrderKey, suspended = Some(true)))) match {
         case e: Exception if e.getMessage startsWith s"$OrderIsOccupiedMessageCode " ⇒
       }
-      eventBus.awaitingKeyedEvent[OrderStepEnded](AOrderKey) {}
+      eventBus.awaiting[OrderStepEnded](AOrderKey) {}
       transaction { implicit entityManager ⇒
         val entity = instance[HibernateOrderStore].fetch(AOrderKey)
         assert(entity.nodeIdOption == Some(NodeId("200")))

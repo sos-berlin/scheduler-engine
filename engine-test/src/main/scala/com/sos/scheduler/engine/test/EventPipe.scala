@@ -26,7 +26,7 @@ extends EventHandlerAnnotated with HasCloser {
     eventBus.on[Event] { case e ⇒ queue.add(e) }
   }
 
-  def nextKeyedEvents[E <: Event: ClassTag](keys: Iterable[E#Key]): immutable.Seq[KeyedEvent[E]] = {
+  def next[E <: Event: ClassTag](keys: Iterable[E#Key]): immutable.Seq[KeyedEvent[E]] = {
     val remainingKeys = HashMultiset.create(asJavaIterable(keys))
     val events = mutable.Buffer[KeyedEvent[E]]()
     while (!remainingKeys.isEmpty) {
@@ -38,29 +38,24 @@ extends EventHandlerAnnotated with HasCloser {
     events.toVector
   }
 
+  def next[E <: Event: ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
+    nextEvent[E](_.key == key, timeout).event
+
+  def nextWhen[E <: Event : ClassTag](predicate: KeyedEvent[E] ⇒ Boolean, timeout: Duration = defaultTimeout): KeyedEvent[E] =
+    nextEvent[E](predicate, timeout)
+
   def nextAny[E <: Event: ClassTag]: KeyedEvent[E] =
-    _next[E]()
-
-  def nextKeyed[E <: Event: ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
-    _next[E](_.key == key, timeout).event
-
-  def nextWithCondition[E <: Event : ClassTag](condition: KeyedEvent[E] ⇒ Boolean): KeyedEvent[E] =
-    nextWithTimeoutAndCondition[E](condition)
-
-  def nextWithTimeoutAndCondition[E <: Event : ClassTag](condition: KeyedEvent[E] ⇒ Boolean, timeout: Duration = defaultTimeout): KeyedEvent[E] =
-    _next[E](condition, timeout)
-
-  private def _next[E <: Event: ClassTag](predicate: KeyedEvent[E] ⇒ Boolean = EveryEvent, timeout: Duration = defaultTimeout): KeyedEvent[E] =
-    nextEvent[E](timeout, predicate, implicitClass[E])
+    nextEvent[E]()
 
   def queued[E <: Event: ClassTag]: immutable.Seq[KeyedEvent[E]] = {
     val result = mutable.ListBuffer[KeyedEvent[E]]()
-    try while (true) result += _next[E](timeout = 0.s)
+    try while (true) result += nextEvent[E](timeout = 0.s)
     catch { case _: TimeoutException ⇒ }
     result.toList
   }
 
-  private def nextEvent[E <: Event](timeout: Duration, predicate: KeyedEvent[E] ⇒ Boolean, expectedEventClass: Class[E]): KeyedEvent[E] = {
+  private def nextEvent[E <: Event: ClassTag](predicate: KeyedEvent[E] ⇒ Boolean = EveryEvent, timeout: Duration = defaultTimeout): KeyedEvent[E] = {
+    val expectedEventClass = implicitClass[E]
     val until = now() + timeout
     def expectedName = expectedEventClass.getSimpleName
 

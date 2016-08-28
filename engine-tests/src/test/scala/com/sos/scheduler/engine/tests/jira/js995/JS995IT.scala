@@ -20,7 +20,7 @@ final class JS995IT extends FreeSpec with ScalaSchedulerTest {
   "Job soll erst aktiv werden, wenn benoetigter Schedule da ist" in {
     def job = instance[JobSubsystemClient].jobOverview(testJobPath)
     job.state shouldEqual JobState.loaded
-    eventBus.awaitingKeyedEvent[FileBasedActivated.type](testJobPath) {
+    eventBus.awaiting[FileBasedActivated.type](testJobPath) {
       testEnvironment.fileFromPath(testSchedulePath).xml = <schedule name={testSchedulePath.name}/>
     }
     job.state shouldEqual JobState.pending

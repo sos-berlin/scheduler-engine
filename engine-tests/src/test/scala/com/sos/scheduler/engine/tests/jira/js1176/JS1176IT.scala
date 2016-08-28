@@ -67,7 +67,7 @@ final class JS1176IT extends FreeSpec with ScalaSchedulerTest {
       }
       assert(!databaseStart.isCompleted)
       awaitFailure(checkFolders()).getMessage should startWith ("SCHEDULER-184")  // "Scheduler database cannot be accessed due to a database problem"
-      eventBus.awaitingEvent2[InfoLogEvent](timeout = LostDatabaseRetryTimeout + TestTimeout, predicate = _.event.codeOption == Some(MessageCode("SCHEDULER-807"))) {
+      eventBus.awaitingInTimeWhen[InfoLogEvent](LostDatabaseRetryTimeout + TestTimeout, _.event.codeOption == Some(MessageCode("SCHEDULER-807"))) {
         awaitSuccess(databaseStart)
       }
       awaitSuccess(checkFolders())
