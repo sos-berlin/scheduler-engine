@@ -50,6 +50,7 @@ import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
 import spray.json._
+import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits._
 
 /**
   * JS-1642 WebSchedulerClient and NewWebServicePlugin.
@@ -182,7 +183,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "orders[OrderOverview]" in {
       val orders = awaitContent(client.orders[OrderOverview])
       assert(orders == awaitContent(directSchedulerClient.orders[OrderOverview]))
-      assert(orders.toVector.sorted == ExpectedOrderOverviews)
+      assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews)
     }
 
     "orders[OrderOverview] speed" in {
@@ -194,13 +195,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "ordersComplemented" in {
       val ordersComplemented = awaitContent(client.ordersComplemented[OrderOverview])
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplemented[OrderOverview]))
-      assert(ordersComplemented == ExpectedOrderOrdersComplemented)
+      assert(ordersComplemented.copy(orders = ordersComplemented.orders map normalizeOrderOverview) ==
+        ExpectedOrderOrdersComplemented)
     }
 
     "orderTreeComplemented" in {
       val treeOverview = awaitContent(client.orderTreeComplementedBy[OrderOverview](OrderQuery.All))
       assert(treeOverview == awaitContent(directSchedulerClient.orderTreeComplementedBy[OrderOverview](OrderQuery.All)))
-      assert(treeOverview == ExpectedOrderTreeComplemented)
+      assert(treeOverview.copy(orderTree = treeOverview.orderTree mapLeafs normalizeOrderOverview) ==
+        ExpectedOrderTreeComplemented)
     }
 
     "ordersComplementedBy isSuspended" in {
@@ -388,22 +391,24 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "orderOverviews" in {
-      val orderOverviews = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
-      assert(Snapshot.unwrapJsArray(orderOverviews) == ExpectedOrderOverviewsJsArray)
+      val snapshot = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
+      val orderOverviewsJsArray = Snapshot.unwrapJsArray(snapshot) map normalizeOrderOverviewJson
+      assert(orderOverviewsJsArray == ExpectedOrderOverviewsJsArray)
     }
 
     "ordersComplemented" in {
       val ordersComplemented = webSchedulerClient.get[JsObject](_.order.complemented[OrderOverview]()) await TestTimeout
       val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Snapshot.EventIdJsonName) ++ Map(
-        "orders" → ordersComplemented.fields("orders").asInstanceOf[JsArray],
-        "usedTasks" → ordersComplemented.fields("usedTasks").asInstanceOf[JsArray],
-        "usedJobs" → ordersComplemented.fields("usedJobs").asInstanceOf[JsArray]))
+        "orders" → (ordersComplemented("orders").asJsArray map normalizeOrderOverviewJson),
+        "usedTasks" → ordersComplemented("usedTasks").asJsArray,
+        "usedJobs" → ordersComplemented("usedJobs").asJsArray))
       assert(orderedOrdersComplemented == ExpectedOrdersOrdersComplementedJsObject)
     }
 
     "orderTreeComplemented" in {
       val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented[OrderOverview]) await TestTimeout
-      assert(JsObject(tree.fields - Snapshot.EventIdJsonName) == ExpectedOrderTreeComplementedJsObject)
+      val normalized = JsObject(tree.fields - Snapshot.EventIdJsonName) deepMapJsObjects normalizeOrderOverviewJson
+      assert(normalized == ExpectedOrderTreeComplementedJsObject)
     }
   }
 
@@ -481,4 +486,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 object JS1642IT {
   intelliJuseImports(JsObjectMarshaller)
   private val logger = Logger(getClass)
+
+  private def normalizeOrderOverview(o: OrderOverview) = o.copy(startedAt = None)
+
+  private def normalizeOrderOverviewJson(o: JsValue) = JsObject(o.asJsObject.fields - "startedAt")
 }

@@ -62,6 +62,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native java.lang.String database_xml__native(long cppReference);
 
 
+    @Override public long endTimeMillis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return endTimeMillis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long endTimeMillis__native(long cppReference);
+
+
     @Override public java.lang.String end_state_string() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -664,6 +678,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native byte[] source_xml_bytes__native(long cppReference);
+
+
+    @Override public long startTimeMillis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return startTimeMillis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long startTimeMillis__native(long cppReference);
 
 
     @Override public java.lang.String string_id() {

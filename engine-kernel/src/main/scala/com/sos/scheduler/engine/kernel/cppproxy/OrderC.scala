@@ -43,6 +43,10 @@ trait OrderC extends CppProxyWithSister[Order] with File_basedC[Order] {
   @CppExpression("$->_java_occupying_cluster_member_id")
   def java_occupying_cluster_member_id: String
   def history_id: Int
+  @CppExpression("$->start_time().millis()")
+  def startTimeMillis: Long
+  @CppExpression("$->end_time().millis()")
+  def endTimeMillis: Long
 }
 
 object OrderC {

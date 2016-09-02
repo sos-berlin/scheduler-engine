@@ -133,6 +133,7 @@ extends SchedulerHtmlPage {
         tr(
           th("OrderId"),
           th(div(cls := "visible-lg-block")("SourceType")),
+          th("Started"),
           th("OrderProcessingState"),
           th("Obstacles"))),
       tbody(
@@ -176,6 +177,7 @@ extends SchedulerHtmlPage {
     tr(cls := rowCssClass)(
       td(orderKeyToA(order.orderKey)(order.orderKey.id.string)),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
+      td(order.startedAt map instantWithDurationToHtml),
       td(processingStateHtml, occupyingMemberHtml),
       td(obstaclesHtml))
   }

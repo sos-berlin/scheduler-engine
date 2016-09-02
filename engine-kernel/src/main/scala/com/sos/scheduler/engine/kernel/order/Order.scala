@@ -101,13 +101,13 @@ with OrderPersistence {
           if (isBlacklisted)
             Blacklisted
           else if (!isTouched)
-            nextStepAt match {
+            nextStepAtOption match {
               case None ⇒ NotPlanned
               case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
               case Some(at) ⇒ Pending(at)
             }
           else if (isSetback)
-            Setback(setbackUntil getOrElse Instant.MAX)
+            Setback(setbackUntilOption getOrElse Instant.MAX)
           else
             WaitingForOther
       }
@@ -134,7 +134,8 @@ with OrderPersistence {
       processingState = processingState,
       historyIdOption,
       obstacles = obstacles,
-      nextStepAt = nextStepAt,
+      startedAt = startedAtOption,
+      nextStepAt = nextStepAtOption,
       occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply,
       liveChanged = replacementOption match {
         case Some(replacement) ⇒
@@ -156,7 +157,7 @@ with OrderPersistence {
       variables = variables)
   }
 
-  private def isSetback = setbackUntil.isDefined
+  private def isSetback = setbackUntilOption.isDefined
 
   def stringToPath(o: String) = OrderKey(o)
 
@@ -208,9 +209,11 @@ with OrderPersistence {
 //    cppProxy.set_end_state(s.string)
 //  }
 
-  private def nextStepAt: Option[Instant] = eternalCppMillisToNoneInstant(cppProxy.next_step_at_millis)
+  private def startedAtOption: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.startTimeMillis)
 
-  private def setbackUntil: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
+  private def nextStepAtOption: Option[Instant] = eternalCppMillisToNoneInstant(cppProxy.next_step_at_millis)
+
+  private def setbackUntilOption: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
 
   private[kernel] def taskId: Option[TaskId] =
     cppProxy.task_id match {
