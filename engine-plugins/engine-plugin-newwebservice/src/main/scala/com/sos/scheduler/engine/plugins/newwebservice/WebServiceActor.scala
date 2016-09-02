@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -29,7 +30,8 @@ final class WebServiceActor @Inject private(
   protected val taskSubsystem: TaskSubsystemClient,
   protected val prefixLog: PrefixLog,
   protected val schedulerThreadCallQueue: SchedulerThreadCallQueue,
-  protected val disposableCppProxyRegister: DisposableCppProxyRegister)
+  protected val disposableCppProxyRegister: DisposableCppProxyRegister,
+  protected val orderStatisticsChangedSource: OrderStatisticsChangedSource)
 extends HttpServiceActor with AllRoutes {
 
   override def postStop() = {

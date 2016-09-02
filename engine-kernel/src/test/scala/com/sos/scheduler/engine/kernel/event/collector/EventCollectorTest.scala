@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollectorTest._
 import org.junit.runner.RunWith
@@ -33,18 +33,21 @@ final class EventCollectorTest extends FreeSpec {
     }
   }
 
-  "whenEvents" in {
+  "when" in {
     autoClosing(new EventCollector(eventBus)) { eventCollector ⇒
-      val future = eventCollector.whenEvents(after = EventId.BeforeFirst)
-      assert(!future.isCompleted)
+      val anyFuture = eventCollector.when[Event](after = EventId.BeforeFirst)
+      val bFuture = eventCollector.when[BEvent](after = EventId.BeforeFirst)
+      assert(!anyFuture.isCompleted)
       eventBus.publish(KeyedEvent(A1)("1"))
-      val iterator: Iterator[Snapshot[AnyKeyedEvent]] = future await 100.ms
-      assert(iterator.toList ==
-        List(Snapshot(KeyedEvent(A1)("1"))(UncheckedEventId)))
+      assert((anyFuture await 100.ms).toList == List(Snapshot(KeyedEvent(A1)("1"))(UncheckedEventId)))
+
+      assert(!bFuture.isCompleted)
+      eventBus.publish(KeyedEvent(B1)("2"))
+      assert((bFuture await 100.ms).toList == List(Snapshot(KeyedEvent(B1)("2"))(UncheckedEventId)))
     }
   }
 
-  "whenEventsForKey" in {
+  "whenForKey" in {
     autoClosing(new EventCollector(eventBus)) { eventCollector ⇒
       eventBus.publish(KeyedEvent(A1)("1"))
       eventBus.publish(KeyedEvent(B1)("1"))
@@ -52,7 +55,7 @@ final class EventCollectorTest extends FreeSpec {
       eventBus.publish(KeyedEvent(A2)("2"))
       eventBus.publish(KeyedEvent(B2)("1"))
       def eventsForKey[E <: Event: ClassTag](key: E#Key) =
-        eventCollector.whenEventsForKey[E](key, after = EventId.BeforeFirst).successValue.toVector map { _.value }
+        eventCollector.whenForKey[E](key, after = EventId.BeforeFirst).successValue.value.toVector map { _.value }
       assert(eventsForKey[AEvent]("1") == Vector(A1, A2))
       assert(eventsForKey[AEvent]("2") == Vector(A2))
       assert(eventsForKey[BEvent]("1") == Vector(B1, B2))

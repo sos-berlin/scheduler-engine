@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
-import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat.anyEventJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview}
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient

@@ -37,7 +37,7 @@ final class ApiRouteTest extends org.scalatest.FreeSpec with ScalatestRouteTest 
 
   protected def taskSubsystem = throw new NotImplementedError
 
-  protected def eventCollector = throw new NotImplementedError
+  protected def orderStatisticsChangedSource = throw new NotImplementedError
 
   protected def prefixLog = null
 

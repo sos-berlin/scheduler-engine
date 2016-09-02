@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, EventId, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
+import scala.reflect.ClassTag
 
 /**
   * @author Joacim Zschimmer
@@ -29,7 +30,7 @@ trait SchedulerClient extends SchedulerOverviewClient with CommandClient with Or
 //
 //  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]]
 
-  def events(after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[AnyKeyedEvent]]]]
+  def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]]
 
   final def ordersComplemented[V <: OrderView: OrderView.Companion]: Future[Snapshot[OrdersComplemented[V]]] =
     ordersComplementedBy[V](OrderQuery.All)

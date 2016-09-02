@@ -142,10 +142,11 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   def events =  uriString(Uri.Path("api/event/"))
 
-  def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, reverse: Boolean = false) = {
+  def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, reverse: Boolean = false, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
     val lim = if (reverse) -limit else limit
     uriString(Uri.Path("api/event/"),
+      (returnType != DefaultEventName list ("return" → returnType)) :::
       (after != EventId.BeforeFirst list ("after" → s"$after")) :::
       (lim != Int.MaxValue list ("limit" → s"$lim")): _*)
   }
@@ -164,6 +165,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 
 object SchedulerUris {
   private val Prefix = "jobscheduler/master"
+  val DefaultEventName = "Event"
 
   def apply(schedulerUri: Uri): SchedulerUris = apply(schedulerUri.toString)
 

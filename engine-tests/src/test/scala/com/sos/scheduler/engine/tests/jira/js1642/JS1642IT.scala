@@ -18,12 +18,12 @@ import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
-import com.sos.scheduler.engine.data.events.SchedulerKeyedEventJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.log.Logged
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStepStarted}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatisticsChanged, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
@@ -110,7 +110,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     def start(): Unit = {
       activatedEventId = eventCollector.lastEventId  // Web events before Scheduler activation are ignored
       eventBus.onHot[Event] {
-        case event if SchedulerKeyedEventJsonFormat canSerialize event ⇒
+        case event if SchedulerAnyKeyedEventJsonFormat canSerialize event ⇒
           if (isPermitted(event)) {
             directEvents += event
           }
@@ -123,23 +123,23 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     private def start(after: EventId): Unit = {
-      webSchedulerClient.events(after).withThisStackTrace onComplete {
+      webSchedulerClient.events[Event](after).withThisStackTrace onComplete {
         case _ if stopping ⇒
         case Failure(t) ⇒
           logger.error(s"webSchedulerClient.events: $t", t)
           controller.terminateAfterException(t)
         case Success(Snapshot(events)) ⇒
-          this.webEvents ++= events filter { snapshot ⇒ isPermitted(snapshot.value) } map { _.value }
+          this.webEvents ++= events filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
           start(after = if (events.isEmpty) after else events.last.eventId)
       }
     }
 
     private def isPermitted(event: AnyKeyedEvent) =
-      (eventCollector.lastEventId > activatedEventId) && (event match {
+      event match {
         case KeyedEvent(_, FileBasedActivated) ⇒ this.webEvents.nonEmpty   // directEvents miss activation events at start
         case KeyedEvent(_, e: Logged) ⇒ false
         case _ ⇒ true
-      })
+      }
 
     def check() = {
       assert(directEvents.nonEmpty)
@@ -449,6 +449,23 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString("TEST/UNKNOWN")) await TestTimeout }
         .response.status shouldEqual NotFound
     }
+  }
+
+  "OrderStatisticsChanged" in {
+    val aSnapshot = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
+    val aStatistics = aSnapshot.value.head.value.event.orderStatistics
+
+    val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst)
+    scheduler executeXml OrderCommand(aAdHocOrderKey, suspended = Some(false))
+    val bSnapshot = bFuture await TestTimeout
+    val bStatistics = bSnapshot.value.head.value.event.orderStatistics
+    assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
+
+    val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aSnapshot.eventId)
+    scheduler executeXml OrderCommand(aAdHocOrderKey, suspended = Some(true))
+    val cSnapshot = cFuture await TestTimeout
+    val cStatistics = cSnapshot.value.head.value.event.orderStatistics
+    assert(cStatistics == aStatistics)
   }
 
   "events" in {
