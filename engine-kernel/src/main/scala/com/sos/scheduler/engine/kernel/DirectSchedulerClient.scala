@@ -5,16 +5,17 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
+import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
+import com.sos.scheduler.engine.kernel.order.{DirectOrderClient, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import javax.inject.{Inject, Singleton}
 import scala.collection.immutable
@@ -30,11 +31,11 @@ final class DirectSchedulerClient @Inject private(
   orderSubsystem: OrderSubsystem,
   taskSubsystem: TaskSubsystem,
   jobSubsystem: JobSubsystem,
-  processClassSubsystem: ProcessClassSubsystem)(
+  processClassSubsystem: ProcessClassSubsystem,
+  protected val eventCollector: EventCollector)(
   implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
-  protected val executionContext: ExecutionContext,
-  protected val eventCollector: EventCollector)
-extends SchedulerClient with DirectCommandClient {
+  protected val executionContext: ExecutionContext)
+extends SchedulerClient with DirectCommandClient with DirectEventClient with DirectOrderClient {
 
   def overview: Future[Snapshot[SchedulerOverview]] =
     respondWith { scheduler.overview }
@@ -78,6 +79,11 @@ extends SchedulerClient with DirectCommandClient {
         (jobs map { _.overview }).sorted,
         (tasks map { _.overview }).sorted,
         (processClasses map { _.overview }).sorted)
+    }
+
+  def orderStatistics: Future[Snapshot[OrderStatistics]] =
+    respondWith {
+      orderSubsystem.orderStatistics
     }
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]] =

@@ -150,6 +150,11 @@ struct Order_subsystem_impl : Order_subsystem
     string                      order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
+    int                         non_distributed_order_count () const { return order_count(NULL); }
+    int                         untouched_order_count       () const;
+    int                         suspended_order_count       () const;
+    int                         setback_order_count         () const;
+    int                         blacklisted_order_count     () const;
 
     void wake_distributed_order_processing();
 

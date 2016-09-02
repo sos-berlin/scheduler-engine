@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
+import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
@@ -28,7 +29,7 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
-import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, StandingOrderSubsystem}
+import com.sos.scheduler.engine.kernel.order.{DirectOrderClient, OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
@@ -87,6 +88,9 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideDirectSchedulerCollector(o: DirectSchedulerClient): DirectOrderClient = o
 
   @Provides @Singleton
   private def provideSchedulerConfiguration(spoolerC: SpoolerC): SchedulerConfiguration =

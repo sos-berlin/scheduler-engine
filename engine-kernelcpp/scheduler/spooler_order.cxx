@@ -109,7 +109,8 @@ struct Order_schedule_use : Schedule_use
     
 Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
 :
-    file_based_subsystem<Order>( scheduler, this, type_standing_order_subsystem )
+    file_based_subsystem<Order>( scheduler, this, type_standing_order_subsystem ),
+    _zero_(this+1)
 {
 }
 
@@ -907,6 +908,54 @@ void Order_subsystem_impl::count_finished_orders()
 {
     _finished_orders_count++;
     _spooler->update_console_title( 2 );
+}
+
+int Order_subsystem_impl::untouched_order_count() const {
+    int result = 0;
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
+        const Job_chain* job_chain = i->second;
+        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
+            const Order* order = i->second;
+            if (!order->is_touched() && !order->is_on_blacklist()) result++;
+        }
+    }
+    return result;
+}
+
+int Order_subsystem_impl::suspended_order_count() const {
+    int result = 0;
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
+        const Job_chain* job_chain = i->second;
+        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
+            const Order* order = i->second;
+            if (order->suspended()) result++;
+        }
+    }
+    return result;
+}
+
+int Order_subsystem_impl::setback_order_count() const {
+    int result = 0;
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
+        const Job_chain* job_chain = i->second;
+        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
+            const Order* order = i->second;
+            if (order->is_setback()) result++;
+        }
+    }
+    return result;
+}
+
+int Order_subsystem_impl::blacklisted_order_count() const {
+    int result = 0;
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
+        const Job_chain* job_chain = i->second;
+        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
+            const Order* order = i->second;
+            if (order->is_on_blacklist()) result++;
+        }
+    }
+    return result;
 }
 
 //-----------------------------------------------------------------Order_subsystem_impl::dom_element
@@ -4792,7 +4841,6 @@ string Order_queue::db_where_expression() const
     return result;
 }
 
-//-------------------------------------------------------------------------------------------------
 
 } //namespace order
 } //namespace spoooler

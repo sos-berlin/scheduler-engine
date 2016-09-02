@@ -280,7 +280,7 @@ struct Order : Com_order,
 
     Com_job*                    com_job                 ();
 
-    bool                        suspended               ()                                          { return _suspended; }
+    bool                        suspended               () const                                    { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
     void                    set_ignore_max_orders       (bool b)                                    { _ignore_max_orders = b; }
@@ -288,7 +288,7 @@ struct Order : Com_order,
 
     void                        set_on_blacklist        ();
     void                        remove_from_blacklist   ();
-    bool                        is_on_blacklist         ()                                          { return _is_on_blacklist; }
+    bool                        is_on_blacklist         () const                                    { return _is_on_blacklist; }
     jlong                       java_fast_flags         () const;
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
@@ -301,7 +301,7 @@ struct Order : Com_order,
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
     bool                        setback_called          () const                                    { return _setback_called; }
     void                        clear_setback           ( bool keep_setback_count = false );
-    bool                     is_setback                 ()                                          { return _setback_count > 0; }
+    bool                     is_setback                 () const                                    { return _setback_count > 0; }
     int                         setback_count           ()                                          { return _setback_count; }
     void                    set_at                      ( const Time& );
     void                    set_at_after_delay          ( const Time& );
@@ -1229,6 +1229,12 @@ struct Order_subsystem: Object,
     virtual const Bstr& scheduler_file_order_path_variable_name_Bstr() const = 0;
 
     virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, int per_order_limit, OrderCallbackJ) = 0;
+
+    virtual int                 non_distributed_order_count () const = 0;
+    virtual int                 untouched_order_count       () const = 0;
+    virtual int                 suspended_order_count       () const = 0;
+    virtual int                 setback_order_count         () const = 0;
+    virtual int                 blacklisted_order_count     () const = 0;
 };
 
 
@@ -1301,7 +1307,8 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
         return _is_activating;
     }
 
-  private:
+    private:
+    Fill_zero _zero_;
     bool _is_activating;
 };
 

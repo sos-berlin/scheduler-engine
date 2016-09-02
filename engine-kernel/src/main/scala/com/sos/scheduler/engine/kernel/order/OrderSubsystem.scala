@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -51,11 +51,12 @@ extends FileBasedSubsystem {
     }
   }
 
-  private[kernel] def orderOverview[V <: OrderView: OrderView.Companion](orderKey: OrderKey): V =
-   order(orderKey).view[V]
-
-  private[kernel] def orderDetailed(orderKey: OrderKey): OrderDetailed =
-   order(orderKey).details
+  private[kernel] def orderStatistics = OrderStatistics(
+    plannedOrPending = cppProxy.untouched_order_count,
+    running = cppProxy.non_distributed_order_count,
+    suspended = cppProxy.suspended_order_count,
+    setback = cppProxy.setback_order_count,
+    blacklisted = cppProxy.blacklisted_order_count)
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }

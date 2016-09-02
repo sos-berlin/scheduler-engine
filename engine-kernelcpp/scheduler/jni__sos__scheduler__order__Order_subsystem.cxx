@@ -17,6 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jint JNICALL blacklisted_1order_1count(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::blacklisted_order_count()");
+        return (o_->blacklisted_order_count());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL file_1based_1paths__Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0)
 {
     Env env = jenv;
@@ -150,7 +167,76 @@ static void JNICALL java_1for_1each_1distributed_1order__Ljava_util_ArrayList_2I
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL non_1distributed_1order_1count(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::non_distributed_order_count()");
+        return (o_->non_distributed_order_count());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL setback_1order_1count(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::setback_order_count()");
+        return (o_->setback_order_count());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL suspended_1order_1count(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::suspended_order_count()");
+        return (o_->suspended_order_count());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL untouched_1order_1count(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::untouched_order_count()");
+        return (o_->untouched_order_count());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
+    { (char*)"blacklisted_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::blacklisted_1order_1count },
     { (char*)"file_based_paths__native", (char*)"(JZ)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1paths__Z },
     { (char*)"finished_orders_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::finished_1orders_1count },
     { (char*)"is_empty__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1empty },
@@ -158,7 +244,11 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"java_file_based__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based__Ljava_lang_String_2 },
     { (char*)"java_file_based_or_null__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based_1or_1null__Ljava_lang_String_2 },
     { (char*)"java_file_baseds__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1baseds },
-    { (char*)"java_for_each_distributed_order__native", (char*)"(JLjava/util/ArrayList;ILcom/sos/scheduler/engine/kernel/order/OrderCallback;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1for_1each_1distributed_1order__Ljava_util_ArrayList_2ILcom_sos_scheduler_engine_kernel_order_OrderCallback_2 }
+    { (char*)"java_for_each_distributed_order__native", (char*)"(JLjava/util/ArrayList;ILcom/sos/scheduler/engine/kernel/order/OrderCallback;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1for_1each_1distributed_1order__Ljava_util_ArrayList_2ILcom_sos_scheduler_engine_kernel_order_OrderCallback_2 },
+    { (char*)"non_distributed_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::non_1distributed_1order_1count },
+    { (char*)"setback_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::setback_1order_1count },
+    { (char*)"suspended_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::suspended_1order_1count },
+    { (char*)"untouched_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::untouched_1order_1count }
 };
 
 namespace zschimmer { namespace javabridge { 
