@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException,
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderHistoryId, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderView}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.CppCall
@@ -132,6 +132,7 @@ with OrderPersistence {
       sourceType,
       nodeId = nodeId,
       processingState = processingState,
+      historyIdOption,
       obstacles = obstacles,
       nextStepAt = nextStepAt,
       occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply,
@@ -177,6 +178,12 @@ with OrderPersistence {
         } else
           OrderId(cppProxy.string_id)
         }
+    }
+
+  private def historyIdOption: Option[OrderHistoryId] =
+    cppProxy.history_id match {
+      case 0 ⇒ None
+      case o ⇒ Some(OrderHistoryId(o))
     }
 
   def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }

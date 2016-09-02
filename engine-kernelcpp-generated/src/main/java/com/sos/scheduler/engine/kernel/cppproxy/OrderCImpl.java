@@ -168,6 +168,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native boolean has_base_file__native(long cppReference);
 
 
+    @Override public int history_id() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return history_id__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int history_id__native(long cppReference);
+
+
     @Override public boolean id_locked() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import java.time.Instant
@@ -24,6 +24,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(3), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(3))),
+    historyId = Some(OrderHistoryId(2)),
     nextStepAt = Some(EPOCH))
   private val a1OrderOverviewJson = s"""{
     "path": "/aJobChain,1",
@@ -36,6 +37,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "processClassPath": "",
       "since": "${taskIdToStartedAt(TaskId(3))}"
     },
+    "historyId": 2,
     "obstacles": [],
     "nextStepAt": "1970-01-01T00:00:00Z"
   }"""
@@ -46,6 +48,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(4), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(4))),
+    historyId = Some(OrderHistoryId(3)),
     nextStepAt = Some(EPOCH))
   private val a2OrderOverviewJson = s"""{
     "path": "/aJobChain,2",
@@ -58,6 +61,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "processClassPath": "",
       "since": "${taskIdToStartedAt(TaskId(4))}"
     },
+    "historyId": 3,
     "obstacles": [],
     "nextStepAt": "1970-01-01T00:00:00Z"
   }"""
@@ -68,7 +72,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.AdHoc,
     NodeId("100"),
     OrderProcessingState.Planned(OrderStartAt),
-    Set(OrderObstacle.Suspended),
+    obstacles = Set(OrderObstacle.Suspended),
     nextStepAt = Some(OrderStartAt))
   private val aAdHocOrderOverviewJson = """{
     "path": "/aJobChain,ÅD-HÖC",
@@ -93,6 +97,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(5), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(5))),
+    historyId = Some(OrderHistoryId(4)),
     nextStepAt = Some(EPOCH),
     liveChanged = Some(OrderOverview.Replaced(OrderOverview(
       b1OrderKey,
@@ -111,6 +116,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "processClassPath": "",
       "since": "${taskIdToStartedAt(TaskId(5))}"
     },
+    "historyId": 4,
     "obstacles": [],
     "nextStepAt": "1970-01-01T00:00:00Z",
     "liveChanged": {
@@ -155,7 +161,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
-    Set(OrderObstacle.Suspended),
+    obstacles = Set(OrderObstacle.Suspended),
     nextStepAt = Some(EPOCH))
   private val xa2OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,2",

@@ -398,8 +398,8 @@ struct Order : Com_order,
     void on_occupied();
     void on_call(const File_exists_call&);
 
-    string history_id() const {
-        return as_string(_history_id);
+    int history_id() const {
+        return _history_id;
     }
 
     int64 next_step_at_millis() const {

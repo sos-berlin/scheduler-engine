@@ -42,6 +42,7 @@ trait OrderC extends CppProxyWithSister[Order] with File_basedC[Order] {
   def java_fast_flags: Long
   @CppExpression("$->_java_occupying_cluster_member_id")
   def java_occupying_cluster_member_id: String
+  def history_id: Int
 }
 
 object OrderC {
