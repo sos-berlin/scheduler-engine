@@ -60,32 +60,35 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected def pageBody(innerBody: Frag*) =
     body(
       pageHeader,
+      navbar,
       div(cls := "container", width := "100%")(
         innerBody))
 
-  protected def pageHeader = {
+  private def pageHeader: Frag = {
     import schedulerOverview.{pid, state, version}
-    List(
-      div(cls := "PageHeader")(
-        div(float.right, paddingLeft := 2.em)(
-          a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
-            span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
-            eventIdToLocalHtml(snapshot.eventId),
-            " ",
-            span(cls := "time-extra")(DefaultZoneId.getId))),
-        div(color.gray)(
-          a(href := uris.overview, cls := "inherit-markup")(
-            joinHtml(" · ")(
-              emptyToNone(schedulerOverview.schedulerId.string).toList,
-              "JobScheduler")),
-          joinHtml(" · ")(
-            " ", version, " Master",
-            span(whiteSpace.nowrap)(s"PID $pid"),
-            span(whiteSpace.nowrap)(s"$state")))),
-      navbar)
+    val jobSchedulerInfoHtml =
+      div(
+        a(href := uris.overview, cls := "inherit-markup")(
+          joinHtml(" · ")(List(
+            emptyToNone(schedulerOverview.schedulerId.string).toList,
+            "JobScheduler"))),
+        joinHtml(" · ")(List(
+          " ", version, " Master",
+          span(whiteSpace.nowrap)(s"PID $pid"),
+          span(whiteSpace.nowrap)(s"$state"))))
+    val timestampHtml =
+      a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
+        span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
+        eventIdToLocalHtml(snapshot.eventId),
+        " ",
+        span(cls := "time-extra")(DefaultZoneId.getId))
+    div(cls := "PageHeader")(
+      div(float.right, paddingLeft := 2.em)(
+        timestampHtml),
+      jobSchedulerInfoHtml)
   }
 
-  private def navbar =
+  private def navbar: Frag =
     nav(cls := "navbar navbar-default navbar-static-top")(
       div(cls := "container-fluid")(
         div(cls := "navbar-header")(

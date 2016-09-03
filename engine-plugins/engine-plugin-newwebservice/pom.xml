@@ -168,5 +168,10 @@
             <artifactId>jquery</artifactId>
             <version>2.2.4</version>
         </dependency>
+        <!--dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery-ui</artifactId>
+            <version>1.12.0</version>
+        </dependency-->
     </dependencies>
 </project>

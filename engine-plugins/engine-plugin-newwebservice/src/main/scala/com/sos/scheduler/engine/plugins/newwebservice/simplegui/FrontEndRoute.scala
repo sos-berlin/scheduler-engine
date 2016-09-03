@@ -6,7 +6,6 @@ import spray.http.CacheDirectives.`max-age`
 import spray.http.HttpHeaders.`Cache-Control`
 import spray.routing.Directives._
 import spray.routing.Route
-import spray.routing.directives.CachingDirectives._
 
 /**
   * @author Joacim Zschimmer
@@ -14,7 +13,7 @@ import spray.routing.directives.CachingDirectives._
 trait FrontEndRoute extends WebjarsRoute {
 
   final def frontEndRoute: Route =
-    cache(routeCache()) {  // Cache slow Jar reads
+    //"Route responses other than HttpResponse or Rejections cannot be cached ": cache(routeCache()) {  // Cache slow Jar reads
       pathPrefix("webjars") {
         webjarsRoute
       } ~
@@ -23,7 +22,7 @@ trait FrontEndRoute extends WebjarsRoute {
           getFromResourceDirectory(FrontendResourceDirectory.path)
         }
       }
-    }
+    //}
 }
 
 object FrontEndRoute {

@@ -47,13 +47,20 @@ extends SchedulerHtmlPage {
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
 
   override protected def title = "Orders"
-  override protected def cssLinks = super.cssLinks :+ uris / "api/frontend/order/order.css"
-  override protected def scriptLinks = super.scriptLinks :+ uris / "api/frontend/order/OrderSelectionWidget.js"
+  override protected def cssLinks = super.cssLinks ++ List(
+    uris / "api/frontend/common/OrderStatisticsWidget.css",
+    uris / "api/frontend/order/OrderSelectionWidget.css",
+    uris / "api/frontend/order/order.css")
+  override protected def scriptLinks = super.scriptLinks ++ List(
+    uris / "api/frontend/common/OrderStatisticsWidget.js",
+    uris / "api/frontend/order/OrderSelectionWidget.js")
 
   def wholePage = {
     htmlPage(
+      div(cls := "Padded")(
+        OrderStatisticsWidget.html),
       div(float.right)(
-        ordersStatistics),
+        orderSelectionStatistics),
       div(float.right)(
         new OrderSelectionWidget(query).html),
       query.jobChainPathQuery match {
@@ -63,10 +70,10 @@ extends SchedulerHtmlPage {
       })
   }
 
-  private def ordersStatistics = {
+  private def orderSelectionStatistics = {
     val statistics = new OrderOverview.Statistics(ordersComplemented.orders)
     import statistics.{blacklistedCount, count, inProcessCount, suspendedCount}
-    div(cls := "ContentBox OrderStatistics")(
+    div(cls := "ContentBox OrderSelectionStatistics")(
       div(paddingTop := 4.px),
       table(cls := "MiniTable")(
         tbody(
