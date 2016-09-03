@@ -12,9 +12,5 @@ trait Order_subsystemC extends CppProxy with SubsystemC[JobChain, Job_chainC] {
 
   def java_for_each_distributed_order(jobChainPaths: java.util.ArrayList[Object], perNodeLimit: Int, callback: OrderCallback): Unit
 
-  def non_distributed_order_count: Int
-  def untouched_order_count: Int
-  def suspended_order_count: Int
-  def setback_order_count: Int
-  def blacklisted_order_count: Int
+  def get_statistics(counters: Array[Int]): Unit
 }

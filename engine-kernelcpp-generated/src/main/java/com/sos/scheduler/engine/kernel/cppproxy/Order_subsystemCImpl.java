@@ -14,20 +14,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
         requireContextIsNull(context);
     }
 
-    @Override public int blacklisted_order_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return blacklisted_order_count__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native int blacklisted_order_count__native(long cppReference);
-
-
     @Override public String[] file_based_paths(boolean p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -56,6 +42,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     }
 
     private static native int finished_orders_count__native(long cppReference);
+
+
+    @Override public void get_statistics(int[] p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            get_statistics__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void get_statistics__native(long cppReference, int[] p0);
 
 
     @Override public boolean is_empty() {
@@ -148,62 +148,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     }
 
     private static native void java_for_each_distributed_order__native(long cppReference, java.util.ArrayList p0, int p1, com.sos.scheduler.engine.kernel.order.OrderCallback p2);
-
-
-    @Override public int non_distributed_order_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return non_distributed_order_count__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native int non_distributed_order_count__native(long cppReference);
-
-
-    @Override public int setback_order_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return setback_order_count__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native int setback_order_count__native(long cppReference);
-
-
-    @Override public int suspended_order_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return suspended_order_count__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native int suspended_order_count__native(long cppReference);
-
-
-    @Override public int untouched_order_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return untouched_order_count__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native int untouched_order_count__native(long cppReference);
 
 
     // </editor-fold>

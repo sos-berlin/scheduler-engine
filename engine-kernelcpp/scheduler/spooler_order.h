@@ -305,7 +305,7 @@ struct Order : Com_order,
     int                         setback_count           ()                                          { return _setback_count; }
     void                    set_at                      ( const Time& );
     void                    set_at_after_delay          ( const Time& );
-    Time                        at                      ()                                          { return _setback; }
+    Time                        at                      () const                                    { return _setback; }
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
     void                        activate_schedule       ();
@@ -470,7 +470,8 @@ struct Order : Com_order,
     Time                       _end_time;
 
     bool                       _is_distributed;         // == scheduler_orders.distributed_next_time is not null
-
+    bool mutable               _is_file_order_cached;
+    bool mutable               _is_file_order_cached_value;
 
     // Flüchtige Variablen, nicht für die Datenbank:
 
@@ -1230,11 +1231,7 @@ struct Order_subsystem: Object,
 
     virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, int per_order_limit, OrderCallbackJ) = 0;
 
-    virtual int                 non_distributed_order_count () const = 0;
-    virtual int                 untouched_order_count       () const = 0;
-    virtual int                 suspended_order_count       () const = 0;
-    virtual int                 setback_order_count         () const = 0;
-    virtual int                 blacklisted_order_count     () const = 0;
+    virtual void                get_statistics              (jintArray) const = 0;
 };
 
 

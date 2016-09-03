@@ -27,14 +27,16 @@ final class SchedulerOverviewHtmlPage private(
 extends SchedulerHtmlPage {
 
   protected val schedulerOverview = snapshot.value
-  import schedulerOverview.{httpPort, java, pid, startedAt, state, system, udpPort}
+  import schedulerOverview.{httpPort, java, pid, startedAt, state, system}
 
   override protected def cssLinks = super.cssLinks :+ uris / "api/frontend/schedulerOverview/overview.css"
+  override protected def scriptLinks = super.scriptLinks :+ uris / "api/frontend/schedulerOverview/overview.js"
 
   def wholePage =
     htmlPage(
       systemInformationHtml,
       schedulerInfoHtml,
+      orderStatisticsHtml,
       commandInput)
 
   private def systemInformationHtml =
@@ -115,6 +117,58 @@ extends SchedulerHtmlPage {
         div(s" HTTP port $o"),
       div(s"PID $pid"),
       div(b(state.toString)))
+
+  private def orderStatisticsHtml: Frag =
+    div(cls := "OrderStatistics")(
+      table(cls := "MiniTable")(
+        tbody(
+          tr(
+            td("total"),
+            td(id := "order-total")
+          ),
+          tr(
+            td("notPlanned"),
+            td(id := "order-notPlanned")
+          ),
+          tr(
+            td("planned or pending"),
+            td(id := "order-plannedOrPending")
+          ),
+          tr(
+            td("running"),
+            td(id := "order-running")
+          ),
+          tr(
+            td("inTask"),
+            td(id := "order-inTask")
+          ),
+          tr(
+            td("inProcess"),
+            td(id := "order-inProcess")
+          ),
+          tr(
+            td("setback"),
+            td(id := "order-setback")
+          ),
+          tr(
+            td("suspended"),
+            td(id := "order-suspended")
+          ),
+          tr(
+            td("blacklisted"),
+            td(id := "order-blacklisted")
+          ),
+          tr(
+            td("permanent"),
+            td(id := "order-permanent")
+          ),
+          tr(
+            td("fileOrder"),
+            td(id := "order-fileOrder")
+          )
+        )
+      )
+    )
 
   private def commandInput: Frag =
     form(action := "api/command", method := "get", clear.both)(

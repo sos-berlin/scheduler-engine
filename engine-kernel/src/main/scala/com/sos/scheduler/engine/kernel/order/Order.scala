@@ -89,6 +89,7 @@ with OrderPersistence {
     val isSuspended = cppFastFlags.isSuspended(flags)
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val taskId = this.taskId
+    val currentSecond = currentTimeMillis / 1000
     val processingState = {
       import OrderProcessingState._
       (taskId, taskId flatMap taskSubsystem.taskOption) match {
@@ -103,7 +104,7 @@ with OrderPersistence {
           else if (!isTouched)
             nextStepAtOption match {
               case None ⇒ NotPlanned
-              case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
+              case Some(at) if at.getEpochSecond >= currentSecond ⇒ Planned(at)
               case Some(at) ⇒ Pending(at)
             }
           else if (isSetback)

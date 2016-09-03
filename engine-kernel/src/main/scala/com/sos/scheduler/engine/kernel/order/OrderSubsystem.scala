@@ -51,12 +51,25 @@ extends FileBasedSubsystem {
     }
   }
 
-  private[kernel] def orderStatistics = OrderStatistics(
-    plannedOrPending = cppProxy.untouched_order_count,
-    running = cppProxy.non_distributed_order_count,
-    suspended = cppProxy.suspended_order_count,
-    setback = cppProxy.setback_order_count,
-    blacklisted = cppProxy.blacklisted_order_count)
+  private val statisticsArray = new Array[Int](12)
+
+  private[kernel] def orderStatistics = {
+    java.util.Arrays.fill(statisticsArray, 0)
+    cppProxy.get_statistics(statisticsArray)
+    OrderStatistics(
+      total = statisticsArray(0),
+      notPlanned = statisticsArray(1),
+      planned = statisticsArray(2),
+      pending = statisticsArray(3),
+      running = statisticsArray(4),
+      inTask = statisticsArray(5),
+      inProcess = statisticsArray(6),
+      setback = statisticsArray(7),
+      suspended = statisticsArray(8),
+      blacklisted = statisticsArray(9),
+      permanent = statisticsArray(10),
+      fileOrder = statisticsArray(11))
+  }
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }

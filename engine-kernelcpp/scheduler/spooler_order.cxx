@@ -456,6 +456,12 @@ Order_subsystem::Order_subsystem( Scheduler* scheduler )
 {
 }
 
+#define FOR_EACH_ORDER_CONST \
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) \
+        if (const Job_chain* job_chain = i->second) \
+            Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) \
+                if (const Order* order = i->second)
+
 //-------------------------------------------------------Order_subsystem_impl::Order_subsystem_impl
 
 Order_subsystem_impl::Order_subsystem_impl( Spooler* spooler )
@@ -646,7 +652,6 @@ void Order_subsystem_impl::for_each_distributed_order(const vector<string>& job_
         }
     }
 }
-
 
 //-----------------------------------------------Order_subsystem_impl::append_calendar_dom_elements
 
@@ -910,52 +915,46 @@ void Order_subsystem_impl::count_finished_orders()
     _spooler->update_console_title( 2 );
 }
 
-int Order_subsystem_impl::untouched_order_count() const {
-    int result = 0;
-    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
-        const Job_chain* job_chain = i->second;
-        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
-            const Order* order = i->second;
-            if (!order->is_touched() && !order->is_on_blacklist()) result++;
-        }
-    }
-    return result;
+void Order_subsystem_impl::get_statistics(jintArray arrayJ) const {
+    javabridge::Env jenv;
+    jboolean is_copy;
+    int n = 12;
+    if (jenv->GetArrayLength(arrayJ) != n) z::throw_xc(Z_FUNCTION, "INVALID ARRAY SIZE");
+    jint* ints = jenv->GetIntArrayElements(arrayJ, &is_copy);
+    if (!ints)  jenv.throw_java("GetIntArrayElements");
+    get_statistics(ints);
+    jenv->ReleaseIntArrayElements(arrayJ, ints, 0);
 }
 
-int Order_subsystem_impl::suspended_order_count() const {
+void Order_subsystem_impl::get_statistics(jint* ints) const {
     int result = 0;
-    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
-        const Job_chain* job_chain = i->second;
-        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
-            const Order* order = i->second;
-            if (order->suspended()) result++;
+    ints[0] = order_count((Read_transaction*)NULL);
+    time_t now = Time::now().as_time_t();
+    FOR_EACH_ORDER_CONST {
+        if (!order->is_touched()) {
+            Time at = order->at();
+            if (at.is_never()) 
+                ints[1]++;  // OrderProcessingState.NotPlanned
+            else
+            if (at.as_time_t() >= now) 
+                ints[2]++;  // OrderProcessingState.Planned
+            else 
+                ints[3]++;  // OrderProcessingState.Pending
+        } else {
+            ints[4]++;  // OrderProcessingState.Running
+            if (const Task* task = order->task()) {
+                ints[5]++;
+                if (!task->step_or_process_started_at().is_zero()) {
+                    ints[6]++;
+                }
+            }
+            if (order->is_setback()) ints[7]++;
         }
+        if (order->suspended()) ints[8]++;
+        if (order->is_on_blacklist()) ints[9]++;
+        if (order->has_base_file()) ints[10]++;
+        if (order->is_file_order()) ints[11]++;
     }
-    return result;
-}
-
-int Order_subsystem_impl::setback_order_count() const {
-    int result = 0;
-    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
-        const Job_chain* job_chain = i->second;
-        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
-            const Order* order = i->second;
-            if (order->is_setback()) result++;
-        }
-    }
-    return result;
-}
-
-int Order_subsystem_impl::blacklisted_order_count() const {
-    int result = 0;
-    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) {
-        const Job_chain* job_chain = i->second;
-        Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) {
-            const Order* order = i->second;
-            if (order->is_on_blacklist()) result++;
-        }
-    }
-    return result;
 }
 
 //-----------------------------------------------------------------Order_subsystem_impl::dom_element

@@ -150,11 +150,7 @@ struct Order_subsystem_impl : Order_subsystem
     string                      order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
-    int                         non_distributed_order_count () const { return order_count(NULL); }
-    int                         untouched_order_count       () const;
-    int                         suspended_order_count       () const;
-    int                         setback_order_count         () const;
-    int                         blacklisted_order_count     () const;
+    void                        get_statistics              (jintArray) const;
 
     void wake_distributed_order_processing();
 
@@ -166,6 +162,8 @@ struct Order_subsystem_impl : Order_subsystem
     Order_id_spaces            _order_id_spaces;
 
   private:
+    void get_statistics(jint*) const;
+
     OrderSubsystemJ            _typed_java_sister;
     ptr<Database_order_detector> _database_order_detector;
     int                        _started_orders_count;

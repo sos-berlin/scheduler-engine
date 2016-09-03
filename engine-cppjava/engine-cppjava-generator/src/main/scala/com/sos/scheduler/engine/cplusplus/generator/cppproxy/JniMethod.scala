@@ -45,6 +45,9 @@ final class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
       if (classOf[CppProxy] isAssignableFrom p.typ)
         cppObjectByReference(CppName(p.typ), p.name)
       else
+      if (classIsIntArray(p.typ))
+        p.name
+      else
         cppJavaClassName(p.typ) + "(" + p.name + ")"
     else
     if (p.typ.getName == "boolean")
