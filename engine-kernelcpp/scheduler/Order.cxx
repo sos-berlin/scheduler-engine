@@ -1968,16 +1968,20 @@ bool Order::is_file_order() const
 {
     File_path result;
 
-    try {
-        if (ptr<Com_variable_set> order_params = params_or_null()) {
-            return order_params->contains(order_subsystem()->scheduler_file_order_path_variable_name_Bstr());
-        } else
-            return false;
+    if (!_is_file_order_cached) {
+        _is_file_order_cached = true;
+        try {
+            if (ptr<Com_variable_set> order_params = params_or_null()) {
+                _is_file_order_cached_value = order_params->contains(order_subsystem()->scheduler_file_order_path_variable_name_Bstr());
+            } else
+                _is_file_order_cached_value = false;
+        }
+        catch( exception& x )  { 
+            Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() << "\n" ); 
+            _is_file_order_cached_value = false;
+        }
     }
-    catch( exception& x )  { 
-        Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() << "\n" ); 
-        return false;
-    }
+    return _is_file_order_cached_value;
 }
 
 
