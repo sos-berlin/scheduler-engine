@@ -30,6 +30,7 @@ object Jni {
 
   def typeName[A](t: Class[A]) = metadata(t) match {
     case Some(m) => m.cppName
+    case None if classIsIntArray(t) ⇒ "jintArray"
     case None => requireIsClass(t); "jobject"
   }
 

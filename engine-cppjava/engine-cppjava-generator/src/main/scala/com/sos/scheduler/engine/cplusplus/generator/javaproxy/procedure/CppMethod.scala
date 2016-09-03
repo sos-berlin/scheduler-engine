@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure
 
-import java.lang.reflect.Method
-import com.sos.scheduler.engine.cplusplus.generator.javaproxy._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas.CppClass
 import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
+import java.lang.reflect.Method
 
-class CppMethod(cppClass: CppClass, s: ProcedureSignature) extends CppProcedure(cppClass, s)
+final class CppMethod(cppClass: CppClass, s: ProcedureSignature) extends CppProcedure(cppClass, s)
 
-object CppMethod{ 
+object CppMethod{
   def apply(cppClass: CppClass, m: Method) =
     new CppMethod(cppClass, ProcedureSignature(m.getName, m.getReturnType, m.getParameterTypes.toList))
 }
