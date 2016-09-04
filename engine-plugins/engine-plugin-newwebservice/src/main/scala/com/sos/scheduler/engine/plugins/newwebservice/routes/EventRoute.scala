@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import com.sos.scheduler.engine.common.convert.As._
+import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, NoKeyEvent, Snapshot}
-import com.sos.scheduler.engine.data.events.{SchedulerAnyKeyedEventJsonFormat, schedulerKeyedEventJsonFormat}
+import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
@@ -30,24 +32,24 @@ trait EventRoute extends HasCloser {
 
   def eventRoute: Route =
     pathSingleSlash {
-      parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-        parameter("limit" ? Int.MaxValue) { limit ⇒
-          if (limit < 1)
-            reject(ValidationRejection(s"Invlid limit=$limit"))
-          else
-            parameter("return" ? classOf[Event].getSimpleName) { returnType ⇒
-              completeTryHtml[immutable.Seq[Snapshot[AnyKeyedEvent]]] {
-                returnType match {
-                  case "OrderStatisticsChanged" ⇒
-                    for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId))
-                      yield nestIntoSeqSnapshot(snapshot)
-                  case _ ⇒
-                    val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
-                    client.events[Event](after = afterEventId, limit = abs(limit), reverse = limit < 0)(classTag)
-                }
-              }
+      parameterMap { parameters ⇒
+        val afterEventId = parameters.as[Long]("after", EventId.BeforeFirst)
+        val limit = parameters.as[Int]("limit", Int.MaxValue)
+        val returnType = parameters.as[String]("return", classOf[Event].getSimpleName)
+        //val timeout = parameters.optionAs[Int]("timeout") map { o ⇒ Duration.ofSeconds(o) }
+        if (limit == 0)
+          reject(ValidationRejection(s"Invalid limit=$limit"))
+        else
+          completeTryHtml[immutable.Seq[Snapshot[AnyKeyedEvent]]] {
+            returnType match {
+              case "OrderStatisticsChanged" ⇒
+                for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId))
+                  yield nestIntoSeqSnapshot(snapshot)
+              case _ ⇒
+                val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
+                client.events[Event](after = afterEventId, limit = abs(limit), reverse = limit < 0)(classTag)
             }
-        }
+          }
       }
     }
 }

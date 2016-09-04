@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdd
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
@@ -107,10 +107,10 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       "/api/order/?return=OrderOverview")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[Vector[OrderOverview]]]
-        assert(snapshot.value == TestOrderOverviews)
+        val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
+        assert(snapshot.value.orders == TestOrderOverviews)
         assert(snapshot.eventId == TestEventId)  // Snapshot.equals ignores eventId
-        assert(responseAs[Snapshot[Vector[OrderOverview]]] == Snapshot(TestOrderOverviews)(666))
+        assert(snapshot == Snapshot(Orders(TestOrderOverviews))(666))
       }
     }
   }
@@ -119,8 +119,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       "/api/order/?return=OrderDetailed")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[Vector[OrderDetailed]]]
-        assert(snapshot.value == TestOrderDetaileds)
+        val snapshot = responseAs[Snapshot[Orders[OrderDetailed]]]
+        assert(snapshot.value.orders == TestOrderDetaileds)
         assert(snapshot.eventId == TestEventId)  // Snapshot.equals ignores eventId
       }
     }
@@ -214,7 +214,7 @@ object OrderRouteTest {
       agentUri = None,
       since = Instant.parse("2016-08-26T11:22:33.444Z")),
     nextStepAt = Some(EPOCH))
-  private val A1OrderDetailed = OrderDetailed(A1OrderOverview)
+  private val A1OrderDetailed = OrderDetailed(A1OrderOverview, priority = 0, title = "")
 
   private val TestOrderOverviews = Vector(A1OrderOverview)
 

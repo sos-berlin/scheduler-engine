@@ -155,6 +155,10 @@ with OrderPersistence {
       file = fileBasedDetailed.file,
       fileModifiedAt = fileBasedDetailed.fileModifiedAt,
       sourceXml = fileBasedDetailed.sourceXml,
+      priority = priority,
+      initialNodeId = emptyToNone(cppProxy.initial_state_string) map NodeId.apply,
+      endNodeId = emptyToNone(cppProxy.end_state_string) map NodeId.apply,
+      title = title,
       variables = variables)
   }
 
