@@ -73,6 +73,13 @@ with EventSource {
         .stripSuffix(", method=CallObjectMethodA []")
         .trim))
     }
+    replacementOption match {
+      case Some(replacement) ⇒
+        b += Replaced
+      case None if configurationFileRemoved ⇒
+        Some(Removed)
+      case _ ⇒
+    }
     b.result
   }
 

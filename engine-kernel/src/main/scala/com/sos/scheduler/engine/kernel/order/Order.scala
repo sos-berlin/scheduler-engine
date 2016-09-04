@@ -137,14 +137,7 @@ with OrderPersistence {
       obstacles = obstacles,
       startedAt = startedAtOption,
       nextStepAt = nextStepAtOption,
-      occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply,
-      liveChanged = replacementOption match {
-        case Some(replacement) ⇒
-          Some(OrderOverview.Replaced(replacement.overview.copy(obstacles = Set(), nextStepAt = None)))
-        case None if configurationFileRemoved ⇒
-          Some(OrderOverview.Removed)
-        case _ ⇒ None
-      })
+      occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
   }
 
   override private[kernel] def details: OrderDetailed = {
