@@ -33,8 +33,8 @@ jQuery(function() {
     .done(function(snapshot) {
       refreshElem.style.visibility = "hidden";
       widgetJq.removeClass('OrderStatistics-error');
-      var events = snapshot.schedulerResponseContent;
-      var event = events[0]
+      var events = snapshot.elements;
+      var event = events[0];
       var stat = event.orderStatistics;
       for (i in keys) {
         var key = keys[i];

@@ -18,7 +18,7 @@
 /* Every @keyframes twice to allow restart of animation by changing animation-name. */
 @keyframes OrderStatistics-higher-0 {
     from {
-      background-color: Coral;
+      background-color: #ffe964;
     }
     to {
       background-color: inherit;
@@ -26,7 +26,7 @@
 }
 @keyframes OrderStatistics-higher-1 {
     from {
-      background-color: Coral;
+      background-color: #ffe964;
     }
     to {
       background-color: inherit;
@@ -34,7 +34,7 @@
 }
 @keyframes OrderStatistics-lower-0 {
     from {
-      background-color: DeepSkyBlue;
+      background-color: LightGray;
     }
     to {
       background-color: inherit;
@@ -42,7 +42,7 @@
 }
 @keyframes OrderStatistics-lower-1 {
     from {
-      background-color: DeepSkyBlue;
+      background-color: LightGray;
     }
     to {
       background-color: inherit;
