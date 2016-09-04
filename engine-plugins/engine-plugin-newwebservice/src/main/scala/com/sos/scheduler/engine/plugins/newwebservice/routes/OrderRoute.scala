@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.exten
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview, Orders}
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -92,10 +92,10 @@ trait OrderRoute extends LogRoute {
         completeTryHtml(client.ordersComplementedBy[OrderDetailed](query))
 
       case Some(OrderOverview.name) ⇒
-        completeTryHtml(client.ordersBy[OrderOverview](query))
+        completeTryHtml(client.ordersBy[OrderOverview](query) map { _ map Orders.apply })
 
       case Some(OrderDetailed.name) ⇒
-        completeTryHtml(client.ordersBy[OrderDetailed](query))
+        completeTryHtml(client.ordersBy[OrderDetailed](query) map { _ map Orders.apply })
 
       case Some(o) ⇒
         reject(ValidationRejection(s"Unknown value for parameter return=$o"))

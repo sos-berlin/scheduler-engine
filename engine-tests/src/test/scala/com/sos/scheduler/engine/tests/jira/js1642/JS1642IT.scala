@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1642
 import akka.util.ByteString
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.base.sprayjson.JsonRegexMatcher._
+import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits._
 import com.sos.scheduler.engine.base.system.SystemInformation
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
@@ -50,7 +51,6 @@ import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
 import spray.json._
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits._
 
 /**
   * JS-1642 WebSchedulerClient and NewWebServicePlugin.
@@ -392,8 +392,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "orderOverviews" in {
       val snapshot = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
-      val orderOverviewsJsArray = Snapshot.unwrapJsArray(snapshot) map normalizeOrderOverviewJson
-      assert(orderOverviewsJsArray == ExpectedOrderOverviewsJsArray)
+      assert((snapshot("orders").asJsArray map normalizeOrderOverviewJson) == ExpectedOrderOverviewsJsArray)
     }
 
     "ordersComplemented" in {
