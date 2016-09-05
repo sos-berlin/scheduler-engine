@@ -24,6 +24,17 @@ jQuery(function() {
   var refreshElem = document.getElementById('OrderStatistics-refresh');
   var widgetJq = $('#OrderStatistics');
   var current = {}
+  var delayedGetNextEvent = null;
+
+  function documentVisibilityChanged() {
+    if (!document.hidden && delayedGetNextEvent) {
+      console.debug("OrderStatisticsWidget visible");
+      var f = delayedGetNextEvent;
+      delayedGetNextEvent = null;
+      f();
+    }
+  }
+  document.addEventListener("visibilitychange", documentVisibilityChanged, false);
 
   function get(lastEventId) {
     jQuery.ajax({
@@ -52,13 +63,24 @@ jQuery(function() {
         }
       }
       current = stat;
-      setTimeout(function() { get(event.eventId); }, 500);
+      function getNextEvent() { get(event.eventId); }
+      if (document.hidden) {
+        showRefreshing();
+        delayedGetNextEvent = getNextEvent;
+        console.debug("OrderStatisticsWidget hidden");
+      } else {
+        setTimeout(getNextEvent, 500);
+      }
     })
     .fail(function() {
-      refreshElem.style.visibility = "inherit";
-      widgetJq.addClass('OrderStatistics-error');
+      showRefreshing();
       setTimeout(function() { get(lastEventId); }, 5000);
     });
+  }
+
+  function showRefreshing() {
+    refreshElem.style.visibility = "inherit";
+    widgetJq.addClass('OrderStatistics-error');
   }
 
   get(0);

@@ -459,13 +459,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     val aSnapshot = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
     val aStatistics = aSnapshot.value.head.value.event.orderStatistics
 
-    val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst)
+    val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aSnapshot.eventId)
     scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
     val bSnapshot = bFuture await TestTimeout
     val bStatistics = bSnapshot.value.head.value.event.orderStatistics
     assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
 
-    val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aSnapshot.eventId)
+    val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bSnapshot.eventId)
     scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
     val cSnapshot = cFuture await TestTimeout
     val cStatistics = cSnapshot.value.head.value.event.orderStatistics
