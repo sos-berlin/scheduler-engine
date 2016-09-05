@@ -96,7 +96,7 @@ with OrderPersistence {
         case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
           task.stepOrProcessStartedAt match {
             case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, task.agentAddress, at)
-            case None ⇒ WaitingInTask(taskId_, task.processClassPath, task.agentAddress)
+            case None ⇒ WaitingInTask(taskId_, task.processClassPath)
           }
         case (_, _) ⇒
           if (isBlacklisted)
