@@ -27,6 +27,7 @@ import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes.`application/json`
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
+import spray.json._
 import spray.routing.Directives._
 import spray.routing.Route
 import spray.testkit.ScalatestRouteTest
@@ -62,25 +63,30 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
           case OrderDetailed ⇒ A1OrderDetailed
         })
 
-    def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
+    def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery) = {
+      assert(query == TestOrderQuery)
       respondWith(
         implicitly[OrderView.Companion[V]] match {
           case OrderOverview ⇒ TestOrderOverviews
           case OrderDetailed ⇒ TestOrderDetaileds
         })
+    }
 
-
-    def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrderTreeComplemented[V]]] =
+    def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrderTreeComplemented[V]]] = {
+      assert(query == TestOrderQuery)
       for (snapshot ← ordersComplementedBy[V](query)) yield
         for (flat ← snapshot) yield
           OrderTreeComplemented.fromOrderComplemented(FolderPath.Root, flat)
+    }
 
-    def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrdersComplemented[V]]] =
+    def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrdersComplemented[V]]] = {
+      assert(query == TestOrderQuery)
       respondWith(
         implicitly[OrderView.Companion[V]] match {
           case OrderOverview ⇒ TestOrdersComplemented
           case OrderDetailed ⇒ DetailedOrdersComplemented
         })
+    }
 
     def overview = throw new NotImplementedError
 
@@ -104,7 +110,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/?return=OrderOverview")) {
+      "/api/order/?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
@@ -114,7 +120,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/?return=OrderDetailed")) {
+      "/api/order/?return=OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         val snapshot = responseAs[Snapshot[Orders[OrderDetailed]]]
@@ -125,9 +131,9 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/",
-      "/api/order/?return=OrderTreeComplemented",
-      "/api/order/?return=OrderTreeComplemented/OrderOverview")) {
+      "/api/order/?isSuspended=false&isOrderSourceType=Permanent",
+      "/api/order/?return=OrderTreeComplemented&isSuspended=false&isOrderSourceType=Permanent",
+      "/api/order/?return=OrderTreeComplemented/OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrderTreeComplemented[OrderOverview]] ==
@@ -137,7 +143,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/?return=OrderTreeComplemented/OrderDetailed")) {
+      "/api/order/?return=OrderTreeComplemented/OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrderTreeComplemented[OrderDetailed]] ==
@@ -147,8 +153,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/?return=OrdersComplemented",
-      "/api/order/?return=OrdersComplemented/OrderOverview")) {
+      "/api/order/?return=OrdersComplemented&isSuspended=false&isOrderSourceType=Permanent",
+      "/api/order/?return=OrdersComplemented/OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrdersComplemented[OrderOverview]] == TestOrdersComplemented)
@@ -157,7 +163,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/?return=OrdersComplemented/OrderDetailed")) {
+      "/api/order/?return=OrdersComplemented/OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrdersComplemented[OrderDetailed]] == DetailedOrdersComplemented)
@@ -166,7 +172,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/aJobChain,1?return=OrderOverview")) {
+      "/api/order/aJobChain,1?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[Snapshot[OrderOverview]].value == A1OrderOverview)
@@ -175,12 +181,24 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (path ← List(
-      "/api/order/aJobChain,1",
-      "/api/order/aJobChain,1?return=OrderDetailed")) {
+      "/api/order/aJobChain,1?isSuspended=false&isOrderSourceType=Permanent",
+      "/api/order/aJobChain,1?return=OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[Snapshot[OrderDetailed]].value == A1OrderDetailed)
       }
+    }
+  }
+
+  "POST OrderQuery" in {
+    val queryJson = JsObject(
+      "isSuspended" → JsFalse,
+      "isOrderSourceType" → JsArray(JsString("Permanent")))
+    Post("/api/order?return=OrderOverview", queryJson) ~>
+      Accept(`application/json`) ~> route ~> check
+    {
+      val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
+      assert(snapshot == Snapshot(TestEventId, Orders(TestOrderOverviews)))
     }
   }
 
@@ -240,6 +258,10 @@ object OrderRouteTest {
     TestOrdersComplemented.usedJobs,
     TestOrdersComplemented.usedTasks,
     TestOrdersComplemented.usedProcessClasses)
+
+  private val TestOrderQuery = OrderQuery(
+    isSuspended = Some(false),
+    isOrderSourceType = Some(Set(OrderSourceType.Permanent)))
 
   private val OrderEvents = Vector(
     FileBasedAdded,
