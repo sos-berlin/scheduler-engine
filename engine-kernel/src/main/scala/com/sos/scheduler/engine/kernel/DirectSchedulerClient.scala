@@ -130,6 +130,6 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
     directOrSchedulerThreadFuture {
       // We are in control of the scheduler thread. No hot scheduler events may occur now.
       // eventCollector.newEventId returns a good EventId usable for the event web service.
-      Snapshot(content)(eventCollector.newEventId())
+      Snapshot(eventCollector.newEventId(), content)
     }
 }

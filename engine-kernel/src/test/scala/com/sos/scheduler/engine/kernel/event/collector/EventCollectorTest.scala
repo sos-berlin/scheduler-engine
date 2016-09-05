@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollectorTest._
 import org.junit.runner.RunWith
@@ -39,11 +39,11 @@ final class EventCollectorTest extends FreeSpec {
       val bFuture = eventCollector.when[BEvent](after = EventId.BeforeFirst)
       assert(!anyFuture.isCompleted)
       eventBus.publish(KeyedEvent(A1)("1"))
-      assert((anyFuture await 100.ms).toList == List(Snapshot(KeyedEvent(A1)("1"))(UncheckedEventId)))
+      assert(((anyFuture await 100.ms).toList map { _.value }) == List(KeyedEvent(A1)("1")))
 
       assert(!bFuture.isCompleted)
       eventBus.publish(KeyedEvent(B1)("2"))
-      assert((bFuture await 100.ms).toList == List(Snapshot(KeyedEvent(B1)("2"))(UncheckedEventId)))
+      assert(((bFuture await 100.ms).toList map { _.value }) == List(KeyedEvent(B1)("2")))
     }
   }
 
@@ -64,7 +64,6 @@ final class EventCollectorTest extends FreeSpec {
 }
 
 object EventCollectorTest {
-  private val UncheckedEventId = EventId(999999999)
   intelliJuseImports(global)
 
   private trait AEvent extends Event {

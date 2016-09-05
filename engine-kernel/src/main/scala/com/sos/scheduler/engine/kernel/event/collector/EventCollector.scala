@@ -34,8 +34,8 @@ extends HasCloser {
   eventBus.onHot[Event] { case keyedEvent ⇒
     val eventId = ids.next()
     keyToEventQueue.getOrElseUpdate(keyedEvent.key, new EventQueue(EventQueueSizeLimitPerKey))
-      .add(Snapshot(keyedEvent.event)(eventId))
-    keyedEventQueue.add(Snapshot(keyedEvent)(eventId))
+      .add(Snapshot(eventId, keyedEvent.event))
+    keyedEventQueue.add(Snapshot(eventId, keyedEvent))
     val p = eventArrivedPromise
     //if (eventArrivedPromiseUsed) {
       eventArrivedPromise = Promise[Unit]()
@@ -52,41 +52,41 @@ extends HasCloser {
   def whenAny[E <: Event](eventClasses: Set[Class[_ <: E]], after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[KeyedEvent[E]]]] = {
     def predicate(e: AnyKeyedEvent) = eventClasses exists { _ isAssignableFrom e.event.getClass }
     for (snapshot ← whenAnyKeyedEvents(after, predicate, reverse = reverse)) yield
-      for (eventSnapshot ← snapshot.value) yield
-        Snapshot(eventSnapshot.value.asInstanceOf[KeyedEvent[E]])(eventSnapshot.eventId)
+      for (snapshot ← snapshot.value) yield
+        snapshot map { _.asInstanceOf[KeyedEvent[E]] }
   }
 
   private def whenAnyKeyedEvents(after: EventId, predicate: AnyKeyedEvent ⇒ Boolean, reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]] = {
     val promise = Promise[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]]()
-    for (eventsSnapshot ← onEventAvailable(after, events(after, reverse = reverse))) {
+    for (Snapshot(eventId, events) ← onEventAvailable(after, events(after, reverse = reverse)))
       Try {
-        val events = eventsSnapshot.value
-        Snapshot(events collect {
-          case snapshot @ Snapshot(keyedEvent) if predicate(keyedEvent) ⇒ snapshot
-        })(eventsSnapshot.eventId)
+        events collect {
+          case snapshot @ Snapshot(_, keyedEvent) if predicate(keyedEvent) ⇒ snapshot
+        }
       } match {
-        case Success(snapshot) if snapshot.value.nonEmpty ⇒ promise.success(snapshot)
-        case Success(_) ⇒ promise.completeWith(whenAnyKeyedEvents(eventsSnapshot.eventId, predicate))
+        case Success(filteredEvents) if filteredEvents.nonEmpty ⇒ promise.success(Snapshot(eventId, filteredEvents))
+        case Success(_) ⇒ promise.completeWith(whenAnyKeyedEvents(eventId, predicate))
         case Failure(t) ⇒ promise.failure(t)
       }
-    }
     promise.future
   }
 
   def whenForKey[E <: Event: ClassTag](key: E#Key, after: EventId, reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[E]]]] =
     onEventAvailable(after, events(after, reverse = reverse) collect {
-      case snapshot @ Snapshot(KeyedEvent(k, event: E @unchecked))
+      case Snapshot(eventId, KeyedEvent(k, event: E @unchecked))
         if (implicitClass[E] isAssignableFrom event.getClass) && key == k ⇒
-          Snapshot(event)(snapshot.eventId)
+          Snapshot(eventId, event)
     })
 
-  private def onEventAvailable[A](after: EventId, body: ⇒ A): Future[Snapshot[A]] =
+  private def onEventAvailable[A](after: EventId, body: ⇒ A): Future[Snapshot[A]] = {
+    def result = Snapshot(newEventId(), body)
     if (keyedEventQueue.hasAfter(after))
-      Future.successful(Snapshot(body)(newEventId()))
+      Future.successful(result)
     else {
       //eventArrivedPromiseUsed = true
-      for (() ← eventArrivedPromise.future) yield Snapshot(body)(newEventId())
+      for (() ← eventArrivedPromise.future) yield result
     }
+  }
 
   private def events(after: EventId, reverse: Boolean): Iterator[Snapshot[AnyKeyedEvent]] =
     if (reverse) reverseEvents(after) else events(after)

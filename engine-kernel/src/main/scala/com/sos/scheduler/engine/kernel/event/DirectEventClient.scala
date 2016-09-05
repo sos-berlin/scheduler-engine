@@ -25,7 +25,7 @@ trait DirectEventClient {
       //if (serializables.isEmpty)
         // TODO Restart in case no Event can be serialized: case Vector() ⇒ this.events(after)
       //else
-        Snapshot(serializables.toVector)(eventId)
+        Snapshot(eventId, serializables.toVector)
     }
   }
 
@@ -37,12 +37,12 @@ trait DirectEventClient {
     }
 
   def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[E]]]] = {
-    for (eventsSnapshot ← eventCollector.whenForKey(key, after, reverse = reverse)) yield {
-      val serializables = eventsSnapshot.value filter { o ⇒ eventTypedJsonFormat canSerialize o.value } take limit
+    for (Snapshot(eventId, events) ← eventCollector.whenForKey(key, after, reverse = reverse)) yield {
+      val serializables = events filter { o ⇒ eventTypedJsonFormat canSerialize o.value } take limit
       //if (serializables.isEmpty)
         // TODO Restart in case no Event can be serialized: case Vector() ⇒ this.events(after)
       //else
-        Snapshot(serializables.toVector)(eventsSnapshot.eventId)
+        Snapshot(eventId, serializables.toVector)
     }
   }
 }

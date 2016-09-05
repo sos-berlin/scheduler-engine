@@ -22,7 +22,5 @@ extends HasCloser {
   def whenOrderStatisticsChanged(after: EventId): Future[Snapshot[OrderStatisticsChanged]] =
     for (_ ← eventCollector.whenAny[Event](Set(classOf[OrderEvent], classOf[FileBasedEvent]), after = after);
          snapshot ← orderStatistics)
-      yield {
-        Snapshot(OrderStatisticsChanged(snapshot.value))(snapshot.eventId)
-      }
+      yield snapshot map OrderStatisticsChanged.apply
 }

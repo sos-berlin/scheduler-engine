@@ -57,7 +57,8 @@ trait EventRoute extends HasCloser {
 object EventRoute {
   // Nests a simple Snapshot[NoKeyEvent] into the expected nested type for the event web service.
   private def nestIntoSeqSnapshot[E <: NoKeyEvent](snapshot: Snapshot[E]): Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]] = {
+    val eventId = snapshot.eventId
     val anyKeyedEvent = KeyedEvent(snapshot.value).asInstanceOf[AnyKeyedEvent]
-    Snapshot(List(Snapshot(anyKeyedEvent)(snapshot.eventId)))(snapshot.eventId)
+    Snapshot(eventId, List(Snapshot(eventId, anyKeyedEvent)))
   }
 }

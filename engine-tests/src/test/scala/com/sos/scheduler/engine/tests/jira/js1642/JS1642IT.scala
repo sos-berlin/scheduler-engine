@@ -129,7 +129,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         case Failure(t) ⇒
           logger.error(s"webSchedulerClient.events: $t", t)
           controller.terminateAfterException(t)
-        case Success(Snapshot(events)) ⇒
+        case Success(Snapshot(_, events)) ⇒
           this.webEvents ++= events filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
           start(after = if (events.isEmpty) after else events.last.eventId)
       }
@@ -439,7 +439,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "WebSchedulerClient.getJson" in {
     val jsonString = webSchedulerClient.getJson("api") await TestTimeout
     val jsObject = jsonString.parseJson.asJsObject
-    val Snapshot(directOverview) = directSchedulerClient.overview await TestTimeout
+    val Snapshot(_, directOverview) = directSchedulerClient.overview await TestTimeout
     assert(jsObject.fields("version") == JsString(directOverview.version))
   }
 

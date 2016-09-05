@@ -84,7 +84,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
     def overview = throw new NotImplementedError
 
-    private def respondWith[A](a: A) = Future.successful(Snapshot(a)(TestEventId))
+    private def respondWith[A](a: A) = Future.successful(Snapshot(TestEventId, a))
   }
 
   override protected def afterAll() = {
@@ -108,9 +108,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"$path" in {
       Get(path) ~> Accept(`application/json`) ~> route ~> check {
         val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
-        assert(snapshot.value.orders == TestOrderOverviews)
-        assert(snapshot.eventId == TestEventId)  // Snapshot.equals ignores eventId
-        assert(snapshot == Snapshot(Orders(TestOrderOverviews))(666))
+        assert(snapshot == Snapshot(TestEventId, Orders(TestOrderOverviews)))
       }
     }
   }
