@@ -103,10 +103,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     };
 
     Configuration              _config;
-
-
     Lock_mode                  _lock_mode;                  // Nur gültig, wenn !_holder_set.empty()
-    State                      _state;
 
     typedef stdext::hash_set<Use*>             Use_set;
     typedef stdext::hash_map<Holder*,Use_set>  Holder_map;  

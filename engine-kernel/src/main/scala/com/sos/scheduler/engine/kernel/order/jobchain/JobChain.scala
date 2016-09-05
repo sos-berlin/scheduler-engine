@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
+import com.sos.scheduler.engine.data.jobchain.JobChainObstacle
 import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
@@ -64,7 +65,23 @@ with UnmodifiableJobChain {
   private[kernel] override def overview = JobChainOverview(
     path = path,
     fileBasedState = fileBasedState,
-    isDistributed = isDistributed)
+    isDistributed = isDistributed,
+    obstacles = {
+      import JobChainObstacle._
+      val builder = Set.newBuilder[JobChainObstacle]
+      emptyToNone(fileBasedObstacles) match {
+        case Some(o) ⇒
+          builder += FileBasedObstacles(o)
+        case None ⇒
+          if (isStopped) {
+            builder += Stopped
+          }
+          orderLimitOption switch {
+            case Some(limit) ⇒ builder += OrderLimitReached(limit)
+          }
+      }
+      builder.result
+    })
 
   def stringToPath(o: String) =
     JobChainPath(o)

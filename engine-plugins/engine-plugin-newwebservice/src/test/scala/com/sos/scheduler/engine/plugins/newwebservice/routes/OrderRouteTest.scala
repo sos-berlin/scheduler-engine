@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eve
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedState}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.OrderQuery
@@ -221,6 +221,8 @@ object OrderRouteTest {
   private val TestOrdersComplemented = OrdersComplemented[OrderOverview](
     TestOrderOverviews,
     Vector(
+      JobChainOverview(AJobChainPath, FileBasedState.active)),
+    Vector(
       SimpleJobNodeOverview(NodeKey(AJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1)),
     Vector(
       JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
@@ -233,6 +235,7 @@ object OrderRouteTest {
 
   private val DetailedOrdersComplemented = OrdersComplemented[OrderDetailed](
     TestOrderDetaileds,
+    TestOrdersComplemented.usedJobChains,
     TestOrdersComplemented.usedNodes,
     TestOrdersComplemented.usedJobs,
     TestOrdersComplemented.usedTasks,

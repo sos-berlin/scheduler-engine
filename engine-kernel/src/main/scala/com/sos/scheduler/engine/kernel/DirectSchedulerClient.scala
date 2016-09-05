@@ -62,6 +62,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
              node ← (jobChain.nodeMap.get(nodeKey.nodeId) collect { case n: JobNode ⇒ n.overview }).toArray sortBy { _.nodeKey.nodeId })  // sort just for determinism - not the original node order
           yield node
       }
+      val jobChainOverviews = (nodeOverviews map { _.jobChainPath }).distinct.sorted flatMap orderSubsystem.jobChainOption map { _.overview }
       val jobs = {
         val jobPaths = (nodeOverviews map { _.jobPath }).distinct
         jobPaths flatMap jobSubsystem.fileBasedOption
@@ -75,6 +76,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       }
       OrdersComplemented(
         orderOverviews,
+        jobChainOverviews,
         nodeOverviews,
         (jobs map { _.overview }).sorted,
         (tasks map { _.overview }).sorted,

@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
@@ -18,6 +18,11 @@ import spray.json.{JsArray, JsObject, _}
   * @author Joacim Zschimmer
   */
 private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
+  val aJobChainOverview = JobChainOverview(aJobChainPath, FileBasedState.active)
+  val bJobChainOverview = JobChainOverview(bJobChainPath, FileBasedState.active)
+  val xaJobChainOverview = JobChainOverview(xaJobChainPath, FileBasedState.active)
+  val xbJobChainOverview = JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)
+
   val a1OrderOverview = OrderOverview(
     a1OrderKey,
     FileBasedState.active,
@@ -220,8 +225,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xb1OrderOverview,
     xbAdHocDistributedOrderOverview)
 
-  val ExpectedOrderOrdersComplemented = OrdersComplemented(
+  val ExpectedOrdersComplemented = OrdersComplemented(
     ExpectedOrderOverviews,
+    Vector(
+      aJobChainOverview,
+      bJobChainOverview,
+      xaJobChainOverview,
+      xbJobChainOverview),
     Vector(
       SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
       SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1),
@@ -238,10 +248,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
   )
 
-  val ExpectedSuspendedOrderOrdersComplemented = ExpectedOrderOrdersComplemented.copy(
-    orders = ExpectedOrderOrdersComplemented.orders filter { _.isSuspended },
+  val ExpectedSuspendedOrdersComplemented = ExpectedOrdersComplemented.copy(
+    orders = ExpectedOrdersComplemented.orders filter { _.isSuspended },
+    usedJobChains = Vector(aJobChainOverview, xaJobChainOverview),
     usedTasks = Nil,
-    usedJobs = ExpectedOrderOrdersComplemented.usedJobs,
+    usedJobs = ExpectedOrdersComplemented.usedJobs,
     usedProcessClasses = Nil,
     usedNodes = Vector(
       SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
@@ -264,10 +275,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
             xb1OrderOverview,
             xbAdHocDistributedOrderOverview),
           Vector()))),
-    ExpectedOrderOrdersComplemented.usedNodes,
-    ExpectedOrderOrdersComplemented.usedJobs,
-    ExpectedOrderOrdersComplemented.usedTasks,
-    ExpectedOrderOrdersComplemented.usedProcessClasses)
+    ExpectedOrdersComplemented.usedNodes,
+    ExpectedOrdersComplemented.usedJobs,
+    ExpectedOrdersComplemented.usedTasks,
+    ExpectedOrdersComplemented.usedProcessClasses)
 
   val OrderCount = ExpectedOrderOverviews.size
 
@@ -282,6 +293,32 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     $xbAdHocDistributedOrderOverviewJson
   ]""".parseJson.asInstanceOf[JsArray]
 
+  val UsedJobChainsJson = """[
+      {
+          "path": "/aJobChain",
+          "fileBasedState": "active",
+          "isDistributed": false,
+          "obstacles": []
+      },
+      {
+          "path": "/bJobChain",
+          "fileBasedState": "active",
+          "isDistributed": false,
+          "obstacles": []
+      },
+      {
+          "path": "/xFolder/x-aJobChain",
+          "fileBasedState": "active",
+          "isDistributed": false,
+          "obstacles": []
+      },
+      {
+          "path": "/xFolder/x-bJobChain",
+          "fileBasedState": "active",
+          "isDistributed": true,
+          "obstacles": []
+      }
+    ]"""
   val UsedNodesJson = """[
     {
       "TYPE": "SimpleJob",
@@ -373,6 +410,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
 
   val ExpectedOrdersOrdersComplementedJsObject: JsObject = s"""{
     "orders": $ExpectedOrderOverviewsJsArray,
+    "usedJobChains": $UsedJobChainsJson,
     "usedTasks": $UsedTasksJson,
     "usedJobs": $UsedJobsJson,
     "usedProcessClasses": $UsedProcessClassesJson,

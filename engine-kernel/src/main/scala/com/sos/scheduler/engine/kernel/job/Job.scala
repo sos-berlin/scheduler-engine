@@ -4,12 +4,13 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState, FileBasedType}
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskPersistentState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
+import com.sos.scheduler.engine.kernel.job.Job._
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import java.time.Instant
@@ -41,15 +42,13 @@ with JobPersistence {
       import JobObstacle._
       val builder = Set.newBuilder[JobObstacle]
       emptyToNone(fileBasedObstacles) match {
-        case Some(o) ⇒ builder += FileBasedObstacles(o)
+        case Some(o) ⇒
+          builder += FileBasedObstacles(o)
         case None ⇒
-        val isGoodState = Set(JobState.pending, JobState.running)
-        if (!isGoodState(state)) {
-          builder += BadState(state)
-        }
-        val taskLimit = this.taskLimit
-        if (runningTasksCount >= taskLimit) builder += TaskLimitReached(taskLimit)
-        if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
+          if (state == JobState.stopped) builder += Stopped
+          else if (!IsGoodState(state)) builder += BadState(state)
+          if (runningTasksCount >= taskLimit) builder += TaskLimitReached(taskLimit)
+          if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
       }
       builder.result
     }
@@ -110,4 +109,6 @@ object Job {
       new Job(proxy, injector.instance[JobSubsystem])
     }
   }
+
+  private val IsGoodState = Set(JobState.pending, JobState.running, JobState.stopped)
 }

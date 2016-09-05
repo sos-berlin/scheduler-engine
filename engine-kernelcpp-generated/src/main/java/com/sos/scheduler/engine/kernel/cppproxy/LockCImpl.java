@@ -11,7 +11,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.LockC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private LockCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.LockC$.MODULE$.sisterType().sister(this, context));
     }
 
     @Override public java.lang.String file() {

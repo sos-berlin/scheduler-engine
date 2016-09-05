@@ -196,7 +196,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val ordersComplemented = awaitContent(client.ordersComplemented[OrderOverview])
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplemented[OrderOverview]))
       assert(ordersComplemented.copy(orders = ordersComplemented.orders map normalizeOrderOverview) ==
-        ExpectedOrderOrdersComplemented)
+        ExpectedOrdersComplemented)
     }
 
     "orderTreeComplemented" in {
@@ -210,7 +210,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderQuery = OrderQuery(isSuspended = Some(true))
       val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](orderQuery))
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
-      assert(ordersComplemented == ExpectedSuspendedOrderOrdersComplemented)
+      assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
     }
 
     "ordersComplementedBy query /aJobChain" in {
@@ -368,7 +368,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderQuery = OrderQuery(isSuspended = Some(true))
       val ordersComplemented = awaitContent(webSchedulerClient.getOrdersComplementedBy[OrderOverview](orderQuery))
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
-      assert(ordersComplemented == ExpectedSuspendedOrderOrdersComplemented)
+      assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
     }
   }
 
