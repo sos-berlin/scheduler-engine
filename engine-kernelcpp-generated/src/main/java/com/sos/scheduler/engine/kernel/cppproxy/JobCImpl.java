@@ -11,7 +11,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private JobCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.JobC$.MODULE$.sisterType().sister(this, context));
     }
 
     @Override public java.lang.String default_process_class_path() {
@@ -458,6 +458,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native java.lang.String title__native(long cppReference);
+
+
+    @Override public String[] unavailable_lock_path_strings() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            String[] result = unavailable_lock_path_strings__native(cppReference());
+            checkIsNotReleased(String[].class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native String[] unavailable_lock_path_strings__native(long cppReference);
 
 
     @Override public boolean waiting_for_process() {

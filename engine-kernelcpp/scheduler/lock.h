@@ -206,6 +206,7 @@ struct Requestor : Object,
     bool                        locks_are_known             () const;
     bool                        locks_are_available_for_holder( Holder* ) const;
     virtual bool                locks_are_available         () const                                { return locks_are_available_for_holder( (Holder*)NULL ); }
+    vector<string>              unavailable_lock_path_strings(Holder*) const;
     bool                        enqueue_lock_requests       ( Holder* );
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
     Abstract_scheduler_object*           object                      () const                                { return _object; }

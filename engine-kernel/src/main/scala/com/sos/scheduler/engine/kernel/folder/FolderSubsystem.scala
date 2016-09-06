@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.folder
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType}
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread

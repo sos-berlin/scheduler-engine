@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
-import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobNodeOverview, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode.logger
@@ -43,6 +44,18 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
   @ForCpp
   private def orderStateTransitionToState(cppInternalValue: Long): String =
     orderStateTransitionToState(OrderNodeTransition.ofCppInternalValue(cppInternalValue)).string
+
+  protected def obstacles: Set[NodeObstacle] = {
+    import NodeObstacle._
+    val builder = Set.newBuilder[NodeObstacle]
+    action switch {
+      case JobChainNodeAction.stop ⇒ builder += Stopping
+    }
+    if (!delay.isZero) {
+      builder += Delaying(delay)
+    }
+    builder.result
+  }
 
   private[kernel] final def orderCount: Int = orderQueue.size
 }

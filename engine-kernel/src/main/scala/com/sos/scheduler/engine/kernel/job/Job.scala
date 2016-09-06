@@ -1,11 +1,13 @@
 package com.sos.scheduler.engine.kernel.job
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskPersistentState}
+import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
@@ -50,6 +52,9 @@ with JobPersistence {
           if (runningTasksCount >= taskLimit) builder += TaskLimitReached(taskLimit)
           if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
       }
+      unavailableLockPaths switch {
+        case o if o.nonEmpty ⇒ builder ++= o map LockUnavailable.apply
+      }
       builder.result
     }
     JobOverview(
@@ -75,7 +80,7 @@ with JobPersistence {
 
   def description: String = inSchedulerThread { cppProxy.description }
 
-  def scriptText: String = inSchedulerThread { cppProxy.script_text() }
+  def scriptText: String = inSchedulerThread { cppProxy.script_text }
 
   private[kernel] def state = JobState.valueOf(cppProxy.state_name)
 
@@ -88,6 +93,9 @@ with JobPersistence {
 
   protected def nextStartInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_start_time_millis)
+
+  private def unavailableLockPaths: Set[LockPath] =
+    (cppProxy.unavailable_lock_path_strings map LockPath.apply).toSet
 
   def endTasks(): Unit = inSchedulerThread { setStateCommand(JobStateCommand.endTasks) }
 
@@ -103,7 +111,7 @@ with JobPersistence {
 }
 
 object Job {
-  private[kernel] final class Type extends SisterType[Job, JobC] {
+  private[kernel] object Type extends SisterType[Job, JobC] {
     def sister(proxy: JobC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
       new Job(proxy, injector.instance[JobSubsystem])

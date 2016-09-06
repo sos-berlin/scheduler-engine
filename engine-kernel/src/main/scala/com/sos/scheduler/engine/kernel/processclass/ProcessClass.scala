@@ -3,13 +3,14 @@ package com.sos.scheduler.engine.kernel.processclass
 import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobPath, ProcessClassOverview, TaskId}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassObstacle, ProcessClassPath}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -97,8 +98,29 @@ extends FileBased {
     finally clients -= client
   }
 
-  private[kernel] override def overview = ProcessClassOverview(path, fileBasedState,
-    processLimit = cppProxy.max_processes, usedProcessCount = cppProxy.used_process_count)
+  private[kernel] override def overview = {
+    val processLimit = cppProxy.max_processes
+    val usedProcessCount = cppProxy.used_process_count
+    ProcessClassOverview(
+      path,
+      fileBasedState,
+      processLimit = processLimit,
+      usedProcessCount = usedProcessCount,
+      obstacles = {
+        import ProcessClassObstacle._
+        val builder = Set.newBuilder[ProcessClassObstacle]
+        emptyToNone(fileBasedObstacles) match {
+          case Some(o) ⇒
+            builder += FileBasedObstacles(o)
+          case None ⇒
+            if (usedProcessCount >= processLimit) {
+              builder += ProcessLimitReached(processLimit)
+            }
+        }
+        builder.result
+      }
+    )
+  }
 
   def agents: immutable.Seq[Agent] = config.agents
 

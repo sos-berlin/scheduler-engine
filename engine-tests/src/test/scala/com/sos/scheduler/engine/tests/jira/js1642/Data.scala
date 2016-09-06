@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils._
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
@@ -233,7 +234,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       xaJobChainOverview,
       xbJobChainOverview),
     Vector(
-      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
+      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3,
+        obstacles = Set(NodeObstacle.Delaying(999999.s))),
       SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1),
       SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2),
       SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 0)),  // Distributed orders yet not counted
@@ -255,7 +257,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     usedJobs = ExpectedOrdersComplemented.usedJobs,
     usedProcessClasses = Nil,
     usedNodes = Vector(
-      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3),
+      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3,
+        obstacles = Set(NodeObstacle.Delaying(999999.s))),
       SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2)))
 
   val ExpectedOrderTreeComplemented = OrderTreeComplemented[OrderOverview](
@@ -330,7 +333,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "errorNodeId": "",
       "jobPath": "/test",
       "action": "process",
-      "orderCount": 3
+      "orderCount": 3,
+      "obstacles": [
+        {
+          "duration": 999999,
+          "TYPE": "Delaying"
+        }
+      ]
     },
     {
       "TYPE": "SimpleJob",
@@ -342,7 +351,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "errorNodeId": "",
       "jobPath": "/test",
       "action": "process",
-      "orderCount": 1
+      "orderCount": 1,
+      "obstacles": []
     },{
       "TYPE": "SimpleJob",
       "nodeKey": {
@@ -353,7 +363,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "errorNodeId": "",
       "jobPath": "/xFolder/test",
       "action": "process",
-      "orderCount": 2
+      "orderCount": 2,
+      "obstacles": []
     },
     {
       "TYPE": "SimpleJob",
@@ -365,7 +376,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "errorNodeId": "",
       "jobPath": "/xFolder/test",
       "action": "process",
-      "orderCount": 0
+      "orderCount": 0,
+      "obstacles": []
     }
   ]"""
   val UsedJobsJson = """[
@@ -404,7 +416,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "path": "",
       "fileBasedState": "active",
       "processLimit": 30,
-      "usedProcessCount": 3
+      "usedProcessCount": 3,
+      "obstacles": []
     }
   ]"""
 

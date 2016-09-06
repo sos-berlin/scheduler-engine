@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
 import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
+import java.time.Duration
 import org.w3c.dom
 
 /**
@@ -55,4 +56,6 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
   final def action = inSchedulerThread { JobChainNodeAction.ofCppName(cppProxy.string_action) }
 
   final def action_=(o: JobChainNodeAction): Unit = inSchedulerThread { cppProxy.set_action_string(o.toCppName) }
+
+  private[kernel] def delay = Duration.ofMillis(cppProxy.delay)
 }

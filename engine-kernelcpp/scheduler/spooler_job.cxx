@@ -3547,6 +3547,13 @@ xml::Element_ptr Standard_job::why_dom_element(const xml::Document_ptr& doc) {
     return result;
 }
 
+vector<string> Standard_job::unavailable_lock_path_strings() const {
+    if (_lock_requestor) 
+        return _lock_requestor->unavailable_lock_path_strings((lock::Holder*)NULL);
+    else
+        return vector<string>();
+}
+
 //------------------------------------------------------Standard_job::append_calendar_dom_elements
 
 void Standard_job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )

@@ -93,7 +93,7 @@ object ProcedureSignature {
   def ofConstructor(t: Seq[Class[_]]) = new ProcedureSignature("<init>", classOf[Void], t.toList)
 
   sealed trait Access
-  final case object MethodAccess extends Access
-  final case object FieldAccess extends Access
+  case object MethodAccess extends Access
+  case object FieldAccess extends Access
   final case class ExpressionAccess(cppExpression: String) extends Access
 }

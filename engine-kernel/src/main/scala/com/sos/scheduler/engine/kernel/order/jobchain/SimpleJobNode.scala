@@ -31,7 +31,8 @@ extends JobNode {
     errorNodeId = errorNodeId,
     action = action,
     jobPath = jobPath,
-    orderCount = orderCount)
+    orderCount = orderCount,
+    obstacles = obstacles)
 
   def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 
