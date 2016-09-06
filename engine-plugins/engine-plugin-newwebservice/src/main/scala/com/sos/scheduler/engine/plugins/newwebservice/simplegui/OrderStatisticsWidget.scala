@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 import scalatags.Text.all._
 import scalatags.text.Frag
 
@@ -8,7 +10,8 @@ import scalatags.text.Frag
   */
 object OrderStatisticsWidget {
 
-  private val fieldGroups = List(
+  private val TimestampName = "timestamp"
+  private val FieldGroups = List(
     List(
       "total",
       "notPlanned",
@@ -24,17 +27,19 @@ object OrderStatisticsWidget {
       "blacklisted"),
     List(
       "permanent",
-      "fileOrder"))
+      "fileOrder",
+      TimestampName))
 
   val html: Frag =
-    div(id := "OrderStatistics")(marginBottom := 1.em)(
-      for (nameGroup ← fieldGroups) yield
+    div(id := "OrderStatistics")(
+      for (nameGroup ← FieldGroups) yield
         div(cls := "OrderStatistics-fieldGroup")(
           for (name ← nameGroup) yield
             div(id := s"order-$name-field", cls := "OrderStatistics-field")(
-              s"$name:\u2009",
-              span(id := s"order-$name-value")("\u2007\u2007\u2007\u2007"))),
-      " ",
-      span(id := "OrderStatistics-refresh", cls := "glyphicon glyphicon-refresh", float.left, position.relative, top := 2.px, marginRight := 8.px),
+              name != TimestampName option s"$name:\u2009",
+              span(id := s"order-$name-value"),
+              name == TimestampName option seqFrag(
+                "\u00a0 ",
+                span(id := "OrderStatistics-refresh", cls := "glyphicon glyphicon-refresh")))),
       div(clear.left))
 }

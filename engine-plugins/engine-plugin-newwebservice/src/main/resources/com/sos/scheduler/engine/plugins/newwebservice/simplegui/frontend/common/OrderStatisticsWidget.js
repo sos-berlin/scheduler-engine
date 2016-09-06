@@ -21,6 +21,7 @@ jQuery(function() {
       valueDom: document.getElementById('order-' + key + "-value")
     }
   }
+  var timestampValueDom = document.getElementById('order-timestamp-value');
   var refreshElem = document.getElementById('OrderStatistics-refresh');
   var widgetJq = $('#OrderStatistics');
   var current = {}
@@ -45,16 +46,15 @@ jQuery(function() {
       refreshElem.style.visibility = "hidden";
       widgetJq.removeClass('OrderStatistics-error');
       var events = snapshot.elements;
+      timestampValueDom.innerText = new Date(snapshot.eventId / 1000).toTimeString().substring(0, 8);
       var event = events[0];
       var stat = event.orderStatistics;
       for (i in keys) {
         var key = keys[i];
         if (stat[key] !== current[key]) {
           var field = fields[key];
-          var string = stat[key].toString();
-          if (string.length < 4) string = (string + "\u2007\u2007\u2007").substring(0, 4);
-          field.valueDom.innerText = string;
-          if (typeof current[key] !== "undefined") {
+          field.valueDom.innerText = stat[key].toString();
+          if (typeof current[key] !== "undefined") {  // Not the first change?
             var style = field.fieldDom.style
             // 'alt' alternates between 1 and 0 to force the animation to restart
             var alt = 1 - 1 * style.animationName.substring(style.animationName.length - 1)

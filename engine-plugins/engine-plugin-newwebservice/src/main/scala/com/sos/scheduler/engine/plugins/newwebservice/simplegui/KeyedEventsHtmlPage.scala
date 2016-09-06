@@ -37,7 +37,7 @@ extends SchedulerHtmlPage {
 
   private implicit def taskIdToHtml(taskId: TaskId): Frag = a(cls := "inherit-markup", href := uris.task.overview(taskId))(taskId.toString)
 
-  private val midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
+  private val midnightInstant = SchedulerHtmlPage.midnightInstant
 
   def wholePage = htmlPage(
     div(cls := "ContentBox ContentBox-single Padded")(

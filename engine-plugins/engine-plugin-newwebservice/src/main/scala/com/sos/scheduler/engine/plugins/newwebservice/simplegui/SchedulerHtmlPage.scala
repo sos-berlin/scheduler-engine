@@ -18,7 +18,7 @@ import java.time.Instant.now
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField._
-import java.time.{Instant, OffsetDateTime}
+import java.time.{Instant, LocalDate, OffsetDateTime}
 import scala.language.implicitConversions
 import scalatags.Text.all._
 import scalatags.Text.{TypedTag, tags2}
@@ -132,6 +132,8 @@ private[simplegui] object SchedulerHtmlPage {
     case FileBasedState.undefined ⇒ "text-danger"
     case _ ⇒ ""
   }
+
+  def midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
   def eventIdToLocalHtml(eventId: EventId, withDateBefore: Instant = Instant.MAX): List[Frag] = {
     val instant = EventId.toInstant(eventId)
