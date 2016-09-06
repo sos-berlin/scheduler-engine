@@ -194,9 +194,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     val queryJson = JsObject(
       "isSuspended" → JsFalse,
       "isOrderSourceType" → JsArray(JsString("Permanent")))
-    Post("/api/order?return=OrderOverview", queryJson) ~>
-      Accept(`application/json`) ~> route ~> check
-    {
+    Post("/api/order?return=OrderOverview", queryJson) ~> Accept(`application/json`) ~> route ~> check {
       val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
       assert(snapshot == Snapshot(TestEventId, Orders(TestOrderOverviews)))
     }
