@@ -105,7 +105,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderProcessingState.InTaskProcess(TaskId(5), ProcessClassPath.Default, agentUri = None, taskIdToStartedAt(TaskId(5))),
     historyId = Some(OrderHistoryId(4)),
     nextStepAt = Some(EPOCH),
-    obstacles = Set(OrderObstacle.FileBasedObstacles(Set(FileBasedObstacle.Replaced))))
+    obstacles = Set(OrderObstacle.FileBasedObstacles(Set(FileBasedObstacle.Replaced()))))
   private val b1OrderOverviewJson = s"""{
     "path": "/bJobChain,1",
     "fileBasedState": "active",

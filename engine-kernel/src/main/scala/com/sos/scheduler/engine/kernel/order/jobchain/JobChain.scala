@@ -68,16 +68,14 @@ with UnmodifiableJobChain {
     obstacles = {
       import JobChainObstacle._
       val builder = Set.newBuilder[JobChainObstacle]
-      emptyToNone(fileBasedObstacles) match {
-        case Some(o) ⇒
-          builder += FileBasedObstacles(o)
-        case None ⇒
-          if (isStopped) {
-            builder += Stopped
-          }
-          orderLimitOption switch {
-            case Some(limit) ⇒ builder += OrderLimitReached(limit)
-          }
+      emptyToNone(fileBasedObstacles) switch {
+        case Some(o) ⇒ builder += FileBasedObstacles(o)
+      }
+      if (isStopped) {
+        builder += Stopped
+      }
+      orderLimitOption switch {
+        case Some(limit) ⇒ builder += OrderLimitReached(limit)
       }
       builder.result
     })

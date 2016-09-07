@@ -991,7 +991,6 @@ vector<string> Requestor::unavailable_lock_path_strings(Holder* holder) const {
         } else {
             result.push_back(lock->path());
         }
-
     }
     return result;
 }

@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inScheduler
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job._
+import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import java.time.Instant
@@ -20,7 +21,8 @@ import java.time.Instant
 @ForCpp
 final class Job(
   protected[this] val cppProxy: JobC,
-  protected[kernel] val subsystem: JobSubsystem)
+  protected[kernel] val subsystem: JobSubsystem,
+  protected[kernel] val processClassSubsystem: ProcessClassSubsystem)
 extends FileBased
 with Sister
 with UnmodifiableJob
@@ -54,6 +56,17 @@ with JobPersistence {
       }
       unavailableLockPaths switch {
         case o if o.nonEmpty ⇒ builder ++= o map LockUnavailable.apply
+      }
+      defaultProcessClassPathOption switch {
+        case Some(path) ⇒
+          processClassSubsystem.fileBasedOption(path) switch {
+            //case None ⇒ Set(ProcessClassObstacle.Missing)
+            case Some(processClass) ⇒
+              val o = processClass.obstacles
+              if (o.nonEmpty) {
+                builder += ProcessClassObstacles(o)
+              }
+          }
       }
       builder.result
     }
@@ -114,7 +127,7 @@ object Job {
   private[kernel] object Type extends SisterType[Job, JobC] {
     def sister(proxy: JobC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Job(proxy, injector.instance[JobSubsystem])
+      new Job(proxy, injector.instance[JobSubsystem], injector.instance[ProcessClassSubsystem])
     }
   }
 

@@ -98,29 +98,31 @@ extends FileBased {
     finally clients -= client
   }
 
-  private[kernel] def overview = {
-    val processLimit = cppProxy.max_processes
-    val usedProcessCount = cppProxy.used_process_count
+  private[kernel] def overview =
     ProcessClassOverview(
       path,
       fileBasedState,
       processLimit = processLimit,
       usedProcessCount = usedProcessCount,
-      obstacles = {
-        import ProcessClassObstacle._
-        val builder = Set.newBuilder[ProcessClassObstacle]
-        emptyToNone(fileBasedObstacles) match {
-          case Some(o) ⇒
-            builder += FileBasedObstacles(o)
-          case None ⇒
-            if (usedProcessCount >= processLimit) {
-              builder += ProcessLimitReached(processLimit)
-            }
-        }
-        builder.result
-      }
+      obstacles = obstacles
     )
+
+  private[kernel] def obstacles: Set[ProcessClassObstacle] = {
+    import ProcessClassObstacle._
+    val builder = Set.newBuilder[ProcessClassObstacle]
+    emptyToNone(fileBasedObstacles) match {
+      case Some(o) ⇒
+        builder += FileBasedObstacles(o)
+      case None ⇒
+        if (usedProcessCount >= processLimit) {
+          builder += ProcessLimitReached(processLimit)
+        }
+    }
+    builder.result
   }
+
+  private def processLimit: Int = cppProxy.max_processes
+  private def usedProcessCount: Int = cppProxy.used_process_count
 
   def agents: immutable.Seq[Agent] = config.agents
 

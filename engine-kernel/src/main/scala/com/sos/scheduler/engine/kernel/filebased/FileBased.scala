@@ -63,14 +63,14 @@ with EventSource {
     fileBasedState match {
       case FileBasedState.active ⇒
       case FileBasedState.not_initialized ⇒  // ad-hoc objects
-      case o ⇒ b += BadState(o, message = emptyToNone(cppProxy.file_based_error_string
+      case o ⇒ b += BadState(o, message = fileBasedErrorMessageOption map { _
         .stripPrefix("Z-JAVA-105  Java exception ")
         .stripSuffix(", method=CallObjectMethodA []")
-        .trim))
+        .trim })
     }
     replacementOption match {
       case Some(replacement) ⇒
-        b += Replaced
+        b += Replaced(replacement.fileBasedErrorMessageOption)
       case None if configurationFileRemoved ⇒
         Some(Removed)
       case _ ⇒
@@ -81,6 +81,9 @@ with EventSource {
   def fileBasedType: FileBasedType
 
   private[kernel] def fileBasedState = FileBasedState.values()(cppProxy.file_based_state)
+
+  private def fileBasedErrorMessageOption: Option[String] =
+    emptyToNone(cppProxy.file_based_error_string)
 
   protected def pathOrKey: ThisPath = path
 
