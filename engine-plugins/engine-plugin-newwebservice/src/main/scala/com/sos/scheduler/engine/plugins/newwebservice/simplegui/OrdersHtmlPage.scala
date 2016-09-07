@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, No
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.joinHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
@@ -172,13 +173,12 @@ extends SchedulerHtmlPage {
       case _ ⇒ jobPathOption.toList flatMap jobPathToObstacleHtml
     }
     val isWaiting = order.processingState.isInstanceOf[OrderProcessingState.Waiting]
-    val obstaclesHtml: List[Frag] = {
+    val obstaclesHtml: Frag = {
       val orderObstaclesHtml = order.obstacles.toList map { o ⇒ stringFrag(o.toString) }
-      val inner = joinFrags(orderObstaclesHtml ++ jobObstaclesHtml, s" $Dot ")
-      if (isWaiting && inner.nonEmpty)
-        span(cls := "text-danger")(inner) :: Nil
-      else
-        inner
+      orderObstaclesHtml ++ jobObstaclesHtml match {
+        case obstacles if obstacles.nonEmpty ⇒ span(cls := "text-danger")(joinHtml(s" $Dot ")(obstacles))
+        case _ ⇒ StringFrag("")
+      }
     }
     val rowCssClass = orderToTrClass(order) getOrElse (if (isWaiting && jobObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
@@ -229,14 +229,4 @@ object OrdersHtmlPage {
         case _ if !order.fileBasedState.isOkay ⇒ Some("bg-danger")
         case _ ⇒ None
       }
-
-  private def joinFrags(frags: List[Frag], joiner: Frag) = {
-    if (frags.isEmpty)
-      Nil
-    else
-      frags.head :: (
-        for (o ← frags.tail;
-             x ← stringFrag(s" $Dot ") :: o :: Nil)
-          yield x)
-  }
 }
