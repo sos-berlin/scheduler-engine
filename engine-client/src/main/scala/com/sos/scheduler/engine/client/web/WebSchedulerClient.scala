@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView, Orders}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
@@ -50,15 +51,20 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def overview =
     get[Snapshot[SchedulerOverview]](_.overview)
 
+  final def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P): Future[Snapshot[FileBasedDetailed]] =
+    for (snapshot ← get[Snapshot[FileBasedDetailed]](_.fileBasedDetailed(path))) yield
+      for (fileBasedDetailed ← snapshot) yield
+        fileBasedDetailed.asTyped[P] // Correct TypedPath (instead of UnknownPath)
+
   // Order
 
-  def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]] =
+  final def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]] =
     get[Snapshot[V]](_.order[V](orderKey))
 
-  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
+  final def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
     post[OrderQuery, Snapshot[Orders[V]]](_.order.forPost[V], query) map { _ map { _.orders }}
 
-  def getOrdersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
+  final def getOrdersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
     get[Snapshot[Orders[V]]](_.order[V](query)) map { _ map { _.orders }}
 
   final def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
@@ -93,7 +99,7 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   // Event
 
-  def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
+  final def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
     get[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]](_.events(after = after, limit = limit, reverse = reverse, returnType = implicitClass[E].getSimpleName))
 
   // Basic

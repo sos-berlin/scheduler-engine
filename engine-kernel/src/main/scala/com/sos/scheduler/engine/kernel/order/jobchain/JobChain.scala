@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.data.jobchain.JobChainObstacle
 import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
@@ -9,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.next_state
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainObstacle, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.QueryableJobChain
@@ -62,7 +61,7 @@ with UnmodifiableJobChain {
     def isDistributed = JobChain.this.isDistributed
   }
 
-  private[kernel] override def overview = JobChainOverview(
+  private[kernel] def overview = JobChainOverview(
     path = path,
     fileBasedState = fileBasedState,
     isDistributed = isDistributed,
@@ -135,15 +134,10 @@ with UnmodifiableJobChain {
   @ForCpp
   private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
-  private[kernel] override def details = {
-    val fileBasedDetailed = super.details
+  private[kernel] def details =
     JobChainDetailed(
       overview = overview,
-      file           = fileBasedDetailed.file,
-      fileModifiedAt = fileBasedDetailed.fileModifiedAt,
-      sourceXml      = fileBasedDetailed.sourceXml,
       nodes = nodes map { _.overview })
-    }
 
   private[order] def refersToJob(job: Job): Boolean = nodes exists {
     case n: SimpleJobNode => n.getJob eq job

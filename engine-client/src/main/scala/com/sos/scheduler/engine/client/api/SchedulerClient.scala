@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
 /**
   * @author Joacim Zschimmer
   */
-trait SchedulerClient extends SchedulerOverviewClient with CommandClient with OrderClient {
+trait SchedulerClient extends SchedulerOverviewClient with CommandClient with FileBasedClient with OrderClient {
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]]
 

@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
@@ -13,6 +14,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
 import com.sos.scheduler.engine.kernel.order.{DirectOrderClient, OrderSubsystem}
@@ -32,6 +34,7 @@ final class DirectSchedulerClient @Inject private(
   taskSubsystem: TaskSubsystem,
   jobSubsystem: JobSubsystem,
   processClassSubsystem: ProcessClassSubsystem,
+  fileBasedSubsystemRegister: FileBasedSubsystem.Register,
   protected val eventCollector: EventCollector)(
   implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val executionContext: ExecutionContext)
@@ -39,6 +42,11 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
 
   def overview: Future[Snapshot[SchedulerOverview]] =
     respondWith { scheduler.overview }
+
+  def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P): Future[Snapshot[FileBasedDetailed]] =
+    respondWith {
+      fileBasedSubsystemRegister.fileBased(path).fileBasedDetailed
+    }
 
   def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey) =
     respondWith { orderSubsystem.order(orderKey).view[V] }

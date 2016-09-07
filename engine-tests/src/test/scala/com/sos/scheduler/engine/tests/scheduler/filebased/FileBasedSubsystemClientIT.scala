@@ -61,13 +61,13 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
         val expectedFileBasedStates = Map(
           FileBasedState.not_initialized → (paths count pathIsNotInitialized),
           FileBasedState.active → (paths count { o ⇒ !pathIsNotInitialized(o) }))
-        subsystem.overview should have (
+        subsystem.fileBasedSubsystemOverview should have (
           'fileBasedType (subsystemDescription.fileBasedType),
           'count (paths.size),
           'fileBasedStateCounts (expectedFileBasedStates filter { _._2 != 0 } ))
       }
 
-      for (path <- testPaths map { _.asInstanceOf[subsystem.ThisPath] }) {
+      for (path ← testPaths map { _.asInstanceOf[subsystem.ThisPath] }) {
         def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.not_initialized else FileBasedState.active
         s"fileBased $path" - {
           lazy val fileBased = subsystem.fileBased(path)
@@ -121,13 +121,12 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
 
           "detailed" in {
             assert(fileBasedDetailed.overview.fileBasedState == expectedFileBasedState)
-            fileBasedDetailed should have (
-              'path (path),
-              'file (Try(fileBased.file).toOption)) //,
-              //'sourceXml (emptyToNone(fileBased.sourceXmlBytes) map xmlBytesToString))
-            if (fileBased.isFileBased)
+            assert(fileBasedDetailed.path == path)
+            assert(fileBasedDetailed.file == Try(fileBased.file).toOption)
+            if (fileBased.isFileBased) {
+              assert(fileBasedDetailed.sourceXml.get startsWith "<")
               fileBasedDetailed.fileModifiedAt.get should (be >= (now() - 30.s) and be <= now())
-            else
+            } else
               fileBasedDetailed.fileModifiedAt shouldBe None
           }
 
@@ -154,7 +153,7 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
   }
 
   "JobSubsystemOverview" in {
-    jobSubsystemClient.overview should have (
+    jobSubsystemClient.fileBasedSubsystemOverview should have (
       'jobStateCounts (Map(JobState.pending → jobSubsystemSetting.paths.size))
     )
   }

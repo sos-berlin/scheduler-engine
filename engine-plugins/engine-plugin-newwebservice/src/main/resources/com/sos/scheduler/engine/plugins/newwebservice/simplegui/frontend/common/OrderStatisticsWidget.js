@@ -29,7 +29,6 @@ jQuery(function() {
 
   function documentVisibilityChanged() {
     if (!document.hidden && delayedGetNextEvent) {
-      console.debug("OrderStatisticsWidget visible");
       var f = delayedGetNextEvent;
       delayedGetNextEvent = null;
       f();
@@ -67,7 +66,6 @@ jQuery(function() {
       if (document.hidden) {
         showRefreshing();
         delayedGetNextEvent = getNextEvent;
-        console.debug("OrderStatisticsWidget hidden");
       } else {
         setTimeout(getNextEvent, 500);
       }

@@ -93,17 +93,15 @@ object SchedulerTestUtils {
   def jobOverview(path: JobPath)(implicit hasInjector: HasInjector): JobOverview =
     instance[JobSubsystemClient].jobOverview(path)
 
-  def jobDetailed(path: JobPath)(implicit hasInjector: HasInjector): FileBasedDetailed =
-    instance[JobSubsystemClient].fileBasedDetailed(path)
-
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
     instance[JobSubsystemClient].job(jobPath)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
     instance[OrderSubsystemClient].jobChain(jobChainPath)
 
   def jobChainDetailed(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainDetailed =
-    instance[OrderSubsystemClient].fileBasedDetailed(jobChainPath)
+    instance[OrderSubsystemClient].detailed(jobChainPath)
 
   def orderOverview(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderOverview =
     instance[OrderSubsystemClient].orderOverview(orderKey)
@@ -111,12 +109,13 @@ object SchedulerTestUtils {
   def orderDetailed(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetailed =
     instance[OrderSubsystemClient].orderDetailed(orderKey)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
     instance[OrderSubsystemClient].order(orderKey)
 
   def orderExists(orderKey: OrderKey)(implicit hasInjector: HasInjector): Boolean = orderOption(orderKey).isDefined
 
-  @Deprecated
+  @deprecated("Avoid direct access to C++ near objects")
   def orderOption(orderKey: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
     instance[OrderSubsystemClient].orderOption(orderKey)
 
@@ -126,9 +125,11 @@ object SchedulerTestUtils {
   def taskDetailed(taskId: TaskId)(implicit hasInjector: HasInjector): TaskDetailed =
     instance[TaskSubsystemClient].taskDetailed(taskId) await TestTimeout
 
+  @deprecated("Avoid direct access to C++ near objects")
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystemClient].task(taskId)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
     instance[ProcessClassSubsystemClient].processClass(path)
 

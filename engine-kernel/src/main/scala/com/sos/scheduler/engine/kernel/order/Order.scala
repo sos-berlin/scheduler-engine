@@ -80,7 +80,7 @@ with OrderPersistence {
       case OrderDetailed ⇒ details.asInstanceOf[V]
     }
 
-  private[kernel] override def overview: OrderOverview = {
+  private[kernel] def overview: OrderOverview = {
     val orderKey = this.pathOrKey
     val nodeId = this.nodeId
     val flags = cppProxy.java_fast_flags
@@ -140,20 +140,14 @@ with OrderPersistence {
       occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
   }
 
-  override private[kernel] def details: OrderDetailed = {
-    val overview = this.overview
-    val fileBasedDetailed = super.details
+  private[kernel] def details: OrderDetailed =
     OrderDetailed(
       overview = overview,
-      file = fileBasedDetailed.file,
-      fileModifiedAt = fileBasedDetailed.fileModifiedAt,
-      sourceXml = fileBasedDetailed.sourceXml,
       priority = priority,
       initialNodeId = emptyToNone(cppProxy.initial_state_string) map NodeId.apply,
       endNodeId = emptyToNone(cppProxy.end_state_string) map NodeId.apply,
       title = title,
       variables = variables)
-  }
 
   private def isSetback = setbackUntilOption.isDefined
 

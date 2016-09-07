@@ -22,6 +22,13 @@ final class SchedulerUrisTest extends FreeSpec {
     assert(uris.overview == "http://0.0.0.0:1111/jobscheduler/master/api")
   }
 
+  "fileBasedDetailed" in {
+    assert(uris.fileBasedDetailed(JobChainPath("/FOLDER/TEST")) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/FOLDER/TEST?return=FileBasedDetailed")
+    assert(uris.fileBasedDetailed(JobChainPath("/FOLDER/TEST") orderKey "1") ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST,1?return=FileBasedDetailed")
+  }
+
   "order" - {
     "GET OrderOverview" in {
       assert(uris.order[OrderOverview](OrderQuery.All) ==

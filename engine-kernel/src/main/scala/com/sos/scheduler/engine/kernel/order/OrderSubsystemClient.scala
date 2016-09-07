@@ -17,18 +17,13 @@ final class OrderSubsystemClient @Inject private(
   (implicit protected val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystemClient {
 
-  override def fileBasedDetailed(path: JobChainPath): JobChainDetailed =
-    inSchedulerThread {
-      subsystem.jobChain(path).details
-    }
-
   override type ThisFileBased = JobChain
 
   def tryRemoveOrder(k: OrderKey): Unit = inSchedulerThread { for (o ← subsystem.orderOption(k)) o.remove() }
 
   def remove(path: JobChainPath): Unit = inSchedulerThread { subsystem.removeJobChain(path) }
 
-  override def detailed(path: companion.Path): JobChainDetailed = inSchedulerThread { subsystem.fileBased(path).details }
+  def detailed(path: companion.Path): JobChainDetailed = inSchedulerThread { subsystem.fileBased(path).details }
 
   @deprecated("Avoid direct access to C++ near objects")
   def jobChain(path: JobChainPath): JobChain = fileBased(path)

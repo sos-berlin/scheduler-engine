@@ -98,7 +98,7 @@ extends FileBased {
     finally clients -= client
   }
 
-  private[kernel] override def overview = {
+  private[kernel] def overview = {
     val processLimit = cppProxy.max_processes
     val usedProcessCount = cppProxy.used_process_count
     ProcessClassOverview(

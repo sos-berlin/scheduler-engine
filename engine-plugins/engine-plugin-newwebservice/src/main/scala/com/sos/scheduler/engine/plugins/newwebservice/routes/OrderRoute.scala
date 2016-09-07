@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
@@ -11,7 +11,6 @@ import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
@@ -19,6 +18,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.imp
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
 import scala.concurrent.ExecutionContext
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
+import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
 
@@ -28,7 +28,7 @@ import spray.routing.{Route, ValidationRejection}
 trait OrderRoute extends LogRoute {
 
   protected def orderSubsystem: OrderSubsystemClient
-  protected implicit def client: OrderClient with SchedulerOverviewClient with DirectEventClient
+  protected implicit def client: OrderClient with SchedulerOverviewClient with FileBasedClient with DirectEventClient
   protected implicit def webServiceContext: WebServiceContext
   protected implicit def executionContext: ExecutionContext
 
@@ -58,6 +58,9 @@ trait OrderRoute extends LogRoute {
 
         case "OrderDetailed" ⇒
           completeTryHtml(client.order[OrderDetailed](orderKey))
+
+        case "FileBasedDetailed" ⇒
+          completeTryHtml(client.fileBasedDetailed(orderKey))
 
         case "Event" ⇒
           parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒

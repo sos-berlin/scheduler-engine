@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedState}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState, TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.Instant._
 import org.junit.runner.RunWith
@@ -51,10 +52,16 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected def actorRefFactory = actorSystem
 
-  protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
+  protected val client = new OrderClient with SchedulerOverviewClient with FileBasedClient with DirectEventClient {
     protected val eventCollector = new EventCollector(eventBus)
 
     protected def executionContext = OrderRouteTest.this.executionContext
+
+    def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P): Future[Snapshot[FileBasedDetailed]] =
+      respondWith {
+        assert(path == A1OrderKey)
+        A1FileBasedDetailed
+      }
 
     def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]] =
       respondWith(
@@ -109,82 +116,89 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
         assert(snapshot == Snapshot(TestEventId, Orders(TestOrderOverviews)))
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/?return=OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[Orders[OrderDetailed]]]
-        assert(snapshot.value.orders == TestOrderDetaileds)
-        assert(snapshot.eventId == TestEventId)  // Snapshot.equals ignores eventId
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
+        assert(responseAs[Snapshot[Orders[OrderDetailed]]] == Snapshot(TestEventId, Orders(TestOrderDetaileds)))
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
+      "/api/order/aJobChain,1?return=FileBasedDetailed")) {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
+        assert((responseAs[Snapshot[FileBasedDetailed]] map { _.asTyped[OrderKey] }) == Snapshot(TestEventId, A1FileBasedDetailed))
+      }
+    }
+  }
+
+  for (uri ← List(
       "/api/order/?isSuspended=false&isOrderSourceType=Permanent",
       "/api/order/?return=OrderTreeComplemented&isSuspended=false&isOrderSourceType=Permanent",
       "/api/order/?return=OrderTreeComplemented/OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrderTreeComplemented[OrderOverview]] ==
           OrderTreeComplemented.fromOrderComplemented(FolderPath.Root, TestOrdersComplemented))
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/?return=OrderTreeComplemented/OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrderTreeComplemented[OrderDetailed]] ==
           OrderTreeComplemented.fromOrderComplemented(FolderPath.Root, DetailedOrdersComplemented))
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/?return=OrdersComplemented&isSuspended=false&isOrderSourceType=Permanent",
       "/api/order/?return=OrdersComplemented/OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrdersComplemented[OrderOverview]] == TestOrdersComplemented)
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/?return=OrdersComplemented/OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[OrdersComplemented[OrderDetailed]] == DetailedOrdersComplemented)
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/aJobChain,1?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[Snapshot[OrderOverview]].value == A1OrderOverview)
       }
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/aJobChain,1?isSuspended=false&isOrderSourceType=Permanent",
       "/api/order/aJobChain,1?return=OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
-    s"$path" in {
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+    s"$uri" in {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[Snapshot[OrderDetailed]].value == A1OrderDetailed)
       }
     }
@@ -200,11 +214,11 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     }
   }
 
-  for (path ← List(
+  for (uri ← List(
       "/api/order/aJobChain,1?return=Event")) {
-    s"$path" in {
+    s"$uri" in {
       for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
-      Get(path) ~> Accept(`application/json`) ~> route ~> check {
+      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert((responseAs[Snapshot[Vector[Snapshot[Event]]]].value map { _.value }) == OrderEvents)
       }
     }
@@ -216,6 +230,14 @@ object OrderRouteTest {
   private val TestJobPath = JobPath("/test")
   private val A1OrderKey = AJobChainPath orderKey "1"
   private val TestEventId = EventId(Long.MaxValue)
+
+  private val A1FileBasedDetailed =FileBasedDetailed(
+    FileBasedOverview(
+    A1OrderKey,
+    FileBasedState.active),
+    Some(Paths.get("/DIR/a,1.order.xml")),
+    Some(Instant.parse("2016-09-07T11:22:33.444Z")),
+    Some("<?xml version='1.0'?><order/>"))
 
   private val A1OrderOverview = OrderOverview(
     A1OrderKey,

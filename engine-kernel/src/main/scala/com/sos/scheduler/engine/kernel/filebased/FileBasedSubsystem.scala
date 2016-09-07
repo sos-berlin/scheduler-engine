@@ -136,8 +136,24 @@ object FileBasedSubsystem {
 
   final class Register private(injector: Injector, typeToCompanion: Map[FileBasedType, Companion]) {
     val companions = typeToCompanion.values.toImmutableSeq
+
     private[kernel] def subsystem(t: FileBasedType): FileBasedSubsystem = injector.getInstance(companion(t).subsystemClass)
-    def client(t: FileBasedType): FileBasedSubsystemClient = injector.getInstance(companion(t).clientClass)
+
+    private[kernel] def fileBased[P <: TypedPath: TypedPath.Companion](path: P): FileBased = {
+      val c = client(implicitly[TypedPath.Companion[P]])
+      c.fileBased(path.asInstanceOf[c.ThisPath])
+    }
+
+//    def client[P <: TypedPath: TypedPath.Companion]: FileBasedSubsystemClient { type ThisPath = P } =
+//      client(implicitly[TypedPath.Companion[P]])
+//        .asInstanceOf[FileBasedSubsystemClient { type ThisPath = P }]
+
+    def client(o: TypedPath.AnyCompanion): FileBasedSubsystemClient = client(o.fileBasedType)
+
+    def client(t: FileBasedType): FileBasedSubsystemClient = client(companion(t))
+
+    def client(o: FileBasedSubsystem.Companion): FileBasedSubsystemClient = injector.getInstance(o.clientClass)
+
     def companion(t: FileBasedType): Companion = typeToCompanion(t)
   }
 

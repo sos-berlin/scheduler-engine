@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
@@ -39,6 +40,7 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
+import java.nio.file.Files
 import java.nio.file.Files.deleteIfExists
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -180,6 +182,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(overview.state == SchedulerState.running)
     }
 
+    "FileBasedDetailed" in {
+      val fileBasedDetailed = awaitContent(client.fileBasedDetailed(a1OrderKey))
+      assert(fileBasedDetailed.copy(sourceXml = None) == awaitContent(directSchedulerClient.fileBasedDetailed(a1OrderKey)).copy(sourceXml = None))
+      val file = testEnvironment.fileFromPath(a1OrderKey)
+      assert(SafeXML.loadString(fileBasedDetailed.sourceXml.get) == file.xml)
+      assert(fileBasedDetailed.fileModifiedAt.isDefined)
+    }
+
     "orders[OrderOverview]" in {
       val orders = awaitContent(client.orders[OrderOverview])
       assert(orders == awaitContent(directSchedulerClient.orders[OrderOverview]))
@@ -261,15 +271,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "jobChainDetailed" in {
       val jobChainDetailed: JobChainDetailed = awaitContent(client.jobChainDetailed(xaJobChainPath))
       assert(jobChainDetailed == awaitContent(directSchedulerClient.jobChainDetailed(xaJobChainPath)))
-      assert(jobChainDetailed.copy(fileModifiedAt = None, sourceXml = None) ==
+      assert(jobChainDetailed ==
         JobChainDetailed(
           JobChainOverview(
             xaJobChainPath,
             FileBasedState.active,
             isDistributed = false),
-          Some(testEnvironment.fileFromPath(xaJobChainPath)),
-          fileModifiedAt = None,
-          sourceXml = None,
           List(
             SimpleJobNodeOverview(
               NodeKey(xaJobChainPath, NodeId("100")),
@@ -279,7 +286,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
               orderCount = 2),
             EndNodeOverview(
               NodeKey(xaJobChainPath, NodeId("END"))))))
-      assert(jobChainDetailed.sourceXml.get startsWith "<job_chain ")
     }
 
     "ordersComplemented speed" in {

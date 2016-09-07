@@ -23,14 +23,9 @@ trait FileBasedSubsystemClient {
       subsystem.fileBased(path).forceFileReread()
     }
 
-  def overview: FileBasedSubsystemOverview =
+  def fileBasedSubsystemOverview: FileBasedSubsystemOverview =
     inSchedulerThread {
       subsystem.overview
-    }
-
-  def detailed(path: ThisPath): FileBasedDetailed =
-    inSchedulerThread {
-      fileBasedDetailed(path)
     }
 
   def count = inSchedulerThread { subsystem.count }
@@ -52,12 +47,12 @@ trait FileBasedSubsystemClient {
 
   def fileBasedOverview(path: ThisPath): FileBasedOverview =
     inSchedulerThread {
-      subsystem.fileBased(path).overview
+      subsystem.fileBased(path).fileBasedOverview
     }
 
   def fileBasedDetailed(path: ThisPath): FileBasedDetailed =
     inSchedulerThread {
-      subsystem.fileBased(path).details
+      subsystem.fileBased(path).fileBasedDetailed
     }
 
   @deprecated("Avoid direct access to C++ near objects")

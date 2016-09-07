@@ -35,7 +35,7 @@ with JobPersistence {
 
   def stringToPath(o: String) = JobPath(o)
 
-  private[kernel] override def overview = {
+  private[kernel] def overview = {
     val state = this.state
     val isInPeriod = this.isInPeriod
     val taskLimit = this.taskLimit

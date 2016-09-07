@@ -36,9 +36,9 @@ with EventSource {
 
   protected[this] def cppProxy: File_basedC[_]
 
-  private[kernel] def details: FileBasedDetailed = {
-    val overview = this.simpleOverview
-    SimpleFileBasedDetailed(
+  private[kernel] def fileBasedDetailed: FileBasedDetailed = {
+    val overview = this.fileBasedOverview
+    FileBasedDetailed(
       overview = overview,
       file = fileOption,
       fileModifiedAt = fileModificationInstantOption,
@@ -50,17 +50,12 @@ with EventSource {
       })
     }
 
-  private[kernel] def overview: FileBasedOverview =
+  private[kernel] def fileBasedOverview: FileBasedOverview =
     inSchedulerThread {
-      SimpleFileBasedOverview(
+      FileBasedOverview(
         path = pathOrKey,
         fileBasedState = fileBasedState)
     }
-
-  private def simpleOverview: SimpleFileBasedOverview =
-    SimpleFileBasedOverview(
-      path = pathOrKey,
-      fileBasedState = fileBasedState)
 
   private[kernel] final def fileBasedObstacles: Set[FileBasedObstacle] = {
     import FileBasedObstacle._

@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQueryHttp}
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.event.EventId
+import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
@@ -22,6 +23,11 @@ final class SchedulerUris private(schedulerUriString: String) {
   lazy val command = resolvePathUri("api/command")
 
   lazy val overview = uriString("api")
+
+  def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P) = {
+    val companion = implicitly[TypedPath.Companion[P]]
+    uriString(Uri.Path("api/" + companion.fileBasedType.lowerCaseCamelName + path.string), "return" → "FileBasedDetailed")
+  }
 
   object order {
     def apply[V <: OrderView: OrderView.Companion](orderKey: OrderKey): String =
