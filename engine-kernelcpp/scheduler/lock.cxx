@@ -988,9 +988,10 @@ vector<string> Requestor::unavailable_lock_path_strings(Holder* holder) const {
             if (!lock->is_free_for(lock_use, holder)) {
                 result.push_back(lock->path());
             }
-        } else {
-            result.push_back(lock->path());
+        //} else {
+        //    result.push_back(lock_use->lock_path());   Already reported as MissingRequisite
         }
+
     }
     return result;
 }
