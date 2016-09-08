@@ -48,7 +48,7 @@ final class SchedulerDirectivesTest extends FreeSpec with ScalatestRouteTest {
         assert(!handled)
       }
       Get("/job/a") ~> route ~> check {
-        assert(responseAs[String] == "Job /a")
+        assert(responseAs[String] == "Job:/a")
       }
       Get("/job/a,1") ~> route ~> check {
         assert(handled)
@@ -57,7 +57,7 @@ final class SchedulerDirectivesTest extends FreeSpec with ScalatestRouteTest {
         assert(!handled)
       }
       Get("/job/a/b") ~> route ~> check {
-        assert(responseAs[String] == "Job /a/b")
+        assert(responseAs[String] == "Job:/a/b")
       }
     }
 
@@ -66,7 +66,7 @@ final class SchedulerDirectivesTest extends FreeSpec with ScalatestRouteTest {
         assert(!handled)
       }
       Get("/folder/") ~> route ~> check {
-        assert(responseAs[String] == "Folder /")
+        assert(responseAs[String] == "Folder:/")
       }
       Get("/folder/a") ~> route ~> check {
         assert(!handled)
@@ -75,10 +75,10 @@ final class SchedulerDirectivesTest extends FreeSpec with ScalatestRouteTest {
         assert(!handled)
       }
       Get("/folder/a/") ~> route ~> check {
-        assert(responseAs[String] == "Folder /a")
+        assert(responseAs[String] == "Folder:/a")
       }
       Get("/folder/a/b/") ~> route ~> check {
-        assert(responseAs[String] == "Folder /a/b")
+        assert(responseAs[String] == "Folder:/a/b")
       }
     }
 
@@ -93,7 +93,7 @@ final class SchedulerDirectivesTest extends FreeSpec with ScalatestRouteTest {
         assert(!handled)
       }
       Get("/order/a,1") ~> route ~> check {
-        assert(responseAs[String] == "Order /a,1")
+        assert(responseAs[String] == "Order:/a,1")
       }
       Get("/order/a/") ~> route ~> check {
         assert(!handled)
