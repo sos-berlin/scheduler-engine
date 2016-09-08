@@ -47,7 +47,8 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     void                        remove_requisite            ( const Requisite_path& );
     bool                        requisite_is_registered     ( const Requisite_path& );
     void                        remove_requisites           ();
-    list<Requisite_path>        missing_requisites          ();
+    virtual list<Requisite_path> missing_requisites         ();
+    vector<string>              missing_requisites_java     ();
     void                        add_accompanying_dependant   ( Dependant* );
     void                        remove_accompanying_dependant( Dependant* );
 

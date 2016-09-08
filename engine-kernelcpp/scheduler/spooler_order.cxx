@@ -1987,6 +1987,28 @@ void Job_chain::close()
     File_based::close();
 }
 
+list<Requisite_path> Job_chain::missing_requisites() {
+    list<Requisite_path> result;
+    list<Requisite_path> missings = Dependant::missing_requisites();
+    Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+        result.push_back(*i);
+    Z_FOR_EACH_CONST(Node_list, _node_list, i) {
+        if (Job_node* node = Job_node::try_cast(*i)) {
+            list<Requisite_path> missings = node->missing_requisites();
+            Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+                result.push_back(*i);
+        }
+    }
+    Z_FOR_EACH_CONST(Order_sources::Order_source_list, _order_sources._order_source_list, i) {
+        if (Dependant* dependant = dynamic_cast<Dependant*>(+*i)) {
+            list<Requisite_path> missings = dependant->missing_requisites();
+            Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+                result.push_back(*i);
+        }
+    }
+    return result;
+}
+
 //-------------------------------Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space
 
 void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()

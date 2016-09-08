@@ -953,6 +953,7 @@ struct Job_chain : Com_job_chain,
     bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
 
 
+    list<Requisite_path>        missing_requisites          ();
     void                        fill_holes                  ();
   //bool                        initialize_nested_job_chains();
     bool                        check_nested_job_chains     ();

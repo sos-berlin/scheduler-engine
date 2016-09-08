@@ -89,6 +89,16 @@ void Dependant::on_requisite_removed( File_based* )
 
 //--------------------------------------------------------------------Dependant::missing_requisites
 
+vector<string> Dependant::missing_requisites_java() {
+    list<Requisite_path> requisite_paths = missing_requisites();
+    vector<string> result;
+    result.reserve(requisite_paths.size());
+    Z_FOR_EACH_CONST(list<Requisite_path>, requisite_paths, i) {
+        result.push_back(i->_subsystem->xml_element_name() + ":" + i->_path);
+    }
+    return result;
+}
+
 list<Requisite_path> Dependant::missing_requisites()
 {
     list<Requisite_path> result;

@@ -21,4 +21,5 @@ trait File_basedC[S <: Sister] {
   def is_to_be_removed: Boolean
   def name_is_fixed: Boolean
   @Nullable def replacement_java: FileBased
+  def missing_requisites_java: Array[String]
 }

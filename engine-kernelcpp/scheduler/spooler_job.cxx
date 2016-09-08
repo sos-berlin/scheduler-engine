@@ -1018,6 +1018,31 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
     }
 }
 
+list<Requisite_path> Standard_job::missing_requisites() {
+    list<Requisite_path> result;
+    list<Requisite_path> missings = Dependant::missing_requisites();
+    Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+        result.push_back(*i);
+    if (_lock_requestor) {
+        Z_FOR_EACH_CONST(lock::Requestor::Use_list, _lock_requestor->_use_list, i) {
+            list<Requisite_path> missings = (*i)->missing_requisites();
+            Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+                result.push_back(*i);
+        }
+    }
+    if (_module && _module->_monitors) {
+        list<Requisite_path> missings = _module->_monitors->missing_requisites();
+        Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+            result.push_back(*i);
+    }
+    if (_schedule_use) {
+        list<Requisite_path> missings = _schedule_use->missing_requisites();
+        Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+            result.push_back(*i);
+    }
+    return result;
+}
+
 //----------------------------------------------------Standard_job::get_step_duration_or_percentage
 
 Duration Standard_job::get_step_duration_or_percentage( const string& value, const Duration& deflt )
