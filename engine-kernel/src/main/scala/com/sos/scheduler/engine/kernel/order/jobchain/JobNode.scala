@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobNodeOverview, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode.logger
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
@@ -22,6 +23,8 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
 
   private[kernel] def overview: JobNodeOverview
   def jobPath: JobPath
+
+  protected final val jobSubsystem = injector.instance[JobSubsystem]
 
   override private[kernel] def processConfigurationDomElement(nodeElement: dom.Element) = {
     val namespaceToJobNodePlugins = injector.instance[PluginSubsystem].xmlNamespaceToPlugins[JobChainNodeNamespaceXmlPlugin] _
@@ -53,6 +56,9 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
     }
     if (!delay.isZero) {
       builder += Delaying(delay)
+    }
+    if (!jobSubsystem.contains(jobPath)) {
+      builder += MissingJob(jobPath)
     }
     builder.result
   }

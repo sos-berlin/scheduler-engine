@@ -59,23 +59,27 @@ with EventSource {
 
   private[kernel] final def fileBasedObstacles: Set[FileBasedObstacle] = {
     import FileBasedObstacle._
-    val b = Set.newBuilder[FileBasedObstacle]
+    val builder = Set.newBuilder[FileBasedObstacle]
     fileBasedState match {
       case FileBasedState.active ⇒
       case FileBasedState.not_initialized ⇒  // ad-hoc objects
-      case o ⇒ b += BadState(o, message = fileBasedErrorMessageOption map { _
+      case o ⇒ builder += BadState(o, error = fileBasedErrorMessageOption map { _
         .stripPrefix("Z-JAVA-105  Java exception ")
         .stripSuffix(", method=CallObjectMethodA []")
         .trim })
     }
     replacementOption match {
       case Some(replacement) ⇒
-        b += Replaced(replacement.fileBasedErrorMessageOption)
+        builder += Replaced(replacement.fileBasedErrorMessageOption)
       case None if configurationFileRemoved ⇒
         Some(Removed)
       case _ ⇒
     }
-    b.result
+    val missingRequisites = this.missingRequisites
+    if (missingRequisites.nonEmpty) {
+      builder += MissingRequisites(missingRequisites)
+    }
+    builder.result
   }
 
   def fileBasedType: FileBasedType
@@ -142,6 +146,9 @@ with EventSource {
   private[kernel] final def configurationFileRemoved = cppProxy.is_to_be_removed
 
   private[kernel] final def replacementOption: Option[Self] = Option(cppProxy.replacement_java.asInstanceOf[Self])
+
+  private final def missingRequisites: Set[TypedPath] =
+    (cppProxy.missing_requisites_java map TypedPath.fromCppTypedString).toSet
 
   protected def fixedPathOption = _fixedPath.toOption
 }

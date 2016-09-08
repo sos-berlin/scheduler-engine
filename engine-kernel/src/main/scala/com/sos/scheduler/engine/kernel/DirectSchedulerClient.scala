@@ -80,7 +80,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       }
       val processClasses = {
         val processClassPaths = (tasks map { _.processClassPath }) ++ (jobs flatMap { _.defaultProcessClassPathOption })
-        processClassPaths.distinct map processClassSubsystem.processClass
+        processClassPaths.distinct flatMap processClassSubsystem.fileBasedOption
       }
       OrdersComplemented(
         orderOverviews,

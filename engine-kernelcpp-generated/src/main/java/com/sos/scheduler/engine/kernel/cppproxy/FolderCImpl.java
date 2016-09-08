@@ -160,6 +160,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.FolderC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log__native(long cppReference);
 
 
+    @Override public String[] missing_requisites_java() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            String[] result = missing_requisites_java__native(cppReference());
+            checkIsNotReleased(String[].class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native String[] missing_requisites_java__native(long cppReference);
+
+
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

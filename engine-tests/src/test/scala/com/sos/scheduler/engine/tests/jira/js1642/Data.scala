@@ -1,19 +1,22 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils._
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.lock.LockPath
+import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import java.time.Instant
 import java.time.Instant._
-import spray.json.{JsArray, JsObject, _}
+import spray.json._
 
 /**
   * @author Joacim Zschimmer
@@ -21,8 +24,20 @@ import spray.json.{JsArray, JsObject, _}
 private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val aJobChainOverview = JobChainOverview(aJobChainPath, FileBasedState.active)
   val bJobChainOverview = JobChainOverview(bJobChainPath, FileBasedState.active)
-  val xaJobChainOverview = JobChainOverview(xaJobChainPath, FileBasedState.active)
-  val xbJobChainOverview = JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)
+  val xaJobChainOverview = JobChainOverview(xaJobChainPath, FileBasedState.active,
+    obstacles = Set(
+      JobChainObstacle.FileBasedObstacles(Set(
+        FileBasedObstacle.MissingRequisites(Set(
+          XTestJobPath))))))
+  val xbJobChainOverview = JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true,
+    obstacles = Set(
+      JobChainObstacle.FileBasedObstacles(Set(
+        FileBasedObstacle.MissingRequisites(Set(
+          LockPath("/xFolder/MISSING-LOCK"),
+          MonitorPath("/xFolder/MISSING-MONITOR"),
+          ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS"),
+          SchedulePath("/xFolder/MISSING-SCHEDULE"),
+          XTestBJobPath))))))
 
   val a1OrderOverview = OrderOverview(
     a1OrderKey,
@@ -137,7 +152,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
-    nextStepAt = Some(EPOCH))
+    nextStepAt = Some(EPOCH),
+    obstacles = Set(
+      OrderObstacle.FileBasedObstacles(Set(
+        FileBasedObstacle.MissingRequisites(Set(
+          XTestJobPath))))))
   private val xa1OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,1",
     "fileBasedState": "active",
@@ -147,7 +166,19 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "TYPE": "Pending",
       "at" : "1970-01-01T00:00:00Z"
     },
-    "obstacles": [],
+    "obstacles": [
+      {
+        "TYPE": "FileBasedObstacles",
+        "fileBasedObstacles": [
+          {
+            "TYPE": "MissingRequisites",
+            "paths": [
+              "Job:/xFolder/test"
+            ]
+          }
+        ]
+      }
+    ],
     "nextStepAt": "1970-01-01T00:00:00Z"
   }"""
 
@@ -157,8 +188,12 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     OrderSourceType.Permanent,
     NodeId("100"),
     OrderProcessingState.Pending(EPOCH),
-    obstacles = Set(OrderObstacle.Suspended),
-    nextStepAt = Some(EPOCH))
+    nextStepAt = Some(EPOCH),
+    obstacles = Set(
+      OrderObstacle.Suspended,
+      OrderObstacle.FileBasedObstacles(Set(
+        FileBasedObstacle.MissingRequisites(Set(
+          XTestJobPath))))))
   private val xa2OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,2",
     "fileBasedState": "active",
@@ -169,6 +204,17 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [
+      {
+        "TYPE": "FileBasedObstacles",
+        "fileBasedObstacles": [
+          {
+            "TYPE": "MissingRequisites",
+            "paths": [
+              "Job:/xFolder/test"
+            ]
+          }
+        ]
+      },
       {
         "TYPE": "Suspended"
       }
@@ -226,6 +272,30 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xb1OrderOverview,
     xbAdHocDistributedOrderOverview)
 
+  val A100NodeOverview = SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+    TestJobPath, orderCount = 3, obstacles = Set(NodeObstacle.Delaying(999999.s)))
+  val B100NodeOverview = SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+    TestJobPath, orderCount = 1)
+  val Xa100NodeOverview = SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+    XTestJobPath, orderCount = 2,
+    obstacles = Set(NodeObstacle.MissingJob(XTestJobPath)))
+  val Xb100NodeOverview = SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+    XTestBJobPath, orderCount = 0)
+
+  val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
+    taskLimit = 10, usedTaskCount = 3, obstacles = Set())
+  val XTestBJobOverview = JobOverview(XTestBJobPath, FileBasedState.incomplete, defaultProcessClassPath = Some(ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS")),
+    JobState.loaded, isInPeriod = false,
+    taskLimit = 1, usedTaskCount = 0,
+    obstacles = Set(
+      JobObstacle.FileBasedObstacles(Set(
+        FileBasedObstacle.BadState(FileBasedState.incomplete),
+        FileBasedObstacle.MissingRequisites(Set(
+          LockPath("/xFolder/MISSING-LOCK"),
+          MonitorPath("/xFolder/MISSING-MONITOR"),
+          ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS"),
+          SchedulePath("/xFolder/MISSING-SCHEDULE")))))))
+
   val ExpectedOrdersComplemented = OrdersComplemented(
     ExpectedOrderOverviews,
     Vector(
@@ -234,14 +304,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       xaJobChainOverview,
       xbJobChainOverview),
     Vector(
-      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3,
-        obstacles = Set(NodeObstacle.Delaying(999999.s))),
-      SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1),
-      SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2),
-      SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 0)),  // Distributed orders yet not counted
+      A100NodeOverview,
+      B100NodeOverview,
+      Xa100NodeOverview,
+      Xb100NodeOverview),
     Vector(
-      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
-        taskLimit = 10, usedTaskCount = 3, obstacles = Set())),
+      XTestJobOverview,
+      XTestBJobOverview),
     Vector(
       TaskOverview(TaskId(3), TestJobPath, TaskState.running, ProcessClassPath.Default),
       TaskOverview(TaskId(4), TestJobPath, TaskState.running, ProcessClassPath.Default),
@@ -254,12 +323,12 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     orders = ExpectedOrdersComplemented.orders filter { _.isSuspended },
     usedJobChains = Vector(aJobChainOverview, xaJobChainOverview),
     usedTasks = Nil,
-    usedJobs = ExpectedOrdersComplemented.usedJobs,
+    usedJobs = Vector(
+      XTestJobOverview),
     usedProcessClasses = Nil,
     usedNodes = Vector(
-      SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 3,
-        obstacles = Set(NodeObstacle.Delaying(999999.s))),
-      SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), XFolderTestJobPath, orderCount = 2)))
+      A100NodeOverview,
+      Xa100NodeOverview))
 
   val ExpectedOrderTreeComplemented = OrderTreeComplemented[OrderOverview](
     FolderTree(
@@ -298,28 +367,56 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
 
   val UsedJobChainsJson = """[
       {
-          "path": "/aJobChain",
-          "fileBasedState": "active",
-          "isDistributed": false,
-          "obstacles": []
+        "path": "/aJobChain",
+        "fileBasedState": "active",
+        "isDistributed": false,
+        "obstacles": []
       },
       {
-          "path": "/bJobChain",
-          "fileBasedState": "active",
-          "isDistributed": false,
-          "obstacles": []
+        "path": "/bJobChain",
+        "fileBasedState": "active",
+        "isDistributed": false,
+        "obstacles": []
       },
       {
-          "path": "/xFolder/x-aJobChain",
-          "fileBasedState": "active",
-          "isDistributed": false,
-          "obstacles": []
+        "path": "/xFolder/x-aJobChain",
+        "fileBasedState": "active",
+        "isDistributed": false,
+        "obstacles": [
+          {
+            "TYPE":"FileBasedObstacles",
+            "fileBasedObstacles": [
+              {
+                "TYPE": "MissingRequisites",
+                "paths": [
+                  "Job:/xFolder/test"
+                ]
+              }
+            ]
+          }
+        ]
       },
       {
-          "path": "/xFolder/x-bJobChain",
-          "fileBasedState": "active",
-          "isDistributed": true,
-          "obstacles": []
+        "path": "/xFolder/x-bJobChain",
+        "fileBasedState": "active",
+        "isDistributed": true,
+        "obstacles": [
+          {
+            "TYPE": "FileBasedObstacles",
+            "fileBasedObstacles": [
+              {
+                "TYPE":"MissingRequisites",
+                "paths": [
+                  "ProcessClass:/xFolder/MISSING-PROCESS-CLASS",
+                  "Job:/xFolder/test-b",
+                  "Schedule:/xFolder/MISSING-SCHEDULE",
+                  "Lock:/xFolder/MISSING-LOCK",
+                  "Monitor:/xFolder/MISSING-MONITOR"
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]"""
   val UsedNodesJson = """[
@@ -353,7 +450,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "action": "process",
       "orderCount": 1,
       "obstacles": []
-    },{
+    },
+    {
       "TYPE": "SimpleJob",
       "nodeKey": {
         "jobChainPath": "/xFolder/x-aJobChain",
@@ -364,7 +462,12 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "jobPath": "/xFolder/test",
       "action": "process",
       "orderCount": 2,
-      "obstacles": []
+      "obstacles": [
+        {
+          "TYPE": "MissingJob",
+          "jobPath": "/xFolder/test"
+        }
+      ]
     },
     {
       "TYPE": "SimpleJob",
@@ -374,7 +477,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       },
       "nextNodeId": "END",
       "errorNodeId": "",
-      "jobPath": "/xFolder/test",
+      "jobPath": "/xFolder/test-b",
       "action": "process",
       "orderCount": 0,
       "obstacles": []
@@ -389,6 +492,35 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "isInPeriod": true,
       "usedTaskCount": 3,
       "obstacles": []
+    },
+    {
+      "path": "/xFolder/test-b",
+      "fileBasedState": "incomplete",
+      "taskLimit": 1,
+      "state": "loaded",
+      "isInPeriod": false,
+      "usedTaskCount": 0,
+      "defaultProcessClassPath": "/xFolder/MISSING-PROCESS-CLASS",
+      "obstacles": [
+        {
+          "TYPE":"FileBasedObstacles",
+          "fileBasedObstacles": [
+            {
+              "TYPE":"BadState",
+              "state": "incomplete"
+            },
+            {
+              "TYPE":"MissingRequisites",
+              "paths": [
+                "ProcessClass:/xFolder/MISSING-PROCESS-CLASS",
+                "Schedule:/xFolder/MISSING-SCHEDULE",
+                "Lock:/xFolder/MISSING-LOCK",
+                "Monitor:/xFolder/MISSING-MONITOR"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]"""
   val UsedTasksJson = """[
@@ -481,5 +613,6 @@ private[js1642] object Data {
   private[js1642] val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")
 
   private[js1642] val TestJobPath = JobPath("/test")
-  private[js1642] val XFolderTestJobPath = JobPath("/xFolder/test")
+  private[js1642] val XTestJobPath = JobPath("/xFolder/test")
+  private[js1642] val XTestBJobPath = JobPath("/xFolder/test-b")
 }

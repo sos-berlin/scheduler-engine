@@ -40,7 +40,6 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
-import java.nio.file.Files
 import java.nio.file.Files.deleteIfExists
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -255,8 +254,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(awaitContent(client.jobChainOverviewsBy(JobChainQuery.All)).toSet == Set(
         JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
         JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
-        JobChainOverview(xaJobChainPath, FileBasedState.active, isDistributed = false),
-        JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)))
+        xaJobChainOverview,
+        xbJobChainOverview))
     }
 
     "jobChainOverview query" in {
@@ -264,8 +263,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val jobChainOverviews: immutable.Seq[JobChainOverview] = awaitContent(client.jobChainOverviewsBy(query))
       assert(jobChainOverviews == awaitContent(directSchedulerClient.jobChainOverviewsBy(query)))
       assert(jobChainOverviews.toSet == Set(
-        JobChainOverview(xaJobChainPath, FileBasedState.active, isDistributed = false),
-        JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true)))
+        xaJobChainOverview,
+        xbJobChainOverview))
     }
 
     "jobChainDetailed" in {
@@ -273,17 +272,9 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(jobChainDetailed == awaitContent(directSchedulerClient.jobChainDetailed(xaJobChainPath)))
       assert(jobChainDetailed ==
         JobChainDetailed(
-          JobChainOverview(
-            xaJobChainPath,
-            FileBasedState.active,
-            isDistributed = false),
+          xaJobChainOverview,
           List(
-            SimpleJobNodeOverview(
-              NodeKey(xaJobChainPath, NodeId("100")),
-              nextNodeId = NodeId("END"),
-              errorNodeId = NodeId(""),
-              JobPath("/xFolder/test"),
-              orderCount = 2),
+            Xa100NodeOverview,
             EndNodeOverview(
               NodeKey(xaJobChainPath, NodeId("END"))))))
     }
