@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.web.order
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp._
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderSourceType
+import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -63,6 +63,54 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
         }
     }
 
+    "OrderQuery isDistributed" in {
+      Get("/prefix/?isDistributed=true") ~>
+        route(OrderQuery(isDistributed = Some(true))) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
+    "OrderQuery isSuspended" in {
+      Get("/prefix/?isSuspended=true") ~>
+        route(OrderQuery(isSuspended = Some(true))) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
+    "OrderQuery isSetback" in {
+      Get("/prefix/?isSetback=true") ~>
+        route(OrderQuery(isSetback = Some(true))) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
+    "OrderQuery isOrderSourceType" in {
+      Get("/prefix/?isOrderSourceType=AdHoc,Permanent") ~>
+        route(OrderQuery(isOrderSourceType = Some(Set(OrderSourceType.AdHoc, OrderSourceType.Permanent)))) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
+    "OrderQuery isOrderProcessingState" in {
+      Get("/prefix/?isOrderProcessingState=NotPlanned,InTaskProcess") ~>
+        route(OrderQuery(isOrderProcessingState = Some(Set(OrderProcessingState.NotPlanned.getClass, classOf[OrderProcessingState.InTaskProcess])))) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
+    "OrderQuery isBlacklisted" in {
+      Get("/prefix/?isBlacklisted=true") ~>
+        route(OrderQuery(isBlacklisted = Some(true))) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
     "OrderQuery /a/ suspended but not blacklisted" in {
       Get("/prefix/a/?isSuspended=true&isBlacklisted=false") ~>
         route(OrderQuery(
@@ -80,8 +128,12 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     checkQuery(OrderQuery(isSuspended = Some(true)), Map("isSuspended" → "true"))
     checkQuery(OrderQuery(isSuspended = Some(false)), Map("isSuspended" → "false"))
     checkQuery(
-      OrderQuery(isSuspended = Some(false), isOrderSourceType = Some(Set(OrderSourceType.AdHoc, OrderSourceType.Permanent))),
-      Map("isSuspended" → "false", "isOrderSourceType" → "AdHoc,Permanent"))  // Incidentally, Scala Set with two elements retains orders
+      OrderQuery(
+        isSuspended = Some(false),
+        isOrderSourceType = Some(Set(OrderSourceType.AdHoc, OrderSourceType.Permanent)),
+        isOrderProcessingState = Some(Set(OrderProcessingState.NotPlanned.getClass, classOf[OrderProcessingState.InTaskProcess]))
+      ),
+      Map("isSuspended" → "false", "isOrderSourceType" → "AdHoc,Permanent", "isOrderProcessingState" → "NotPlanned,InTaskProcess"))  // Incidentally, Scala Set with two elements retains orders
     checkQuery(OrderQuery(notInTaskLimitPerNode = Some(123)), Map("notInTaskLimitPerNode" → "123"))
   }
 

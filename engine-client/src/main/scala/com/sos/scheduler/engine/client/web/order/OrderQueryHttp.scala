@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.client.web.jobchain.{PathQueryHttp, QueryHttp}
 import com.sos.scheduler.engine.common.convert.As
 import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderId, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.queries.OrderQuery._
 import scala.collection.JavaConversions._
@@ -32,6 +32,7 @@ object OrderQueryHttp {
       isSetback = parameters.optionAs[Boolean](IsSetbackName),
       isBlacklisted = parameters.optionAs[Boolean](IsBlacklistedName),
       isOrderSourceType = parameters.optionAs(IsOrderSourceTypeName)(As { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet }),
+      isOrderProcessingState = parameters.optionAs(IsOrderProcessingStateName)(As { o ⇒ (CommaSplitter.split(o) map OrderProcessingState.typedJsonFormat.typeNameToClass).toSet }),
       notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode))
 
   def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.patternString

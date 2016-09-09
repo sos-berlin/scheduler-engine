@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderSelectionWidget._
 import scalatags.Text.all._
@@ -31,12 +32,18 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
                   StringFrag(" "),
                   labeledCheckbox(key, valueOption, checkedMeans = false),
                   br)),
-            td(
-              verticalAlign := "top",
-              paddingLeft := 6.px,
-              paddingTop := 4.px,
-              borderLeft := "1px solid #aaa")(
-                limitPerNodeInput(query.notInTaskLimitPerNode))),
+            td(paddingRight := 6.px, rowspan := 2, borderLeft := "1px solid #aaa")(
+              for ((key, valueOption) ← OrderSourceType.values map { o ⇒ o → (query.isOrderSourceType map { _ contains o }) })
+                yield List(
+                  labeledEnum(query.isOrderSourceType map { _ map { _.name }}, "isOrderSourceType", key.name, valueOption),
+                  br)),
+            td(paddingRight := 6.px, rowspan := 2, borderLeft := "1px solid #aaa")(
+              for ((key, valueOption) ← (OrderProcessingState.typedJsonFormat.typeNameToClass map { case (typeName, clazz) ⇒ typeName → (query.isOrderProcessingState map { _ exists { _ isAssignableFrom clazz }}) }).toList)
+                yield List(
+                  labeledEnum(query.isOrderProcessingState map { _ map OrderProcessingState.typedJsonFormat.classToTypeName }, "isOrderProcessingState", key, valueOption),
+                  br)),
+            td(verticalAlign := "top", paddingLeft := 6.px, paddingTop := 4.px, borderLeft := "1px solid #aaa")(
+              limitPerNodeInput(query.notInTaskLimitPerNode))),
           tr(
             td(verticalAlign := "bottom", textAlign.right)(
               button(`type` := "submit")(
@@ -50,6 +57,15 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
       input(attrs.name := name, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
       span(position.relative, top := (-2).px)(
         boldIf(checked)(if (checkedMeans) removePrefixIs(key) else s"not")))
+  }
+
+  private def labeledEnum(set: Option[Set[String]],  group: String, key: String, value: Option[Boolean]) = {
+    val checked = value getOrElse false
+    val onClick = s"javascript:reloadPage({})" // ??? {$group: [$key: document.getElementsByName('$key')[0].checked ? true : undefined]})"
+    label(
+      input(attrs.name := key, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick, disabled),
+      span(position.relative, top := (-2).px)(
+        boldIf(checked)(key)))
   }
 
   private def limitPerNodeInput(limitPerNode: Option[Int]) =

@@ -44,11 +44,13 @@ with OrderPersistence {
   private val idOnce = new SetOnce[OrderId]
   private val sourceTypeOnce = new SetOnce[OrderSourceType]
   private[kernel] val queryable = new QueryableOrder {
-    def isSuspended = Order.this.isSuspended
-    def isSetback = Order.this.isSetback
+    private def flags = cppProxy.java_fast_flags
+    def isSuspended = cppFastFlags.isSuspended(flags)
+    def isSetback = cppFastFlags.isSetback(flags)
     def sourceType = Order.this.sourceType
     def orderKey = Order.this.orderKey
-    def isBlacklisted = Order.this.isBlacklisted
+    def isBlacklisted = cppFastFlags.isBlacklisted(flags)
+    def processingStateClass = processingState(cppProxy.java_fast_flags, nextStepAtOption = nextStepAtOption).getClass
   }
 
   def onCppProxyInvalidated(): Unit = {}
@@ -84,35 +86,10 @@ with OrderPersistence {
     val orderKey = this.pathOrKey
     val nodeId = this.nodeId
     val flags = cppProxy.java_fast_flags
-    val isTouched = cppFastFlags.isTouched(flags)
-    val isSetback = cppFastFlags.isSetback(flags)
     val isSuspended = cppFastFlags.isSuspended(flags)
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
-    val taskId = this.taskId
-    val currentSecond = currentTimeMillis / 1000
-    val processingState = {
-      import OrderProcessingState._
-      (taskId, taskId flatMap taskSubsystem.taskOption) match {
-        case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
-          task.stepOrProcessStartedAt match {
-            case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, task.agentAddress, at)
-            case None ⇒ WaitingInTask(taskId_, task.processClassPath)
-          }
-        case (_, _) ⇒
-          if (isBlacklisted)
-            Blacklisted
-          else if (!isTouched)
-            nextStepAtOption match {
-              case None ⇒ NotPlanned
-              case Some(at) if at.getEpochSecond >= currentSecond ⇒ Planned(at)
-              case Some(at) ⇒ Pending(at)
-            }
-          else if (isSetback)
-            Setback(setbackUntilOption getOrElse Instant.MAX)
-          else
-            WaitingForOther
-      }
-    }
+    val nextStepAtOption = this.nextStepAtOption
+    val processingState = this.processingState(flags, nextStepAtOption)
     val obstacles = {
       import OrderObstacle._
       val b = Set.newBuilder[OrderObstacle]
@@ -140,6 +117,35 @@ with OrderPersistence {
       occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
   }
 
+  private def processingState(flags: Long, nextStepAtOption: Option[Instant]): OrderProcessingState = {
+    val isBlacklisted = cppFastFlags.isBlacklisted(flags)
+    val isTouched = cppFastFlags.isTouched(flags)
+    val isSetback = cppFastFlags.isSetback(flags)
+    val taskId = this.taskId
+    val currentSecond = currentTimeMillis / 1000
+    import OrderProcessingState._
+    (taskId, taskId flatMap taskSubsystem.taskOption) match {
+      case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
+        task.stepOrProcessStartedAt match {
+          case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, task.agentAddress, at)
+          case None ⇒ WaitingInTask(taskId_, task.processClassPath)
+        }
+      case (_, _) ⇒
+        if (isBlacklisted)
+          Blacklisted
+        else if (!isTouched)
+          nextStepAtOption match {
+            case None ⇒ NotPlanned
+            case Some(at) if at.getEpochSecond >= currentSecond ⇒ Planned(at)
+            case Some(at) ⇒ Pending(at)
+          }
+        else if (isSetback)
+          Setback(setbackUntilOption getOrElse Instant.MAX)
+        else
+          WaitingForOther
+    }
+  }
+
   private[kernel] def details: OrderDetailed =
     OrderDetailed(
       overview = overview,
@@ -148,8 +154,6 @@ with OrderPersistence {
       endNodeId = emptyToNone(cppProxy.end_state_string) map NodeId.apply,
       title = title,
       variables = variables)
-
-  private def isSetback = setbackUntilOption.isDefined
 
   def stringToPath(o: String) = OrderKey(o)
 
@@ -226,8 +230,6 @@ with OrderPersistence {
 //  def isSuspended_=(b: Boolean): Unit = {
 //    cppProxy.set_suspended(b)
 //  }
-
-  private def isBlacklisted = cppProxy.is_on_blacklist
 
   def title: String = inSchedulerThread { cppProxy.title }
 

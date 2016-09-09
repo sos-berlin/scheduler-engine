@@ -61,9 +61,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
 
   def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     respondWith {
-      val orderOverviews = orderSubsystem.orderViews[V](query)
+      val views = orderSubsystem.orderViews[V](query)
       val nodeOverviews = {
-        val jobChainPathToNodeKeys = (orderOverviews map { _.nodeKey }).distinct groupBy { _.jobChainPath }
+        val jobChainPathToNodeKeys = (views map { _.nodeKey }).distinct groupBy { _.jobChainPath }
         for ((jobChainPath, nodeKeys) ← jobChainPathToNodeKeys.toVector.sortBy { _._1 };
              jobChain ← orderSubsystem.jobChainOption(jobChainPath).iterator;
              nodeKey ← nodeKeys;
@@ -75,7 +75,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
         val jobPaths = (nodeOverviews map { _.jobPath }).distinct
         jobPaths flatMap jobSubsystem.fileBasedOption
       }
-      val tasks = orderOverviews map { _.processingState } collect {
+      val tasks = views map { _.processingState } collect {
         case inTask: OrderProcessingState.InTask ⇒ taskSubsystem.task(inTask.taskId)
       }
       val processClasses = {
@@ -83,7 +83,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
         processClassPaths.distinct flatMap processClassSubsystem.fileBasedOption
       }
       OrdersComplemented(
-        orderOverviews,
+        views,
         jobChainOverviews,
         nodeOverviews,
         (jobs map { _.overview }).sorted,

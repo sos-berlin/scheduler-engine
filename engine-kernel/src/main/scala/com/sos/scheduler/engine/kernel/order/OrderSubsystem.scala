@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -83,7 +83,7 @@ extends FileBasedSubsystem {
     var iterator = localOrders ++ distriOrders
     for (limit ← query.notInTaskLimitPerNode) {
       val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderView) ⇒ o.nodeKey)
-      iterator = iterator filter { o ⇒ o.processingState.isInTask || perKeyLimiter(o) }
+      iterator = iterator filter { o ⇒ o.processingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
     }
     iterator.toVector
   }
