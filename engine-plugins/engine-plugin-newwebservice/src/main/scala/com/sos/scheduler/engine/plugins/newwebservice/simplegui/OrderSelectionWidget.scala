@@ -1,10 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import collection.immutable
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.OrderQuery
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderSelectionWidget._
 import scalatags.Text.all._
@@ -16,25 +14,25 @@ import spray.json._
   */
 private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
 
-  def html = List(
+  def html: Frag = seqFrag(
     raw(s"<script type='text/javascript'>$javascript</script>"),
     form(cls := "ContentBox OrderSelection", onsubmit := "javascript:reloadPage({}); return false")(
       table(
         tbody(
           tr(
-            td(colspan := 2, paddingTop := 4.px, paddingBottom := 4.px)(
+            td(cls := "OrderSelection-Header", colspan := 2)(
               "Show only ...")),
           tr(
-            td(paddingRight := 6.px, rowspan := 2)(
+            td(cls := "OrderSelection-Boolean", rowspan := 2)(
               booleanCheckBoxes),
-            td(paddingLeft := 6.px, paddingRight := 6.px, rowspan := 2, borderLeft := "1px solid #aaa")(
+            td(cls := "OrderSelection-Enum", rowspan := 2)(
               orderSourceTypes),
-            td(paddingLeft := 6.px, paddingRight := 6.px, rowspan := 2, borderLeft := "1px solid #aaa")(
+            td(cls := "OrderSelection-Enum", rowspan := 2)(
               orderProcessingStates),
-            td(verticalAlign := "top", paddingLeft := 6.px, paddingTop := 4.px, borderLeft := "1px solid #aaa")(
+            td(cls := "OrderSelection-LimitPerNode")(
               limitPerNodeInput(query.notInTaskLimitPerNode))),
           tr(
-            td(verticalAlign := "bottom", textAlign.right)(
+            td(cls := "OrderSelection-LimitPerNode-Submit")(
               button(`type` := "submit")(
                 StringFrag("Show"))))))))
 
@@ -62,8 +60,10 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
   private def orderSourceTypes =
     enumHtml("isOrderSourceType", OrderSourceType.values map { _.name }, query.isOrderSourceType map { _ map { _.name }})
 
-  private def orderProcessingStates =
-    enumHtml("isOrderProcessingState", OrderProcessingState.typedJsonFormat.typeNames.toSeq, query.isOrderProcessingState map { _ map OrderProcessingState.typedJsonFormat.classToTypeName })
+  private def orderProcessingStates = {
+    import OrderProcessingState.typedJsonFormat
+    enumHtml("isOrderProcessingState", typedJsonFormat.subtypeNames, query.isOrderProcessingState map { _ map typedJsonFormat.classToTypeName })
+  }
 
   private def enumHtml(key: String, names: Seq[String], selected: Option[Set[String]]) = {
     val onClick = s"javascript:reloadPage(selectionToKeyValue('$key', ${names.mkString("['", "','", "']")}))"

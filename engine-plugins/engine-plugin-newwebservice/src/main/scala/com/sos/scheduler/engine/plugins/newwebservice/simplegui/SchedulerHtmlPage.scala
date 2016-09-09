@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.joinHtml
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toAsyncScriptHtml, toCssLinkHtml}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute.NeededWebjars
@@ -22,7 +22,6 @@ import java.time.{Instant, LocalDate, OffsetDateTime}
 import scala.language.implicitConversions
 import scalatags.Text.all._
 import scalatags.Text.{TypedTag, tags2}
-import scalatags.text.Frag
 import spray.http.Uri
 
 /**
@@ -135,22 +134,23 @@ private[simplegui] object SchedulerHtmlPage {
 
   def midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
-  def eventIdToLocalHtml(eventId: EventId, withDateBefore: Instant = Instant.MAX): List[Frag] = {
+  def eventIdToLocalHtml(eventId: EventId, withDateBefore: Instant = Instant.MAX): Frag = {
     val instant = EventId.toInstant(eventId)
-    instantToHtml(instant, if (instant >= withDateBefore) LocalTimeFormatter else LocalDateTimeFormatter) ::
-      subsecondsToHtml(instant) :: Nil
+    seqFrag(
+      instantToHtml(instant, if (instant >= withDateBefore) LocalTimeFormatter else LocalDateTimeFormatter),
+      subsecondsToHtml(instant))
   }
 
   def subsecondsToHtml(instant: Instant): Frag =
     span(cls := "time-extra")(s".${formatDateTime(instant, LocalMillisFormatter)}")
 
-  def instantWithDurationToHtml(instant: Instant): List[Frag] =
+  def instantWithDurationToHtml(instant: Instant): Frag =
     if (instant == Instant.EPOCH)
-      StringFrag("immediately") :: Nil
+      "immediately"
     else
-      instantToHtml(instant, LocalDateTimeFormatter) ::
-        span(cls := "time-extra")(s".${formatDateTime(instant, LocalMillisFormatter)} (${(now - instant).pretty})") ::
-        Nil
+      seqFrag(
+        instantToHtml(instant, LocalDateTimeFormatter),
+        span(cls := "time-extra")(s".${formatDateTime(instant, LocalMillisFormatter)} (${(now - instant).pretty})"))
 
   private val LocalTimeFormatter = new DateTimeFormatterBuilder()
     .appendValue(HOUR_OF_DAY, 2)

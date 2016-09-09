@@ -9,9 +9,9 @@ import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
-import java.time.{Instant, LocalDate}
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 import scalatags.Text.all._
@@ -58,30 +58,32 @@ extends SchedulerHtmlPage {
       td(whiteSpace.nowrap)(eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
       eventToTds(eventSnapshot.value))
 
-  private def eventToTds(keyedEvent: AnyKeyedEvent): List[Frag] = {
+  private def eventToTds(keyedEvent: AnyKeyedEvent): Frag = {
     val eventName = keyedEvent.event.getClass.getSimpleName stripSuffix "$"
     keyedEvent match {
       case KeyedEvent(orderKey: OrderKey, event: OrderEvent) ⇒
-        td(orderKey.string) :: td(eventName) :: (
+        seqFrag(
+          td(orderKey.string),
+          td(eventName),
           event match {
-            case OrderFinished(nodeId: NodeId) ⇒ td(nodeId) :: Nil
-            case OrderNestedFinished ⇒ Nil
-            case OrderNestedStarted ⇒ Nil
-            case OrderNodeChanged(nodeId, fromNodeId) ⇒ td(nodeId) :: td("← ", fromNodeId) :: Nil
-            case OrderResumed ⇒ Nil
-            case OrderSetBack(nodeId) ⇒ td(nodeId) :: Nil
-            case OrderStepEnded(stateTransition) ⇒ td(stateTransition.toString) :: Nil
-            case OrderStepStarted(nodeId, taskId) ⇒ td(nodeId) :: td(taskId) :: Nil
-            case OrderSuspended ⇒ Nil
-            case OrderStarted ⇒ Nil
-            case _ ⇒ td(colspan := 3, event.toString) :: Nil
+            case OrderFinished(nodeId: NodeId) ⇒ td(nodeId)
+            case OrderNestedFinished ⇒ seqFrag()
+            case OrderNestedStarted ⇒ seqFrag()
+            case OrderNodeChanged(nodeId, fromNodeId) ⇒ seqFrag(td(nodeId), td("← ", fromNodeId))
+            case OrderResumed ⇒ seqFrag()
+            case OrderSetBack(nodeId) ⇒ td(nodeId)
+            case OrderStepEnded(stateTransition) ⇒ td(stateTransition.toString)
+            case OrderStepStarted(nodeId, taskId) ⇒ seqFrag(td(nodeId), td(taskId))
+            case OrderSuspended ⇒ seqFrag()
+            case OrderStarted ⇒ seqFrag()
+            case _ ⇒ td(colspan := 3, event.toString)
           })
       case KeyedEvent(_, e: Logged) ⇒
-        td() :: td(e.level.toString) :: td(colspan := 4)(e.message) :: Nil
+        seqFrag(td(), td(e.level.toString), td(colspan := 4)(e.message))
       case KeyedEvent(key, e) ⇒
-        td(key.toString) :: td(eventName) :: td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil
+        seqFrag(td(key.toString), td(eventName), td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
       case _ ⇒
-        td() :: td(eventName) :: td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")") :: Nil
+        seqFrag(td(), td(eventName), td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
     }
   }
 }

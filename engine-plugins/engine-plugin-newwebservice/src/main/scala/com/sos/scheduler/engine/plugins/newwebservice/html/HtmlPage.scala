@@ -31,8 +31,8 @@ object HtmlPage {
     }
   }
 
-  def joinHtml(glue: Modifier)(elements: Iterable[Modifier]): Modifier =
-    elements reduce { (a, b) ⇒ SeqNode(Vector(a, glue, b)) }
+  def joinHtml(glue: Frag)(elements: Iterable[Frag]): Frag =
+    elements reduce { (a, b) ⇒ seqFrag(Vector(a, glue, b)) }
 
   def seqFrag(frags: Frag*) = SeqFrag(frags)
 }

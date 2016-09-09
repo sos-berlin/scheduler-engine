@@ -12,15 +12,14 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, No
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.joinHtml
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
+import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 import scalatags.Text.all._
-import scalatags.text.Frag
 import spray.http.Uri
 
 /**
@@ -38,19 +37,19 @@ extends SchedulerHtmlPage {
   private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
   private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
-  private val jobPathToObstacleHtml: Map[JobPath, List[Frag]] = ordersComplemented.usedJobs.toKeyedMap { _.path }
+  private val jobPathToObstacleHtml: Map[JobPath, Frag] = ordersComplemented.usedJobs.toKeyedMap { _.path }
     .mapValues { jobOverview ⇒
       if (jobOverview.obstacles.nonEmpty)
-        List(stringFrag(s"${jobOverview.path}: " + jobOverview.obstacles.mkString(" ")))
+        seqFrag(s"${jobOverview.path}: ", jobOverview.obstacles.mkString(" "))
       else
-        Nil
+        seqFrag()
     }
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
 
   override protected def title = "Orders"
   override protected def cssLinks = super.cssLinks ++ List(
     uris / "api/frontend/common/OrderStatisticsWidget.css",
-    uris / "api/frontend/common/OrderSelectionWidget.css",
+    uris / "api/frontend/order/OrderSelectionWidget.css",
     uris / "api/frontend/order/order.css")
   override protected def scriptLinks = super.scriptLinks ++ List(
     uris / "api/frontend/common/OrderStatisticsWidget.js",
@@ -64,11 +63,12 @@ extends SchedulerHtmlPage {
         orderSelectionStatistics),
       div(float.right)(
         new OrderSelectionWidget(query).html),
-      query.jobChainPathQuery match {
-        case single: PathQuery.SinglePath ⇒ div(jobChainOrdersToHtml(single.as[JobChainPath], ordersComplemented.orders))
-        case PathQuery.Folder(folderPath) ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
-        case _ ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
-      })
+      div(clear.both)(
+        query.jobChainPathQuery match {
+          case single: PathQuery.SinglePath ⇒ div(jobChainOrdersToHtml(single.as[JobChainPath], ordersComplemented.orders))
+          case PathQuery.Folder(folderPath) ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
+          case _ ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
+        }))
   }
 
   private def orderSelectionStatistics = {
@@ -149,28 +149,28 @@ extends SchedulerHtmlPage {
 
   private def orderToTr(order: OrderOverview) = {
     val jobPathOption = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath }
-    val processingStateHtml: immutable.Seq[Frag] =
+    val processingStateHtml: Frag =
       order.processingState match {
         case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
-        case OrderProcessingState.Pending(at) ⇒ (at != EPOCH list instantWithDurationToHtml(at)) ++ List(List(stringFrag("pending"))) reduce { _ ++ List(stringFrag(" ")) ++ _ }
-        case OrderProcessingState.Setback(at) ⇒ "Set back until " :: instantWithDurationToHtml(at)
+        case OrderProcessingState.Pending(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Pending")))
+        case OrderProcessingState.Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
         case inTask: OrderProcessingState.InTask ⇒
           val taskId = inTask.taskId
           val jobPath = jobPathOption map { _.string } getOrElse "(unknown job)"
-          val taskHtml = List(
+          val taskHtml = seqFrag(
             b(
               span(cls := "visible-lg-inline")(
                 taskToA(taskId)(s"Task $jobPath:${taskId.string}"))))
           inTask match {
-            case _: OrderProcessingState.WaitingInTask ⇒ taskHtml ++ List(stringFrag(" waiting for process"))
-            case o: OrderProcessingState.InTaskProcess ⇒ taskHtml ::: stringFrag(" since ") :: instantWithDurationToHtml(o.since)
+            case _: OrderProcessingState.WaitingInTask ⇒ seqFrag(taskHtml, " waiting for process")
+            case o: OrderProcessingState.InTaskProcess ⇒ seqFrag(taskHtml, " since ", instantWithDurationToHtml(o.since))
          }
-        case o ⇒ List(stringFrag(o.toString))
+        case o ⇒ stringFrag(o.toString)
       }
     val occupyingMemberHtml = order.occupyingClusterMemberId map { o ⇒ stringFrag(s", occupied by $o") }
     val jobObstaclesHtml: List[Frag] = order.processingState match {
       case _: OrderProcessingState.InTask ⇒ Nil
-      case _ ⇒ jobPathOption.toList flatMap jobPathToObstacleHtml
+      case _ ⇒ jobPathOption.toList map jobPathToObstacleHtml
     }
     val isWaiting = order.processingState.isInstanceOf[OrderProcessingState.Waiting]
     val obstaclesHtml: Frag = {

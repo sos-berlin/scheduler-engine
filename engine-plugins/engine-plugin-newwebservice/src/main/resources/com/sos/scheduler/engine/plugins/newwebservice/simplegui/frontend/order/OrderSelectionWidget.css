@@ -1,0 +1,28 @@
+.OrderSelection-Header {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.OrderSelection-Boolean {
+  padding-right: 6px;
+}
+
+.OrderSelection-Enum {
+  padding-left: 6px;
+  padding-right: 6px;
+  border-left: 1px solid #aaa;
+  line-height: 10px;
+}
+
+.OrderSelection-LimitPerNode {
+  padding-top: 4px;
+  padding-left: 6px;
+  padding-right: 6px;
+  border-left: 1px solid #aaa;
+  vertical-align: top;
+}
+
+.OrderSelection-LimitPerNode-Submit {
+  vertical-align: bottom;
+  text-align: right
+}
