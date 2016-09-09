@@ -50,7 +50,7 @@ extends SchedulerHtmlPage {
   override protected def title = "Orders"
   override protected def cssLinks = super.cssLinks ++ List(
     uris / "api/frontend/common/OrderStatisticsWidget.css",
-    uris / "api/frontend/order/OrderSelectionWidget.css",
+    uris / "api/frontend/common/OrderSelectionWidget.css",
     uris / "api/frontend/order/order.css")
   override protected def scriptLinks = super.scriptLinks ++ List(
     uris / "api/frontend/common/OrderStatisticsWidget.js",

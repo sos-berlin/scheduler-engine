@@ -17,3 +17,18 @@ function orderQueryToUrl(query, change) {
   if (q.length) href += "?" + q.join('&');
   return href;
 }
+
+function selectionToKeyValue(key, names) {
+  var name, i;
+  var selected = [];
+  for (i = 0; i < names.length; i++) {
+    name = names[i];
+    if (document.getElementsByName(key + "-" + name)[0].checked) {
+      selected.push(name);
+    }
+  }
+  var result = {};
+  // Revert meaning when nothing is checked: All is accepted
+  result[key] = selected.length == 0 ? undefined : selected.join(",");
+  return result;
+}
