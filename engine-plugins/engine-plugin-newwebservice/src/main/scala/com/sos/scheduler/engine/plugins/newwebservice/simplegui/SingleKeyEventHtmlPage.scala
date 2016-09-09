@@ -9,7 +9,8 @@ import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
+import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
 import java.time.{Instant, LocalDate}
 import scala.collection.immutable
@@ -57,20 +58,21 @@ extends SchedulerHtmlPage {
       td(whiteSpace.nowrap)(eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
       eventToTds(eventSnapshot.value))
 
-  private def eventToTds(event: Event): List[Frag] = {
+  private def eventToTds(event: Event): Frag = {
     val eventName = event.getClass.getSimpleName stripSuffix "$"
 
-    def unknownEventToTds(event: Event): List[Frag] = {
+    def unknownEventToTds(event: Event): Frag = {
       val withoutEventName = event.toString match {
         case `eventName` ⇒ ""
         case string ⇒ string stripPrefix s"$eventName(" stripSuffix ")"
       }
-      td(colspan := 4, withoutEventName) :: Nil
+      td(colspan := 4, withoutEventName)
     }
 
     event match {
       case event: OrderEvent ⇒
-        td(eventName) :: (
+        seqFrag(
+          td(eventName),
           event match {
             case OrderFinished(nodeId: NodeId)        ⇒ td(nodeId) :: Nil
             case OrderNodeChanged(nodeId, fromNodeId) ⇒ td(nodeId) :: td("← ", fromNodeId) :: Nil
@@ -80,9 +82,9 @@ extends SchedulerHtmlPage {
             case _ ⇒ unknownEventToTds(event)
           })
       case event: Logged ⇒
-        td() :: td(event.level.toString) :: td(colspan := 4)(event.message) :: Nil
+        seqFrag(td(), td(event.level.toString), td(colspan := 4)(event.message))
       case _ ⇒
-        td(eventName) :: unknownEventToTds(event)
+        seqFrag(td(eventName), unknownEventToTds(event))
     }
   }
 
