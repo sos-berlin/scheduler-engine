@@ -86,24 +86,8 @@ with OrderPersistence {
     val orderKey = this.pathOrKey
     val nodeId = this.nodeId
     val flags = cppProxy.java_fast_flags
-    val isSuspended = cppFastFlags.isSuspended(flags)
-    val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val nextStepAtOption = this.nextStepAtOption
     val processingState = this.processingState(flags, nextStepAtOption)
-    val obstacles = {
-      import OrderObstacle._
-      val b = Set.newBuilder[OrderObstacle]
-      for (o ← emptyToNone(fileBasedObstacles)) {
-        b += FileBasedObstacles(o)
-      }
-      if (isSuspended) b += Suspended
-      if (isBlacklisted) b += Blacklisted
-      processingState match {
-        case OrderProcessingState.Setback(at) ⇒ b += Setback(at)
-        case _ ⇒
-      }
-      b.result
-    }
     OrderOverview(
       path = orderKey,  // key because this.path is valid only for permanent orders
       cppFastFlags.fileBasedState(flags),
@@ -111,13 +95,13 @@ with OrderPersistence {
       nodeId = nodeId,
       processingState = processingState,
       historyIdOption,
-      obstacles = obstacles,
+      obstacles = obstacles(flags, processingState),
       startedAt = startedAtOption,
       nextStepAt = nextStepAtOption,
       occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
   }
 
-  private def processingState(flags: Long, nextStepAtOption: Option[Instant]): OrderProcessingState = {
+  private[order] def processingState(flags: Long, nextStepAtOption: Option[Instant]): OrderProcessingState = {
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val isTouched = cppFastFlags.isTouched(flags)
     val isSetback = cppFastFlags.isSetback(flags)
@@ -144,6 +128,23 @@ with OrderPersistence {
         else
           WaitingForOther
     }
+  }
+
+  private[order] def obstacles(flags: Long, processingState: OrderProcessingState) = {
+    val isBlacklisted = cppFastFlags.isBlacklisted(flags)
+    val isSuspended = cppFastFlags.isSuspended(flags)
+    import OrderObstacle._
+    val b = Set.newBuilder[OrderObstacle]
+    for (o ← emptyToNone(fileBasedObstacles)) {
+      b += FileBasedObstacles(o)
+    }
+    if (isSuspended) b += Suspended
+    if (isBlacklisted) b += Blacklisted
+    processingState match {
+      case OrderProcessingState.Setback(at) ⇒ b += Setback(at)
+      case _ ⇒
+    }
+    b.result
   }
 
   private[kernel] def details: OrderDetailed =
@@ -207,7 +208,7 @@ with OrderPersistence {
 
   private def startedAtOption: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.startTimeMillis)
 
-  private def nextStepAtOption: Option[Instant] = eternalCppMillisToNoneInstant(cppProxy.next_step_at_millis)
+  private[order] def nextStepAtOption: Option[Instant] = eternalCppMillisToNoneInstant(cppProxy.next_step_at_millis)
 
   private def setbackUntilOption: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
 

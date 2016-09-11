@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
+import akka.util.Switch
 import com.sos.scheduler.engine.client.web.WebSchedulerClient
 import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -30,11 +31,20 @@ private[js1642] trait SpeedTests {
 
   def addOptionalSpeedTests() {
     for (n ← sys.props.optionAs[Int]("JS1642IT")) {
-      "Speed test Order C++ accesses" in {
-        instance[OrderTester].testSpeed(a1OrderKey, 3, 10000)
-        inSchedulerThread {
-          for (_ ← 1 to 5) Stopwatch.measureTime(100000, "OrderOverview") {
-            directSchedulerClient.ordersBy[OrderOverview](OrderQuery(isDistributed = Some(false))).successValue
+      "Speed test Order C++ accesses" - {
+        "a1OrderKey" in {
+          instance[OrderTester].testSpeed(a1OrderKey, 3, 10000)
+        }
+        "b1OrderKey with obstacle" in {
+          instance[OrderTester].testSpeed(b1OrderKey, 3, 10000)  // With MissingRequisites
+        }
+        "OrderOverview" in {
+          inSchedulerThread {
+            var logged = new Switch
+            for (_ ← 1 to 5) Stopwatch.measureTime(n, "OrderOverview") {
+              val response = directSchedulerClient.ordersBy[OrderOverview](OrderQuery(isDistributed = Some(false))).successValue
+              logged switchOn { logger.info(response.toString) }
+            }
           }
         }
       }

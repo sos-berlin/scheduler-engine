@@ -147,7 +147,7 @@ with EventSource {
 
   private[kernel] final def replacementOption: Option[Self] = Option(cppProxy.replacement_java.asInstanceOf[Self])
 
-  private final def missingRequisites: Set[TypedPath] =
+  private[kernel] final def missingRequisites: Set[TypedPath] =
     (cppProxy.missing_requisites_java map TypedPath.fromCppTypedString).toSet
 
   protected def fixedPathOption = _fixedPath.toOption

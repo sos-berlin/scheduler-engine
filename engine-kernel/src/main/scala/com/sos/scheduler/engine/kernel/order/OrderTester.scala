@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.common.time.Stopwatch.measureTime
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -14,65 +14,127 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
   (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) {
 
   def testSpeed(orderKey: OrderKey, m: Int, n: Int): Unit = {
+    val order = inSchedulerThread { orderSubsystem.order(orderKey) }
+    val orderC = inSchedulerThread { order.cppProxy }
+    val m = 3
+    val n = 10000
     inSchedulerThread {
-      val order = orderSubsystem.order(orderKey)
-      val orderC = order.cppProxy
-      val m = 3
-      val n = 10000
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "java_fast_flags") {
+      for (_ ← 1 to m) measureTime(n, "java_fast_flags") {
         orderC.java_fast_flags
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "is_file_order") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "is_file_order") {
         orderC.is_file_order
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "is_file_based") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "is_file_based") {
         orderC.is_file_based
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "file_based_state") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "file_based_state") {
         orderC.file_based_state
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "suspended") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "suspended") {
         orderC.suspended
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "is_on_blacklist") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "is_on_blacklist") {
         orderC.is_on_blacklist
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "java_job_chain_node") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "java_job_chain_node") {
         orderC.java_job_chain_node
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "job_chain") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "job_chain") {
         orderC.job_chain
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "task_id") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "task_id") {
         orderC.task_id
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "OrderC") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "OrderC.{java_fast_flags job_chain java_job_chain_node.nodeId task_id}") {
         orderC.java_fast_flags
         orderC.job_chain
         orderC.java_job_chain_node.nodeId
         orderC.task_id
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "sourceType") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "sourceType") {
         order.sourceType
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "sameOrder.overview") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "fileBasedObstacles") {
+        order.fileBasedObstacles
+      }
+    }
+    inSchedulerThread {
+      val flags = orderC.java_fast_flags
+      val nextStepAtOption = order.nextStepAtOption
+      for (_ ← 1 to m) measureTime(n, "processingState") {
+        order.processingState(flags, nextStepAtOption)
+      }
+    }
+    inSchedulerThread {
+      val flags = orderC.java_fast_flags
+      val nextStepAtOption = order.nextStepAtOption
+      val processingState = order.processingState(flags, nextStepAtOption)
+      for (_ ← 1 to m) measureTime(n, "obstacles") {
+        order.obstacles(flags, processingState)
+      }
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "missing_requisites_java") {
+        orderC.missing_requisites_java
+      }
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "sameOrder.overview") {
         order.overview
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "Order") {
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, "Order") {
         orderSubsystem.localOrderIterator.toVector
       }
-      val orders = orderSubsystem.localOrderIterator.toVector
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "foreach-Order.overview") {
-        for (o <- orders) o.overview
+    }
+    val orders = inSchedulerThread { orderSubsystem.localOrderIterator.toVector }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).overview") {
+        for (o ← orders) o.overview
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "foreach-Order.sourceType") {
-        for (o <- orders) o.sourceType
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).sourceType") {
+        for (o ← orders) o.sourceType
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "foreach-Order.isSuspended") {
-        for (o <- orders) o.isSuspended
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).isSuspended") {
+        for (o ← orders) o.isSuspended
       }
-      for (_ ← 1 to m) Stopwatch.measureTime(n, "foreach-Order.java_fast_flags") {
-        for (o <- orders) o.cppProxy.java_fast_flags
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).java_fast_flags") {
+        for (o ← orders) o.cppProxy.java_fast_flags
+      }
+    }
+    inSchedulerThread {
+      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).missing_requisites_java") {
+        for (o ← orders) o.cppProxy.missing_requisites_java
       }
     }
   }
