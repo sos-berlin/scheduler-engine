@@ -64,8 +64,8 @@ struct Absolute_path : Path
     static void                 self_test                   ();
 
                                 Absolute_path               ()                                      {}
-                              //Absolute_path               ( const string& path )                  { set_path( path ); }
-                              //Absolute_path               ( const char* path )                    { set_path( path ); }
+                                Absolute_path               ( const string& path )                  { set_path( path ); }
+                                Absolute_path               ( const char* path )                    { set_path( path ); }
                                 Absolute_path               ( const Absolute_path& absolute_directory, const string& path )  { set_absolute( absolute_directory, path ); }
                                 Absolute_path               ( const Absolute_path& absolute_directory, const Bstr&   path )  { set_absolute( absolute_directory, string_from_bstr( path ) ); }
                                 Absolute_path               ( const Absolute_path& absolute_directory, const char*   path )  { set_absolute( absolute_directory, path ); }

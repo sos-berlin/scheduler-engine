@@ -31,9 +31,8 @@ struct Requisite_path
 
     string                      obj_name                    () const;
 
-
-    File_based_subsystem*      _subsystem;
-    Absolute_path              _path;
+    File_based_subsystem* const _subsystem;
+    Absolute_path const         _path;
 };
 
 //----------------------------------------------------------------------------------------Dependant
