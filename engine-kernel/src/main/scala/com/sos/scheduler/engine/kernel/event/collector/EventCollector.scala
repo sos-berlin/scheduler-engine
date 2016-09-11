@@ -12,7 +12,7 @@ import scala.annotation.tailrec
 import scala.collection.concurrent
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.control.NonFatal
 
 /**
   * @author Joacim Zschimmer
@@ -59,14 +59,18 @@ extends HasCloser {
   private def whenAnyKeyedEvents(after: EventId, predicate: AnyKeyedEvent ⇒ Boolean, reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]] = {
     val promise = Promise[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]]()
     for (Snapshot(eventId, events) ← onEventAvailable(after, events(after, reverse = reverse)))
-      Try {
-        events collect {
-          case snapshot @ Snapshot(_, keyedEvent) if predicate(keyedEvent) ⇒ snapshot
+      try
+        events filter {
+          case Snapshot(_, keyedEvent) ⇒ predicate(keyedEvent)
+        } match {
+          case filteredEvents if filteredEvents.hasNext ⇒
+            promise.success(Snapshot(eventId, filteredEvents))
+          case _ ⇒
+            // Filtering has left no event. So we wait for new events.
+            promise.completeWith(whenAnyKeyedEvents(eventId, predicate))
         }
-      } match {
-        case Success(filteredEvents) if filteredEvents.nonEmpty ⇒ promise.success(Snapshot(eventId, filteredEvents))
-        case Success(_) ⇒ promise.completeWith(whenAnyKeyedEvents(eventId, predicate))
-        case Failure(t) ⇒ promise.failure(t)
+      catch {
+        case NonFatal(t) ⇒ promise.failure(t)
       }
     promise.future
   }
