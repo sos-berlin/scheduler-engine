@@ -4,6 +4,7 @@ namespace sos {
 namespace scheduler {
 namespace folder {
 
+
 //-----------------------------------------------------------------------------Dependant::Dependant
 
 Dependant::Dependant()
@@ -94,7 +95,12 @@ vector<string> Dependant::missing_requisites_java() {
     vector<string> result;
     result.reserve(requisite_paths.size());
     Z_FOR_EACH_CONST(list<Requisite_path>, requisite_paths, i) {
-        result.push_back(i->_subsystem->xml_element_name() + ":" + i->_path);
+        string s;
+        s.reserve(30 + i->_path.size());
+        s.append(i->_subsystem->xml_element_name());
+        s.append(":");
+        s.append(i->_path);
+        result.push_back(s);
     }
     return result;
 }
@@ -107,28 +113,21 @@ list<Requisite_path> Dependant::missing_requisites()
     {
         File_based_subsystem* subsystem = ds->first;
 
-        Z_FOR_EACH_CONST( Requisite_set, ds->second, d )
-        {
-            Absolute_path path      ( *d );
-            File_based*   requisite = subsystem->file_based_or_null( path );
-            
-            if( requisite )
-            {
-                list<Requisite_path> missings = requisite->missing_requisites();
-                result.insert( result.end(), missings.begin(), missings.end() );
+        Z_FOR_EACH_CONST(Requisite_set, ds->second, d) {
+            Absolute_path path = *d;
+            File_based* requisite = subsystem->file_based_or_null(path);
+            if (requisite) {
+                result.splice(result.end(), requisite->missing_requisites());
             }
-
-            if( !requisite  ||  !requisite->is_active_and_not_to_be_removed() )
-            {
-                result.push_back( Requisite_path( subsystem, path ) );
+            if (!requisite || !requisite->is_active_and_not_to_be_removed()) {
+                result.push_back(Requisite_path(subsystem, path));
             }
         }
     }
 
     Z_FOR_EACH_CONST( stdext::hash_set<Dependant*>, _accompanying_dependants, p )
     {
-        list<Requisite_path> missings = (*p)->missing_requisites();
-        result.insert( result.end(), missings.begin(), missings.end() );
+        result.splice(result.end(), (*p)->missing_requisites());
     }
 
     return result;

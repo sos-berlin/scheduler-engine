@@ -48,9 +48,6 @@ struct Java_job : Job {
         return _cppNewJobJ.onActivate();
     }
 
-    //list<Requisite_path> missing_requisites() {
-    //}
-
     void on_prepare_to_remove() {
         return _cppNewJobJ.onPrepareToRemove();
     }
