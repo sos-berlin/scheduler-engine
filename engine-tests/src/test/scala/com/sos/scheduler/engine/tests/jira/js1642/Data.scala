@@ -312,9 +312,9 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       XTestJobOverview,
       XTestBJobOverview),
     Vector(
-      TaskOverview(TaskId(3), TestJobPath, TaskState.running, ProcessClassPath.Default),
-      TaskOverview(TaskId(4), TestJobPath, TaskState.running, ProcessClassPath.Default),
-      TaskOverview(TaskId(5), TestJobPath, TaskState.running, ProcessClassPath.Default)),
+      TaskOverview(TaskId(3), TestJobPath, TaskState.running, Some(ProcessClassPath.Default)),
+      TaskOverview(TaskId(4), TestJobPath, TaskState.running, Some(ProcessClassPath.Default)),
+      TaskOverview(TaskId(5), TestJobPath, TaskState.running, Some(ProcessClassPath.Default))),
     Vector(
       ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
   )

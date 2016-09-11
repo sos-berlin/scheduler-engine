@@ -10,7 +10,6 @@ trait TaskC extends CppProxyWithSister[Task] {
   def job: JobC
   def job_path: String
   def state_name: String
-  def process_class_path: String
   def remote_scheduler_address: String
   def order: OrderC
   def params: Variable_setC
@@ -24,6 +23,8 @@ trait TaskC extends CppProxyWithSister[Task] {
 
   @CppExpression("$->step_or_process_started_at().millis()")  // First step starts with process, second with step (spooler_process)
   def stepOrProcessStartedAt: Long
+
+  def process_class_or_null: Process_classC
 }
 
 object TaskC {

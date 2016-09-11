@@ -79,8 +79,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
         case inTask: OrderProcessingState.InTask ⇒ taskSubsystem.task(inTask.taskId)
       }
       val processClasses = {
-        val processClassPaths = (tasks map { _.processClassPath }) ++ (jobs flatMap { _.defaultProcessClassPathOption })
-        processClassPaths.distinct flatMap processClassSubsystem.fileBasedOption
+        val taskProcessClasses = tasks flatMap { _.processClassOption }
+        val jobProcessClasses = (jobs flatMap { _.defaultProcessClassPathOption }).distinct flatMap processClassSubsystem.fileBasedOption
+        (taskProcessClasses ++ jobProcessClasses).distinct
       }
       OrdersComplemented(
         views,

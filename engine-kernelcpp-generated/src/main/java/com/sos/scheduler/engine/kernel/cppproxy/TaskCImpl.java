@@ -138,11 +138,11 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native long processStartedAt__native(long cppReference);
 
 
-    @Override public java.lang.String process_class_path() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Process_classC process_class_or_null() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = process_class_path__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
+            com.sos.scheduler.engine.kernel.cppproxy.Process_classC result = process_class_or_null__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Process_classC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -151,7 +151,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
         }
     }
 
-    private static native java.lang.String process_class_path__native(long cppReference);
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Process_classC process_class_or_null__native(long cppReference);
 
 
     @Override public java.lang.String remote_scheduler_address() {

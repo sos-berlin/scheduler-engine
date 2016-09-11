@@ -3005,7 +3005,8 @@ bool Standard_job::try_start_one_task()
                     _start_min_tasks = false;
 
                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
-                _log->info(message_string("SCHEDULER-930", task->id(), c, task->process_class_path()));   // Task::do_load() has set process_class_path
+                _log->info(message_string("SCHEDULER-930", task->id(), c, 
+                    task->process_class()? task->process_class()->path() : string("(process class not yet known)")));   // Task::do_load() has set process_class_path
 
                 task_started = true;
                 _wake_when_in_period = false;

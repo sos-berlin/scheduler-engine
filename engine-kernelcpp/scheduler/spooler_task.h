@@ -257,10 +257,6 @@ struct Task : Object,
     const File_path             stdout_path                 () const                                { return _module_instance? _module_instance->stdout_path() : File_path(); }
     const File_path             stderr_path                 () const                                { return _module_instance? _module_instance->stderr_path() : File_path(); }    
 
-    public: Absolute_path process_class_path() const {
-        return _process_class ? _process_class->path() : Absolute_path("");
-    }
-
     public: Process_class* process_class() const {
         if (!_process_class) z::throw_xc(Z_FUNCTION);
         return _process_class;

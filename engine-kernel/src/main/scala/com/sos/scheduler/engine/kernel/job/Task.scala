@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.Order
+import com.sos.scheduler.engine.kernel.processclass.ProcessClass
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions
 import java.nio.file.Paths
@@ -34,7 +35,7 @@ extends UnmodifiableTask with Sister with EventSource {
     variables,
     stdoutFile = stdoutFile)
 
-  private[kernel] def overview = TaskOverview(id, jobPath, state, processClassPath, agentAddress)
+  private[kernel] def overview = TaskOverview(id, jobPath, state, processClassOption map { _.path }, agentAddress)
 
   private[kernel] def taskKey = TaskKey(jobPath, id)
 
@@ -48,7 +49,14 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def id = new TaskId(cppProxy.id)
 
-  private[kernel] def processClassPath = ProcessClassPath(cppProxy.process_class_path)
+  private[kernel] def processClassPath: ProcessClassPath =
+    processClassOption.getOrElse(throw new NoSuchElementException("Task has not ProcessClass yet")).path
+
+  private[kernel] def processClassOption: Option[ProcessClass] =
+    cppProxy.process_class_or_null match {
+      case null ⇒ None
+      case o ⇒ Some(o.getSister)
+    }
 
   def processStartedAt: Option[Instant] = inSchedulerThread { CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.processStartedAt) }
 
