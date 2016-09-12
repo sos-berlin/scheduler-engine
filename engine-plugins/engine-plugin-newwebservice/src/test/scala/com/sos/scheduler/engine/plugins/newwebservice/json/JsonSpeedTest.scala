@@ -48,7 +48,8 @@ private object JsonSpeedTest {
       FileBasedState.active,
       OrderSourceType.AdHoc,
       NodeId(numbers.next().toString),
-      OrderProcessingState.InTaskProcess(TaskId(numbers.next()), ProcessClassPath.Default, agentUri = None, inProcessSince),
+      OrderProcessingState.InTaskProcess(TaskId(numbers.next()), ProcessClassPath.Default, occupyingClusterMemberId = None,
+        inProcessSince, agentUri = None),
       nextStepAt = Some(now))
     logger.info(stopwatch.itemsPerSecondString(n, "OrderOverview"))
     result

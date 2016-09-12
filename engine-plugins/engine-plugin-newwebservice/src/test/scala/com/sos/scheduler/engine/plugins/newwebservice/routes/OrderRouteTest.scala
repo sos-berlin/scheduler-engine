@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, N
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.OrderQuery
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
@@ -247,8 +248,8 @@ object OrderRouteTest {
     OrderProcessingState.InTaskProcess(
       TaskId(3),
       ProcessClassPath.Default,
-      agentUri = None,
-      since = Instant.parse("2016-08-26T11:22:33.444Z")),
+      since = Instant.parse("2016-08-26T11:22:33.444Z"),
+      agentUri = None),
     nextStepAt = Some(EPOCH))
   private val A1OrderDetailed = OrderDetailed(A1OrderOverview, priority = 0, title = "")
 

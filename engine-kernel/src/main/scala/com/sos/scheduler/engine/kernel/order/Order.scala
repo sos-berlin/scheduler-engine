@@ -97,8 +97,7 @@ with OrderPersistence {
       historyIdOption,
       obstacles = obstacles(flags, processingState),
       startedAt = startedAtOption,
-      nextStepAt = nextStepAtOption,
-      occupyingClusterMemberId = emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply)
+      nextStepAt = nextStepAtOption)
   }
 
   private[order] def processingState(flags: Long, nextStepAtOption: Option[Instant]): OrderProcessingState = {
@@ -111,8 +110,8 @@ with OrderPersistence {
     (taskId, taskId flatMap taskSubsystem.taskOption) match {
       case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
         task.stepOrProcessStartedAt match {
-          case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, task.agentAddress, at)
-          case None ⇒ WaitingInTask(taskId_, task.processClassPath)
+          case None ⇒ WaitingInTask(taskId_, task.processClassPath, occupyingClusterMemberId)
+          case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, occupyingClusterMemberId, at, task.agentAddress)
         }
       case (_, _) ⇒
         if (isBlacklisted)
@@ -211,6 +210,9 @@ with OrderPersistence {
   private[order] def nextStepAtOption: Option[Instant] = eternalCppMillisToNoneInstant(cppProxy.next_step_at_millis)
 
   private def setbackUntilOption: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.setback_millis)
+
+  private def occupyingClusterMemberId: Option[ClusterMemberId] =
+    emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply
 
   private[kernel] def taskId: Option[TaskId] =
     cppProxy.task_id match {
