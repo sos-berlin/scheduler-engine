@@ -3,18 +3,23 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Globalization;
     using System.Linq;
     using System.Management.Automation;
+    using System.Management.Automation.Runspaces;
     using System.Text;
 
     public class PowershellAdapter : ScriptAdapter
     {
-        private bool isShellMode;
-        private readonly PowershellSpoolerParams spoolerParams;
-        private readonly PowerShell shell;
+        #region Constants and Fields
 
-        #region Constructor
+        private PowershellAdapterPSHost host;
+        private bool isShellMode;
+        private Runspace runspace;
+        private PowershellSpoolerParams spoolerParams;
+
+        #endregion
+
+        #region Constructors and Destructors
 
         public PowershellAdapter(
             Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String scriptContent)
@@ -24,19 +29,58 @@
             this.spoolerParams = new PowershellSpoolerParams(
                 this.spooler_task, this.spooler, this.IsOrderJob, this.isShellMode);
 
-            this.shell = PowerShell.Create();
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_task", this.spooler_task);
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_job", this.spooler_job);
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler", this.spooler);
-            this.shell.Runspace.SessionStateProxy.SetVariable("spooler_params", this.spoolerParams);
+            this.host = new PowershellAdapterPSHost(this.spooler_log);
+            this.runspace = RunspaceFactory.CreateRunspace(this.host);
+            this.runspace.Open();
+            this.runspace.SessionStateProxy.SetVariable("spooler_log", this.spooler_log);
+            this.runspace.SessionStateProxy.SetVariable("spooler_task", this.spooler_task);
+            this.runspace.SessionStateProxy.SetVariable("spooler_job", this.spooler_job);
+            this.runspace.SessionStateProxy.SetVariable("spooler", this.spooler);
+            this.runspace.SessionStateProxy.SetVariable("spooler_params", this.spoolerParams);
         }
 
         #endregion
 
-        #region Public JobScheduler API methods
+        #region Public Methods
 
-        #region Public Job_impl methods
+        public override void spooler_close()
+        {
+            if (this.isShellMode)
+            {
+                return;
+            }
+
+            try
+            {
+                this.InvokeFunction("spooler_close");
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
+        }
+
+        public override void spooler_exit()
+        {
+            try
+            {
+                if (this.isShellMode)
+                {
+                }
+                else
+                {
+                    this.InvokeFunction("spooler_exit");
+                }
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
+            finally
+            {
+                this.Close();
+            }
+        }
 
         public override bool spooler_init()
         {
@@ -48,10 +92,40 @@
             try
             {
                 this.InitializeScript(false);
-                var results = this.InvokeCommand("spooler_init");
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
-                return GetReturnValue(results, index, true);
+                var result = this.InvokeFunction("spooler_init");
+                return GetReturnValue(result, true);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
+        }
+
+        public override void spooler_on_error()
+        {
+            if (this.isShellMode)
+            {
+                return;
+            }
+            try
+            {
+                this.InvokeFunction("spooler_on_error");
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
+        }
+
+        public override void spooler_on_success()
+        {
+            if (this.isShellMode)
+            {
+                return;
+            }
+            try
+            {
+                this.InvokeFunction("spooler_on_success");
             }
             catch (RuntimeException ex)
             {
@@ -68,10 +142,8 @@
 
             try
             {
-                var results = this.InvokeCommand("spooler_open");
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
-                return GetReturnValue(results, index, true);
+                var result = this.InvokeFunction("spooler_open");
+                return GetReturnValue(result, true);
             }
             catch (RuntimeException ex)
             {
@@ -91,122 +163,8 @@
                     return this.IsOrderJob;
                 }
 
-                var results = this.InvokeCommand("spooler_process");
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
-                return GetReturnValue(results, index, this.IsOrderJob);
-            }
-            catch (RuntimeException ex)
-            {
-                throw new Exception(GetErrorMessage(ex.ErrorRecord));
-            }
-        }
-
-        public override void spooler_close()
-        {
-            if (this.isShellMode)
-            {
-                return;
-            }
-
-            try
-            {
-                var results = this.InvokeCommand("spooler_close");
-                this.Log(results);
-            }
-            catch (RuntimeException ex)
-            {
-                throw new Exception(GetErrorMessage(ex.ErrorRecord));
-            }
-        }
-
-        public override void spooler_on_success()
-        {
-            if (this.isShellMode)
-            {
-                return;
-            }
-
-            try
-            {
-                var results = this.InvokeCommand("spooler_on_success");
-                this.Log(results);
-            }
-            catch (RuntimeException ex)
-            {
-                throw new Exception(GetErrorMessage(ex.ErrorRecord));
-            }
-        }
-
-        public override void spooler_on_error()
-        {
-            if (this.isShellMode)
-            {
-                return;
-            }
-
-            try
-            {
-                var results = this.InvokeCommand("spooler_on_error");
-                this.Log(results);
-            }
-            catch (RuntimeException ex)
-            {
-                throw new Exception(GetErrorMessage(ex.ErrorRecord));
-            }
-        }
-
-        public override void spooler_exit()
-        {
-            try
-            {
-                if (this.isShellMode)
-                {
-                }
-                else
-                {
-                    var results = this.InvokeCommand("spooler_exit");
-                    this.Log(results);
-                }
-            }
-            catch (RuntimeException ex)
-            {
-                throw new Exception(GetErrorMessage(ex.ErrorRecord));
-            }
-            finally
-            {
-                this.Close();
-            }
-        }
-
-        #endregion
-
-        #region Public Monitor_impl methods
-
-        public override bool spooler_task_before()
-        {
-            try
-            {
-                this.InitializeScript(false);
-                var results = this.InvokeCommand("spooler_task_before");
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
-                return GetReturnValue(results, index, true);
-            }
-            catch (RuntimeException ex)
-            {
-                throw new Exception(GetErrorMessage(ex.ErrorRecord));
-            }
-        }
-
-        public override bool spooler_process_before()
-        {
-            try
-            {
-                var results = this.InvokeCommand("spooler_process_before");
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
-                return GetReturnValue(results, index, true);
+                var result = this.InvokeFunction("spooler_process");
+                return GetReturnValue(result, this.IsOrderJob);
             }
             catch (RuntimeException ex)
             {
@@ -218,10 +176,21 @@
         {
             try
             {
-                var results = this.InvokeCommand("spooler_process_after", spoolerProcessResult);
-                var index = GetReturnValueIndex(results);
-                this.Log(results, index);
-                return GetReturnValue(results, index, spoolerProcessResult);
+                var result = this.InvokeFunction("spooler_process_after", spoolerProcessResult);
+                return GetReturnValue(result, spoolerProcessResult);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
+        }
+
+        public override bool spooler_process_before()
+        {
+            try
+            {
+                var result = this.InvokeFunction("spooler_process_before");
+                return GetReturnValue(result, true);
             }
             catch (RuntimeException ex)
             {
@@ -233,8 +202,7 @@
         {
             try
             {
-                var results = this.InvokeCommand("spooler_task_after");
-                this.Log(results);
+                this.InvokeFunction("spooler_task_after");
             }
             catch (RuntimeException ex)
             {
@@ -246,11 +214,126 @@
             }
         }
 
-        #endregion
+        public override bool spooler_task_before()
+        {
+            try
+            {
+                this.InitializeScript(false);
+                var result = this.InvokeFunction("spooler_task_before");
+                return GetReturnValue(result, true);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new Exception(GetErrorMessage(ex.ErrorRecord));
+            }
+        }
 
         #endregion
 
-        #region Private methods
+        #region Methods
+
+        private static string GetErrorMessage(ErrorRecord errorRecord)
+        {
+            var sb = new StringBuilder(errorRecord.ToString());
+            sb.Append(errorRecord.InvocationInfo.PositionMessage);
+            return sb.ToString();
+        }
+
+        private static bool GetReturnValue(string result, bool defaultValue)
+        {
+            var rs = defaultValue;
+            if (result != null)
+            {
+                try
+                {
+                    rs = Boolean.Parse(result);
+                }
+                catch (Exception)
+                {
+                }
+            }
+            return rs;
+        }
+
+        private void CheckLastExitCode(bool useLocalScope)
+        {
+            var lastExitCode = this.InvokeCommand("$Global:LastExitCode", useLocalScope).FirstOrDefault();
+            var exitCode = 0;
+            if (lastExitCode != null)
+            {
+                try
+                {
+                    exitCode = Int32.Parse(lastExitCode.ToString());
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            if (exitCode == 0)
+            {
+                return;
+            }
+            this.spooler_log.error(
+                String.Format(
+                    "Process terminated with exit code {0}. See the following warning SCHEDULER-280.", exitCode));
+            this.spooler_task.set_exit_code(exitCode);
+        }
+
+        private void Close()
+        {
+            this.runspace.Close();
+            this.runspace.Dispose();
+
+            this.runspace = null;
+            this.host = null;
+            this.spoolerParams = null;
+        }
+
+        private void InitializeScript(bool useLocalScope)
+        {
+            this.InvokeScript(this.Script, useLocalScope);
+        }
+
+        private IEnumerable<PSObject> InvokeCommand(String command, bool useLocalScope)
+        {
+            Collection<PSObject> result;
+            using (var pipeline = this.runspace.CreatePipeline())
+            {
+                pipeline.Commands.AddScript(command, useLocalScope);
+                result = pipeline.Invoke();
+            }
+            return result;
+        }
+
+        private string InvokeFunction(String functionName, bool? param = null)
+        {
+            var functionParams = "";
+            if (param.HasValue)
+            {
+                functionParams = "($" + param.Value + ")";
+            }
+
+            var command = String.Format(
+                "if($function:{0}){{ {1}{2} }}",
+                functionName,
+                functionName,
+                functionParams);
+
+            return this.InvokeScript(command, false);
+        }
+
+        private string InvokeScript(String command, bool useLocalScope)
+        {
+            using (var pipeline = this.runspace.CreatePipeline())
+            {
+                pipeline.Commands.AddScript(command, useLocalScope);
+                pipeline.Commands.Add("Out-Default");
+                pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
+                pipeline.Invoke();
+            }
+            return ((PowershellAdapterPSHostUserInterface)this.host.UI).LastInfoMessage;
+        }
 
         private void ParseScript()
         {
@@ -272,144 +355,6 @@
                           || t.Content.Equals("spooler_on_error")
                           || t.Content.Equals("spooler_exit")));
             this.isShellMode = apiFunction == null;
-        }
-
-        private void InitializeScript(bool useLocalScope)
-        {
-            this.shell.Commands.Clear();
-            this.shell.AddScript(this.Script, useLocalScope);
-            this.shell.AddCommand("Out-String").AddParameter("Stream", true);
-            var results = this.shell.Invoke();
-            this.Log(results);
-        }
-
-        private void CheckLastExitCode(bool useLocalScope)
-        {
-            this.shell.Commands.Clear();
-            this.shell.AddScript("$Global:LastExitCode", useLocalScope);
-            var lastExitCode = this.shell.Invoke().FirstOrDefault();
-            var exitCode = 0;
-            if (lastExitCode != null)
-            {
-                try
-                {
-                    exitCode = Int32.Parse(lastExitCode.ToString());
-                }
-                catch (Exception ex)
-                {
-                }
-            }
-
-            if (exitCode == 0)
-            {
-                return;
-            }
-            this.spooler_log.error(String.Format("Process terminated with exit code {0}. See the following warning SCHEDULER-280.", exitCode));
-            this.spooler_task.set_exit_code(exitCode);
-        }
-        
-        private Collection<PSObject> InvokeCommand(String methodName, bool? param = null)
-        {
-            this.shell.Commands.Clear();
-            var methodParams = "";
-            if (param.HasValue)
-            {
-                var str = string.Concat("$", param.Value.ToString(CultureInfo.InvariantCulture));
-                methodParams = "(" + str + ")";
-            }
-            this.shell.AddScript(
-                "if ($function:" + methodName + ") {" + methodName + methodParams + " | Out-String -Stream}", false);
-            return this.shell.Invoke();
-        }
-
-        private void Log(IEnumerable<PSObject> results, int returnValueIndex = -1)
-        {
-            this.LogResults(results, returnValueIndex);
-            this.LogStreams();
-        }
-
-        private void LogResults(IEnumerable<PSObject> results, int returnValueIndex)
-        {
-            if (results == null)
-            {
-                return;
-            }
-            var i = 0;
-            foreach (var psObject in results)
-            {
-                if (psObject != null && i != returnValueIndex)
-                {
-                    Console.Out.WriteLine(psObject.ToString());
-                }
-                i++;
-            }
-        }
-
-        private void LogStreams()
-        {
-            if (this.shell.Streams.Error.Count > 0)
-            {
-                Console.Error.WriteLine(GetErrorMessage(this.shell.Streams.Error[0]));
-            }
-            if (this.shell.Streams.Warning.Count > 0)
-            {
-                Console.Out.WriteLine(this.shell.Streams.Warning[0].ToString());
-            }
-            if (this.shell.Streams.Debug.Count > 0)
-            {
-                Console.Out.WriteLine(this.shell.Streams.Debug[0].ToString());
-            }
-            if (this.shell.Streams.Verbose.Count > 0)
-            {
-                Console.Out.WriteLine(this.shell.Streams.Verbose[0].ToString());
-            }
-            this.shell.Streams.ClearStreams();
-        }
-
-        private static string GetErrorMessage(ErrorRecord errorRecord)
-        {
-            var sb = new StringBuilder(errorRecord.ToString());
-            sb.Append(errorRecord.InvocationInfo.PositionMessage);
-            return sb.ToString();
-        }
-
-        private static int GetReturnValueIndex(IEnumerable<PSObject> results)
-        {
-            var index = -1;
-            try
-            {
-                index = results.Select(
-                    (v, i) => new
-                    {
-                        Value = v.ToString().ToLower(),
-                        Index = i
-                    }).Where(x => x.Value.Equals("true") || x.Value.Equals("false")).Select(x => x.Index).Last();
-            }
-            catch (Exception)
-            {
-            }
-            return index;
-        }
-
-        private static bool GetReturnValue(IEnumerable<PSObject> results, int returnValueIndex, bool defaultValue)
-        {
-            var result = defaultValue;
-            if (returnValueIndex > -1)
-            {
-                try
-                {
-                    result = Boolean.Parse(results.ElementAt(returnValueIndex).ToString());
-                }
-                catch (Exception)
-                {
-                }
-            }
-            return result;
-        }
-
-        private void Close()
-        {
-            this.shell.Dispose();
         }
 
         #endregion
