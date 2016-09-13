@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js653
 
+import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
+import scala.util.Try
 
 /**
   * Ticket JS-653.
@@ -43,6 +45,7 @@ final class JS653IT extends FreeSpec with ScalaSchedulerTest {
 
   eventBus.onHot[OrderStarted.type] {
     case KeyedEvent(orderKey, _) ⇒
+      waitForCondition(10.s, 100.ms) { Try { scheduler} .isSuccess }   // TestSchedulerController updates scheduler not so quickly
       orderStarts.add(orderKey.id → orderOverview(orderKey).nodeId)
   }
 
