@@ -110,22 +110,26 @@ with OrderPersistence {
     (taskId, taskId flatMap taskSubsystem.taskOption) match {
       case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
         task.stepOrProcessStartedAt match {
-          case None ⇒ WaitingInTask(taskId_, task.processClassPath, occupyingClusterMemberId)
-          case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, occupyingClusterMemberId, at, task.agentAddress)
+          case None ⇒ WaitingInTask(taskId_, task.processClassPath)
+          case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, at, task.agentAddress)
         }
       case (_, _) ⇒
-        if (isBlacklisted)
-          Blacklisted
-        else if (!isTouched)
-          nextStepAtOption match {
-            case None ⇒ NotPlanned
-            case Some(at) if at.getEpochSecond >= currentSecond ⇒ Planned(at)
-            case Some(at) ⇒ Pending(at)
-          }
-        else if (isSetback)
-          Setback(setbackUntilOption getOrElse Instant.MAX)
-        else
-          WaitingForOther
+        occupyingClusterMemberId match {
+          case Some(clusterMemberId) ⇒ OccupiedByClusterMember(clusterMemberId)
+          case None ⇒
+            if (isBlacklisted)
+              Blacklisted
+            else if (!isTouched)
+              nextStepAtOption match {
+                case None ⇒ NotPlanned
+                case Some(at) if at.getEpochSecond >= currentSecond ⇒ Planned(at)
+                case Some(at) ⇒ Pending(at)
+              }
+            else if (isSetback)
+              Setback(setbackUntilOption getOrElse Instant.MAX)
+            else
+              WaitingForOther
+        }
     }
   }
 
