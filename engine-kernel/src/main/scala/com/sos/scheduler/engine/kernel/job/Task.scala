@@ -46,11 +46,11 @@ extends UnmodifiableTask with Sister with EventSource {
     val builder = Set.newBuilder[TaskObstacle]
     state switch {
       case TaskState.waiting_for_process if cppProxy.is_waiting_for_remote_scheduler ⇒
-        builder += AgentUnavailable
+        builder += WaitingForAgent
       case TaskState.waiting_for_process ⇒
-        builder += ProcessClassUnavailable
+        builder += WaitingForProcessClass
       case TaskState.opening_waiting_for_locks | TaskState.running_waiting_for_locks ⇒
-        builder += LockUnavailable
+        builder += WaitingForLock
       case TaskState.running_delayed ⇒
         builder += Delayed
       case TaskState.suspended ⇒
