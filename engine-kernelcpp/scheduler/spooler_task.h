@@ -166,6 +166,7 @@ struct Task : Object,
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     xml::Document_ptr           dom                         ( const Show_what& ) const;
+    bool                        is_waiting_for_remote_scheduler() const;
 
     State                       state                       () const                                { return _state; }
     void                        init                        ();

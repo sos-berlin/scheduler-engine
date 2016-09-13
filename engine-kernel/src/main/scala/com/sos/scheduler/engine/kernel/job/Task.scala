@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.job
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.SetOnce
@@ -7,7 +8,7 @@ import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.{JobPath, TaskDetailed, TaskId, TaskKey, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskDetailed, TaskId, TaskKey, TaskObstacle, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -39,6 +40,24 @@ extends UnmodifiableTask with Sister with EventSource {
     stdoutFile = stdoutFile)
 
   private[kernel] def overview = TaskOverview(taskId, jobPath, state, processClassOption map { _.path }, agentAddress)
+
+  private def obstacles: Set[TaskObstacle] = {
+    import TaskObstacle._
+    val builder = Set.newBuilder[TaskObstacle]
+    state switch {
+      case TaskState.waiting_for_process if cppProxy.is_waiting_for_remote_scheduler ⇒
+        builder += AgentUnavailable
+      case TaskState.waiting_for_process ⇒
+        builder += ProcessClassUnavailable
+      case TaskState.opening_waiting_for_locks | TaskState.running_waiting_for_locks ⇒
+        builder += LockUnavailable
+      case TaskState.running_delayed ⇒
+        builder += Delayed
+      case TaskState.suspended ⇒
+        builder += Suspended
+    }
+    builder.result
+  }
 
   private[kernel] def taskKey = TaskKey(jobPath, taskId)
 

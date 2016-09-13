@@ -335,12 +335,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
-        if (_state == s_waiting_for_process) {
-            if (Remote_module_instance_proxy* o = dynamic_cast<Remote_module_instance_proxy*>(+_module_instance)) {
-                if (o->is_waiting_for_remote_scheduler()) {
-                    task_element.setAttribute("waiting_for_remote_scheduler", "true");
-                }
-            }
+        if (is_waiting_for_remote_scheduler()) {
+            task_element.setAttribute_optional("waiting_for_remote_scheduler", "true");
         }
 
         if( _enqueued_state )
@@ -446,6 +442,17 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.appendChild( _environment->dom_element( document, "environment", "variable" ) );
 
     return task_element;
+}
+
+bool Task::is_waiting_for_remote_scheduler() const {
+    if (_state == s_waiting_for_process) {
+        if (Remote_module_instance_proxy* o = dynamic_cast<Remote_module_instance_proxy*>(+_module_instance)) {
+            if (o->is_waiting_for_remote_scheduler()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //----------------------------------------------------------------------------------------Task::dom

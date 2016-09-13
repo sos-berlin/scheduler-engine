@@ -34,6 +34,23 @@ static jint JNICALL id(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jboolean JNICALL is_1waiting_1for_1remote_1scheduler(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Task* o_ = has_proxy< ::sos::scheduler::Task >::of_cpp_reference(cppReference,"::sos::scheduler::Task::is_waiting_for_remote_scheduler()");
+        return (o_->is_waiting_for_remote_scheduler());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL job(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -255,6 +272,7 @@ static jlong JNICALL stepOrProcessStartedAt(JNIEnv* jenv, jobject, jlong cppRefe
 
 const static JNINativeMethod native_methods[] = {
     { (char*)"id__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::id },
+    { (char*)"is_waiting_for_remote_scheduler__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1waiting_1for_1remote_1scheduler },
     { (char*)"job__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job },
     { (char*)"job_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1path },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },

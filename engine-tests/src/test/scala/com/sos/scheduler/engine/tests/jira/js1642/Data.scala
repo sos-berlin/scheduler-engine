@@ -528,19 +528,22 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "taskId": "3",
       "jobPath": "/test",
       "state": "running",
-      "processClassPath": ""
+      "processClassPath": "",
+      "obstacles": []
     },
     {
       "taskId": "4",
       "jobPath": "/test",
       "state": "running",
-      "processClassPath": ""
+      "processClassPath": "",
+      "obstacles": []
     },
     {
       "taskId": "5",
       "jobPath": "/test",
       "state": "running",
-      "processClassPath": ""
+      "processClassPath": "",
+      "obstacles": []
     }
   ]"""
   val UsedProcessClassesJson = """[

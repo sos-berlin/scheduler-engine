@@ -25,6 +25,8 @@ trait TaskC extends CppProxyWithSister[Task] {
   def stepOrProcessStartedAt: Long
 
   def process_class_or_null: Process_classC
+
+  def is_waiting_for_remote_scheduler: Boolean
 }
 
 object TaskC {

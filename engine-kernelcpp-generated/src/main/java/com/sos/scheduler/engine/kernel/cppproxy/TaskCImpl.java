@@ -28,6 +28,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native int id__native(long cppReference);
 
 
+    @Override public boolean is_waiting_for_remote_scheduler() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_waiting_for_remote_scheduler__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_waiting_for_remote_scheduler__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
