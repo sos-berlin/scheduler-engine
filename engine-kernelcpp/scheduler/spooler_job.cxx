@@ -3574,7 +3574,7 @@ xml::Element_ptr Standard_job::why_dom_element(const xml::Document_ptr& doc) {
 }
 
 vector<string> Standard_job::unavailable_lock_path_strings() const {
-    if (_lock_requestor) 
+    if (_lock_requestor && _lock_requestor->is_enqueued()) 
         return _lock_requestor->unavailable_lock_path_strings((lock::Holder*)NULL);
     else
         return vector<string>();
