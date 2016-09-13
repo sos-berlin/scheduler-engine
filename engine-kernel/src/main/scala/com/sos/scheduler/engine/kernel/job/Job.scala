@@ -55,7 +55,7 @@ with JobPersistence {
           if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
       }
       unavailableLockPaths switch {
-        case o if o.nonEmpty ⇒ builder ++= o map LockUnavailable.apply
+        case o if o.nonEmpty ⇒ builder += WaitingForLocks(o)
       }
       defaultProcessClassPathOption switch {
         case Some(path) ⇒
