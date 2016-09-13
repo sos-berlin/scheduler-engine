@@ -57,6 +57,9 @@ final class SchedulerUris private(schedulerUriString: String) {
     def complementedForPost[V <: OrderView: OrderView.Companion]: String =
       forPost(returnType = Some(s"OrdersComplemented/${orderView.name}"))
 
+    def statistics: String =
+      uriString(Uri.Path("api/order/"), "return" → "OrderStatistics")
+
     private def forGet(query: OrderQuery, returnType: Option[String]): String = {
       val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
       uriString(Uri(

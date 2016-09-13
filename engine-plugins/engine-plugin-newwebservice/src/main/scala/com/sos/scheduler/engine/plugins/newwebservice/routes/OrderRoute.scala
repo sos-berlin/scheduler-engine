@@ -40,6 +40,13 @@ trait OrderRoute extends LogRoute {
     } ~
     testSlash(webServiceContext) {
       get {
+        pathSingleSlash {
+          //parameter("return" ! "OrderStatistics") {  This accepts URI with no query parameter, too ...
+          parameter("return") {
+            case "OrderStatistics" ⇒ completeTryHtml(client.orderStatistics)
+            case _ ⇒ reject
+          }
+        } ~
         singleOrder ~
         extendedOrderQuery { query ⇒
           queriedOrders(query)

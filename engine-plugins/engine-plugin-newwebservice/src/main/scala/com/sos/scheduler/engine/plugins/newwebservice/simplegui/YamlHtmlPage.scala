@@ -19,9 +19,9 @@ object YamlHtmlPage {
     implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       ToHtmlPage[Snapshot[A]] { (snapshot, pageUri) ⇒
         val yamlFuture = Future { snapshot map { o ⇒ YamlPrinter(o.toJson) } }
-        for (Snapshot(_, schedulerOverview) ← client.overview;
+        for (Snapshot(eventId, schedulerOverview) ← client.overview;
              yaml ← yamlFuture) yield
-          new StringHtmlPage(yaml, pageUri, webServiceContext.uris, schedulerOverview)
+          new StringHtmlPage(yaml, eventId, pageUri, webServiceContext.uris, schedulerOverview)
       }
   }
 }
