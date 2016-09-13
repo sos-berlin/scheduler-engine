@@ -61,36 +61,39 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
 
   def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     respondWith {
-      val views = orderSubsystem.orderViews[V](query)
-      val nodeOverviews = {
-        val jobChainPathToNodeKeys = (views map { _.nodeKey }).distinct groupBy { _.jobChainPath }
-        for ((jobChainPath, nodeKeys) ← jobChainPathToNodeKeys.toVector.sortBy { _._1 };
-             jobChain ← orderSubsystem.jobChainOption(jobChainPath).iterator;
-             nodeKey ← nodeKeys;
-             node ← (jobChain.nodeMap.get(nodeKey.nodeId) collect { case n: JobNode ⇒ n.overview }).toArray sortBy { _.nodeKey.nodeId })  // sort just for determinism - not the original node order
-          yield node
-      }
-      val jobChainOverviews = (nodeOverviews map { _.jobChainPath }).distinct.sorted flatMap orderSubsystem.jobChainOption map { _.overview }
-      val jobs = {
-        val jobPaths = (nodeOverviews map { _.jobPath }).distinct
-        jobPaths flatMap jobSubsystem.fileBasedOption
-      }
-      val tasks = views map { _.processingState } collect {
-        case inTask: OrderProcessingState.InTask ⇒ taskSubsystem.task(inTask.taskId)
-      }
-      val processClasses = {
-        val taskProcessClasses = tasks flatMap { _.processClassOption }
-        val jobProcessClasses = (jobs flatMap { _.defaultProcessClassPathOption }).distinct flatMap processClassSubsystem.fileBasedOption
-        (taskProcessClasses ++ jobProcessClasses).distinct
-      }
-      OrdersComplemented(
-        views,
-        jobChainOverviews,
-        nodeOverviews,
-        (jobs map { _.overview }).sorted,
-        (tasks map { _.overview }).sorted,
-        (processClasses map { _.overview }).sorted)
+      complementOrders(orderSubsystem.orderViews[V](query))
     }
+
+  private def complementOrders[V <: OrderView: OrderView.Companion](views: immutable.Seq[V]) = {
+    val nodeOverviews = {
+      val jobChainPathToNodeKeys = (views map { _.nodeKey }).distinct groupBy { _.jobChainPath }
+      for ((jobChainPath, nodeKeys) ← jobChainPathToNodeKeys.toVector.sortBy { _._1 };
+           jobChain ← orderSubsystem.jobChainOption(jobChainPath).iterator;
+           nodeKey ← nodeKeys;
+           node ← (jobChain.nodeMap.get(nodeKey.nodeId) collect { case n: JobNode ⇒ n.overview }).toArray sortBy { _.nodeKey.nodeId })  // sort just for determinism - not the original node order
+        yield node
+    }
+    val jobChainOverviews = (nodeOverviews map { _.jobChainPath }).distinct.sorted flatMap orderSubsystem.jobChainOption map { _.overview }
+    val jobs = {
+      val jobPaths = (nodeOverviews map { _.jobPath }).distinct
+      jobPaths flatMap jobSubsystem.fileBasedOption
+    }
+    val tasks = views map { _.processingState } collect {
+      case inTask: OrderProcessingState.InTask ⇒ taskSubsystem.task(inTask.taskId)
+    }
+    val processClasses = {
+      val taskProcessClasses = tasks flatMap { _.processClassOption }
+      val jobProcessClasses = (jobs flatMap { _.defaultProcessClassPathOption }).distinct flatMap processClassSubsystem.fileBasedOption
+      (taskProcessClasses ++ jobProcessClasses).distinct
+    }
+    OrdersComplemented(
+      views,
+      jobChainOverviews,
+      nodeOverviews,
+      (jobs map { _.overview }).sorted,
+      (tasks map { _.overview }).sorted,
+      (processClasses map { _.overview }).sorted)
+  }
 
   def orderStatistics: Future[Snapshot[OrderStatistics]] =
     respondWith {
