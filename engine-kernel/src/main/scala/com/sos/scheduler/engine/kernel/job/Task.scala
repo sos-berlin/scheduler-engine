@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
+import com.sos.scheduler.engine.common.scalautil.SetOnce
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
@@ -28,6 +29,8 @@ extends UnmodifiableTask with Sister with EventSource {
   import taskSubsystem.schedulerThreadCallQueue
   intelliJuseImports(schedulerThreadCallQueue)
 
+  private val taskIdOnce = new SetOnce[TaskId]
+
   def onCppProxyInvalidated(): Unit = {}
 
   private[kernel] def details = TaskDetailed(
@@ -35,9 +38,9 @@ extends UnmodifiableTask with Sister with EventSource {
     variables,
     stdoutFile = stdoutFile)
 
-  private[kernel] def overview = TaskOverview(id, jobPath, state, processClassOption map { _.path }, agentAddress)
+  private[kernel] def overview = TaskOverview(taskId, jobPath, state, processClassOption map { _.path }, agentAddress)
 
-  private[kernel] def taskKey = TaskKey(jobPath, id)
+  private[kernel] def taskKey = TaskKey(jobPath, taskId)
 
   private def jobPath = JobPath(cppProxy.job_path)
 
@@ -47,7 +50,7 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def orderOption: Option[Order] = Option(cppProxy.order.getSister)
 
-  private[kernel] def id = new TaskId(cppProxy.id)
+  private[kernel] def taskId = taskIdOnce getOrUpdate TaskId(cppProxy.id)
 
   private[kernel] def processClassPath: ProcessClassPath =
     processClassOption.getOrElse(throw new NoSuchElementException("Task has not ProcessClass yet")).path
@@ -75,8 +78,7 @@ extends UnmodifiableTask with Sister with EventSource {
 
   def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 
-  override def toString =
-    s"Task($id)"
+  override def toString = s"Task ${taskIdOnce toStringOr ""}".trim
 }
 
 object Task {

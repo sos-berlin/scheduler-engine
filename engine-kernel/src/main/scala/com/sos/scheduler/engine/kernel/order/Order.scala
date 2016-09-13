@@ -104,16 +104,15 @@ with OrderPersistence {
     val isBlacklisted = cppFastFlags.isBlacklisted(flags)
     val isTouched = cppFastFlags.isTouched(flags)
     val isSetback = cppFastFlags.isSetback(flags)
-    val taskId = this.taskId
     val currentSecond = currentTimeMillis / 1000
     import OrderProcessingState._
-    (taskId, taskId flatMap taskSubsystem.taskOption) match {
-      case (Some(taskId_), Some(task)) ⇒  // The task may be registered a little bit later.
+    taskIdOption flatMap taskSubsystem.taskOption match {
+      case Some(task) ⇒  // The task may be registered a little bit later.
         task.stepOrProcessStartedAt match {
-          case None ⇒ WaitingInTask(taskId_, task.processClassPath)
-          case Some(at) ⇒ InTaskProcess(taskId_, task.processClassPath, at, task.agentAddress)
+          case None ⇒ WaitingInTask(task.taskId, task.processClassPath)
+          case Some(at) ⇒ InTaskProcess(task.taskId, task.processClassPath, at, task.agentAddress)
         }
-      case (_, _) ⇒
+      case _ ⇒
         occupyingClusterMemberId match {
           case Some(clusterMemberId) ⇒ OccupiedByClusterMember(clusterMemberId)
           case None ⇒
@@ -218,7 +217,7 @@ with OrderPersistence {
   private def occupyingClusterMemberId: Option[ClusterMemberId] =
     emptyToNone(cppProxy.java_occupying_cluster_member_id) map ClusterMemberId.apply
 
-  private[kernel] def taskId: Option[TaskId] =
+  private[kernel] def taskIdOption: Option[TaskId] =
     cppProxy.task_id match {
       case 0 ⇒ None
       case o ⇒ Some(TaskId(o))
