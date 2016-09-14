@@ -39,7 +39,7 @@ extends UnmodifiableTask with Sister with EventSource {
     variables,
     stdoutFile = stdoutFile)
 
-  private[kernel] def overview = TaskOverview(taskId, jobPath, state, processClassOption map { _.path }, agentAddress)
+  private[kernel] def overview = TaskOverview(taskId, jobPath, state, processClassOption map { _.path }, agentAddress, obstacles)
 
   private def obstacles: Set[TaskObstacle] = {
     import TaskObstacle._

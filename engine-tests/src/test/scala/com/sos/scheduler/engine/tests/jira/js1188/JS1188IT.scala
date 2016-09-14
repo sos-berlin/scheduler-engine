@@ -7,8 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskState}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskObstacle, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -172,6 +171,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private def requireTaskIsWaitingForAgent(taskId: TaskId, expected: Boolean = true): Unit = {
     (scheduler.executeXml(<show_task id={taskId.string}/>).answer \ "task" \@ "waiting_for_remote_scheduler").toBoolean shouldEqual expected
     taskOverview(taskId).state shouldEqual TaskState.waiting_for_process
+    assert(taskOverview(taskId).obstacles contains TaskObstacle.WaitingForAgent)
   }
 
   private def newAgent(agentRef: AgentRef) =
