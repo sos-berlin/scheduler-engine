@@ -26,11 +26,12 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
             td(cls := "OrderSelection-Boolean", rowspan := 2)(
               booleanCheckBoxes),
             td(cls := "OrderSelection-Enum", rowspan := 2)(
-              orderSourceTypes),
+              orderSourceTypesHtml),
             td(cls := "OrderSelection-Enum", rowspan := 2)(
-              orderProcessingStates),
+              orderProcessingStatesHtml,
+              orIsSuspendedHtml),
             td(cls := "OrderSelection-LimitPerNode")(
-              limitPerNodeInput(query.notInTaskLimitPerNode))),
+              limitPerNodeInputHtml(query.notInTaskLimitPerNode))),
           tr(
             td(cls := "OrderSelection-LimitPerNode-Submit")(
               button(`type` := "submit")(
@@ -42,13 +43,13 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
                                    OrderQuery.IsBlacklistedName → query.isBlacklisted,
                                    OrderQuery.IsDistributedName → query.isDistributed))
       yield List(
-        labeledCheckbox(key, valueOption, checkedMeans = true),
+        labeledDoubleCheckbox(key, valueOption, checkedMeans = true),
         StringFrag(" "),
-        labeledCheckbox(key, valueOption, checkedMeans = false),
+        labeledDoubleCheckbox(key, valueOption, checkedMeans = false),
         br)
 
-  private def labeledCheckbox(key: String, value: Option[Boolean], checkedMeans: Boolean) = {
-    val name = if (checkedMeans) key else s"not-$key"
+  private def labeledDoubleCheckbox(key: String, value: Option[Boolean], checkedMeans: Boolean) = {
+    val name = "OrderSelection-" + (if (checkedMeans) key else s"not-$key")
     val checked = !checkedMeans ^ (value getOrElse !checkedMeans)
     val onClick = s"javascript:reloadPage({$key: document.getElementsByName('$name')[0].checked ? $checkedMeans : undefined})"
     label(
@@ -57,10 +58,10 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
         boldIf(checked)(if (checkedMeans) removePrefixIs(key) else s"not")))
   }
 
-  private def orderSourceTypes =
+  private def orderSourceTypesHtml =
     enumHtml("isOrderSourceType", OrderSourceType.values map { _.name }, query.isOrderSourceType map { _ map { _.name }})
 
-  private def orderProcessingStates = {
+  private def orderProcessingStatesHtml = {
     import OrderProcessingState.typedJsonFormat
     enumHtml("isOrderProcessingState", typedJsonFormat.subtypeNames, query.isOrderProcessingState map { _ map typedJsonFormat.classToTypeName })
   }
@@ -71,14 +72,23 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
          fieldName = s"$key-$name";
          checked = selected exists { _ contains name }) yield
       seqFrag(
-        label(
-          input(attrs.name := fieldName, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
-          span(position.relative, top := (-2).px)(
-            boldIf(checked)(name))),
-        br)
+        div(
+          label(
+            input(attrs.name := fieldName, `type` := "checkbox", checked option attrs.checked, attrs.onclick := onClick),
+            span(position.relative, top := (-2).px)(
+              boldIf(checked)(name)))))
   }
 
-  private def limitPerNodeInput(limitPerNode: Option[Int]) =
+  private def orIsSuspendedHtml: Frag = {
+    val name = "OrderSelection-orIsSuspended"
+    val onClick = s"javascript:reloadPage({ orIsSuspended: document.getElementsByName('$name')[0].checked ? true : undefined })"
+    label(
+      input(attrs.name := name, `type` := "checkbox", query.orIsSuspended option attrs.checked, attrs.onclick := onClick),
+      span(position.relative, top := (-2).px)(
+        boldIf(query.orIsSuspended)("orIsSuspended")))
+  }
+
+  private def limitPerNodeInputHtml(limitPerNode: Option[Int]) =
     div(
       div(marginBottom := 2.px,
         span(title := "Per node limit of orders currently not being executed by a task")(

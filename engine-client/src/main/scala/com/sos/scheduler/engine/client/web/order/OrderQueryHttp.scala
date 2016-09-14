@@ -33,7 +33,8 @@ object OrderQueryHttp {
       isBlacklisted = parameters.optionAs[Boolean](IsBlacklistedName),
       isOrderSourceType = parameters.optionAs(IsOrderSourceTypeName)(As { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet }),
       isOrderProcessingState = parameters.optionAs(IsOrderProcessingStateName)(As { o ⇒ (CommaSplitter.split(o) map OrderProcessingState.typedJsonFormat.typeNameToClass).toSet }),
-      notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode))
+      notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode),
+      orIsSuspended = parameters.as[Boolean](OrIsSuspendedName, false))
 
   def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.patternString
 }

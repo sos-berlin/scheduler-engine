@@ -103,6 +103,14 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
         }
     }
 
+    "OrderQuery orIsSuspended" in {
+      Get("/prefix/?orIsSuspended=true") ~>
+        route(OrderQuery(orIsSuspended = true)) ~>
+        check {
+          assert(status == OK)
+        }
+    }
+
     "OrderQuery isBlacklisted" in {
       Get("/prefix/?isBlacklisted=true") ~>
         route(OrderQuery(isBlacklisted = Some(true))) ~>
