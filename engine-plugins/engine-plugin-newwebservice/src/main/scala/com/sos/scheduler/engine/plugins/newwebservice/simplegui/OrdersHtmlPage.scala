@@ -66,7 +66,7 @@ extends SchedulerHtmlPage {
       div(clear.both)(
         query.jobChainPathQuery match {
           case single: PathQuery.SinglePath ⇒ div(jobChainOrdersToHtml(single.as[JobChainPath], ordersComplemented.orders))
-          case PathQuery.Folder(folderPath) ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
+          case PathQuery.Folder(folderPath, ignoringIsRecursive) ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
           case _ ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
         }))
   }

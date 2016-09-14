@@ -24,6 +24,5 @@ object PathQueryHttp {
   def fromUriPath[A <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery =
     PathQuery[A](path.toString)
 
-
   def toUriPath(query: PathQuery): String = query.patternString
 }

@@ -137,7 +137,7 @@ extends FileBasedSubsystem {
       case PathQuery.All ⇒
         val reducedQuery = query withJobChainPathQuery PathQuery.All
         orderedVisibleFileBasedIterator filter { o ⇒ reducedQuery matchesJobChain o.queryable }
-      case PathQuery.Folder(folderPath) ⇒
+      case PathQuery.Folder(folderPath, ignoringIsRecursive) ⇒
         folderSubsystem.requireExistence(folderPath)
         orderedVisibleFileBasedIterator filter { o ⇒ query matchesJobChain o.queryable }
       case single: PathQuery.SinglePath ⇒

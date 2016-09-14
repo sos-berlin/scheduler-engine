@@ -22,8 +22,8 @@ import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedState}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatisticsChanged, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
