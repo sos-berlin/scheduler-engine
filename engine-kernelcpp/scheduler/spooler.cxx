@@ -1590,8 +1590,10 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.flag      ( "reuse-port"       ) )  _reuse_addr = opt.set();
             else
-            if( opt.with_value( "http-port"         ) )  modifiable_settings()->set(setting_http_port, as_string(opt.as_int()));
-            else
+            if (opt.with_value( "http-port")) { 
+                modifiable_settings()->set(setting_http_port, as_string(opt.as_int())); 
+                _http_port_as_option_set = true;
+            } else
             if( opt.with_value( "tcp-port"         ) )  _tcp_port = opt.as_int(),  _tcp_port_as_option_set = true;
             else
             if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
@@ -1774,6 +1776,7 @@ void Spooler::load()
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
+    _java_subsystem->on_scheduler_loaded();
 }
 
 //---------------------------------------------------------------------------Spooler::open_pid_file

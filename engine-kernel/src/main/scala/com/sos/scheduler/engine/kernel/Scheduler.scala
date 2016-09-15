@@ -151,13 +151,17 @@ with HasCloser {
     }
   }
 
-  @ForCpp private def onLoad(): Unit = {
+  @ForCpp private def onSchedulerLoaded(): Unit = {
     injector.instance[SchedulerConfiguration].initialize()
     pluginSubsystem.initialize()
+  }
+
+  @ForCpp private def onLoad(): Unit = {
+    // Actually, we are called at Scheduler::activate() - after onSchedulerLoaded
     controllerBridge.onSchedulerStarted(this)
   }
 
-  @ForCpp private def onDatabaseOpened(): Unit = databaseSubsystem.onOpened()
+  @ForCpp private def onDatabaseOpened(): Unit = databaseSubsystem.onDatabaseOpened()
 
   @ForCpp private def onActivate(): Unit = {
     initializeCppDependencySingletons()

@@ -104,6 +104,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         if( !_central_configuration_directory_as_option_set )
             _central_configuration_directory = config_element.getAttribute( "central_configuration_directory", _central_configuration_directory );
 
+        if (!_http_port_as_option_set && config_element.hasAttribute("http_port")) {
+            modifiable_settings()->set(setting_http_port, as_string(config_element.int_getAttribute("http_port")));
+        }
         if( !_tcp_port_as_option_set )
         {
             _tcp_port  = config_element.int_getAttribute( "port"         , _tcp_port );

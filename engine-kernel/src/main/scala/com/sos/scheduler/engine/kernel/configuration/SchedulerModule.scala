@@ -19,6 +19,7 @@ import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerCluste
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
@@ -65,7 +66,6 @@ with HasCloser {
     bindInstance(cppProxy.log.getSister: PrefixLog )
     provideCppSingleton { new SchedulerId(cppProxy.id) }
     provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
-    provideCppSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideCppSingleton { cppProxy.variables.getSister: VariableSet }
     lateBoundCppSingletons += classOf[MessageCodeHandler]
     lateBoundCppSingletons += classOf[ZoneId]
@@ -110,6 +110,12 @@ with HasCloser {
   @Provides @Singleton
   private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
     databaseSubsystem.newEntityManagerFactory()
+
+  @Provides @Singleton
+  private def provideDatabaseSubsystem(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) =
+    new DatabaseSubsystem(() ⇒ inSchedulerThread {
+      cppProxy.db.properties.getSister.toMap
+    })
 
   @Provides @Singleton
   private def provideSchedulerClusterMemberKey(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId) =

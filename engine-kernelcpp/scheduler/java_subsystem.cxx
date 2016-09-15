@@ -33,7 +33,8 @@ struct Java_subsystem : Java_subsystem_interface
     SchedulerJ&                 schedulerJ                  ()                                      { return _schedulerJ; }
     PluginSubsystemJ&           pluginSubsystemJ            ()                                      { return _pluginSubsystemJ; }
     xml::Element_ptr            dom_element                 (const xml::Document_ptr&);
-    virtual void                on_scheduler_activated      ();
+    void                        on_scheduler_loaded         ();
+    void                        on_scheduler_activated      ();
 
   private:
     ptr<javabridge::Vm>        _java_vm;
@@ -110,6 +111,10 @@ bool Java_subsystem::subsystem_load()
     _schedulerJ.onLoad();
     _subsystem_state = subsys_loaded;
     return true;
+}
+
+void Java_subsystem::on_scheduler_loaded() {
+    _schedulerJ.onSchedulerLoaded();
 }
 
 //---------------------------------------------------------------Java_subsystem::subsystem_activate
