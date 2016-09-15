@@ -17,6 +17,5 @@
         <module>engine-plugin-jetty</module>
         <module>engine-plugin-newwebservice</module>
         <module>engine-plugin-node-order</module>
-        <module>engine-plugins-legacy</module>
     </modules>
 </project>
