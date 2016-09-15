@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, Job
 import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.monitor.MonitorPath
-import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
@@ -599,18 +599,20 @@ private[js1642] object Data {
 
   val aJobChainPath = JobChainPath("/aJobChain")
 
-  val a1OrderKey = aJobChainPath orderKey "1"
+  val OneOrderId = OrderId("1")
+  val a1OrderKey = aJobChainPath orderKey OneOrderId
   val a2OrderKey = aJobChainPath orderKey "2"
   val aAdHocOrderKey = aJobChainPath orderKey "ÅD-HÖC"
   val bJobChainPath = JobChainPath("/bJobChain")
-  val b1OrderKey = bJobChainPath orderKey "1"
+  val b1OrderKey = bJobChainPath orderKey OneOrderId
   val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
-  val xa1OrderKey = xaJobChainPath orderKey "1"
+  val xa1OrderKey = xaJobChainPath orderKey OneOrderId
   val xa2OrderKey = xaJobChainPath orderKey "2"
   val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
 
-  val xb1OrderKey = xbJobChainPath orderKey "1"
+  val xb1OrderKey = xbJobChainPath orderKey OneOrderId
   val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
+  val AllOrderKeys = Set(a1OrderKey, a2OrderKey, b1OrderKey, xa1OrderKey, xa2OrderKey)
   val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
 
   private[js1642] val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")

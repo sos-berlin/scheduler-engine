@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainPath}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -22,6 +22,8 @@ extends FileBasedSubsystemClient {
   def tryRemoveOrder(k: OrderKey): Unit = inSchedulerThread { for (o ← subsystem.orderOption(k)) o.remove() }
 
   def remove(path: JobChainPath): Unit = inSchedulerThread { subsystem.removeJobChain(path) }
+
+  def overview(path: companion.Path): JobChainOverview = inSchedulerThread { subsystem.fileBased(path).overview }
 
   def detailed(path: companion.Path): JobChainDetailed = inSchedulerThread { subsystem.fileBased(path).details }
 

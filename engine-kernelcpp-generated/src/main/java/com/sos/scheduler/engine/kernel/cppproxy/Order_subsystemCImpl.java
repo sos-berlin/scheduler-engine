@@ -136,10 +136,10 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     private static native java.util.ArrayList java_file_baseds__native(long cppReference);
 
 
-    @Override public void java_for_each_distributed_order(java.util.ArrayList p0, int p1, com.sos.scheduler.engine.kernel.order.OrderCallback p2) {
+    @Override public void java_for_each_distributed_order(java.util.ArrayList p0, java.util.ArrayList p1, int p2, com.sos.scheduler.engine.kernel.order.OrderCallback p3) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java_for_each_distributed_order__native(cppReference(), p0, p1, p2);
+            java_for_each_distributed_order__native(cppReference(), p0, p1, p2, p3);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
@@ -147,7 +147,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
         }
     }
 
-    private static native void java_for_each_distributed_order__native(long cppReference, java.util.ArrayList p0, int p1, com.sos.scheduler.engine.kernel.order.OrderCallback p2);
+    private static native void java_for_each_distributed_order__native(long cppReference, java.util.ArrayList p0, java.util.ArrayList p1, int p2, com.sos.scheduler.engine.kernel.order.OrderCallback p3);
 
 
     // </editor-fold>

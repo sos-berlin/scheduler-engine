@@ -17,7 +17,12 @@ import spray.routing._
   */
 object OrderQueryHttp {
 
-  private val CommaSplitter = Splitter.on(',').omitEmptyStrings.trimResults
+  private val CommaSplitter = Splitter.on(',')
+
+  private[order] def commaSplittedAsSet[A](to: String ⇒ A) = As[String, Set[A]] {
+    case "" ⇒ Set()
+    case o ⇒ (CommaSplitter split o map to).toSet
+  }
 
   object directives {
     def extendedOrderQuery: Directive1[OrderQuery] = QueryHttp.pathAndParametersDirective(pathAndParametersToQuery)
@@ -26,13 +31,13 @@ object OrderQueryHttp {
   def pathAndParametersToQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery =
     OrderQuery(
       jobChainPathQuery = PathQueryHttp.fromUriPath[JobChainPath](path),
-      orderId = parameters.optionAs[String](OrderIdName) map OrderId.apply,
+      orderIds = parameters.optionAs(OrderIdName)(commaSplittedAsSet(OrderId.apply)),
       isDistributed = parameters.optionAs[Boolean](IsDistributedName),
       isSuspended = parameters.optionAs[Boolean](IsSuspendedName),
       isSetback = parameters.optionAs[Boolean](IsSetbackName),
       isBlacklisted = parameters.optionAs[Boolean](IsBlacklistedName),
-      isOrderSourceType = parameters.optionAs(IsOrderSourceTypeName)(As { o ⇒ (CommaSplitter.split(o) map OrderSourceType.valueOf).toSet }),
-      isOrderProcessingState = parameters.optionAs(IsOrderProcessingStateName)(As { o ⇒ (CommaSplitter.split(o) map OrderProcessingState.typedJsonFormat.typeNameToClass).toSet }),
+      isOrderSourceType = parameters.optionAs(IsOrderSourceTypeName)(commaSplittedAsSet(OrderSourceType.valueOf)),
+      isOrderProcessingState = parameters.optionAs(IsOrderProcessingStateName)(commaSplittedAsSet(OrderProcessingState.typedJsonFormat.typeNameToClass)),
       notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode),
       orIsSuspended = parameters.as[Boolean](OrIsSuspendedName, false))
 

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderKey, OrderOverview, OrderStarted}
@@ -99,6 +99,9 @@ object SchedulerTestUtils {
   @deprecated("Avoid direct access to C++ near objects")
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
     instance[OrderSubsystemClient].jobChain(jobChainPath)
+
+  def jobChainOverview(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainOverview =
+    instance[OrderSubsystemClient].overview(jobChainPath)
 
   def jobChainDetailed(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainDetailed =
     instance[OrderSubsystemClient].detailed(jobChainPath)

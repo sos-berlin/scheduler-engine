@@ -19,6 +19,22 @@ import spray.testkit.ScalatestRouteTest
 @RunWith(classOf[JUnitRunner])
 final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
+  "commaSplittedAsSet" in {
+    val asInts = OrderQueryHttp.commaSplittedAsSet(_.toInt)
+    assert(asInts("") == Set())
+    assert(asInts("1") == Set(1))
+    assert(asInts("1") == Set(1))
+    assert(asInts("1") == Set(1))
+    assert(asInts("1,22,333") == Set(1,22,333))
+    assert(asInts("1,22,333") == Set(1,22,333))
+    intercept[IllegalArgumentException] { asInts(" ") }
+    intercept[IllegalArgumentException] { asInts(",") }
+    intercept[IllegalArgumentException] { asInts(" 1") }
+    intercept[IllegalArgumentException] { asInts("1 ") }
+    intercept[IllegalArgumentException] { asInts("1,") }
+    intercept[IllegalArgumentException] { asInts("1, 2") }
+  }
+
   "OrderQuery" - {
     def route(expected: ⇒ OrderQuery) =
       pathPrefix("prefix") {

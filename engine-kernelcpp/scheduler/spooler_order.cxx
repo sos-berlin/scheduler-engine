@@ -610,16 +610,29 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
     catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_job_chain_nodes_table.sql_name() + " or " + db()->_job_chains_table.sql_name(), x), Z_FUNCTION); }
 }
 
-void Order_subsystem_impl::java_for_each_distributed_order(const ArrayListJ& job_chain_paths_j, int limit, OrderCallbackJ callbackJ) {
-    int n = job_chain_paths_j.size();
+void Order_subsystem_impl::java_for_each_distributed_order(const ArrayListJ& job_chain_paths_j, const ArrayListJ& order_ids_j, int limit, OrderCallbackJ callbackJ) {
     vector<string> job_chain_paths;
-    job_chain_paths.reserve(n);
-    for (int i = 0; i < n; i++) {
-        javaproxy::java::lang::String s = (javaproxy::java::lang::String)job_chain_paths_j.get(i);
-        if (!s) z::throw_xc(Z_FUNCTION);
-        job_chain_paths.push_back((string)s);
+    {
+        int n = job_chain_paths_j.size();
+        job_chain_paths.reserve(n);
+        for (int i = 0; i < n; i++) {
+            javaproxy::java::lang::String s = (javaproxy::java::lang::String)job_chain_paths_j.get(i);
+            if (!s) z::throw_xc(Z_FUNCTION);
+            job_chain_paths.push_back((string)s);
+        }
     }
-    for_each_distributed_order(job_chain_paths, limit, &Order_subsystem_impl::java_order_callback, &callbackJ);
+    vector<string> order_ids;
+    bool has_order_ids = order_ids_j.get_jobject() != NULL;
+    if (has_order_ids) {
+        int n = order_ids_j.size();
+        order_ids.reserve(n);
+        for (int i = 0; i < n; i++) {
+            javaproxy::java::lang::String s = (javaproxy::java::lang::String)order_ids_j.get(i);
+            if (!s) z::throw_xc(Z_FUNCTION);
+            order_ids.push_back((string)s);
+        }
+    }
+    for_each_distributed_order(job_chain_paths, has_order_ids, order_ids, limit, &Order_subsystem_impl::java_order_callback, &callbackJ);
 }
 
 void Order_subsystem_impl::java_order_callback(void* callback_context, Order* order) {
@@ -627,7 +640,14 @@ void Order_subsystem_impl::java_order_callback(void* callback_context, Order* or
     callbackJ->apply(order->java_proxy_jobject());
 }
 
-void Order_subsystem_impl::for_each_distributed_order(const vector<string>& job_chain_paths, int limit, Order_callback callback, void* callback_context) {
+void Order_subsystem_impl::for_each_distributed_order(
+    const vector<string>& job_chain_paths, 
+    bool has_order_ids, 
+    const vector<string>& order_ids, 
+    int limit, 
+    Order_callback callback, 
+    void* callback_context) 
+{
     if (db() && !db()->is_in_transaction()) {
         Read_transaction ta(db());
         S select_sql;
@@ -637,9 +657,11 @@ void Order_subsystem_impl::for_each_distributed_order(const vector<string>& job_
             "  from " << db()->_orders_tablename <<
             "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
               " and `distributed_next_time` is not null "
-              //" and (`occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or `occupying_cluster_member_id` is null)"
               " and " << job_chains_in_clause(job_chain_paths);
-            "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
+        if (has_order_ids) {
+            select_sql << " and " << in_clause("id", order_ids);
+        }
+        select_sql << "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
 
         for (Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); !result_set.eof();) {
             Record record = result_set.get_record();
@@ -857,16 +879,16 @@ string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  
     }
 }
 
-string Order_subsystem_impl::job_chains_in_clause(const vector<string>& job_chain_paths) const {
+string Order_subsystem_impl::in_clause(const string& key, const vector<string>& values) const {
     const int limit = db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin ? 1000 : INT_MAX;
     list<string> chunks;
-    vector<string>::const_iterator i = job_chain_paths.begin();
-    while (i != job_chain_paths.end()) {
-        list<string> next_job_chain_paths;
-        while (i != job_chain_paths.end() && next_job_chain_paths.size() < limit) {
-            next_job_chain_paths.push_back("'" + *i++ + "'");
+    vector<string>::const_iterator i = values.begin();
+    while (i != values.end()) {
+        list<string> next_values;
+        while (i != values.end() && next_values.size() < limit) {
+            next_values.push_back("'" + *i++ + "'");
         }
-        chunks.push_back(S() << "`job_chain` in (" << join(",", next_job_chain_paths) << ")");
+        chunks.push_back(S() << "`" << key << "` in (" << join(",", next_values) << ")");
     }
     return S() << "(" << join(" or ", chunks) << ")";
 }

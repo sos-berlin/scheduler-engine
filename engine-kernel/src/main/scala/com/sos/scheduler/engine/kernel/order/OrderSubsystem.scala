@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
@@ -19,6 +20,7 @@ import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
+import java.util.NoSuchElementException
 import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 import scala.collection.{immutable, mutable}
@@ -73,41 +75,70 @@ extends FileBasedSubsystem {
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
-    val localOrders = localChains flatMap { _.orderIterator } filter { o ⇒ query matchesOrder o.queryable } map { _.view[V] }
-    val distriOrders =
-      for (o ← distributedOrderViews[V](distriChains, query)) yield
-        if (o.occupyingClusterMemberId contains ownClusterMemberId)
-          orderOption(o.orderKey) map { _.view[V] } getOrElse o
-        else
-          o
-    var iterator = localOrders ++ distriOrders
+    val local = localOrderViews[V](localChains, query)
+    val distributed = distributedOrderViews[V](distriChains, query) map replaceWithOwnOrderView[V]
+    var all: Iterator[V] = local ++ distributed
     for (limit ← query.notInTaskLimitPerNode) {
       val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderView) ⇒ o.nodeKey)
-      iterator = iterator filter { o ⇒ o.processingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
+      all = all filter { o ⇒ o.processingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
     }
-    iterator.toVector
+    all.toVector
+  }
+
+  private def localOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Iterator[V] = {
+    val localOrders = query.orderKeyOption match {
+      case Some(orderKey) ⇒
+        // If a single Order is specified, we want get an exception (with error message) if it does not exists.
+        Iterator(jobChain(orderKey.jobChainPath).order(orderKey.id))
+      case _ ⇒
+        val jobChainToOrders = query.orderIds match {
+          case Some(orderIds) ⇒ (o: JobChain) ⇒ o.orderIterator(orderIds)
+          case None           ⇒ (o: JobChain) ⇒ o.orderIterator
+        }
+        jobChains flatMap jobChainToOrders
+      }
+    localOrders filter { o ⇒ query matchesOrder o.queryable } map { _.view[V] }
   }
 
   private def distributedOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Seq[V] = {
-    val result = mutable.Buffer[V]()
     val jobChainPathArray = new java.util.ArrayList[AnyRef] sideEffect { a ⇒
       for (jobChain ← jobChains) a.add(jobChain.path.withoutStartingSlash)
     }
-    if (!jobChainPathArray.isEmpty) {
+    val orderIdArray = query.orderIds match {
+      case Some(orderIds) ⇒
+        new java.util.ArrayList[AnyRef] sideEffect { a ⇒
+          for (orderId ← orderIds) a.add(orderId.string)
+        }
+      case None ⇒ null
+    }
+    if (jobChainPathArray.isEmpty || (query.orderIds/*Option*/ exists { _.isEmpty }))
+      Nil
+    else {
+      val result = mutable.Buffer[V]()
+      var read = false
       cppProxy.java_for_each_distributed_order(
         jobChainPathArray,
+        orderIdArray,
         perNodeLimit = Int.MaxValue,
         callback = new OrderCallback {
           def apply(orderC: OrderC) = {
+            read = true
             val order = orderC.getSister
             if (query matchesOrder order.queryable) {
               result += orderC.getSister.view[V]
             }
           }
         })
+      for (orderKey ← query.orderKeyOption) throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), FileBasedType.Order, orderKey))
+      result
     }
-    result
   }
+
+  private def replaceWithOwnOrderView[V <: OrderView: OrderView.Companion](o: V): V =
+    if (o.occupyingClusterMemberId contains ownClusterMemberId)
+      orderOption(o.orderKey) map { _.view[V] } getOrElse o
+    else
+      o
 
   private[order] def localOrderIterator: Iterator[Order] =
     jobChainsByQuery(JobChainQuery.All) flatMap { _.orderIterator }

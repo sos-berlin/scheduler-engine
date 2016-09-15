@@ -1230,7 +1230,7 @@ struct Order_subsystem: Object,
     virtual Order_id_spaces*    order_id_spaces             ()                                      = 0;
     virtual const Bstr& scheduler_file_order_path_variable_name_Bstr() const = 0;
 
-    virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, int per_order_limit, OrderCallbackJ) = 0;
+    virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, const ArrayListJ& order_ids_j, int per_order_limit, OrderCallbackJ) = 0;
 
     virtual void                get_statistics              (jintArray) const = 0;
 };

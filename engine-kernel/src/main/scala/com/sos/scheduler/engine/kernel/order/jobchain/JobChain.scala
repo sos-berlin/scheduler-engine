@@ -166,7 +166,11 @@ with UnmodifiableJobChain {
   private[kernel] def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
 
-  private[order] def orderIterator: Iterator[Order] = cppProxy.java_orders.toIterator map { o ⇒ o.asInstanceOf[OrderC].getSister }
+  private[order] def orderIterator: Iterator[Order] =
+    cppProxy.java_orders.toIterator map { _.asInstanceOf[OrderC].getSister }
+
+  private[order] def orderIterator(orderIds: Iterable[OrderId]): Iterator[Order] =
+    orderIds.toIterator flatMap orderOption
 
   private def isStopped = cppProxy.is_stopped
 

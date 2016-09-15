@@ -36,6 +36,7 @@ import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
+import com.sos.scheduler.engine.test.SchedulerTestUtils.jobChainOverview
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
@@ -248,6 +249,30 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       intercept[RuntimeException] {
         client.ordersComplementedBy[OrderOverview](query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
+    }
+
+    "orders query OrderId" in {
+      val orderQuery = OrderQuery(orderIds = Some(Set(OneOrderId)))
+      val orders = awaitContent(client.ordersBy[OrderOverview](orderQuery))
+      assert(orders == awaitContent(directSchedulerClient.ordersBy[OrderOverview](orderQuery)))
+      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey))
+    }
+
+    "orders single non-existent, non-distributed OrderKey throws exception" in {
+      assert(!jobChainOverview(aJobChainPath).isDistributed)
+      checkUnknownOrderKeyException(aJobChainPath orderKey "UNKNOWN")
+    }
+
+    "orders single non-existent, distributed OrderKey throws exception" in {
+      assert(jobChainOverview(xbJobChainPath).isDistributed)
+      checkUnknownOrderKeyException(xbJobChainPath orderKey "UNKNOWN")
+    }
+
+    def checkUnknownOrderKeyException(orderKey: OrderKey): Unit = {
+      val orderQuery = OrderQuery().withOrderKey(orderKey)
+      intercept[RuntimeException] {
+        client.ordersBy[OrderOverview](orderQuery) await TestTimeout
+      }
     }
 
     "jobChainOverview All" in {
