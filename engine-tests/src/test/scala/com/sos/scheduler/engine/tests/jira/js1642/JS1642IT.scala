@@ -21,7 +21,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedState}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, FileBasedState, TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.log.Logged
@@ -147,11 +147,11 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(directEvents.nonEmpty)
       waitForCondition(5.s, 100.ms) { webEvents.size == directEvents.size }
       assert(webEvents == directEvents)
-//      val untypedPathDirectEvents = directEvents map {
-//        case KeyedEvent(key: TypedPath, e: FileBasedEvent) ⇒ KeyedEvent(e)(key.asTyped[UnknownTypedPath])  // Trait TypedPath is not properly deserializable
-//        case o ⇒ o
-//      }
-//      assert(webEvents == untypedPathDirectEvents)
+      val untypedPathDirectEvents = directEvents map {
+        case KeyedEvent(key: TypedPath, e: FileBasedEvent) ⇒ KeyedEvent(e)(key.asTyped[UnknownTypedPath])  // Trait TypedPath is not properly deserializable
+        case o ⇒ o
+      }
+      assert(webEvents == untypedPathDirectEvents)
     }
   }
 
