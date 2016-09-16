@@ -268,6 +268,20 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       checkUnknownOrderKeyException(xbJobChainPath orderKey "UNKNOWN")
     }
 
+    "orders query JobPath" in {
+      val orderQuery = OrderQuery(jobPaths = Some(Set(TestJobPath)))
+      val orders = awaitContent(client.ordersBy[OrderOverview](orderQuery))
+      assert(orders == awaitContent(directSchedulerClient.ordersBy[OrderOverview](orderQuery)))
+      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey))
+    }
+
+    "orders query JobPath of non-existent job, distributed" in {
+      val orderQuery = OrderQuery(jobPaths = Some(Set(XTestBJobPath)))
+      val orders = awaitContent(client.ordersBy[OrderOverview](orderQuery))
+      assert(orders == awaitContent(directSchedulerClient.ordersBy[OrderOverview](orderQuery)))
+      assert((orders map { _.orderKey }).toSet == Set(xb1OrderKey, xbAdHocDistributedOrderKey))
+    }
+
     def checkUnknownOrderKeyException(orderKey: OrderKey): Unit = {
       val orderQuery = OrderQuery().withOrderKey(orderKey)
       intercept[RuntimeException] {

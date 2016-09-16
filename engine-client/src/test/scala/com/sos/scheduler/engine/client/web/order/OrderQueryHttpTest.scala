@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.client.web.order
 
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
 import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
@@ -63,7 +64,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
 
     "OrderQuery /a?orderId=1" in {
-      Get("/prefix/a?orderId=1") ~>
+      Get("/prefix/a?orderIds=1") ~>
         route(OrderQuery.All.withOrderKey(JobChainPath("/a") orderKey "1")) ~>
         check {
           assert(status == OK)
@@ -76,6 +77,14 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
         check {
           assert(!handled)
           assert(rejection.toString contains "Comma not allowed")
+        }
+    }
+
+    "OrderQuery /?jobPaths=/A,/B" in {
+      Get("/prefix/?jobPaths=/A,/B") ~>
+        route(OrderQuery(jobPaths = Some(Set(JobPath("/A"), JobPath("/B"))))) ~>
+        check {
+          assert(status == OK)
         }
     }
 

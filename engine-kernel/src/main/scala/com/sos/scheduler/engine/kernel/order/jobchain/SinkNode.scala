@@ -19,10 +19,9 @@ final class SinkNode(
 extends JobNode {
 
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
+  lazy val jobPath = JobPath(inSchedulerThread { cppProxy.job_path })
 
   private[kernel] def overview = SinkNodeOverview(nodeKey, nextNodeId, errorNodeId, action, jobPath, orderCount, obstacles)
-
-  def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 

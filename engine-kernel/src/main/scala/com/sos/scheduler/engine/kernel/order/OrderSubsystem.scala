@@ -97,7 +97,7 @@ extends FileBasedSubsystem {
         }
         jobChains flatMap jobChainToOrders
       }
-    localOrders filter { o ⇒ query matchesOrder o.queryable } map { _.view[V] }
+    localOrders filter { o ⇒ query.matchesOrder(o.queryable, o.jobPathOption) } map { _.view[V] }
   }
 
   private def distributedOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Seq[V] = {
@@ -124,7 +124,7 @@ extends FileBasedSubsystem {
           def apply(orderC: OrderC) = {
             read = true
             val order = orderC.getSister
-            if (query matchesOrder order.queryable) {
+            if (query.matchesOrder(order.queryable, order.jobPathOption)) {
               result += orderC.getSister.view[V]
             }
           }

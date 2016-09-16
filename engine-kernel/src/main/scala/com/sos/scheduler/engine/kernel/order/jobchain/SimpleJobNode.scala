@@ -20,6 +20,7 @@ final class SimpleJobNode(
 extends JobNode {
 
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
+  lazy val jobPath = JobPath(inSchedulerThread { cppProxy.job_path })
 
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 
@@ -33,8 +34,6 @@ extends JobNode {
     jobPath = jobPath,
     orderCount = orderCount,
     obstacles = obstacles)
-
-  def jobPath: JobPath = inSchedulerThread { JobPath(cppProxy.job_path) }
 
   private[kernel] def getJob: Job = cppProxy.job.getSister
 }

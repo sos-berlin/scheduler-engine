@@ -224,6 +224,7 @@ struct Order : Com_order,
     Job*                        job                     () const;
 
     void                    set_job_chain_node          ( job_chain::Node*, bool is_error_state = false );
+    void                    set_job_chain_node_raw      (job_chain::Node* node)                     { _job_chain_node = node; }
     void                    set_state                   ( const State&, const Time& );
     void                    set_state                   ( const State& );
     void                    set_state1                  ( const State& );
@@ -806,7 +807,7 @@ struct Job_node : Order_queue_node,
     friend struct               order::Job_chain;           // add_job_node()
 
     Fill_zero                  _zero_;
-    Absolute_path              _job_path;
+    Absolute_path const        _job_path;
     Job*                       _job;
     bool                       _on_error_setback;
     bool                       _on_error_suspend;

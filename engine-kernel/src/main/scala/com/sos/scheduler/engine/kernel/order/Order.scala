@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderHistoryId, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderView}
 import com.sos.scheduler.engine.data.queries.QueryableOrder
@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.Order._
-import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, JobNode, Node}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderAgentUriVariableName, FileOrderPathVariableName}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions.{eternalCppMillisToNoneInstant, zeroCppMillisToNoneInstant}
@@ -184,6 +184,12 @@ with OrderPersistence {
     cppProxy.history_id match {
       case 0 ⇒ None
       case o ⇒ Some(OrderHistoryId(o))
+    }
+
+  private[kernel] def jobPathOption: Option[JobPath] =
+    nodeOption match {
+      case Some(o: JobNode) ⇒ Some(o.jobPath)
+      case _ ⇒ None
     }
 
   def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }

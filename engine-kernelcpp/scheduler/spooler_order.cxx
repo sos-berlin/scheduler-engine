@@ -636,6 +636,9 @@ void Order_subsystem_impl::java_for_each_distributed_order(const ArrayListJ& job
 }
 
 void Order_subsystem_impl::java_order_callback(void* callback_context, Order* order) {
+    if (Job_chain* job_chain = job_chain_or_null(order->job_chain_path())) {
+        order->set_job_chain_node_raw(job_chain->node_from_state_or_null(order->state()));   // For Scala Order.jobChainPath, OrderQuery
+    }
     OrderCallbackJ* callbackJ = (OrderCallbackJ*)callback_context;
     callbackJ->apply(order->java_proxy_jobject());
 }

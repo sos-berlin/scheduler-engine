@@ -4,6 +4,7 @@ import com.google.common.base.Splitter
 import com.sos.scheduler.engine.client.web.jobchain.{PathQueryHttp, QueryHttp}
 import com.sos.scheduler.engine.common.convert.As
 import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions._
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.OrderQuery
@@ -31,7 +32,8 @@ object OrderQueryHttp {
   def pathAndParametersToQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery =
     OrderQuery(
       jobChainPathQuery = PathQueryHttp.fromUriPath[JobChainPath](path),
-      orderIds = parameters.optionAs(OrderIdName)(commaSplittedAsSet(OrderId.apply)),
+      orderIds = parameters.optionAs(OrderIdsName)(commaSplittedAsSet(OrderId.apply)),
+      jobPaths = parameters.optionAs(JobPathsName)(commaSplittedAsSet(JobPath.apply)),
       isDistributed = parameters.optionAs[Boolean](IsDistributedName),
       isSuspended = parameters.optionAs[Boolean](IsSuspendedName),
       isSetback = parameters.optionAs[Boolean](IsSetbackName),

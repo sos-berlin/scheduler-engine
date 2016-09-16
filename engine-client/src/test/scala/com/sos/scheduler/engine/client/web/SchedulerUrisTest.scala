@@ -76,14 +76,14 @@ final class SchedulerUrisTest extends FreeSpec {
       assert(uris.order[OrderDetailed](OrderQuery(isSuspended = Some(true)).withOrderKey(JobChainPath("/FOLDER/TEST") orderKey "ID/1-Ä")) ==
         Uri("http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST")
           .withQuery(Uri.Query(
-            "orderId" → "ID/1-Ä",
+            "orderIds" → "ID/1-Ä",
             "isSuspended" → "true",
             "return" → "OrderDetailed")).toString)
     }
 
     "GET with umlauts in OrderId" in {
       assert(uris.order(OrderQuery.All.withOrderKey(JobChainPath("/FOLDER/TEST") orderKey "ID/1:Ä?"), returnType = None) ==
-        "http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST?orderId=ID/1:%C3%84?")
+        "http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST?orderIds=ID/1:%C3%84?")
     }
   }
 
