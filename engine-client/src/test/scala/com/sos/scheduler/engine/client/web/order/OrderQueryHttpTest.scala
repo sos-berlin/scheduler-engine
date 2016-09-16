@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.web.order
 
-import com.sos.scheduler.engine.client.web.order.OrderQueryHttp._
 import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
+import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
@@ -147,22 +147,24 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
   }
 
-  "orderQueryToMap, fromHttpQueryMap" in {
-    checkQuery(OrderQuery(), Map())
-    checkQuery(OrderQuery(isSuspended = Some(true)), Map("isSuspended" → "true"))
-    checkQuery(OrderQuery(isSuspended = Some(false)), Map("isSuspended" → "false"))
+  "withoutPathToMap, fromUriPathAndParameters" in {
+    checkQuery(OrderQuery(), Uri.Path("/"), Map())
+    checkQuery(OrderQuery(PathQuery(FolderPath("/FOLDER")), isSuspended = Some(true)), Uri.Path("/FOLDER/"), Map("isSuspended" → "true"))
+    checkQuery(OrderQuery(PathQuery(JobChainPath("/JOBCHAIN")), isSuspended = Some(false)), Uri.Path("/JOBCHAIN"), Map("isSuspended" → "false"))
     checkQuery(
       OrderQuery(
+        PathQuery(FolderPath("/FOLDER"), isRecursive = false),
         isSuspended = Some(false),
         isOrderSourceType = Some(Set(OrderSourceType.AdHoc, OrderSourceType.Permanent)),
         isOrderProcessingState = Some(Set(OrderProcessingState.NotPlanned.getClass, classOf[OrderProcessingState.InTaskProcess]))
       ),
+      Uri.Path("/FOLDER/*"),
       Map("isSuspended" → "false", "isOrderSourceType" → "AdHoc,Permanent", "isOrderProcessingState" → "NotPlanned,InTaskProcess"))  // Incidentally, Scala Set with two elements retains orders
-    checkQuery(OrderQuery(notInTaskLimitPerNode = Some(123)), Map("notInTaskLimitPerNode" → "123"))
+    checkQuery(OrderQuery(notInTaskLimitPerNode = Some(123)), Uri.Path("/"), Map("notInTaskLimitPerNode" → "123"))
   }
 
-  private def checkQuery(orderQuery: OrderQuery, parameters: Map[String, String]) = {
-    assert(orderQuery.withoutPathToMap == parameters)
-    assert(pathAndParametersToQuery(Uri.Path("/"), Map(parameters.toVector: _*)) == orderQuery)
+  private def checkQuery(orderQuery: OrderQuery, path: Uri.Path, parameters: Map[String, String]) = {
+    assert(orderQuery.toUriPathAndMap == ((path.toString, parameters)))
+    assert(OrderQueryHttp.pathAndParametersToQuery(path, Map(parameters.toVector: _*)) == orderQuery)
   }
 }

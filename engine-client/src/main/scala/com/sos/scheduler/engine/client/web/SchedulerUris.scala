@@ -61,10 +61,10 @@ final class SchedulerUris private(schedulerUriString: String) {
       uriString(Uri.Path("api/order/"), "return" → "OrderStatistics")
 
     private def forGet(query: OrderQuery, returnType: Option[String]): String = {
-      val subpath = PathQueryHttp.toUriPath(query.jobChainPathQuery)
+      val (path, parameters) = query.toUriPathAndMap
       uriString(Uri(
-        path = Uri.Path(s"api/order$subpath"),
-        query = Uri.Query(query.withoutPathToMap ++ (returnType map { o ⇒ "return" → o }))))
+        path = Uri.Path(s"api/order$path"),
+        query = Uri.Query(parameters ++ (returnType map { o ⇒ "return" → o }))))
     }
 
     def forPost[V <: OrderView: OrderView.Companion]: String =

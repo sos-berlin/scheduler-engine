@@ -103,7 +103,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
           attrs.value := limitPerNode map { _.toString } getOrElse "")))
 
   private def javascript = {
-    val orderJson = JsObject(query.withoutPathToMap mapValues JsString.apply).toString
+    val orderJson = JsObject(query.toUriPathAndMap._2 mapValues JsString.apply).toString
     s"""function reloadPage(change) {
       window.location.href = orderQueryToUrl($orderJson, change);
     }"""
