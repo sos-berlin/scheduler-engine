@@ -82,7 +82,7 @@ trait FileBasedSubsystem extends Subsystem {
   private[kernel] final def requireExistence(path: Path): Unit = fileBased(path)
 
   private[kernel] final def fileBased(path: Path): ThisFileBased =
-    _pathToFileBased.getOrElse(path, {  throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string)) })
+    _pathToFileBased.getOrElse(path, { throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string)) })
 
   private final def noCacheFileBased(path: Path): ThisFileBased =
     fileBasedOption(path) getOrElse { throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), fileBasedType, path.string))}

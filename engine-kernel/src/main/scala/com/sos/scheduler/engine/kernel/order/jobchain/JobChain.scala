@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, S
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.next_state
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainObstacle, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.queries.QueryableJobChain
@@ -160,7 +161,9 @@ with UnmodifiableJobChain {
 
   def order(id: OrderId) =
     inSchedulerThread {
-      orderOption(id) getOrElse sys.error(s"$toString does not contain order '$id'")
+      orderOption(id)
+    } getOrElse {
+      throw new NoSuchElementException(messageCodeHandler(MessageCode("SCHEDULER-161"), FileBasedType.Order, (path orderKey id).string))
     }
 
   private[kernel] def orderOption(id: OrderId): Option[Order] =
@@ -197,6 +200,8 @@ with UnmodifiableJobChain {
   private[kernel] def processClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private[kernel] def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
+
+  private def messageCodeHandler = subsystem.messageCodeHandler
 }
 
 object JobChain {

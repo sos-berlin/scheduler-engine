@@ -286,7 +286,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderQuery = OrderQuery().withOrderKey(orderKey)
       intercept[RuntimeException] {
         client.ordersBy[OrderOverview](orderQuery) await TestTimeout
-      }
+      } .getMessage should include ("SCHEDULER-161")
     }
 
     "jobChainOverview All" in {
