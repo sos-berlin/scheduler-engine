@@ -285,7 +285,7 @@ object SchedulerTestUtils {
     }
 
   def orderIsBlacklisted(orderKey: OrderKey)(implicit hasInjector: HasInjector, entityManagerFactory: EntityManagerFactory): Boolean =
-    if (jobChain(orderKey.jobChainPath).isDistributed)
+    if (jobChainOverview(orderKey.jobChainPath).isDistributed)
       transaction { implicit entityManager ⇒
         instance[HibernateOrderStore].fetch(orderKey).isBlacklisted
       }

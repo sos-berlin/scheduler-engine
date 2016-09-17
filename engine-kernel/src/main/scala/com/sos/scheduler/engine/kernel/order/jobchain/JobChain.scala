@@ -66,6 +66,7 @@ with UnmodifiableJobChain {
     path = path,
     fileBasedState = fileBasedState,
     isDistributed = isDistributed,
+    orderLimit = orderLimitOption,
     obstacles = {
       import JobChainObstacle._
       val builder = Set.newBuilder[JobChainObstacle]
@@ -144,17 +145,14 @@ with UnmodifiableJobChain {
   }
 
   def jobNodes: immutable.Seq[SimpleJobNode] =
-    inSchedulerThread {
-      nodes collect { case o: SimpleJobNode => o }
-    }
+    nodes collect { case o: SimpleJobNode ⇒ o }
 
-  def node(o: NodeId): Node =
-    inSchedulerThread {
-      nodeMap(o)
-    }
+  def node(o: NodeId): Node = nodeMap(o)
 
   private[kernel] lazy val nodeMap: Map[NodeId, Node] =
-    (nodes map { n ⇒ n.nodeId → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
+    inSchedulerThread {
+      (nodes map { n ⇒ n.nodeId → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
+    }
 
   private[order] lazy val nodes: Vector[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector
@@ -181,23 +179,15 @@ with UnmodifiableJobChain {
     cppProxy.set_stopped(o)
   }
 
-  private def orderLimitOption: Option[Int] = someUnless(orderLimit, none = Int.MaxValue)
-
-  /**
-   * @return Int.MaxValue, when unlimited
-   */
-  def orderLimit: Int =
-    inSchedulerThread {
-      cppProxy.max_orders
-    }
+  private lazy val orderLimitOption: Option[Int] = someUnless(cppProxy.max_orders, none = Int.MaxValue)
 
   private[order] def remove(): Unit = {
     cppProxy.remove()
   }
 
-  def isDistributed: Boolean = inSchedulerThread { cppProxy.is_distributed() }
+  private[kernel] lazy val isDistributed: Boolean = cppProxy.is_distributed
 
-  private[kernel] def processClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+  private def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private[kernel] def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
 

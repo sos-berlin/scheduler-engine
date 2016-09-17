@@ -42,7 +42,7 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Limited job chain should continue when number of orders falls below limit" in {
-    val orderKeys = 1 to jobChain(TestJobChainPath).orderLimit + 2 map { i ⇒ TestJobChainPath orderKey i.toString }
+    val orderKeys = 1 to jobChainOverview(TestJobChainPath).orderLimit.get + 2 map { i ⇒ TestJobChainPath orderKey i.toString }
     val futures =
       for (orderKey <- orderKeys) yield {
         val f = eventBus.eventFuture[OrderFinished](orderKey)
