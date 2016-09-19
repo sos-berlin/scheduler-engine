@@ -4,8 +4,8 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosedEvent}
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -41,16 +41,16 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
     val count = new AtomicInteger
     try
       intercept[TimeoutException] {
-        eventBus.awaitingEvent2[ErrorLogEvent](TestDuration, _ ⇒ true) {
+        eventBus.awaitingInTimeWhen[ErrorLogged](TestDuration, _ ⇒ true) {
           writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
           runJob(JobPath("/test"))   // Smoke test
-          eventBus.on[TaskClosedEvent] { case _ ⇒ count.incrementAndGet() }
+          eventBus.on[TaskClosed.type] { case _ ⇒ count.incrementAndGet() }
           for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()
         }
       }
     finally {
       stop = true
-      waitForCondition(TestTimeout, 100.ms) { job(TestJobPath).state == JobState.pending }
+      waitForCondition(TestTimeout, 100.ms) { jobOverview(TestJobPath).state == JobState.pending }
     }
     logger.info(s"$count processes, ${count.get * 1000 / (currentTimeMillis() - t)} processes/s")
   }

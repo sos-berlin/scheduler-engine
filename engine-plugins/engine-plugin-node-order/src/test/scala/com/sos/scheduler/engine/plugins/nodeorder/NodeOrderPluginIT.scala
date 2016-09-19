@@ -1,17 +1,16 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
 import com.sos.scheduler.engine.common.scalautil.Closers._
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPluginIT._
-import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError}
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, interceptSchedulerError, orderDetailed}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -31,8 +30,9 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
       val promiseMap = (OrderKeys map { _ → Promise[Map[String, String]]() }).toMap
       withCloser { implicit closer ⇒
-        eventBus.onHotEventSourceEvent[OrderFinishedEvent] {
-          case EventSourceEvent(_, order: UnmodifiableOrder) ⇒ promiseMap(order.key).success(order.parameters.toMap)
+        eventBus.onHot[OrderFinished] {
+          case KeyedEvent(orderKey, _) ⇒
+            promiseMap(orderKey).success(orderDetailed(orderKey).variables)
         }
         scheduler executeXml OrderCommand(OriginalOrderKey, parameters = OriginalVariables)
         val results = awaitSuccess(Future.sequence(OrderKeys map promiseMap map { _.future }))
@@ -43,11 +43,11 @@ final class NodeOrderPluginIT extends FreeSpec with ScalaSchedulerTest {
 
   "Error when adding the new order is logged and ignored" in {
     controller.toleratingErrorCodes(Set(MissingJobchainCode, CommandFailedCode)) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](ErrorOrderKey) {
+      eventBus.awaiting[OrderFinished](ErrorOrderKey) {
         withEventPipe { eventPipe ⇒
           scheduler executeXml OrderCommand(ErrorOrderKey)
-          eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(MissingJobchainCode) }
-          eventPipe.nextWithCondition[ErrorLogEvent] { _.codeOption == Some(CommandFailedCode) }
+          eventPipe.nextWhen[ErrorLogged] { _.event.codeOption == Some(MissingJobchainCode) }
+          eventPipe.nextWhen[ErrorLogged] { _.event.codeOption == Some(CommandFailedCode) }
         }
       }
     }

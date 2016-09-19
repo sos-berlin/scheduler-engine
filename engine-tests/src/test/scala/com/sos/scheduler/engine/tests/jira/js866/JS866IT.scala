@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js866
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -31,9 +31,9 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
   private def checkedKillTask(jobPath: JobPath): Unit = {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <start_job job={jobPath.string}/>
-    val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == jobPath } .taskId
+    val taskId = eventPipe.nextWhen[TaskStarted.type] { _.key.jobPath == jobPath } .key.taskId
     scheduler executeXml <kill_task job={jobPath.string} id={taskId.number.toString} immediately="yes"/>
-    eventPipe.nextKeyed[TaskEndedEvent](taskId)
+    eventPipe.next[TaskEnded](TaskKey(jobPath, taskId))
   }
 }
 

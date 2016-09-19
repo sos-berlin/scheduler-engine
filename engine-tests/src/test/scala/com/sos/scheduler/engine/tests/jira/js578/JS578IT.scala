@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js578
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js578.JS578IT._
@@ -13,32 +14,34 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS578IT extends FunSuite with ScalaSchedulerTest {
-  private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystem])
+  private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystemClient])
 
   test("<modify_order at='now'/>") {
     val eventPipe = controller.newEventPipe()
     startOrderAt("now")
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+    eventPipe.next[OrderFinished](orderKey)
   }
 
   test("<modify_order at='now'/> while order is running does nothing") {
     val eventPipe = controller.newEventPipe()
     setJobChainNodeStop(true)
     startOrderAt("now")
-    eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
-    orderSubsystem.order(orderKey).state should equal (OrderState("200"))
+    eventPipe.next[OrderStepEnded](orderKey)
+    orderSubsystem.orderOverview(orderKey).nodeId should equal (NodeId("200"))
 
     startOrderAt("now")
     setJobChainNodeStop(false)
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
-    intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[OrderTouchedEvent](3.s)  { _.orderKey == orderKey }}
+    eventPipe.next[OrderFinished](orderKey)
+    intercept[EventPipe.TimeoutException] {
+      eventPipe.next[OrderStarted.type](orderKey, 3.s)
+    }
   }
 
   ignore("<modify_order at='next'/> (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       startOrderAt("next")
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+      eventPipe.next[OrderFinished](orderKey)
     }
   }
 
@@ -47,14 +50,14 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
       val eventPipe = controller.newEventPipe()
       setJobChainNodeStop(true)
       startOrderAt("next")
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
-      orderSubsystem.order(orderKey).state should equal (OrderState("200"))
+      eventPipe.next[OrderStepEnded](orderKey)
+      orderSubsystem.orderOverview(orderKey).nodeId should equal (NodeId("200"))
 
       startOrderAt("next")
       setJobChainNodeStop(false)
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
-      eventPipe.nextWithCondition[OrderTouchedEvent] { _.orderKey == orderKey }
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
+      eventPipe.next[OrderFinished](orderKey)
+      eventPipe.next[OrderStarted.type](orderKey)
+      eventPipe.next[OrderFinished](orderKey)
     }
   }
 

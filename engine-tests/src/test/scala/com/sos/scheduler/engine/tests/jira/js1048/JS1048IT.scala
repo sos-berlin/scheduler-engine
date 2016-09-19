@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderComma
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOption}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOption, orderOverview}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestEnvironment, TestSchedulerController}
 import com.sos.scheduler.engine.tests.jira.js1048.JS1048IT._
@@ -33,7 +33,7 @@ final class JS1048IT extends FreeSpec {
         modifyOrders()
       }
       envProvider.runScheduler() { implicit controller =>
-        order(SuspendOrderKey) shouldBe 'suspended
+        assert(orderOverview(SuspendOrderKey).isSuspended)
         order(TitleOrderKey).title shouldEqual CommandModifiedTitle
         requireDatabaseRecords(suspendedOrderExists = true, expectedTitle = Some(CommandModifiedTitle))
       }
@@ -49,7 +49,7 @@ final class JS1048IT extends FreeSpec {
       SuspendOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order><run_time/></order>
       TitleOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order title={FileChangedTitle}><run_time/></order>
       envProvider.runScheduler() { implicit controller =>
-        order(SuspendOrderKey) should not be 'suspended
+        assert(!orderOverview(SuspendOrderKey).isSuspended)
         order(TitleOrderKey).title shouldEqual FileChangedTitle
         requireDatabaseRecords(suspendedOrderExists = false, expectedTitle = None)
       }
@@ -104,7 +104,7 @@ final class JS1048IT extends FreeSpec {
         requireOrdersNotExist()
         controller.scheduler executeXml OrderCommand(SuspendOrderKey, xmlChildren = <run_time/>)
         controller.scheduler executeXml OrderCommand(TitleOrderKey, title = Some(FileChangedTitle), xmlChildren = <run_time/>)
-        order(SuspendOrderKey) should not be 'suspended
+        assert(orderOverview(SuspendOrderKey).isSuspended)
         order(TitleOrderKey).title shouldEqual FileChangedTitle
       }
       SuspendOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order><run_time/></order>
@@ -119,7 +119,7 @@ final class JS1048IT extends FreeSpec {
 
   private def modifyOrders()(implicit controller: TestSchedulerController): Unit = {
     controller.scheduler executeXml ModifyOrderCommand(SuspendOrderKey, suspended = Some(true))
-    order(SuspendOrderKey) shouldBe 'suspended
+    assert(orderOverview(SuspendOrderKey).isSuspended)
     order(TitleOrderKey).title shouldEqual OriginalTitle
     controller.scheduler executeXml ModifyOrderCommand(TitleOrderKey, title = Some(CommandModifiedTitle))
     order(TitleOrderKey).title shouldEqual CommandModifiedTitle
@@ -132,10 +132,10 @@ final class JS1048IT extends FreeSpec {
   }
 
   private def requireOriginalFileBasedOrders()(implicit controller: TestSchedulerController): Unit = {
-    order(SuspendOrderKey) should not be 'suspended
+    assert(!orderOverview(SuspendOrderKey).isSuspended)
     order(TitleOrderKey).title shouldEqual OriginalTitle
   }
-  
+
   private def requireOrdersNotExist()(implicit controller: TestSchedulerController): Unit = {
     orderOption(SuspendOrderKey) should not be 'defined
     orderOption(TitleOrderKey) should not be 'defined

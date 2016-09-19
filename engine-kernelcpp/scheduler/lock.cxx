@@ -980,6 +980,22 @@ bool Requestor::locks_are_available_for_holder( Holder* holder ) const
     return all_locks_are_free  &&  its_my_turn;   
 }
 
+vector<string> Requestor::unavailable_lock_path_strings(Holder* holder) const {
+    vector<string> result;
+    Z_FOR_EACH_CONST(Use_list, _use_list, u) {
+        Use* lock_use = *u;
+        if (Lock* lock = lock_use->lock_or_null()) {
+            if (!lock->is_free_for(lock_use, holder)) {
+                result.push_back(lock->path());
+            }
+        //} else {
+        //    result.push_back(lock_use->lock_path());   Already reported as MissingRequisite
+        }
+
+    }
+    return result;
+}
+
 //-----------------------------------------------------------------------Requestor::locks_are_known
 
 bool Requestor::locks_are_known() const

@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures._
@@ -9,24 +8,25 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
 import com.sos.scheduler.engine.data.job._
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderKey, OrderOverview, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem, Task, TaskSubsystem}
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
+import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystemClient, Task, TaskSubsystemClient}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
-import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, UnmodifiableOrder}
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystemClient}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystem}
+import com.sos.scheduler.engine.kernel.processclass.{ProcessClass, ProcessClassSubsystemClient}
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.TestSchedulerController.TestTimeout
@@ -68,41 +68,73 @@ object SchedulerTestUtils {
       logger.debug(s"Sleeping a second to get a different file time for $file")
       sleep(1.s)  // Assure different timestamp for configuration file, so JobScheduler can see a change
     }
-    controller.eventBus.awaitingEvent[FileBasedEvent](e ⇒ e.key == path && (e.isInstanceOf[FileBasedAddedEvent] || e.isInstanceOf[FileBasedReplacedEvent])) {
+    updateFoldersWith(path) {
       file.xml = xmlElem
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
     }
   }
+
+  def updateFoldersWith(path: TypedPath)(body: ⇒ Unit)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
+    controller.eventBus.awaiting[FileBasedAddedOrReplaced](path) {
+      body
+      instance[FolderSubsystemClient].updateFolders()
+    }
 
   /**
    * Delete the configuration file and awaits JobScheduler's acceptance.
    */
   def deleteConfigurationFile[A](path: TypedPath)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit = {
-    controller.eventBus.awaitingKeyedEvent[FileBasedRemovedEvent](path) {
+    controller.eventBus.awaiting[FileBasedRemoved.type](path) {
       Files.delete(controller.environment.fileFromPath(path))
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
     }
   }
 
+  def jobOverview(path: JobPath)(implicit hasInjector: HasInjector): JobOverview =
+    instance[JobSubsystemClient].jobOverview(path)
+
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
-    instance[JobSubsystem].job(jobPath)
+    instance[JobSubsystemClient].job(jobPath)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def jobChain(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChain =
-    instance[OrderSubsystem].jobChain(jobChainPath)
+    instance[OrderSubsystemClient].jobChain(jobChainPath)
 
+  def jobChainOverview(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainOverview =
+    instance[OrderSubsystemClient].overview(jobChainPath)
+
+  def jobChainDetailed(jobChainPath: JobChainPath)(implicit hasInjector: HasInjector): JobChainDetailed =
+    instance[OrderSubsystemClient].detailed(jobChainPath)
+
+  def orderOverview(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderOverview =
+    instance[OrderSubsystemClient].orderOverview(orderKey)
+
+  def orderDetailed(orderKey: OrderKey)(implicit hasInjector: HasInjector): OrderDetailed =
+    instance[OrderSubsystemClient].orderDetailed(orderKey)
+
+  @deprecated("Avoid direct access to C++ near objects")
   def order(orderKey: OrderKey)(implicit hasInjector: HasInjector): Order =
-    instance[OrderSubsystem].order(orderKey)
+    instance[OrderSubsystemClient].order(orderKey)
 
   def orderExists(orderKey: OrderKey)(implicit hasInjector: HasInjector): Boolean = orderOption(orderKey).isDefined
 
+  @deprecated("Avoid direct access to C++ near objects")
   def orderOption(orderKey: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
-    instance[OrderSubsystem].orderOption(orderKey)
+    instance[OrderSubsystemClient].orderOption(orderKey)
 
+  def taskOverview(taskId: TaskId)(implicit hasInjector: HasInjector): TaskOverview =
+    instance[TaskSubsystemClient].taskOverview(taskId) await TestTimeout
+
+  def taskDetailed(taskId: TaskId)(implicit hasInjector: HasInjector): TaskDetailed =
+    instance[TaskSubsystemClient].taskDetailed(taskId) await TestTimeout
+
+  @deprecated("Avoid direct access to C++ near objects")
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
-    instance[TaskSubsystem].task(taskId)
+    instance[TaskSubsystemClient].task(taskId)
 
+  @deprecated("Avoid direct access to C++ near objects")
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
-    instance[ProcessClassSubsystem].processClass(path)
+    instance[ProcessClassSubsystemClient].processClass(path)
 
   def runJob(jobPath: JobPath, variables: Iterable[(String, String)] = Nil)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): TaskResult =
     runJob(StartJobCommand(jobPath, variables))
@@ -120,11 +152,12 @@ object SchedulerTestUtils {
     inSchedulerThread { // All calls in JobScheduler Engine thread, to safely subscribe the events before their occurrence.
       val commandResult = controller.scheduler executeXml startJobCommand
       val taskId = TaskId((commandResult.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
-      val started = controller.eventBus.keyedEventFuture[TaskStartedEvent](taskId)
+      val taskKey = TaskKey(startJobCommand.jobPath, taskId)
+      val started = controller.eventBus.eventFuture[TaskStarted.type](taskKey)
       val startedTime = started map { _ ⇒ currentTimeMillis() }
-      val ended = controller.eventBus.keyedEventFuture[TaskEndedEvent](taskId)
+      val ended = controller.eventBus.eventFuture[TaskEnded](taskKey)
       val endedTime = ended map { _ ⇒ currentTimeMillis() }
-      val closed = controller.eventBus.keyedEventFuture[TaskClosedEvent](taskId)
+      val closed = controller.eventBus.eventFuture[TaskClosed.type](taskKey)
       val result = for (_ ← closed; s ← startedTime; end ← ended; e ← endedTime)
                    yield TaskResult(startJobCommand.jobPath, taskId, end.returnCode, endedInstant = Instant.ofEpochMilli(e), duration = max(0, e - s).ms)
       TaskRun(startJobCommand.jobPath, taskId, started, ended, closed, result)
@@ -134,9 +167,9 @@ object SchedulerTestUtils {
   final case class TaskRun(
     jobPath: JobPath,
     taskId: TaskId,
-    started: Future[TaskStartedEvent],
-    ended: Future[TaskEndedEvent],
-    closed: Future[TaskClosedEvent],
+    started: Future[TaskStarted.type],
+    ended: Future[TaskEnded],
+    closed: Future[TaskClosed.type],
     result: Future[TaskResult])
   {
     def logString(implicit controller: TestSchedulerController): String = taskLog(taskId)
@@ -161,31 +194,31 @@ object SchedulerTestUtils {
 
   final case class OrderRun(
     orderKey: OrderKey,
-    touched: Future[OrderTouchedEvent],
-    finished: Future[OrderFinishedEvent],
+    touched: Future[OrderStarted.type],
+    finished: Future[OrderFinished],
     result: Future[OrderRunResult])
 
   object OrderRun {
     def apply(orderKey: OrderKey)(implicit controller: TestSchedulerController): OrderRun = {
       import controller.eventBus
-      val whenTouched = eventBus.keyedEventFuture[OrderTouchedEvent](orderKey)
-      val whenFinished: Future[(OrderFinishedEvent, Map[String, String])] = {
-        val promise = Promise[(OrderFinishedEvent, Map[String, String])]()
-        lazy val subscription: EventSubscription = EventSubscription.withSource[OrderFinishedEvent] {
-          case (event: OrderFinishedEvent, order: UnmodifiableOrder) if event.orderKey == orderKey ⇒
+      val whenTouched = eventBus.eventFuture[OrderStarted.type](orderKey)
+      val whenFinished: Future[(OrderFinished, Map[String, String])] = {
+        val promise = Promise[(OrderFinished, Map[String, String])]()
+        lazy val subscription: EventSubscription = EventSubscription[OrderFinished] {
+          case KeyedEvent(`orderKey`, event) ⇒
             eventBus.unregisterHot(subscription)
-            promise.success((event, order.parameters.toMap))
+            promise.success((event, orderDetailed(orderKey).variables))
         }
         eventBus.registerHot(subscription)
         promise.future
       }
-      val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.state, variables)
+      val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.nodeId, variables)
       val whenFinishedEvent = whenFinished map { _._1 }
-      OrderRun(orderKey, whenTouched, whenFinishedEvent, result)
+      new OrderRun(orderKey, whenTouched, whenFinishedEvent, result)
     }
   }
 
-  final case class OrderRunResult(orderKey: OrderKey, state: OrderState, variables: Map[String, String]) {
+  final case class OrderRunResult(orderKey: OrderKey, nodeId: NodeId, variables: Map[String, String]) {
     def logString(implicit controller: TestSchedulerController): String = orderLog(orderKey)
   }
 
@@ -216,7 +249,7 @@ object SchedulerTestUtils {
 //    * @param errorCode Code der im Hauptprokoll zu tolerierenden Fehlermeldung.
 //    * @param testException: Test-Code, der bei einer falschen CppException eine Exception wirft, zum Bespiel mit ScalaTest. */
 //  def interceptLoggedSchedulerError(errorCode: MessageCode, testException: SchedulerException ⇒ Unit = _ ⇒ ())(body: ⇒ Unit)(implicit controller: TestSchedulerController) {
-//    controller.toleratingErrorLogEvent(errorCode) {
+//    controller.toleratingErrorLogged(errorCode) {
 //      val e = intercept[SchedulerException](body)
 //      s"${e.getMessage} " should startWith (s"$errorCode ")
 //      testException(e)
@@ -233,17 +266,17 @@ object SchedulerTestUtils {
     result
   }
 
-  def interceptErrorLogEvent[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
-    val eventFuture = controller.eventBus.eventFuture[ErrorLogEvent] { _.codeOption contains errorCode }
+  def interceptErrorLogged[A](errorCode: MessageCode)(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): ResultAndEvent[A] = {
+    val errorLoggedFuture = controller.eventBus.futureWhen[ErrorLogged] { _.event.codeOption contains errorCode }
     val result = controller.toleratingErrorCodes(Set(errorCode)) { body }
-    val event = try awaitResult(eventFuture, timeout.duration)
+    val errorLogged = try awaitResult(errorLoggedFuture, timeout.duration)
       catch { case t: TimeoutException ⇒ throw new TimeoutException(s"${t.getMessage}, while waiting for error message $errorCode") }
-    ResultAndEvent(result, event)
+    ResultAndEvent(result, errorLogged)
   }
 
-  def interceptErrorLogEvents[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
+  def interceptErrorLoggeds[A](errorCodes: Set[MessageCode])(body: ⇒ A)(implicit controller: TestSchedulerController, timeout: ImplicitTimeout): Unit =
     controller.toleratingErrorCodes(errorCodes) {
-      val futures = errorCodes map { o ⇒ controller.eventBus.eventFuture[ErrorLogEvent](_.codeOption contains o) }
+      val futures = errorCodes map { o ⇒ controller.eventBus.futureWhen[ErrorLogged](_.event.codeOption contains o) }
       body
       try awaitResults(futures)
       catch {
@@ -251,14 +284,13 @@ object SchedulerTestUtils {
       }
     }
 
-
   def orderIsBlacklisted(orderKey: OrderKey)(implicit hasInjector: HasInjector, entityManagerFactory: EntityManagerFactory): Boolean =
-    if (jobChain(orderKey.jobChainPath).isDistributed)
+    if (jobChainOverview(orderKey.jobChainPath).isDistributed)
       transaction { implicit entityManager ⇒
         instance[HibernateOrderStore].fetch(orderKey).isBlacklisted
       }
     else
-      order(orderKey).isBlacklisted
+      orderOverview(orderKey).isBlacklisted
 
-  final case class ResultAndEvent[A](result: A, event: ErrorLogEvent)
+  final case class ResultAndEvent[A](result: A, event: ErrorLogged)
 }

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.event.AnyKeyedEvent
 
 /**
  * @author Joacim Zschimmer
@@ -15,6 +15,6 @@ trait EventBus {
 
   def unregister(o: EventSubscription): Unit
 
-  def publish(e: Event): Unit
+  def publish(e: AnyKeyedEvent): Unit
 }
 

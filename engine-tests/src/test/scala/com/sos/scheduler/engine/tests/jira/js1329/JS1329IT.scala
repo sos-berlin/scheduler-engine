@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1329
 
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
-import com.sos.scheduler.engine.data.log.{ErrorLogEvent, InfoLogEvent}
+import com.sos.scheduler.engine.data.log.{ErrorLogged, InfoLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
@@ -23,7 +23,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   override protected lazy val testConfiguration = TestConfiguration(getClass,
-    errorLogEventIsTolerated = _.message contains "TEST-STDERR")
+    errorLoggedIsTolerated = _.message contains "TEST-STDERR")
 
   private val processClassSetting = List(
     "Without Agent" → (() ⇒ ProcessClassConfiguration()),
@@ -45,13 +45,13 @@ final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   private def testOutput(jobPath: JobPath): TaskResult = {
     var result: TaskResult = null
-    eventBus.awaitingEvent[InfoLogEvent](_.message contains "TEST-STDOUT") {
-      eventBus.awaitingEvent[ErrorLogEvent](_.message contains "TEST-STDERR") {
+    eventBus.awaitingWhen[InfoLogged](_.event.message contains "TEST-STDOUT") {
+      eventBus.awaitingWhen[ErrorLogged](_.event.message contains "TEST-STDERR") {
         result = controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) {
           runJob(jobPath)
         }
-      } .message should not include "[stderr]"
-    } .message should not include "[stdout]"
+      } .event.message should not include "[stderr]"
+    } .event.message should not include "[stdout]"
     result
   }
 }

@@ -51,6 +51,22 @@ static jint JNICALL finished_1orders_1count(JNIEnv* jenv, jobject, jlong cppRefe
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL get_1statistics___3I(JNIEnv* jenv, jobject, jlong cppReference, jintArray p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::get_statistics()");
+        (o_->get_statistics(p0));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jboolean JNICALL is_1empty(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -134,14 +150,32 @@ static jobject JNICALL java_1file_1baseds(JNIEnv* jenv, jobject, jlong cppRefere
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static void JNICALL java_1for_1each_1distributed_1order__Ljava_util_ArrayList_2Ljava_util_ArrayList_2ILcom_sos_scheduler_engine_kernel_order_OrderCallback_2(JNIEnv* jenv, jobject, jlong cppReference, jobject p0, jobject p1, jint p2, jobject p3)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::java_for_each_distributed_order()");
+        (o_->java_for_each_distributed_order(::javaproxy::java::util::ArrayList(p0), ::javaproxy::java::util::ArrayList(p1), p2, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderCallback(p3)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
     { (char*)"file_based_paths__native", (char*)"(JZ)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1paths__Z },
     { (char*)"finished_orders_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::finished_1orders_1count },
+    { (char*)"get_statistics__native", (char*)"(J[I)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::get_1statistics___3I },
     { (char*)"is_empty__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1empty },
     { (char*)"java_active_file_based__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1active_1file_1based__Ljava_lang_String_2 },
     { (char*)"java_file_based__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based__Ljava_lang_String_2 },
     { (char*)"java_file_based_or_null__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based_1or_1null__Ljava_lang_String_2 },
-    { (char*)"java_file_baseds__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1baseds }
+    { (char*)"java_file_baseds__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1baseds },
+    { (char*)"java_for_each_distributed_order__native", (char*)"(JLjava/util/ArrayList;Ljava/util/ArrayList;ILcom/sos/scheduler/engine/kernel/order/OrderCallback;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1for_1each_1distributed_1order__Ljava_util_ArrayList_2Ljava_util_ArrayList_2ILcom_sos_scheduler_engine_kernel_order_OrderCallback_2 }
 };
 
 namespace zschimmer { namespace javabridge { 

@@ -8,20 +8,28 @@ import com.sos.scheduler.engine.kernel.cppproxy.LockC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
-final class Lock private(protected[this] val cppProxy: LockC, protected val subsystem: LockSubsystem)
+private[kernel] final class Lock private(
+  protected[this] val cppProxy: LockC,
+  protected[kernel] val subsystem: LockSubsystem)
 extends FileBased {
 
+  protected type Self = Lock
   type ThisPath = LockPath
 
   def stringToPath(o: String) = LockPath(o)
 
-  def fileBasedType = FileBasedType.lock
+  def fileBasedType = FileBasedType.Lock
 
   def onCppProxyInvalidated(): Unit = {}
+
+//  def obstacles: Set[LockObstacle] = {
+//    val builder = Set.newBuilder[LockObstacle]
+//    builder.result
+//  }
 }
 
 object Lock {
-  final class Type extends SisterType[Lock, LockC] {
+  object Type extends SisterType[Lock, LockC] {
     def sister(proxy: LockC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
       new Lock(proxy, injector.instance[LockSubsystem])

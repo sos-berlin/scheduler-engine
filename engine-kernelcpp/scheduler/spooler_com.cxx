@@ -5683,7 +5683,7 @@ STDMETHODIMP Com_order::get_Ignore_max_orders(VARIANT_BOOL* result)
 STDMETHODIMP Com_order::get_History_id(BSTR* result) {
     try {
         if (!_order) return E_POINTER;
-        return String_to_bstr(_order->history_id(), result);
+        return String_to_bstr(as_string(_order->history_id()), result);
     }
     catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
 }

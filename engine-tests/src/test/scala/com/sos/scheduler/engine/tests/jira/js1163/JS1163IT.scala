@@ -107,7 +107,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).logString should (not include FinishedNormally and not include SigtermTrapped)
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
-            assert(job(jobPath).state == JobState.stopped)
+            assert(jobOverview(jobPath).state == JobState.stopped)
             val normalizedReturnCode = results(jobPath).returnCode.normalized
             if (setting == universalAgentSetting && jobPath == StandardJobPath)
               ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
@@ -157,7 +157,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         s"(preparation: run and kill tasks)" in {
           deleteAndWriteConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = setting.agentUriOption.toList))
           //controller.toleratingErrorCodes(Set("Z-REMOTE-101", "ERRNO-32", "SCHEDULER-202", "SCHEDULER-279", "SCHEDULER-280") map MessageCode) {
-          controller.toleratingErrorLogEvent(_ ⇒ true) {
+          controller.toleratingErrorLogged(_ ⇒ true) {
             val jobPaths = List(
               StandardJobPath, StandardMonitorJobPath,
               TrapJobPath, TrapMonitorJobPath,
@@ -180,7 +180,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration
             results(jobPath).returnCode.normalized shouldEqual setting.returnCode(SIGTERM)
-            assert(job(jobPath).state == JobState.stopped)
+            assert(jobOverview(jobPath).state == JobState.stopped)
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
@@ -191,7 +191,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             results(jobPath).duration should be < UndisturbedDuration
             results(jobPath).endedInstant should be < killTime + MaxKillDuration + TrapDuration
             results(jobPath).returnCode shouldEqual ReturnCode(7)
-            assert(job(jobPath).state == JobState.stopped)
+            assert(jobOverview(jobPath).state == JobState.stopped)
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }
@@ -211,7 +211,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             } else
               // Why not this ??? results(jobPath).returnCode.normalized shouldEqual ReturnCode(SIGKILL)
               results(jobPath).returnCode.normalized shouldEqual (if (jobPath == IgnoringJobPath) setting.returnCode(SIGKILL) else ReturnCode(1))   // Warum nicht auch SIGKILL ???
-            assert(job(jobPath).state == JobState.stopped)
+            assert(jobOverview(jobPath).state == JobState.stopped)
             scheduler executeXml ModifyJobCommand(jobPath, cmd = Some(Unstop))
           }
         }

@@ -5,5 +5,11 @@
         <security>
             <allowed_host host="127.0.0.1" level="all"/>
         </security>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.plugins.jetty.JettyPlugin">
+                <plugin.config port="TEST"/>
+            </plugin>
+            <plugin java_class="com.sos.scheduler.engine.plugins.newwebservice.NewWebServicePlugin"/>
+        </plugins>
     </config>
 </spooler>

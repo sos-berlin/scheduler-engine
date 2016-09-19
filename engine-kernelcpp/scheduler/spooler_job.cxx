@@ -1018,6 +1018,31 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
     }
 }
 
+list<Requisite_path> Standard_job::missing_requisites() {
+    list<Requisite_path> result;
+    list<Requisite_path> missings = Dependant::missing_requisites();
+    Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+        result.push_back(*i);
+    if (_lock_requestor) {
+        Z_FOR_EACH_CONST(lock::Requestor::Use_list, _lock_requestor->_use_list, i) {
+            list<Requisite_path> missings = (*i)->missing_requisites();
+            Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+                result.push_back(*i);
+        }
+    }
+    if (_module && _module->_monitors) {
+        list<Requisite_path> missings = _module->_monitors->missing_requisites();
+        Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+            result.push_back(*i);
+    }
+    if (_schedule_use) {
+        list<Requisite_path> missings = _schedule_use->missing_requisites();
+        Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+            result.push_back(*i);
+    }
+    return result;
+}
+
 //----------------------------------------------------Standard_job::get_step_duration_or_percentage
 
 Duration Standard_job::get_step_duration_or_percentage( const string& value, const Duration& deflt )
@@ -1724,6 +1749,18 @@ xml::Element_ptr Standard_job::Task_queue::why_dom_element(const xml::Document_p
         //if (at_reached && (in_period || task->force()))  break;
     }
     return result;
+}
+
+jlong Standard_job::next_possible_start_millis() const { 
+    Time result = _period.begin();
+    Task_queue::iterator i = _task_queue->begin();
+    if (i != _task_queue->end()) {
+        Task* task = *i;
+        if (task->force()) {
+            result = min(result, task->at());
+        }
+    }
+    return result.millis();
 }
 
 //----------------------------------------------------------------Standard_job::get_task_from_queue
@@ -2968,7 +3005,8 @@ bool Standard_job::try_start_one_task()
                     _start_min_tasks = false;
 
                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
-                _log->info(message_string("SCHEDULER-930", task->id(), c, task->process_class_path()));   // Task::do_load() has set process_class_path
+                _log->info(message_string("SCHEDULER-930", task->id(), c, 
+                    task->process_class()? task->process_class()->path() : string("(process class not yet known)")));   // Task::do_load() has set process_class_path
 
                 task_started = true;
                 _wake_when_in_period = false;
@@ -3533,6 +3571,13 @@ xml::Element_ptr Standard_job::why_dom_element(const xml::Document_ptr& doc) {
     }
 
     return result;
+}
+
+vector<string> Standard_job::unavailable_lock_path_strings() const {
+    if (_lock_requestor && _lock_requestor->is_enqueued()) 
+        return _lock_requestor->unavailable_lock_path_strings((lock::Holder*)NULL);
+    else
+        return vector<string>();
 }
 
 //------------------------------------------------------Standard_job::append_calendar_dom_elements

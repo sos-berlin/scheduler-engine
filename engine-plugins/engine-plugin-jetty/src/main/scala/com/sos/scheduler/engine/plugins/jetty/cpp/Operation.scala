@@ -1,24 +1,26 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
-import Operation._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse
-import com.sos.scheduler.engine.kernel.scheduler.{SchedulerIsClosed, SchedulerHttpService}
+import com.sos.scheduler.engine.kernel.scheduler.{SchedulerHttpService, SchedulerIsClosed}
+import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
+import com.sos.scheduler.engine.plugins.jetty.cpp.Operation._
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nullable
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
-import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
-import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
 
 private[cpp] final class Operation(
     request: HttpServletRequest,
     response: HttpServletResponse,
     schedulerHttpService: SchedulerHttpService,
     cppProxyRegister: DisposableCppProxyRegister,
-    schedulerIsClosed: SchedulerIsClosed
-) extends SchedulerHttpResponse {
+    schedulerIsClosed: SchedulerIsClosed)
+  (implicit  schedulerThreadCallQueue: SchedulerThreadCallQueue)
+extends SchedulerHttpResponse {
 
   private val _isClosed = new AtomicBoolean(false)
 
@@ -45,11 +47,16 @@ private[cpp] final class Operation(
 
   private def httpResponseC = httpResponseCRef.get
 
-  @Nullable private lazy val chunkReaderC = httpResponseC.chunk_reader
+  @Nullable private lazy val chunkReaderC =
+    inSchedulerThread {
+      httpResponseC.chunk_reader
+    }
 
   def start(): Unit = {
-    response.setStatus(httpResponseC.status)
-    splittedHeaders(httpResponseC.header_string) foreach { h => response.setHeader(h._1, h._2) }
+    inSchedulerThread {
+      response.setStatus(httpResponseC.status)
+      splittedHeaders(httpResponseC.header_string) foreach { h => response.setHeader(h._1, h._2) }
+    }
     if (chunkReaderC != null) continue()
     else close()
   }
@@ -67,10 +74,12 @@ private[cpp] final class Operation(
   }
 
   private def closeHttpResponseC(): Unit = {
-    try httpResponseC.close()
-    finally {
-      logger.debug("httpResponseC.dispose()")
-      cppProxyRegister.dispose(httpResponseCRef)
+    inSchedulerThread {
+      try httpResponseC.close()
+      finally {
+        logger.debug("httpResponseC.dispose()")
+        cppProxyRegister.dispose(httpResponseCRef)
+      }
     }
   }
 
@@ -87,10 +96,12 @@ private[cpp] final class Operation(
   }
 
   def serveChunks(): Unit = {
-    while (!isClosed && chunkReaderC != null && chunkReaderC.next_chunk_is_ready) {
-      chunkReaderC.get_next_chunk_size match {
+    while (!isClosed && chunkReaderC != null && inSchedulerThread { chunkReaderC.next_chunk_is_ready }) {
+      inSchedulerThread { chunkReaderC.get_next_chunk_size } match {
         case 0 => close()
-        case size => response.getOutputStream.write(chunkReaderC.read_from_chunk(size))
+        case size =>
+          val chunk = inSchedulerThread { chunkReaderC.read_from_chunk(size) }
+          response.getOutputStream.write(chunk)
       }
     }
   }

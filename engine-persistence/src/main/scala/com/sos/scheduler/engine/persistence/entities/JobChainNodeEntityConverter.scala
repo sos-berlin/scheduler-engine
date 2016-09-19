@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import com.sos.scheduler.engine.data.order.OrderState
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodePersistentStateKey, JobChainNodeAction, JobChainNodePersistentState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainNodePersistentStateKey, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.SchedulerDatabases._
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
@@ -14,7 +13,7 @@ trait JobChainNodeEntityConverter extends ObjectEntityConverter[JobChainNodePers
 
   final def toObject(e: JobChainNodeEntity) = JobChainNodePersistentState(
     JobChainPath("/"+ e.jobChainPath),
-    OrderState(e.orderState),
+    NodeId(e.orderState),
     if (e.action == null) JobChainNodeAction.process else JobChainNodeAction.ofCppName(e.action))
 
   final def toEntity(o: JobChainNodePersistentState) = {
@@ -27,5 +26,5 @@ trait JobChainNodeEntityConverter extends ObjectEntityConverter[JobChainNodePers
     schedulerIdDBString,
     clusterMemberIdDBString,
     key.jobChainPath.withoutStartingSlash,
-    key.state.string)
+    key.nodeId.string)
 }

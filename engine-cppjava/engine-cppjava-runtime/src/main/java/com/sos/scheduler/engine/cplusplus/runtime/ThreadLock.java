@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
 import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
+import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.currentThread;
 
@@ -18,15 +16,37 @@ public class ThreadLock {
     private static final int logTimeoutMillis = 15*1000;     // Wenn's länger dauert, Meldung loggen
     private static final Logger logger = LoggerFactory.getLogger(ThreadLock.class);
 
+    @Nullable private Thread requiredCppThread = null;
     private final SimpleLock myLock = new LoggingLock();
 //    private final AtomicInteger counter = new AtomicInteger(0);
 
-    public final void lock() {
+    public final void startLock() {
         myLock.lock();
     }
 
-    public final void unlock() {
+    public final void endLock() {
         myLock.unlock();
+    }
+
+    public final void lock() {
+        if (requiredCppThread == null)   // In production
+            myLock.lock();
+        else
+        // requireCppThread is non-null only under test framework, see SchedulerThreadControllerBridge.
+        // This is to test the irrelevance of myLock. Under production, myLock is always used.
+        if (requiredCppThread != currentThread())
+            throw new IllegalStateException("Not in C++ thread");   // Not in production
+    }
+
+    public final void unlock() {
+        if (requiredCppThread == null) {
+            myLock.unlock();
+        }
+    }
+
+    public final void setCppThreadRequired(boolean b) {
+        requireUnlocked();
+        requiredCppThread = b ? currentThread() : null;
     }
 
     public final void requireUnlocked() {

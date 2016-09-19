@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1476
 
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.NowAt
@@ -27,27 +27,27 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
   "Resuming order staying in completely skipped nested last job chain" in {
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = JobChainPath("/test-nested-c") orderKey superOrderKey.id
-    val stoppedState = OrderState("NESTED-C-2")
-    scheduler executeXml <job_chain_node.modify job_chain={CJobChainPath.string} state={stoppedState.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderStateChangedEvent](cOrderKey) {
+    val stoppedNodeId = NodeId("NESTED-C-2")
+    scheduler executeXml <job_chain_node.modify job_chain={CJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
+    eventBus.awaiting[OrderFinished](cOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](cOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
-      } .state shouldEqual stoppedState
+      } .nodeId shouldEqual stoppedNodeId
       scheduler executeXml <job_chain_node.modify job_chain={CJobChainPath.string} state="NESTED-C-3" action="next_state"/> // Last node
       scheduler executeXml <job_chain_node.modify job_chain={CJobChainPath.string} state="NESTED-C-2" action="next_state"/> // Then current node
     }
   }
 
   "Continuing order when next and last nested job chain are completely skipped" in {
-    setSkippingNodes(BOrderStates ++ COrderStates)
+    setSkippingNodes(BOrderNodeIds ++ COrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val aOrderKey = AJobChainPath orderKey superOrderKey.id
-    val stoppedState = OrderState("NESTED-A-2")
-    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedState.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](aOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderStateChangedEvent](aOrderKey) {
+    val stoppedNodeId = NodeId("NESTED-A-2")
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](aOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
-      } .state shouldEqual stoppedState
+      } .nodeId shouldEqual stoppedNodeId
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-2" action="process"/>
     }
   }
@@ -56,12 +56,12 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     // Jobchain test-nested-b is completely skipping
     val superOrderKey = superOrderKeys.next()
     val aOrderKey = AJobChainPath orderKey superOrderKey.id
-    val stoppedState = OrderState("NESTED-A-2")
-    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedState.string} action="stop"/>
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](aOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderStateChangedEvent](aOrderKey) {
+    val stoppedNodeId = NodeId("NESTED-A-2")
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](aOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
-      } .state shouldEqual stoppedState
+      } .nodeId shouldEqual stoppedNodeId
       scheduler executeXml OrderCommand(aOrderKey, suspended = Some(true))
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-2" action="next_state"/>
       scheduler executeXml OrderCommand(aOrderKey, suspended = Some(false))
@@ -69,41 +69,41 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Adding order when all nested job chains are completely skipping" in {
-    setSkippingNodes(AOrderStates ++ BOrderStates ++ COrderStates)
+    setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds ++ COrderNodeIds)
     // All nested jobchains are completely skipped
     val superOrderKey = superOrderKeys.next()
-    interceptSchedulerError(MessageCode("SCHEDULER-438")) {  // "Invalid Job_chain_node for add_order() with state='END'"
+    interceptSchedulerError(MessageCode("SCHEDULER-438")) {  // "Invalid Job_chain_node for add_order() with nodeId='END'"
       scheduler executeXml OrderCommand(superOrderKey)
     }
   }
 
   "Adding order when only the first nested job chain is completely skipping" in {
-    setSkippingNodes(AOrderStates)
+    setSkippingNodes(AOrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml OrderCommand(superOrderKey)
     }
   }
 
   "Adding order when only the middle nested job chain is completely skipping" in {
-    setSkippingNodes(BOrderStates)
+    setSkippingNodes(BOrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml OrderCommand(superOrderKey)
     }
   }
 
   "Adding and repeating a permanent order when first nested job chain is completely skipping" in {
-    setSkippingNodes(AOrderStates ++ BOrderStates)
+    setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds)
     val superOrderKey = superOrderKeys.next()
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       writeConfigurationFile(superOrderKey, <order/>)
     }
     requireOrderIsVisible(cOrderKey)
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
     requireOrderIsVisible(cOrderKey)
@@ -115,14 +115,14 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     val superOrderKey = superOrderKeys.next()
     writeConfigurationFile(superOrderKey, <order><run_time><at at="1999-01-01"/></run_time></order>)
     requireOrderIsVisible(AJobChainPath orderKey superOrderKey.id)
-    setSkippingNodes(AOrderStates ++ BOrderStates)
+    setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds)
     val cOrderKey = CJobChainPath orderKey superOrderKey.id
     requireOrderIsVisible(cOrderKey)
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
     requireOrderIsVisible(cOrderKey)
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](cOrderKey) {
+    eventBus.awaiting[OrderFinished](cOrderKey) {
       scheduler executeXml ModifyOrderCommand(CJobChainPath orderKey superOrderKey.id, at = Some(NowAt))
     }
     requireOrderIsVisible(cOrderKey)
@@ -131,14 +131,14 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
 
   // "Order.reset" in { see JS631IT }
 
-  private def setSkippingNodes(states: Set[OrderState]): Unit = {
-    def set(jobChainPath: JobChainPath, state: OrderState): Unit = {
-      val action = if (states(state)) "next_state" else "process"
-      scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state={state.string} action={action}/>
+  private def setSkippingNodes(states: Set[NodeId]): Unit = {
+    def set(jobChainPath: JobChainPath, nodeId: NodeId): Unit = {
+      val action = if (states(nodeId)) "next_state" else "process"
+      scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state={nodeId.string} action={action}/>
     }
-    for (state ← AOrderStates) set(AJobChainPath, state)
-    for (state ← BOrderStates) set(BJobChainPath, state)
-    for (state ← COrderStates) set(CJobChainPath, state)
+    for (nodeId ← AOrderNodeIds) set(AJobChainPath, nodeId)
+    for (nodeId ← BOrderNodeIds) set(BJobChainPath, nodeId)
+    for (nodeId ← COrderNodeIds) set(CJobChainPath, nodeId)
   }
 
   def requireOrderIsVisible(orderKey: OrderKey): Unit = {
@@ -153,7 +153,7 @@ private object JS1476IT {
   private val AJobChainPath = JobChainPath("/test-nested-a")
   private val BJobChainPath = JobChainPath("/test-nested-b")
   private val CJobChainPath = JobChainPath("/test-nested-c")
-  private val AOrderStates = Set(OrderState("NESTED-A-1"), OrderState("NESTED-A-2"), OrderState("NESTED-A-3"))
-  private val BOrderStates = Set(OrderState("NESTED-B-1"), OrderState("NESTED-B-2"), OrderState("NESTED-B-3"))
-  private val COrderStates = Set(OrderState("NESTED-C-1"), OrderState("NESTED-C-2"), OrderState("NESTED-C-3"))
+  private val AOrderNodeIds = Set(NodeId("NESTED-A-1"), NodeId("NESTED-A-2"), NodeId("NESTED-A-3"))
+  private val BOrderNodeIds = Set(NodeId("NESTED-B-1"), NodeId("NESTED-B-2"), NodeId("NESTED-B-3"))
+  private val COrderNodeIds = Set(NodeId("NESTED-C-1"), NodeId("NESTED-C-2"), NodeId("NESTED-C-3"))
 }

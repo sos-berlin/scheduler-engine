@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.xml.VariableSets
@@ -62,7 +61,7 @@ extends JobChainNodeNamespaceXmlPlugin {
   private def onReturnCode(addOrder: AddOrder)(order: Order): Unit = {
     val addOrderCommand = OrderCommand(
       orderKey = addOrder.orderKeyPattern.resolveWith(order.id),
-      parameters = order.parameters.toMap ++ addOrder.variables)
+      parameters = order.variables ++ addOrder.variables)
     schedulerThreadFuture {
       try xmlCommandExecutor executeXml addOrderCommand
       catch {

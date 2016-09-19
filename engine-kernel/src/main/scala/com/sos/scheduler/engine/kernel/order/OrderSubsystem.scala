@@ -1,121 +1,189 @@
 package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.base.utils.PerKeyLimiter
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderQuery}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
+import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
-import javax.inject.{Inject, Singleton}
+import java.util.NoSuchElementException
+import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 @ForCpp
 @Singleton
-private[engine] final class OrderSubsystem @Inject private(
+final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   folderSubsystem: FolderSubsystem,
-  injector: Injector)
+  ownClusterMemberIdProvider: Provider[ClusterMemberId],
+  protected val injector: Injector)
 extends FileBasedSubsystem {
 
+  type ThisSubsystemClient = OrderSubsystemClient
   type ThisSubsystem = OrderSubsystem
   type ThisFileBased = JobChain
   type ThisFile_basedC = Job_chainC
 
-  val description = OrderSubsystem
+  val companion = OrderSubsystem
 
   private implicit lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
   private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
-
-//  def jobChainMap = new Map[JobChainPath, JobChain] {
-//    def get(key: JobChainPath) =
-//      jobChainOption(key)
-//
-//    def iterator =
-//      jobChains.iterator map { o => o.path -> o }
-//
-//    def -(key: JobChainPath) =
-//      throw new NotImplementedError
-//
-//    def +[B1 >: JobChain](kv: (JobChainPath, B1)) =
-//      throw new NotImplementedError
-//  }
+  private lazy val ownClusterMemberId = ownClusterMemberIdProvider.get()
 
   @ForCpp
-  def persistNodeState(node: Node): Unit = {
+  private def persistNodeState(node: Node): Unit = {
     transaction { implicit entityManager =>
       persistentStateStore.store(node.persistentState)
     }
   }
 
-  def tryRemoveOrder(k: OrderKey): Unit = {
-    inSchedulerThread {
-      for (o <- orderOption(k))
-        o.remove()
+  private val statisticsArray = new Array[Int](12)
+
+  private[kernel] def orderStatistics = {
+    java.util.Arrays.fill(statisticsArray, 0)
+    cppProxy.get_statistics(statisticsArray)
+    OrderStatistics(
+      total = statisticsArray(0),
+      notPlanned = statisticsArray(1),
+      planned = statisticsArray(2),
+      pending = statisticsArray(3),
+      running = statisticsArray(4),
+      inTask = statisticsArray(5),
+      inProcess = statisticsArray(6),
+      setback = statisticsArray(7),
+      suspended = statisticsArray(8),
+      blacklisted = statisticsArray(9),
+      permanent = statisticsArray(10),
+      fileOrder = statisticsArray(11))
+  }
+
+  private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
+    val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
+    val local = localOrderViews[V](localChains, query)
+    val distributed = distributedOrderViews[V](distriChains, query)
+    var all: Iterator[V] = local ++ distributed
+    for (limit ← query.notInTaskLimitPerNode) {
+      val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderView) ⇒ o.nodeKey)
+      all = all filter { o ⇒ o.processingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
     }
+    all.toVector
   }
 
-  def orderOverviews: immutable.Seq[OrderOverview] = orderOverviews(OrderQuery.All)
-
-  def orderOverviews(query: OrderQuery): immutable.Seq[OrderOverview] =
-    ordersByQuery(query).toVector map { _.overview }
-
-  private def ordersByQuery(query: OrderQuery): Seq[Order] = {
-    val q = query.copy(jobChainQuery = JobChainQuery.All)
-    jobChainsByQuery(query.jobChainQuery) flatMap { _.orders } filter q.matches
+  private def localOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Iterator[V] = {
+    val orders = query.orderKeyOption match {
+      case Some(orderKey) ⇒
+        // If a single non-distributed Order is specified, we want get an exception (with error message) if it does not exists.
+        Iterator(jobChain(orderKey.jobChainPath).order(orderKey.id))
+      case _ ⇒
+        val jobChainToOrders = query.orderIds match {
+          case Some(orderIds) ⇒ (o: JobChain) ⇒ o.orderIterator(orderIds)
+          case None           ⇒ (o: JobChain) ⇒ o.orderIterator
+        }
+        jobChains flatMap jobChainToOrders
+      }
+    orders filter { o ⇒ query.matchesOrder(o.queryable, o.jobPathOption) } map { _.view[V] }
   }
 
-  def orders: Seq[Order] = jobChains flatMap { _.orders }
+  private object distributedOrderViews {
+    def apply[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Seq[V] =
+      if (jobChains.isEmpty || (query.orderIds/*Option*/ exists { _.isEmpty }))
+        Nil
+      else {
+        val result = mutable.Buffer[V]()
+        cppProxy.java_for_each_distributed_order(
+          jobChainPaths = toJavaArrayList((jobChains map { _.path.withoutStartingSlash }).toSeq),
+          orderIds = (query.orderIds map { o ⇒ toJavaArrayList(o map { _.string }) }).orNull,
+          perNodeLimit = query.notInTaskLimitPerNode getOrElse Int.MaxValue,
+          new OrderCallback {
+            def apply(orderC: OrderC) = {
+              val order = orderC.getSister
+              if (query.matchesOrder(order.queryable, order.jobPathOption)) {
+                result += order.view[V]
+              }
+            }
+          })
+        result map replaceWithOwnOrderView[V]
+      }
+
+    private def toJavaArrayList[A <: AnyRef](elements: Iterable[A]): java.util.ArrayList[AnyRef] =
+      new java.util.ArrayList[AnyRef](elements.size) sideEffect { a ⇒
+        for (e ← elements) a.add(e)
+
+      }
+
+    private def replaceWithOwnOrderView[V <: OrderView: OrderView.Companion](o: V): V =
+      if (o.occupyingClusterMemberId contains ownClusterMemberId)
+        orderOption(o.orderKey) map { _.view[V] } getOrElse o
+      else
+        o
+  }
+
+  private[order] def localOrderIterator: Iterator[Order] =
+    jobChainsByQuery(JobChainQuery.All) flatMap { _.orderIterator }
 
   def order(orderKey: OrderKey): Order =
-    jobChain(orderKey.jobChainPath).order(orderKey.id)
+    inSchedulerThread {
+      jobChain(orderKey.jobChainPath).order(orderKey.id)
+    }
 
   def orderOption(orderKey: OrderKey): Option[Order] =
-    jobChain(orderKey.jobChainPath).orderOption(orderKey.id)
-
-  def removeJobChain(o: JobChainPath): Unit = {
-    jobChain(o).remove()
-  }
-
-  def jobChainsOfJob(job: Job): Iterable[JobChain] =
     inSchedulerThread {
-      jobChains filter { _ refersToJob job }
+      jobChain(orderKey.jobChainPath).orderOption(orderKey.id)
     }
 
-  def jobChainsByQuery(query: JobChainQuery): Seq[JobChain] = {
-    def visibleJobChains = visiblePaths map jobChain
-    query.reduce match {
-      case JobChainQuery.All ⇒ visibleJobChains
-      case jobChainPath: JobChainPath ⇒ List(jobChain(jobChainPath))
-      case folderPath: FolderPath ⇒
-        folderSubsystem.fileBased(folderPath)  // Fails if folders does not exists
-        visibleJobChains filter { o ⇒ query.matches(o.path) }
+  def removeJobChain(o: JobChainPath): Unit =
+    inSchedulerThread {
+      jobChain(o).remove()
     }
-  }
 
-  def jobChains: Seq[JobChain] =
-    fileBaseds
+  def jobChainsOfJob(job: Job): Vector[JobChain] =
+    inSchedulerThread {
+      (fileBasedIterator filter { _ refersToJob job }).toVector
+    }
+
+  private[kernel] def jobChainsByQuery(query: JobChainQuery): Iterator[JobChain] =
+    query.jobChainPathQuery match {
+      case PathQuery.All ⇒
+        val reducedQuery = query withJobChainPathQuery PathQuery.All
+        orderedVisibleFileBasedIterator filter { o ⇒ reducedQuery matchesJobChain o.queryable }
+      case PathQuery.Folder(folderPath, ignoringIsRecursive) ⇒
+        folderSubsystem.requireExistence(folderPath)
+        orderedVisibleFileBasedIterator filter { o ⇒ query matchesJobChain o.queryable }
+      case single: PathQuery.SinglePath ⇒
+        Iterator(jobChain(single.as[JobChainPath])) filter { o ⇒ query matchesJobChain o.queryable }
+    }
 
   def jobChain(o: JobChainPath): JobChain =
-    fileBased(o)
+    inSchedulerThread {
+      fileBased(o)
+    }
 
   def jobChainOption(o: JobChainPath): Option[JobChain] =
-    fileBasedOption(o)
+    inSchedulerThread {
+      fileBasedOption(o)
+    }
 }
 
 
-object OrderSubsystem extends FileBasedSubsystem.AbstractDesription[OrderSubsystem, JobChainPath, JobChain] {
-  val fileBasedType = FileBasedType.jobChain
+object OrderSubsystem extends
+FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobChainPath, JobChain] {
+
+  val fileBasedType = FileBasedType.JobChain
   val stringToPath = JobChainPath.apply _
 }

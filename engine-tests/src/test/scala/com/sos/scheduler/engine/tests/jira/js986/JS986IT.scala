@@ -14,10 +14,10 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS986IT extends FunSuite with ScalaSchedulerTest {
 
-  test("JS-986 Fix: order.state=end should not suppress stdout in order log") {
+  test("JS-986 Fix: order.nodeId=end should not suppress stdout in order log") {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml OrderCommand(testOrderKey)
-    eventPipe.nextWithCondition { e: OrderFinishedEvent => e.orderKey == testOrderKey }
+    eventPipe.next[OrderFinished](testOrderKey)
     withClue("Task log") { controller.environment.taskLogFileString(testJobPath) should include (expectedJobOutput) }
     withClue("Order log") { orderLogString(testOrderKey) should include (expectedJobOutput) }
   }

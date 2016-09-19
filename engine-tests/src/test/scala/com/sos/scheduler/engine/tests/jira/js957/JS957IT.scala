@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.tests.jira.js957
 
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestSchedulerController}
@@ -28,11 +28,11 @@ final class JS957IT extends FreeSpec {
     autoClosing(ProvidesTestEnvironment(testConfiguration)) { envProvider ⇒
       envProvider.runScheduler() { implicit controller ⇒
         autoClosing(controller.newEventPipe()) { eventPipe ⇒
-          controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(RepeatOrderKey)
+          controller.instance[OrderSubsystemClient].order(RepeatOrderKey)
           controller.scheduler executeXml ModifyOrderCommand(RepeatOrderKey, title = Some(AlteredTitle))
           repeatOrder.title shouldEqual AlteredTitle
-          eventPipe.nextKeyed[OrderFinishedEvent](RepeatOrderKey)
-          eventPipe.nextKeyed[OrderFinishedEvent](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
           executeShowOrder().toString should include ("<source")
           simulateAbort()
         }
@@ -40,9 +40,9 @@ final class JS957IT extends FreeSpec {
       envProvider.runScheduler() { implicit controller ⇒
         autoClosing(controller.newEventPipe()) { eventPipe ⇒
           repeatOrder.title shouldEqual AlteredTitle
-          eventPipe.nextKeyed[OrderFinishedEvent](RepeatOrderKey)
-          eventPipe.nextKeyed[OrderFinishedEvent](RepeatOrderKey)
-          eventPipe.nextKeyed[OrderFinishedEvent](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
+          eventPipe.next[OrderFinished](RepeatOrderKey)
           executeShowOrder().toString should include ("<source")   // JS-956: Nach Wiederherstellung des Auftrags aus der Datenbank wird weiterhin der Text der Konfigurationsdatei geliefert
           controller.terminateScheduler()
         }
@@ -67,7 +67,7 @@ final class JS957IT extends FreeSpec {
       <show_order job_chain={RepeatOrderKey.jobChainPath.string} order={RepeatOrderKey.id.string} what="source"/>
 
   private def repeatOrder(implicit controller: TestSchedulerController) =
-    controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(RepeatOrderKey)
+    controller.scheduler.injector.getInstance(classOf[OrderSubsystemClient]).order(RepeatOrderKey)
 }
 
 

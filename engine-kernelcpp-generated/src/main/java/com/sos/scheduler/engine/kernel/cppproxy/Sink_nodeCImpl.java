@@ -14,6 +14,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Sink_nodeC {
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public long delay() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return delay__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long delay__native(long cppReference);
+
+
     @Override public java.lang.String file_order_sink_move_to() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

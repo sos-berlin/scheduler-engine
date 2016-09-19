@@ -11,7 +11,10 @@ import scala.util.Try
 object SchedulerThreadFutures {
 
   def inSchedulerThread[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): A =
-    Await.ready(directOrSchedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf).successValue
+    if (isInSchedulerThread)
+      f
+    else
+      Await.ready(schedulerThreadFuture(f)(schedulerThreadCallQueue), Duration.Inf).successValue
 
   /** Executes f, directly if in JobScheduler thread, else by CallQueue. */
   def directOrSchedulerThreadFuture[A](f: ⇒ A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =

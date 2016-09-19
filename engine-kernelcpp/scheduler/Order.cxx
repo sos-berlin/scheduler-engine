@@ -13,7 +13,7 @@ using namespace job_chain;
 //---------------------------------------------------------------------------------------------const
 
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
-const string scheduler_file_order_path_variable_name = "scheduler_file_path";
+extern const string scheduler_file_order_path_variable_name = "scheduler_file_path";
 const string scheduler_file_order_agent_variable_name = "scheduler_file_remote_scheduler";
 
 DEFINE_SIMPLE_CALL(Order, File_exists_call)
@@ -1661,7 +1661,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _task )
         {
             result.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
-            result.setAttribute( "in_process_since", _task->last_process_start_time().xml_value() );
+            result.setAttribute( "in_process_since", _task->step_started_at().xml_value() );
         }
 
         if( _state_text != "" )
@@ -1953,7 +1953,7 @@ File_path Order::file_path() const
         if( ptr<Com_variable_set> order_params = params_or_null() )
         {
             Variant path;
-            order_params->get_Var( Bstr( scheduler_file_order_path_variable_name ), &path );
+            order_params->get_Var(order_subsystem()->scheduler_file_order_path_variable_name_Bstr(), &path);
             result.set_path( string_from_variant( path ) );
         }
     }
@@ -1966,7 +1966,22 @@ File_path Order::file_path() const
 
 bool Order::is_file_order() const
 {
-    return file_path() != "";
+    File_path result;
+
+    if (!_is_file_order_cached) {
+        _is_file_order_cached = true;
+        try {
+            if (ptr<Com_variable_set> order_params = params_or_null()) {
+                _is_file_order_cached_value = order_params->contains(order_subsystem()->scheduler_file_order_path_variable_name_Bstr());
+            } else
+                _is_file_order_cached_value = false;
+        }
+        catch( exception& x )  { 
+            Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() << "\n" ); 
+            _is_file_order_cached_value = false;
+        }
+    }
+    return _is_file_order_cached_value;
 }
 
 
@@ -2260,7 +2275,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if (is_in_job_chain())
         {
-            report_event(CppEventFactoryJ::newOrderStateChangedEvent(_job_chain_path, string_id(), previous_state.as_string(), _state.as_string()), java_sister());
+            report_event(CppEventFactoryJ::newOrderStateChangedEvent(_job_chain_path, string_id(), previous_state.as_string(), _state.as_string()));
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
@@ -2686,6 +2701,10 @@ Job_chain* Order::job_chain_for_api() const
             _removed_from_job_chain_path != ""? order_subsystem()->job_chain_or_null( _removed_from_job_chain_path ) :
             _job_chain_path              != ""? order_subsystem()->job_chain_or_null( _job_chain_path )
                                               : NULL;
+}
+
+javabridge::Lightweight_jobject Order::java_job_chain_node() const {
+    return javabridge::Lightweight_jobject(_job_chain_node  ? _job_chain_node->java_sister() : NULL);
 }
 
 //----------------------------------------------------------------------------Order::postprocessing
@@ -3445,6 +3464,18 @@ void Order::remove_from_blacklist()
 
         handle_changed_processable_state();
     }
+}
+
+
+jlong Order::java_fast_flags() const {
+    return 
+        (is_file_based()  ? 0x01 : 0) |
+        (_suspended       ? 0x02 : 0) |
+        (_is_on_blacklist ? 0x04 : 0) |
+        (_setback_count   ? 0x08 : 0) |
+        (((jlong)file_based_state() << 4) & 0xf0) |
+        (_is_touched      ? 0x100 : 0) |
+        (_task && _task->state() > Task::s_waiting_for_process ? 0x200 : 0);
 }
 
 //-------------------------------------------------------------------------------Order::web_service

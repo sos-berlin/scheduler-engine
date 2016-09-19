@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1523
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
@@ -101,7 +101,7 @@ final class JS1523IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         result = body
         result.returnCode shouldEqual ReturnCode.StandardFailure
       }
-      events.queued[ErrorLogEvent] flatMap { _.codeOption } contains MessageCode("SCHEDULER-202")
+      events.queued[ErrorLogged] flatMap { _.event.codeOption } contains MessageCode("SCHEDULER-202")
       // How to check the process has actually being killed ??? EventBus!
     }
     result

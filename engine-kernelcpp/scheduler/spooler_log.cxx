@@ -421,6 +421,7 @@ void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, 
         if( order_log )  order_log->write( text, len );
 
         if( _spooler->_log_to_stderr  &&  level >= _spooler->_log_to_stderr_level )  my_write( _spooler, "(stderr)", fileno(stderr), text, len );
+        if (_corresponding_prefix_log) _corresponding_prefix_log->on_logged();
     }
 }
 
@@ -540,6 +541,7 @@ Prefix_log::Prefix_log( int )
 
 Prefix_log::Prefix_log(Scheduler_object* o)
 :
+    javabridge::has_proxy<Prefix_log>(o->spooler()),
     _zero_(this+1),
     _object(o),
     _spooler(o->spooler()),
@@ -697,7 +699,7 @@ void Prefix_log::open()
             _spooler->_log_file_cache->cache(this);
         }
 
-        if (typed_java_sister()) typed_java_sister().onStarted();
+        if (typed_java_sister()) typed_java_sister().onStarted(_spooler->java_sister());
         _started = true;
     }
 }
@@ -895,6 +897,10 @@ void Prefix_log::write( const char* text, int len )
         }
     }
 
+    on_logged();
+}
+
+void Prefix_log::on_logged() {
     if (typed_java_sister()) typed_java_sister().onLogged();
 }
 
@@ -1099,7 +1105,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     }
 
     if (_object  &&  javabridge::Vm::is_active())
-        _object->report_event(CppEventFactoryJ::newLogEvent(level, line) );
+        _object->report_event(CppEventFactoryJ::newLoggedEvent(level, line) );
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event

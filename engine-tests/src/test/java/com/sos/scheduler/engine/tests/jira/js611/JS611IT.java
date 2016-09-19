@@ -4,13 +4,13 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;
-
 import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFileEncoding;
 
 /** Test, ob Scheduler Log-Dateien vorübergehend schließt, wenn mehr Logs als festgelegt geschrieben werden.
@@ -43,7 +43,7 @@ public final class JS611IT extends SchedulerTest {
         //TODO  Jetzt die close_file-Zeilen pro Auftrag zählen. Sollte ab 51 Logs mehr als eine pro Auftrag sein. Aber 25 Tasks brauchen mehrere Gigabyte Adressraum ...
     }
 
-    @EventHandler public void handle(OrderFinishedEvent e) {
+    @EventHandler public void handle(KeyedEvent<OrderFinished> g) {
         finishedOrderCount += 1;
         if (finishedOrderCount == maxOrderCount)
             controller().terminateScheduler();

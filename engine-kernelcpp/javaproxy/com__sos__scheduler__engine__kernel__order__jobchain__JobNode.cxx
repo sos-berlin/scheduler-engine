@@ -17,6 +17,7 @@ struct JobNode__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Method const __constructor____method;
     ::zschimmer::javabridge::Method const _onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method;
+    ::zschimmer::javabridge::Method const _orderCount____method;
     ::zschimmer::javabridge::Method const _orderStateTransitionToState__J__method;
     ::zschimmer::javabridge::Method const _processConfigurationDomElement__Lorg_w3c_dom_Element_2__method;
 
@@ -29,6 +30,7 @@ JobNode__class::JobNode__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor____method(this, "<init>", "()V")
     ,_onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method(this, "onOrderStepEnded", "(Lcom/sos/scheduler/engine/kernel/order/Order;I)V")
+    ,_orderCount____method(this, "orderCount", "()I")
     ,_orderStateTransitionToState__J__method(this, "orderStateTransitionToState", "(J)Ljava/lang/String;")
     ,_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method(this, "processConfigurationDomElement", "(Lorg/w3c/dom/Element;)V"){}
 
@@ -65,6 +67,12 @@ void JobNode::onOrderStepEnded(const ::zschimmer::javabridge::proxy_jobject< ::j
     parameter_list._jvalues[1].i = p1;
     JobNode__class* cls = _class.get();
     cls->_onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method.call(get_jobject(), parameter_list);
+}
+
+jint JobNode::orderCount() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    JobNode__class* cls = _class.get();
+    return cls->_orderCount____method.int_call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String JobNode::orderStateTransitionToState(jlong p0) const {

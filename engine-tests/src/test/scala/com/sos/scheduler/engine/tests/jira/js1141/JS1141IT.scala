@@ -3,9 +3,9 @@ package com.sos.scheduler.engine.tests.jira.js1141
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
+import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.runJob
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -54,19 +54,19 @@ final class JS1141IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job is older than include" in {
-    eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
+    eventBus.awaiting[FileBasedActivated.type](TestJobPath) {
       modifyIncludes(+1)
       Thread.sleep(2500)
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
     }
     runJob(TestJobPath)
   }
 
   "Job is newer than include" in {
-    eventBus.awaitingKeyedEvent[FileBasedActivatedEvent](TestJobPath) {
+    eventBus.awaiting[FileBasedActivated.type](TestJobPath) {
       modifyIncludes(-1)
       Thread.sleep(2500)
-      instance[FolderSubsystem].updateFolders()
+      instance[FolderSubsystemClient].updateFolders()
     }
     runJob(TestJobPath)
   }

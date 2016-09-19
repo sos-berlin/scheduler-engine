@@ -21,6 +21,7 @@ struct Java_subsystem_interface : Object, Subsystem
     virtual PluginSubsystemJ&   pluginSubsystemJ            ()                                      = 0;
   //virtual const PlatformJ&    platformJ                   () const                                = 0;
     virtual xml::Element_ptr    dom_element                 (const xml::Document_ptr&)              = 0;
+    virtual void                on_scheduler_loaded         ()                                      = 0;
     virtual void                on_scheduler_activated      ()                                      = 0;
 
     static string               classname_of_scheduler_object(const string&);

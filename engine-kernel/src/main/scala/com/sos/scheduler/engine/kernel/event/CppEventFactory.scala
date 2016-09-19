@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.{AbstractEvent, Event}
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedAddedEvent, FileBasedRemovedEvent, FileBasedReplacedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosedEvent, TaskEndedEvent, TaskId, TaskStartedEvent}
-import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
+import com.sos.scheduler.engine.data.jobchain.NodeId
+import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.event.CppEventCode._
@@ -14,69 +15,69 @@ import com.sos.scheduler.engine.kernel.order.Order
 
 @ForCpp object CppEventFactory {
 
-  private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): Event = {
+  private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): AnyKeyedEvent = {
     cppEventCode match {
-      case `fileBasedActivatedEvent` =>
-        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].path)
+      case `fileBasedActivatedEvent` ⇒
+        KeyedEvent(FileBasedActivated)(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedAddedEvent` =>
-        new FileBasedAddedEvent(eventSource.asInstanceOf[FileBased].path)
+        KeyedEvent(FileBasedAdded)(eventSource.asInstanceOf[FileBased].path)
 
-      case `fileBasedRemovedEvent` =>
-        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].path)
+      case `fileBasedRemovedEvent` ⇒
+        KeyedEvent(FileBasedRemoved)(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedReplacedEvent` =>
-        new FileBasedReplacedEvent(eventSource.asInstanceOf[FileBased].path)
+        KeyedEvent(FileBasedReplaced)(eventSource.asInstanceOf[FileBased].path)
 
-      case `taskStartedEvent` =>
+      case `taskStartedEvent` ⇒
         val task = eventSource.asInstanceOf[Task]
-        new TaskStartedEvent(task.id, task.job.path)
+        KeyedEvent(TaskStarted)(task.taskKey)
 
       case `taskClosedEvent` =>
         val task = eventSource.asInstanceOf[Task]
-        new TaskClosedEvent(task.id, task.job.path)
+        KeyedEvent(TaskClosed)(task.taskKey)
 
-      case `orderTouchedEvent` =>
-        new OrderTouchedEvent(eventSource.asInstanceOf[Order].key)
+      case `orderTouchedEvent` ⇒
+        KeyedEvent(OrderStarted)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderFinishedEvent` =>
+      case `orderFinishedEvent` ⇒
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderFinishedEvent(eventSource.asInstanceOf[Order].key, order.state)
+        KeyedEvent(OrderFinished(order.nodeId))(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderNestedTouchedEvent` =>
-        new OrderNestedTouchedEvent(eventSource.asInstanceOf[Order].key)
+      case `orderNestedTouchedEvent` ⇒
+        KeyedEvent(OrderNestedStarted)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderNestedFinishedEvent` =>
-        new OrderNestedFinishedEvent(eventSource.asInstanceOf[Order].key)
+      case `orderNestedFinishedEvent` ⇒
+        KeyedEvent(OrderNestedFinished)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderSuspendedEvent` =>
-        new OrderSuspendedEvent(eventSource.asInstanceOf[Order].key)
+      case `orderSuspendedEvent` ⇒
+        KeyedEvent(OrderSuspended)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderResumedEvent` =>
-        new OrderResumedEvent(eventSource.asInstanceOf[Order].key)
+      case `orderResumedEvent` ⇒
+        KeyedEvent(OrderResumed)(eventSource.asInstanceOf[Order].orderKey)
 
-      case `orderSetBackEvent` =>
+      case `orderSetBackEvent` ⇒
         val order = eventSource.asInstanceOf[Order]
-        new OrderSetBackEvent(order.key, order.state)
+        KeyedEvent(OrderSetBack(order.nodeId))(order.orderKey)
 
-      case `orderStepStartedEvent` =>
+      case `orderStepStartedEvent` ⇒
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderStepStartedEvent(order.key, order.state, order.taskId getOrElse TaskId.Null)
+        KeyedEvent(OrderStepStarted(order.nodeId, order.taskIdOption getOrElse TaskId.Null))(order.orderKey)
 
-      case o =>
+      case o ⇒
         sys.error(s"Not implemented cppEventCode=$o")
     }
   }
 
-  @ForCpp def newLogEvent(cppLevel: Int, message: String): AbstractEvent =
-    LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message)
+  @ForCpp def newLoggedEvent(cppLevel: Int, message: String): AnyKeyedEvent =
+    KeyedEvent(Logged(SchedulerLogLevel.ofCpp(cppLevel), message))
 
-  @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousState: String, state: String): AbstractEvent =
-    OrderStateChangedEvent(OrderKey(jobChainPath, orderId), previousState = OrderState(previousState), state = OrderState(state))
+  @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AnyKeyedEvent =
+    KeyedEvent(OrderNodeChanged(nodeId = NodeId(nodeId), fromNodeId = NodeId(previousNodeId)))(OrderKey(jobChainPath, orderId))
 
-  @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Long): AbstractEvent =
-    OrderStepEndedEvent(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppInternalValue(orderStateTransitionCpp))
+  @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, nodeTransitionCpp: Long): AnyKeyedEvent =
+    KeyedEvent(OrderStepEnded(OrderNodeTransition.ofCppInternalValue(nodeTransitionCpp)))(OrderKey(jobChainPath, orderId))
 
-  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AbstractEvent =
-    TaskEndedEvent(TaskId(taskId), JobPath(jobPath), ReturnCode(returnCode))
+  @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AnyKeyedEvent =
+    KeyedEvent(TaskEnded(ReturnCode(returnCode)))(TaskKey(JobPath(jobPath), TaskId(taskId)))
 }

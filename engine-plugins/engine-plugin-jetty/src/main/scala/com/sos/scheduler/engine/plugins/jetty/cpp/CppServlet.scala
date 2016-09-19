@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
-import CppServlet._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, DisposableCppProxyRegister}
-import com.sos.scheduler.engine.kernel.scheduler.{SchedulerIsClosed, SchedulerHttpService}
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.scheduler.{SchedulerHttpService, SchedulerIsClosed}
+import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet._
+import javax.inject.{Inject, Singleton}
 import javax.servlet.http.HttpServletResponse.SC_MOVED_PERMANENTLY
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -14,6 +14,7 @@ final class CppServlet @Inject private(
     schedulerHttpService: SchedulerHttpService,
     cppProxyRegister: DisposableCppProxyRegister,
     schedulerIsClosed: SchedulerIsClosed)
+  (implicit schedulerThreadCallQueue: SchedulerThreadCallQueue)
   extends HttpServlet {
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {

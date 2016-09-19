@@ -6,16 +6,15 @@ import com.sos.scheduler.engine.data.order.OrderPersistentState
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.order.OrderPersistence._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
+import java.time.Instant
 import java.time.Instant.now
 import java.time.ZoneOffset.UTC
 import java.time.format.DateTimeFormatter
-import java.time.{ZoneId, Instant}
 
 trait OrderPersistence {
   this: Order =>
 
   protected val cppProxy: OrderC
-  protected val subsystem: StandingOrderSubsystem
 
   import subsystem.{entityManagerFactory, orderStore}
 
@@ -32,8 +31,8 @@ trait OrderPersistence {
     occupyingClusterIdOption = None, //if (jobChain.isDistributed) Some(orderSubsystem.clusterMemberId) else None,
     priority = priority,
     ordering = nextOrderingNumber(),
-    stateOption = Some(state),
-    initialStateOption = Some(initialState),
+    nodeIdOption = Some(nodeId),
+    initialNodeIdOption = Some(initialNodeId),
     title = title.take(titleColumnSize),
     creationTimestampOption = createdAtOption,
     modificationTimestampOption = Some(now),

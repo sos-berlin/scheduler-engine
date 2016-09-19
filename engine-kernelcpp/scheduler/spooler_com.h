@@ -166,6 +166,11 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     int64                       get_int64                   ( const string& name, int64 deflt ) const;
     bool                        get_bool                    ( const string& name, bool deflt ) const;
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
+   
+    bool contains(const Bstr& name) {
+        return _map.find(name) != _map.end();
+    }
+
     ArrayListJ java_names() const; 
     void                        merge                       ( const Ivariable_set* );
     ptr<Com_variable_set>       clone                       ();

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js616
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js616.JS616IT._
 import org.joda.time.DateTimeZone
@@ -23,7 +23,7 @@ final class JS616IT extends FunSuite with ScalaSchedulerTest {
             <at at={ISODateTimeFormat.dateHourMinuteSecond.withZone(DateTimeZone.getDefault).print(t)}/>
           </run_time>
         </job>
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == shellOrderKey }
+      eventPipe.next[OrderFinished](shellOrderKey)
     }
   }
 }

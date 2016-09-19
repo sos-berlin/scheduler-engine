@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.scheduler.job.javaoptions
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosed}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.util.Sockets.findAvailablePort
@@ -33,8 +33,8 @@ final class JavaOptionsIT extends FunSuite with ScalaSchedulerTest {
 
   private def runJob(j: JobPath): Unit = {
     scheduler executeXml <start_job job={j.string}/>
-    eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
-    instance[VariableSet].apply(j.name +".myJavaOption") should equal ("TEST")
+    eventPipe.nextWhen[TaskClosed.type] { _.key.jobPath == j }
+    instance[SchedulerVariableSet].apply(j.name +".myJavaOption") should equal ("TEST")
   }
 }
 

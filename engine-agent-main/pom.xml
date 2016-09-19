@@ -83,7 +83,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                                <descriptor>src/assembly/bin.xml</descriptor>
                             </descriptors>
                             <archive>
                                 <manifest>

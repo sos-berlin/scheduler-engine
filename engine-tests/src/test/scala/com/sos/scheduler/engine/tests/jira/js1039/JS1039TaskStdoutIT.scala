@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{runJob, writeConfigurationFile}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -29,7 +29,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"))
-  private lazy val schedulerVariables = instance[VariableSet]
+  private lazy val schedulerVariables = instance[SchedulerVariableSet]
 
   private lazy val jobResults: Map[JobPath, JobResult] = {
     (JobSettings map { _.jobPath } map { jobPath =>

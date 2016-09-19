@@ -11,7 +11,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private TaskCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.TaskC$.MODULE$.sisterType().sister(this, context));
     }
 
     @Override public int id() {
@@ -26,6 +26,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native int id__native(long cppReference);
+
+
+    @Override public boolean is_waiting_for_remote_scheduler() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_waiting_for_remote_scheduler__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_waiting_for_remote_scheduler__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job() {
@@ -124,11 +138,25 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
 
 
-    @Override public java.lang.String process_class_path() {
+    @Override public long processStartedAt() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = process_class_path__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
+            return processStartedAt__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long processStartedAt__native(long cppReference);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Process_classC process_class_or_null() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Process_classC result = process_class_or_null__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Process_classC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -137,7 +165,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
         }
     }
 
-    private static native java.lang.String process_class_path__native(long cppReference);
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Process_classC process_class_or_null__native(long cppReference);
 
 
     @Override public java.lang.String remote_scheduler_address() {
@@ -202,6 +230,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native java.lang.String stdout_path__native(long cppReference);
+
+
+    @Override public long stepOrProcessStartedAt() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return stepOrProcessStartedAt__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long stepOrProcessStartedAt__native(long cppReference);
 
 
     // </editor-fold>

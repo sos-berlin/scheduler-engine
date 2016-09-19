@@ -9,12 +9,13 @@ import java.util.concurrent.atomic.AtomicReference;
 /** Der Scheduler in einem eigenen Thread. */
 class SchedulerThread extends Thread {
     private final SchedulerControllerBridge controllerBridge;
-    private final CppScheduler cppScheduler = new CppScheduler();
+    private final CppScheduler cppScheduler;
     private ImmutableList<String> arguments = null;
     private final AtomicReference<Integer> exitCodeAtom = new AtomicReference<Integer>();
 
     SchedulerThread(SchedulerControllerBridge controllerBridge) {
         this.controllerBridge = controllerBridge;
+        cppScheduler = new CppScheduler(controllerBridge.isCppThreadRequired());
         setName("JobScheduler Engine");
     }
 

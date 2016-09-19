@@ -103,10 +103,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     };
 
     Configuration              _config;
-
-
     Lock_mode                  _lock_mode;                  // Nur gültig, wenn !_holder_set.empty()
-    State                      _state;
 
     typedef stdext::hash_set<Use*>             Use_set;
     typedef stdext::hash_map<Holder*,Use_set>  Holder_map;  
@@ -209,6 +206,7 @@ struct Requestor : Object,
     bool                        locks_are_known             () const;
     bool                        locks_are_available_for_holder( Holder* ) const;
     virtual bool                locks_are_available         () const                                { return locks_are_available_for_holder( (Holder*)NULL ); }
+    vector<string>              unavailable_lock_path_strings(Holder*) const;
     bool                        enqueue_lock_requests       ( Holder* );
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
     Abstract_scheduler_object*           object                      () const                                { return _object; }

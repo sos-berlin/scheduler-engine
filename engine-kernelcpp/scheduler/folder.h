@@ -31,9 +31,8 @@ struct Requisite_path
 
     string                      obj_name                    () const;
 
-
-    File_based_subsystem*      _subsystem;
-    Absolute_path              _path;
+    File_based_subsystem* const _subsystem;
+    Absolute_path const         _path;
 };
 
 //----------------------------------------------------------------------------------------Dependant
@@ -47,7 +46,8 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     void                        remove_requisite            ( const Requisite_path& );
     bool                        requisite_is_registered     ( const Requisite_path& );
     void                        remove_requisites           ();
-    list<Requisite_path>        missing_requisites          ();
+    virtual list<Requisite_path> missing_requisites         ();
+    vector<string>              missing_requisites_java     ();
     void                        add_accompanying_dependant   ( Dependant* );
     void                        remove_accompanying_dependant( Dependant* );
 
@@ -196,7 +196,7 @@ struct File_based : Abstract_scheduler_object,
     bool                        is_in_folder                () const                                { return _typed_folder != NULL; }
     Typed_folder*               typed_folder                () const                                { return _typed_folder; }
     Folder*                     folder                      () const;
-    bool                        has_base_file               () const                                { return _base_file_info._filename != ""; }
+    bool                        has_base_file               () const                                { return !_base_file_info._filename.empty(); }
     bool                        is_file_based               () const                                { return _base_file_info._last_write_time != 0; }  // Verteilte Aufträge können dateibasiert, aber auf einem Scheduler ohne Datei sein.
     const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
     bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
@@ -210,6 +210,11 @@ struct File_based : Abstract_scheduler_object,
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     void                        fix_name                    ()                                      { _name_is_fixed = true; }
+    
+    bool name_is_fixed() const { 
+        return _name_is_fixed; 
+    }
+
     Absolute_path               path                        () const;
     Absolute_path               path_or_empty               () const;
     string                      string_path                 () const                                { return path().with_slash(); }
@@ -223,6 +228,7 @@ struct File_based : Abstract_scheduler_object,
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
+    string                      file_based_error_string     () const                                { return _base_file_xc.what(); }
     bool                        is_file_based_reread        () const                                { return _reread; }
     bool                        is_loaded                   () const                                { return _state >= s_loaded  &&  _state < s_closed; }
 
@@ -234,6 +240,9 @@ struct File_based : Abstract_scheduler_object,
 
     void                    set_replacement                 ( File_based* );
     File_based*                 replacement                 () const                                { return _replacement; }
+    javabridge::Lightweight_jobject replacement_java() {
+        return _replacement ? _replacement->java_sister() : NULL;
+    }
 
     void                    set_typed_folder                ( Typed_folder* );                      // Nur für Typed_folder!
     void                    set_folder_path                 ( const Absolute_path& );

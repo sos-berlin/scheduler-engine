@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js846
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js846.JS846IT._
 import org.junit.runner.RunWith
@@ -17,7 +17,7 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
       val eventPipe = controller.newEventPipe()
       val longTitle = "x" * titleLength
       scheduler executeXml <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string} title={longTitle}/>
-      eventPipe.nextWithCondition { e: OrderFinishedEvent => e.orderKey == orderKey }
+      eventPipe.next[OrderFinished](orderKey)
     }
   }
 
@@ -25,7 +25,7 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
     val orderKey = jobChainPath.orderKey("1")
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} suspended="false"/>
-    eventPipe.nextWithCondition { e: OrderFinishedEvent => e.orderKey == orderKey }
+    eventPipe.next[OrderFinished](orderKey)
   }
 }
 

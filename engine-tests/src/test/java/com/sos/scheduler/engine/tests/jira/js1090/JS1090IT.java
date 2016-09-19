@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.tests.jira.js1090;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.jobchain.JobChainPath;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.JobPath;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
 import java.io.File;
-
+import org.junit.Test;
 import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -39,8 +38,8 @@ public final class JS1090IT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleEvent(OrderFinishedEvent e) {
-        scheduler().terminate();
+    public void handleEvent(KeyedEvent<OrderFinished> g) {
+        controller().terminateScheduler();
         logFileContent = controller().environment().taskLogFileString(jobPath);
     }
 }

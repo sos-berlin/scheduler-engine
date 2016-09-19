@@ -28,14 +28,14 @@ public final class TestCppBinaries {
     private TestCppBinaries() {}
 
     public static CppBinaries cppBinaries(CppBinariesDebugMode debugMode) {
-        return debugMode == CppBinariesDebugMode.debug? debugCppBinaries.get() : releaseCppBinaries.get();
+        return debugMode == CppBinariesDebugMode.Debug? debugCppBinaries.get() : releaseCppBinaries.get();
     }
 
     private static final Lazy<CppBinaries> debugCppBinaries = new Lazy<CppBinaries>() {
-        @Override protected CppBinaries compute() { return newCppBinaries(CppBinariesDebugMode.debug); }
+        @Override protected CppBinaries compute() { return newCppBinaries(CppBinariesDebugMode.Debug); }
     };
     private static final Lazy<CppBinaries> releaseCppBinaries = new Lazy<CppBinaries>() {
-        @Override protected CppBinaries compute() { return newCppBinaries(CppBinariesDebugMode.release); }
+        @Override protected CppBinaries compute() { return newCppBinaries(CppBinariesDebugMode.Release); }
     };
 
     private static CppBinaries newCppBinaries(CppBinariesDebugMode debugMode) {

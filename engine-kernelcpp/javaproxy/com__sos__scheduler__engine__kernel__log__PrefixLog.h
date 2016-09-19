@@ -11,6 +11,7 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Scheduler; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -52,7 +53,7 @@ struct PrefixLog : ::zschimmer::javabridge::proxy_jobject< PrefixLog >, ::javapr
 
     void onClosed() const;
     void onLogged() const;
-    void onStarted() const;
+    void onStarted(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler >& p0) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

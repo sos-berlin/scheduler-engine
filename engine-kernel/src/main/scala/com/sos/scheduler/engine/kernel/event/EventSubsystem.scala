@@ -1,28 +1,20 @@
 package com.sos.scheduler.engine.kernel.event
 
-import EventSubsystem._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.AbstractEvent
-import com.sos.scheduler.engine.eventbus.EventSource
-import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.data.event.AnyKeyedEvent
+import com.sos.scheduler.engine.eventbus.{EventSource, SchedulerEventBus}
+import com.sos.scheduler.engine.kernel.event.EventSubsystem._
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Inject, Singleton}
 
 @ForCpp @Singleton
-final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
+private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
 
-  /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event]],
-    *         weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AbstractEvent): Unit = {
+  /** @param e [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]] statt [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]],
+    *          weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+  @ForCpp private def report(e: AnyKeyedEvent): Unit = {
     eventBus.publish(e)
-  }
-
-  /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtigt.]]
-    * @param eventSource { @link Object} statt { @link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-  @ForCpp private def report(e: AbstractEvent, eventSource: AnyRef): Unit = {
-    eventBus.publish(e, eventSource.asInstanceOf[EventSource])
   }
 
   @ForCpp private def checkNumberOfEventCodes(count: Int): Unit = {
@@ -33,7 +25,7 @@ final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends 
     try {
       val o = eventSource.asInstanceOf[EventSource]
       val e = CppEventFactory.newInstance(CppEventCode.values()(cppEventCode), o)
-      eventBus.publish(e, tryUnmodifiableEventSource(e, o))
+      eventBus.publish(e)
     }
     catch {
       case x: Exception => logger.error(s"EventSubsystem.reportEventClass($cppEventCode):", x)

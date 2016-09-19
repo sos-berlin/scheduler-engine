@@ -1,12 +1,17 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
+import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import spray.http.HttpHeaders.Accept
-import spray.http.MediaRange
+import spray.http.HttpMethods.GET
 import spray.http.MediaTypes.`text/html`
-import spray.httpx.marshalling.ToResponseMarshallable
+import spray.http.StatusCodes._
+import spray.http.{HttpRequest, MediaRange, Uri}
+import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
+import spray.httpx.marshalling.ToResponseMarshaller
 import spray.routing.Directives._
 import spray.routing._
 
@@ -15,32 +20,130 @@ import spray.routing._
   */
 object HtmlDirectives {
 
-  def completeTryHtml[A](resultFuture: ⇒ Future[A])(
+  /**
+    * If HTML is requested, path ends with slash and request has no query, then redirect to path without slash, in case of typo.
+    */
+  def pathEndRedirectToSlash(webServiceContext: WebServiceContext): Route =
+    pathEnd {
+      redirectEmptyQueryBy(webServiceContext, path ⇒ Uri.Path(path.toString + "/"))
+    }
+
+  /**
+    * If HTML is requested, path ends with slash and request has no query, then redirect to path without slash, in case of typo.
+    */
+  def pathEndElseRedirect(webServiceContext: WebServiceContext): Directive0 =
+    mapInnerRoute { route ⇒
+      pathEnd {
+        route
+      } ~
+      pathSingleSlash {
+        htmlPreferred(webServiceContext) {
+          get {
+            requestInstance { request ⇒
+              passIf(request.uri.query == Uri.Query.Empty) {
+                val withoutSlash = request.uri.copy(
+                  scheme = "",
+                  authority = Uri.Authority.Empty,
+                  path = Uri.Path(request.uri.path.toString stripSuffix "/"))
+                redirect(withoutSlash, TemporaryRedirect)
+              }
+            }
+          }
+        }
+      }
+    }
+
+  /**
+    * If HTML is requested, trailing slash is missing and request has no query, then redirect to trailing slash, in case of typo.
+    */
+  def testSlash(webServiceContext: WebServiceContext): Directive0 =
+    mapInnerRoute { route ⇒
+      redirectToSlash(webServiceContext) ~
+      unmatchedPath {
+        case path: Uri.Path.Slash ⇒ route
+        case _ ⇒ reject
+      }
+    }
+
+  /**
+    * If HTML is requested, trailing slash is missing and request has no query, then redirect to trailing slash, in case of typo.
+    */
+  def redirectToSlash(webServiceContext: WebServiceContext): Route =
+    pathEnd {
+      htmlPreferred(webServiceContext) {  // The browser user may type "api/"
+        requestInstance { request ⇒
+          passIf(request.uri.query == Uri.Query.Empty) {
+            val withSlash = request.uri.copy(
+              scheme = "",
+              authority = Uri.Authority.Empty,
+              path = Uri.Path(request.uri.path.toString + "/"))
+            redirect(withSlash, TemporaryRedirect)
+          }
+        }
+      }
+    }
+
+  /**
+    * If HTML is requested and request has no query, then redirect according to `changePath`, in case of user typo.
+    */
+  def redirectEmptyQueryBy(webServiceContext: WebServiceContext, changePath: Uri.Path ⇒ Uri.Path): Route =
+    htmlPreferred(webServiceContext) {
+      get {
+        requestInstance { request ⇒
+          if (request.uri.query == Uri.Query.Empty) {
+            redirect(
+              request.uri.copy(
+                scheme = "",
+                authority = Uri.Authority.Empty,
+                path = changePath(request.uri.path)),
+              TemporaryRedirect)
+          } else
+            reject
+        }
+      }
+    }
+
+  trait ToHtmlPage[A] {
+    def apply(a: A, pageUri: Uri): Future[HtmlPage]
+  }
+
+  object ToHtmlPage {
+    def apply[A](body: (A, Uri) ⇒ Future[HtmlPage]) =
+      new ToHtmlPage[A] {
+        def apply(a: A, uri: Uri) = body(a, uri)
+      }
+  }
+
+  def completeTryHtml[A](snapshotFuture: ⇒ Future[Snapshot[A]])(
     implicit
-      toHtmlPage: A ⇒ Future[HtmlPage],
+      toHtmlPage: ToHtmlPage[Snapshot[A]],
+      toResponseMarshaller: ToResponseMarshaller[Snapshot[A]],
       webServiceContext: WebServiceContext,
-      ec: ExecutionContext,
-      toResponseMarshallable: A ⇒ ToResponseMarshallable): Route
+      executionContext: ExecutionContext): Route
   =
     htmlPreferred(webServiceContext) {
-      complete(resultFuture flatMap toHtmlPage)
+      requestUri { uri ⇒
+        complete {
+          for (snapshot ← snapshotFuture) yield
+            toHtmlPage(snapshot, uri)
+        }
+      }
     } ~
-      complete(resultFuture map toResponseMarshallable)
+      complete(snapshotFuture)
 
   def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒
-      if (webServiceContext.htmlEnabled)
-        requestInstance { request ⇒
-          if (request.header[Accept] exists { o ⇒ isHtmlPreferred(o.mediaRanges) })
-            handleRejections(RejectionHandler.Default) {
-              route
-            }
-          else
-            reject
+      requestInstance { request ⇒
+        passIf(webServiceContext.htmlEnabled && request.method == GET && isHtmlPreferred(request)) {
+          handleRejections(RejectionHandler.Default) {
+            route
+          }
         }
-      else
-        reject
+      }
     }
+
+  private def isHtmlPreferred(request: HttpRequest): Boolean =
+    request.header[Accept] exists { o ⇒ isHtmlPreferred(o.mediaRanges) }
 
   /**
     * Workaround for Spray 1.3.3, which weights the MediaType ordering of the UnMarshaller over the (higher) weight of more specific MediaRange.

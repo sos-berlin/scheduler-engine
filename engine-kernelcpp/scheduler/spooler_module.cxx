@@ -696,7 +696,7 @@ void Module_instance::fill_process_environment()
             _process_environment->set_var( "SCHEDULER_JOB_CHAIN_CONFIGURATION_DIRECTORY", 
                 order->job_chain() && order->job_chain()->has_base_file()? order->job_chain()->base_file_info()._path.directory() : File_path()  );  // Directory for the job_chain configuration file should dynamic configuration from hot folders be used (for jobs with order=yes)
             _process_environment->set_var( "SCHEDULER_ORDER_ID" , order->string_id() );
-            _process_environment->set_var( "SCHEDULER_ORDER_HISTORY_ID" , order->history_id());
+            _process_environment->set_var( "SCHEDULER_ORDER_HISTORY_ID", as_string(order->history_id()));
         }
     }
 }

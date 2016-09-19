@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1256.JS1256IT._
 import java.io.{File, RandomAccessFile}
@@ -26,7 +26,7 @@ final class JS1256IT extends FreeSpec with ScalaSchedulerTest {
       allocateFile(bigFile, FileSize)
       withEventPipe { eventPipe ⇒
         scheduler executeXml JobChainElem(directory)
-        eventPipe.nextKeyed[OrderFinishedEvent](TestJobChainPath.orderKey(bigFile.getPath))
+        eventPipe.next[OrderFinished](TestJobChainPath.orderKey(bigFile.getPath))
         bigFile should not be 'exists
       }
     }

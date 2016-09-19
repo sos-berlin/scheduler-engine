@@ -114,19 +114,11 @@ Scheduler_object::~Scheduler_object()
 
 //-------------------------------------------------------------------Scheduler_object::report_event
 
-void Scheduler_object::report_event(const AbstractEventJ& e)
+void Scheduler_object::report_event(const KeyedEventJ& e)
 {
     if (Spooler* sp = spooler())
         if (Event_subsystem* s = sp->event_subsystem()) 
             s->report(e);
-}
-
-//-------------------------------------------------------------------Scheduler_object::report_event
-
-void Scheduler_object::report_event(const AbstractEventJ& e, const ObjectJ& eventSource) {
-    if (Spooler* sp = spooler())
-        if (Event_subsystem* s = sp->event_subsystem()) 
-            s->report(e, eventSource);
 }
 
 //-------------------------------------------------------------------Scheduler_object::report_event

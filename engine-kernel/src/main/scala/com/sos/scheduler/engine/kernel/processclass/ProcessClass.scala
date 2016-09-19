@@ -3,13 +3,14 @@ package com.sos.scheduler.engine.kernel.processclass
 import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobPath, ProcessClassOverview, TaskId}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassObstacle, ProcessClassPath}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -26,34 +27,36 @@ import scala.math.max
 @ForCpp
 final class ProcessClass private(
   protected[this] val cppProxy: Process_classC,
-  protected val subsystem: ProcessClassSubsystem,
+  protected[kernel] val subsystem: ProcessClassSubsystem,
   callQueue: SchedulerThreadCallQueue,
   newCppHttpRemoteApiProcessClient: CppHttpRemoteApiProcessClient.Factory,
   /** Verzögerung für nicht erreichbare Agents - erst nach Scheduler-Aktivierung (Settings::freeze) nutzbar. */
   val agentConnectRetryDelayLazy: () ⇒ Duration)
 extends FileBased {
 
+  protected type Self = ProcessClass
   type ThisPath = ProcessClassPath
 
+  @volatile
   private[this] var _config = Configuration(None, immutable.IndexedSeq())
   private[this] var _failableAgents: FailableCollection[Agent] = null
   private[this] val clients = mutable.HashSet[CppHttpRemoteApiProcessClient]()
 
   def stringToPath(o: String) = ProcessClassPath(o)
 
-  def fileBasedType = FileBasedType.processClass
+  def fileBasedType = FileBasedType.ProcessClass
 
   def onCppProxyInvalidated(): Unit = {
     for (c ← clients) logger.error(s"CppHttpRemoteApiProcessClient has not been removed: $c")
   }
 
   @ForCpp
-  def processConfigurationDomElement(element: dom.Element): Unit = {
+  private def processConfigurationDomElement(element: dom.Element): Unit = {
     changeConfiguration(Configuration.parse(element))
   }
 
   @ForCpp
-  def replaceWith(other: ProcessClass): Unit = {
+  private def replaceWith(other: ProcessClass): Unit = {
     changeConfiguration(other.config)
   }
 
@@ -74,10 +77,10 @@ extends FileBased {
   }
 
   @ForCpp
-  def hasMoreAgents = config.moreAgents.nonEmpty
+  private def hasMoreAgents = config.moreAgents.nonEmpty
 
   @ForCpp
-  def startCppHttpRemoteApiProcessClient(
+  private def startCppHttpRemoteApiProcessClient(
     conf: Api_process_configurationC,
     schedulerApiTcpPort: Int,
     warningCall: CppCall,
@@ -90,13 +93,36 @@ extends FileBased {
   }
 
   @ForCpp
-  def removeCppHttpRemoteApiProcessClient(client: CppHttpRemoteApiProcessClient): Unit = {
+  private def removeCppHttpRemoteApiProcessClient(client: CppHttpRemoteApiProcessClient): Unit = {
     try client.close()
     finally clients -= client
   }
 
-  override def overview = ProcessClassOverview(path, fileBasedState,
-    processLimit = cppProxy.max_processes, usedProcessCount = cppProxy.used_process_count)
+  private[kernel] def overview =
+    ProcessClassOverview(
+      path,
+      fileBasedState,
+      processLimit = processLimit,
+      usedProcessCount = usedProcessCount,
+      obstacles = obstacles
+    )
+
+  private[kernel] def obstacles: Set[ProcessClassObstacle] = {
+    import ProcessClassObstacle._
+    val builder = Set.newBuilder[ProcessClassObstacle]
+    emptyToNone(fileBasedObstacles) match {
+      case Some(o) ⇒
+        builder += FileBasedObstacles(o)
+      case None ⇒
+        if (usedProcessCount >= processLimit) {
+          builder += ProcessLimitReached(processLimit)
+        }
+    }
+    builder.result
+  }
+
+  private def processLimit: Int = cppProxy.max_processes
+  private def usedProcessCount: Int = cppProxy.used_process_count
 
   def agents: immutable.Seq[Agent] = config.agents
 

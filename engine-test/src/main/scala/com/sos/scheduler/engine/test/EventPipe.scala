@@ -1,13 +1,11 @@
 package com.sos.scheduler.engine.test
 
 import com.google.common.collect.HashMultiset
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Event}
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
 import com.sos.scheduler.engine.test.EventPipe._
@@ -22,15 +20,15 @@ import scala.reflect.ClassTag
 final class EventPipe(eventBus: SchedulerEventBus, defaultTimeout: Duration)
 extends EventHandlerAnnotated with HasCloser {
 
-  private val queue = new LinkedBlockingQueue[Event]
+  private val queue = new LinkedBlockingQueue[AnyKeyedEvent]
 
   closeOnError(closer) {
     eventBus.on[Event] { case e ⇒ queue.add(e) }
   }
 
-  def nextKeyedEvents[E <: KeyedEvent : ClassTag](orderKeys: Iterable[OrderKey]): immutable.Seq[E] = {
-    val remainingKeys = HashMultiset.create(asJavaIterable(orderKeys))
-    val events = mutable.Buffer[E]()
+  def next[E <: Event: ClassTag](keys: Iterable[E#Key]): immutable.Seq[KeyedEvent[E]] = {
+    val remainingKeys = HashMultiset.create(asJavaIterable(keys))
+    val events = mutable.Buffer[KeyedEvent[E]]()
     while (!remainingKeys.isEmpty) {
       val e = nextAny[E]
       if (remainingKeys.remove(e.key)) {
@@ -40,42 +38,35 @@ extends EventHandlerAnnotated with HasCloser {
     events.toVector
   }
 
-  def nextAny[E <: Event : ClassTag]: E = next[E]()
+  def next[E <: Event: ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
+    nextEvent[E](_.key == key, timeout).event
 
-  def nextKeyed[E <: KeyedEvent : ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
-    next[E]({ e: E ⇒ e.key == key }, timeout)
+  def nextWhen[E <: Event : ClassTag](predicate: KeyedEvent[E] ⇒ Boolean, timeout: Duration = defaultTimeout): KeyedEvent[E] =
+    nextEvent[E](predicate, timeout)
 
-  def nextWithCondition[E <: Event : ClassTag](condition: E ⇒ Boolean): E =
-    next[E](condition, defaultTimeout)
+  def nextAny[E <: Event: ClassTag]: KeyedEvent[E] =
+    nextEvent[E]()
 
-  def nextWithTimeoutAndCondition[E <: Event : ClassTag](timeout: Duration)(condition: E ⇒ Boolean): E =
-    next[E](condition, timeout)
-
-  def next[E <: Event : ClassTag](predicate: E ⇒ Boolean = EveryEvent, timeout: Duration = defaultTimeout): E =
-    nextEvent2(timeout, predicate, implicitClass[E])
-
-  /**
-   * @return All so far queued events of type E.
-   */
-  def queued[E <: Event : ClassTag]: immutable.Seq[E] = {
-    val result = mutable.ListBuffer[E]()
-    try while (true) result += nextEvent2(0.s, EveryEvent, implicitClass[E])
+  def queued[E <: Event: ClassTag]: immutable.Seq[KeyedEvent[E]] = {
+    val result = mutable.ListBuffer[KeyedEvent[E]]()
+    try while (true) result += nextEvent[E](timeout = 0.s)
     catch { case _: TimeoutException ⇒ }
     result.toList
   }
 
-  private def nextEvent2[E <: Event](timeout: Duration, predicate: E ⇒ Boolean, expectedEventClass: Class[E]): E = {
+  private def nextEvent[E <: Event: ClassTag](predicate: KeyedEvent[E] ⇒ Boolean = EveryEvent, timeout: Duration = defaultTimeout): KeyedEvent[E] = {
+    val expectedEventClass = implicitClass[E]
     val until = now() + timeout
     def expectedName = expectedEventClass.getSimpleName
 
-    @tailrec def waitForEvent(): E =
+    @tailrec def waitForEvent(): KeyedEvent[E] =
       tryPoll(until - now()) match {
         case None ⇒
           throw new TimeoutException(s"Expected event '$expectedName' has not arrived within ${timeout.pretty}")
-        case Some(e: TerminatedEvent) ⇒
+        case Some(KeyedEvent(_, e: TerminatedEvent)) ⇒
           sys.error(s"Expected event '$expectedName' has not arrived before ${classOf[TerminatedEvent].getName} has arrived")
-        case Some(e: Event) if (expectedEventClass isAssignableFrom e.getClass) && evalPredicateIfDefined(predicate, e.asInstanceOf[E]) ⇒
-          e.asInstanceOf[E]
+        case Some(e: AnyKeyedEvent) if (expectedEventClass isAssignableFrom e.event.getClass) && evalPredicateIfDefined[E](predicate, e.asInstanceOf[KeyedEvent[E]]) ⇒
+          e.asInstanceOf[KeyedEvent[E]]
         case _ ⇒
           waitForEvent()
       }
@@ -83,21 +74,21 @@ extends EventHandlerAnnotated with HasCloser {
     waitForEvent()
   }
 
-  def poll(t: Duration): Event =
+  def poll(t: Duration): AnyKeyedEvent =
     tryPoll(t) getOrElse sys.error(s"Event has not arrived within ${t.pretty}")
 
-  def tryPoll(t: Duration): Option[Event] =
+  def tryPoll(t: Duration): Option[AnyKeyedEvent] =
     Option(queue.poll(t.toMillis, TimeUnit.MILLISECONDS))
 }
 
 object EventPipe {
-  private val EveryEvent = (_: Event) ⇒ true
+  private val EveryEvent = (_: AnyKeyedEvent) ⇒ true
 
   class TimeoutException(override val getMessage: String) extends RuntimeException
 
-  private def evalPredicateIfDefined[E <: Event](predicate: E ⇒ Boolean, event: E): Boolean =
+  private def evalPredicateIfDefined[E <: Event](predicate: KeyedEvent[E] ⇒ Boolean, event: KeyedEvent[E]): Boolean =
     predicate match {
-      case pf: PartialFunction[E, Boolean] ⇒ PartialFunction.cond(event)(pf)
+      case pf: PartialFunction[KeyedEvent[E], Boolean] ⇒ PartialFunction.cond(event)(pf)
       case _ ⇒ predicate(event)
     }
 }

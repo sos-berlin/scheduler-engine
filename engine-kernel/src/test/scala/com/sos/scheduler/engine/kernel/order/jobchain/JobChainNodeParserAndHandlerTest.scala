@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.xmls.{ScalaXMLEventReader, XmlElemSource}
 import com.sos.scheduler.engine.data.job.ReturnCode
-import com.sos.scheduler.engine.data.order.{ErrorOrderStateTransition, OrderState, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.jobchain.NodeId
+import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler.OrderFunction
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandlerTest._
@@ -25,10 +25,10 @@ final class JobChainNodeParserAndHandlerTest extends FreeSpec {
     System.err.println(JobchainNodeElem.toString)
     val x = new X
     x.initializeWithNodeXml(XmlElemSource(JobchainNodeElem), Map(TestNamespace → testNamespaceParse _).lift)
-    x.orderStateTransitionToState(SuccessOrderStateTransition) shouldEqual State0
-    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(1))) shouldEqual State1
-    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(7))) shouldEqual State7
-    x.orderStateTransitionToState(ErrorOrderStateTransition(ReturnCode(99))) shouldEqual ErrorState
+    x.orderStateTransitionToState(OrderNodeTransition.Success) shouldEqual NodeId0
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(1))) shouldEqual NodeId1
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(7))) shouldEqual NodeId7
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(99))) shouldEqual ErrorNodeId
     x.returnCodeToOrderFunctions(ReturnCode(0)) shouldEqual Nil
     x.returnCodeToOrderFunctions(ReturnCode(1)) shouldEqual Nil
     x.returnCodeToOrderFunctions(ReturnCode(2)) shouldEqual Nil
@@ -38,12 +38,12 @@ final class JobChainNodeParserAndHandlerTest extends FreeSpec {
 }
 
 private object JobChainNodeParserAndHandlerTest {
-  private val CurrentState = OrderState("CURRENT")
-  private val NextState = OrderState("NEXT")
-  private val ErrorState = OrderState("ERROR")
-  private val State0 = OrderState("STATE-0")
-  private val State1 = OrderState("STATE-1")
-  private val State7 = OrderState("STATE-7")
+  private val CurrentNodeId = NodeId("CURRENT")
+  private val NextNodeId = NodeId("NEXT")
+  private val ErrorNodeId = NodeId("ERROR")
+  private val NodeId0 = NodeId("STATE-0")
+  private val NodeId1 = NodeId("STATE-1")
+  private val NodeId7 = NodeId("STATE-7")
   private val TestNamespace = "https://EXAMPLE.COM/TEST"
   private val IgnoredNamespace = "http://EXAMPLE.COM/UNKNOWN"
   private val TestCallbackName = "TEST-CALLBACK"
@@ -55,23 +55,23 @@ private object JobChainNodeParserAndHandlerTest {
         xmlns:Ignored={IgnoredNamespace}>
       <on_return_codes>
         <on_return_code return_code="0">
-          <to_state state={State0.string}/>
+          <to_state state={NodeId0.string}/>
         </on_return_code>
         <on_return_code return_code="1">
           <Ignored:ignored/>
-          <to_state state={State1.string}/>
+          <to_state state={NodeId1.string}/>
         </on_return_code>
         <on_return_code return_code="7">
           <Test:TEST/>
-          <to_state state={State7.string}/>
+          <to_state state={NodeId7.string}/>
         </on_return_code>
       </on_return_codes>
     </job_chain_node>
 
   private class X extends JobChainNodeParserAndHandler {
-    protected def orderState = CurrentState
-    protected def nextState = NextState
-    protected def errorState = ErrorState
+    def nodeId = CurrentNodeId
+    def nextNodeId = NextNodeId
+    def errorNodeId = ErrorNodeId
   }
 
   private def testNamespaceParse(xmlEventReader: XMLEventReader): OrderFunction =

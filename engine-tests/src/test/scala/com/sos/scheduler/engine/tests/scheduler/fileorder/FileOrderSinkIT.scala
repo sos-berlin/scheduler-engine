@@ -5,10 +5,10 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey, OrderState}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{ProcessClassConfiguration, RemoveOrderCommand}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -97,7 +97,7 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
         sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
         val orderKey = TestJobChainPath orderKey file.toString
         controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-340"))) {  // "File still exists. Order has been set on the blacklist"
-          eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+          eventBus.awaiting[OrderFinished](orderKey) {
             touch(file)
           }
         }
@@ -117,12 +117,12 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
       val run = OrderRun(orderKey)
       matchingFile.contentString = content
       val result = run.result await TestTimeout
-      assert(result.state == OrderState("SINK"))   // JS-1627 <file_order_sink> must not changed order state
+      assert(result.nodeId == NodeId("SINK"))   // JS-1627 <file_order_sink> must not changed order nodeId
     }
   }
 
   private def runUntilFileRemovedMessage(orderKey: OrderKey)(body: ⇒ Unit): Unit =
-    eventBus.awaitingEvent[LogEvent](_.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
+    eventBus.awaitingWhen[Logged](_.event.codeOption contains MessageCode("SCHEDULER-981")) { // "File has been removed"
       body
     }
 }

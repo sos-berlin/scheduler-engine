@@ -50,6 +50,9 @@ enum Untouched_is_allowed {
     untouched_allowed = true
 };
 
+
+extern const string scheduler_file_order_path_variable_name;
+
 //---------------------------------------------------------------------------Order_state_transition
 
 struct Order_state_transition { 
@@ -182,6 +185,10 @@ struct Order : Com_order,
     static string               string_id               ( const Id& );
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { return _id == id; }
+    
+    bool id_locked() const {
+        return _id_locked;
+    }
 
     void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  log()->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { return _title; }
@@ -200,10 +207,11 @@ struct Order : Com_order,
 
     Job_chain*                  job_chain               () const;
     Absolute_path               job_chain_path          () const                                    { return _job_chain_path; }
-    string                     job_chain_path_string   () const                                    { return _job_chain_path.with_slash(); }
+    string                      job_chain_path_string   () const                                    { return _job_chain_path.with_slash(); }
     bool                        is_in_job_chain         () const                                    { return !_job_chain_path.empty(); }
     Job_chain*                  job_chain_for_api       () const;
     job_chain::Node*            job_chain_node          () const                                    { return _job_chain_node; }
+    javabridge::Lightweight_jobject java_job_chain_node() const;
     Order_queue*                order_queue             ();
 
     bool                        finished                ();
@@ -216,6 +224,7 @@ struct Order : Com_order,
     Job*                        job                     () const;
 
     void                    set_job_chain_node          ( job_chain::Node*, bool is_error_state = false );
+    void                    set_job_chain_node_raw      (job_chain::Node* node)                     { _job_chain_node = node; }
     void                    set_state                   ( const State&, const Time& );
     void                    set_state                   ( const State& );
     void                    set_state1                  ( const State& );
@@ -272,7 +281,7 @@ struct Order : Com_order,
 
     Com_job*                    com_job                 ();
 
-    bool                        suspended               ()                                          { return _suspended; }
+    bool                        suspended               () const                                    { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
     void                    set_ignore_max_orders       (bool b)                                    { _ignore_max_orders = b; }
@@ -280,7 +289,8 @@ struct Order : Com_order,
 
     void                        set_on_blacklist        ();
     void                        remove_from_blacklist   ();
-    bool                        is_on_blacklist         ()                                          { return _is_on_blacklist; }
+    bool                        is_on_blacklist         () const                                    { return _is_on_blacklist; }
+    jlong                       java_fast_flags         () const;
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed( const string& debug_text );
@@ -292,11 +302,11 @@ struct Order : Com_order,
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
     bool                        setback_called          () const                                    { return _setback_called; }
     void                        clear_setback           ( bool keep_setback_count = false );
-    bool                     is_setback                 ()                                          { return _setback_count > 0; }
+    bool                     is_setback                 () const                                    { return _setback_count > 0; }
     int                         setback_count           ()                                          { return _setback_count; }
     void                    set_at                      ( const Time& );
     void                    set_at_after_delay          ( const Time& );
-    Time                        at                      ()                                          { return _setback; }
+    Time                        at                      () const                                    { return _setback; }
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
     void                        activate_schedule       ();
@@ -389,8 +399,8 @@ struct Order : Com_order,
     void on_occupied();
     void on_call(const File_exists_call&);
 
-    string history_id() const {
-        return as_string(_history_id);
+    int history_id() const {
+        return _history_id;
     }
 
     int64 next_step_at_millis() const {
@@ -461,7 +471,8 @@ struct Order : Com_order,
     Time                       _end_time;
 
     bool                       _is_distributed;         // == scheduler_orders.distributed_next_time is not null
-
+    bool mutable               _is_file_order_cached;
+    bool mutable               _is_file_order_cached_value;
 
     // Flüchtige Variablen, nicht für die Datenbank:
 
@@ -497,6 +508,8 @@ struct Order : Com_order,
     bool                       _ignore_max_orders;
     OrderJ                     _typed_java_sister;
     ptr<File_exists_call>      _file_exists_call;
+
+    public: string _java_occupying_cluster_member_id;  // Only temporarly used for java_for_each_distributed_order
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -794,7 +807,7 @@ struct Job_node : Order_queue_node,
     friend struct               order::Job_chain;           // add_job_node()
 
     Fill_zero                  _zero_;
-    Absolute_path              _job_path;
+    Absolute_path const        _job_path;
     Job*                       _job;
     bool                       _on_error_setback;
     bool                       _on_error_suspend;
@@ -941,6 +954,7 @@ struct Job_chain : Com_job_chain,
     bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
 
 
+    list<Requisite_path>        missing_requisites          ();
     void                        fill_holes                  ();
   //bool                        initialize_nested_job_chains();
     bool                        check_nested_job_chains     ();
@@ -962,8 +976,8 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            node_from_state             ( const Order::State& ) const;
     job_chain::Node*            node_from_state_or_null     ( const Order::State& ) const;
     job_chain::Job_node*        node_from_job               ( Job* );
-    ArrayListJ java_nodes();
-    ArrayListJ java_orders();
+    vector<javabridge::Has_proxy*> java_nodes();
+    vector<javabridge::Has_proxy*> java_orders();
 
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
@@ -1101,7 +1115,7 @@ struct Order_queue : Com_order_queue,
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time& now);
-
+      
     job_chain::Order_queue_node* order_queue_node           () const                                { return _order_queue_node; }
     Job_chain*                  job_chain                   () const                                { return _job_chain; }
 
@@ -1215,6 +1229,11 @@ struct Order_subsystem: Object,
     virtual int                 finished_orders_count       () const                                = 0;
     virtual Order_id_spaces_interface* order_id_spaces_interface()                                  = 0;
     virtual Order_id_spaces*    order_id_spaces             ()                                      = 0;
+    virtual const Bstr& scheduler_file_order_path_variable_name_Bstr() const = 0;
+
+    virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, const ArrayListJ& order_ids_j, int per_order_limit, OrderCallbackJ) = 0;
+
+    virtual void                get_statistics              (jintArray) const = 0;
 };
 
 
@@ -1287,7 +1306,8 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
         return _is_activating;
     }
 
-  private:
+    private:
+    Fill_zero _zero_;
     bool _is_activating;
 };
 

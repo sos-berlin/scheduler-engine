@@ -3,23 +3,21 @@ package com.sos.scheduler.engine.tests.jira.js1291
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.{RichPath, _}
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEndedEvent}
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.InfoLogEvent
+import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStepEndedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepEnded}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConfiguration}
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -44,34 +42,43 @@ import scala.concurrent.Promise
 @RunWith(classOf[JUnitRunner])
 final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogEvent}
-  private lazy val List(tcpPort, httpPort) = findRandomFreeTcpPorts(2)
+  import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogged}
+  private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
+    mainArguments = List(s"-tcp-port=$tcpPort"))
 
+  private val oldAgentSetting = Setting(
+    () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)),
+    shellTaskMaximum = OldAgentTaskParallelCount)
+  private val newAgentSetting = Setting(
+    () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)),
+    shellTaskMaximum = NewAgentShellTaskParallelCount)
   List(
-    //"With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)) },
-    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)) })
-  .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
+    "With TCP C++ Agent" → oldAgentSetting,
+    "With Universal Agent" → newAgentSetting)
+  .foreach { case (testGroupName, setting) ⇒
     testGroupName - {
-      val eventsPromise = Promise[immutable.Seq[Event]]()
-      lazy val taskLogLines = (eventsPromise.successValue collect { case e: InfoLogEvent ⇒ e.message split "\r?\n" }).flatten
+      val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
+      lazy val taskLogLines = (eventsPromise.successValue collect {
+        case KeyedEvent(_, e: InfoLogged) ⇒ e.message split "\r?\n"
+      }).flatten
       lazy val shellOutput: immutable.Seq[String] = taskLogLines collect { case ScriptOutputRegex(o) ⇒ o.trim }
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
       "(prepare process class)" in {
-        deleteAndWriteConfigurationFile(TestProcessClassPath, lazyProcessClassConfig())
+        deleteAndWriteConfigurationFile(TestProcessClassPath, setting.lazyProcessClassConfiguration())
       }
 
       "Run shell job via order" in {
         scheduler executeXml newJobElem()
         autoClosing(newEventPipe()) { eventPipe ⇒
           toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
-            val orderKey = TestJobchainPath orderKey testGroupName
-            eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
-              case EventSourceEvent(event, order: Order) ⇒ finishedOrderParametersPromise.trySuccess(order.parameters.toMap)
+            val orderKey = TestJobChainPath orderKey testGroupName
+            eventBus.onHot[OrderStepEnded] {
+              case KeyedEvent(`orderKey`, _) ⇒
+                finishedOrderParametersPromise.trySuccess(orderDetailed(orderKey).variables)
             }
-            eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+            eventBus.awaiting[OrderFinished](orderKey) {
               scheduler executeXml OrderCommand(orderKey, parameters = Map(OrderVariable.pair, OrderParamOverridesJobParam.pair))
             }
           }
@@ -81,7 +88,9 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
       "Shell script exit code" in {
         assertResult(List(TestReturnCode)) {
-          eventsPromise.successValue collect { case TaskEndedEvent(_, TestJobPath, returnCode) ⇒ returnCode }
+          eventsPromise.successValue collect {
+            case KeyedEvent(TaskKey(TestJobPath, _), TaskEnded(returnCode)) ⇒ returnCode
+          }
         }
         eventBus.dispatchEvents()
       }
@@ -160,9 +169,20 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         }
       }
 
+      if (setting == newAgentSetting) {
+        "API Task stdout and stderr are logged for every order step (JS-1665)" in {
+          // https://change.sos-berlin.com/browse/JS-1665
+          val result = runOrder(StdoutApiJobChainPath orderKey "ORDER-1")
+          for (outerr ← List("STDOUT", "STDERR");
+               jobPath ← List(JobPath("/stdout-api-1"), JobPath("/stdout-api-2")))
+          {
+            assert(result.logString contains s"$outerr LINE STEP FOR ORDER-1, JOB ${jobPath.name}")
+          }
+        }
+      }
+
       "Exception in Monitor" in {
-        toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
-        //toleratingErrorLogEvent({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
+        toleratingErrorLogged({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
           runJob(JobPath("/throwing-monitor"))
         }
       }
@@ -181,14 +201,12 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
           assert((results filterNot { _.returnCode.isSuccess }) == Nil)
         }
 
-        val shellTaskCount = 100
-        s"Start $shellTaskCount simultaneously running shell tasks" in {
-          runTasks(JobPath("/test-sleep"), shellTaskCount, taskMaximumDuration = 1.s)
+        s"Start ${setting.shellTaskMaximum} simultaneously running shell tasks" in {
+          runTasks(JobPath("/test-sleep"), setting.shellTaskMaximum, taskMaximumDuration = 1.s)
         }
 
-        val javaTaskCount = 10
-        s"Start $javaTaskCount simultaneously running API tasks" in {
-          runTasks(JobPath("/test-sleep-api"), javaTaskCount, taskMaximumDuration = 20.s)  // 1 (out of 8) processor thread Intel 3770K (2012): 6s per task
+        s"Start $JavaTaskParallelCount simultaneously running API tasks" in {
+          runTasks(JobPath("/test-sleep-api"), JavaTaskParallelCount, taskMaximumDuration = 20.s)  // 1 (out of 8) processor thread Intel 3770K (2012): 6s per task
         }
       }
     }
@@ -200,10 +218,15 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 }
 
 object JS1291AgentIT {
+  private val CpuIs64bit = sys.props("os.arch") contains "64"  // This is to detect low memory 32 bit operating system
+  private val OldAgentTaskParallelCount = 10
+  private val NewAgentShellTaskParallelCount = if (CpuIs64bit) 100 else 20
+  private val JavaTaskParallelCount = if (CpuIs64bit) 10 else 3
   private val TestProcessClassPath = ProcessClassPath("/test")
-  private val TestJobchainPath = JobChainPath("/test")
+  private val TestJobChainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
   private val TestReturnCode = ReturnCode(42)
+  private val StdoutApiJobChainPath = JobChainPath("/stdout-api")
   private val FirstStdoutLine = "FIRST STDOUT LINE"
   private val OrderVariable = Variable("orderparam", "ORDERVALUE")
   private val OrderParamOverridesJobParam = Variable("ORDEROVERRIDESJOBPARAM", "ORDEROVERRIDESJOBVALUE")
@@ -272,4 +295,8 @@ object JS1291AgentIT {
     </job>
 
   private def paramToEnvName(name: String) = s"SCHEDULER_PARAM_${name.toUpperCase}"
+
+  private case class Setting(
+    lazyProcessClassConfiguration: () ⇒ ProcessClassConfiguration,
+    shellTaskMaximum: Int)
 }

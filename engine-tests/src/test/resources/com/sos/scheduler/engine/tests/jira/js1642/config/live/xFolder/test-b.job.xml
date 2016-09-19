@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     order="true"
+     process_class="MISSING-PROCESS-CLASS"
+>
+    <lock.use lock="MISSING-LOCK"/>
+    <script java_class="com.sos.scheduler.engine.tests.jira.js1642.TestJob"/>
+    <monitor.use monitor="MISSING-MONITOR"/>
+    <run_time schedule="MISSING-SCHEDULE"/>
+</job>

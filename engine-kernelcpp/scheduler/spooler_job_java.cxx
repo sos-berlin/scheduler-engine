@@ -48,9 +48,6 @@ struct Java_job : Job {
         return _cppNewJobJ.onActivate();
     }
 
-    //list<Requisite_path> missing_requisites() {
-    //}
-
     void on_prepare_to_remove() {
         return _cppNewJobJ.onPrepareToRemove();
     }
@@ -113,6 +110,10 @@ struct Java_job : Job {
     }
 
     int64 next_start_time_millis() const  {
+        z::throw_xc(Z_FUNCTION);
+    }
+
+    jlong next_possible_start_millis() const  {
         z::throw_xc(Z_FUNCTION);
     }
 
@@ -250,6 +251,7 @@ struct Java_job : Job {
     bool max_tasks_reached() const { throw_xc("NOT-IMPLEMENTED"); }
     int max_tasks() const { throw_xc("NOT-IMPLEMENTED"); }
     int running_tasks_count() const { throw_xc("NOT-IMPLEMENTED"); }
+    vector<string> unavailable_lock_path_strings() const { throw_xc("NOT-IMPLEMENTED"); }
 };
 
 ptr<Job> new_java_job(Spooler* spooler) {

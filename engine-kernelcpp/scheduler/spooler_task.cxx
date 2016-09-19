@@ -335,12 +335,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
-        if (_state == s_waiting_for_process) {
-            if (Remote_module_instance_proxy* o = dynamic_cast<Remote_module_instance_proxy*>(+_module_instance)) {
-                if (o->is_waiting_for_remote_scheduler()) {
-                    task_element.setAttribute("waiting_for_remote_scheduler", "true");
-                }
-            }
+        if (is_waiting_for_remote_scheduler()) {
+            task_element.setAttribute_optional("waiting_for_remote_scheduler", "true");
         }
 
         if( _enqueued_state )
@@ -366,8 +362,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         if( _cause )
         task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
-        if( _state == s_running  &&  _last_process_start_time.not_zero() )
-        task_element.setAttribute( "in_process_since", _last_process_start_time.xml_value() );
+        if( _state == s_running  &&  _step_started_at.not_zero() )
+        task_element.setAttribute( "in_process_since", _step_started_at.xml_value() );
 
         task_element.setAttribute( "steps"           , _step_count );
 
@@ -446,6 +442,17 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.appendChild( _environment->dom_element( document, "environment", "variable" ) );
 
     return task_element;
+}
+
+bool Task::is_waiting_for_remote_scheduler() const {
+    if (_state == s_waiting_for_process) {
+        if (Remote_module_instance_proxy* o = dynamic_cast<Remote_module_instance_proxy*>(+_module_instance)) {
+            if (o->is_waiting_for_remote_scheduler()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //----------------------------------------------------------------------------------------Task::dom
@@ -1465,12 +1472,12 @@ bool Task::do_something()
                         case s_starting: {
                             _begin_called = true;
                             if( !_operation ) {
+                                _process_started_at = now;
                                 _operation = begin__start();
                                 if (!_operation->async_finished())
                                     _operation->on_async_finished_call(_call_register.new_async_call<Task_starting_completed_call>());
                             } else {
                                 ok = operation__end();
-
                                 if( _job->_history.min_steps() == 0 )  _history.start();
 
                                 _file_logger->add_file(_module_instance->stdout_path(), log_info         , _stderr_log_level == log_info? "stdout" : "");
@@ -1584,7 +1591,7 @@ bool Task::do_something()
                                         }
                                     }
                                     _running_state_reached = true;
-                                    _last_process_start_time = now;
+                                    _step_started_at = now;
                                     if( _step_count + 1 == _job->_history.min_steps() )
                                         _history.start();
                                     if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] ) {
@@ -1817,7 +1824,7 @@ bool Task::do_something()
                                     }
                                 }
 
-                                report_event(CppEventFactoryJ::newTaskEndedEvent(_id, _job->path(), _exit_code), java_sister());
+                                report_event(CppEventFactoryJ::newTaskEndedEvent(_id, _job->path(), _exit_code));
                                 set_state_direct( s_deleting_files );
                                 loop = true;
                             }
@@ -2232,7 +2239,7 @@ void Task::postprocess_order(const Order_state_transition& state_transition, boo
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
 
         if (!_order->job_chain_path().empty())
-            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()), _order->java_sister());
+            report_event(CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition.internal_value()));
         _order->postprocessing(state_transition, _error);
 
         if( due_to_exception && !_order->setback_called() )
@@ -2252,7 +2259,7 @@ void Task::detach_order_after_error(const Order_state_transition& transition)
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
             if (!_order->job_chain_path().empty())
-                report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order_state_transition::keep.internal_value()), _order->java_sister());
+                report_event(CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order_state_transition::keep.internal_value()));
             _order->processing_error();
             detach_order();
         } else {

@@ -33,6 +33,10 @@ struct Log
     int                         fd                          ()                                  { return _file; }
     void                        start_new_file              ();
     Time                        last_time                   () const                            { return _last_time; }
+    
+    void set_corresponding_prefix_log(Prefix_log* log) {
+        _corresponding_prefix_log = log;
+    }
 
   protected:
     friend struct               Prefix_log;                 // _semaphore
@@ -50,6 +54,7 @@ struct Log
   //string                     _log_line;
     string                     _log_buffer;                 // Bis Ausgabedatei geöffnet ist
     Time                       _last_time;
+    Prefix_log*                _corresponding_prefix_log;
 };
 
 //---------------------------------------------------------------------------------------Prefix_log
@@ -83,7 +88,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                    set_append_for_cache            ( bool b )                          { _append_for_cache = b; }
     void                    set_filename                    ( const File_path& );
     File_path                   filename                    () const                            { return _filename == "" && _log? _log->filename() : _filename; }
-    const File_path&            this_filename               () const                            { return _filename; }
+    File_path                   this_filename               () const                            { return _log && this == _log->_corresponding_prefix_log ? _log->_filename : _filename; }
     void                    set_title                       ( const string& title )             { _title = title; }
     string                      title                       ()                                  { return _title; }
     void                    set_remove_after_close          ( bool b )                          { _remove_after_close = b; }
@@ -167,6 +172,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        open_file                   ();
     void                        check_open_errno            ();
     void                        write                       ( const char*, int );
+    void on_logged();
 
     friend struct               Log;
     friend struct               Task;                       // Für _mail_on_error etc.

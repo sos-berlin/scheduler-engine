@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel
 
 import com.google.common.base.MoreObjects.firstNonNull
+import com.google.inject
 import com.google.inject.Guice.createInjector
-import com.google.inject.Injector
 import com.google.inject.Stage.DEVELOPMENT
+import com.google.inject.{Injector, TypeLiteral}
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
@@ -13,19 +14,23 @@ import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.system.SystemInformations.systemInformation
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.data.scheduler.{SchedulerCloseEvent, SchedulerOverview, SchedulerState}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerOverview, SchedulerState}
+import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
-import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.Scheduler._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.directOrSchedulerThreadFuture
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.command.{CommandSubsystem, UnknownCommandException}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -34,6 +39,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
+import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.log.{CppLogger, PrefixLog}
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Result
@@ -41,6 +47,7 @@ import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import com.sos.scheduler.engine.main.event.SchedulerClosed
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
 import java.time.Instant.now
@@ -50,7 +57,7 @@ import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone
 import scala.collection.JavaConversions._
-import scala.collection.breakOut
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -97,17 +104,32 @@ with HasCloser {
 
   @ForCpp
   private def initialize(): Unit = {
+    instantiateSubsystems()
     pluginSubsystem = injector.instance[PluginSubsystem]
     commandSubsystem = injector.instance[CommandSubsystem]
     databaseSubsystem = injector.instance[DatabaseSubsystem]
     executionContext = injector.instance[ExecutionContext]
-    val eventSubscription = {
-      val subsystemDescriptions = injector.instance[FileBasedSubsystem.Register].descriptions
-      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
-      EventSubscription[FileBasedEvent] { e ⇒ for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) }
+    catchFileBasedEvents()
+  }
+
+  private def instantiateSubsystems(): Unit = {
+    for (companion ← injector.instance[FileBasedSubsystem.Register].companions) {
+      injector.getInstance(companion.subsystemClass)
+      injector.getInstance(companion.clientClass)
     }
-    eventBus.registerHot(eventSubscription)
-    onClose { eventBus.unregisterHot(eventSubscription) }
+    injector.instance[TaskSubsystemClient]
+  }
+
+  private def catchFileBasedEvents(): Unit = {
+    val subsystemCompanions = injector.instance[FileBasedSubsystem.Register].companions
+    val subsystemMap: Map[FileBasedType, FileBasedSubsystem] =
+      subsystemCompanions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
+    eventBus.onHot[FileBasedEvent] {
+      case KeyedEvent(path, event) ⇒
+        for (subsystem ← subsystemMap.get(path.fileBasedType)) {
+          subsystem.onFileBasedEvent(KeyedEvent(event)(path))
+        }
+    }
   }
 
   def onCppProxyInvalidated(): Unit = {}
@@ -116,7 +138,7 @@ with HasCloser {
     closed = true
     try {
       schedulerThreadCallQueue.close()
-      eventBus.publish(new SchedulerCloseEvent)
+      eventBus.publish(KeyedEvent(SchedulerClosed))
       eventBus.dispatchEvents()
       schedulerThreadCallQueue.close()
       try databaseSubsystem.close() catch { case NonFatal(x) ⇒ prefixLog.error(s"databaseSubsystem.close(): $x") }
@@ -129,12 +151,17 @@ with HasCloser {
     }
   }
 
-  @ForCpp private def onLoad(): Unit = {
+  @ForCpp private def onSchedulerLoaded(): Unit = {
+    injector.instance[SchedulerConfiguration].initialize()
     pluginSubsystem.initialize()
+  }
+
+  @ForCpp private def onLoad(): Unit = {
+    // Actually, we are called at Scheduler::activate() - after onSchedulerLoaded
     controllerBridge.onSchedulerStarted(this)
   }
 
-  @ForCpp private def onDatabaseOpened(): Unit = databaseSubsystem.onOpened()
+  @ForCpp private def onDatabaseOpened(): Unit = databaseSubsystem.onDatabaseOpened()
 
   @ForCpp private def onActivate(): Unit = {
     initializeCppDependencySingletons()
@@ -144,6 +171,8 @@ with HasCloser {
   private def initializeCppDependencySingletons(): Unit = {
     // Eagerly call all C++ providers now to avoid later deadlock (Scheduler lock and DI lock)
     for (o ← injector.instance[LateBoundCppSingletons].interfaces) injector.getInstance(o)
+    val t = new TypeLiteral[immutable.Iterable[LicenseKeyString]] {}
+    injector.getInstance(inject.Key.get(t))
   }
 
   @ForCpp private def onActivated(): Unit = {
@@ -158,7 +187,7 @@ with HasCloser {
     if (somethingDone) -nextTime else nextTime
   }
 
-  def executeCallQueue() = callRunner.executeMatureCalls()
+  def executeCallQueue() = inSchedulerThread { callRunner.executeMatureCalls() }
 
   /** Nur für C++, zur Ausführung eines Kommandos in Java */
   @ForCpp private def javaExecuteXml(xml: String): String = {
@@ -265,21 +294,19 @@ with HasCloser {
       _ stripSuffix "\u0000"  // Von C++ angehängtes '\0', siehe Command_response::end_standard_response()
     }
 
-  def callCppAndDoNothing(): Unit = {
-    cppProxy.tcp_port
-  }
+  def callCppAndDoNothing(): Unit = inSchedulerThread { cppProxy.tcp_port }
 
-  def overview: Future[SchedulerOverview] =
-    directOrSchedulerThreadFuture {
-      new SchedulerOverview(
-        version = mavenProperties.buildVersion,
-        startedAt = startedAt,
-        schedulerId = schedulerConfiguration.schedulerId,
-        httpPort = schedulerConfiguration.httpPortOption,
-        udpPort = schedulerConfiguration.udpPort,
-        pid = cppProxy.pid,
-        state = SchedulerState.ofCppName(cppProxy.state_name))
-    }
+  private[kernel] def overview: SchedulerOverview =
+    new SchedulerOverview(
+      version = mavenProperties.buildVersion,
+      startedAt = startedAt,
+      schedulerId = schedulerConfiguration.schedulerId,
+      httpPort = schedulerConfiguration.httpPortOption,
+      udpPort = schedulerConfiguration.udpPort,
+      pid = cppProxy.pid,
+      state = SchedulerState.ofCppName(cppProxy.state_name),
+      system = systemInformation(),
+      java = JavaInformation())
 
   def isClosed = closed
 }

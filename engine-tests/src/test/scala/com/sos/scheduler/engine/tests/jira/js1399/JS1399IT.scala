@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -35,10 +35,10 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val matchingFile = directory / "X-MATCHING-FILE-1"
     val orderKey = TestJobChainPath orderKey matchingFile.toString
     writeConfigurationFile(TestJobChainPath, newJobChainElem(directory, agentUri, 1.s))
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+    eventBus.awaiting[OrderFinished](orderKey) {
       intercept[TimeoutException] {
         implicit val implicitTimeout = ImplicitTimeout(10.s)
-        eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {
+        eventBus.awaiting[OrderStarted.type](orderKey) {
           assert(!exists(matchingFile))
           touch(matchingFile)
         }
@@ -52,10 +52,10 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val matchingFile = directory / "X-MATCHING-FILE-2"
     val orderKey = TestJobChainPath orderKey matchingFile.toString
     deleteConfigurationFile(TestProcessClassPath)
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+    eventBus.awaiting[OrderFinished](orderKey) {
       intercept[TimeoutException] {
         implicit val implicitTimeout = ImplicitTimeout(10.s)
-        eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {
+        eventBus.awaiting[OrderStarted.type](orderKey) {
           assert(!exists(matchingFile))
           touch(matchingFile)
         }
@@ -68,14 +68,14 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "file_order_source handles change of process_class" in {
     val matchingFile = directory / "X-MATCHING-FILE-3"
     val orderKey = TestJobChainPath orderKey matchingFile.toString
-    controller.toleratingErrorLogEvent(_.message contains "spray.can.Http$ConnectionException") {
+    controller.toleratingErrorLogged(_.message contains "spray.can.Http$ConnectionException") {
       autoClosing(new ServerSocket()) { socket ⇒
         socket.bind(new InetSocketAddress("127.0.0.1", 0))
         val deadPort = socket.getLocalPort
         writeConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(s"http://127.0.0.1:$deadPort")))
         intercept[TimeoutException] {
           implicit val implicitTimeout = ImplicitTimeout(10.s)
-          eventBus.awaitingKeyedEvent[OrderTouchedEvent](orderKey) {
+          eventBus.awaiting[OrderStarted.type](orderKey) {
             assert(!exists(matchingFile))
             touch(matchingFile)
           }

@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1595
 
 import com.sos.scheduler.engine.common.system.OperatingSystem._
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.DotnetProvidingAgent
@@ -30,12 +29,12 @@ final class JS1595IT extends FreeSpec with ScalaSchedulerTest with DotnetProvidi
       s"$language" - {
         val jobChainPath = JobChainPath(s"/test-${language.toLowerCase}")
         "Script" in {
-          testOrder(jobChainPath).state shouldEqual OrderState("END")
+          testOrder(jobChainPath).nodeId shouldEqual NodeId("END")
         }
 
         "Exception in script" in {
           controller.toleratingErrorCodes(Set(MessageCode("COM-80020009"))) {
-            testOrder(jobChainPath, Map("FAIL" → "1")).state shouldEqual OrderState("FAILED")
+            testOrder(jobChainPath, Map("FAIL" → "1")).nodeId shouldEqual NodeId("FAILED")
           }
         }
       }

@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jobchain.max_order;
 
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
+import com.sos.scheduler.engine.data.order.OrderStarted$;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import java.time.Duration;
 import org.junit.Test;
-
 import static java.lang.Math.max;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -25,16 +26,17 @@ public final class MaxOrderIT extends SchedulerTest {
         controller().waitForTermination(Duration.ofSeconds(5*60));
     }
 
-    @EventHandler public void handleEvent(OrderTouchedEvent e) {
-        runningOrderCount++;
-        maxTouchedOrderCount = max(maxTouchedOrderCount, runningOrderCount);
-    }
-
-    @EventHandler public void handleEvent(OrderFinishedEvent e) {
-        runningOrderCount--;
-        finishedOrderCount++;
-        if (finishedOrderCount == addedOrderCount)
-            finish();
+    @EventHandler public void handleEvent(KeyedEvent<Event> g) {
+        if (g.event().equals(OrderStarted$.MODULE$)) {
+            runningOrderCount++;
+            maxTouchedOrderCount = max(maxTouchedOrderCount, runningOrderCount);
+        } else
+        if (g.event() instanceof OrderFinished) {
+            runningOrderCount--;
+            finishedOrderCount++;
+            if (finishedOrderCount == addedOrderCount)
+                finish();
+        }
     }
 
     private void finish() {

@@ -4,7 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.{TaskId, TaskPersistentState}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskPersistentState}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_nodeC, SpoolerC, Variable_setC}
@@ -28,7 +28,7 @@ extends Sister {
   private var configuration: JobConfiguration = null
   private var stateText = ""
 
-  private def jobPath = jobSister.path
+  private def jobPath = JobPath("/CppNewJob-OUT-OF-ORDER")//jobSister.path
   //var stateText = ""
 
   def onCppProxyInvalidated(): Unit = {}

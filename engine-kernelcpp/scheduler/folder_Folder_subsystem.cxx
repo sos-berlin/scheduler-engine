@@ -63,6 +63,7 @@ void Folder_subsystem::initialize_cache_directory()
 bool Folder_subsystem::subsystem_initialize()
 {
     _root_folder = Z_NEW( Folder( this, (Folder*)NULL ) );
+    _root_folder->fix_name();
     add_file_based( _root_folder );
 
     _subsystem_state = subsys_initialized;

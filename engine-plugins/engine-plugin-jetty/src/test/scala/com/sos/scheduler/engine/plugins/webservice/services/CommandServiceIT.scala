@@ -25,11 +25,17 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
 
   "Execute a command via POST" in {
     postCommand("<show_state><!--äöü--></show_state>") should include ("<state")
+    controller.toleratingErrorCodes(_ ⇒ true) {
+      postCommand("<invalid-äöü/>") should include ("invalid-äöü")  // This succeeds with @Produces(Array("text/xml")), too ?
+    }
   }
 
   "Execute a show command via GET" in {
     getCommand("<show_state/>") should include ("<state")
     getCommand("<s/>") should include ("<state")
+    controller.toleratingErrorCodes(_ ⇒ true) {
+      getCommand("<show_äöü/>") should include ("show_äöü")  // This succeeds with @Produces(Array("text/xml")), too ?
+    }
   }
 
   "Execute a show command without XML syntax via GET" in {

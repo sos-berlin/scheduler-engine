@@ -1,0 +1,28 @@
+div.SystemProperties {
+  margin-right: 2em;
+}
+
+div.SystemInformation {
+  float: right;
+  padding: 10px;
+  margin-bottom: 2em;
+  /* font-family: "Trebuchet MS", Verdana, Arial, sans-serif;
+  font-size: 13px;*/
+}
+
+table.SystemInformation > tbody > tr > td {
+  padding-bottom: 1.5em;
+}
+
+table.SystemInformation > tbody > tr > td:first-child {
+  padding-top: 2px;
+}
+
+.SchedulerOverview {
+  margin-bottom: 30px;
+}
+
+.SystemBar {
+  margin-left: 1em;
+  width: 180px;
+}

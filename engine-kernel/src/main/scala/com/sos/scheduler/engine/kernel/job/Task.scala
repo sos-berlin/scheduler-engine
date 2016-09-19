@@ -1,54 +1,110 @@
 package com.sos.scheduler.engine.kernel.job
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
+import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.cplusplus.runtime.Sister
+import com.sos.scheduler.engine.common.scalautil.SetOnce
+import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskDetailed, TaskId, TaskKey, TaskObstacle, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.eventbus.EventSource
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.Order
-import java.io.File
+import com.sos.scheduler.engine.kernel.processclass.ProcessClass
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions
+import java.nio.file.Paths
+import java.time.Instant
 
 @ForCpp
-private[engine] final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with EventSource {
+private[engine] final class Task(
+  cppProxy: TaskC,
+  taskSubsystem: TaskSubsystem)
+extends UnmodifiableTask with Sister with EventSource {
+
+  import taskSubsystem.schedulerThreadCallQueue
+  intelliJuseImports(schedulerThreadCallQueue)
+
+  private val taskIdOnce = new SetOnce[TaskId]
 
   def onCppProxyInvalidated(): Unit = {}
 
-  def overview = TaskOverview(id, jobPath, state, processClassPath, agentAddress)
+  private[kernel] def details = TaskDetailed(
+    overview,
+    variables,
+    stdoutFile = stdoutFile)
 
-  def jobPath = JobPath(cppProxy.job_path)
+  private[kernel] def overview = TaskOverview(taskId, jobPath, state, processClassOption map { _.path }, agentAddress, obstacles)
 
-  def job = cppProxy.job.getSister
+  private def obstacles: Set[TaskObstacle] = {
+    import TaskObstacle._
+    val builder = Set.newBuilder[TaskObstacle]
+    state switch {
+      case TaskState.waiting_for_process if cppProxy.is_waiting_for_remote_scheduler ⇒
+        builder += WaitingForAgent
+      case TaskState.waiting_for_process ⇒
+        builder += WaitingForProcessClass
+      case TaskState.opening_waiting_for_locks | TaskState.running_waiting_for_locks ⇒
+        builder += WaitingForLock
+      case TaskState.running_delayed ⇒
+        builder += Delayed
+      case TaskState.suspended ⇒
+        builder += Suspended
+    }
+    builder.result
+  }
 
-  def agentAddress: Option[AgentAddress] = emptyToNone(cppProxy.remote_scheduler_address) map AgentAddress.apply
+  private[kernel] def taskKey = TaskKey(jobPath, taskId)
 
-  def orderOption: Option[Order] = Option(cppProxy.order.getSister)
+  private def jobPath = JobPath(cppProxy.job_path)
 
-  def id = new TaskId(cppProxy.id)
+  private[kernel] def job = cppProxy.job.getSister
 
-  def processClassPath = ProcessClassPath(cppProxy.process_class_path)
+  private[kernel] def agentAddress: Option[AgentAddress] = emptyToNone(cppProxy.remote_scheduler_address) map AgentAddress.apply
 
-  def agentAdress = AgentAddress(cppProxy.remote_scheduler_address)
+  private[kernel] def orderOption: Option[Order] = Option(cppProxy.order.getSister)
 
-  def state: TaskState = TaskState.of(cppProxy.state_name)
+  private[kernel] def taskId = taskIdOnce getOrUpdate TaskId(cppProxy.id)
+
+  private[kernel] def processClassPath: ProcessClassPath =
+    processClassOption.getOrElse(throw new NoSuchElementException("Task has not ProcessClass yet")).path
+
+  private[kernel] def processClassOption: Option[ProcessClass] =
+    cppProxy.process_class_or_null match {
+      case null ⇒ None
+      case o ⇒ Some(o.getSister)
+    }
+
+  def processStartedAt: Option[Instant] = inSchedulerThread { CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.processStartedAt) }
+
+  private[kernel] def stepOrProcessStartedAt = CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.stepOrProcessStartedAt)
+
+  private def state: TaskState = TaskState.of(cppProxy.state_name)
 
   def parameterValue(name: String): String =
-    cppProxy.params.get_string(name)
+    inSchedulerThread {
+      cppProxy.params.get_string(name)
+    }
 
-  def logString =
-    cppProxy.log_string
+  private def variables: Map[String, String] = cppProxy.params.getSister.toMap
 
-  def stdoutFile =
-    new File(cppProxy.stdout_path)
+  def stdoutFile = inSchedulerThread { Paths.get(cppProxy.stdout_path) }
 
-  def stderrFile =
-    new File(cppProxy.stderr_path)
+  def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 
-  def log: PrefixLog = cppProxy.log.getSister
+  override def toString = s"Task ${taskIdOnce toStringOr ""}".trim
+}
 
-  override def toString =
-    s"Task($id)"
+object Task {
+  private[kernel] object Type extends SisterType[Task, TaskC] {
+    def sister(proxy: TaskC, context: Sister) = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new Task(proxy, injector.instance[TaskSubsystem])
+    }
+  }
 }

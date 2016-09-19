@@ -83,6 +83,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*) = 0;
     virtual xml::Element_ptr    why_dom_element             ( const xml::Document_ptr& )            = 0;
+    virtual vector<string>      unavailable_lock_path_strings() const                               = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
     virtual string              description                 () const                                = 0;
     virtual void                set_schedule_dom            (const xml::Element_ptr&)               = 0;
@@ -121,6 +122,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function ) = 0;
 
     virtual int64               next_start_time_millis      () const                                = 0;
+    virtual jlong               next_possible_start_millis  () const                                = 0;
 
     virtual void                set_state_cmd               ( State_cmd )                           = 0;
     virtual void                set_state_cmd               (const string&)                         = 0;
@@ -259,6 +261,7 @@ struct Standard_job : Job
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*  );
     xml::Element_ptr            why_dom_element             ( const xml::Document_ptr& );
+    vector<string>              unavailable_lock_path_strings() const;
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     string                      description                 () const                                { return _description; }
 
@@ -331,6 +334,8 @@ struct Standard_job : Job
     void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
     int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
+    jlong                       next_possible_start_millis  () const;
+
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 

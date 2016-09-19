@@ -8,16 +8,17 @@ import com.sos.scheduler.engine.kernel.cppproxy.ScheduleC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
-final class Schedule private(
+private[kernel] final class Schedule private(
   protected[this] val cppProxy: ScheduleC,
-  protected val subsystem: ScheduleSubsystem)
+  protected[kernel] val subsystem: ScheduleSubsystem)
 extends FileBased {
 
+  protected type Self = Schedule
   type ThisPath = SchedulePath
 
   def stringToPath(o: String) = SchedulePath(o)
 
-  def fileBasedType = FileBasedType.schedule
+  def fileBasedType = FileBasedType.Schedule
 
   def onCppProxyInvalidated() = {}
 }

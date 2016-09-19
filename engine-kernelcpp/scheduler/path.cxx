@@ -44,78 +44,71 @@ static bool is_absolute_path( const string& path )
 
 //--------------------------------------------------------------------------simplified_dot_dot_path
 
-static string simplified_dot_dot_path( const string& path )
+static string simplified_path( const string& path )
 { 
-    string result;
-
+    assert( path != "" );
     bool is_absolute = is_absolute_path( path );
+    string result;
+    vector<string> parts     = vector_split( "/", path );
+    list<string>   part_list;
 
-    if( path.find( '.' ) == string::npos  &&     // Kein . oder .. ?
-        path.find( '/' ) == string::npos )
+    for( int i = 0; i < parts.size(); i++ )  if( parts[i] != "" )  part_list.push_back( parts[i] );
+
+    for( list<string>::iterator p = part_list.begin(); p != part_list.end(); )
     {
-        result = path;
-    }
-    else
-    {
-        assert( path != "" );
-
-
-        vector<string> parts     = vector_split( "/", path );
-        list<string>   part_list;
-
-        for( int i = 0; i < parts.size(); i++ )  if( parts[i] != "" )  part_list.push_back( parts[i] );
-
-        for( list<string>::iterator p = part_list.begin(); p != part_list.end(); )
+        if( *p == "." )  
         {
-            if( *p == "." )  
+            p = part_list.erase( p );
+        }
+        else
+        if( *p == ".." )  
+        {
+            if( p == part_list.begin() )
             {
-                p = part_list.erase( p );
+                if( is_absolute )  z::throw_xc( "SCHEDULER-461", path );
+                p++;  // Relativer Pfad darf überschüssige ".." haben. Also stehen lassen
             }
             else
-            if( *p == ".." )  
             {
-                if( p == part_list.begin() )
+                --p;
+                if( *p == ".." )
                 {
-                    if( is_absolute )  z::throw_xc( "SCHEDULER-461", path );
-                    p++;  // Relativer Pfad darf überschüssige ".." haben. Also stehen lassen
+                    assert( !is_absolute );
+                    p++, p++;
                 }
                 else
                 {
-                    --p;
-                    if( *p == ".." )
-                    {
-                        assert( !is_absolute );
-                        p++, p++;
-                    }
-                    else
-                    {
-                        p = part_list.erase( p );
-                        p = part_list.erase( p );
-                    }
+                    p = part_list.erase( p );
+                    p = part_list.erase( p );
                 }
             }
-            else 
-                p++;
         }
-
-        if( is_absolute )  result = "/";
-        result += join( "/", part_list );
-        if( result == "" )  result = ".";
-        else
-        if( !part_list.empty()  &&  string_ends_with( path, "/" ) )  result += "/";        // path endet mit "xx/"
+        else 
+            p++;
     }
 
+    if( is_absolute )  result = "/";
+    result += join( "/", part_list );
+    if( result == "" )  result = ".";
+    else
+    if( !part_list.empty()  &&  string_ends_with( path, "/" ) )  result += "/";        // path endet mit "xx/"
     return result;
 }
 
 //----------------------------------------------------------------------------------simplified_path
 
-static string simplified_path( const string& path )                  
-{ 
-    return simplified_dot_dot_path( path );
-    //return simplified_dot_dot_path( simplified_double_slash_path( path ) );
+bool is_simplified_path(const string& path) {
+    return path.empty() || (
+            path != "." &&
+            path != ".." &&
+            !string_begins_with(path, "./") &&
+            !string_begins_with(path, "../") &&
+            !string_ends_with(path, "/..") &&
+            !string_ends_with(path, "/.") &&
+            path.find("//") == string::npos &&
+            path.find("/./") == string::npos &&
+            path.find("/../") == string::npos);
 }
-
 //---------------------------------------------------------------------------------------Path::Path
 
 Path::Path( const string& folder_path, const string& tail_path ) 
@@ -144,15 +137,16 @@ Path::Path( const string& folder_path, const string& tail_path )
 
         set_path( path );
     }
-
-    assert( to_string() == simplified_path( *this ) );
 }
 
 //-----------------------------------------------------------------------------------Path::set_path
 
 void Path::set_path( const string& path )                  
 { 
-    *static_cast<string*>( this ) = simplified_path( path );
+    if (is_simplified_path(path))
+        *static_cast<string*>(this) = path;
+    else
+        *static_cast<string*>(this) = simplified_path(path);
 
     // Bei relativem Pfad könnte die Auflösung der ".." verschoben werden. Dann nur simplified_double_slash_path().
     // Verknüpfungen im Dateisystem werden nicht berücksichtigt.

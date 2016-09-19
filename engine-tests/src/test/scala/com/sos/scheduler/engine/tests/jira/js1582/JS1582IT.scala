@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1582
 
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -15,8 +15,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1582IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val apiStarted = controller.eventBus.eventFuture[TaskStartedEvent](_.jobPath == JobPath("/test-api"))
-  private lazy val shellStarted = controller.eventBus.eventFuture[TaskStartedEvent](_.jobPath == JobPath("/test-shell"))
+  private lazy val apiStarted = eventBus.futureWhen[TaskStarted.type](_.key.jobPath == JobPath("/test-api"))
+  private lazy val shellStarted = eventBus.futureWhen[TaskStarted.type](_.key.jobPath == JobPath("/test-shell"))
 
   override protected def onBeforeSchedulerActivation() = {
     apiStarted

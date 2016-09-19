@@ -1653,6 +1653,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "config"           ) )  result = execute_config( element );
     else
+    if( element.nodeName_is("show_process_classes"))  result = execute_show_process_classes(show);
+    else
     if( element.nodeName_is( "show_job_chains"  ) )  result = execute_show_job_chains( element, show );
     else
     if( element.nodeName_is( "show_job_chain"   ) )  result = execute_show_job_chain( element, show );

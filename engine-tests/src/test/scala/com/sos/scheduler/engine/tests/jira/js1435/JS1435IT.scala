@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1435
 
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderState, OrderStateChangedEvent}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderNodeChanged}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -22,13 +22,13 @@ final class JS1435IT extends FreeSpec with ScalaSchedulerTest {
   "JS-1435IT" in {
     runJob(JobPath("/test"))
     val orderKey = JobChainPath("/test") orderKey "1"
-    val event = eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
-      val e = eventBus.awaitingKeyedEvent[OrderStateChangedEvent](orderKey) {
+    val event = eventBus.awaiting[OrderFinished](orderKey) {
+      val e = eventBus.awaiting[OrderNodeChanged](orderKey) {
         scheduler executeXml OrderCommand(orderKey)
       }
-      assert(e.previousState == OrderState("100"))
-      assert(e.state == OrderState("END"))
+      assert(e.fromNodeId == NodeId("100"))
+      assert(e.nodeId == NodeId("END"))
     }
-    assert(event.state == OrderState("END"))
+    assert(event.nodeId == NodeId("END"))
   }
 }

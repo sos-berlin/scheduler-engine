@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.tests.jira.js1227
 
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent, OrderSuspendedEvent, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.order.{OrderStarted, OrderStepEnded, OrderSuspended}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
@@ -31,17 +31,17 @@ final class JS1227IT extends FreeSpec with ClusterTest {
 
   "Suspend order running in some other scheduler" in {
     awaitSuccess(otherScheduler.postCommand(ModifyJobCommand(TestJobPath, cmd = Some(ModifyJobCommand.Cmd.Stop))))
-    eventBus.awaitingKeyedEvent[OrderTouchedEvent](AOrderKey) {
+    eventBus.awaiting[OrderStarted.type](AOrderKey) {
       scheduler executeXml OrderCommand(AOrderKey)
     }
-    eventBus.awaitingKeyedEvent[OrderSuspendedEvent](AOrderKey) {
+    eventBus.awaiting[OrderSuspended.type](AOrderKey) {
       awaitFailure(otherScheduler.postCommand(ModifyOrderCommand(AOrderKey, suspended = Some(true)))) match {
         case e: Exception if e.getMessage startsWith s"$OrderIsOccupiedMessageCode " ⇒
       }
-      eventBus.awaitingKeyedEvent[OrderStepEndedEvent](AOrderKey) {}
+      eventBus.awaiting[OrderStepEnded](AOrderKey) {}
       transaction { implicit entityManager ⇒
         val entity = instance[HibernateOrderStore].fetch(AOrderKey)
-        assert(entity.stateOption == Some(OrderState("200")))
+        assert(entity.nodeIdOption == Some(NodeId("200")))
         val e = SafeXML.loadString(entity.xmlOption.get)
         if (e \@ "suspended" != "yes") fail("Order should be suspended")
       }

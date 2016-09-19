@@ -52,6 +52,7 @@ struct JobNode : ::zschimmer::javabridge::proxy_jobject< JobNode >, ::javaproxy:
   public:
 
     void onOrderStepEnded(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, jint p1) const;
+    jint orderCount() const;
     ::javaproxy::java::lang::String orderStateTransitionToState(jlong p0) const;
     void processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const;
 

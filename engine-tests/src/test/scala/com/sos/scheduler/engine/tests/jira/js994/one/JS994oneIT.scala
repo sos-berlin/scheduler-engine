@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js994.one
 
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -21,6 +21,6 @@ final class JS994oneIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("Ein sich selbst referenzierendes schedule soll abgewiesen werden") {
-    eventPipe.nextAny[ErrorLogEvent].message should (startWith ("SCHEDULER-428") and include ("SCHEDULER-486"))
+    eventPipe.nextAny[ErrorLogged].event.message should (startWith ("SCHEDULER-428") and include ("SCHEDULER-486"))
   }
 }

@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType}
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
 import javax.inject.{Inject, Singleton}
@@ -18,12 +19,12 @@ class FolderService @Inject private(folderSubsystem: FolderSubsystem) {
   def get(@QueryParam("folder") @DefaultValue("") folderPathString: String,
           @QueryParam("type") @DefaultValue("") typeName: String,
           @Context request: HttpServletRequest, @Context u: UriInfo) = {
-    val folderPath = AbsolutePath.of(folderPathString)
+    val folderPath = FolderPath(folderPathString)
     val v = view(folderPath, typeName, u)
     Response.ok(v).cacheControl(noCache).build()
   }
 
-  private def view(folderPath: AbsolutePath, typeName: String, u: UriInfo) = {
+  private def view(folderPath: FolderPath, typeName: String, u: UriInfo) = {
     val typ = FileBasedType.values find { _.toString.toLowerCase == typeName.toLowerCase } getOrElse FileBasedType.fromCppName(typeName)
     try FolderView(folderSubsystem.names(folderPath, typ), folderPath, typeName, u.getBaseUri)
     catch {

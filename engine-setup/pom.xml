@@ -315,7 +315,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/setup.xml</descriptor>
+                                <descriptor>src/assembly/setup.xml</descriptor>
                             </descriptors>
                             <archive>
                                 <manifest>

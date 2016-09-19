@@ -109,7 +109,8 @@ struct Order_schedule_use : Schedule_use
     
 Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
 :
-    file_based_subsystem<Order>( scheduler, this, type_standing_order_subsystem )
+    file_based_subsystem<Order>( scheduler, this, type_standing_order_subsystem ),
+    _zero_(this+1)
 {
 }
 
@@ -455,13 +456,20 @@ Order_subsystem::Order_subsystem( Scheduler* scheduler )
 {
 }
 
+#define FOR_EACH_ORDER_CONST \
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) \
+        if (const Job_chain* job_chain = i->second) \
+            Z_FOR_EACH_CONST(Job_chain::Order_map, job_chain->_order_map, i) \
+                if (const Order* order = i->second)
+
 //-------------------------------------------------------Order_subsystem_impl::Order_subsystem_impl
 
 Order_subsystem_impl::Order_subsystem_impl( Spooler* spooler )
 :
     Order_subsystem( spooler ),
     _zero_(this+1),
-    _order_id_spaces(this)
+    _order_id_spaces(this),
+    _scheduler_file_order_path_variable_name_Bstr(scheduler_file_order_path_variable_name)
 {
 }
 
@@ -600,6 +608,74 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
         }
     }
     catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_job_chain_nodes_table.sql_name() + " or " + db()->_job_chains_table.sql_name(), x), Z_FUNCTION); }
+}
+
+void Order_subsystem_impl::java_for_each_distributed_order(const ArrayListJ& job_chain_paths_j, const ArrayListJ& order_ids_j, int limit, OrderCallbackJ callbackJ) {
+    vector<string> job_chain_paths;
+    {
+        int n = job_chain_paths_j.size();
+        job_chain_paths.reserve(n);
+        for (int i = 0; i < n; i++) {
+            javaproxy::java::lang::String s = (javaproxy::java::lang::String)job_chain_paths_j.get(i);
+            if (!s) z::throw_xc(Z_FUNCTION);
+            job_chain_paths.push_back((string)s);
+        }
+    }
+    vector<string> order_ids;
+    bool has_order_ids = order_ids_j.get_jobject() != NULL;
+    if (has_order_ids) {
+        int n = order_ids_j.size();
+        order_ids.reserve(n);
+        for (int i = 0; i < n; i++) {
+            javaproxy::java::lang::String s = (javaproxy::java::lang::String)order_ids_j.get(i);
+            if (!s) z::throw_xc(Z_FUNCTION);
+            order_ids.push_back((string)s);
+        }
+    }
+    for_each_distributed_order(job_chain_paths, has_order_ids, order_ids, limit, &Order_subsystem_impl::java_order_callback, &callbackJ);
+}
+
+void Order_subsystem_impl::java_order_callback(void* callback_context, Order* order) {
+    if (Job_chain* job_chain = job_chain_or_null(order->job_chain_path())) {
+        order->set_job_chain_node_raw(job_chain->node_from_state_or_null(order->state()));   // For Scala Order.jobChainPath, OrderQuery
+    }
+    OrderCallbackJ* callbackJ = (OrderCallbackJ*)callback_context;
+    callbackJ->apply(order->java_proxy_jobject());
+}
+
+void Order_subsystem_impl::for_each_distributed_order(
+    const vector<string>& job_chain_paths, 
+    bool has_order_ids, 
+    const vector<string>& order_ids, 
+    int limit, 
+    Order_callback callback, 
+    void* callback_context) 
+{
+    if (db() && !db()->is_in_transaction()) {
+        Read_transaction ta(db());
+        S select_sql;
+        select_sql << "select ";
+        if (limit < INT_MAX) select_sql << "%limit(" << limit << ") ";
+        select_sql << order_select_database_columns << ", `job_chain`, `occupying_cluster_member_id` " << 
+            "  from " << db()->_orders_tablename <<
+            "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
+              " and `distributed_next_time` is not null "
+              " and " << job_chains_in_clause(job_chain_paths);
+        if (has_order_ids) {
+            select_sql << " and " << in_clause("id", order_ids);
+        }
+        select_sql << "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
+
+        for (Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); !result_set.eof();) {
+            Record record = result_set.get_record();
+            ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
+            Absolute_path job_chain_path(root_path, record.as_string("job_chain"));
+            order->load_record(job_chain_path, record);
+            order->load_order_xml_blob( &ta );
+            order->_java_occupying_cluster_member_id = record.as_string("occupying_cluster_member_id");
+            (this->*callback)(callback_context, order);   // How to type correctly ?
+        }
+    }
 }
 
 //-----------------------------------------------Order_subsystem_impl::append_calendar_dom_elements
@@ -792,37 +868,32 @@ string Order_subsystem_impl::job_chain_db_where_condition( const Absolute_path& 
 
 string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  // JS-507
 {
-    list<string> job_chain_names;
+    vector<string> job_chain_paths;
+    job_chain_paths.reserve(_file_based_map.size());
     FOR_EACH_JOB_CHAIN(job_chain) {
         if (job_chain->is_distributed()) {
-            S s;
-            s << "'" << job_chain->path().without_slash() << "'";
-            job_chain_names.push_back( s );
+            job_chain_paths.push_back(job_chain->path().without_slash());
         }
     }
-
-    if( job_chain_names.empty() ) 
+    if( job_chain_paths.empty() ) 
         return "";
     else {
-        const int limit = 1000;
-        string job_chain_clause = "";
-        if ((db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin) && job_chain_names.size() > limit) {
-            list<string> chunks;
-            list<string>::iterator i = job_chain_names.begin();
-            while (i != job_chain_names.end()) {
-                list<string> next_job_chain_names;
-                while (i != job_chain_names.end() && next_job_chain_names.size() < limit) {
-                    next_job_chain_names.push_back(*i++);
-                }
-                chunks.push_back(S() << "`job_chain` in (" << join(",", next_job_chain_names) << ")");
-            }
-            job_chain_clause = S() << "(" << join(" or ", chunks) << ")";
-        } else {
-            job_chain_clause = S() << "`job_chain` in (" << join( ",", job_chain_names ) << ")";
-        }
-        return S() << db_where_condition() 
-                   << " and " << job_chain_clause;; 
+        return S() << db_where_condition() << " and " << job_chains_in_clause(job_chain_paths);
     }
+}
+
+string Order_subsystem_impl::in_clause(const string& key, const vector<string>& values) const {
+    const int limit = db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin ? 1000 : INT_MAX;
+    list<string> chunks;
+    vector<string>::const_iterator i = values.begin();
+    while (i != values.end()) {
+        list<string> next_values;
+        while (i != values.end() && next_values.size() < limit) {
+            next_values.push_back("'" + *i++ + "'");
+        }
+        chunks.push_back(S() << "`" << key << "` in (" << join(",", next_values) << ")");
+    }
+    return S() << "(" << join(" or ", chunks) << ")";
 }
 
 //----------------------------------------------------------------Order_subsystem_impl::order_count
@@ -867,6 +938,48 @@ void Order_subsystem_impl::count_finished_orders()
 {
     _finished_orders_count++;
     _spooler->update_console_title( 2 );
+}
+
+void Order_subsystem_impl::get_statistics(jintArray arrayJ) const {
+    javabridge::Env jenv;
+    jboolean is_copy;
+    int n = 12;
+    if (jenv->GetArrayLength(arrayJ) != n) z::throw_xc(Z_FUNCTION, "INVALID ARRAY SIZE");
+    jint* ints = jenv->GetIntArrayElements(arrayJ, &is_copy);
+    if (!ints)  jenv.throw_java("GetIntArrayElements");
+    get_statistics(ints);
+    jenv->ReleaseIntArrayElements(arrayJ, ints, 0);
+}
+
+void Order_subsystem_impl::get_statistics(jint* ints) const {
+    int result = 0;
+    ints[0] = order_count((Read_transaction*)NULL);
+    time_t now = Time::now().as_time_t();
+    FOR_EACH_ORDER_CONST {
+        if (!order->is_touched()) {
+            Time at = order->at();
+            if (at.is_never()) 
+                ints[1]++;  // OrderProcessingState.NotPlanned
+            else
+            if (at.as_time_t() >= now) 
+                ints[2]++;  // OrderProcessingState.Planned
+            else 
+                ints[3]++;  // OrderProcessingState.Pending
+        } else {
+            ints[4]++;  // OrderProcessingState.Running
+            if (const Task* task = order->task()) {
+                ints[5]++;
+                if (!task->step_or_process_started_at().is_zero()) {
+                    ints[6]++;
+                }
+            }
+            if (order->is_setback()) ints[7]++;
+        }
+        if (order->suspended()) ints[8]++;
+        if (order->is_on_blacklist()) ints[9]++;
+        if (order->has_base_file()) ints[10]++;
+        if (order->is_file_order()) ints[11]++;
+    }
 }
 
 //-----------------------------------------------------------------Order_subsystem_impl::dom_element
@@ -1899,6 +2012,28 @@ void Job_chain::close()
     File_based::close();
 }
 
+list<Requisite_path> Job_chain::missing_requisites() {
+    list<Requisite_path> result;
+    list<Requisite_path> missings = Dependant::missing_requisites();
+    Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+        result.push_back(*i);
+    Z_FOR_EACH_CONST(Node_list, _node_list, i) {
+        if (Job_node* node = Job_node::try_cast(*i)) {
+            list<Requisite_path> missings = node->missing_requisites();
+            Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+                result.push_back(*i);
+        }
+    }
+    Z_FOR_EACH_CONST(Order_sources::Order_source_list, _order_sources._order_source_list, i) {
+        if (Dependant* dependant = dynamic_cast<Dependant*>(+*i)) {
+            list<Requisite_path> missings = dependant->missing_requisites();
+            Z_FOR_EACH_CONST(list<Requisite_path>, missings, i) 
+                result.push_back(*i);
+        }
+    }
+    return result;
+}
+
 //-------------------------------Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space
 
 void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
@@ -2412,26 +2547,42 @@ Node* Job_chain::add_end_node( const Order::State& state )
 
 //----------------------------------------------------------------------------Job_chain::java_nodes
 
-ArrayListJ Job_chain::java_nodes() 
+vector<javabridge::Has_proxy*> Job_chain::java_nodes() 
 {
-    ArrayListJ result = ArrayListJ::new_instance(int_cast(_node_list.size()));
-    Z_FOR_EACH (Node_list, _node_list, it)
-        result.add((*it)->java_sister());
+    vector<javabridge::Has_proxy*> result;
+    result.reserve(_node_list.size());
+    Z_FOR_EACH (Node_list, _node_list, it) {
+        Node* node = *it;
+        if (Sink_node* n = Sink_node::try_cast(node)) 
+            result.push_back((has_proxy<Sink_node>*)n);
+        else
+        if (Job_node* n = Job_node::try_cast(node)) 
+            result.push_back(n);
+        else
+        if (Nested_job_chain_node* n = Nested_job_chain_node::try_cast(node)) 
+            result.push_back(n);
+        else
+        if (End_node* n = End_node::try_cast(node)) 
+            result.push_back(n);
+        else
+            z::throw_xc("UNKNOWN-NODE-TYPE", n->obj_name());
+    }
     return result;
 }
 
-ArrayListJ Job_chain::java_orders() {
+vector<javabridge::Has_proxy*> Job_chain::java_orders() {
     // Retain order of Nodes and Orders
-    ArrayListJ result = ArrayListJ::new_instance(int_cast(_order_map.size()));
+    vector<javabridge::Has_proxy*> result;
+    result.reserve(_order_map.size() + _blacklist_map.size());
     Z_FOR_EACH_CONST(Node_list, _node_list, n) {
         if (Order_queue_node* q = Order_queue_node::try_cast(*n)) {
-            Z_FOR_EACH_REVERSE_CONST(Order_queue::Queue, q->order_queue()->_queue, o) {
-                result.add((*o)->java_sister());
+            Z_FOR_EACH_CONST(Order_queue::Queue, q->order_queue()->_queue, o) {
+                result.push_back(*o);
             }
         }
     }
     Z_FOR_EACH_CONST(Blacklist_map, _blacklist_map, i) {
-        result.add(i->second->java_sister());
+        result.push_back(i->second);
     }
     return result;
 }
@@ -4105,6 +4256,7 @@ string Order_queue::obj_name() const
 
 xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
+    // See also Order_subsystem_impl::for_each_distributed_order
     Read_transaction ta ( db() );
 
     xml::Element_ptr element = document.createElement( "order_queue" );
@@ -4735,7 +4887,6 @@ string Order_queue::db_where_expression() const
     return result;
 }
 
-//-------------------------------------------------------------------------------------------------
 
 } //namespace order
 } //namespace spoooler

@@ -1,0 +1,101 @@
+@keyframes OrderStatistics-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#OrderStatistics {
+  margin-bottom: 1em;
+}
+
+/* Every @keyframes twice to allow restart of animation by changing animation-name. */
+@keyframes OrderStatistics-higher-0 {
+  from {
+    background-color: #7dffff;
+  }
+  to {
+    background-color: inherit;
+  }
+}
+
+@keyframes OrderStatistics-higher-1 {
+  from {
+    background-color: #7dffff;
+  }
+  to {
+    background-color: inherit;
+  }
+}
+
+@keyframes OrderStatistics-lower-0 {
+  from {
+    background-color: LightGray;
+  }
+  to {
+    background-color: inherit;
+  }
+}
+
+@keyframes OrderStatistics-lower-1 {
+  from {
+    background-color: LightGray;
+  }
+  to {
+    background-color: inherit;
+  }
+}
+
+.OrderStatistics-fieldGroup {
+  float: left;
+  white-space: nowrap;
+}
+
+.OrderStatistics-field {
+  animation-duration: 3s;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+  /* For background-color appearance: */
+  padding: 2px;
+  border-radius: 3px;
+  float: left;
+  width: 15ex;
+  margin-top: 2px;
+  margin-right: 1ex;
+}
+
+.OrderStatistics-higher {
+  animation-name: OrderStatistics-higher;
+  animation-duration: 3s;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+}
+
+.OrderStatistics-lower {
+  animation-name: OrderStatistics-lower;
+  animation-duration: 3s;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+}
+
+#order-timestamp-field {
+  float: left;
+  margin-top: 2px;
+  margin-right: 1ex;
+}
+
+#OrderStatistics-refresh {
+  visibility: hidden;
+  position: relative;
+  top: 1px;
+  animation-name: OrderStatistics-rotate;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.OrderStatistics-error {
+  color: #a0a0a0;
+}

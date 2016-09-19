@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.spoolerapi.scala.ScalaJobIT._
@@ -30,7 +30,7 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
   List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>
     test("Job with "+logLevel+" should call some methods") {
       scheduler.executeXml(startJobElem(logLevel))
-      eventPipe.nextWithCondition[TaskEndedEvent] {_.jobPath == jobPath}
+      eventPipe.nextWhen[TaskEnded] { _.key.jobPath == jobPath }
       checkMethodCallCounters(logLevel)
     }
   }
@@ -38,8 +38,8 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
   private def checkMethodCallCounters(logLevel: SchedulerLogLevel): Unit = {
     // Der Job schreibt in scheduler.variables, wie oft der Scheduler jede Methode aufgerufen hat.
     val LevelString = logLevel.cppNumber.toString
-    val result = instance[VariableSet] collect { case (VariableNamePattern(LevelString, call), value) => call -> value.toInt }
-    result.toMap should equal (expectedCallFrequencies(logLevel))
+    val result = instance[SchedulerVariableSet].toMap collect { case (VariableNamePattern(LevelString, call), value) => call -> value.toInt }
+    result should equal (expectedCallFrequencies(logLevel))
   }
 }
 

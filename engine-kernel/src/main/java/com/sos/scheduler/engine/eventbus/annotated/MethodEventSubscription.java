@@ -1,11 +1,14 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
-import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -17,7 +20,7 @@ abstract class MethodEventSubscription implements EventSubscription {
     private final Method method;
 
     MethodEventSubscription(EventHandlerAnnotated o, Method method) {
-        this.eventClass = checkedParameterClass(method, 0, Event.class);
+        this.eventClass = checkedParameterClass(method);
         this.annotatedObject = o;
         checkReturnType(method);
         this.method = method;
@@ -25,14 +28,17 @@ abstract class MethodEventSubscription implements EventSubscription {
     }
 
     @SuppressWarnings("unchecked")
-    static <T, U extends T> Class<U> checkedParameterClass(Method m, int i, Class<T> c) {
-        Class<?>[] t = m.getParameterTypes();
-        if (t.length < i)
-            throw new IllegalArgumentException("Method "+m+" must have "+i+" parameters");
-        Class<?> p = t[i];
-        if (!c.isAssignableFrom(p))
-            throw new IllegalArgumentException("Method "+m+" must have parameters #"+ (i+1) +" of a subtype of "+ c.getName());
-        return (Class<U>)p;
+    static <T, U extends T> Class<U> checkedParameterClass(Method method) {
+        Type[] types = method.getGenericParameterTypes();
+        if (types.length != 1)
+            throw new IllegalArgumentException("Method "+method+" must have exactly 1 parameter");
+        try {
+            ParameterizedType p = (ParameterizedType)types[0];
+            return (Class<U>)p.getActualTypeArguments()[0];
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException("Method "+method+" must have parameter of a type KeyedEvent<Event>: " + e, e);
+        }
     }
 
     static void checkMethodParameterCount(Method m, int min, int max) {
@@ -51,7 +57,7 @@ abstract class MethodEventSubscription implements EventSubscription {
         return c == Void.class || c.getName().equals("void");
     }
 
-    @Override public final void handleEvent(Event event) {
+    @Override public final void handleEvent(KeyedEvent<Event> event) {
         try {
             invokeHandler(event);
         } catch (IllegalArgumentException x) { throw new Error("Method "+ method +" rejected argument '"+event+"'", x);
@@ -61,7 +67,7 @@ abstract class MethodEventSubscription implements EventSubscription {
         }
     }
 
-    protected abstract void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException;
+    protected abstract void invokeHandler(KeyedEvent<Event> event) throws InvocationTargetException, IllegalAccessException;
 
     @Override public final Class<? extends Event> eventClass() {
         return eventClass;

@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import CommandService._
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor
 import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
+import com.sos.scheduler.engine.plugins.webservice.services.CommandService._
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
 import javax.inject.{Inject, Singleton}
 import javax.servlet.http.HttpServletRequest
@@ -15,14 +15,14 @@ import javax.ws.rs.core.{Context, MediaType, Response}
 final class CommandService @Inject private(xmlCommandExecutor: SchedulerXmlCommandExecutor) {
   @POST
   @Consumes(Array(MediaType.TEXT_XML, MediaType.APPLICATION_XML))
-  @Produces(Array(MediaType.TEXT_XML))
+  @Produces(Array("text/xml; charset=utf-8"))
   def post(
       command: String,
       @Context request: HttpServletRequest) =
     executeCommandWithSecurityLevel(xmlCommandExecutor, command, request)
 
   @GET
-  @Produces(Array(MediaType.TEXT_XML))
+  @Produces(Array("text/xml; charset=utf-8"))
   def get(
       @DefaultValue("") @QueryParam("command") command: String,
       @Context request: HttpServletRequest) = {
@@ -36,7 +36,10 @@ object CommandService {
 
   def executeCommandWithSecurityLevel(xmlCommandExecutor: SchedulerXmlCommandExecutor, command: String, request: HttpServletRequest) = {
     val securityLevel = SchedulerSecurityRequest.securityLevel(request)
-    val clientHost = Option(request.getHeader("X-Forwarded-For")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost
+    val clientHost = Option(request.getHeader("X-Forwarded-For")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost match {
+      case "0:0:0:0:0:0:0:1" ⇒ "127.0.0.1"  // C++ code supports only IPv4
+      case o ⇒ o
+    }
     val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel, clientHost)
     Response.ok(resultXml).cacheControl(noCache).build()
   }

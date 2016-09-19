@@ -8,7 +8,9 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.{autoClosing, close
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
-import com.sos.scheduler.engine.data.log.{ErrorLogEvent, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
+import com.sos.scheduler.engine.data.log.{ErrorLogged, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
@@ -40,11 +42,11 @@ with HasInjector {
 
   private val testName = testConfiguration.testClass.getName
   protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
-  private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
+  private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.Debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
-  @volatile private var errorLogEventIsTolerated: ErrorLogEvent ⇒ Boolean = Set()
+  @volatile private var errorLoggedIsTolerated: ErrorLogged ⇒ Boolean = Set()
 
   private val jdbcUrlOption: Option[String] =
     testConfiguration.database collect {
@@ -54,20 +56,20 @@ with HasInjector {
     }
 
   closeOnError(closer) {
-    eventBus.onHot[ErrorLogEvent] { case e =>
+    eventBus.onHot[ErrorLogged] { case KeyedEvent(NoKey, e) =>
       // Kann ein anderer Thread sein: C++ Heart_beat_watchdog_thread Abbruchmeldung SCHEDULER-386
       if (testConfiguration.terminateOnError &&
         !(e.codeOption exists testConfiguration.ignoreError) &&
-        !errorLogEventIsTolerated(e) &&
-        !testConfiguration.errorLogEventIsTolerated(e)) {
+        !errorLoggedIsTolerated(e) &&
+        !testConfiguration.errorLoggedIsTolerated(e)) {
         terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message }"))
       }
     }
 
-    eventBus.onHotAndCold[EventHandlerFailedEvent] { case e ⇒
+    eventBus.onHotAndCold[EventHandlerFailedEvent] { case KeyedEvent(NoKey, e) ⇒
       if (testConfiguration.terminateOnError) {
         logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
-        terminateAfterException(e.getThrowable)
+        terminateAfterException(e.throwable)
       }
     }
   }
@@ -79,7 +81,7 @@ with HasInjector {
   }
 
   onClose {
-    delegate.close()   // Possibly called twice, then checking for SchedulerCloseEvent handling error
+    delegate.close()   // Possibly called twice, then checking for SchedulerClosed handling error
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
@@ -153,20 +155,20 @@ with HasInjector {
   }
 
   def suppressingTerminateOnError[A](f: ⇒ A): A =
-    toleratingErrorLogEvent(_ ⇒ true)(f)
+    toleratingErrorLogged(_ ⇒ true)(f)
 
   def toleratingErrorCodes[A](tolerateErrorCodes: MessageCode ⇒ Boolean)(f: ⇒ A): A =
-    toleratingErrorLogEvent(_.codeOption exists tolerateErrorCodes)(f)
+    toleratingErrorLogged(_.codeOption exists tolerateErrorCodes)(f)
 
-  def toleratingErrorLogEvent[A](predicate: ErrorLogEvent ⇒ Boolean)(f: ⇒ A): A = {
-    require(errorLogEventIsTolerated == Set(), "Not nestable")
-    errorLogEventIsTolerated = predicate
+  def toleratingErrorLogged[A](predicate: ErrorLogged ⇒ Boolean)(f: ⇒ A): A = {
+    require(errorLoggedIsTolerated == Set(), "Not nestable")
+    errorLoggedIsTolerated = predicate
     try {
       val result = f
-      eventBus.dispatchEvents()   // Damit handleEvent(ErrorLogEvent) wirklich jetzt gerufen wird, solange noch errorLogEventIsTolerated gesetzt ist
+      eventBus.dispatchEvents()   // Damit handleEvent(ErrorLogged) wirklich jetzt gerufen wird, solange noch errorLoggedIsTolerated gesetzt ist
       result
     }
-    finally errorLogEventIsTolerated = Set()
+    finally errorLoggedIsTolerated = Set()
   }
 
   final def instance[A : ClassTag]: A = injector.instance[A]

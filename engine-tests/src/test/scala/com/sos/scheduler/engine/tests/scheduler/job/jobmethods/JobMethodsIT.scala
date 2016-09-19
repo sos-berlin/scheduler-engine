@@ -183,7 +183,7 @@ final class JobMethodsIT extends FreeSpec with ScalaSchedulerTest with AgentWith
           def run() = runJob(JobPath.makeAbsolute(jobName), variables = MethodDefaults ++ List("EXIT" → exitCode.toString))
           val taskResult =
             exitCode match {
-              case 1 ⇒ interceptErrorLogEvent(MessageCode("SCHEDULER-280")) { run() } .result
+              case 1 ⇒ interceptErrorLogged(MessageCode("SCHEDULER-280")) { run() } .result
               case 0 ⇒ run()
             }
           val c = calls(taskResult.logString)

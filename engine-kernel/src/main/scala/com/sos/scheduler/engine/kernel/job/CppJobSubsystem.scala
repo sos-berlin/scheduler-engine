@@ -13,17 +13,17 @@ import javax.inject.{Inject, Singleton}
 import javax.persistence.EntityManagerFactory
 
 @Singleton
-final class CppJobSubsystem @Inject private(
+private[kernel] final class CppJobSubsystem @Inject private(
   protected[this] val cppProxy: Job_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
-  injector: Injector)
+  protected val injector: Injector)
 extends JobSubsystem {
 
   private[job] lazy val entityManagerFactory = injector.instance[EntityManagerFactory]
   private[job] lazy val jobStore = injector.instance[HibernateJobStore]
   private[job] lazy val taskStore = injector.instance[HibernateTaskStore]
 
-  override def overview: JobSubsystemOverview = {
+  private[kernel] override def overview: JobSubsystemOverview = {
     case class JobInfo(fileBasedState: FileBasedState, jobState: JobState, needsProcess: Boolean)
     def jobInfo(path: JobPath) = job(path) match { case j ⇒ JobInfo(j.fileBasedState, j.state, j.needsProcess) }
     val (superOverview, jobInfos) = inSchedulerThread { (super.overview, paths map jobInfo) }

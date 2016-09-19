@@ -1,31 +1,33 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.SinkNodeOverview
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.Sink_nodeC
 import com.sos.scheduler.engine.kernel.order.OrderQueue
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 
 @ForCpp
 final class SinkNode(
-  protected val cppProxy: Sink_nodeC,
+  protected[kernel] val cppProxy: Sink_nodeC,
   protected val injector: Injector)
 extends JobNode {
 
-  def overview = SinkNodeOverview(orderState, nextState, errorState, action, jobPath, orderCount)
+  protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
+  lazy val jobPath = JobPath(inSchedulerThread { cppProxy.job_path })
 
-  def jobPath: JobPath = JobPath(cppProxy.job_path)
+  private[kernel] def overview = SinkNodeOverview(nodeKey, nextNodeId, errorNodeId, action, jobPath, orderCount, obstacles)
 
-  def orderCount: Int = cppProxy.order_queue.java_order_count()
+  private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 
-  def orderQueue: OrderQueue = cppProxy.order_queue.getSister
+  private[kernel] def isDeletingFile: Boolean = cppProxy.file_order_sink_remove()
 
-  def isDeletingFile: Boolean = cppProxy.file_order_sink_remove()
-
-  def moveFileTo: String = cppProxy.file_order_sink_move_to()
+  private[kernel] def moveFileTo: String = cppProxy.file_order_sink_move_to()
 }
 
 private object SinkNode {

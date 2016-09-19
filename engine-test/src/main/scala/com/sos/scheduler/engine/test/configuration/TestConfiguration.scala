@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test.configuration
 
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
 import com.sos.scheduler.engine.test.ResourceToFileTransformer
@@ -27,10 +27,10 @@ final case class TestConfiguration(
 
   database: Option[DatabaseConfiguration] = Some(DefaultDatabaseConfiguration()),
 
-  /** Bricht den Test mit Fehler ab, wenn ein [[com.sos.scheduler.engine.data.log.ErrorLogEvent]] ausgelöst worden ist. */
+  /** Bricht den Test mit Fehler ab, wenn ein [[com.sos.scheduler.engine.data.log.ErrorLogged]] ausgelöst worden ist. */
   terminateOnError: Boolean = true,
 
-  errorLogEventIsTolerated: ErrorLogEvent ⇒ Boolean = _ ⇒ false,
+  errorLoggedIsTolerated: ErrorLogged ⇒ Boolean = _ ⇒ false,
 
   ignoreError: MessageCode ⇒ Boolean = _ ⇒ false,
 

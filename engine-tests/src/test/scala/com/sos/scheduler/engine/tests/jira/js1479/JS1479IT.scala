@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1479
 
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderState, OrderTouchedEvent}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStarted}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -24,15 +24,15 @@ final class JS1479IT extends FreeSpec with ScalaSchedulerTest {
     val primaryOrderKey = JobChainPath("/test-a") orderKey "1"
     val eventPipe = controller.newEventPipe()
     writeConfigurationFile(primaryOrderKey, OrderCommand(primaryOrderKey, parameters = Map("A" → "TEST-A")))
-    assert(eventPipe.nextAny[OrderTouchedEvent].orderKey == primaryOrderKey)
+    assert(eventPipe.nextAny[OrderStarted.type].key == primaryOrderKey)
     val addedOrderFinishedSeq = List.fill(2) {
-      val orderKey = eventPipe.nextAny[OrderTouchedEvent].orderKey
-      eventBus.keyedEventFuture[OrderFinishedEvent](orderKey)
+      val orderKey = eventPipe.nextAny[OrderStarted.type].key
+      eventBus.eventFuture[OrderFinished](orderKey)
     }
-    val endStates = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.state }
+    val nodeIds = awaitSuccess(Future.sequence(addedOrderFinishedSeq)) map { _.nodeId }
     intercept[Exception] {
-      endStates shouldEqual List(OrderState("OKAY"), OrderState("OKAY"))
+      nodeIds shouldEqual List(NodeId("OKAY"), NodeId("OKAY"))
     }
-    endStates shouldEqual List(OrderState("FAILED"), OrderState("FAILED"))  // Test fails with scheduler.order.keep_order_content_on_reschedule=false
+    nodeIds shouldEqual List(NodeId("FAILED"), NodeId("FAILED"))  // Test fails with scheduler.order.keep_order_content_on_reschedule=false
   }
 }

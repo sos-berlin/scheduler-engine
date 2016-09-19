@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1195
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -14,8 +14,8 @@ import org.scalatest.junit.JUnitRunner
 final class JS1195IT extends FreeSpec with ScalaSchedulerTest  {
 
   "JS1195IT" in {
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](ClonedOrderKey) {
-      eventBus.awaitingKeyedEvent[OrderFinishedEvent](OriginalOrderKey) {
+    eventBus.awaiting[OrderFinished](ClonedOrderKey) {
+      eventBus.awaiting[OrderFinished](OriginalOrderKey) {
         scheduler executeXml OrderCommand(OriginalOrderKey)
       }
     }

@@ -1,21 +1,21 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import akka.actor.ActorRefFactory
+import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.accept
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
-import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerOverviewHtmlPage._
-import com.sos.scheduler.engine.plugins.newwebservice.json.JsonProtocol._
+import com.sos.scheduler.engine.kernel.log.PrefixLog
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.FrontEndRoute
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage.implicits.schedulerOverviewToHtmlPage
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
 import spray.http.HttpHeaders.`Cache-Control`
-import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes._
 import spray.routing.Directives._
 import spray.routing.{ExceptionHandler, Route}
@@ -23,56 +23,94 @@ import spray.routing.{ExceptionHandler, Route}
 /**
   * @author Joacim Zschimmer
   */
-trait ApiRoute extends JobChainRoute with OrderRoute {
+trait ApiRoute
+extends JobChainRoute
+with OrderRoute
+with JobRoute
+with ProcessClassRoute
+with TaskRoute
+with CommandRoute
+with LogRoute
+with EventRoute
+with FrontEndRoute {
 
   protected def client: DirectSchedulerClient
-  protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
+  //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
+  protected def prefixLog: PrefixLog
   protected implicit def executionContext: ExecutionContext
+  protected implicit def actorRefFactory: ActorRefFactory
 
   protected final def apiRoute: Route =
-    pathPrefix("api") {
-      respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
-        handleExceptions(ApiExceptionHandler) {
-          (pathEnd & get) {
-            completeTryHtml(client.overview)
-          } ~
-          (pathSingleSlash & get) {
-            accept(`text/html`) {
-              redirect("../api", TemporaryRedirect)
-            }
-          } ~
-          (pathPrefix("command") & pathEnd & post) {
-            entity(as[XmlString]) { case XmlString(xmlString) ⇒
-             complete(client.executeXml(xmlString) map XmlString.apply)
-            }
-          } ~
-          pathPrefix("order") {
-            (pathEnd & get) {
-               redirect("order/", TemporaryRedirect)
-            } ~
-            orderRoute
-          } ~
-          pathPrefix("jobChain") {
-            (pathEnd & get) {
-               redirect("jobChain/", TemporaryRedirect)
-            } ~
-            jobChainRoute
-          }
-          /*~
-          pathPrefix("subsystems") {
-            subsystemsRoute
-          }
-          */
-        }
+    respondWithHeader(`Cache-Control`(`max-age`(0), `no-store`, `no-cache`)) {
+      handleExceptions(ApiExceptionHandler) {
+        realApiRoute
       }
+    } ~
+    pathPrefix("frontend") {
+      frontEndRoute
     }
 
+  private def realApiRoute =
+    handleExceptions(exceptionHandler) {
+      pathEndElseRedirect(webServiceContext) {
+        get {
+          completeTryHtml(client.overview)
+        }
+      } ~
+      (pathPrefix("command") & pathEnd) {
+        commandRoute
+      } ~
+      pathPrefix("order") {
+        orderRoute
+      } ~
+      pathPrefix("jobChain") {
+        testSlash(webServiceContext) {
+          jobChainRoute
+        }
+      } ~
+      pathPrefix("job") {
+        testSlash(webServiceContext) {
+          jobRoute
+        }
+      } ~
+      pathPrefix("processClass") {
+        testSlash(webServiceContext) {
+          processClassRoute
+        }
+      } ~
+      pathPrefix("task") {
+        testSlash(webServiceContext) {
+          taskRoute
+        }
+      } ~
+      pathPrefix("scheduler") {
+        pathEnd {
+          parameter("return") {
+            case "log" ⇒ logRoute(prefixLog)
+            case _ ⇒ reject
+          }
+        }
+      } ~
+      pathPrefix("event") {
+        testSlash(webServiceContext) {
+          eventRoute
+        }
+      }
+      /*~
+      pathPrefix("subsystems") {
+        subsystemsRoute
+      }
+      */
+    }
+
+
+  /*
   private def subsystemsRoute: Route =
     pathEnd {
       get {
-        complete(fileBasedSubsystemRegister.descriptions map { _.fileBasedType.cppName })
+        complete(fileBasedSubsystemRegister.companions map { _.fileBasedType.cppName })
       }
-    } /*~
+    } ~
     pathPrefix(Segment) { subsystemName ⇒
       val subsystem = fileBasedSubsystemRegister.subsystem(FileBasedType.fromCppName(subsystemName))
       pathEnd {
@@ -94,17 +132,21 @@ trait ApiRoute extends JobChainRoute with OrderRoute {
           }
         }
       } ~
-      path("fileBased" / "details") {
+      path("fileBased" / "detailed") {
         parameter("path") { fileBasedPath ⇒
           detach(()) {
             complete {
-              subsystem.fileBased(subsystem.description.stringToPath(fileBasedPath)).details
+              subsystem.fileBased(subsystem.companion.stringToPath(fileBasedPath)).detailed
             }
           }
         }
       }
     }
     */
+
+  private val exceptionHandler = ExceptionHandler {
+    case e: CppException if e.getMessage startsWith "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
+  }
 }
 
 object ApiRoute {
@@ -113,14 +155,10 @@ object ApiRoute {
   private val ApiExceptionHandler = ExceptionHandler {
     // This is an internal API, so we expose internal error messages !!!
     case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
-    case e: IllegalArgumentException ⇒ complete((BadRequest, e.getMessage))
-    case e: RuntimeException ⇒ complete((BadRequest, e.getMessage))
+//    case e: IllegalArgumentException ⇒ complete((BadRequest, e.toSimplifiedString))
+//    case e: RuntimeException ⇒ complete((BadRequest, e.toSimplifiedString))
     case NonFatal(t) ⇒
-      logger.debug(t.toString, t)
-      val message = t match {
-        case _: IllegalArgumentException | _: RuntimeException ⇒ t.getMessage
-        case _ ⇒ t.toString
-      }
-      complete((BadRequest, message))
+      logger.warn(t.toString, t)
+      complete((BadRequest, t.toSimplifiedString))
   }
 }

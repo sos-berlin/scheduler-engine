@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1008
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent}
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.OrderStepEnded
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1008.JS1008IT._
 import java.io.File
@@ -17,13 +17,13 @@ final class JS1008IT extends FreeSpec with ScalaSchedulerTest {
   "file_order_source" in {
     // Ob Fehler in FindFirstChangeNotification ignoriert werden, testen wir manuell durch vorübergehenden Eingriff in den C++-Code. Dazu Polling-Intervall mit repeat="5" verkürzen
     val eventPipe = controller.newEventPipe()
-    val orderSubsystem = instance[OrderSubsystem]
+    val orderSubsystem = instance[OrderSubsystemClient]
     val directory = testEnvironment.newFileOrderSourceDirectory()
     scheduler executeXml jobChainElem(directory)
-    orderSubsystem.jobChain(testJobChainPath).nodeMap(OrderState("200")).action = JobChainNodeAction.stop
+    orderSubsystem.jobChain(testJobChainPath).node(NodeId("200")).action = JobChainNodeAction.stop
     val file = new File(directory, "test")
     touch(file)
-    eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == testJobChainPath.orderKey(file.getPath) }
+    eventPipe.next[OrderStepEnded](testJobChainPath.orderKey(file.getPath))
   }
 }
 

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.{noCache, schedulerTextPlainVariant}
 import javax.inject.Inject
@@ -13,7 +13,7 @@ import javax.ws.rs.core.{MediaType, Response}
 class OrderService @Inject private(
     @QueryParam("jobChain") @DefaultValue("") jobChainPathString: String,
     @PathParam("orderId") @DefaultValue("") orderId: OrderId,
-    orderSubsystem: OrderSubsystem,
+    orderSubsystem: OrderSubsystemClient,
     schedulerInstanceId: SchedulerInstanceId) {
 
   private lazy val jobChain = orderSubsystem.jobChain(JobChainPath(jobChainPathString))

@@ -7,18 +7,19 @@ import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskStartedEvent}
+import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.{ErrorLogEvent, WarningLogEvent}
+import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.{HasCloserBeforeAndAfterAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT._
 import java.nio.file.Files
@@ -70,21 +71,21 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   "An API task ignores scheduer.remote_scheduler" in {
     withEventPipe { eventPipe ⇒
       testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, expectedResult = "**")
-      eventPipe.nextWithTimeoutAndCondition[WarningLogEvent](0.s) { _.codeOption == Some(MessageCode("SCHEDULER-484")) }
-      eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
+      eventPipe.nextWhen[WarningLogged](_.event.codeOption == Some(MessageCode("SCHEDULER-484")), 0.s )
+      eventPipe.nextWhen[TaskStarted.type](_.key.jobPath == ApiJobPath, 0.s).key.taskId
     }
   }
 
 //  s"For an order, the API task running on right remote scheduler is selected" in {
 //    withEventPipe { eventPipe ⇒
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent)
-//      val aTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
+//      val aTaskId = eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent)
-//      val bTaskId = eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath }.taskId
+//      val bTaskId = eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath }.taskId
 //      testOrderWithRemoteScheduler(ApiJobChainPath, aAgent, aTaskId)
-//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath } }
+//      intercept[EventPipe.TimeoutException] { eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
 //      testOrderWithRemoteScheduler(ApiJobChainPath, bAgent, bTaskId)
-//      intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[TaskStartedEvent](0.s) { _.jobPath == ApiJobPath } }
+//      intercept[EventPipe.TimeoutException] { eventPipe.nextWhen[TaskStarted](0.s) { _.jobPath == ApiJobPath } }
 //    }
 //  }
 
@@ -98,7 +99,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     orderFile.contentString = "test"
     val jobChainPath = JobChainPath("/test-file-order")
     val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
-    eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+    eventBus.awaiting[OrderFinished](orderKey) {
       scheduler executeXml
         <job_chain name={jobChainPath.name}>
           <file_order_source directory={fileOrdersDir.toString} regex="^test\.txt$"/>
@@ -161,7 +162,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
   private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddressString], expectedResult: String): Unit = {
     withEventPipe { eventPipe ⇒
       scheduler executeXml newOrder(orderKey, remoteScheduler)
-      eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey }.result should startWith(expectedResult)
+      eventPipe.nextWhen[OrderFinishedWithResultEvent] { _.key == orderKey }.event.result should startWith(expectedResult)
     }
   }
 
@@ -169,18 +170,18 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     val eventPipe = controller.newEventPipe()
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
-      val firstJobPath = instance[OrderSubsystem].jobChain(jobChainPath).jobNodes.head.jobPath
-      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.pending
+      val firstJobPath = instance[OrderSubsystemClient].jobChain(jobChainPath).jobNodes.head.jobPath
+      instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
-      eventPipe.nextAny[ErrorLogEvent].codeOption shouldEqual Some(expectedErrorCode)
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual KeepOrderStateTransition
-      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.stopped
+      eventPipe.nextAny[ErrorLogged].event.codeOption shouldEqual Some(expectedErrorCode)
+      eventPipe.next[OrderStepEnded](orderKey).nodeTransition shouldEqual OrderNodeTransition.Keep
+      instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.stopped
     }
   }
 
-  @HotEventHandler
-  def handle(e: OrderFinishedEvent, o: UnmodifiableOrder): Unit = {
-    eventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.parameters(ResultVariableName)))
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      eventBus.publishCold(KeyedEvent(OrderFinishedWithResultEvent(orderDetailed(orderKey).variables.getOrElse(ResultVariableName, "")))(orderKey))
   }
 
   private val orderIdGenerator = (1 to Int.MaxValue).iterator map { i => new OrderId(i.toString) }
@@ -207,7 +208,9 @@ private object JS973IT {
       }</params>
     </order>
 
-  private case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
+  private case class OrderFinishedWithResultEvent(result: String) extends Event {
+    type Key = OrderKey
+  }
 
   private class Agent(val extraScheduler: ExtraScheduler, _expectedResult: String) extends AutoCloseable {
     def close(): Unit = {

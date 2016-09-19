@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
 import com.sos.scheduler.engine.data.job.ReturnCode
-import com.sos.scheduler.engine.data.order.{KeepOrderStateTransition, OrderState, OrderStateTransition, ProceedingOrderStateTransition, SuccessOrderStateTransition}
+import com.sos.scheduler.engine.data.jobchain.NodeId
+import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainNodeParserAndHandler._
 import javax.xml.stream.XMLEventReader
@@ -17,11 +18,11 @@ import scala.collection.immutable
  */
 private[jobchain] trait JobChainNodeParserAndHandler {
 
-  protected def orderState: OrderState
+  protected[kernel] def nodeId: NodeId
 
-  protected def nextState: OrderState
+  protected def nextNodeId: NodeId
 
-  protected def errorState: OrderState
+  protected def errorNodeId: NodeId
 
   private var returnCodeToOnReturnCode = PartialFunction.empty[ReturnCode, OnReturnCode]
 
@@ -36,13 +37,13 @@ private[jobchain] trait JobChainNodeParserAndHandler {
     returnCodeToOnReturnCode = parseNodeXml(xmlSource, namespaceToOnReturnCodeParser)
   }
 
-  def orderStateTransitionToState(t: OrderStateTransition): OrderState =
+  def orderStateTransitionToState(t: OrderNodeTransition): NodeId =
     t match {
-      case KeepOrderStateTransition ⇒ orderState
-      case ProceedingOrderStateTransition(returnCode) ⇒
+      case OrderNodeTransition.Keep ⇒ nodeId
+      case OrderNodeTransition.Proceeding(returnCode) ⇒
         returnCodeToOnReturnCode.lift(returnCode) match {
-          case Some(OnReturnCode(_, Some(state), _)) ⇒ state
-          case _ ⇒ if (t == SuccessOrderStateTransition) nextState else errorState
+          case Some(OnReturnCode(_, Some(nodeId), _)) ⇒ nodeId
+          case _ ⇒ if (t == OrderNodeTransition.Success) nextNodeId else errorNodeId
         }
     }
 
@@ -87,13 +88,13 @@ private[jobchain] object JobChainNodeParserAndHandler {
                       NoAction
                   }
               }
-              OnReturnCode(returnCodes, actions.option[ToState] map { _.state }, actions.byClass[Callback])
+              OnReturnCode(returnCodes, actions.option[ToNodeId] map { _.nodeId }, actions.byClass[Callback])
             }
           }
 
-        def parseToState(): ToState =
+        def parseToState(): ToNodeId =
           parseElement("to_state") {
-            ToState(OrderState(attributeMap("state")))
+            ToNodeId(NodeId(attributeMap("state")))
           }
 
         parseElement("job_chain_node") {
@@ -113,18 +114,18 @@ private[jobchain] object JobChainNodeParserAndHandler {
     }
   }
 
-  private[jobchain] type ValueToState = PartialFunction[Int, OrderState]
+  private[jobchain] type ValueToNodeId = PartialFunction[Int, NodeId]
 
   private case class NodeConfiguration(onReturnCodes: immutable.Seq[OnReturnCode])
 
-  private case class OnReturnCode(returnCodes: RangeSet, toStateOption: Option[OrderState], callbacks: immutable.Seq[Callback])
+  private case class OnReturnCode(returnCodes: RangeSet, toNodeIdOption: Option[NodeId], callbacks: immutable.Seq[Callback])
 
   private def returnCodeToOnReturnCode(onReturnCodes: immutable.Seq[OnReturnCode])(returnCode: ReturnCode): Option[OnReturnCode] =
     onReturnCodes collectFirst { case o if o.returnCodes contains returnCode.toInt ⇒ o }
 
   private sealed trait ReturnCodeAction
 
-  private case class ToState(state: OrderState) extends ReturnCodeAction
+  private case class ToNodeId(nodeId: NodeId) extends ReturnCodeAction
 
   private case class Callback(orderFunction: OrderFunction) extends ReturnCodeAction
 

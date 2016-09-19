@@ -4,16 +4,17 @@ import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivatedEvent, FileBasedRemovedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosedEvent}
-import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedRemoved}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
+import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.order.OrderId
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.persistence.entities._
+import com.sos.scheduler.engine.test.SchedulerTestUtils.jobOverview
 import com.sos.scheduler.engine.test.TestEnvironment.TestSchedulerId
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -42,20 +43,18 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   override def onSchedulerActivated(): Unit = {
     withEventPipe { eventPipe ⇒
       scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
-      eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
+      eventPipe.nextWhen[TaskClosed.type] { _.key.jobPath == orderJobPath }
       scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
       scheduler executeXml <start_job job={simpleJobPath.string} at={DaylightSavingTimeString}/>
       scheduler executeXml <start_job job={simpleJobPath.string} at={StandardTimeInstantString}><params><param name="myJobParameter" value="myValue"/></params></start_job>
-      job(simpleJobPath).forceFileReread()
-      instance[FolderSubsystem].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
-      simpleJob.forceFileReread()
-      instance[FolderSubsystem].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
+      instance[JobSubsystemClient].forceFileReread(simpleJobPath)
+      instance[FolderSubsystemClient].updateFolders()
+      eventPipe.next[FileBasedActivated.type](simpleJobPath)
+      instance[JobSubsystemClient].forceFileReread(simpleJobPath)
+      instance[FolderSubsystemClient].updateFolders()
+      eventPipe.next[FileBasedActivated.type](simpleJobPath)
     }
   }
-
-  private def simpleJob = instance[JobSubsystem].job(simpleJobPath)
 
   private def entityManager = instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
@@ -200,16 +199,16 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
     withEventPipe { eventPipe ⇒
-      instance[OrderSubsystem].jobChain(jobChainPath).forceFileReread()
-      instance[FolderSubsystem].updateFolders()
-      eventPipe.nextKeyed[FileBasedActivatedEvent](jobChainPath)
+      instance[OrderSubsystemClient].forceFileReread(jobChainPath)
+      instance[FolderSubsystemClient].updateFolders()
+      eventPipe.next[FileBasedActivated.type](jobChainPath)
     }
-    val jobChain = instance[OrderSubsystem].jobChain(jobChainPath)
+    val jobChain = instance[OrderSubsystemClient].jobChain(jobChainPath)
     pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
       jobChain shouldBe 'stopped
-      jobChain.node(OrderState("100")).action shouldEqual JobChainNodeAction.nextState
-      jobChain.node(OrderState("200")).action shouldEqual JobChainNodeAction.process
-      jobChain.node(OrderState("300")).action shouldEqual JobChainNodeAction.stop
+      jobChain.node(NodeId("100")).action shouldEqual JobChainNodeAction.next_state
+      jobChain.node(NodeId("200")).action shouldEqual JobChainNodeAction.process
+      jobChain.node(NodeId("300")).action shouldEqual JobChainNodeAction.stop
     }
   }
 
@@ -217,9 +216,9 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     withEventPipe { eventPipe ⇒
-      deleteIfExists(instance[OrderSubsystem].jobChain(jobChainPath).file) || sys.error("JobChain configuration file could not be deleted")
-      instance[FolderSubsystem].updateFolders()
-      eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)
+      deleteIfExists(instance[OrderSubsystemClient].jobChain(jobChainPath).file) || sys.error("JobChain configuration file could not be deleted")
+      instance[FolderSubsystemClient].updateFolders()
+      eventPipe.next[FileBasedRemoved.type](jobChainPath)
       tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
       fetchJobChainNodeEntities(jobChainPath) shouldBe 'empty
     }
@@ -242,11 +241,11 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   private def stopJobAndWait(jobPath: JobPath): Unit = {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
-    waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { job(orderJobPath).state == JobState.stopped }
+    waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { jobOverview(orderJobPath).state == JobState.stopped }
   }
 
   private def job(o: JobPath) =
-    instance[JobSubsystem].job(o)
+    instance[JobSubsystemClient].job(o)
 }
 
 

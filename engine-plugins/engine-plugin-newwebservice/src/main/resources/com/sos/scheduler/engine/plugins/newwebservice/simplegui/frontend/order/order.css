@@ -1,0 +1,32 @@
+h2.Folder {
+  margin-top: 3em;
+}
+
+h3.JobChain {
+  margin-top: 0;
+  padding-top: 10px;
+}
+
+.OrderSelectionStatistics {
+  margin-bottom: 1em;
+  background-color: white;
+  margin-right: 30px;
+  padding: 0 4px 4px 4px;
+}
+
+.OrderSelection {
+  margin-bottom: 1em;
+  margin-right: 20px;
+  background-color: #f9d186;
+  line-height: 1em;
+  padding: 0 4px 4px 4px;
+}
+
+.JobChain {
+  margin-top: 40px;
+}
+
+.NodeHeadline {
+  margin: 2em 0 1em;
+  font-weight: bold;
+}

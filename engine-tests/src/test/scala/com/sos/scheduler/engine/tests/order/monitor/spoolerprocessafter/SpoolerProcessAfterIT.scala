@@ -3,21 +3,20 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskId}
-import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
+import com.sos.scheduler.engine.data.job.{TaskClosed, TaskId, TaskKey}
+import com.sos.scheduler.engine.data.jobchain.NodeId
+import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.eventbus.EventSourceEvent
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
-import com.sos.scheduler.engine.test.SchedulerTestUtils.deleteAndWriteConfigurationFile
+import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT._
@@ -42,8 +41,8 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val agent = new Agent(AgentConfiguration.forTest(httpPort = agentHttpPort)).closeWithCloser
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
-  private lazy val jobSubsystem = instance[JobSubsystem]
-  private lazy val orderSubsystem = instance[OrderSubsystem]
+  private lazy val jobSubsystem = instance[JobSubsystemClient]
+  private lazy val orderSubsystem = instance[OrderSubsystemClient]
 
   private sealed abstract class AgentMode(override val toString: String, val addressOption: () ⇒ Option[String])
   private object NoAgent          extends AgentMode("No Agent"         , () ⇒ None)
@@ -70,6 +69,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       deleteAndWriteConfigurationFile(ProcessClassPath("/test"), <process_class remote_scheduler={agentMode.addressOption().orNull}/>)
       val job = jobSubsystem.job(setting.jobPath)
+      def jobState = jobSubsystem.jobOverview(setting.jobPath).state
 
       try {
         val e = execute()
@@ -87,17 +87,18 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       def cleanUpAfterExcecute(): Unit = {
         orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
         job.endTasks()   // Task kann schon beendet und Job schon gestoppt sein.
-        eventPipe.nextAny[TaskClosedEvent] match { case e ⇒
-          assert(e.taskId == expectedTaskId, "TaskClosedEvent not for expected task - probably a previous test failed")
+        eventPipe.nextAny[TaskClosed.type] match {
+          case KeyedEvent(TaskKey(_, taskId), _) ⇒
+            assert(taskId == expectedTaskId, "TaskClosed not for expected task - probably a previous test failed")
         }
-        waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+        waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { jobState == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
       }
 
-      def checkAssertions(event: MyFinishedEvent): Unit = {
-        assert(event.orderKey == setting.orderKey)
-        assert(expected.orderStateExpectation matches event.state, s", expected OrderState=${expected.orderStateExpectation}, but was ${event.state}")
-        assert(event.spoolerProcessAfterParameterOption == expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
-        assert(job.state == expected.jobState, ", Job.state is not as expected")
+      def checkAssertions(event: KeyedEvent[MyFinishedEvent]): Unit = {
+        assert(event.key == setting.orderKey)
+        assert(expected.orderStateExpectation matches event.event.nodeId, s", expected NodeId=${expected.orderStateExpectation}, but was ${event.event.nodeId}")
+        assert(event.event.spoolerProcessAfterParameterOption == expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
+        assert(jobState == expected.jobState, ", Job.state is not as expected")
         expected.requireMandatoryMessageCodes(messageCodes)
         //??? assert(expected.removeIgnorables(messageCodes).toMap  == expected.messageCodes.toMap)
       }
@@ -108,29 +109,29 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
       }
     }
 
-  eventBus.onHotEventSourceEvent[OrderStepEndedEvent] {
-    case EventSourceEvent(e: OrderStepEndedEvent, order: UnmodifiableOrder) ⇒
-      if (e.stateTransition == KeepOrderStateTransition) {
-        // Es wird kein OrderFinishedEvent geben.
-        publishMyFinishedEvent(order)
-      }
+  eventBus.onHot[OrderStepEnded] {
+    case KeyedEvent(orderKey, e) if e.nodeTransition == OrderNodeTransition.Keep ⇒
+      // Es wird kein OrderFinished geben.
+      publishMyFinishedEvent(orderDetailed(orderKey))
   }
 
-  eventBus.onHotEventSourceEvent[OrderFinishedEvent] {
-    case EventSourceEvent(e: OrderFinishedEvent, order: UnmodifiableOrder) ⇒
-    publishMyFinishedEvent(order)
+  eventBus.onHot[OrderFinished] {
+    case KeyedEvent(orderKey, _) ⇒
+      publishMyFinishedEvent(orderDetailed(orderKey))
   }
 
-  private def publishMyFinishedEvent(order: UnmodifiableOrder): Unit = {
-    eventBus.publishCold(MyFinishedEvent(
-      order.key, order.state,
-      emptyToNone(order.parameters(SpoolerProcessAfterNames.parameter)) map { _.toBoolean }))
+  private def publishMyFinishedEvent(order: OrderDetailed): Unit = {
+    eventBus.publishCold(KeyedEvent(
+      MyFinishedEvent(
+        order.overview.nodeId,
+        order.variables.get(SpoolerProcessAfterNames.parameter) map { _.toBoolean }))
+      (order.orderKey))
   }
 
-  eventBus.on[LogEvent] { case e: LogEvent ⇒
+  eventBus.onHot[Logged] { case KeyedEvent(_, e: Logged) ⇒
     if (Expected.LogLevels contains e.level) {
-      for (code ← Option(e.getCodeOrNull))
-        messageCodes.addBinding(e.level, code)
+      for (code ← e.codeOption)
+        messageCodes.addBinding(e.level, code.string)
     }
   }
 }
@@ -139,5 +140,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
 private object SpoolerProcessAfterIT {
   private class MyMutableMultiMap[A, B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
-  private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
+  private case class MyFinishedEvent(nodeId: NodeId, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event {
+    type Key = OrderKey
+  }
 }

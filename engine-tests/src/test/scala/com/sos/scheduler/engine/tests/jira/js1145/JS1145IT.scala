@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.monitor.MonitorPath
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1145.JS1145IT._
@@ -51,8 +51,8 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Job with referencing an unknown monitor is not active" in {
-    assert(job(LateMonitorJobPath).fileBasedState == FileBasedState.incomplete)
-    assert(job(LateMonitorJobPath).state == JobState.loaded)
+    assert(jobOverview(LateMonitorJobPath).fileBasedState == FileBasedState.incomplete)
+    assert(jobOverview(LateMonitorJobPath).state == JobState.loaded)
   }
 
   "When the monitor is defined, the job is activated" in {
@@ -61,8 +61,8 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
         <script java_class="com.sos.scheduler.engine.tests.jira.js1145.TestAMonitor"/>
       </monitor>
     updateFolders()
-    assert(job(LateMonitorJobPath).fileBasedState == FileBasedState.active)
-    assert(job(LateMonitorJobPath).state == JobState.pending)
+    assert(jobOverview(LateMonitorJobPath).fileBasedState == FileBasedState.active)
+    assert(jobOverview(LateMonitorJobPath).state == JobState.pending)
   }
 
   "Deleting a monitor stopps dependant job and ends its tasks" in {
@@ -72,24 +72,24 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
     assert(run.ended.isCompleted)
     Files.move(aMonitorFile, renamed(aMonitorFile))
     updateFolders()
-    assert(job(NamedMonitorJobPath).fileBasedState == FileBasedState.incomplete)
+    assert(jobOverview(NamedMonitorJobPath).fileBasedState == FileBasedState.incomplete)
     awaitSuccess(run.ended)(5.s)
-    assert(job(NamedMonitorJobPath).state == JobState.stopped)
+    assert(jobOverview(NamedMonitorJobPath).state == JobState.stopped)
   }
 
   "When all missing monitors have been appeared, the dependant job is activated again" in {
     Files.move(renamed(aMonitorFile), aMonitorFile)
     updateFolders()
-    assert(job(NamedMonitorJobPath).fileBasedState == FileBasedState.active)
-    assert(job(NamedMonitorJobPath).state == JobState.pending)
+    assert(jobOverview(NamedMonitorJobPath).fileBasedState == FileBasedState.active)
+    assert(jobOverview(NamedMonitorJobPath).state == JobState.pending)
     runNamedMonitorJob()
   }
 
   "A missing include file used by a monitor results in failed job start" in {
     Files.move(sIncludeFile, renamed(sIncludeFile))
     updateFolders()
-    assert(job(JavascriptMonitorJobPath).fileBasedState == FileBasedState.active)
-    assert(job(JavascriptMonitorJobPath).state == JobState.pending)
+    assert(jobOverview(JavascriptMonitorJobPath).fileBasedState == FileBasedState.active)
+    assert(jobOverview(JavascriptMonitorJobPath).state == JobState.pending)
     controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-399"), MessageCode("SCHEDULER-280"))) {
       runJob(JavascriptMonitorJobPath).logString should include ("SCHEDULER-399")
     }
@@ -98,8 +98,8 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   "When all missing include files used by monitors reappears, the dependant job runs successfully again" in {
     Files.move(renamed(sIncludeFile), sIncludeFile)
     updateFolders()
-    assert(job(JavascriptMonitorJobPath).fileBasedState == FileBasedState.active)
-    assert(job(JavascriptMonitorJobPath).state == JobState.pending)
+    assert(jobOverview(JavascriptMonitorJobPath).fileBasedState == FileBasedState.active)
+    assert(jobOverview(JavascriptMonitorJobPath).state == JobState.pending)
     runNamedJavascriptMonitorJob()
   }
 
@@ -118,7 +118,7 @@ final class JS1145IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def updateFolders() = {
-    instance[FolderSubsystem].updateFolders()
+    instance[FolderSubsystemClient].updateFolders()
   }
 
   private def runNamedMonitorJob(): Unit = {

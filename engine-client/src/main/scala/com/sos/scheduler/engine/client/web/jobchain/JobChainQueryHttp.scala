@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.web.jobchain
 
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainQuery}
-import spray.http.Uri
-import spray.routing.Directives._
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
+import spray.http.Uri.Path
 import spray.routing._
 
 /**
@@ -10,19 +10,20 @@ import spray.routing._
   */
 object JobChainQueryHttp {
 
+  private val DistributedName = "isDistributed"
+  protected val parameterNames = Set(DistributedName)
+
   object directives {
-    def jobChainQuery: Directive1[JobChainQuery] =
-      unmatchedPath flatMap { path ⇒
-        if (path startsWith Uri.Path.SingleSlash)
-          provide(fromUriPath(path.toString))
-        else
-          reject
-      }
+    def orderQuery: Directive1[JobChainQuery] = QueryHttp.pathAndParametersDirective(pathAndParametersToQuery)
   }
 
-  def fromUriPath(path: String) = new JobChainQuery(path)
+  protected def pathAndParametersToQuery(path: Path, parameters: Map[String, String]) =
+    JobChainQuery.Standard(
+      jobChainPathQuery = PathQuery[JobChainPath](path.toString),
+      isDistributed = parameters.get(DistributedName) map { _.toBoolean })
 
-  def toUriPath(query: JobChainQuery) = query.string
+  def toUriPath(q: JobChainQuery): String = q.jobChainPathQuery.patternString
 
-  def toUriPath(jobChainPath: JobChainPath) = jobChainPath.string
+  def toHttpQueryMap(q: JobChainQuery) = Map() ++
+    (q.isDistributed map { o ⇒ DistributedName → o.toString })
 }

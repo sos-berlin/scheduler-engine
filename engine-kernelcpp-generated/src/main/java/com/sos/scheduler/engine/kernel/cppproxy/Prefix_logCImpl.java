@@ -14,6 +14,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC {
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public java.lang.String filename() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = filename__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String filename__native(long cppReference);
+
+
     @Override public java.lang.String java_last(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

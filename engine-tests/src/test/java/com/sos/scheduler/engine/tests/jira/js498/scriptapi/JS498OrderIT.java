@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js498.scriptapi;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -67,7 +67,7 @@ public final class JS498OrderIT extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(OrderFinishedEvent e) {
+    public void handleOrderFinished(KeyedEvent<OrderFinished> g) {
         controller().terminateScheduler();
     }
 

@@ -1,20 +1,23 @@
 package com.sos.scheduler.engine.tests.jira.js802
 
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderTouchedEvent}
-import com.sos.scheduler.engine.eventbus.EventHandler
-import com.sos.scheduler.engine.test.SchedulerTest
+import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.scheduler.engine.data.job.{TaskEnded, TaskKey}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderStarted}
+import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js802.JS802IT._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
-import org.junit.Test
+import org.junit.runner.RunWith
+import org.scalatest.FreeSpec
+import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 import scala.language.reflectiveCalls
 
 /** JS-802 "http://www.sos-berlin.com/jira/browse/JS-802": Testet einen Auftrag und einen Job.
   * @see <a href="http://www.sos-berlin.com/jira/browse/JS-802">JS-802</a> */
-class JS802IT extends SchedulerTest {
+@RunWith(classOf[JUnitRunner])
+final class JS802IT extends FreeSpec with ScalaSchedulerTest {
 
   @volatile private var startTime = new DateTime(0)
 
@@ -29,25 +32,23 @@ class JS802IT extends SchedulerTest {
     }
   }
 
-  @Test def test(): Unit = {
-    controller.activateScheduler()
+  "test" in {
     startTime = secondNow() plusSeconds orderDelay
     scheduler.executeXml(orderElem(orderKey, startTime))
     scheduler.executeXml(jobElem(jobName, startTime))
     controller.waitForTermination()
   }
 
-  @EventHandler def handleEvent(event: OrderTouchedEvent): Unit = {
-    if (event.orderKey == orderKey) {
-      assertTrue(s"Order ${event.orderKey} has been started before expected time $startTime", new DateTime() isAfter startTime)
-      collector.add(event.orderKey)
-    }
+  eventBus.on[OrderStarted.type] {
+    case KeyedEvent(key, OrderStarted) ⇒
+      assertTrue(s"Order $key has been started before expected time $startTime", new DateTime() isAfter startTime)
+      collector.add(key)
   }
 
-  @EventHandler def handleEvent(event: TaskEndedEvent): Unit = {
-    assertTrue(s"Job ${event.jobPath} has been started before expected time $startTime", new DateTime() isAfter startTime)
-    if (event.jobPath.name == jobName)
-      collector.add(event.jobPath.name)
+  eventBus.on[TaskEnded] {
+    case KeyedEvent(TaskKey(jobPath, _), _: TaskEnded) if jobPath.name == jobName ⇒
+      assertTrue(s"$jobPath has been started before expected time $startTime", new DateTime() isAfter startTime)
+      collector.add(jobPath.name)
   }
 }
 

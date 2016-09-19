@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js856
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js856.JS856IT._
 import org.scalatest.FunSuite
@@ -42,14 +42,14 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
     final def runUntilEnd(): Unit = {
       val eventPipe = controller.newEventPipe()
       startOrder()
-      eventPipe.nextAny[OrderFinishedEvent]
+      eventPipe.nextAny[OrderFinished]
     }
 
     final def runUntilSuspendedThenReset(): Unit = {
       val eventPipe = controller.newEventPipe()
       startOrder(List(suspendedParameterName -> suspendedTrue))
-      eventPipe.nextAny[OrderStepEndedEvent]
-      eventPipe.nextAny[OrderSuspendedEvent]
+      eventPipe.nextAny[OrderStepEnded]
+      eventPipe.nextAny[OrderSuspended.type]
       orderParameters should equal (whenSuspendedExpectedParameters)
       resetOrder()
     }
@@ -60,9 +60,9 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} action="reset"/>
     }
 
-    final def orderParameters = order.parameters.toMap filterKeys { _ != suspendedParameterName }
+    final def orderParameters = order.variables filterKeys { _ != suspendedParameterName }
 
-    final def order = instance[OrderSubsystem].order(orderKey)
+    final def order = instance[OrderSubsystemClient].order(orderKey)
   }
 
   class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(jobChainPath orderKey "1") {

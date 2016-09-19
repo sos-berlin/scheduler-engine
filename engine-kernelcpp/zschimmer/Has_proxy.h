@@ -89,7 +89,9 @@ struct proxy_jobject : Proxy_jobject
 //--------------------------------------------------------------------------------java_array_from_c
 
 jobjectArray java_array_from_c(const std::vector<string>&);
+jobjectArray java_array_from_c(const std::vector<Has_proxy*>&);
 jbyteArray java_byte_array_from_c(const string&);
+
 string string_from_java_byte_array(jbyteArray);
 
 //Für Has_proxy nicht getestet:

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.schedulertest;
 
+import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -17,7 +18,7 @@ public final class FailingTerminatedEventHandlerIT extends SchedulerTest {
         controller().close();
     }
 
-    @HotEventHandler public void handleEvent(TerminatedEvent e) {
+    @HotEventHandler public void handleEvent(KeyedEvent<TerminatedEvent> e) {
         throw new TestError();
     }
 }

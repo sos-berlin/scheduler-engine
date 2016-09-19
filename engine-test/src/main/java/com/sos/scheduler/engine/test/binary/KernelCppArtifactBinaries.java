@@ -2,15 +2,13 @@ package com.sos.scheduler.engine.test.binary;
 
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
+import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.common.system.OperatingSystemJava.cpuArchitecture;
 import static com.sos.scheduler.engine.common.system.OperatingSystemJava.isWindows;
-import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.debug;
+import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.Release;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
@@ -21,7 +19,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
 
     KernelCppArtifactBinaries(CppBinariesDebugMode debugMode) {
         String bin = isWindows?
-                cpuArchitecture.visualStudioName() +"/"+ (debugMode == debug? "Debug" : "Release") :
+                cpuArchitecture.visualStudioName() +"/"+ (debugMode == Release || System.getProperty("jobscheduler.release") != null? "Release" : "Debug") :
                 cpuArchitecture.officialName() +"/Release";
         directory = new File(kernelCppDir(), bin);
         checkArgument(directory.isDirectory(), "%s does not exist or is not a directory", directory);

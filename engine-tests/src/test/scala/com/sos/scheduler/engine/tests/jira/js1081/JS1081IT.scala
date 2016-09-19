@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1081
 import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits.asJavaInstant
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.order
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1081.JS1081IT._
@@ -26,7 +26,7 @@ final class JS1081IT extends FreeSpec with ScalaSchedulerTest {
       for (i ← 0 to 2) {
         withClue(s"Instant $i, $myOrderElem") {
           assert(order(AOrderKey).nextInstantOption contains asJavaInstant(instants(i)))
-          eventPipe.nextKeyed[OrderFinishedEvent](AOrderKey)
+          eventPipe.next[OrderFinished](AOrderKey)
         }
       }
     }
