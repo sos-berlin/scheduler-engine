@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1291
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.{RichPath, _}
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
@@ -48,9 +48,13 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
 
   List(
-    //"With TCP C++ Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)) },
-    "With Universal Agent" → { () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)) })
-  .foreach { case (testGroupName, lazyProcessClassConfig) ⇒
+    "With TCP C++ Agent" → Setting(
+      () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)),
+      shellTaskMaximum = OldAgentTaskParallelCount),
+    "With Universal Agent" → Setting(
+      () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)),
+      shellTaskMaximum = NewAgentShellTaskParallelCount))
+  .foreach { case (testGroupName, setting) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
       lazy val taskLogLines = (eventsPromise.successValue collect {
@@ -60,7 +64,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
       val finishedOrderParametersPromise = Promise[Map[String, String]]()
 
       "(prepare process class)" in {
-        deleteAndWriteConfigurationFile(TestProcessClassPath, lazyProcessClassConfig())
+        deleteAndWriteConfigurationFile(TestProcessClassPath, setting.lazyProcessClassConfiguration())
       }
 
       "Run shell job via order" in {
@@ -184,8 +188,8 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
           assert((results filterNot { _.returnCode.isSuccess }) == Nil)
         }
 
-        s"Start $ShellTaskParallelCount simultaneously running shell tasks" in {
-          runTasks(JobPath("/test-sleep"), ShellTaskParallelCount, taskMaximumDuration = 1.s)
+        s"Start ${setting.shellTaskMaximum} simultaneously running shell tasks" in {
+          runTasks(JobPath("/test-sleep"), setting.shellTaskMaximum, taskMaximumDuration = 1.s)
         }
 
         s"Start $JavaTaskParallelCount simultaneously running API tasks" in {
@@ -202,7 +206,8 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
 object JS1291AgentIT {
   private val CpuIs64bit = sys.props("os.arch") contains "64"  // This is to detect low memory 32 bit operating system
-  private val ShellTaskParallelCount = if (CpuIs64bit) 100 else 20
+  private val OldAgentTaskParallelCount = 10
+  private val NewAgentShellTaskParallelCount = if (CpuIs64bit) 100 else 20
   private val JavaTaskParallelCount = if (CpuIs64bit) 10 else 3
   private val TestProcessClassPath = ProcessClassPath("/test")
   private val TestJobchainPath = JobChainPath("/test")
@@ -276,4 +281,8 @@ object JS1291AgentIT {
     </job>
 
   private def paramToEnvName(name: String) = s"SCHEDULER_PARAM_${name.toUpperCase}"
+
+  private case class Setting(
+    lazyProcessClassConfiguration: () ⇒ ProcessClassConfiguration,
+    shellTaskMaximum: Int)
 }
