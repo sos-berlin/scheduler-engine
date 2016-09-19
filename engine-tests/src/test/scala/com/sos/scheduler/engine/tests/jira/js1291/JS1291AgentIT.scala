@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -43,17 +43,19 @@ import scala.concurrent.Promise
 final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogged}
-  private lazy val List(tcpPort, httpPort) = findRandomFreeTcpPorts(2)
+  private lazy val tcpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort"))
+    mainArguments = List(s"-tcp-port=$tcpPort"))
 
+  private val oldAgentSetting = Setting(
+    () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)),
+    shellTaskMaximum = OldAgentTaskParallelCount)
+  private val newAgentSetting = Setting(
+    () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)),
+    shellTaskMaximum = NewAgentShellTaskParallelCount)
   List(
-    "With TCP C++ Agent" → Setting(
-      () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)),
-      shellTaskMaximum = OldAgentTaskParallelCount),
-    "With Universal Agent" → Setting(
-      () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)),
-      shellTaskMaximum = NewAgentShellTaskParallelCount))
+    "With TCP C++ Agent" → oldAgentSetting,
+    "With Universal Agent" → newAgentSetting)
   .foreach { case (testGroupName, setting) ⇒
     testGroupName - {
       val eventsPromise = Promise[immutable.Seq[AnyKeyedEvent]]()
@@ -71,7 +73,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         scheduler executeXml newJobElem()
         autoClosing(newEventPipe()) { eventPipe ⇒
           toleratingErrorCodes(Set(MessageCode("SCHEDULER-280"))) { // "Process terminated with exit code ..."
-            val orderKey = TestJobchainPath orderKey testGroupName
+            val orderKey = TestJobChainPath orderKey testGroupName
             eventBus.onHot[OrderStepEnded] {
               case KeyedEvent(`orderKey`, _) ⇒
                 finishedOrderParametersPromise.trySuccess(orderDetailed(orderKey).variables)
@@ -167,9 +169,20 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         }
       }
 
+      if (setting == newAgentSetting) {
+        "API Task stdout and stderr are logged for every order step (JS-1665)" in {
+          // https://change.sos-berlin.com/browse/JS-1665
+          val result = runOrder(StdoutApiJobChainPath orderKey "ORDER-1")
+          for (outerr ← List("STDOUT", "STDERR");
+               jobPath ← List(JobPath("/stdout-api-1"), JobPath("/stdout-api-2")))
+          {
+            assert(result.logString contains s"$outerr LINE STEP FOR ORDER-1, JOB ${jobPath.name}")
+          }
+        }
+      }
+
       "Exception in Monitor" in {
         toleratingErrorLogged({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009") && (e.message contains "MONITOR EXCEPTION") }) {
-        //toleratingErrorLogged({ e ⇒ (e.codeOption contains MessageCode("SCHEDULER-280")) || (e.message startsWith "COM-80020009 java.lang.RuntimeException: MONITOR EXCEPTION") }) {
           runJob(JobPath("/throwing-monitor"))
         }
       }
@@ -210,9 +223,10 @@ object JS1291AgentIT {
   private val NewAgentShellTaskParallelCount = if (CpuIs64bit) 100 else 20
   private val JavaTaskParallelCount = if (CpuIs64bit) 10 else 3
   private val TestProcessClassPath = ProcessClassPath("/test")
-  private val TestJobchainPath = JobChainPath("/test")
+  private val TestJobChainPath = JobChainPath("/test")
   private val TestJobPath = JobPath("/test")
   private val TestReturnCode = ReturnCode(42)
+  private val StdoutApiJobChainPath = JobChainPath("/stdout-api")
   private val FirstStdoutLine = "FIRST STDOUT LINE"
   private val OrderVariable = Variable("orderparam", "ORDERVALUE")
   private val OrderParamOverridesJobParam = Variable("ORDEROVERRIDESJOBPARAM", "ORDEROVERRIDESJOBVALUE")
