@@ -11,4 +11,6 @@ public interface Job_nodeC extends Order_queue_nodeCI, CppProxyWithSister<Simple
     JobC job();
 
     String job_path();
+
+    String[] missing_requisites_java();
 }

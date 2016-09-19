@@ -57,6 +57,9 @@ with JobPersistence {
       unavailableLockPaths switch {
         case o if o.nonEmpty ⇒ builder += WaitingForLocks(o)
       }
+      if (waitingForProcessClass) {
+        builder += WaitingForProcessClass
+      }
       defaultProcessClassPathOption switch {
         case Some(path) ⇒
           processClassSubsystem.fileBasedOption(path) switch {
@@ -99,7 +102,7 @@ with JobPersistence {
 
   def stateText = inSchedulerThread { cppProxy.state_text }
 
-  def needsProcess: Boolean = inSchedulerThread { cppProxy.waiting_for_process }
+  def waitingForProcessClass: Boolean = inSchedulerThread { cppProxy.waiting_for_process }
 
   protected def nextPossibleStartInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_possible_start_millis)
