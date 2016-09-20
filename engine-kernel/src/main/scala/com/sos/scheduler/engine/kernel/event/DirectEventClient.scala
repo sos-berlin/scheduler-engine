@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.event
 
-import com.sos.scheduler.engine.data.event.KeyedTypedEventJsonFormat
-import com.sos.scheduler.engine.data.event._
+import com.sos.scheduler.engine.data.event.{KeyedTypedEventJsonFormat, _}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.log.Logged
@@ -19,14 +18,20 @@ trait DirectEventClient {
 
   def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]] = {
     val eventJsonFormat = implicitly[KeyedTypedEventJsonFormat[Event]]
-    for (iterator ← eventCollector.when[E](after, reverse = reverse)) yield {
-      val eventId = eventCollector.newEventId()  // This EventId is only to give the response a timestamp. To continue the event stream, use the last event's EventId.
-      val serializables = iterator filter { o ⇒ eventIsSelected(o.value) && (eventJsonFormat canSerialize o.value) } take limit
-      //if (serializables.isEmpty)
-        // TODO Restart in case no Event can be serialized: case Vector() ⇒ this.events(after)
-      //else
-        Snapshot(eventId, serializables.toVector)
-    }
+    for (snapshotIterator ← eventCollector.when[E](after, reverse = reverse);
+         wholeSnapshot ← {
+           val wholeEventId = eventCollector.newEventId() // This EventId is only to give the response a timestamp. To continue the event stream, use the last event's EventId.
+           var lastEventId = after
+           val serializables = snapshotIterator filter { o ⇒
+             lastEventId = o.eventId
+             eventIsSelected(o.value) && (eventJsonFormat canSerialize o.value)
+           } take limit
+           if (serializables.isEmpty)
+             events[E](after = lastEventId, limit = limit, reverse = reverse)
+           else
+             Future.successful(Snapshot(wholeEventId, serializables.toVector))
+         })
+      yield wholeSnapshot
   }
 
   private def eventIsSelected(event: AnyKeyedEvent): Boolean =
@@ -36,13 +41,18 @@ trait DirectEventClient {
       case _ ⇒ true
     }
 
-  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[E]]]] = {
-    for (Snapshot(eventId, events) ← eventCollector.whenForKey(key, after, reverse = reverse)) yield {
-      val serializables = events filter { o ⇒ eventTypedJsonFormat canSerialize o.value } take limit
-      //if (serializables.isEmpty)
-        // TODO Restart in case no Event can be serialized: case Vector() ⇒ this.events(after)
-      //else
-        Snapshot(eventId, serializables.toVector)
-    }
-  }
+  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[E]]]] =
+    for (Snapshot(eventId, events) ← eventCollector.whenForKey(key, after, reverse = reverse);
+         wholeSnapshot ← {
+           var lastEventId = EventId.BeforeFirst
+           val serializables = events filter { o ⇒
+             lastEventId = o.eventId
+             eventTypedJsonFormat canSerialize o.value
+           } take limit
+           if (serializables.isEmpty)
+             eventsForKey[E](key, after = lastEventId, limit = limit, reverse = reverse)
+           else
+             Future.successful(Snapshot(eventId, serializables.toVector))
+         })
+      yield wholeSnapshot
 }
