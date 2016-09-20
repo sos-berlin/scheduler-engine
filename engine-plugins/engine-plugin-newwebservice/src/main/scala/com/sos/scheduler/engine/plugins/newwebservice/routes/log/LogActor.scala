@@ -75,10 +75,11 @@ extends Actor {
 
   def receive = {
     case Start ⇒
-      schedulerThreadFuture { prefixLog.file } map { file ⇒ self ! UseFile(file) } onFailure {
-        case t ⇒
-          logger.warn(t.toString, t)
-          stop(self)
+      (for (file ← schedulerThreadFuture { prefixLog.file }) yield
+        self ! UseFile(file))
+      .failed foreach { t ⇒
+        logger.warn(t.toString, t)
+        stop(self)
       }
 
     case End ⇒
