@@ -610,7 +610,12 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
     catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_job_chain_nodes_table.sql_name() + " or " + db()->_job_chains_table.sql_name(), x), Z_FUNCTION); }
 }
 
-void Order_subsystem_impl::java_for_each_distributed_order(const ArrayListJ& job_chain_paths_j, const ArrayListJ& order_ids_j, int limit, OrderCallbackJ callbackJ) {
+void Order_subsystem_impl::java_for_each_distributed_order(
+    const ArrayListJ& job_chain_paths_j, 
+    const ArrayListJ& order_ids_j, 
+    int limit, 
+    OrderCallbackJ callbackJ) 
+{
     vector<string> job_chain_paths;
     {
         int n = job_chain_paths_j.size();
@@ -662,7 +667,7 @@ void Order_subsystem_impl::for_each_distributed_order(
               " and `distributed_next_time` is not null "
               " and " << job_chains_in_clause(job_chain_paths);
         if (has_order_ids) {
-            select_sql << " and " << in_clause("id", order_ids);
+            select_sql << " and " << string_in_clause("id", order_ids);
         }
         select_sql << "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
 
@@ -882,7 +887,7 @@ string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  
     }
 }
 
-string Order_subsystem_impl::in_clause(const string& key, const vector<string>& values) const {
+string Order_subsystem_impl::string_in_clause(const string& key, const vector<string>& values) const {
     const int limit = db()->dbms_kind() == dbms_oracle || db()->dbms_kind() == dbms_oracle_thin ? 1000 : INT_MAX;
     list<string> chunks;
     vector<string>::const_iterator i = values.begin();
@@ -940,46 +945,17 @@ void Order_subsystem_impl::count_finished_orders()
     _spooler->update_console_title( 2 );
 }
 
-void Order_subsystem_impl::get_statistics(jintArray arrayJ) const {
+void Order_subsystem_impl::get_statistics(jintArray resultJ) const {
     javabridge::Env jenv;
-    jboolean is_copy;
-    int n = 12;
-    if (jenv->GetArrayLength(arrayJ) != n) z::throw_xc(Z_FUNCTION, "INVALID ARRAY SIZE");
-    jint* ints = jenv->GetIntArrayElements(arrayJ, &is_copy);
-    if (!ints)  jenv.throw_java("GetIntArrayElements");
-    get_statistics(ints);
-    jenv->ReleaseIntArrayElements(arrayJ, ints, 0);
-}
-
-void Order_subsystem_impl::get_statistics(jint* ints) const {
-    int result = 0;
-    ints[0] = order_count((Read_transaction*)NULL);
-    time_t now = Time::now().as_time_t();
+    jboolean is_copy = false;
+    jint* result = jenv->GetIntArrayElements(resultJ, &is_copy);
+    if (!result) jenv.throw_java("GetIntArrayElements");
+    Time now = Time::now();
+    int result_size = jenv->GetArrayLength(resultJ);
     FOR_EACH_ORDER_CONST {
-        if (!order->is_touched()) {
-            Time at = order->at();
-            if (at.is_never()) 
-                ints[1]++;  // OrderProcessingState.NotPlanned
-            else
-            if (at.as_time_t() >= now) 
-                ints[2]++;  // OrderProcessingState.Planned
-            else 
-                ints[3]++;  // OrderProcessingState.Pending
-        } else {
-            ints[4]++;  // OrderProcessingState.Running
-            if (const Task* task = order->task()) {
-                ints[5]++;
-                if (!task->step_or_process_started_at().is_zero()) {
-                    ints[6]++;
-                }
-            }
-            if (order->is_setback()) ints[7]++;
-        }
-        if (order->suspended()) ints[8]++;
-        if (order->is_on_blacklist()) ints[9]++;
-        if (order->has_base_file()) ints[10]++;
-        if (order->is_file_order()) ints[11]++;
+        order->add_to_statistics(now, result_size, result);
     }
+    jenv->ReleaseIntArrayElements(resultJ, result, 0);
 }
 
 //-----------------------------------------------------------------Order_subsystem_impl::dom_element

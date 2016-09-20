@@ -52,6 +52,7 @@ enum Untouched_is_allowed {
 
 
 extern const string scheduler_file_order_path_variable_name;
+extern const int order_statistics_array_size;
 
 //---------------------------------------------------------------------------Order_state_transition
 
@@ -395,6 +396,7 @@ struct Order : Com_order,
     Order_subsystem_impl*       order_subsystem         () const;
     Com_log*                    com_log                 () const                                    { return _com_log; }
 
+    void add_to_statistics(Time now, int size, jint* result) const;
     void db_start_order_history();
     void on_occupied();
     void on_call(const File_exists_call&);

@@ -117,8 +117,8 @@ struct Order_subsystem_impl : Order_subsystem
     bool                        has_any_order               ();
     int                         order_count                 ( Read_transaction* ) const;
     string                      distributed_job_chains_db_where_condition() const;
-    string                      job_chains_in_clause        (const vector<string>& job_chain_paths) const { return in_clause("job_chain", job_chain_paths); }
-    string                      in_clause                   (const string&, const vector<string>&) const;
+    string                      job_chains_in_clause        (const vector<string>& job_chain_paths) const { return string_in_clause("job_chain", job_chain_paths); }
+    string                      string_in_clause            (const string&, const vector<string>&) const;
     int                         processing_order_count      ( Read_transaction* ta ) const;
     xml::Element_ptr            state_statistic_element     (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const;
 
@@ -163,8 +163,6 @@ struct Order_subsystem_impl : Order_subsystem
     Order_id_spaces            _order_id_spaces;
 
   private:
-    void get_statistics(jint*) const;
-
     OrderSubsystemJ            _typed_java_sister;
     ptr<Database_order_detector> _database_order_detector;
     int                        _started_orders_count;
