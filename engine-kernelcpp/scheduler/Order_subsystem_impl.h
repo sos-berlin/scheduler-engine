@@ -124,7 +124,7 @@ struct Order_subsystem_impl : Order_subsystem
 
     Job_chain*                  active_job_chain            ( const Absolute_path& path )           { return active_file_based( path ); }
     Job_chain*                  job_chain                   ( const Absolute_path& path )           { return file_based( path ); }
-    Job_chain*                  job_chain_or_null           ( const Absolute_path& path )           { return file_based_or_null( path ); }
+    Job_chain*                  job_chain_or_null           ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
@@ -151,7 +151,7 @@ struct Order_subsystem_impl : Order_subsystem
     string                      order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
-    void                        get_statistics              (jintArray) const;
+    void                        add_non_distributed_to_order_statistics              (jintArray) const;
 
     void wake_distributed_order_processing();
 

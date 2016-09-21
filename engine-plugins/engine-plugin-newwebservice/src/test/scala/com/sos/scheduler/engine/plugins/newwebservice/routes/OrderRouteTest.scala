@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, Proces
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStatistics, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.queries.OrderQuery
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
@@ -95,8 +95,10 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
         })
     }
 
-    def orderStatistics: Future[Snapshot[OrderStatistics]] =
+    def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] = {
+      assert(query == JobChainQuery.All)
       respondWith(TestOrderStatistics)
+    }
 
     def overview = throw new NotImplementedError
 

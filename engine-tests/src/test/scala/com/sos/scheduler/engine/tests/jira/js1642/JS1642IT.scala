@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEve
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.log.Logged
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatisticsChanged, OrderStepStarted}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
@@ -323,6 +323,45 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "ordersComplemented speed" in {
       Stopwatch.measureTime(50, "ordersComplemented") {
         client.ordersComplemented[OrderOverview] await TestTimeout
+      }
+    }
+
+    "orderStatistics" - {
+      "/" in {
+        val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery.All))
+        assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery.All)))
+        assert(orderStatistics == OrderStatistics(
+          total = 6,
+          notPlanned = 0,
+          planned = 1,
+          pending = 2,
+          running = 3,
+          inTask = 3,
+          inProcess = 3,
+          setback = 0,
+          suspended = 2,
+          blacklisted = 0,
+          permanent = 5,
+          fileOrder = 0))
+      }
+
+      s"$xFolderPath" in {
+        val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery(PathQuery(xFolderPath))))
+        assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery(PathQuery(xFolderPath)))))
+        // Distributed orders are not counted yet
+        assert(orderStatistics == OrderStatistics(
+          total = 2,
+          notPlanned = 0,
+          planned = 0,
+          pending = 2,
+          running = 0,
+          inTask = 0,
+          inProcess = 0,
+          setback = 0,
+          suspended = 1,
+          blacklisted = 0,
+          permanent = 2,
+          fileOrder = 0))
       }
     }
 

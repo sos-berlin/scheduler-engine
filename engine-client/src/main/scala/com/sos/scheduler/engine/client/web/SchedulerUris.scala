@@ -2,7 +2,8 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris._
-import com.sos.scheduler.engine.client.web.jobchain.{JobChainQueryHttp, PathQueryHttp}
+import com.sos.scheduler.engine.client.web.common.PathQueryHttp
+import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.filebased.TypedPath
@@ -57,11 +58,14 @@ final class SchedulerUris private(schedulerUriString: String) {
     def complementedForPost[V <: OrderView: OrderView.Companion]: String =
       forPost(returnType = Some(s"OrdersComplemented/${orderView.name}"))
 
-    def statistics: String =
-      uriString(Uri.Path("api/order/"), "return" → "OrderStatistics")
+    def getStatistics(query: JobChainQuery = JobChainQuery.All): String =
+      forGet(query, returnType = Some("OrderStatistics"))
 
-    private def forGet(query: OrderQuery, returnType: Option[String]): String = {
-      val (path, parameters) = query.toUriPathAndMap
+    def statisticsForPost(query: JobChainQuery = JobChainQuery.All): String =
+      forPost(returnType = Some("OrderStatistics"))
+
+    private def forGet(query: JobChainQuery, returnType: Option[String]): String = {
+      val (path, parameters) = query.toUriPathAndParameters
       uriString(Uri(
         path = Uri.Path(s"api/order$path"),
         query = Uri.Query(parameters ++ (returnType map { o ⇒ "return" → o }))))

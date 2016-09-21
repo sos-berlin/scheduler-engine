@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
@@ -20,7 +19,6 @@ import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
-import java.util.NoSuchElementException
 import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 import scala.collection.{immutable, mutable}
@@ -34,6 +32,8 @@ final class OrderSubsystem @Inject private(
   ownClusterMemberIdProvider: Provider[ClusterMemberId],
   protected val injector: Injector)
 extends FileBasedSubsystem {
+
+  import com.sos.scheduler.engine.kernel.order.OrderSubsystem._
 
   type ThisSubsystemClient = OrderSubsystemClient
   type ThisSubsystem = OrderSubsystem
@@ -53,25 +53,22 @@ extends FileBasedSubsystem {
     }
   }
 
-  private val statisticsArray = new Array[Int](12)
+  private val toOrderStatistics = new ToOrderStatistics
 
-  private[kernel] def orderStatistics = {
-    java.util.Arrays.fill(statisticsArray, 0)
-    cppProxy.get_statistics(statisticsArray)
-    OrderStatistics(
-      total = statisticsArray(0),
-      notPlanned = statisticsArray(1),
-      planned = statisticsArray(2),
-      pending = statisticsArray(3),
-      running = statisticsArray(4),
-      inTask = statisticsArray(5),
-      inProcess = statisticsArray(6),
-      setback = statisticsArray(7),
-      suspended = statisticsArray(8),
-      blacklisted = statisticsArray(9),
-      permanent = statisticsArray(10),
-      fileOrder = statisticsArray(11))
-  }
+  private[kernel] def orderStatistics(query: JobChainQuery): OrderStatistics =
+    query match {
+      case JobChainQuery.All ⇒
+        toOrderStatistics(cppProxy.add_non_distributed_to_order_statistics)
+      case _ ⇒
+        toOrderStatistics { array ⇒
+          for (jobChain ← jobChainsByQuery(query)) {
+            jobChain.addToOrderStatistics(array)
+          }
+        }
+    }
+
+  private[kernel] def orderStatistics: OrderStatistics =
+    toOrderStatistics(cppProxy.add_non_distributed_to_order_statistics)
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
@@ -124,7 +121,6 @@ extends FileBasedSubsystem {
     private def toJavaArrayList[A <: AnyRef](elements: Iterable[A]): java.util.ArrayList[AnyRef] =
       new java.util.ArrayList[AnyRef](elements.size) sideEffect { a ⇒
         for (e ← elements) a.add(e)
-
       }
 
     private def replaceWithOwnOrderView[V <: OrderView: OrderView.Companion](o: V): V =
@@ -180,10 +176,36 @@ extends FileBasedSubsystem {
     }
 }
 
-
 object OrderSubsystem extends
 FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobChainPath, JobChain] {
 
   val fileBasedType = FileBasedType.JobChain
   val stringToPath = JobChainPath.apply _
+
+  private def newOrderStatisticsArray() = new Array[Int](12)
+
+  private def toOrderStatistics(statisticsArray: Array[Int]) =
+    OrderStatistics(
+      total = statisticsArray(0),
+      notPlanned = statisticsArray(1),
+      planned = statisticsArray(2),
+      pending = statisticsArray(3),
+      running = statisticsArray(4),
+      inTask = statisticsArray(5),
+      inProcess = statisticsArray(6),
+      setback = statisticsArray(7),
+      suspended = statisticsArray(8),
+      blacklisted = statisticsArray(9),
+      permanent = statisticsArray(10),
+      fileOrder = statisticsArray(11))
+
+  private[order] final class ToOrderStatistics {
+    private val statisticsArray = newOrderStatisticsArray()
+
+    def apply(addTo: Array[Int] ⇒ Unit): OrderStatistics = {
+      java.util.Arrays.fill(statisticsArray, 0)
+      addTo(statisticsArray)
+      toOrderStatistics(statisticsArray)
+    }
+  }
 }

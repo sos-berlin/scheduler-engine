@@ -945,7 +945,7 @@ void Order_subsystem_impl::count_finished_orders()
     _spooler->update_console_title( 2 );
 }
 
-void Order_subsystem_impl::get_statistics(jintArray resultJ) const {
+void Order_subsystem_impl::add_non_distributed_to_order_statistics(jintArray resultJ) const {
     javabridge::Env jenv;
     jboolean is_copy = false;
     jint* result = jenv->GetIntArrayElements(resultJ, &is_copy);
@@ -2561,6 +2561,20 @@ vector<javabridge::Has_proxy*> Job_chain::java_orders() {
         result.push_back(i->second);
     }
     return result;
+}
+
+void Job_chain::add_non_distributed_to_order_statistics(jintArray resultJ) const {
+    javabridge::Env jenv;
+    jboolean is_copy = false;
+    jint* result = jenv->GetIntArrayElements(resultJ, &is_copy);
+    if (!result) jenv.throw_java("GetIntArrayElements");
+    Time now = Time::now();
+    int result_size = jenv->GetArrayLength(resultJ);
+    Z_FOR_EACH_CONST(Order_map, _order_map, it) {
+        const Order* order = it->second;
+        order->add_to_statistics(now, result_size, result);
+    }
+    jenv->ReleaseIntArrayElements(resultJ, result, 0);
 }
 
 //-------------------------------------------------------------------------Job_chain::on_initialize
