@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.client.web.order
 
 import com.google.common.base.Splitter
-import com.sos.scheduler.engine.client.web.jobchain.{PathQueryHttp, QueryHttp}
+import com.sos.scheduler.engine.client.web.common.QueryHttp
+import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp.toJobChainQuery
 import com.sos.scheduler.engine.common.convert.As
 import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions._
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.queries.OrderQuery._
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import scala.collection.JavaConversions._
 import spray.http.Uri
 import spray.routing._
@@ -26,15 +26,16 @@ object OrderQueryHttp {
   }
 
   object directives {
-    def extendedOrderQuery: Directive1[OrderQuery] = QueryHttp.pathAndParametersDirective(pathAndParametersToQuery)
+    def orderQuery: Directive1[OrderQuery] = QueryHttp.pathAndParametersDirective(toOrderQuery)
   }
 
-  def pathAndParametersToQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery =
+  private[order] def toOrderQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery = {
+    val JobChainQuery.Standard(jobChainPathQuery, isDistributed) = toJobChainQuery(path, parameters)
     OrderQuery(
-      jobChainPathQuery = PathQueryHttp.fromUriPath[JobChainPath](path),
+      jobChainPathQuery = jobChainPathQuery,
       orderIds = parameters.optionAs(OrderIdsName)(commaSplittedAsSet(OrderId.apply)),
       jobPaths = parameters.optionAs(JobPathsName)(commaSplittedAsSet(JobPath.apply)),
-      isDistributed = parameters.optionAs[Boolean](IsDistributedName),
+      isDistributed = isDistributed,
       isSuspended = parameters.optionAs[Boolean](IsSuspendedName),
       isSetback = parameters.optionAs[Boolean](IsSetbackName),
       isBlacklisted = parameters.optionAs[Boolean](IsBlacklistedName),
@@ -42,6 +43,7 @@ object OrderQueryHttp {
       isOrderProcessingState = parameters.optionAs(IsOrderProcessingStateName)(commaSplittedAsSet(OrderProcessingState.typedJsonFormat.typeNameToClass)),
       notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode),
       orIsSuspended = parameters.as[Boolean](OrIsSuspendedName, false))
+  }
 
-  def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.patternString
+  def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.toUriPath
 }

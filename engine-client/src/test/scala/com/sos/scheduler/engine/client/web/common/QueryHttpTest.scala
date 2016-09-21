@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.client.web.jobchain
+package com.sos.scheduler.engine.client.web.common
 
-import com.sos.scheduler.engine.client.web.jobchain.QueryHttp._
+import com.sos.scheduler.engine.client.web.common.QueryHttp._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

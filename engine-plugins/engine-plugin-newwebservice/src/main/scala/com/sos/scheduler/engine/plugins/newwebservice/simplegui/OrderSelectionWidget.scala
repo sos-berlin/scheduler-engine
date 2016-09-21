@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.OrderQuery
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderSelectionWidget._
 import scalatags.Text.all._
@@ -41,7 +41,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
     for ((key, valueOption) ← List(OrderQuery.IsSuspendedName → query.isSuspended,
                                    OrderQuery.IsSetbackName → query.isSetback,
                                    OrderQuery.IsBlacklistedName → query.isBlacklisted,
-                                   OrderQuery.IsDistributedName → query.isDistributed))
+                                   JobChainQuery.IsDistributedName → query.isDistributed))
       yield List(
         labeledDoubleCheckbox(key, valueOption, checkedMeans = true),
         StringFrag(" "),
@@ -103,7 +103,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
           attrs.value := limitPerNode map { _.toString } getOrElse "")))
 
   private def javascript = {
-    val orderJson = JsObject(query.toUriPathAndMap._2 mapValues JsString.apply).toString
+    val orderJson = JsObject(query.toUriPathAndParameters._2 mapValues JsString.apply).toString
     s"""function reloadPage(change) {
       window.location.href = orderQueryToUrl($orderJson, change);
     }"""

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.web.jobchain.PathQueryHttp.directives.pathQuery
+import com.sos.scheduler.engine.client.web.common.PathQueryHttp.directives.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.queries.PathQuery
