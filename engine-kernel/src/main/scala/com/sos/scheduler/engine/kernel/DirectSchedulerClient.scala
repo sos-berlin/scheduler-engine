@@ -95,9 +95,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       (processClasses map { _.overview }).sorted)
   }
 
-  def orderStatistics: Future[Snapshot[OrderStatistics]] =
+  def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] =
     respondWith {
-      orderSubsystem.orderStatistics
+      orderSubsystem.orderStatistics(query)
     }
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]] =

@@ -3521,6 +3521,34 @@ string Order::obj_name() const
     return result;
 }
 
+void Order::add_to_statistics(Time now, int result_size, jint* result) const {
+    if (result_size != 12) z::throw_xc(Z_FUNCTION);
+    result[0]++;
+    if (!is_touched()) {
+        Time at = this->at();
+        if (at.is_never()) 
+            result[1]++;  // OrderProcessingState.NotPlanned
+        else
+        if (at.as_time_t() >= now.as_time_t()) 
+            result[2]++;  // OrderProcessingState.Planned
+        else 
+            result[3]++;  // OrderProcessingState.Pending
+    } else {
+        result[4]++;  // OrderProcessingState.Running
+        if (const Task* task = this->task()) {
+            result[5]++;
+            if (!task->step_or_process_started_at().is_zero()) {
+                result[6]++;
+            }
+        }
+        if (is_setback()) result[7]++;
+    }
+    if (suspended()) result[8]++;
+    if (is_on_blacklist()) result[9]++;
+    if (has_base_file()) result[10]++;
+    if (is_file_order()) result[11]++;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace order

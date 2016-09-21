@@ -52,6 +52,7 @@ enum Untouched_is_allowed {
 
 
 extern const string scheduler_file_order_path_variable_name;
+extern const int order_statistics_array_size;
 
 //---------------------------------------------------------------------------Order_state_transition
 
@@ -395,6 +396,7 @@ struct Order : Com_order,
     Order_subsystem_impl*       order_subsystem         () const;
     Com_log*                    com_log                 () const                                    { return _com_log; }
 
+    void add_to_statistics(Time now, int size, jint* result) const;
     void db_start_order_history();
     void on_occupied();
     void on_call(const File_exists_call&);
@@ -978,6 +980,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Job_node*        node_from_job               ( Job* );
     vector<javabridge::Has_proxy*> java_nodes();
     vector<javabridge::Has_proxy*> java_orders();
+    void add_non_distributed_to_order_statistics(jintArray) const;
 
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
@@ -1223,7 +1226,7 @@ struct Order_subsystem: Object,
     virtual int                 order_count                 ( Read_transaction* )  const            = 0;
 
     virtual Job_chain*          job_chain                   ( const Absolute_path& )                = 0;
-    virtual Job_chain*          job_chain_or_null           ( const Absolute_path& )                = 0;
+    virtual Job_chain*          job_chain_or_null           ( const Absolute_path& ) const          = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
 
     virtual int                 finished_orders_count       () const                                = 0;
@@ -1232,8 +1235,7 @@ struct Order_subsystem: Object,
     virtual const Bstr& scheduler_file_order_path_variable_name_Bstr() const = 0;
 
     virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, const ArrayListJ& order_ids_j, int per_order_limit, OrderCallbackJ) = 0;
-
-    virtual void                get_statistics              (jintArray) const = 0;
+    virtual void add_non_distributed_to_order_statistics(jintArray) const = 0;
 };
 
 

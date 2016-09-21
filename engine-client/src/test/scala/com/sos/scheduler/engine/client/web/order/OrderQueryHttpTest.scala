@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.web.order
 
-import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.extendedOrderQuery
+import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.orderQuery
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -39,7 +39,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
   "OrderQuery" - {
     def route(expected: ⇒ OrderQuery) =
       pathPrefix("prefix") {
-        extendedOrderQuery { query: OrderQuery ⇒
+        orderQuery { query: OrderQuery ⇒
           assert(query == expected)
           complete(OK)
         }
@@ -173,7 +173,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
   }
 
   private def checkQuery(orderQuery: OrderQuery, path: Uri.Path, parameters: Map[String, String]) = {
-    assert(orderQuery.toUriPathAndMap == ((path.toString, parameters)))
-    assert(OrderQueryHttp.pathAndParametersToQuery(path, Map(parameters.toVector: _*)) == orderQuery)
+    assert(orderQuery.toUriPathAndParameters == ((path.toString, parameters)))
+    assert(OrderQueryHttp.toOrderQuery(path, Map(parameters.toVector: _*)) == orderQuery)
   }
 }

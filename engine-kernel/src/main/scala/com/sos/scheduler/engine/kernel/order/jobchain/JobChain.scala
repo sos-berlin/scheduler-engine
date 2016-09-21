@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem.ToOrderStatistics
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain._
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
@@ -144,6 +145,14 @@ with UnmodifiableJobChain {
     case _ => false
   }
 
+  private val toOrderStatistics = new ToOrderStatistics
+
+  private[kernel] def orderStatistics = toOrderStatistics(addToOrderStatistics)
+
+  private[order] def addToOrderStatistics(statisticsArray: Array[Int]): Unit = {
+    cppProxy.add_non_distributed_to_order_statistics(statisticsArray)
+  }
+
   def jobNodes: immutable.Seq[SimpleJobNode] =
     nodes collect { case o: SimpleJobNode ⇒ o }
 
@@ -195,7 +204,7 @@ with UnmodifiableJobChain {
 }
 
 object JobChain {
-  final class Type extends SisterType[JobChain, Job_chainC] {
+  object Type extends SisterType[JobChain, Job_chainC] {
     def sister(proxy: Job_chainC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
       new JobChain(proxy, injector.instance[OrderSubsystem], injector)

@@ -79,8 +79,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def getOrdersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     get[Snapshot[OrdersComplemented[V]]](_.order.complemented[V](query))
 
-  final def orderStatistics: Future[Snapshot[OrderStatistics]] =
-    get[Snapshot[OrderStatistics]](_.order.statistics)
+  final def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] =
+    post[JobChainQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
 
   // JobChain
 

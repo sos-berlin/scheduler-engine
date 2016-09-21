@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEve
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.log.Logged
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatisticsChanged, OrderStepStarted}
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
@@ -48,7 +48,6 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 import spray.http.MediaTypes.{`text/html`, `text/richtext`}
 import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
@@ -126,14 +125,17 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     private def start(after: EventId): Unit = {
-      webSchedulerClient.events[Event](after).withThisStackTrace onComplete {
-        case _ if stopping ⇒
-        case Failure(t) ⇒
-          logger.error(s"webSchedulerClient.events: $t", t)
-          controller.terminateAfterException(t)
-        case Success(Snapshot(_, events)) ⇒
-          this.webEvents ++= events filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
-          start(after = if (events.isEmpty) after else events.last.eventId)
+      (for (Snapshot(_, eventSnapshots) ← webSchedulerClient.events[Event](after).withThisStackTrace) yield {
+        this.webEvents ++= eventSnapshots filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
+        if (!stopping) {
+          start(after = eventSnapshots.last.eventId)
+        }
+      })
+      .failed foreach { throwable ⇒
+        logger.error(s"webSchedulerClient.events: $throwable", throwable)
+        if (!stopping) {
+          controller.terminateAfterException(throwable)
+        }
       }
     }
 
@@ -321,6 +323,45 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "ordersComplemented speed" in {
       Stopwatch.measureTime(50, "ordersComplemented") {
         client.ordersComplemented[OrderOverview] await TestTimeout
+      }
+    }
+
+    "orderStatistics" - {
+      "/" in {
+        val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery.All))
+        assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery.All)))
+        assert(orderStatistics == OrderStatistics(
+          total = 6,
+          notPlanned = 0,
+          planned = 1,
+          pending = 2,
+          running = 3,
+          inTask = 3,
+          inProcess = 3,
+          setback = 0,
+          suspended = 2,
+          blacklisted = 0,
+          permanent = 5,
+          fileOrder = 0))
+      }
+
+      s"$xFolderPath" in {
+        val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery(PathQuery(xFolderPath))))
+        assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery(PathQuery(xFolderPath)))))
+        // Distributed orders are not counted yet
+        assert(orderStatistics == OrderStatistics(
+          total = 2,
+          notPlanned = 0,
+          planned = 0,
+          pending = 2,
+          running = 0,
+          inTask = 0,
+          inProcess = 0,
+          setback = 0,
+          suspended = 1,
+          blacklisted = 0,
+          permanent = 2,
+          fileOrder = 0))
       }
     }
 

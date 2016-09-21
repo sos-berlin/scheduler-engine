@@ -605,6 +605,7 @@ private[js1642] object Data {
   val aAdHocOrderKey = aJobChainPath orderKey "ÅD-HÖC"
   val bJobChainPath = JobChainPath("/bJobChain")
   val b1OrderKey = bJobChainPath orderKey OneOrderId
+  val xFolderPath = FolderPath("/xFolder")
   val xaJobChainPath = JobChainPath("/xFolder/x-aJobChain")
   val xa1OrderKey = xaJobChainPath orderKey OneOrderId
   val xa2OrderKey = xaJobChainPath orderKey "2"

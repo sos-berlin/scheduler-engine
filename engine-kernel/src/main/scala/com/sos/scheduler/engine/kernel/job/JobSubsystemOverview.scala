@@ -10,7 +10,7 @@ final case class JobSubsystemOverview(
   count: Int,
   fileBasedStateCounts: Map[FileBasedState, Int],
   jobStateCounts: Map[JobState, Int],
-  needProcessCount: Int)
+  waitingForProcessClassCount: Int)
 extends FileBasedSubsystemOverview
 
 

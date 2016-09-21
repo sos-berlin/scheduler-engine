@@ -14,6 +14,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
         requireContextIsNull(context);
     }
 
+    @Override public void add_non_distributed_to_order_statistics(int[] p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            add_non_distributed_to_order_statistics__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void add_non_distributed_to_order_statistics__native(long cppReference, int[] p0);
+
+
     @Override public String[] file_based_paths(boolean p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -42,20 +56,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     }
 
     private static native int finished_orders_count__native(long cppReference);
-
-
-    @Override public void get_statistics(int[] p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            get_statistics__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void get_statistics__native(long cppReference, int[] p0);
 
 
     @Override public boolean is_empty() {

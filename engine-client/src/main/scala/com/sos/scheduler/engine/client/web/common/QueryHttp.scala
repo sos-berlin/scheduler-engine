@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client.web.jobchain
+package com.sos.scheduler.engine.client.web.common
 
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}

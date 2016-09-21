@@ -24,15 +24,15 @@ extends JobSubsystem {
   private[job] lazy val taskStore = injector.instance[HibernateTaskStore]
 
   private[kernel] override def overview: JobSubsystemOverview = {
-    case class JobInfo(fileBasedState: FileBasedState, jobState: JobState, needsProcess: Boolean)
-    def jobInfo(path: JobPath) = job(path) match { case j ⇒ JobInfo(j.fileBasedState, j.state, j.needsProcess) }
+    case class JobInfo(fileBasedState: FileBasedState, jobState: JobState, waitingForProcessClass: Boolean)
+    def jobInfo(path: JobPath) = job(path) match { case j ⇒ JobInfo(j.fileBasedState, j.state, j.waitingForProcessClass) }
     val (superOverview, jobInfos) = inSchedulerThread { (super.overview, paths map jobInfo) }
     JobSubsystemOverview(
       fileBasedType = superOverview.fileBasedType,
       count = superOverview.count,
       fileBasedStateCounts = superOverview.fileBasedStateCounts,
       jobStateCounts = (jobInfos map { _.jobState }).countEquals,
-      needProcessCount = jobInfos count { _.needsProcess }
+      waitingForProcessClassCount = jobInfos count { _.waitingForProcessClass }
     )
   }
 }

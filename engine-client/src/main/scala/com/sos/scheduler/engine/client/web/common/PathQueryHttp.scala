@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.client.web.jobchain
+package com.sos.scheduler.engine.client.web.common
 
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.queries.PathQuery
@@ -12,17 +12,17 @@ import spray.routing._
 object PathQueryHttp {
 
   object directives {
-    def pathQuery[A <: TypedPath](implicit companion: TypedPath.Companion[A]): Directive1[PathQuery] =
+    def pathQuery[P <: TypedPath](implicit companion: TypedPath.Companion[P]): Directive1[PathQuery] =
       unmatchedPath flatMap { path ⇒
         if (path startsWith Uri.Path.SingleSlash)
-          provide(fromUriPath[A](path))
+          provide(fromUriPath[P](path))
         else
           reject
       }
   }
 
-  def fromUriPath[A <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery =
-    PathQuery[A](path.toString)
+  def fromUriPath[P <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery =
+    PathQuery[P](path.toString)
 
-  def toUriPath(query: PathQuery): String = query.patternString
+  def toUriPath(query: PathQuery): String = query.toUriPath
 }
