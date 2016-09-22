@@ -60,15 +60,12 @@ extends FileBasedSubsystem {
       case JobChainQuery.All ⇒
         toOrderStatistics(cppProxy.add_non_distributed_to_order_statistics)
       case _ ⇒
-        toOrderStatistics { array ⇒
+        toOrderStatistics { allocatedArray ⇒
           for (jobChain ← jobChainsByQuery(query)) {
-            jobChain.addToOrderStatistics(array)
+            jobChain.addNonDistributedToOrderStatistics(allocatedArray)
           }
         }
     }
-
-  private[kernel] def orderStatistics: OrderStatistics =
-    toOrderStatistics(cppProxy.add_non_distributed_to_order_statistics)
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
@@ -200,12 +197,12 @@ FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobCh
       fileOrder = statisticsArray(11))
 
   private[order] final class ToOrderStatistics {
-    private val statisticsArray = newOrderStatisticsArray()
+    private val allocatedArray = newOrderStatisticsArray()
 
     def apply(addTo: Array[Int] ⇒ Unit): OrderStatistics = {
-      java.util.Arrays.fill(statisticsArray, 0)
-      addTo(statisticsArray)
-      toOrderStatistics(statisticsArray)
+      java.util.Arrays.fill(allocatedArray, 0)
+      addTo(allocatedArray)
+      toOrderStatistics(allocatedArray)
     }
   }
 }

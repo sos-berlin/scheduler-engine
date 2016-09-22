@@ -147,9 +147,7 @@ with UnmodifiableJobChain {
 
   private val toOrderStatistics = new ToOrderStatistics
 
-  private[kernel] def orderStatistics = toOrderStatistics(addToOrderStatistics)
-
-  private[order] def addToOrderStatistics(statisticsArray: Array[Int]): Unit = {
+  private[order] def addNonDistributedToOrderStatistics(statisticsArray: Array[Int]): Unit = {
     cppProxy.add_non_distributed_to_order_statistics(statisticsArray)
   }
 
