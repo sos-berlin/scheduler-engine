@@ -17,6 +17,22 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL add_1distributed_1to_1order_1statistics__Ljava_lang_String_2_3I(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jintArray p1)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::add_distributed_to_order_statistics()");
+        (o_->add_distributed_to_order_statistics(env.string_from_jstring(p0), p1));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL add_1non_1distributed_1to_1order_1statistics___3I(JNIEnv* jenv, jobject, jlong cppReference, jintArray p0)
 {
     Env env = jenv;
@@ -167,6 +183,7 @@ static void JNICALL java_1for_1each_1distributed_1order__Ljava_util_ArrayList_2L
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"add_distributed_to_order_statistics__native", (char*)"(JLjava/lang/String;[I)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::add_1distributed_1to_1order_1statistics__Ljava_lang_String_2_3I },
     { (char*)"add_non_distributed_to_order_statistics__native", (char*)"(J[I)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::add_1non_1distributed_1to_1order_1statistics___3I },
     { (char*)"file_based_paths__native", (char*)"(JZ)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1paths__Z },
     { (char*)"finished_orders_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::finished_1orders_1count },

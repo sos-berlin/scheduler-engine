@@ -108,13 +108,15 @@ with HasCloser {
       StandingOrderSubsystem))
 
   @Provides @Singleton
-  private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
-    databaseSubsystem.newEntityManagerFactory()
+  private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem)(implicit stcq: SchedulerThreadCallQueue): EntityManagerFactory =
+    inSchedulerThread {
+      databaseSubsystem.newEntityManagerFactory()
+    }
 
   @Provides @Singleton
-  private def provideDatabaseSubsystem(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) =
+  private def provideDatabaseSubsystem(implicit stcq: SchedulerThreadCallQueue) =
     new DatabaseSubsystem(() ⇒ inSchedulerThread {
-      cppProxy.db.properties.getSister.toMap
+      cppProxy.db
     })
 
   @Provides @Singleton
@@ -126,19 +128,24 @@ with HasCloser {
     new CommandSubsystem(asJavaIterable(commandHandlers(List(pluginSubsystem))))
 
   @Provides @Singleton
-  private def provideMessageCodeHandler(spoolerC: SpoolerC): MessageCodeHandler =
-    MessageCodeHandler.fromCodeAndTextStrings(spoolerC.settings.messageTexts)
+  private def provideMessageCodeHandler(spoolerC: SpoolerC)(implicit stcq: SchedulerThreadCallQueue): MessageCodeHandler =
+    inSchedulerThread {
+      MessageCodeHandler.fromCodeAndTextStrings(spoolerC.settings.messageTexts)
+    }
 
   @Provides @Singleton
-  private def licenseKeyStrings(spoolerC: SpoolerC): immutable.Iterable[LicenseKeyString] =
-    Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
+  private def licenseKeyStrings(spoolerC: SpoolerC)(implicit stcq: SchedulerThreadCallQueue): immutable.Iterable[LicenseKeyString] =
+    inSchedulerThread {
+      Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
+    }
 
   @Provides @Singleton
-  private def zoneId: ZoneId = {
-    val state = cppProxy.state_name
-    if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
-    ZoneId of cppProxy.time_zone_name
-  }
+  private def zoneId(implicit stcq: SchedulerThreadCallQueue): ZoneId =
+    inSchedulerThread {
+      val state = cppProxy.state_name
+      if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
+      ZoneId of cppProxy.time_zone_name
+    }
 
   @Provides @Singleton
   private def actorSystem(config: Config): ActorSystem = {
@@ -152,9 +159,11 @@ with HasCloser {
   }
 
   @Provides @Singleton
-  private def config(conf: SchedulerConfiguration): Config =
-    Configs.parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf") withFallback
-      SchedulerConfiguration.DefaultConfig
+  private def config(conf: SchedulerConfiguration)(implicit stcq: SchedulerThreadCallQueue): Config =
+    inSchedulerThread {
+      Configs.parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf") withFallback
+        SchedulerConfiguration.DefaultConfig
+    }
 
   @Provides @Singleton
   private def executionContext(actorSystem: ActorSystem): ExecutionContext = actorSystem.dispatcher

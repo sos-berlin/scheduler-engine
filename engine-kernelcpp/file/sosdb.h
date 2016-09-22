@@ -17,6 +17,8 @@
 #   include "../kram/sostimer.h"
 #endif
 
+#include "../zschimmer/java.h"
+
 namespace sos
 {
 
@@ -83,6 +85,7 @@ struct Sos_database_session : Sos_self_deleting
     virtual string              translate_limit         ( const string& stmt, int limit );
     typedef ::stdext::hash_map<string,string> Properties;
     virtual Properties          properties();
+    virtual zschimmer::javabridge::Lightweight_jobject jdbc_connection() const { return NULL; }
 
   protected:
     void                        transaction_begun       ();

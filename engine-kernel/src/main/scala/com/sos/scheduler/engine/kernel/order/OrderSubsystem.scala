@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC, Order_subsystemC}
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
@@ -29,6 +30,7 @@ final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC,
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   folderSubsystem: FolderSubsystem,
+  databaseSubsystem: DatabaseSubsystem,
   ownClusterMemberIdProvider: Provider[ClusterMemberId],
   protected val injector: Injector)
 extends FileBasedSubsystem {
@@ -56,16 +58,34 @@ extends FileBasedSubsystem {
   private val toOrderStatistics = new ToOrderStatistics
 
   private[kernel] def orderStatistics(query: JobChainQuery): OrderStatistics =
-    query match {
-      case JobChainQuery.All ⇒
-        toOrderStatistics(cppProxy.add_non_distributed_to_order_statistics)
-      case _ ⇒
-        toOrderStatistics { allocatedArray ⇒
-          for (jobChain ← jobChainsByQuery(query)) {
-            jobChain.addNonDistributedToOrderStatistics(allocatedArray)
-          }
-        }
+    toOrderStatistics { allocatedArray ⇒
+      val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
+      addLocalOrderStatistics(query, localChains, allocatedArray)
+      addDistributedOrderStatistics(distriChains, allocatedArray)
     }
+
+  private def addLocalOrderStatistics(query: JobChainQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
+    val q = JobChainQuery.Standard(query.jobChainPathQuery, query.isDistributed)
+    if (q.copy(isDistributed = Some(true)).matchesAllJobChains)
+      cppProxy.add_non_distributed_to_order_statistics(result)
+    else
+      for (jobChain ← jobChains) {
+        jobChain.addNonDistributedToOrderStatistics(result)
+      }
+  }
+
+  private def addDistributedOrderStatistics(jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
+    if (jobChains.nonEmpty) {
+      val sqlClause = jobChainPathsToSql(jobChains map { _.path })
+      cppProxy.add_distributed_to_order_statistics(sqlClause, result)
+    }
+  }
+
+  private def jobChainPathsToSql(jobChainPaths: TraversableOnce[JobChainPath]): String =
+    databaseSubsystem.toInClauseSql(
+      column = "job_chain",
+      for (path ← jobChainPaths) yield
+        DatabaseSubsystem.quoteSqlString(path.withoutStartingSlash))
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }

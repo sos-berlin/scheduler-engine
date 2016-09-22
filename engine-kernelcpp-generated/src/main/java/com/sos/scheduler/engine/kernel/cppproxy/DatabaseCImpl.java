@@ -14,6 +14,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC {
         requireContextIsNull(context);
     }
 
+    @Override public java.lang.Object jdbc_connection() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.Object result = jdbc_connection__native(cppReference());
+            checkIsNotReleased(java.lang.Object.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.Object jdbc_connection__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

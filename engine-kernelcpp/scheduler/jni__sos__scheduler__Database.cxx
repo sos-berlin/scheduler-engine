@@ -17,6 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL jdbc_1connection(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Database* o_ = has_proxy< ::sos::scheduler::Database >::of_cpp_reference(cppReference,"::sos::scheduler::Database::jdbc_connection()");
+        return (o_->jdbc_connection()).local_ref();
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL properties(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -33,6 +50,7 @@ static jobject JNICALL properties(JNIEnv* jenv, jobject, jlong cppReference)
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"jdbc_connection__native", (char*)"(J)Ljava/lang/Object;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::jdbc_1connection },
     { (char*)"properties__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::properties }
 };
 

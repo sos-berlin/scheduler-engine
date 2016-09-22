@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview, Orders}
-import com.sos.scheduler.engine.data.queries.OrderQuery
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
@@ -35,11 +35,15 @@ trait OrderRoute extends LogRoute {
 
   protected final def orderRoute: Route =
     (pathEnd & post) {
-      entity(as[OrderQuery]) { query ⇒
-        parameter("return") {
-          case "OrderStatistics" ⇒ completeTryHtml(client.orderStatistics(query))
-          case _ ⇒ queriedOrders(query)
-        }
+      parameter("return") {
+        case "OrderStatistics" ⇒
+          entity(as[JobChainQuery]) { query ⇒
+            completeTryHtml(client.orderStatistics(query))
+          }
+        case _ ⇒
+          entity(as[OrderQuery]) { query ⇒
+            queriedOrders(query)
+          }
       }
     } ~
     testSlash(webServiceContext) {

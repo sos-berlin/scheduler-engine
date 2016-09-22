@@ -96,6 +96,8 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
         return _last_scheduler_run_failed;
     }
 
+    javabridge::Lightweight_jobject jdbc_connection();
+
     Fill_zero                  _zero_;
     
     string                     _variables_tablename;

@@ -1800,6 +1800,13 @@ void Database::require_database() const {
     _spooler->settings()->require_role(Settings::role_scheduler);
 }
 
+javabridge::Lightweight_jobject Database::jdbc_connection() {
+    if (Sos_database_session* session = _db.sos_database_session_or_null())
+        return session->jdbc_connection();
+    else
+        return NULL;
+}
+
 //-------------------------------------------------------------------------Job_history::Job_history
 
 Job_history::Job_history( Job* job )

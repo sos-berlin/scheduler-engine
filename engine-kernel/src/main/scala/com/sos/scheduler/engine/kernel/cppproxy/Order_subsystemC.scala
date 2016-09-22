@@ -17,5 +17,7 @@ trait Order_subsystemC extends CppProxy with SubsystemC[JobChain, Job_chainC] {
     perNodeLimit: Int,
     callback: OrderCallback): Unit
 
-  def add_non_distributed_to_order_statistics(counters: Array[Int]): Unit
+  def add_non_distributed_to_order_statistics(result: Array[Int]): Unit
+
+  def add_distributed_to_order_statistics(sqlClause: String, result: Array[Int]): Unit
 }

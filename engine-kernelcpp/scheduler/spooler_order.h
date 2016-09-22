@@ -981,7 +981,7 @@ struct Job_chain : Com_job_chain,
     vector<javabridge::Has_proxy*> java_nodes();
     vector<javabridge::Has_proxy*> java_orders();
     void add_non_distributed_to_order_statistics(jintArray) const;
-
+    void add_distributed_to_order_statistics(const string&, jintArray) const;
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
     void                        add_order                   ( Order* );
@@ -1236,6 +1236,7 @@ struct Order_subsystem: Object,
 
     virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, const ArrayListJ& order_ids_j, int per_order_limit, OrderCallbackJ) = 0;
     virtual void add_non_distributed_to_order_statistics(jintArray) const = 0;
+    virtual void add_distributed_to_order_statistics(const string&, jintArray) = 0;
 };
 
 

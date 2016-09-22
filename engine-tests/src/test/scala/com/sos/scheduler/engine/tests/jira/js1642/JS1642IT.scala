@@ -330,11 +330,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       "/" in {
         val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery.All))
         assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery.All)))
+        // Distributed orders are not counted yet
         assert(orderStatistics == OrderStatistics(
-          total = 6,
+          total = 8,
           notPlanned = 0,
           planned = 1,
-          pending = 2,
+          pending = 4,
           running = 3,
           inTask = 3,
           inProcess = 3,
@@ -348,12 +349,11 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       s"$xFolderPath" in {
         val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery(PathQuery(xFolderPath))))
         assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery(PathQuery(xFolderPath)))))
-        // Distributed orders are not counted yet
         assert(orderStatistics == OrderStatistics(
-          total = 2,
+          total = 4,
           notPlanned = 0,
           planned = 0,
-          pending = 2,
+          pending = 4,
           running = 0,
           inTask = 0,
           inProcess = 0,

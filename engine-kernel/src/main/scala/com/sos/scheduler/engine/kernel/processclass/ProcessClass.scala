@@ -148,7 +148,7 @@ object ProcessClass {
         injector.instance[ProcessClassSubsystem],
         injector.instance[SchedulerThreadCallQueue],
         injector.instance[CppHttpRemoteApiProcessClient.Factory],
-        agentConnectRetryDelayLazy = () ⇒ max(1, injector.instance[SpoolerC].settings()._remote_scheduler_connect_retry_delay).s)
+        agentConnectRetryDelayLazy = () ⇒ max(1, injector.instance[SpoolerC].settings._remote_scheduler_connect_retry_delay).s)
     }
   }
 
