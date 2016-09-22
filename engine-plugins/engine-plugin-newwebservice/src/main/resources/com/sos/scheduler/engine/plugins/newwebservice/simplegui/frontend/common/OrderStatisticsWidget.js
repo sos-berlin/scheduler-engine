@@ -1,4 +1,4 @@
-jQuery(function() {
+function startOrderStatisticsChangedListener(path) {
   var keys = [
     "total",
     "notPlanned",
@@ -39,7 +39,7 @@ jQuery(function() {
   function get(lastEventId) {
     jQuery.ajax({
       dataType: 'json',
-      url: "/jobscheduler/master/api/event/?return=OrderStatisticsChanged&after=" + lastEventId
+      url: "/jobscheduler/master/api/event" + path + "?return=OrderStatisticsChanged&after=" + lastEventId
     })
     .done(function(snapshot) {
       refreshElem.style.visibility = "hidden";
@@ -82,4 +82,4 @@ jQuery(function() {
   }
 
   get(0);
-});
+}

@@ -126,7 +126,6 @@ extends SchedulerHtmlPage {
       h3("Orders"),
       OrderStatisticsWidget.html)
 
-
   private def commandInput: Frag =
     form(action := "api/command", method := "get", clear.both)(
       span(cls := "input-group input-group-sm")(

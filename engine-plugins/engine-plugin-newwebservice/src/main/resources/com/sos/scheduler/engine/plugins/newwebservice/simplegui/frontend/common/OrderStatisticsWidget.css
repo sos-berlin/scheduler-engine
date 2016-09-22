@@ -8,7 +8,13 @@
 }
 
 #OrderStatistics {
+  padding-bottom: 2px;
   margin-bottom: 1em;
+}
+
+.OrderStatistics-Header {
+  font-weight: bold;
+  padding: 2px;
 }
 
 /* Every @keyframes twice to allow restart of animation by changing animation-name. */

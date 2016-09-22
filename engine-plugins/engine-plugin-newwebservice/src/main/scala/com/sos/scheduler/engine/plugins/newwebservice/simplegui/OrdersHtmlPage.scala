@@ -45,6 +45,7 @@ extends SchedulerHtmlPage {
         seqFrag()
     }
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
+  private val orderStatisticsWidget = new OrderStatisticsWidget(query.jobChainPathQuery)
 
   override protected def title = "Orders"
   override protected def cssLinks = super.cssLinks ++ List(
@@ -57,8 +58,7 @@ extends SchedulerHtmlPage {
 
   def wholePage = {
     htmlPage(
-      div(cls := "Padded")(
-        OrderStatisticsWidget.html),
+      orderStatisticsWidget.html,
       div(float.right)(
         orderSelectionStatistics),
       div(float.right)(
@@ -78,7 +78,7 @@ extends SchedulerHtmlPage {
       div(paddingTop := 4.px),
       table(cls := "MiniTable")(
         tbody(
-          tr(td(textAlign.right)(s"$count")                    , td(s" orders")),
+          tr(td(textAlign.right, width := 5.ex)(s"$count")     , td(s" orders")),
           tr(td(textAlign.right)(s"$inProcessCount")           , td(s"in process")),
           tr(td(textAlign.right)(s"${ jobPathToOverview.size}"), td(s"jobs")),
           tr(td(textAlign.right)(s"$suspendedCount")           , td(s"suspended")),

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toAsyncScriptHtml, toCssLinkHtml}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toCssLinkHtml, toScriptHtml}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute.NeededWebjars
 import java.time.Instant.now
@@ -50,7 +50,7 @@ trait SchedulerHtmlPage extends HtmlPage {
         href := (uris / "api/frontend/common/images/jobscheduler.ico").toString)) ++
     (NeededWebjars flatMap includer.webjarsToHtml) ++
     (cssLinks map toCssLinkHtml) ++
-    (scriptLinks map toAsyncScriptHtml)
+    (scriptLinks map toScriptHtml)
   }
 
   protected def cssLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.css")

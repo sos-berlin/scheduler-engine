@@ -15,5 +15,5 @@ final class OrderStatisticsChangedSourceInjectible @Inject private(
   protected implicit val executionContext: ExecutionContext,
   orderClient: DirectOrderClient)
 extends OrderStatisticsChangedSource {
-  protected def orderStatistics = orderClient.orderStatistics(JobChainQuery.All)
+  protected def orderStatistics(query: JobChainQuery) = orderClient.orderStatistics(query)
 }
