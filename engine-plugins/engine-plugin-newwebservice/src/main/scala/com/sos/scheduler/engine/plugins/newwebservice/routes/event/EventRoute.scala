@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
-import com.sos.scheduler.engine.common.convert.As._
-import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
+import com.sos.scheduler.engine.base.convert.As._
+import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Snapshot}

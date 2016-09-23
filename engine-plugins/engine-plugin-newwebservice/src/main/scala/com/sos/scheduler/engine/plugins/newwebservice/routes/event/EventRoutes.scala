@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
-import com.sos.scheduler.engine.common.convert.As._
-import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
+import com.sos.scheduler.engine.base.convert.As._
+import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.data.event.{KeyedEvent, _}
 import scala.collection.immutable
 import shapeless.{::, HNil}

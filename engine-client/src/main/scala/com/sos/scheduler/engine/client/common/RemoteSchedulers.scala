@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.common
 
-import com.sos.scheduler.engine.common.convert.As
+import com.sos.scheduler.engine.base.convert.As
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.data.message.MessageCode

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
 import akka.util.Switch
+import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.client.web.WebSchedulerClient
-import com.sos.scheduler.engine.common.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.Stopwatch
