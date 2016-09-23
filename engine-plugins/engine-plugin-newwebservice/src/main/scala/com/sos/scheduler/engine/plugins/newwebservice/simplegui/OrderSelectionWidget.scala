@@ -41,7 +41,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
     for ((key, valueOption) ← List(OrderQuery.IsSuspendedName → query.isSuspended,
                                    OrderQuery.IsSetbackName → query.isSetback,
                                    OrderQuery.IsBlacklistedName → query.isBlacklisted,
-                                   JobChainQuery.IsDistributedName → query.isDistributed))
+                                   JobChainQuery.IsDistributedName → query.jobChainQuery.isDistributed))
       yield List(
         labeledDoubleCheckbox(key, valueOption, checkedMeans = true),
         StringFrag(" "),

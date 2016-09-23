@@ -45,7 +45,7 @@ extends SchedulerHtmlPage {
         seqFrag()
     }
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
-  private val orderStatisticsWidget = new OrderStatisticsWidget(query.jobChainPathQuery)
+  private val orderStatisticsWidget = new OrderStatisticsWidget(query.jobChainQuery.pathQuery)
 
   override protected def title = "Orders"
   override protected def cssLinks = super.cssLinks ++ List(
@@ -64,7 +64,7 @@ extends SchedulerHtmlPage {
       div(float.right)(
         new OrderSelectionWidget(query).html),
       div(clear.both)(
-        query.jobChainPathQuery match {
+        query.jobChainQuery.pathQuery match {
           case single: PathQuery.SinglePath ⇒ div(jobChainOrdersToHtml(single.as[JobChainPath], ordersComplemented.orders))
           case PathQuery.Folder(folderPath, ignoringIsRecursive) ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(folderPath, ordersComplemented.orders)))
           case _ ⇒ div(wholeFolderTreeToHtml(FolderTree.fromHasPaths(FolderPath.Root, ordersComplemented.orders)))
@@ -189,9 +189,9 @@ extends SchedulerHtmlPage {
       td(obstaclesHtml))
   }
 
-  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
+  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path))))
 
-  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainPathQuery = PathQuery(path)))
+  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path))))
 
   private def queryToA(query: OrderQuery) = hiddenA(uris.order(query, returnType = None))
 

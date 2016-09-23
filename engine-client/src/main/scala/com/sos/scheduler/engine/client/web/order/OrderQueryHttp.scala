@@ -29,13 +29,11 @@ object OrderQueryHttp {
     def orderQuery: Directive1[OrderQuery] = QueryHttp.pathAndParametersDirective(toOrderQuery)
   }
 
-  private[order] def toOrderQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery = {
-    val JobChainQuery.Standard(jobChainPathQuery, isDistributed) = toJobChainQuery(path, parameters)
+  private[order] def toOrderQuery(path: Uri.Path, parameters: Map[String, String]): OrderQuery =
     OrderQuery(
-      jobChainPathQuery = jobChainPathQuery,
+      jobChainQuery = toJobChainQuery(path, parameters),
       orderIds = parameters.optionAs(OrderIdsName)(commaSplittedAsSet(OrderId.apply)),
       jobPaths = parameters.optionAs(JobPathsName)(commaSplittedAsSet(JobPath.apply)),
-      isDistributed = isDistributed,
       isSuspended = parameters.optionAs[Boolean](IsSuspendedName),
       isSetback = parameters.optionAs[Boolean](IsSetbackName),
       isBlacklisted = parameters.optionAs[Boolean](IsBlacklistedName),
@@ -43,7 +41,6 @@ object OrderQueryHttp {
       isOrderProcessingState = parameters.optionAs(IsOrderProcessingStateName)(commaSplittedAsSet(OrderProcessingState.typedJsonFormat.typeNameToClass)),
       notInTaskLimitPerNode = parameters.optionAs[Int](NotInTaskLimitPerNode),
       orIsSuspended = parameters.as[Boolean](OrIsSuspendedName, false))
-  }
 
-  def toUriPath(q: OrderQuery): String = q.jobChainPathQuery.toUriPath
+  def toUriPath(q: OrderQuery): String = q.jobChainQuery.pathQuery.toUriPath
 }

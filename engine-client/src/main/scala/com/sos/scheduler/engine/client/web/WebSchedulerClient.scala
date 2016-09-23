@@ -85,10 +85,10 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   // JobChain
 
   final def jobChainOverview(jobChainPath: JobChainPath) =
-    get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))
+    get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery(PathQuery(jobChainPath))))
 
   final def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainOverview]]] =
-    query.jobChainPathQuery match {
+    query.pathQuery match {
       case single: PathQuery.SinglePath ⇒
         for (schedulerResponse ← get[Snapshot[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath])))
              yield for (o ← schedulerResponse)

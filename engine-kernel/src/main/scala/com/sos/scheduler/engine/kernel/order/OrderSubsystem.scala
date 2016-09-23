@@ -65,8 +65,8 @@ extends FileBasedSubsystem {
     }
 
   private def addLocalOrderStatistics(query: JobChainQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
-    val q = JobChainQuery.Standard(query.jobChainPathQuery, query.isDistributed)
-    if (q.copy(isDistributed = Some(true)).matchesAllJobChains)
+    val q = JobChainQuery(query.pathQuery, query.isDistributed)
+    if (q.copy(isDistributed = Some(true)).matchesAll)
       cppProxy.add_non_distributed_to_order_statistics(result)
     else
       for (jobChain ← jobChains) {
@@ -88,7 +88,7 @@ extends FileBasedSubsystem {
         DatabaseSubsystem.quoteSqlString(path.withoutStartingSlash))
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
-    val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
+    val (distriChains, localChains) = jobChainsByQuery(query.jobChainQuery) partition { _.isDistributed }
     val local = localOrderViews[V](localChains, query)
     val distributed = distributedOrderViews[V](distriChains, query)
     var all: Iterator[V] = local ++ distributed
@@ -171,15 +171,15 @@ extends FileBasedSubsystem {
     }
 
   private[kernel] def jobChainsByQuery(query: JobChainQuery): Iterator[JobChain] =
-    query.jobChainPathQuery match {
+    query.pathQuery match {
       case PathQuery.All ⇒
-        val reducedQuery = query withJobChainPathQuery PathQuery.All
-        orderedVisibleFileBasedIterator filter { o ⇒ reducedQuery matchesJobChain o.queryable }
+        val reducedQuery = query.copy(pathQuery = PathQuery.All)
+        orderedVisibleFileBasedIterator filter { o ⇒ reducedQuery matches o.queryable }
       case PathQuery.Folder(folderPath, ignoringIsRecursive) ⇒
         folderSubsystem.requireExistence(folderPath)
-        orderedVisibleFileBasedIterator filter { o ⇒ query matchesJobChain o.queryable }
+        orderedVisibleFileBasedIterator filter { o ⇒ query matches o.queryable }
       case single: PathQuery.SinglePath ⇒
-        Iterator(jobChain(single.as[JobChainPath])) filter { o ⇒ query matchesJobChain o.queryable }
+        Iterator(jobChain(single.as[JobChainPath])) filter { o ⇒ query matches o.queryable }
     }
 
   def jobChain(o: JobChainPath): JobChain =

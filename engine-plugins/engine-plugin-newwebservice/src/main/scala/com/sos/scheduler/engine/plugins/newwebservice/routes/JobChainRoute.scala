@@ -27,7 +27,7 @@ trait JobChainRoute {
       parameter("return".?) { returnType ⇒
         pathQuery(JobChainPath) {
           case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)
-          case query ⇒ multipleJobChainsRoute(JobChainQuery.Standard(query), returnType)
+          case query ⇒ multipleJobChainsRoute(JobChainQuery(query), returnType)
         }
       }
     }

@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -58,7 +58,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
 
     "OrderQuery /a/b" in {
-      Get("/prefix/a/b") ~> route(OrderQuery(jobChainPathQuery = PathQuery[JobChainPath]("/a/b"))) ~> check {
+      Get("/prefix/a/b") ~> route(OrderQuery(jobChainQuery = JobChainQuery(pathQuery = PathQuery[JobChainPath]("/a/b")))) ~> check {
         assert(status == OK)
       }
     }
@@ -90,7 +90,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
     "OrderQuery isDistributed" in {
       Get("/prefix/?isDistributed=true") ~>
-        route(OrderQuery(isDistributed = Some(true))) ~>
+        route(OrderQuery(JobChainQuery(isDistributed = Some(true)))) ~>
         check {
           assert(status == OK)
         }
@@ -147,7 +147,7 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     "OrderQuery /a/ suspended but not blacklisted" in {
       Get("/prefix/a/?isSuspended=true&isBlacklisted=false") ~>
         route(OrderQuery(
-          jobChainPathQuery = PathQuery[JobChainPath]("/a/"),
+          jobChainQuery = JobChainQuery(pathQuery = PathQuery[JobChainPath]("/a/")),
           isSuspended = Some(true),
           isBlacklisted = Some(false))) ~>
         check {
@@ -158,11 +158,11 @@ final class OrderQueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
   "withoutPathToMap, fromUriPathAndParameters" in {
     checkQuery(OrderQuery(), Uri.Path("/"), Map())
-    checkQuery(OrderQuery(PathQuery(FolderPath("/FOLDER")), isSuspended = Some(true)), Uri.Path("/FOLDER/"), Map("isSuspended" → "true"))
-    checkQuery(OrderQuery(PathQuery(JobChainPath("/JOBCHAIN")), isSuspended = Some(false)), Uri.Path("/JOBCHAIN"), Map("isSuspended" → "false"))
+    checkQuery(OrderQuery(JobChainQuery(PathQuery(FolderPath("/FOLDER"))), isSuspended = Some(true)), Uri.Path("/FOLDER/"), Map("isSuspended" → "true"))
+    checkQuery(OrderQuery(JobChainQuery(PathQuery(JobChainPath("/JOBCHAIN"))), isSuspended = Some(false)), Uri.Path("/JOBCHAIN"), Map("isSuspended" → "false"))
     checkQuery(
       OrderQuery(
-        PathQuery(FolderPath("/FOLDER"), isRecursive = false),
+        JobChainQuery(PathQuery(FolderPath("/FOLDER"), isRecursive = false)),
         isSuspended = Some(false),
         isOrderSourceType = Some(Set(OrderSourceType.AdHoc, OrderSourceType.Permanent)),
         isOrderProcessingState = Some(Set(OrderProcessingState.NotPlanned.getClass, classOf[OrderProcessingState.InTaskProcess]))

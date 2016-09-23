@@ -40,7 +40,7 @@ final class JobChainQueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
 
     "JobChainQuery /a/b" in {
-      Get("/prefix/a/b") ~> route(JobChainQuery(jobChainPathQuery = PathQuery[JobChainPath]("/a/b"))) ~> check {
+      Get("/prefix/a/b") ~> route(JobChainQuery(PathQuery[JobChainPath]("/a/b"))) ~> check {
         assert(status == OK)
       }
     }

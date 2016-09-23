@@ -226,28 +226,28 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "ordersComplementedBy query /aJobChain" in {
-      val query = OrderQuery(jobChainPathQuery = PathQuery[JobChainPath]("/aJobChain"))
+      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain")))
       val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](query))
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](query)))
       assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
 
     "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
-      val query = OrderQuery(jobChainPathQuery = PathQuery[JobChainPath]("/aJobChain/"))
+      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain/")))
       intercept[RuntimeException] {
         client.ordersComplementedBy[OrderOverview](query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
     }
 
     "ordersComplementedBy query /xFolder/" in {
-      val orderQuery = OrderQuery(jobChainPathQuery = PathQuery[JobChainPath]("/xFolder/"))
+      val orderQuery = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder/")))
       val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](orderQuery))
       assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
       assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
     }
 
     "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
-      val query = OrderQuery(jobChainPathQuery = PathQuery[JobChainPath]("/xFolder"))
+      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder")))
       intercept[RuntimeException] {
         client.ordersComplementedBy[OrderOverview](query) await TestTimeout
       } .getMessage should include ("SCHEDULER-161")
@@ -300,7 +300,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "jobChainOverview query" in {
-      val query = JobChainQuery.Standard(PathQuery[JobChainPath]("/xFolder/"))
+      val query = JobChainQuery(PathQuery[JobChainPath]("/xFolder/"))
       val jobChainOverviews: immutable.Seq[JobChainOverview] = awaitContent(client.jobChainOverviewsBy(query))
       assert(jobChainOverviews == awaitContent(directSchedulerClient.jobChainOverviewsBy(query)))
       assert(jobChainOverviews.toSet == Set(
