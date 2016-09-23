@@ -10,12 +10,13 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import spray.http.Uri
+import spray.testkit.ScalatestRouteTest
 
 /**
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class PathQueryHttpTest extends FreeSpec {
+final class PathQueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
   "toUriPath, fromUriPath" in {
     intercept[IllegalArgumentException] { fromUriPath[FolderPath](Uri.Path.Empty) }
@@ -33,7 +34,7 @@ final class PathQueryHttpTest extends FreeSpec {
     intercept[IllegalArgumentException] { fromUriPath[JobChainPath](Uri.Path("/a,1")) }
   }
 
-  private def check[P <: TypedPath: TypedPath.Companion](pathString: String, query: PathQuery): Unit = {
+  def check[P <: TypedPath: TypedPath.Companion](pathString: String, query: PathQuery): Unit = {
     val uriPath = Uri.Path(pathString)
     assert(fromUriPath[P](uriPath) == query)
     assert(toUriPath(query) == pathString)

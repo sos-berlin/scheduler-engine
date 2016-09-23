@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
@@ -103,7 +104,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
           attrs.value := limitPerNode map { _.toString } getOrElse "")))
 
   private def javascript = {
-    val orderJson = JsObject(query.toUriPathAndParameters._2 mapValues JsString.apply).toString
+    val orderJson = JsObject(toPathAndParameters(query)._2 mapValues JsString.apply).toString
     s"""function reloadPage(change) {
       window.location.href = orderQueryToUrl($orderJson, change);
     }"""

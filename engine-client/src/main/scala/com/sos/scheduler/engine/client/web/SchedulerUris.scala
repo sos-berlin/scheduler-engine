@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.client.web
 
+import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
+import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.common.PathQueryHttp
-import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.filebased.TypedPath
@@ -65,8 +66,8 @@ final class SchedulerUris private(schedulerUriString: String) {
     def statisticsForPost(query: JobChainQuery = JobChainQuery.All): String =
       forPost(returnType = Some("OrderStatistics"))
 
-    private def forGet(query: { def toUriPathAndParameters: (String, Map[String, String])}, returnType: Option[String]): String = {
-      val (path, parameters) = query.toUriPathAndParameters
+    private def forGet[A: PathAndParameterSerializable](query: A, returnType: Option[String]): String = {
+      val (path, parameters) = toPathAndParameters(query)
       uriString(Uri(
         path = Uri.Path(s"api/order$path"),
         query = Uri.Query(parameters ++ (returnType map { o ⇒ "return" → o }))))
@@ -90,7 +91,7 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   object jobChain {
     def overviews(query: JobChainQuery = JobChainQuery.All): String = {
-      val subpath = JobChainQueryHttp.toUriPath(query)
+      val subpath = query.pathQuery.toUriPath
       require(subpath endsWith "/", "JobChainQuery must denote folder, terminated by a slash")
       uriString(Uri.Path(s"api/jobChain$subpath"))  // Default with trailing slash: query = Uri.Query("return" → "JobChainOverview")))
     }

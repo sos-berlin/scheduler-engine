@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
-import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp.directives.jobChainQuery
-import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.orderQuery
+import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview, Orders}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
@@ -34,32 +33,17 @@ trait OrderRoute extends LogRoute {
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    (pathEnd & post) {
-      parameter("return") {
-        case "OrderStatistics" ⇒
-          entity(as[JobChainQuery]) { query ⇒
+    (testSlash(webServiceContext) | pass) {
+      parameter("return".?) {
+        case Some("OrderStatistics") ⇒
+          jobChainQuery { query ⇒
             completeTryHtml(client.orderStatistics(query))
           }
         case _ ⇒
-          entity(as[OrderQuery]) { query ⇒
+          singleOrder ~
+          orderQuery { query ⇒
             queriedOrders(query)
           }
-      }
-    } ~
-    testSlash(webServiceContext) {
-      get {
-        //parameter("return" ! "OrderStatistics") {  This accepts URI with no query parameter, too ...
-        parameter("return") {
-          case "OrderStatistics" ⇒
-            jobChainQuery { query ⇒
-              completeTryHtml(client.orderStatistics(query))
-            }
-          case _ ⇒ reject
-        } ~
-        singleOrder ~
-        orderQuery { query ⇒
-          queriedOrders(query)
-        }
       }
     }
 

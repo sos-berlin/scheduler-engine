@@ -12,6 +12,7 @@ import spray.routing._
 object PathQueryHttp {
 
   object directives {
+
     def pathQuery[P <: TypedPath](implicit companion: TypedPath.Companion[P]): Directive1[PathQuery] =
       unmatchedPath flatMap { path ⇒
         if (path startsWith Uri.Path.SingleSlash)
@@ -21,7 +22,7 @@ object PathQueryHttp {
       }
   }
 
-  def fromUriPath[P <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery =
+  private[common] def fromUriPath[P <: TypedPath: TypedPath.Companion](path: Uri.Path): PathQuery =
     PathQuery[P](path.toString)
 
   def toUriPath(query: PathQuery): String = query.toUriPath
