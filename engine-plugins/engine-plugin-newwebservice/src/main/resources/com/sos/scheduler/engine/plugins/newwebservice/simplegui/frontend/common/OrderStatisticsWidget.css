@@ -20,7 +20,7 @@
 /* Every @keyframes twice to allow restart of animation by changing animation-name. */
 @keyframes OrderStatistics-higher-0 {
   from {
-    background-color: #7dffff;
+    background-color: #f9d186;
   }
   to {
     background-color: inherit;
@@ -29,7 +29,7 @@
 
 @keyframes OrderStatistics-higher-1 {
   from {
-    background-color: #7dffff;
+    background-color: #f9d186;
   }
   to {
     background-color: inherit;
@@ -38,7 +38,7 @@
 
 @keyframes OrderStatistics-lower-0 {
   from {
-    background-color: LightGray;
+    background-color: #a7e1fa;
   }
   to {
     background-color: inherit;
@@ -47,7 +47,7 @@
 
 @keyframes OrderStatistics-lower-1 {
   from {
-    background-color: LightGray;
+    background-color: #a7e1fa;
   }
   to {
     background-color: inherit;
@@ -67,9 +67,13 @@
   padding: 2px;
   border-radius: 3px;
   float: left;
-  width: 15ex;
+  width: 14ex;
   margin-top: 2px;
   margin-right: 1ex;
+}
+
+#order-timestamp-value {
+  padding-right: 1em;
 }
 
 .OrderStatistics-higher {
@@ -84,12 +88,6 @@
   animation-duration: 3s;
   animation-iteration-count: 1;
   animation-timing-function: linear;
-}
-
-#order-timestamp-field {
-  float: left;
-  margin-top: 2px;
-  margin-right: 1ex;
 }
 
 #OrderStatistics-refresh {

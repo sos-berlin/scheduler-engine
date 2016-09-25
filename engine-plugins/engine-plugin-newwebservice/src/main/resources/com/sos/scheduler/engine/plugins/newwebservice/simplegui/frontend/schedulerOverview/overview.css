@@ -14,8 +14,12 @@ table.SystemInformation > tbody > tr > td {
   padding-bottom: 1.5em;
 }
 
-table.SystemInformation > tbody > tr > td:first-child {
+table.SystemInformation > tbody > tr:first-child > td {
   padding-top: 2px;
+}
+
+table.SystemInformation > tbody > tr:last-child > td {
+  padding-bottom: 0;
 }
 
 .SchedulerOverview {

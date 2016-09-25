@@ -12,9 +12,15 @@ body {
   padding: 0 7px 20px 7px;
 }
 
-div.PageHeader {
-  margin-bottom: 4px;
-  padding: 1px 5px 0 5px;
+.container-fluid {
+  background-color: #f2f2f2;
+  padding: 0 9px;
+}
+
+@media(min-width: 768px) {
+  .navbar-right {
+      margin-right: -7px;
+  }
 }
 
 h1 {
@@ -110,8 +116,4 @@ span.time-extra {
 
 .Padded {
   padding: 0 5px;
-}
-
-.container-fluid {
-  background-color: white;
 }

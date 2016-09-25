@@ -45,7 +45,7 @@ extends SchedulerHtmlPage {
         seqFrag()
     }
     .withDefault { jobPath ⇒ List(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
-  private val orderStatisticsWidget = new OrderStatisticsWidget(query.jobChainQuery.pathQuery)
+  private val orderStatisticsWidget = new OrderStatisticsWidget(uris, query)
 
   override protected def title = "Orders"
   override protected def cssLinks = super.cssLinks ++ List(

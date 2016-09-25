@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
@@ -123,8 +124,7 @@ extends SchedulerHtmlPage {
 
   private def orderStatistics: Frag =
     div(clear.both, marginTop := 1.em, marginBottom := 2.em)(
-      h3("Orders"),
-      OrderStatisticsWidget.html)
+      new OrderStatisticsWidget(uris, OrderQuery.All, title = "Orders").html)
 
   private def commandInput: Frag =
     form(action := "api/command", method := "get", clear.both)(

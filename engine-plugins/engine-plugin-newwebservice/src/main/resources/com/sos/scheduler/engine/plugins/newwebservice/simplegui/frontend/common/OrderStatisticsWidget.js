@@ -1,4 +1,5 @@
 function startOrderStatisticsChangedListener(path) {
+  var tryAgainTimeoutSeconds = 10
   var keys = [
     "total",
     "notPlanned",
@@ -37,6 +38,7 @@ function startOrderStatisticsChangedListener(path) {
   document.addEventListener("visibilitychange", documentVisibilityChanged, false);
 
   function get(lastEventId) {
+    var requestedAt = new Date()
     jQuery.ajax({
       dataType: 'json',
       url: "/jobscheduler/master/api/event" + path + "?return=OrderStatisticsChanged&after=" + lastEventId
@@ -72,7 +74,8 @@ function startOrderStatisticsChangedListener(path) {
     })
     .fail(function() {
       showRefreshing();
-      setTimeout(function() { get(lastEventId); }, 5000);
+      var duration = tryAgainTimeoutSeconds - Math.max(0, new Date().getSeconds() - requestedAt.getSeconds());
+      setTimeout(function() { get(lastEventId); }, duration * 1000);
     });
   }
 
