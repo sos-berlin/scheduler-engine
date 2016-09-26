@@ -26,7 +26,7 @@ import scala.math.max
 
 @ForCpp
 final class ProcessClass private(
-  protected[this] val cppProxy: Process_classC,
+  protected[kernel] val cppProxy: Process_classC,
   protected[kernel] val subsystem: ProcessClassSubsystem,
   callQueue: SchedulerThreadCallQueue,
   newCppHttpRemoteApiProcessClient: CppHttpRemoteApiProcessClient.Factory,

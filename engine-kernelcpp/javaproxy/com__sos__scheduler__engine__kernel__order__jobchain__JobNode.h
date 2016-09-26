@@ -16,6 +16,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct Order; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace org { namespace w3c { namespace dom { struct Element; }}}}
+namespace javaproxy { namespace scala { struct Option; }}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
@@ -54,6 +55,7 @@ struct JobNode : ::zschimmer::javabridge::proxy_jobject< JobNode >, ::javaproxy:
     void onOrderStepEnded(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, jint p1) const;
     jint orderCount() const;
     ::javaproxy::java::lang::String orderStateTransitionToState(jlong p0) const;
+    ::javaproxy::scala::Option processClassPathOption() const;
     void processConfigurationDomElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

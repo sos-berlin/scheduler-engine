@@ -162,6 +162,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual bool max_tasks_reached() const = 0;
     virtual int max_tasks() const = 0;
     virtual int running_tasks_count() const = 0;
+    virtual bool is_task_ready_for_order(Process_class*) = 0;
 
   private:
     Fill_zero                  _zero_;
@@ -410,6 +411,8 @@ struct Standard_job : Job
     public: int running_tasks_count() const {
         return _running_tasks.size();
     }
+
+    public: bool is_task_ready_for_order(Process_class*);
 
   private:
     void                        set_log                     ();
