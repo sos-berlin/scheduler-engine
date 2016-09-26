@@ -194,7 +194,7 @@ with UnmodifiableJobChain {
 
   private[kernel] lazy val isDistributed: Boolean = cppProxy.is_distributed
 
-  private def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+  private[order] def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private[kernel] def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
 

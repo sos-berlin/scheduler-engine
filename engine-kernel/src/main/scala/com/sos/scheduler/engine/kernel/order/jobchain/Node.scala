@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodeP
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
 import java.time.Duration
 import org.w3c.dom
@@ -26,7 +27,8 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
   private[kernel] def overview: NodeOverview
 
   protected[kernel] val cppProxy: NodeCI
-
+  private lazy val orderSubsystem = injector.instance[OrderSubsystem]
+  private val jobChainPathOnce = new SetOnce[JobChainPath]
   private val nodeIdOnce = new SetOnce[NodeId]
 
   def onCppProxyInvalidated() = close()
@@ -45,7 +47,11 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   final def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }
 
-  final def jobChainPath = inSchedulerThread { JobChainPath(cppProxy.job_chain_path) }
+  private[order] def jobChain = orderSubsystem.jobChain(jobChainPath)
+
+  def jobChainPath = inSchedulerThread {
+    jobChainPathOnce getOrUpdate JobChainPath(cppProxy.job_chain_path)
+  }
 
   protected[kernel] final def nodeId = nodeIdOnce getOrUpdate NodeId(cppProxy.string_order_state)
 

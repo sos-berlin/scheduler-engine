@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
+import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
@@ -45,11 +46,11 @@ with OrderPersistence {
   private val sourceTypeOnce = new SetOnce[OrderSourceType]
   private[kernel] val queryable = new QueryableOrder {
     private def flags = cppProxy.java_fast_flags
-    def isSuspended = cppFastFlags.isSuspended(flags)
-    def isSetback = cppFastFlags.isSetback(flags)
+    def isSuspended = CppFastFlags.isSuspended(flags)
+    def isSetback = CppFastFlags.isSetback(flags)
     def sourceType = Order.this.sourceType
     def orderKey = Order.this.orderKey
-    def isBlacklisted = cppFastFlags.isBlacklisted(flags)
+    def isBlacklisted = CppFastFlags.isBlacklisted(flags)
     def processingStateClass = processingState(cppProxy.java_fast_flags, nextStepAtOption = nextStepAtOption).getClass
   }
 
@@ -90,7 +91,7 @@ with OrderPersistence {
     val processingState = this.processingState(flags, nextStepAtOption)
     OrderOverview(
       path = orderKey,  // key because this.path is valid only for permanent orders
-      cppFastFlags.fileBasedState(flags),
+      CppFastFlags.fileBasedState(flags),
       sourceType,
       nodeId = nodeId,
       processingState = processingState,
@@ -101,10 +102,6 @@ with OrderPersistence {
   }
 
   private[order] def processingState(flags: Long, nextStepAtOption: Option[Instant]): OrderProcessingState = {
-    val isBlacklisted = cppFastFlags.isBlacklisted(flags)
-    val isTouched = cppFastFlags.isTouched(flags)
-    val isSetback = cppFastFlags.isSetback(flags)
-    val currentSecond = currentTimeMillis / 1000
     import OrderProcessingState._
     taskIdOption flatMap taskSubsystem.taskOption match {
       case Some(task) ⇒  // The task may be registered a little bit later.
@@ -116,15 +113,15 @@ with OrderPersistence {
         occupyingClusterMemberId match {
           case Some(clusterMemberId) ⇒ OccupiedByClusterMember(clusterMemberId)
           case None ⇒
-            if (isBlacklisted)
+            if (CppFastFlags.isBlacklisted(flags))
               Blacklisted
-            else if (!isTouched)
+            else if (!CppFastFlags.isTouched(flags))
               nextStepAtOption match {
                 case None ⇒ NotPlanned
-                case Some(at) if at.getEpochSecond >= currentSecond ⇒ Planned(at)
+                case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
                 case Some(at) ⇒ Pending(at)
               }
-            else if (isSetback)
+            else if (CppFastFlags.isSetback(flags))
               Setback(setbackUntilOption getOrElse Instant.MAX)
             else
               WaitingForOther
@@ -132,31 +129,27 @@ with OrderPersistence {
     }
   }
 
-  private[order] def obstacles(flags: Long, processingState: OrderProcessingState) = {
-    val isBlacklisted = cppFastFlags.isBlacklisted(flags)
-    val isSuspended = cppFastFlags.isSuspended(flags)
+  private[order] def obstacles(flags: Long, processingState: OrderProcessingState): Set[OrderObstacle] = {
     import OrderObstacle._
     val b = Set.newBuilder[OrderObstacle]
     for (o ← emptyToNone(fileBasedObstacles)) {
       b += FileBasedObstacles(o)
     }
-    if (isSuspended) b += Suspended
-    if (isBlacklisted) b += Blacklisted
-    processingState match {
+    if (CppFastFlags.isSuspended(flags)) b += Suspended
+    if (CppFastFlags.isBlacklisted(flags)) b += Blacklisted
+    processingState switch {
       case OrderProcessingState.Setback(at) ⇒ b += Setback(at)
-      case _ ⇒
     }
     b.result
   }
 
-  private[kernel] def details: OrderDetailed =
-    OrderDetailed(
-      overview = overview,
-      priority = priority,
-      initialNodeId = emptyToNone(cppProxy.initial_state_string) map NodeId.apply,
-      endNodeId = emptyToNone(cppProxy.end_state_string) map NodeId.apply,
-      title = title,
-      variables = variables)
+  private[kernel] def details = OrderDetailed(
+    overview = overview,
+    priority = priority,
+    initialNodeId = emptyToNone(cppProxy.initial_state_string) map NodeId.apply,
+    endNodeId = emptyToNone(cppProxy.end_state_string) map NodeId.apply,
+    title = title,
+    variables = variables)
 
   def stringToPath(o: String) = OrderKey(o)
 
@@ -297,7 +290,7 @@ object Order {
 
   private val logger = Logger(getClass)
 
-  object cppFastFlags {
+  object CppFastFlags {
     def isFileBased   (flags: Long) = (flags & 0x01) != 0
     def isSuspended   (flags: Long) = (flags & 0x02) != 0
     def isBlacklisted (flags: Long) = (flags & 0x04) != 0

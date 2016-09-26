@@ -280,7 +280,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     XTestJobPath, orderCount = 2,
     obstacles = Set(NodeObstacle.MissingJob(XTestJobPath)))
   val Xb100NodeOverview = SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
-    XTestBJobPath, orderCount = 0)
+    XTestBJobPath, orderCount = 0, obstacles = Set(NodeObstacle.WaitingForJob))
 
   val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
     taskLimit = 10, usedTaskCount = 3, obstacles = Set())
@@ -480,7 +480,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "jobPath": "/xFolder/test-b",
       "action": "process",
       "orderCount": 0,
-      "obstacles": []
+      "obstacles": [
+        {
+          "TYPE": "WaitingForJob"
+        }
+      ]
     }
   ]"""
   val UsedJobsJson = """[

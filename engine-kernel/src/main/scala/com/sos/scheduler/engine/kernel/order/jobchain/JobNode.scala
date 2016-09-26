@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobNodeOverview, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode.logger
@@ -23,6 +24,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
 
   private[kernel] def overview: JobNodeOverview
   def jobPath: JobPath
+  private[order] def processClassPathOption: Option[ProcessClassPath]
 
   protected final val jobSubsystem = injector.instance[JobSubsystem]
 
@@ -50,15 +52,14 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
 
   protected def obstacles: Set[NodeObstacle] = {
     import NodeObstacle._
+    val delay = this.delay
+    val jobPath = this.jobPath
     val builder = Set.newBuilder[NodeObstacle]
-    action switch {
-      case JobChainNodeAction.stop ⇒ builder += Stopping
-    }
-    if (!delay.isZero) {
-      builder += Delaying(delay)
-    }
-    if (!jobSubsystem.contains(jobPath)) {
-      builder += MissingJob(jobPath)
+    if (action == JobChainNodeAction.stop) builder += Stopping
+    if (!delay.isZero) builder += Delaying(delay)
+    jobSubsystem.fileBasedOption(jobPath) switch {
+      case None ⇒ builder += MissingJob(jobPath)
+      case Some(job) if !job.isReadyForOrderIn(processClassPathOption) ⇒ builder += WaitingForJob
     }
     builder.result
   }
