@@ -82,7 +82,6 @@ object ProcedureSignature {
         require(method.getParameterTypes.length == 0, "@CppField requires no method parameters")
         FieldAccess
       case (false, Some(expression)) ⇒
-        require(method.getParameterTypes.length == 0, "@CppExpression requires no method parameters")
         ExpressionAccess(expression)
       case _ ⇒ sys.error("Combination of @CppField and @CppExpression is not possible")
     }

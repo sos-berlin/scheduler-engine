@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppIgnore
 
 class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends CppCode {
   private val isCppProxy = classOf[CppProxy] isAssignableFrom javaClass
@@ -25,7 +26,7 @@ class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends
   val cppMethods = {
     val signatures = if (suppressMethods) Nil else
       (validMethods(javaClass)
-        filter { m => parameterTypesAreKnown(m.getParameterTypes) && returnTypeIsKnown(m.getReturnType) }
+        filter { m => parameterTypesAreKnown(m.getParameterTypes) && returnTypeIsKnown(m.getReturnType) && (m.getAnnotation(classOf[CppIgnore]) == null)}
         map { m ⇒ ProcedureSignature(javaClass, m) })
     signatures.sorted map { new CppMethod(this, _) }
   }
