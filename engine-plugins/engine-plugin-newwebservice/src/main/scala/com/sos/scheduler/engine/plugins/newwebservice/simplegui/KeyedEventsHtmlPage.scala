@@ -47,7 +47,9 @@ extends SchedulerHtmlPage {
             th("Timestamp"),
             th("Object"),
             th("Event"),
-            th, th, th
+            th,
+            th,
+            th
           )
         ),
         tbody(
@@ -79,11 +81,11 @@ extends SchedulerHtmlPage {
             case _ ⇒ td(colspan := 3, event.toString)
           })
       case KeyedEvent(_, e: Logged) ⇒
-        seqFrag(td(), td(e.level.toString), td(colspan := 4)(e.message))
+        seqFrag(td, td(e.level.toString), td(e.message))
       case KeyedEvent(key, e) ⇒
-        seqFrag(td(key.toString), td(eventName), td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
+        seqFrag(td(key.toString), td(eventName), td(keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
       case _ ⇒
-        seqFrag(td(), td(eventName), td(colspan := 4, keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
+        seqFrag(td, td(eventName), td(keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
     }
   }
 }

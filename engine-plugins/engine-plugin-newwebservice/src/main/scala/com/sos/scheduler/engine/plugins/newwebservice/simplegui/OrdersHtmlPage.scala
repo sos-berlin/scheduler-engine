@@ -78,7 +78,7 @@ extends SchedulerHtmlPage {
       div(paddingTop := 4.px),
       table(cls := "MiniTable")(
         tbody(
-          tr(td(textAlign.right, width := 5.ex)(s"$count")     , td(s" orders")),
+          tr(td(textAlign.right, width := 5.ex)(s"$count")     , td(s"orders")),
           tr(td(textAlign.right)(s"$inProcessCount")           , td(s"in process")),
           tr(td(textAlign.right)(s"${ jobPathToOverview.size}"), td(s"jobs")),
           tr(td(textAlign.right)(s"$suspendedCount")           , td(s"suspended")),
@@ -132,11 +132,6 @@ extends SchedulerHtmlPage {
 
   private def ordersToTable(orders: immutable.Seq[OrderOverview]): Frag =
     table(cls := "table table-condensed table-hover")(
-      colgroup(
-        col,
-        col,
-        col,
-        col),
       thead(
         tr(
           th("OrderId"),

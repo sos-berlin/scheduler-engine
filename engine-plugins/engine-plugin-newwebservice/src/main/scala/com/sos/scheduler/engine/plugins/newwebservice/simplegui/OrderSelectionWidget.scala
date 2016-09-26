@@ -21,20 +21,20 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
       table(
         tbody(
           tr(
-            td(cls := "OrderSelection-Header", colspan := 2)(
+            td(cls := "OrderSelection-Header", colspan := 4)(
               "Show only ...")),
           tr(
-            td(cls := "OrderSelection-Boolean", rowspan := 2)(
+            td(cls := "OrderSelection-Boolean")(
               booleanCheckBoxes),
-            td(cls := "OrderSelection-Enum", rowspan := 2)(
+            td(cls := "OrderSelection-Enum")(
               orderSourceTypesHtml),
-            td(cls := "OrderSelection-Enum", rowspan := 2)(
+            td(cls := "OrderSelection-Enum")(
               orderProcessingStatesHtml,
               orIsSuspendedHtml),
             td(cls := "OrderSelection-LimitPerNode")(
               limitPerNodeInputHtml(query.notInTaskLimitPerNode))),
           tr(
-            td(cls := "OrderSelection-LimitPerNode-Submit")(
+            td(cls := "OrderSelection-LimitPerNode-Submit", colspan := 4)(
               button(`type` := "submit")(
                 StringFrag("Show"))))))))
 

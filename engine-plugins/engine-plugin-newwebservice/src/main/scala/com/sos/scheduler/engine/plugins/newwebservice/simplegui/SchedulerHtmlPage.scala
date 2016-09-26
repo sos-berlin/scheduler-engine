@@ -61,14 +61,6 @@ trait SchedulerHtmlPage extends HtmlPage {
       div(cls := "container", width := "100%")(
         innerBody))
 
-  private def versionHtml: Frag = {
-    import schedulerOverview.{state, version}
-    div(
-      joinHtml(" · ")(List(
-        s"v$version",
-        span(whiteSpace.nowrap)(s"$state"))))
-  }
-
   private def timestampHtml: Frag =
     a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
       span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
@@ -79,31 +71,44 @@ trait SchedulerHtmlPage extends HtmlPage {
   private def navbar: Frag =
     nav(cls := "navbar navbar-default navbar-static-top")(
       div(cls := "container-fluid")(
-        //pageHeader,
         div(cls := "navbar-header")(
           uncollapseButton,
-          a(cls := "navbar-brand", position.relative, top := (-9).px, href := uris.overview, whiteSpace.nowrap)(
-            div(
-              table(
-                tbody(
-                  tr(
-                    td(rowspan := 2, paddingRight := 1.ex)(
-                      span(img("width".attr := 40, "height".attr := 40,
-                        src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif")))),
-                    td(
-                      span(" JobScheduler \u00a0'", schedulerOverview.schedulerId.string, "'"))),
-                  tr(td(span(fontSize := 12.px)(
-                    versionHtml)))))))),
-          div(cls := "collapse navbar-collapse")(
-          ul(cls := "nav navbar-nav ")(
-            navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
-            navBarTab("Job chains"     , uris.jobChain.overviews()),
-            navBarTab("Jobs"           , uris.job.overviews()),
-            navBarTab("Process classes", uris.processClass.overviews()),
-            navBarTab("Events"         , uris.events(limit = 1000, reverse = true))),
-          p(cls := "navbar-text navbar-right")(timestampHtml))))
+          brand),
+        div(cls := "collapse navbar-collapse")(
+          menue,
+          div(cls := "navbar-text navbar-right")(
+            timestampHtml))))
 
-  private def uncollapseButton =
+  private def brand: Frag =
+    a(cls := "navbar-brand", position.relative, top := (-9).px, whiteSpace.nowrap, href := uris.overview)(
+      table(
+        tbody(
+          tr(
+            td(rowspan := 2, paddingRight := 1.ex)(
+              img("width".attr := 40, "height".attr := 40, alt := "Rabbit",
+                src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
+            td(
+              span(" JobScheduler \u00a0'", schedulerOverview.schedulerId.string, "'"))),
+          tr(
+            td(fontSize := 13.px)(
+              versionAndStateHtml)))))
+
+  private def versionAndStateHtml: Frag = {
+    import schedulerOverview.{state, version}
+    joinHtml(" · ")(List(
+      s"v$version",
+      span(whiteSpace.nowrap)(s"$state")))
+  }
+
+  private def menue: Frag =
+    ul(cls := "nav navbar-nav ")(
+      navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
+      navBarTab("Job chains"     , uris.jobChain.overviews()),
+      navBarTab("Jobs"           , uris.job.overviews()),
+      navBarTab("Process classes", uris.processClass.overviews()),
+      navBarTab("Events"         , uris.events(limit = 1000, reverse = true)))
+
+  private def uncollapseButton: Frag =
     button(`type` := "button", cls := "navbar-toggle", data("toggle") := "collapse", data("target") := ".navbar-collapse")(
       span(cls := "icon-bar"),
       span(cls := "icon-bar"),
