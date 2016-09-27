@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
@@ -38,7 +37,7 @@ final class SchedulerAgentClientFactory @Inject private[client](
     }
     val agentUri_ = agentUri
     new AgentClient {
-      val agentUri = agentUri_
+      val agentUri = Uri(agentUri_)
       def licenseKeys = SchedulerAgentClientFactory.this.licenseKeys
       val actorRefFactory = SchedulerAgentClientFactory.this.actorSystem
       override val userAndPasswordOption = config.optionAs[String]("jobscheduler.master.credentials.password") map

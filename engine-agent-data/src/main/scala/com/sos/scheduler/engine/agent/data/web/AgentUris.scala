@@ -13,7 +13,7 @@ import spray.http.Uri.Path
  */
 final class AgentUris private(agentUriString: String) {
 
-  private val prefixedUri = Uri(s"$agentUriString/$AgentUriConstantPrefix")
+  val prefixedUri = Uri(s"$agentUriString/$AgentUriConstantPrefix")
 
   def overview = uriString(Api)
 
@@ -21,7 +21,7 @@ final class AgentUris private(agentUriString: String) {
 
   def fileExists(filePath: String): String =
     (withPath("api/fileExists") withQuery ("file" → filePath)).toString()
-  
+
   object task {
     def overview = uriString(s"$Api/task")
 

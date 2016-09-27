@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
 import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.base.generic.SecretString
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
@@ -42,12 +43,12 @@ import spray.json.JsBoolean
 trait AgentClient {
   import actorRefFactory.dispatcher
 
-  protected[client] val agentUri: String
+  val agentUri: Uri
   protected def licenseKeys: immutable.Iterable[LicenseKeyString]
   implicit protected val actorRefFactory: ActorRefFactory
   protected def userAndPasswordOption: Option[UserAndPassword] = None
 
-  protected lazy val agentUris = AgentUris(agentUri)
+  protected lazy val agentUris = AgentUris(agentUri.toString)
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
     else identity
   lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
@@ -106,6 +107,34 @@ trait AgentClient {
   final def get[A: FromResponseUnmarshaller](uri: AgentUris ⇒ String): Future[A] =
     unmarshallingPipeline[A].apply(Get(uri(agentUris)))
 
+  final def apply[A: FromResponseUnmarshaller](request: HttpRequest): Future[A] =
+    toCheckedAgentUri(request.uri) match {
+      case Some(uri) ⇒
+        val req = request.copy(uri = uri)
+        unmarshallingPipeline[A].apply(req)
+      case None ⇒
+        Future.failed(new IllegalArgumentException(s"URI '${request.uri} does not match $toString"))
+    }
+
+  private[client] def toCheckedAgentUri(uri: Uri): Option[Uri] = {
+    var u = normalizeAgentUri(uri)
+    checkAgentUri(u)
+  }
+
+  private[client] def normalizeAgentUri(uri: Uri): Uri = {
+    val Uri(scheme, authority, path, query, fragment) = uri
+    if (scheme.isEmpty && authority.isEmpty)
+      Uri(agentUri.scheme, agentUri.authority, path, query, fragment)
+    else
+      uri
+  }
+
+  private[client] def checkAgentUri(uri: Uri): Option[Uri] = {
+    val myAgentUri = Uri(scheme = uri.scheme, authority = uri.authority)
+    myAgentUri == agentUri && uri.path.toString.startsWith(agentUris.prefixedUri.path.toString) option
+      uri
+  }
+
   private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"AgentClient($agentUri)"
@@ -117,6 +146,10 @@ object AgentClient {
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
   private val logger = Logger(getClass)
+
+  final class Standard(val agentUri: Uri, protected val licenseKeys: immutable.Iterable[LicenseKeyString] = Nil)
+    (implicit protected val actorRefFactory: ActorRefFactory)
+  extends AgentClient
 
   /**
    * The returns timeout for the HTTP request is longer than the expected duration of the request

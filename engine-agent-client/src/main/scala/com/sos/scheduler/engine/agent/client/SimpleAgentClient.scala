@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
+import spray.http.Uri
 
 /**
  * Simple client for JobScheduler Agent.
@@ -9,7 +10,7 @@ import akka.actor.ActorSystem
  *
  * @author Joacim Zschimmer
  */
-final class SimpleAgentClient private(protected[client] val agentUri: String) extends AgentClient with AutoCloseable {
+final class SimpleAgentClient private(val agentUri: Uri) extends AgentClient with AutoCloseable {
 
   protected val licenseKeys = Nil
   protected val actorRefFactory = ActorSystem("SimpleAgentClient")
@@ -18,5 +19,5 @@ final class SimpleAgentClient private(protected[client] val agentUri: String) ex
 }
 
 object SimpleAgentClient {
-  def apply(agentUri: String) = new SimpleAgentClient(agentUri)
+  def apply(agentUri: String) = new SimpleAgentClient(Uri(agentUri))
 }
