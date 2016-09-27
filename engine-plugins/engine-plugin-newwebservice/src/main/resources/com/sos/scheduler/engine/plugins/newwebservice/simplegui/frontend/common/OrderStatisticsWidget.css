@@ -72,6 +72,10 @@
   margin-right: 1ex;
 }
 
+.OrderStatistics-field-Active {
+  font-weight: bold;
+}
+
 #order-timestamp-value {
   padding-right: 1em;
 }

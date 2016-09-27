@@ -7,17 +7,17 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderStatisticsWidget._
 import scalatags.Text.all._
 
 /**
   * @author Joacim Zschimmer
   */
-final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, title: String = "") {
+final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, title: String = "", markActive: Boolean = false) {
 
   import orderQuery.jobChainQuery.pathQuery
 
-  private val TimestampName = "timestamp"
-  private val FieldGroups = {
+  private val fieldGroups = {
     import OrderProcessingState._
     import OrderSourceType._
     val q = OrderQuery(jobChainQuery = JobChainQuery(pathQuery = orderQuery.jobChainQuery.pathQuery))
@@ -26,8 +26,8 @@ final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, t
         TimestampName → orderQuery),
       List(
         "total" → q,
-        "permanent" → q.copy(isOrderSourceType = Some(Set(Permanent))),
-        "fileOrder" → q.copy(isOrderSourceType = Some(Set(FileOrder)))),
+        "fileOrder" → q.copy(isOrderSourceType = Some(Set(FileOrder))),
+        "permanent" → q.copy(isOrderSourceType = Some(Set(Permanent)))),
       List(
         "notPlanned" → q.copy(isOrderProcessingState = Some(Set(NotPlanned.getClass))),
         "planned" → q.copy(isOrderProcessingState = Some(Set(classOf[Planned]))),
@@ -64,7 +64,7 @@ final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, t
   }
 
   private def fields: Frag =
-    for (nameGroup ← FieldGroups) yield
+    for (nameGroup ← fieldGroups) yield
       div(cls := "OrderStatistics-fieldGroup")(
         for ((name, query) ← nameGroup) yield
           div(id := s"order-$name-field", cls := "OrderStatistics-field")(
@@ -72,16 +72,28 @@ final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, t
               if (name == TimestampName)
                 timestampField
               else
-                seqFrag(
-                  name,
-                  "\u2009",
-                  span(id := s"order-$name-value")))))
+                valueField(name, query))))
 
   private def timestampField: Frag =
     seqFrag(
       span(id := "order-timestamp-value"),
       span(id := "OrderStatistics-refresh", cls := "glyphicon glyphicon-refresh"))
 
+  private def valueField(name: String, query: OrderQuery) = {
+    val frag = seqFrag(
+      name,
+      "\u2009",
+      span(id := s"order-$name-value"))
+    if (markActive && query == orderQuery)
+      span(cls := "OrderStatistics-field-Active")(frag)
+    else
+      frag
+  }
+
   private def javascript =
     s"jQuery(function() { startOrderStatisticsChangedListener('${pathQuery.toUriPath}') });"
+}
+
+object OrderStatisticsWidget {
+  private val TimestampName = "timestamp"
 }
