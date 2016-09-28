@@ -8,9 +8,10 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.{JobPath, ProcessClassOverview, TaskId}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassObstacle, ProcessClassPath}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassObstacle, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -98,14 +99,22 @@ extends FileBased {
     finally clients -= client
   }
 
-  private[kernel] def overview =
-    ProcessClassOverview(
-      path,
-      fileBasedState,
-      processLimit = processLimit,
-      usedProcessCount = usedProcessCount,
-      obstacles = obstacles
-    )
+//  private[kernel] def detailed = ProcessClassDetailed(
+//    overview,
+//    _config.agents map { _.address })
+
+  private[kernel] def agentUris: immutable.Seq[AgentAddress] =
+    _config.agents map { _.address }
+
+  private[kernel] def containsAgentUri(agentUri: AgentAddress) =
+    _config.agents exists { _.address == agentUri }
+
+  private[kernel] def overview = ProcessClassOverview(
+    path,
+    fileBasedState,
+    processLimit = processLimit,
+    usedProcessCount = usedProcessCount,
+    obstacles = obstacles)
 
   private[kernel] def obstacles: Set[ProcessClassObstacle] = {
     import ProcessClassObstacle._

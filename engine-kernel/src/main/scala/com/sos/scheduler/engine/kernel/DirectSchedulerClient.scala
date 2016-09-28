@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, ProcessClassOverview, TaskId, TaskOverview}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -125,6 +126,16 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       jobSubsystem.job(jobPath).overview
     }
 
+//  def processClassDetaileds: Future[Snapshot[Vector[ProcessClassDetailed]]] =
+//    respondWith {
+//      processClassSubsystem.fileBaseds map { _.detailed }
+//    }
+
+//  def processClassDetailed(processClassPath: ProcessClassPath): Future[Snapshot[ProcessClassDetailed]] =
+//    respondWith {
+//      processClassSubsystem.processClass(processClassPath).detailed
+//    }
+
   def processClassOverviews: Future[Snapshot[Vector[ProcessClassOverview]]] =
     respondWith {
       processClassSubsystem.fileBaseds map { _.overview }
@@ -138,6 +149,19 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
   def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]] =
     respondWith {
       taskSubsystem.task(taskId).overview
+    }
+
+  def agentUris: Future[Snapshot[Set[AgentAddress]]] =
+    respondWith {
+      (for (processClass ← processClassSubsystem.fileBaseds;
+           agentUri ← processClass.agentUris)
+        yield agentUri
+      ).toSet
+    }
+
+  def isKnownAgentUri(uri: AgentAddress): Future[Boolean] =
+    directOrSchedulerThreadFuture {
+      processClassSubsystem.fileBaseds exists { _ containsAgentUri uri }
     }
 
   private def respondWith[A](content: ⇒ A): Future[Snapshot[A]] =

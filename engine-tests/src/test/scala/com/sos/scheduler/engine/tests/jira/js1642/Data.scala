@@ -6,12 +6,12 @@ import com.sos.scheduler.engine.common.utils.IntelliJUtils._
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
-import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import java.time.Instant

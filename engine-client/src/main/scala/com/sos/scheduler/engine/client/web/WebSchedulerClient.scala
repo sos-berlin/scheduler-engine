@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
@@ -99,6 +100,14 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.details(jobChainPath))
+
+  // Agent
+
+  final def agentUris: Future[Snapshot[Set[AgentAddress]]] =
+    get[Snapshot[Set[AgentAddress]]](_.agent.agentUris)
+
+  final def agentGet[A: FromResponseUnmarshaller](uri: String): Future[A] =
+    get[A](_.agent.forward(uri))
 
   // Event
 

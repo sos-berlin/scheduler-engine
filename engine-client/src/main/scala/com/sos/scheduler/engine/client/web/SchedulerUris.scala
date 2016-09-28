@@ -155,6 +155,12 @@ final class SchedulerUris private(schedulerUriString: String) {
     def overview(taskId: TaskId) = uriString(Uri.Path("api/task") / taskId.string)
   }
 
+  object agent {
+    def agentUris = uriString(Uri.Path("api/agent/"))
+
+    def forward(agentUri: String) = uriString(Uri.Path(s"api/agent/$agentUri"))
+  }
+
   def events =  uriString(Uri.Path("api/event/"))
 
   def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, reverse: Boolean = false, returnType: String = DefaultEventName) = {

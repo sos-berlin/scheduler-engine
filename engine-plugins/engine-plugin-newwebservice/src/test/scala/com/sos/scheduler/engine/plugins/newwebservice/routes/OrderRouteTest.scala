@@ -7,10 +7,10 @@ import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStatistics, OrderStepStarted, OrderView, Orders}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient

@@ -5,7 +5,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
-import spray.http.HttpHeaders.Accept
+import spray.http.CacheDirectives.{`max-age`, `no-cache`, `no-store`}
+import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.HttpMethods.GET
 import spray.http.MediaTypes.`text/html`
 import spray.http.StatusCodes._
@@ -19,6 +20,20 @@ import spray.routing._
   * @author Joacim Zschimmer
   */
 object HtmlDirectives {
+
+  def dontCache: Directive0 =
+    mapInnerRoute { inner ⇒
+      requestInstance { request ⇒
+        val header =
+          if (isHtmlPreferred(request))
+            `Cache-Control`(`max-age`(0))  // This allows browsers to use the cache when hitting the back button - for good user experience
+          else
+            `Cache-Control`(`max-age`(0), `no-store`, `no-cache`)
+        respondWithHeader(header) {
+          inner
+        }
+      }
+    }
 
   /**
     * If HTML is requested, path ends with slash and request has no query, then redirect to path without slash, in case of typo.

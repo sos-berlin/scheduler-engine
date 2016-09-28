@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.Props
 import com.google.inject.Injector
+import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
@@ -16,7 +17,8 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.WebServiceActor._
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes
-import javax.inject.Inject
+import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRouteSchedulerAdapter
+import javax.inject.{Inject, Provider}
 import scala.collection.JavaConversions._
 import spray.routing._
 
@@ -31,8 +33,11 @@ final class WebServiceActor @Inject private(
   protected val prefixLog: PrefixLog,
   protected val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val disposableCppProxyRegister: DisposableCppProxyRegister,
-  protected val orderStatisticsChangedSource: OrderStatisticsChangedSource)
-extends HttpServiceActor with AllRoutes {
+  protected val orderStatisticsChangedSource: OrderStatisticsChangedSource,
+  toAgentClientProvider: Provider[SchedulerAgentClientFactory])
+extends HttpServiceActor with AllRoutes with AgentRouteSchedulerAdapter {
+
+  protected lazy val toAgentClient = toAgentClientProvider.get()
 
   override def postStop() = {
     logger.debug("Stopped")
@@ -43,7 +48,6 @@ extends HttpServiceActor with AllRoutes {
     for (o ← extraRoutes) logger.info(s"Using ${o.getClass.getName}")
     var extras: Vector[Route] = extraRoutes.toVector map { _.route }
     val routes = route +: extras
-//sys.error("FEHLER")
     runRoute(routes reduce { _ ~ _ })
   }
 }
