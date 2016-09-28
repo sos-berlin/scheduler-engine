@@ -34,29 +34,36 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected val uris: SchedulerUris
   protected def pageUri: Uri
 
+  private val includer = new HtmlIncluder(uris)
+
   protected def htmlPage(innerBody: Frag*): TypedTag[String] =
     html(lang := "en")(
-      head(htmlHeadFrags),
-      pageBody(innerBody :_*))
+      head(htmlHeadFrag),
+      body(pageBody(innerBody :_*)))
 
-  protected def htmlHeadFrags: Vector[Frag] = {
-    val includer = new HtmlIncluder(uris)
-    Vector(
+  protected def htmlHeadFrag: Frag =
+    seqFrag(
       meta(httpEquiv := "X-UA-Compatible", content := "IE=edge"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
       tags2.title(s"$title · ${schedulerOverview.schedulerId}"),
+      css,
+      javascript,
       link(rel := "icon", "sizes".attr := "64x64", `type` := "image/vnd.microsoft.icon",
-        href := (uris / "api/frontend/common/images/jobscheduler.ico").toString)) ++
-    (NeededWebjars flatMap includer.webjarsToHtml) ++
-    (cssLinks map toCssLinkHtml) ++
-    (scriptLinks map toScriptHtml)
-  }
+        href := (uris / "api/frontend/common/images/jobscheduler.ico").toString))
+
+  private def css: Frag =
+    (NeededWebjars map includer.cssHtml) ++
+      (cssLinks map toCssLinkHtml)
+
+  private def javascript: Frag =
+    (NeededWebjars map includer.javascriptHtml) ++
+      (scriptLinks map toScriptHtml)
 
   protected def cssLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.css")
   protected def scriptLinks: Vector[Uri] = Vector()
 
-  protected def pageBody(innerBody: Frag*) =
-    body(
+  protected def pageBody(innerBody: Frag*): Frag =
+    seqFrag(
       navbar,
       div(cls := "container", width := "100%")(
         innerBody))
