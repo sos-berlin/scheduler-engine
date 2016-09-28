@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
 import com.sos.scheduler.engine.tunnel.client.WebTunnelClient
 import javax.inject.{Inject, Singleton}
@@ -22,7 +23,7 @@ final class HttpRemoteProcessStarter @Inject private(
   def startRemoteTask(
     schedulerApiTcpPort: Int,
     configuration: ApiProcessConfiguration,
-    agentUri: String,
+    agentUri: AgentAddress,
     httpHeartbeatTiming: Option[HttpHeartbeatTiming]): Future[HttpRemoteProcess] =
   {
     val port = schedulerApiTcpPort

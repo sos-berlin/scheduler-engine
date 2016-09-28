@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test.agent
 
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -24,7 +25,7 @@ trait ThreeTypesOfAgentProcessClasses extends AgentWithSchedulerTest {
   protected lazy val processClassConfigurations = List(
     TitledProcessClassConfiguration("without Agent", () ⇒ ProcessClassConfiguration()),
     TitledProcessClassConfiguration("with Universal Agent", () ⇒ ProcessClassConfiguration(agentUris = List(agentUri))),
-    TitledProcessClassConfiguration("with Classic Agent", () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"))))
+    TitledProcessClassConfiguration("with Classic Agent", () ⇒ ProcessClassConfiguration(agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort")))))
 
   protected def addTestsForThreeTypesOfAgent(processClassPath: ProcessClassPath)(body: String ⇒ Unit): Unit = {
     for (TitledProcessClassConfiguration(title, config) ← processClassConfigurations) {

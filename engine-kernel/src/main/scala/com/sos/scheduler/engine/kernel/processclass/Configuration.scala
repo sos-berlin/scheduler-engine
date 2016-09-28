@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.processclass
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.processclass.Configuration._
 import com.sos.scheduler.engine.kernel.processclass.agent.Agent
@@ -24,8 +25,7 @@ private[processclass] case class Configuration(
   val agents: immutable.IndexedSeq[Agent] = agentOption.toVector ++ moreAgents
 
   if (agents.size > 1) {
-    val addresses = agents map { _.address }
-    addresses foreach { o ⇒ new URI(o) }   // URI syntax required
+    for (a ← agents) a.address.requireURI()
   }
 }
 
@@ -39,7 +39,8 @@ private[processclass] object Configuration {
       import eventReader._
       parseElement("process_class") {
         val nextId: () ⇒ Int = (Iterator from 0).next
-        val attributeAgentOption = attributeMap.get("remote_scheduler") filter { _.nonEmpty } map { o ⇒ Agent(nextId(), o, httpHeartbeatTiming = None) }
+        val attributeAgentOption = for (string ← attributeMap.get("remote_scheduler") if string.nonEmpty) yield
+          Agent(nextId(), AgentAddress.normalized(string), httpHeartbeatTiming = None)
         attributeMap.ignoreUnread()
         (forEachStartElement {
           case "remote_schedulers" ⇒ parseElement() {
@@ -56,7 +57,7 @@ private[processclass] object Configuration {
                   for (timeout ← attributeMap.get("http_heartbeat_timeout") map { o ⇒ Duration ofSeconds o.toInt };
                        period = attributeMap.get("http_heartbeat_period") map { o ⇒ Duration ofSeconds o.toInt } getOrElse timeout / 2)
                   yield HttpHeartbeatTiming(period = period, timeout = timeout)
-                Agent(nextId(), uri.toString, httpHeartbeatTimingOption)
+                Agent(nextId(), AgentAddress(uri), httpHeartbeatTimingOption)
               }
               case _ ⇒ ()
             }

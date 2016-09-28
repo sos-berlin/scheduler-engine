@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
 import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -35,14 +36,16 @@ final class JS1457IT extends FreeSpec with ScalaSchedulerTest {
   @volatile private var stop = false
 
   "Fixed: High deadlock probability when starting multiple processes, CreateProcess fails with MSWIN-00000020" in {
-    writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
+    writeConfigurationFile(ProcessClassPath("/test-agent"),
+      ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort"))))
     runJob(JobPath("/test"))   // Smoke test
     val t = currentTimeMillis()
     val count = new AtomicInteger
     try
       intercept[TimeoutException] {
         eventBus.awaitingInTimeWhen[ErrorLogged](TestDuration, _ ⇒ true) {
-          writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(s"127.0.0.1:$tcpPort")))
+          writeConfigurationFile(ProcessClassPath("/test-agent"),
+            ProcessClassConfiguration(processMaximum = Some(ParallelTaskCount), agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort"))))
           runJob(JobPath("/test"))   // Smoke test
           eventBus.on[TaskClosed.type] { case _ ⇒ count.incrementAndGet() }
           for (_ ← 1 to ParallelTaskCount) startJobAgainAndAgain()

@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -35,7 +36,7 @@ final class JS1421IT extends FreeSpec with ScalaSchedulerTest {
   if (false)
   for (jobPath ← List(JobPath("/test-shell"), JobPath("/test-shell-monitor"), JobPath("/test-api"), JobPath("/test-api-monitor"))) {
     jobPath.withoutStartingSlash in {
-      writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
+      writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort"))))
       val signalFile = testEnvironment.directory / "SIGNALFILE"
       val run = startJob(jobPath, variables = Map("SIGNALFILE" → signalFile.toString))
       waitForCondition(TestTimeout, 100.ms) { exists(signalFile) } shouldBe true

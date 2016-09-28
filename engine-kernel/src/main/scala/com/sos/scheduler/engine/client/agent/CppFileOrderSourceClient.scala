@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.Tries._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import java.time.Duration
@@ -23,7 +24,7 @@ import scala.util.Try
 @ForCpp
 final class CppFileOrderSourceClient private(
   agentClientFactory: SchedulerAgentClientFactory,
-  agentUri: String,
+  agentUri: AgentAddress,
   directory: String,
   regex: String,
   duration: Duration)
@@ -68,7 +69,7 @@ object CppFileOrderSourceClient {
   def apply(agentUri: String, directory: String, regex: String, durationMillis: Long)(injector: Injector) =
     new CppFileOrderSourceClient(
       injector.instance[SchedulerAgentClientFactory],
-      agentUri = agentUri,
+      agentUri = AgentAddress.normalized(agentUri),
       directory = directory,
       regex = regex,
       duration = Duration.ofMillis(durationMillis))(

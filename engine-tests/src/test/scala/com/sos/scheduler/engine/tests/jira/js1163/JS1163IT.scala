@@ -14,6 +14,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.Exceptions.ignoreException
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.common.utils.{Exceptions, JavaResource}
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, ReturnCode}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -267,7 +268,7 @@ private[js1163] object JS1163IT {
 
   private trait Setting {
     def name: String
-    def agentUriOption: Option[String]
+    def agentUriOption: Option[AgentAddress]
     def returnCode(signal: ProcessSignal): ReturnCode
     override final def toString = name
   }
@@ -287,7 +288,7 @@ private[js1163] object JS1163IT {
     def agentUriOption = None
   }
 
-  private class UniversalAgentSetting(agentUri: () ⇒ String) extends Setting {
+  private class UniversalAgentSetting(agentUri: () ⇒ AgentAddress) extends Setting {
     def name = "With Universal Agent"
     def agentUriOption = Some(agentUri())
     def returnCode(signal: ProcessSignal): ReturnCode =
@@ -303,6 +304,6 @@ private[js1163] object JS1163IT {
 
   private class ClassicAgentSetting(tcpPort: () ⇒ Int) extends Setting with CppReturnCode {
     def name = "With TCP classic agent"
-    def agentUriOption = Some(s"127.0.0.1:${tcpPort()}")
+    def agentUriOption = Some(AgentAddress(s"127.0.0.1:${tcpPort()}"))
   }
 }

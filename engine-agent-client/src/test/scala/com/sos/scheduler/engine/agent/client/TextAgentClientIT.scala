@@ -14,6 +14,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.scalatest.Assertions._
@@ -93,7 +94,8 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
       client.requireIsResponding()
     }
     assert(output == List("JobScheduler Agent is responding"))
-    autoClosing(new TextAgentClient(agentUri = s"http://127.0.0.1:${findRandomFreeTcpPort()}", _ ⇒ Unit)) { client ⇒
+    val agentUri = AgentAddress(s"http://127.0.0.1:${findRandomFreeTcpPort()}")
+    autoClosing(new TextAgentClient(agentUri, _ ⇒ Unit)) { client ⇒
       intercept[Http.ConnectionAttemptFailedException] {client.requireIsResponding() }
     }
   }

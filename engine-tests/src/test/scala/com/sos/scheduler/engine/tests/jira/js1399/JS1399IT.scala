@@ -4,6 +4,7 @@ import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -34,7 +35,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   "file_order_source waits for process_class" in {
     val matchingFile = directory / "X-MATCHING-FILE-1"
     val orderKey = TestJobChainPath orderKey matchingFile.toString
-    writeConfigurationFile(TestJobChainPath, newJobChainElem(directory, agentUri, 1.s))
+    writeConfigurationFile(TestJobChainPath, newJobChainElem(directory, 1.s))
     eventBus.awaiting[OrderFinished](orderKey) {
       intercept[TimeoutException] {
         implicit val implicitTimeout = ImplicitTimeout(10.s)
@@ -72,7 +73,8 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       autoClosing(new ServerSocket()) { socket ⇒
         socket.bind(new InetSocketAddress("127.0.0.1", 0))
         val deadPort = socket.getLocalPort
-        writeConfigurationFile(TestProcessClassPath, ProcessClassConfiguration(agentUris = List(s"http://127.0.0.1:$deadPort")))
+        writeConfigurationFile(TestProcessClassPath,
+          ProcessClassConfiguration(agentUris = List(AgentAddress(s"http://127.0.0.1:$deadPort"))))
         intercept[TimeoutException] {
           implicit val implicitTimeout = ImplicitTimeout(10.s)
           eventBus.awaiting[OrderStarted.type](orderKey) {
@@ -85,7 +87,7 @@ final class JS1399IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     }
   }
 
-  private def newJobChainElem(directory: Path, agentUri: String, repeat: Duration): xml.Elem =
+  private def newJobChainElem(directory: Path, repeat: Duration): xml.Elem =
     <job_chain file_watching_process_class={TestProcessClassPath.withoutStartingSlash}>
       <file_order_source directory={directory.toString} regex="MATCHING-" repeat={repeat.getSeconds.toString}/>
       <job_chain_node state="100" job="/test"/>

@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
@@ -64,10 +65,10 @@ with OrderPersistence {
   private def agentFileExists(cppCall: CppCall): Unit = {
     import subsystem.schedulerThreadCallQueue.implicits.executionContext
     val orderId = id
-    val p = cppProxy.params.getSister
-    val file = p("scheduler_file_path")
+    val params = cppProxy.params.getSister
+    val file = params("scheduler_file_path")
     require(file.nonEmpty, "Order variable scheduler_file_path must not be empty")
-    val agentUri = p(FileOrderAgentUriVariableName)
+    val agentUri = AgentAddress.normalized(params(FileOrderAgentUriVariableName))
     require(agentUri.nonEmpty, s"Order variable $FileOrderAgentUriVariableName must not be empty")
     agentClientFactory.apply(agentUri).fileExists(file) onComplete {
       case Success(exists) ⇒

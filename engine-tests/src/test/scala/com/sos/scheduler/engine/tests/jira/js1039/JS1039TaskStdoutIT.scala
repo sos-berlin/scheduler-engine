@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1039
 
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
@@ -42,7 +43,7 @@ final class JS1039TaskStdoutIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   protected override def onSchedulerActivated(): Unit = {
-    writeConfigurationFile(ProcessClassPath("/test-remote"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
+    writeConfigurationFile(ProcessClassPath("/test-remote"), ProcessClassConfiguration(agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort"))))
     super.onSchedulerActivated()
   }
 

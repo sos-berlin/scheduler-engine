@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskObstacle, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -120,7 +121,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "Replacing configuration file .process_class.xml" in {
     withEventPipe { eventPipe ⇒
-      assertResult(List("http://127.0.0.254:1", "http://127.0.0.253:1")) {
+      assertResult(List(AgentAddress("http://127.0.0.254:1"), AgentAddress("http://127.0.0.253:1"))) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       val taskRun = startJob(ReplaceTestJobPath)
@@ -136,7 +137,7 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
   "Replacing configuration file .process_class.xml, removing remote_schedulers" in {
     withEventPipe { eventPipe ⇒
-      assertResult(List(s"${agentRefs(1).uri}")) {
+      assertResult(List(AgentAddress(s"${agentRefs(1).uri}"))) {
         processClass(ReplaceProcessClassPath).agents map { _.address }
       }
       for (a ← runningAgents.values) {
@@ -194,7 +195,7 @@ private object JS1188IT {
   private val AgentNameRegex = "TEST_AGENT_NAME=/(.*)/".r
 
   private case class AgentRef(name: String, port: Int) {
-    def uri = s"http://127.0.0.1:$port"
+    def uri = AgentAddress(s"http://127.0.0.1:$port")
     def testOutput = s"TEST_AGENT_NAME=/$name/"
   }
 

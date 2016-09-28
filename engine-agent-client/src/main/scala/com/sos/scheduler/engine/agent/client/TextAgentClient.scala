@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.common.sprayutils.https.Https.acceptTlsCertifica
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import java.nio.charset.StandardCharsets._
 import scala.concurrent.Future
 import scala.util.Try
@@ -27,7 +28,7 @@ import spray.json.{JsValue, JsonParser}
 /**
   * @author Joacim Zschimmer
   */
-private[client] class TextAgentClient(agentUri: String, print: String ⇒ Unit,
+private[client] class TextAgentClient(agentUri: AgentAddress, print: String ⇒ Unit,
   userAndPassword: Option[UserAndPassword] = None, keystore: Option[KeystoreReference] = None)
 extends AutoCloseable {
 
@@ -36,7 +37,7 @@ extends AutoCloseable {
   import actorSystem.dispatcher
 
   keystore match {
-    case Some(ref) ⇒ acceptTlsCertificateFor(ref, agentUri)
+    case Some(ref) ⇒ acceptTlsCertificateFor(ref, uri = agentUri.string)
     case None ⇒
   }
 

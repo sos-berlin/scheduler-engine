@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.agent.client
 
 import akka.actor.ActorSystem
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import spray.http.Uri
 
 /**
@@ -19,5 +20,5 @@ final class SimpleAgentClient private(val agentUri: Uri) extends AgentClient wit
 }
 
 object SimpleAgentClient {
-  def apply(agentUri: String) = new SimpleAgentClient(Uri(agentUri))
+  def apply(agentUri: AgentAddress) = new SimpleAgentClient(agentUri.string)
 }
