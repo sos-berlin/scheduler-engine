@@ -120,7 +120,7 @@ with OrderPersistence {
               nextStepAtOption match {
                 case None ⇒ NotPlanned
                 case Some(at) if at.getEpochSecond >= currentTimeMillis / 1000 ⇒ Planned(at)
-                case Some(at) ⇒ Pending(at)
+                case Some(at) ⇒ Due(at)
               }
             else if (CppFastFlags.isSetback(flags))
               Setback(setbackUntilOption getOrElse Instant.MAX)

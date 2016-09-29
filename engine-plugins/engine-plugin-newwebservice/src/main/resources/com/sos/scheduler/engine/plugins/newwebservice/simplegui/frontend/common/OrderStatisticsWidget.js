@@ -4,7 +4,7 @@ function startOrderStatisticsChangedListener(path) {
     "total",
     "notPlanned",
     "planned",
-    "pending",
+    "due",
     "running",
     "inTask",
     "inProcess",

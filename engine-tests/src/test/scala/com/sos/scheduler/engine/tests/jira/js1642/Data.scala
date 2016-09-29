@@ -151,7 +151,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH),
     obstacles = Set(
       OrderObstacle.FileBasedObstacles(Set(
@@ -163,7 +163,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
-      "TYPE": "Pending",
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [
@@ -187,7 +187,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH),
     obstacles = Set(
       OrderObstacle.Suspended,
@@ -200,7 +200,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
-      "TYPE": "Pending",
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [
@@ -227,7 +227,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.not_initialized,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xb1OrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,1",
@@ -235,7 +235,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "Permanent",
     "nodeId": "100",
     "processingState" : {
-      "TYPE": "Pending",
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],
@@ -247,7 +247,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.not_initialized,
     OrderSourceType.AdHoc,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xbAdHocDistributedOrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
@@ -255,7 +255,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "sourceType": "AdHoc",
     "nodeId": "100",
     "processingState" : {
-      "TYPE": "Pending",
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],

@@ -155,7 +155,7 @@ extends SchedulerHtmlPage {
   private def orderToTr(order: OrderOverview) = {
     val processingStateHtml: Frag = order.processingState match {
       case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
-      case OrderProcessingState.Pending(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Pending")))
+      case OrderProcessingState.Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Due")))
       case OrderProcessingState.Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
       case inTask: OrderProcessingState.InTask ⇒
         val taskId = inTask.taskId
@@ -228,7 +228,7 @@ object OrdersHtmlPage {
     else
       order.processingState match {
         case _: OrderProcessingState.InTaskProcess ⇒ Some("bg-primary")
-        case _: OrderProcessingState.Pending ⇒ Some("bg-info")
+        case _: OrderProcessingState.Due ⇒ Some("bg-info")
         case _ if !order.fileBasedState.isOkay ⇒ Some("bg-danger")
         case _ ⇒ None
       }
