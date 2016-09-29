@@ -15,7 +15,7 @@ final class EndNode(
   protected val injector: Injector)
 extends Node {
 
-  private[kernel] override def overview = EndNodeOverview(nodeKey)
+  private[kernel] override def overview = EndNodeOverview(nodeKey.jobChainPath, nodeKey.nodeId)
 
   protected val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
 }

@@ -29,7 +29,7 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
   protected[kernel] val cppProxy: NodeCI
   private lazy val orderSubsystem = injector.instance[OrderSubsystem]
   private val jobChainPathOnce = new SetOnce[JobChainPath]
-  private val nodeIdOnce = new SetOnce[NodeId]
+  private val nodeKeyOnce = new SetOnce[NodeKey]
 
   def onCppProxyInvalidated() = close()
 
@@ -45,7 +45,10 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   private[kernel] final def persistentState = new JobChainNodePersistentState(jobChainPath, nodeId, action)
 
-  final def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }
+  final lazy val nodeKey = nodeKeyOnce getOrUpdate
+    inSchedulerThread {
+      NodeKey(jobChainPath, NodeId(cppProxy.string_order_state))
+    }
 
   private[order] def jobChain = orderSubsystem.jobChain(jobChainPath)
 
@@ -53,7 +56,7 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
     jobChainPathOnce getOrUpdate JobChainPath(cppProxy.job_chain_path)
   }
 
-  protected[kernel] final def nodeId = nodeIdOnce getOrUpdate NodeId(cppProxy.string_order_state)
+  protected[kernel] final def nodeId = nodeKey.nodeId
 
   protected[kernel] final def nextNodeId = NodeId(cppProxy.string_next_state)
 

@@ -272,14 +272,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xb1OrderOverview,
     xbAdHocDistributedOrderOverview)
 
-  val A100NodeOverview = SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val A100NodeOverview = SimpleJobNodeOverview(aJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     TestJobPath, orderCount = 3, obstacles = Set(NodeObstacle.Delaying(999999.s)))
-  val B100NodeOverview = SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val B100NodeOverview = SimpleJobNodeOverview(bJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     TestJobPath, orderCount = 1)
-  val Xa100NodeOverview = SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val Xa100NodeOverview = SimpleJobNodeOverview(xaJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     XTestJobPath, orderCount = 2,
     obstacles = Set(NodeObstacle.MissingJob(XTestJobPath)))
-  val Xb100NodeOverview = SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val Xb100NodeOverview = SimpleJobNodeOverview(xbJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     XTestBJobPath, orderCount = 0, obstacles = Set(NodeObstacle.WaitingForJob))
 
   val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
@@ -422,10 +422,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val UsedNodesJson = """[
     {
       "TYPE": "Job",
-      "nodeKey": {
-        "jobChainPath": "/aJobChain",
-        "nodeId": "100"
-      },
+      "jobChainPath": "/aJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/test",
@@ -440,10 +438,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     },
     {
       "TYPE": "Job",
-      "nodeKey": {
-        "jobChainPath": "/bJobChain",
-        "nodeId": "100"
-      },
+      "jobChainPath": "/bJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/test",
@@ -453,10 +449,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     },
     {
       "TYPE": "Job",
-      "nodeKey": {
-        "jobChainPath": "/xFolder/x-aJobChain",
-        "nodeId": "100"
-      },
+      "jobChainPath": "/xFolder/x-aJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/xFolder/test",
@@ -471,10 +465,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     },
     {
       "TYPE": "Job",
-      "nodeKey": {
-        "jobChainPath": "/xFolder/x-bJobChain",
-        "nodeId": "100"
-      },
+      "jobChainPath": "/xFolder/x-bJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/xFolder/test-b",

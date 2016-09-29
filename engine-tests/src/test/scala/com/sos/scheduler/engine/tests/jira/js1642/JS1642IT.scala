@@ -316,7 +316,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           List(
             Xa100NodeOverview,
             EndNodeOverview(
-              NodeKey(xaJobChainPath, NodeId("END"))))))
+              xaJobChainPath,
+              NodeId("END")))))
     }
 
     "ordersComplemented speed" in {
