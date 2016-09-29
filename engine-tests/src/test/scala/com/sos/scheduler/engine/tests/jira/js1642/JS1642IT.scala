@@ -512,9 +512,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
-  "WebSchedulerClient.getJson" in {
-    val jsonString = webSchedulerClient.getJson("api") await TestTimeout
-    val jsObject = jsonString.parseJson.asJsObject
+  "WebSchedulerClient.getByUri" in {
+    val jsObject = webSchedulerClient.getByUri[JsObject]("api") await TestTimeout
     val Snapshot(_, directOverview) = directSchedulerClient.overview await TestTimeout
     assert(jsObject.fields("version") == JsString(directOverview.version))
   }
