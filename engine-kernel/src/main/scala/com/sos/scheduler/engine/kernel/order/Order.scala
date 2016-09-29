@@ -125,7 +125,7 @@ with OrderPersistence {
             else if (CppFastFlags.isSetback(flags))
               Setback(setbackUntilOption getOrElse Instant.MAX)
             else
-              WaitingForOther
+              WaitingForResource
         }
     }
   }
