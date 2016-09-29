@@ -38,7 +38,7 @@ trait AgentRoute {
         rawPathPrefix(Slash) {
           pathEnd {
             dontCache {
-              complete(client.agentUris)
+              complete(client.agentUris map { _ map { _.toSeq.sorted }})
             }
           } ~
           extract(identity) { requestContext ⇒
