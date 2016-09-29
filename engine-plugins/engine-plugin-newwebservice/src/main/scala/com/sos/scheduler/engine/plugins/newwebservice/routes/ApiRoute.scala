@@ -4,7 +4,7 @@ import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.cplusplus.runtime.CppException
+import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import spray.http.StatusCodes._
 import spray.routing.Directives._
-import spray.routing.{ExceptionHandler, Route}
+import spray.routing.{ExceptionHandler, RejectionHandler, Route, ValidationRejection}
 
 /**
   * @author Joacim Zschimmer
@@ -43,7 +43,7 @@ with TaskRoute {
 
   protected final def apiRoute: Route =
     handleExceptions(ApiExceptionHandler) {
-      handleExceptions(exceptionHandler) {
+      handleRejections(ApiRejectionHandler) {
         dontCache {
           realApiRoute
         } ~
@@ -146,22 +146,19 @@ with TaskRoute {
       }
     }
     */
-
-  private val exceptionHandler = ExceptionHandler {
-    case e: CppException if e.getMessage startsWith "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
-  }
 }
 
 object ApiRoute {
   private val logger = Logger(getClass)
 
   private val ApiExceptionHandler = ExceptionHandler {
-    // This is an internal API, so we expose internal error messages !!!
-    case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete((NotFound, e.getMessage))
-//    case e: IllegalArgumentException ⇒ complete((BadRequest, e.toSimplifiedString))
-//    case e: RuntimeException ⇒ complete((BadRequest, e.toSimplifiedString))
     case NonFatal(t) ⇒
       logger.warn(t.toString, t)
-      complete((BadRequest, t.toSimplifiedString))
+      // This is an internal API, we expose internal error messages !!!
+      complete(BadRequest → WebError(t.toSimplifiedString))
+  }
+
+  private val ApiRejectionHandler = RejectionHandler {
+    case ValidationRejection(message, _) :: _ ⇒ complete(BadRequest → WebError(message))
   }
 }
