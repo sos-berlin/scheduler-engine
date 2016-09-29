@@ -84,7 +84,7 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
     inSchedulerThread {
       val flags = orderC.java_fast_flags
       val nextStepAtOption = order.nextStepAtOption
-      for (_ ← 1 to m) measureTime(n, "processingState") {
+      for (_ ← 1 to m) measureTime(n, "orderProcessingState") {
         order.processingState(flags, nextStepAtOption)
       }
     }

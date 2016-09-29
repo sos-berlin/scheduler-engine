@@ -79,7 +79,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       val jobPaths = (nodeOverviews map { _.jobPath }).distinct
       jobPaths flatMap jobSubsystem.fileBasedOption
     }
-    val tasks = views map { _.processingState } collect {
+    val tasks = views map { _.orderProcessingState } collect {
       case inTask: OrderProcessingState.InTask ⇒ taskSubsystem.task(inTask.taskId)
     }
     val processClasses = {

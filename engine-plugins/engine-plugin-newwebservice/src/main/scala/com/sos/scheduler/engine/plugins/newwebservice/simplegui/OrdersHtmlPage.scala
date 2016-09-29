@@ -153,7 +153,7 @@ extends SchedulerHtmlPage {
         (orders.par map orderToTr).seq))
 
   private def orderToTr(order: OrderOverview) = {
-    val processingStateHtml: Frag = order.processingState match {
+    val processingStateHtml: Frag = order.orderProcessingState match {
       case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
       case OrderProcessingState.Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Due")))
       case OrderProcessingState.Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
@@ -171,7 +171,7 @@ extends SchedulerHtmlPage {
       case o ⇒ stringFrag(o.toString)
     }
     val occupyingMemberHtml = order.occupyingClusterMemberId map { o ⇒ stringFrag(s", occupied by $o") }
-    val nodeObstaclesHtml: Option[Frag] = order.processingState match {
+    val nodeObstaclesHtml: Option[Frag] = order.orderProcessingState match {
       case _: OrderProcessingState.InTask ⇒ None
       case _ ⇒ nodeKeyToObstacleHtml(order.nodeKey)
     }
@@ -182,7 +182,7 @@ extends SchedulerHtmlPage {
         case _ ⇒ StringFrag("")
       }
     }
-    val rowCssClass = orderToTrClass(order) getOrElse (if (order.processingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
+    val rowCssClass = orderToTrClass(order) getOrElse (if (order.orderProcessingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
       td(orderKeyToA(order.orderKey)(order.orderKey.id.string)),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
@@ -225,7 +225,7 @@ object OrdersHtmlPage {
     if (order.obstacles.nonEmpty)
       Some("bg-warning")
     else
-      order.processingState match {
+      order.orderProcessingState match {
         case _: OrderProcessingState.InTaskProcess ⇒ Some("bg-primary")
         case _: OrderProcessingState.Due ⇒ Some("bg-info")
         case _ if !order.fileBasedState.isOkay ⇒ Some("bg-danger")

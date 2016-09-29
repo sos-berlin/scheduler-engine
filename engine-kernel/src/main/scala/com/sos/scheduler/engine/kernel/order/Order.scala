@@ -95,7 +95,7 @@ with OrderPersistence {
       CppFastFlags.fileBasedState(flags),
       sourceType,
       nodeId = nodeId,
-      processingState = processingState,
+      orderProcessingState = processingState,
       historyIdOption,
       obstacles = obstacles(flags, processingState),
       startedAt = startedAtOption,

@@ -52,7 +52,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "3",
       "processClassPath": "",
@@ -76,7 +76,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "4",
       "processClassPath": "",
@@ -100,7 +100,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "not_initialized",
     "nodeId": "100",
     "sourceType": "AdHoc",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "Planned",
       "at": "2038-01-01T11:22:33Z"
     },
@@ -126,7 +126,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "nodeId": "100",
     "sourceType": "Permanent",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "5",
       "processClassPath": "",
@@ -162,7 +162,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
@@ -199,7 +199,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
@@ -234,7 +234,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "not_initialized",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
@@ -254,7 +254,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "not_initialized",
     "sourceType": "AdHoc",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
