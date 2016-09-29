@@ -421,7 +421,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     ]"""
   val UsedNodesJson = """[
     {
-      "TYPE": "SimpleJob",
+      "TYPE": "Job",
       "nodeKey": {
         "jobChainPath": "/aJobChain",
         "nodeId": "100"
@@ -439,7 +439,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ]
     },
     {
-      "TYPE": "SimpleJob",
+      "TYPE": "Job",
       "nodeKey": {
         "jobChainPath": "/bJobChain",
         "nodeId": "100"
@@ -452,7 +452,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "obstacles": []
     },
     {
-      "TYPE": "SimpleJob",
+      "TYPE": "Job",
       "nodeKey": {
         "jobChainPath": "/xFolder/x-aJobChain",
         "nodeId": "100"
@@ -470,7 +470,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ]
     },
     {
-      "TYPE": "SimpleJob",
+      "TYPE": "Job",
       "nodeKey": {
         "jobChainPath": "/xFolder/x-bJobChain",
         "nodeId": "100"

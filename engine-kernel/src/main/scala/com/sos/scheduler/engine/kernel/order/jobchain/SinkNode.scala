@@ -23,7 +23,7 @@ extends JobNode {
 
   private[order] def processClassPathOption = jobChain.fileWatchingProcessClassPathOption
 
-  private[kernel] def overview = SinkNodeOverview(nodeKey, nextNodeId, errorNodeId, action, jobPath, orderCount, obstacles)
+  private[kernel] def overview = SinkNodeOverview(nodeKey, nextNodeId, errorNodeId, jobPath, action, orderCount, obstacles)
 
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 

@@ -175,7 +175,6 @@ extends SchedulerHtmlPage {
       case _: OrderProcessingState.InTask ⇒ None
       case _ ⇒ nodeKeyToObstacleHtml(order.nodeKey)
     }
-    val isWaiting = order.processingState.isInstanceOf[OrderProcessingState.Waiting]
     val obstaclesHtml: Frag = {
       val orderObstaclesHtml = order.obstacles.toList map { o ⇒ stringFrag(o.toString) }
       orderObstaclesHtml ++ nodeObstaclesHtml match {
@@ -183,7 +182,7 @@ extends SchedulerHtmlPage {
         case _ ⇒ StringFrag("")
       }
     }
-    val rowCssClass = orderToTrClass(order) getOrElse (if (isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
+    val rowCssClass = orderToTrClass(order) getOrElse (if (order.processingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
       td(orderKeyToA(order.orderKey)(order.orderKey.id.string)),
       td(div(cls := "visible-lg-block")(order.sourceType.toString)),
