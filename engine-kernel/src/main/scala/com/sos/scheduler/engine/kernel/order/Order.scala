@@ -46,13 +46,14 @@ with OrderPersistence {
   private val idOnce = new SetOnce[OrderId]
   private val sourceTypeOnce = new SetOnce[OrderSourceType]
   private[kernel] val queryable = new QueryableOrder {
+    def nodeId = Order.this.nodeId
     private def flags = cppProxy.java_fast_flags
     def isSuspended = CppFastFlags.isSuspended(flags)
     def isSetback = CppFastFlags.isSetback(flags)
     def sourceType = Order.this.sourceType
     def orderKey = Order.this.orderKey
     def isBlacklisted = CppFastFlags.isBlacklisted(flags)
-    def processingStateClass = processingState(cppProxy.java_fast_flags, nextStepAtOption = nextStepAtOption).getClass
+    def orderProcessingStateClass = processingState(cppProxy.java_fast_flags, nextStepAtOption = nextStepAtOption).getClass
   }
 
   def onCppProxyInvalidated(): Unit = {}

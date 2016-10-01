@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderStatisticsWidget._
 import scalatags.Text.all._
@@ -15,12 +15,12 @@ import scalatags.Text.all._
   */
 final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, title: String = "", markActive: Boolean = false) {
 
-  import orderQuery.jobChainQuery.pathQuery
+  import orderQuery.nodeQuery.jobChainQuery.pathQuery
 
   private val fieldGroups = {
     import OrderProcessingState._
     import OrderSourceType._
-    val q = OrderQuery(jobChainQuery = JobChainQuery(pathQuery = orderQuery.jobChainQuery.pathQuery))
+    val q = OrderQuery(pathQuery, notInTaskLimitPerNode = orderQuery.notInTaskLimitPerNode)
     List(  // Best layout in small window if groups have same size
       List(
         TimestampName → orderQuery),

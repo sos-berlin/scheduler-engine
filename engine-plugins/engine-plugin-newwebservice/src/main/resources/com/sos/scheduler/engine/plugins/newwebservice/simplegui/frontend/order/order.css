@@ -21,3 +21,35 @@ h3.JobChain {
   margin: 2em 0 1em;
   font-weight: bold;
 }
+
+.Order-Due {
+  background-color: #ffffea;
+}
+
+.Order-Due-Suspended {
+  background-color: #f0ffff;
+}
+
+.Order-Suspended {
+  background-color: #eaf6ff;
+}
+.Order-WaitingInTask {
+  background-color: #FFFFC0;
+}
+
+.Order-InTaskProcess,
+.Order-OccupiedByClusterMember {
+  background-color: #d0ffd0;
+}
+
+.Order-Setback {
+  background-color: #eaf6ff;
+}
+
+.Order-WaitingForResource {
+  background-color: #b9cde7;
+}
+
+.Order-Blacklisted {
+  background-color: #d0d0d0;
+}

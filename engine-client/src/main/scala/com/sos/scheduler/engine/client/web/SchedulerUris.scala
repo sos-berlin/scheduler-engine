@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import scala.language.reflectiveCalls
 import spray.http.Uri
 
@@ -63,7 +63,7 @@ final class SchedulerUris private(schedulerUriString: String) {
     def getStatistics(query: JobChainQuery = JobChainQuery.All): String =
       forGet(query, returnType = Some("OrderStatistics"))
 
-    def statisticsForPost(query: JobChainQuery = JobChainQuery.All): String =
+    def statisticsForPost(query: JobChainNodeQuery = JobChainNodeQuery.All): String =
       forPost(returnType = Some("OrderStatistics"))
 
     private def forGet[A: PathAndParameterSerializable](query: A, returnType: Option[String]): String = {

@@ -2,18 +2,20 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.PerKeyLimiter
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem.{quoteSqlName, quoteSqlString}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
@@ -57,26 +59,34 @@ extends FileBasedSubsystem {
 
   private val toOrderStatistics = new ToOrderStatistics
 
-  private[kernel] def orderStatistics(query: JobChainQuery): OrderStatistics =
+  private[kernel] def orderStatistics(query: JobChainNodeQuery): OrderStatistics =
     toOrderStatistics { allocatedArray ⇒
-      val (distriChains, localChains) = jobChainsByQuery(query) partition { _.isDistributed }
+      val (distriChains, localChains) = jobChainsByQuery(query.jobChainQuery) partition { _.isDistributed }
       addLocalOrderStatistics(query, localChains, allocatedArray)
-      addDistributedOrderStatistics(distriChains, allocatedArray)
+      addDistributedOrderStatistics(query, distriChains, allocatedArray)
     }
 
-  private def addLocalOrderStatistics(query: JobChainQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
-    val q = JobChainQuery(query.pathQuery, query.isDistributed)
-    if (q.copy(isDistributed = Some(true)).matchesAll)
+  private def addLocalOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
+    if (query.matchesAllNonDistributed) {
       cppProxy.add_non_distributed_to_order_statistics(result)
-    else
+    } else
+    if (query.matchesCompleteJobChains)
       for (jobChain ← jobChains) {
         jobChain.addNonDistributedToOrderStatistics(result)
       }
+    else
+      for (jobChain ← jobChains; node ← jobChain.jobNodes(query)) {
+        node.addNonDistributedToOrderStatistics(result)
+      }
   }
 
-  private def addDistributedOrderStatistics(jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
-    if (jobChains.nonEmpty) {
-      val sqlClause = jobChainPathsToSql(jobChains map { _.path })
+  private def addDistributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
+    val sqlClause =
+      if (query.matchesCompleteJobChains)
+        jobChainPathsToSql(jobChains map { _.path })
+      else
+        nodeKeysToSql(query, jobChains map { _.path })
+    if (sqlClause.nonEmpty) {
       cppProxy.add_distributed_to_order_statistics(sqlClause, result)
     }
   }
@@ -84,17 +94,29 @@ extends FileBasedSubsystem {
   private def jobChainPathsToSql(jobChainPaths: TraversableOnce[JobChainPath]): String =
     databaseSubsystem.toInClauseSql(
       column = "job_chain",
-      for (path ← jobChainPaths) yield
-        DatabaseSubsystem.quoteSqlString(path.withoutStartingSlash))
+      jobChainPaths map { o ⇒ quoteSqlString(o.withoutStartingSlash) })
+
+  private def nodeKeysToSql(query: JobChainNodeQuery, jobChainPaths: TraversableOnce[JobChainPath]): String =
+    (for (jobChainPath ← jobChainPaths) yield {
+      val nodes = jobChain(jobChainPath).jobNodes(query)
+      nodes.nonEmpty option
+        "(" +
+          quoteSqlName("job_chain") +
+          "=" +
+          quoteSqlString(jobChainPath.withoutStartingSlash) +
+          " and " +
+          databaseSubsystem.toInClauseSql(column = "state", nodes map { o ⇒ quoteSqlString(o.nodeId.string) }) +
+        ")"
+    }).flatten mkString " and "
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
-    val (distriChains, localChains) = jobChainsByQuery(query.jobChainQuery) partition { _.isDistributed }
+    val (distriChains, localChains) = jobChainsByQuery(query.nodeQuery.jobChainQuery) partition { _.isDistributed }
     val local = localOrderViews[V](localChains, query)
     val distributed = distributedOrderViews[V](distriChains, query)
     var all: Iterator[V] = local ++ distributed
     for (limit ← query.notInTaskLimitPerNode) {
       val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderView) ⇒ o.nodeKey)
-      all = all filter { o ⇒ o.processingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
+      all = all filter { o ⇒ o.orderProcessingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
     }
     all.toVector
   }

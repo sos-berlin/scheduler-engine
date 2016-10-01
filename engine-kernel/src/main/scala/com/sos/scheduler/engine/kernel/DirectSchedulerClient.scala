@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOver
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -96,7 +96,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       (processClasses map { _.overview }).sorted)
   }
 
-  def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] =
+  def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
     respondWith {
       orderSubsystem.orderStatistics(query)
     }

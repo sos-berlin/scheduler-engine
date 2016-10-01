@@ -1615,6 +1615,25 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
     return element;
 }
 
+void Order_queue_node::add_non_distributed_to_order_statistics(jintArray resultJ) const {
+    javabridge::Env jenv;
+    jboolean is_copy = false;
+    jint* result = jenv->GetIntArrayElements(resultJ, &is_copy);
+    if (!result) jenv.throw_java("GetIntArrayElements");
+    Time now = Time::now();
+    int result_size = jenv->GetArrayLength(resultJ);
+    Z_FOR_EACH_CONST(Order_queue::Queue, _order_queue->_queue, it) {
+        const Order* order = *it;
+        order->add_to_statistics(now, result_size, result);
+    }
+    jenv->ReleaseIntArrayElements(resultJ, result, 0);
+}
+
+void Order_queue_node::add_to_statistics(void* callback_context, Order* order) {
+    jint* result = (jint*)callback_context;
+    order->add_to_statistics(Time::now(), order_statistics_array_size, result);
+}
+
 //-------------------------------------------------------------------------------Job_node::Job_node
 
 Job_node::Job_node( Job_chain* job_chain, const Order::State& state, const Absolute_path& job_path ) 

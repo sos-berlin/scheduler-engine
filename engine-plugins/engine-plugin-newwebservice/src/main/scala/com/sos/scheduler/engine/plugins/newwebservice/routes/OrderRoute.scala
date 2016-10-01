@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
-import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainQuery, orderQuery}
+import com.sos.scheduler.engine.client.web.common.QueryHttp
+import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainNodeQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
@@ -36,7 +37,7 @@ trait OrderRoute extends LogRoute {
     (testSlash(webServiceContext) | pass) {
       parameter("return".?) {
         case Some("OrderStatistics") ⇒
-          jobChainQuery { query ⇒
+          jobChainNodeQuery { query ⇒
             completeTryHtml(client.orderStatistics(query))
           }
         case _ ⇒

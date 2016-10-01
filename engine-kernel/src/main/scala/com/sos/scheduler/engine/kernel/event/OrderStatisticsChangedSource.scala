@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.filebased.FileBasedEvent
 import com.sos.scheduler.engine.data.order.{OrderEvent, OrderKey, OrderStatistics, OrderStatisticsChanged}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource._
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import scala.PartialFunction.cond
@@ -19,12 +19,12 @@ trait OrderStatisticsChangedSource
 extends HasCloser {
 
   protected def eventCollector: EventCollector
-  protected def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]]
+  protected def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]]
   protected implicit def executionContext: ExecutionContext
 
   def whenOrderStatisticsChanged(after: EventId, query: PathQuery = PathQuery.All): Future[Snapshot[OrderStatisticsChanged]] =
     for (_ ← eventCollector.whenAny[Event](Set(classOf[OrderEvent], classOf[FileBasedEvent]), after = after, pathPredicate(query));
-         snapshot ← orderStatistics(JobChainQuery(query)))
+         snapshot ← orderStatistics(JobChainNodeQuery(JobChainQuery(query))))
       yield snapshot map OrderStatisticsChanged.apply
 }
 

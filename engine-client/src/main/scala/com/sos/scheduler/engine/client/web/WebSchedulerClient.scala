@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView, Orders}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -80,8 +80,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def getOrdersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     get[Snapshot[OrdersComplemented[V]]](_.order.complemented[V](query))
 
-  final def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] =
-    post[JobChainQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
+  final def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
+    post[JobChainNodeQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
 
   // JobChain
 

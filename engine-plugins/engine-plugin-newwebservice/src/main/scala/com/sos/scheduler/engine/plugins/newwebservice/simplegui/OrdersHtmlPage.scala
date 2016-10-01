@@ -9,11 +9,12 @@ import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey, NodeObstacle}
+import com.sos.scheduler.engine.data.order.OrderProcessingState._
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState}
-import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
@@ -154,10 +155,10 @@ extends SchedulerHtmlPage {
 
   private def orderToTr(order: OrderOverview) = {
     val processingStateHtml: Frag = order.orderProcessingState match {
-      case OrderProcessingState.Planned(at) ⇒ instantWithDurationToHtml(at)
-      case OrderProcessingState.Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Due")))
-      case OrderProcessingState.Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
-      case inTask: OrderProcessingState.InTask ⇒
+      case Planned(at) ⇒ instantWithDurationToHtml(at)
+      case Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Due")))
+      case Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
+      case inTask: InTask ⇒
         val taskId = inTask.taskId
         val jobPath = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath } map { _.string } getOrElse "(unknown job)"
         val taskHtml = seqFrag(
@@ -165,21 +166,25 @@ extends SchedulerHtmlPage {
             span(cls := "visible-lg-inline")(
               taskToA(taskId)(s"Task $jobPath:${taskId.string}"))))
         inTask match {
-          case _: OrderProcessingState.WaitingInTask ⇒ seqFrag(taskHtml, " waiting for process")
-          case o: OrderProcessingState.InTaskProcess ⇒ seqFrag(taskHtml, " since ", instantWithDurationToHtml(o.since))
+          case _: WaitingInTask ⇒ seqFrag(taskHtml, " waiting for process")
+          case o: InTaskProcess ⇒ seqFrag(taskHtml, " since ", instantWithDurationToHtml(o.since))
        }
       case o ⇒ stringFrag(o.toString)
     }
     val occupyingMemberHtml = order.occupyingClusterMemberId map { o ⇒ stringFrag(s", occupied by $o") }
     val nodeObstaclesHtml: Option[Frag] = order.orderProcessingState match {
-      case _: OrderProcessingState.InTask ⇒ None
+      case _: InTask ⇒ None
       case _ ⇒ nodeKeyToObstacleHtml(order.nodeKey)
     }
     val obstaclesHtml: Frag = {
       val orderObstaclesHtml = order.obstacles.toList map { o ⇒ stringFrag(o.toString) }
-      orderObstaclesHtml ++ nodeObstaclesHtml match {
-        case obstacles if obstacles.nonEmpty ⇒ span(cls := "text-danger")(dotJoin(obstacles))
-        case _ ⇒ StringFrag("")
+      val htmls = orderObstaclesHtml ++ nodeObstaclesHtml
+      htmls.nonEmpty option {
+        val joined = dotJoin(htmls)
+        if (order.orderProcessingState.isDueOrStarted)
+          span(cls := "text-danger")(joined)
+        else
+          joined
       }
     }
     val rowCssClass = orderToTrClass(order) getOrElse (if (order.orderProcessingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
@@ -191,9 +196,9 @@ extends SchedulerHtmlPage {
       td(obstaclesHtml))
   }
 
-  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path))))
+  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(nodeQuery = JobChainNodeQuery(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path)))))
 
-  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path))))
+  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(nodeQuery = JobChainNodeQuery(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path)))))
 
   private def queryToA(query: OrderQuery) = hiddenA(uris.order(query, returnType = None))
 
@@ -222,15 +227,12 @@ object OrdersHtmlPage {
       new OrdersHtmlPage(snapshot, pageUri, query, schedulerOverviewResponse.value, webServiceContext.uris)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =
-    if (order.obstacles.nonEmpty)
-      Some("bg-warning")
-    else
-      order.orderProcessingState match {
-        case _: OrderProcessingState.InTaskProcess ⇒ Some("bg-primary")
-        case _: OrderProcessingState.Due ⇒ Some("bg-info")
-        case _ if !order.fileBasedState.isOkay ⇒ Some("bg-danger")
-        case _ ⇒ None
-      }
+    order.orderProcessingState match {
+      case NotPlanned | _: Planned ⇒ None
+      case _: Due ⇒ Some("Order-Due-Suspended")
+      case _: Due | _: Started | _: WaitingInTask if order.isSuspended ⇒ Some("Order-Suspended")
+      case o ⇒ Some(s"Order-${o.getClass.getSimpleName stripSuffix "$"}")
+    }
 
   private def dotJoin(frags: Iterable[Frag]) = joinHtml(s" $Dot ")(frags)
 }

@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobNodeOverview, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.queries.QueryableJobNode
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode.logger
@@ -50,6 +51,13 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
   private def orderStateTransitionToState(cppInternalValue: Long): String =
     orderStateTransitionToState(OrderNodeTransition.ofCppInternalValue(cppInternalValue)).string
 
+  private[order] val queryable: QueryableJobNode =
+    new QueryableJobNode {
+      def jobChain = JobNode.this.jobChain.queryable
+      def nodeId = JobNode.this.nodeId
+      def jobPath = JobNode.this.jobPath
+    }
+
   protected def obstacles: Set[NodeObstacle] = {
     import NodeObstacle._
     val delay = this.delay
@@ -62,6 +70,10 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
       case Some(job) if !job.isReadyForOrderIn(processClassPathOption) ⇒ builder += WaitingForJob
     }
     builder.result
+  }
+
+  private[order] def addNonDistributedToOrderStatistics(statisticsArray: Array[Int]): Unit = {
+    cppProxy.add_non_distributed_to_order_statistics(statisticsArray)
   }
 
   private[kernel] final def orderCount: Int = orderQueue.size

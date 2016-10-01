@@ -3546,7 +3546,7 @@ void Order::add_to_statistics(Time now, int result_size, jint* result) const {
     }
     if (suspended()) result[8]++;
     if (is_on_blacklist()) result[9]++;
-    if (has_base_file()) result[10]++;
+    if (is_file_based()) result[10]++;
     if (is_file_order()) result[11]++;
 }
 

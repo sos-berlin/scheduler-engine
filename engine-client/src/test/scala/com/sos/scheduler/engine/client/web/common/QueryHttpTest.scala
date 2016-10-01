@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -107,7 +107,7 @@ final class QueryHttpTest extends FreeSpec with ScalatestRouteTest {
     }
 
     "OrderQuery /a/b" in {
-      Get("/prefix/a/b") ~> route(OrderQuery(jobChainQuery = JobChainQuery(pathQuery = PathQuery[JobChainPath]("/a/b")))) ~> check {
+      Get("/prefix/a/b") ~> route(OrderQuery(JobChainNodeQuery(jobChainQuery = JobChainQuery(pathQuery = PathQuery[JobChainPath]("/a/b"))))) ~> check {
         assert(status == OK)
       }
     }
@@ -131,7 +131,7 @@ final class QueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
     "OrderQuery /?jobPaths=/A,/B" in {
       Get("/prefix/?jobPaths=/A,/B") ~>
-        route(OrderQuery(jobPaths = Some(Set(JobPath("/A"), JobPath("/B"))))) ~>
+        route(OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(JobPath("/A"), JobPath("/B")))))) ~>
         check {
           assert(status == OK)
         }
@@ -139,7 +139,7 @@ final class QueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
     "OrderQuery isDistributed" in {
       Get("/prefix/?isDistributed=true") ~>
-        route(OrderQuery(JobChainQuery(isDistributed = Some(true)))) ~>
+        route(OrderQuery(JobChainNodeQuery(JobChainQuery(isDistributed = Some(true))))) ~>
         check {
           assert(status == OK)
         }
@@ -196,7 +196,7 @@ final class QueryHttpTest extends FreeSpec with ScalatestRouteTest {
     "OrderQuery /a/ suspended but not blacklisted" in {
       Get("/prefix/a/?isSuspended=true&isBlacklisted=false") ~>
         route(OrderQuery(
-          jobChainQuery = JobChainQuery(pathQuery = PathQuery[JobChainPath]("/a/")),
+          PathQuery[JobChainPath]("/a/"),
           isSuspended = Some(true),
           isBlacklisted = Some(false))) ~>
         check {

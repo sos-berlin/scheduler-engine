@@ -19,15 +19,16 @@ import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
+import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, FileBasedState, TypedPath, UnknownTypedPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedDetailed, FileBasedEvent, FileBasedState, TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.job.TaskId
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId, NodeKey}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerState}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -172,198 +173,282 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     taskIdToStartedAt = (for (taskId ← 3 to 5 map TaskId.apply) yield taskId → taskSubsystem.task(taskId).processStartedAt.get).toMap)
   import data._
 
+  "overview" in {
+    val overview = fetchWebAndDirectEqualized[SchedulerOverview](
+      _.overview,
+      _.copy(system = SystemInformation.ForTest, java = JavaInformation.ForTest))
+    assert(overview.schedulerId == SchedulerId("test"))
+    assert(overview.state == SchedulerState.running)
+  }
+
+  "FileBasedDetailed" in {
+    val fileBasedDetailed = fetchWebAndDirectEqualized[FileBasedDetailed](
+      _.fileBasedDetailed(a1OrderKey),
+      _.copy(sourceXml = None))
+    val file = testEnvironment.fileFromPath(a1OrderKey)
+    assert(SafeXML.loadString(fileBasedDetailed.sourceXml.get) == file.xml)
+    assert(fileBasedDetailed.fileModifiedAt.isDefined)
+  }
+
+  "orders[OrderOverview]" in {
+    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+      _.orders[OrderOverview]
+    }
+    assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews)
+  }
+
+  "ordersComplemented" in {
+    val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
+      _.ordersComplemented[OrderOverview]
+    }
+    assert(ordersComplemented.copy(orders = ordersComplemented.orders map normalizeOrderOverview) ==
+      ExpectedOrdersComplemented)
+  }
+
+  "orderTreeComplemented" in {
+    val treeOverview: OrderTreeComplemented[OrderOverview] = fetchWebAndDirect {
+      _.orderTreeComplementedBy[OrderOverview](OrderQuery.All)
+    }
+    assert(treeOverview.copy(orderTree = treeOverview.orderTree mapLeafs normalizeOrderOverview) ==
+      ExpectedOrderTreeComplemented)
+  }
+
+  "ordersComplementedBy isSuspended" in {
+    val orderQuery = OrderQuery(isSuspended = Some(true))
+    val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
+      _.ordersComplementedBy[OrderOverview](orderQuery)
+    }
+    assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
+  }
+
+  "ordersComplementedBy query /aJobChain" in {
+    val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain")))
+    val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
+      _.ordersComplementedBy[OrderOverview](query)
+    }
+    assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
+  }
+
+  "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
+    val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain/")))
+    intercept[RuntimeException] {
+      fetchWebAndDirect {
+        _.ordersComplementedBy[OrderOverview](query)
+      }
+    } .getMessage should include ("SCHEDULER-161")
+  }
+
+  "ordersComplementedBy query /xFolder/" in {
+    val orderQuery = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder/")))
+    val ordersComplemented = fetchWebAndDirect[OrdersComplemented[OrderOverview]] {
+      _.ordersComplementedBy[OrderOverview](orderQuery)
+    }
+    assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
+  }
+
+  "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
+    val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder")))
+    intercept[RuntimeException] {
+      fetchWebAndDirect {
+        _.ordersComplementedBy[OrderOverview](query)
+      }
+    } .getMessage should include ("SCHEDULER-161")
+  }
+
+  "orders query OrderId" in {
+    val orderQuery = OrderQuery(orderIds = Some(Set(OneOrderId)))
+    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+      _.ordersBy[OrderOverview](orderQuery)
+    }
+    assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey))
+  }
+
+  "orders single non-existent, non-distributed OrderKey throws exception" in {
+    assert(!jobChainOverview(aJobChainPath).isDistributed)
+    checkUnknownOrderKeyException(aJobChainPath orderKey "UNKNOWN")
+  }
+
+  "orders single non-existent, distributed OrderKey throws exception" in {
+    assert(jobChainOverview(xbJobChainPath).isDistributed)
+    checkUnknownOrderKeyException(xbJobChainPath orderKey "UNKNOWN")
+  }
+
+  "orders query JobPath" in {
+    val orderQuery = OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(TestJobPath))))
+    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+      _.ordersBy[OrderOverview](orderQuery)
+    }
+    assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey))
+  }
+
+  "orders query JobPath of non-existent job, distributed" in {
+    val orderQuery = OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(XTestBJobPath))))
+    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+      _.ordersBy[OrderOverview](orderQuery)
+    }
+    assert((orders map { _.orderKey }).toSet == Set(xb1OrderKey, xbAdHocDistributedOrderKey))
+  }
+
+  def checkUnknownOrderKeyException(orderKey: OrderKey): Unit = {
+    val orderQuery = OrderQuery().withOrderKey(orderKey)
+    intercept[RuntimeException] {
+      fetchWebAndDirect {
+        _.ordersBy[OrderOverview](orderQuery)
+      }
+    } .getMessage should include ("SCHEDULER-161")
+  }
+
+  "jobChainOverview All" in {
+    val jobChainOverviews: immutable.Seq[JobChainOverview] = fetchWebAndDirect {
+      _.jobChainOverviewsBy(JobChainQuery.All)
+    }
+    assert(jobChainOverviews.toSet == Set(
+      JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
+      JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
+      xaJobChainOverview,
+      xbJobChainOverview))
+  }
+
+  "jobChainOverview query" in {
+    val query = JobChainQuery(PathQuery[JobChainPath]("/xFolder/"))
+    val jobChainOverviews: immutable.Seq[JobChainOverview] = fetchWebAndDirect {
+      _.jobChainOverviewsBy(query)
+    }
+    assert(jobChainOverviews.toSet == Set(
+      xaJobChainOverview,
+      xbJobChainOverview))
+  }
+
+  "jobChainDetailed" in {
+    val jobChainDetailed: JobChainDetailed = fetchWebAndDirect {
+      _.jobChainDetailed(xaJobChainPath)
+    }
+    assert(jobChainDetailed ==
+      JobChainDetailed(
+        xaJobChainOverview,
+        List(
+          Xa100NodeOverview,
+          EndNodeOverview(
+            xaJobChainPath,
+            NodeId("END")))))
+  }
+
+  "orderStatistics" - {
+    "/" in {
+      val orderStatistics: OrderStatistics = fetchWebAndDirect {
+        _.orderStatistics(JobChainQuery.All)
+      }
+      // Distributed orders are not counted yet
+      assert(orderStatistics == OrderStatistics(
+        total = 8,
+        notPlanned = 0,
+        planned = 1,
+        due = 4,
+        running = 3,
+        inTask = 3,
+        inProcess = 3,
+        setback = 0,
+        suspended = 2,
+        blacklisted = 0,
+        permanent = 6,
+        fileOrder = 0))
+    }
+
+    s"$xFolderPath" in {
+      val orderStatistics: OrderStatistics = fetchWebAndDirect {
+        _.orderStatistics(JobChainQuery(PathQuery(xFolderPath)))
+      }
+      assert(orderStatistics == OrderStatistics(
+        total = 4,
+        notPlanned = 0,
+        planned = 0,
+        due = 4,
+        running = 0,
+        inTask = 0,
+        inProcess = 0,
+        setback = 0,
+        suspended = 1,
+        blacklisted = 0,
+        permanent = 3,
+        fileOrder = 0))
+    }
+
+    s"NodeId 100" in {
+      val orderStatistics: OrderStatistics = fetchWebAndDirect {
+        _.orderStatistics(JobChainNodeQuery(nodeIds = Some(Set(NodeId("100")))))
+      }
+      assert(orderStatistics == OrderStatistics(
+        total = 8,
+        notPlanned = 0,
+        planned = 1,
+        due = 4,
+        running = 3,
+        inTask = 3,
+        inProcess = 3,
+        setback = 0,
+        suspended = 2,
+        blacklisted = 0,
+        permanent = 6,
+        fileOrder = 0))
+    }
+
+    s"NodeId 200" in {
+      val orderStatistics: OrderStatistics = fetchWebAndDirect {
+        _.orderStatistics(JobChainNodeQuery(nodeIds = Some(Set(NodeId("200")))))
+      }
+      assert(orderStatistics == OrderStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+    }
+
+    s"Job /test" in {
+      val orderStatistics: OrderStatistics = fetchWebAndDirect {
+        _.orderStatistics(JobChainNodeQuery(jobPaths = Some(Set(TestJobPath))))
+      }
+      assert(orderStatistics == OrderStatistics(
+        total = 4,
+        notPlanned = 0,
+        planned = 1,
+        due = 0,
+        running = 3,
+        inTask = 3,
+        inProcess = 3,
+        setback = 0,
+        suspended = 1,
+        blacklisted = 0,
+        permanent = 3,
+        fileOrder = 0))
+    }
+
+    s"Job /xFolder/test-b, distributed" in {
+      val orderStatistics: OrderStatistics = fetchWebAndDirect {
+        _.orderStatistics(JobChainNodeQuery(jobPaths = Some(Set(XTestBJobPath))))
+      }
+      assert(orderStatistics == OrderStatistics(
+        total = 2,
+        notPlanned = 0,
+        planned = 0,
+        due = 2,
+        running = 0,
+        inTask = 0,
+        inProcess = 0,
+        setback = 0,
+        suspended = 0,
+        blacklisted = 0,
+        permanent = 1,
+        fileOrder = 0))
+    }
+  }
+
+  def fetchWebAndDirect[A](body: SchedulerClient ⇒ Future[Snapshot[A]]): A =
+    fetchWebAndDirectEqualized[A](body, identity)
+
+  def fetchWebAndDirectEqualized[A](body: SchedulerClient ⇒ Future[Snapshot[A]], equalize: A ⇒ A): A = {
+    val a: A = awaitContent(body(webSchedulerClient))
+    assert(equalize(a) == equalize(awaitContent(body(directSchedulerClient))))
+    a
+  }
+
   for ((testGroup, getClient) ← setting) testGroup - {
     lazy val client = getClient()
-
-    "overview" in {
-      val overview = awaitContent(client.overview)
-      assert(overview.copy(system = SystemInformation.ForTest, java = JavaInformation.ForTest) ==
-        awaitContent(directSchedulerClient.overview).copy(system = SystemInformation.ForTest, java = JavaInformation.ForTest))
-      assert(overview.schedulerId == SchedulerId("test"))
-      assert(overview.state == SchedulerState.running)
-    }
-
-    "FileBasedDetailed" in {
-      val fileBasedDetailed = awaitContent(client.fileBasedDetailed(a1OrderKey))
-      assert(fileBasedDetailed.copy(sourceXml = None) == awaitContent(directSchedulerClient.fileBasedDetailed(a1OrderKey)).copy(sourceXml = None))
-      val file = testEnvironment.fileFromPath(a1OrderKey)
-      assert(SafeXML.loadString(fileBasedDetailed.sourceXml.get) == file.xml)
-      assert(fileBasedDetailed.fileModifiedAt.isDefined)
-    }
-
-    "orders[OrderOverview]" in {
-      val orders = awaitContent(client.orders[OrderOverview])
-      assert(orders == awaitContent(directSchedulerClient.orders[OrderOverview]))
-      assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews)
-    }
-
-    "orders[OrderOverview] speed" in {
-      Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
-        client.orders[OrderOverview] await TestTimeout
-      }
-    }
-
-    "ordersComplemented" in {
-      val ordersComplemented = awaitContent(client.ordersComplemented[OrderOverview])
-      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplemented[OrderOverview]))
-      assert(ordersComplemented.copy(orders = ordersComplemented.orders map normalizeOrderOverview) ==
-        ExpectedOrdersComplemented)
-    }
-
-    "orderTreeComplemented" in {
-      val treeOverview = awaitContent(client.orderTreeComplementedBy[OrderOverview](OrderQuery.All))
-      assert(treeOverview == awaitContent(directSchedulerClient.orderTreeComplementedBy[OrderOverview](OrderQuery.All)))
-      assert(treeOverview.copy(orderTree = treeOverview.orderTree mapLeafs normalizeOrderOverview) ==
-        ExpectedOrderTreeComplemented)
-    }
-
-    "ordersComplementedBy isSuspended" in {
-      val orderQuery = OrderQuery(isSuspended = Some(true))
-      val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](orderQuery))
-      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
-      assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
-    }
-
-    "ordersComplementedBy query /aJobChain" in {
-      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain")))
-      val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](query))
-      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](query)))
-      assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
-    }
-
-    "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
-      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain/")))
-      intercept[RuntimeException] {
-        client.ordersComplementedBy[OrderOverview](query) await TestTimeout
-      } .getMessage should include ("SCHEDULER-161")
-    }
-
-    "ordersComplementedBy query /xFolder/" in {
-      val orderQuery = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder/")))
-      val ordersComplemented = awaitContent(client.ordersComplementedBy[OrderOverview](orderQuery))
-      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
-      assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
-    }
-
-    "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
-      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder")))
-      intercept[RuntimeException] {
-        client.ordersComplementedBy[OrderOverview](query) await TestTimeout
-      } .getMessage should include ("SCHEDULER-161")
-    }
-
-    "orders query OrderId" in {
-      val orderQuery = OrderQuery(orderIds = Some(Set(OneOrderId)))
-      val orders = awaitContent(client.ordersBy[OrderOverview](orderQuery))
-      assert(orders == awaitContent(directSchedulerClient.ordersBy[OrderOverview](orderQuery)))
-      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey))
-    }
-
-    "orders single non-existent, non-distributed OrderKey throws exception" in {
-      assert(!jobChainOverview(aJobChainPath).isDistributed)
-      checkUnknownOrderKeyException(aJobChainPath orderKey "UNKNOWN")
-    }
-
-    "orders single non-existent, distributed OrderKey throws exception" in {
-      assert(jobChainOverview(xbJobChainPath).isDistributed)
-      checkUnknownOrderKeyException(xbJobChainPath orderKey "UNKNOWN")
-    }
-
-    "orders query JobPath" in {
-      val orderQuery = OrderQuery(jobPaths = Some(Set(TestJobPath)))
-      val orders = awaitContent(client.ordersBy[OrderOverview](orderQuery))
-      assert(orders == awaitContent(directSchedulerClient.ordersBy[OrderOverview](orderQuery)))
-      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey))
-    }
-
-    "orders query JobPath of non-existent job, distributed" in {
-      val orderQuery = OrderQuery(jobPaths = Some(Set(XTestBJobPath)))
-      val orders = awaitContent(client.ordersBy[OrderOverview](orderQuery))
-      assert(orders == awaitContent(directSchedulerClient.ordersBy[OrderOverview](orderQuery)))
-      assert((orders map { _.orderKey }).toSet == Set(xb1OrderKey, xbAdHocDistributedOrderKey))
-    }
-
-    def checkUnknownOrderKeyException(orderKey: OrderKey): Unit = {
-      val orderQuery = OrderQuery().withOrderKey(orderKey)
-      intercept[RuntimeException] {
-        client.ordersBy[OrderOverview](orderQuery) await TestTimeout
-      } .getMessage should include ("SCHEDULER-161")
-    }
-
-    "jobChainOverview All" in {
-      assert(awaitContent(client.jobChainOverviewsBy(JobChainQuery.All)).toSet == Set(
-        JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
-        JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
-        xaJobChainOverview,
-        xbJobChainOverview))
-    }
-
-    "jobChainOverview query" in {
-      val query = JobChainQuery(PathQuery[JobChainPath]("/xFolder/"))
-      val jobChainOverviews: immutable.Seq[JobChainOverview] = awaitContent(client.jobChainOverviewsBy(query))
-      assert(jobChainOverviews == awaitContent(directSchedulerClient.jobChainOverviewsBy(query)))
-      assert(jobChainOverviews.toSet == Set(
-        xaJobChainOverview,
-        xbJobChainOverview))
-    }
-
-    "jobChainDetailed" in {
-      val jobChainDetailed: JobChainDetailed = awaitContent(client.jobChainDetailed(xaJobChainPath))
-      assert(jobChainDetailed == awaitContent(directSchedulerClient.jobChainDetailed(xaJobChainPath)))
-      assert(jobChainDetailed ==
-        JobChainDetailed(
-          xaJobChainOverview,
-          List(
-            Xa100NodeOverview,
-            EndNodeOverview(
-              xaJobChainPath,
-              NodeId("END")))))
-    }
-
-    "ordersComplemented speed" in {
-      Stopwatch.measureTime(50, "ordersComplemented") {
-        client.ordersComplemented[OrderOverview] await TestTimeout
-      }
-    }
-
-    "orderStatistics" - {
-      "/" in {
-        val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery.All))
-        assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery.All)))
-        // Distributed orders are not counted yet
-        assert(orderStatistics == OrderStatistics(
-          total = 8,
-          notPlanned = 0,
-          planned = 1,
-          due = 4,
-          running = 3,
-          inTask = 3,
-          inProcess = 3,
-          setback = 0,
-          suspended = 2,
-          blacklisted = 0,
-          permanent = 5,
-          fileOrder = 0))
-      }
-
-      s"$xFolderPath" in {
-        val orderStatistics: OrderStatistics = awaitContent(client.orderStatistics(JobChainQuery(PathQuery(xFolderPath))))
-        assert(orderStatistics == awaitContent(directSchedulerClient.orderStatistics(JobChainQuery(PathQuery(xFolderPath)))))
-        assert(orderStatistics == OrderStatistics(
-          total = 4,
-          notPlanned = 0,
-          planned = 0,
-          due = 4,
-          running = 0,
-          inTask = 0,
-          inProcess = 0,
-          setback = 0,
-          suspended = 1,
-          blacklisted = 0,
-          permanent = 2,
-          fileOrder = 0))
-      }
-    }
 
     "command" - {
       "<show_state> as xml.Elem" in {
@@ -550,6 +635,22 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "events" in {
     eventReader.check()
+  }
+
+  for ((testGroup, getClient) ← setting) testGroup - {
+    lazy val client = getClient()
+
+    "orders[OrderOverview] speed" in {
+      Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
+        client.orders[OrderOverview] await TestTimeout
+      }
+    }
+
+    "ordersComplemented speed" in {
+      Stopwatch.measureTime(50, "ordersComplemented") {
+        client.ordersComplemented[OrderOverview] await TestTimeout
+      }
+    }
   }
 
   addOptionalSpeedTests()

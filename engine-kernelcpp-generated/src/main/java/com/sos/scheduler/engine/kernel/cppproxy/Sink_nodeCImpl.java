@@ -11,8 +11,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Sink_nodeC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private Sink_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.Sink_nodeC$.MODULE$.sisterType().sister(this, context));
     }
+
+    @Override public void add_non_distributed_to_order_statistics(int[] p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            add_non_distributed_to_order_statistics__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void add_non_distributed_to_order_statistics__native(long cppReference, int[] p0);
+
 
     @Override public long delay() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();

@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.common.WebError
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}
 import spray.http.StatusCodes._
@@ -19,6 +19,8 @@ import spray.routing.directives.MarshallingDirectives
 object QueryHttp {
 
   def jobChainQuery = getOrPost[JobChainQuery]
+
+  def jobChainNodeQuery = getOrPost[JobChainNodeQuery]
 
   def orderQuery = getOrPost[OrderQuery]
 
