@@ -39,13 +39,13 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   def uris: SchedulerUris
 
-  private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+  private lazy val nonCachingHttpResponsePipeline =
     addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
     encode(Gzip) ~>
     sendReceive ~>
     decode(Gzip)
 
-  private lazy val jsonNonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+  private lazy val jsonNonCachingHttpResponsePipeline =
     addHeader(Accept(`application/json`)) ~>
     nonCachingHttpResponsePipeline
 
@@ -119,11 +119,11 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def getByUri[A: FromResponseUnmarshaller](relativeUri: String): Future[A] =
     get[A](_.uriString(relativeUri))
 
-  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String): Future[A] =
-    jsonUnmarshallingPipeline[A].apply(Get(uri(uris)))
-
-  final def get2[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType): Future[A] =
-    unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
+  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`): Future[A] =
+    if (accept == `application/json`)
+      jsonUnmarshallingPipeline[A].apply(Get(uri(uris)))
+    else
+      unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
 
   private def unmarshallingPipeline[A: FromResponseUnmarshaller](accept: MediaType) =
     addHeader(Accept(accept)) ~> nonCachingHttpResponsePipeline ~> unmarshal[A]

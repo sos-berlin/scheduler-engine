@@ -576,14 +576,14 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "Unknown Accept content type is rejected" - {
     "overview" in {
       intercept[UnsuccessfulResponseException] {
-        webSchedulerClient.get2[String](_.overview, accept = `text/richtext`) await TestTimeout
+        webSchedulerClient.get[String](_.overview, accept = `text/richtext`) await TestTimeout
       }.response.status shouldEqual NotAcceptable
     }
   }
 
   "text/html" - {  // Inofficial
     "overview" in {
-      val html = webSchedulerClient.get2[String](_.overview, accept = `text/html`) await TestTimeout
+      val html = webSchedulerClient.get[String](_.overview, accept = `text/html`) await TestTimeout
       assert(html startsWith "<!DOCTYPE html")
       assert(html endsWith "</html>")
       assert(html contains "JobScheduler")
@@ -591,7 +591,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "order.ordersComplemented" in {
-      val html = webSchedulerClient.get2[String](_.order.complemented[OrderOverview](), accept = `text/html`) await TestTimeout
+      val html = webSchedulerClient.get[String](_.order.complemented[OrderOverview](), accept = `text/html`) await TestTimeout
       assert(html startsWith "<!DOCTYPE html")
       assert(html endsWith "</html>")
       assert(html contains "JobScheduler")
