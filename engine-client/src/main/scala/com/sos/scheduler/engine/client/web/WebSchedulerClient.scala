@@ -1,7 +1,9 @@
 package com.sos.scheduler.engine.client.web
 
+import akka.util.Timeout
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
@@ -34,6 +36,8 @@ import spray.json.DefaultJsonProtocol._
 trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   import actorRefFactory.dispatcher
+
+  private implicit val timeout = Timeout(3600.s.toFiniteDuration)
 
   protected final def commandUri = uris.command
 
