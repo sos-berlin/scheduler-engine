@@ -33,7 +33,7 @@ object RemoteSchedulers {
           }
         }
       }
-      result.values.toImmutableSeq
+      result.values
     } catch {
       case ScalaXMLEventReader.XmlException(x: XmlResponseException) ⇒ throw x
     }
