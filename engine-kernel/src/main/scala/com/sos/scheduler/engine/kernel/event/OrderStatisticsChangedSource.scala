@@ -24,7 +24,7 @@ extends HasCloser {
 
   def whenOrderStatisticsChanged(after: EventId, query: PathQuery = PathQuery.All): Future[Snapshot[OrderStatisticsChanged]] =
     for (_ ← eventCollector.whenAny[Event](Set(classOf[OrderEvent], classOf[FileBasedEvent]), after = after, pathPredicate(query));
-         snapshot ← orderStatistics(JobChainNodeQuery(JobChainQuery(query))))
+         snapshot ← orderStatistics(JobChainNodeQuery(JobChainQuery(query, isDistributed = Some(false/*No database access*/)))))
       yield snapshot map OrderStatisticsChanged.apply
 }
 
