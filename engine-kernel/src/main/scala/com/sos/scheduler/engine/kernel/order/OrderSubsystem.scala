@@ -24,6 +24,7 @@ import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import com.typesafe.config.Config
+import java.lang.Math.min
 import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 import scala.collection.{immutable, mutable}
@@ -97,15 +98,21 @@ extends FileBasedSubsystem {
   }
 
   private def fetchDistributedOrderStatistics(query: JobChainNodeQuery, conditionSql: String): Future[OrderStatistics] =
-    if (config.as[Boolean]("jobscheduler.master.legacy-cpp-jdbc"))
+    if (config.getBoolean("jobscheduler.master.legacy-cpp-jdbc"))
       Future.successful(
         toOrderStatistics { result ⇒
           cppProxy.add_distributed_to_order_statistics(conditionSql, result)
         })
-    else
+    else {
+      val parallelizeBelowOrderXmlSize = min(Int.MaxValue,
+        config.getMemorySize("jobscheduler.master.parallelize-below-order-xml-size").toBytes).toInt
       jdbcConnectionPool.transactionFuture { connection ⇒
-        DatabaseOrders.fetchDistributedOrderStatistics(connection, databaseOrders.queryToSql(query, conditionSql))
+        DatabaseOrders.fetchDistributedOrderStatistics(
+          connection,
+          databaseOrders.queryToSql(query, conditionSql),
+          parallelizeBelowOrderXmlSize = parallelizeBelowOrderXmlSize )
       }
+    }
 
   private def queryToNodeKeys(query: JobChainNodeQuery, jobChainPaths: TraversableOnce[JobChainPath]): TraversableOnce[NodeKey] =
     for (jobChainPath ← jobChainPaths;

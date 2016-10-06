@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.order
 import com.sos.scheduler.engine.base.utils.ScalaUtils.{RichAny, SwitchStatement}
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
@@ -13,12 +14,14 @@ import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import java.io.Reader
+import java.io.{Reader, StringReader}
 import java.sql
 import java.sql.ResultSet
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import javax.xml.transform.stream.StreamSource
+import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * @author Joacim Zschimmer
@@ -69,26 +72,42 @@ private[order] final class DatabaseOrders @Inject private(
 }
 
 private[order] object DatabaseOrders {
-  //private val StandardOrderColumns = "`ID`, `PRIORITY`, `STATE`, `STATE_TEXT`, `INITIAL_STATE`, `TITLE`, `CREATED_TIME`"
+  private val ParallelizationTimeout = 10 * 60.s
 
-  private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String): OrderStatistics = {
-    val result = new OrderStatistics.Mutable
+  private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String, parallelizeBelowOrderXmlSize: Int)(implicit ec: ExecutionContext): OrderStatistics = {
+    val parallelization = sys.runtime.availableProcessors
     autoClosing(connection.prepareStatement(sqlStmt)) { stmt ⇒
       val resultSet = stmt.executeQuery()
-      while (resultSet.next()) {
-        addRowToOrderStatistics(resultSet, result)
-      }
-      result.toImmutable
+      fetchDistributedOrderStatistics(resultSet, parallelization, parallelizeBelowOrderXmlSize = parallelizeBelowOrderXmlSize)
     }
   }
 
-  private def addRowToOrderStatistics(resultSet: ResultSet, result: OrderStatistics.Mutable): Unit = {
-    val row = OrderRow(resultSet)
-    val clob = resultSet.getClob("ORDER_XML")
-    val xmlResolved = autoClosing(clob.getCharacterStream) { reader ⇒
-      OrderXmlResolved(reader)
+  private def fetchDistributedOrderStatistics(resultSet: ResultSet, parallelization: Int, parallelizeBelowOrderXmlSize: Int)(implicit ec: ExecutionContext): OrderStatistics = {
+    require(parallelization >= 1)
+    var result = new OrderStatistics.Mutable
+    var hasNext = resultSet.next()
+    while (hasNext) {
+      val futures = new mutable.ArrayBuffer[Future[OrderStatistics]](parallelization)
+      while (futures.size < parallelization && hasNext) {
+        val row = OrderRow(resultSet)
+        val clob = resultSet.getClob("ORDER_XML")
+        hasNext = resultSet.next()
+        if (clob.length * 2/*UTF-16*/ < parallelizeBelowOrderXmlSize) {
+          val orderXml = clob.getSubString(1, clob.length.toInt)
+          futures += Future {
+            val xmlResolved = OrderXmlResolved(new StringReader(orderXml))  // May take longer
+            toOrderStatistics(toQueryableOrder(row, xmlResolved))
+          }
+        } else {
+          val xmlResolved = autoClosing(clob.getCharacterStream)(OrderXmlResolved.apply)
+          result += toOrderStatistics(toQueryableOrder(row, xmlResolved))
+        }
+      }
+      for (o ← futures await ParallelizationTimeout) {
+        result += o
+      }
     }
-    addToOrderStatistics(toQueryableOrder(row, xmlResolved), result)
+    result.toImmutable
   }
 
   private def toQueryableOrder(row: OrderRow, xmlResolved: OrderXmlResolved): QueryableOrder =
@@ -185,39 +204,21 @@ private[order] object DatabaseOrders {
       case o ⇒ o
     }
 
-  private[order] def addToOrderStatistics(order: QueryableOrder, result: OrderStatistics.Mutable): Unit = {
-    result.total += 1
+  private[order] def toOrderStatistics(order: QueryableOrder): OrderStatistics = {
     import OrderProcessingState._
-    if (order.orderProcessingStateClass == NotPlanned.getClass) {
-      result.notPlanned += 1
-    }
-    else if (order.orderProcessingStateClass == classOf[Planned]) {
-      result.planned += 1
-    }
-    else if (order.orderProcessingStateClass == classOf[Due]) {
-      result.due += 1
-    }
-    else if (order.orderProcessingStateClass == InTaskProcess.getClass) {
-      result.inProcess += 1
-    }
-    else if (order.orderProcessingStateClass == classOf[Setback]) {
-      result.setback += 1
-    }
-    if (classOf[Started] isAssignableFrom order.orderProcessingStateClass) {
-      result.running += 1
-    }
-    if (classOf[InTask] isAssignableFrom order.orderProcessingStateClass) {
-      result.inTask += 1
-    }
-    if (order.isSuspended) {
-      result.suspended += 1
-    }
-    if (order.isBlacklisted) {
-      result.blacklisted += 1
-    }
-    order.sourceType switch {
-      case OrderSourceType.Permanent ⇒ result.permanent += 1
-      case OrderSourceType.FileOrder ⇒ result.fileOrder += 1
-    }
+    def toInt(b: Boolean): Int = if (b) 1 else 0
+    OrderStatistics(
+      total       = 1,
+      notPlanned  = toInt(order.orderProcessingStateClass == NotPlanned.getClass),
+      planned     = toInt(order.orderProcessingStateClass == classOf[Planned]),
+      due         = toInt(order.orderProcessingStateClass == classOf[Due]),
+      inProcess   = toInt(order.orderProcessingStateClass == InTaskProcess.getClass),
+      setback     = toInt(order.orderProcessingStateClass == classOf[Setback]),
+      running     = toInt(classOf[Started] isAssignableFrom order.orderProcessingStateClass),
+      inTask      = toInt(classOf[InTask] isAssignableFrom order.orderProcessingStateClass),
+      suspended   = toInt(order.isSuspended),
+      blacklisted = toInt(order.isBlacklisted),
+      permanent   = toInt(order.sourceType == OrderSourceType.Permanent),
+      fileOrder   = toInt(order.sourceType == OrderSourceType.FileOrder))
   }
 }

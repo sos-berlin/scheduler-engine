@@ -38,7 +38,7 @@ import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils.jobChainOverview
-import com.sos.scheduler.engine.test.configuration.{DatabaseConfiguration, DefaultDatabaseConfiguration, HostwareDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.configuration.{DatabaseConfiguration, DefaultDatabaseConfiguration, HostwareDatabaseConfiguration, InMemoryDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
@@ -69,9 +69,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     mainArguments = List(s"-http-port=$httpPort", "-distributed-orders", "-suppress-watchdog-thread"),
     database = Some(
       if (sys.props contains "test.mysql")
-        HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=jobscheduler -password=jobscheduler jdbc:mysql://127.0.0.1/scheduler")
+        HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=jobscheduler -password=jobscheduler jdbc:mysql://127.0.0.1/jobscheduler")
       else
         DefaultDatabaseConfiguration()))
+        //InMemoryDatabaseConfiguration))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private lazy val taskSubsystem = instance[TaskSubsystemClient]
   private lazy val eventCollector = instance[EventCollector]

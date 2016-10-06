@@ -55,7 +55,7 @@ final class DatabaseOrdersTest extends FreeSpec {
 
     if (false)
     "Speed test" - {
-      val textSize = 3000*1000
+      val textSize = 4*1000*1000
       for ((lineCount, lineLength, iterations) ← Array(
         (1, textSize, 100),
         (textSize, 1, 100),
