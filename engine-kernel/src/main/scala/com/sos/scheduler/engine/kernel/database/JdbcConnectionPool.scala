@@ -29,13 +29,12 @@ extends HasCloser {
   def poolSize = dataSource.getMaximumPoolSize
 
   def transactionFuture[A](body: sql.Connection ⇒ A): Future[A] = {
-    implicit def ec = sqlExecutionContext
     val promise = Promise[A]()
     Future {
       val connection = dataSource.getConnection
       try promise complete Try { body(connection) }
       finally connection.close()  // After promise completion
-    }
+    } (sqlExecutionContext)
     promise.future
   }
 }
