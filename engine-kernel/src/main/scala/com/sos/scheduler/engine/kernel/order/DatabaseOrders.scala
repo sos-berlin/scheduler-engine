@@ -86,7 +86,7 @@ private[order] object DatabaseOrders {
   private def fetchDistributedOrderStatistics(resultSet: ResultSet, parallelizeBelowOrderXmlSize: Int)(implicit ec: ExecutionContext): OrderStatistics = {
     var result = new OrderStatistics.Mutable
     blocking {
-      val parallel = Parallelizer.to(timeout = OrderOperationTimeout) { o: OrderStatistics ⇒ result += o }
+      val parallel = Parallelizer(timeout = OrderOperationTimeout, processResult = (o: OrderStatistics) ⇒ result += o)
       while (resultSet.next()) {
         val row = OrderRow(resultSet)
         val clob = resultSet.getClob("ORDER_XML")
