@@ -49,9 +49,27 @@ static jobject JNICALL properties(JNIEnv* jenv, jobject, jlong cppReference)
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jstring JNICALL transform_1sql__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Database* o_ = has_proxy< ::sos::scheduler::Database >::of_cpp_reference(cppReference,"::sos::scheduler::Database::transform_sql()");
+        return env.jstring_from_string(o_->transform_sql(env.string_from_jstring(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
     { (char*)"jdbc_connection__native", (char*)"(J)Ljava/lang/Object;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::jdbc_1connection },
-    { (char*)"properties__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::properties }
+    { (char*)"properties__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::properties },
+    { (char*)"transform_sql__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::transform_1sql__Ljava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 

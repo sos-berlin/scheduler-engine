@@ -67,7 +67,7 @@ with OrderPersistence {
     import subsystem.schedulerThreadCallQueue.implicits.executionContext
     val orderId = id
     val params = cppProxy.params.getSister
-    val file = params("scheduler_file_path")
+    val file = params(FilePathParameterName)
     require(file.nonEmpty, "Order variable scheduler_file_path must not be empty")
     val agentUri = AgentAddress.normalized(params(FileOrderAgentUriVariableName))
     require(agentUri.nonEmpty, s"Order variable $FileOrderAgentUriVariableName must not be empty")
@@ -290,6 +290,7 @@ object Order {
     }
   }
 
+  private[order] val FilePathParameterName = "scheduler_file_path"
   private val logger = Logger(getClass)
 
   object CppFastFlags {

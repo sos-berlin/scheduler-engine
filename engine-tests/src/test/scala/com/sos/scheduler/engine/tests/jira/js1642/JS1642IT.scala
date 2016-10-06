@@ -38,7 +38,7 @@ import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils.jobChainOverview
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import com.sos.scheduler.engine.test.configuration.{DatabaseConfiguration, DefaultDatabaseConfiguration, HostwareDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
@@ -66,7 +66,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
   protected lazy val webSchedulerClient = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-http-port=$httpPort", "-distributed-orders", "-suppress-watchdog-thread"))
+    mainArguments = List(s"-http-port=$httpPort", "-distributed-orders", "-suppress-watchdog-thread"),
+    database = Some(
+      if (sys.props contains "test.mysql")
+        HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=jobscheduler -password=jobscheduler jdbc:mysql://127.0.0.1/scheduler")
+      else
+        DefaultDatabaseConfiguration()))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private lazy val taskSubsystem = instance[TaskSubsystemClient]
   private lazy val eventCollector = instance[EventCollector]
@@ -132,8 +137,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         }
       })
       .failed foreach { throwable ⇒
-        logger.error(s"webSchedulerClient.events: $throwable", throwable)
         if (!stopping) {
+          logger.error(s"webSchedulerClient.events: $throwable", throwable)
           controller.terminateAfterException(throwable)
         }
       }
@@ -338,7 +343,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderStatistics: OrderStatistics = fetchWebAndDirect {
         _.orderStatistics(JobChainQuery.All)
       }
-      // Distributed orders are not counted yet
       assert(orderStatistics == OrderStatistics(
         total = 8,
         notPlanned = 0,
@@ -396,7 +400,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orderStatistics: OrderStatistics = fetchWebAndDirect {
         _.orderStatistics(JobChainNodeQuery(nodeIds = Some(Set(NodeId("200")))))
       }
-      assert(orderStatistics == OrderStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+      assert(orderStatistics == OrderStatistics.Zero)
     }
 
     s"Job /test" in {

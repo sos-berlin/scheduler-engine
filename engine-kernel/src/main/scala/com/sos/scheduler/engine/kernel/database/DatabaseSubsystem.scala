@@ -7,7 +7,8 @@ import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.persistenceUnitName
-import java.sql.Connection
+import java.io.Closeable
+import java.sql
 import javax.persistence.Persistence.createEntityManagerFactory
 import javax.persistence.{EntityManagerFactory, PersistenceException}
 import scala.collection.JavaConversions._
@@ -17,27 +18,25 @@ private[kernel] final class DatabaseSubsystem private[kernel](getCppProxy: () �
 extends Subsystem with HasCloser {
 
   private lazy val cppProxy = getCppProxy()
-  private lazy val cppProperties = cppProxy.properties.getSister.toMap
-  private lazy val connection = cppProxy.jdbc_connection.asInstanceOf[Connection]
-  private lazy val inClauseLimit = if (connection.getMetaData.getDatabaseProductName == "Oracle") 1000 else Int.MaxValue
+  private val cppPropertiesOnce = new SetOnce[CppDatabaseProperties]
+  private val inClauseLimitOnce = new SetOnce[Int]
+
   private var databaseOpened = false
-  private val entityManagerPropertiesOnce = new SetOnce[Map[String, String]]
+
+  private[database] def registerCloseable[A <: Closeable](o: A): A = closer.register(o)
 
   private[kernel] def onDatabaseOpened(): Unit = {
     databaseOpened = true
+    cppPropertiesOnce := CppDatabaseProperties(cppProxy.properties.getSister.toMap)
+    val connection = cppProxy.jdbc_connection.asInstanceOf[sql.Connection]
+    inClauseLimitOnce := (if (connection.getMetaData.getDatabaseProductName == "Oracle") 1000 else Int.MaxValue)
   }
+
+  private[kernel] def cppProperties: CppDatabaseProperties = cppPropertiesOnce()
 
   private[kernel] def newEntityManagerFactory(): EntityManagerFactory = {
     require(databaseOpened, "EntityManagerFactory requested but before JobScheduler database has been opened")
-    val properties = entityManagerPropertiesOnce getOrUpdate {
-      Map(
-        //"hibernate.show_sql" → "true",
-        "javax.persistence.jdbc.driver"   → cppProperties("jdbc.driverClass"),
-        "javax.persistence.jdbc.url"      → cppProperties("path"),
-        "javax.persistence.jdbc.user"     → cppProperties("user"),
-        "javax.persistence.jdbc.password" → cppProperties("password"))
-    }
-    try createEntityManagerFactory(persistenceUnitName, properties) withCloser { _.close() }  // closes all EntityManager, too
+    try createEntityManagerFactory(persistenceUnitName, cppProperties.toEntityManagerProperties) withCloser { _.close() }  // closes all EntityManager, too
     catch {
       // Hibernate provides only the message "Unable to build EntityManagerFactory" without the cause
       case e: PersistenceException ⇒ throw new RuntimeException(s"$e. Cause: ${e.getCause}", e)
@@ -47,9 +46,11 @@ extends Subsystem with HasCloser {
   def onCppProxyInvalidated() = close()
 
   private[kernel] def toInClauseSql(column: String, sqlElements: TraversableOnce[String]): String =
-    sqlElements.toSeq grouped inClauseLimit map {
+    sqlElements.toSeq grouped inClauseLimitOnce() map {
       elements ⇒ quoteSqlName(column) + " in " + elements.mkString("(", ", ", ")")
     } mkString " or "
+
+  private[kernel] def transformSql(string: String) = cppProxy.transform_sql(string)
 }
 
 object DatabaseSubsystem {

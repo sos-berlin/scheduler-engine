@@ -362,28 +362,9 @@ void Jdbc_session::_open( Sos_database_file* db_file )
 
     if( _driver_class_name != "" )
     {
-#if 0  // Mit Class.forName()
-        Class         class_loader_class ( static_ptr()->_java_vm, "java/lang/ClassLoader" );
-        Local_jobject class_loader       ( static_ptr()->_java_vm );
-        Local_jobject cls                ( static_ptr()->_java_vm );                     // Dann mit java.lang.Class.forName(), denn dieser Aufruf lädt nicht aus der .jar (Linux)
-        class_loader = class_loader_class.call_static_object_method( "getSystemClassLoader", "()Ljava/lang/ClassLoader;" );
-
-        Z_LOG2( "jdbc", "java Class.forName(\"" << _driver_class_name << "\")\n" );
-        //cls = env->CallStaticObjectMethod( static_ptr()->_class_class,
-        //                                 static_ptr()->_class_class.static_method_id( "forName", "(Ljava/lang/String;)Ljava/lang/Class;" ),
-        //                                 (jstring)Local_jstring( _driver_class_name ) );
-        cls = env->CallStaticObjectMethod( static_ptr()->_class_class,
-                                         static_ptr()->_class_class.static_method_id( "forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;" ),
-                                         (jstring)Local_jstring( _driver_class_name ),
-                                         (jboolean)true,
-                                         (jobject)class_loader );
-
-        if( !cls )  env.throw_java( "Class.forName", _driver_class_name );
-        _jdbc_driver = env->CallObjectMethod( cls, static_ptr()->_class_class.method_id( "newInstance", "()Ljava/lang/Object;" ) );
-#else
         _jdbc_driver_class.load( _driver_class_name );
         jobject jdbc_driver = env->CallObjectMethod( _jdbc_driver_class, static_ptr()->_class_class.method_id( "newInstance", "()Ljava/lang/Object;" ) );
-#endif
+
         //_jdbc_driver = env->CallObjectMethod( c, env->GetMethodID( c, "newInstance", "()Ljava/lang/Object;" ) );
         if( !jdbc_driver || env->ExceptionCheck() )  env.throw_java( "newInstance", _driver_class_name );
 
@@ -802,9 +783,7 @@ void Jdbc_file::prepare_open( const char* filename, Open_mode open_mode, const F
 
     if( !select_statement.empty() )
     {
-        Dynamic_area stmt;
-        _session->convert_stmt( Const_area( c_str( select_statement ), length( select_statement ) ), &stmt );
-        select_statement = string( stmt.char_ptr(), length( stmt ) );
+        select_statement = _session->transform_sql(select_statement);
 
         Z_LOG2( "jdbc", "jdbc: prepareStatement  " << select_statement << "\n" );
         _jdbc_statement = session()->_jdbc_connection.call_object_method("prepareStatement", "(Ljava/lang/String;)Ljava/sql/PreparedStatement;",

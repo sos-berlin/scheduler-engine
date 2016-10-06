@@ -46,5 +46,21 @@ implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties__native(long cppReference);
 
 
+    @Override public java.lang.String transform_sql(java.lang.String p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = transform_sql__native(cppReference(), p0);
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String transform_sql__native(long cppReference, java.lang.String p0);
+
+
     // </editor-fold>
 }

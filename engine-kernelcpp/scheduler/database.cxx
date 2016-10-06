@@ -120,7 +120,7 @@ Any_file Read_transaction::open_result_set( const string& sql, const string& deb
 { 
     if( need_commit_or_rollback )  assert_is_commitable( debug_text );
 
-    string native_sql = db()->_db.sos_database_session()->translate_sql( sql );
+    string native_sql = db()->_db.sos_database_session()->transform_sql( sql );
 
     S s;
     if( !need_commit_or_rollback )  s << "-read-transaction ";
@@ -475,6 +475,10 @@ ptr<Com_variable_set> Database::properties() {
         _properties = result;
     }
     return _properties;     // Für Java verankern, damit C++-Proxy nicht sofort stirbt
+}
+
+string Database::transform_sql(const string& statement) {
+    return _db.sos_database_session()->transform_sql(statement);
 }
 
 //-----------------------------------------------------------------------------------Database::open
@@ -1518,7 +1522,7 @@ void Transaction::execute( const string& stmt, const string& debug_text, Execute
         if( !_log->is_enabled_log_level( _spooler->_db_log_level ) )  Z_LOG2( "scheduler", Z_FUNCTION << "  " << stmt << debug_extra << "\n" );
 
         string native_sql = flags == ex_native? stmt 
-                                              : db()->_db.sos_database_session()->translate_sql( stmt );
+                                              : db()->_db.sos_database_session()->transform_sql( stmt );
 
         try
         {

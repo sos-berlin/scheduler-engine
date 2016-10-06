@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
+import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -88,6 +88,10 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideJdbcConnectionPool(o: DatabaseSubsystem, stcq: SchedulerThreadCallQueue): JdbcConnectionPool =
+    new JdbcConnectionPool(() ⇒ o.cppProperties).closeWithCloser
 
   @Provides @Singleton
   private def provideDirectSchedulerCollector(o: DirectSchedulerClient): DirectOrderClient = o

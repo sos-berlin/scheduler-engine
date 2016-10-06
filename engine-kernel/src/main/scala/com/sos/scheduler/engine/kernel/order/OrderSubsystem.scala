@@ -3,28 +3,31 @@ package com.sos.scheduler.engine.kernel.order
 import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.PerKeyLimiter
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
-import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC, Order_subsystemC}
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem.{quoteSqlName, quoteSqlString}
+import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
+import com.typesafe.config.Config
 import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 import scala.collection.{immutable, mutable}
+import scala.concurrent.{ExecutionContext, Future}
 
 @ForCpp
 @Singleton
@@ -34,7 +37,12 @@ final class OrderSubsystem @Inject private(
   folderSubsystem: FolderSubsystem,
   databaseSubsystem: DatabaseSubsystem,
   ownClusterMemberIdProvider: Provider[ClusterMemberId],
+  jdbcConnectionPool: JdbcConnectionPool,
+  schedulerId: SchedulerId,
+  databaseOrders: DatabaseOrders,
+  config: Config,
   protected val injector: Injector)
+  (implicit executionContext: ExecutionContext)
 extends FileBasedSubsystem {
 
   import com.sos.scheduler.engine.kernel.order.OrderSubsystem._
@@ -59,55 +67,50 @@ extends FileBasedSubsystem {
 
   private val toOrderStatistics = new ToOrderStatistics
 
-  private[kernel] def orderStatistics(query: JobChainNodeQuery): OrderStatistics =
-    toOrderStatistics { allocatedArray ⇒
-      val (distriChains, localChains) = jobChainsByQuery(query.jobChainQuery) partition { _.isDistributed }
-      addLocalOrderStatistics(query, localChains, allocatedArray)
-      addDistributedOrderStatistics(query, distriChains, allocatedArray)
-    }
-
-  private def addLocalOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
-    if (query.matchesAllNonDistributed) {
-      cppProxy.add_non_distributed_to_order_statistics(result)
-    } else
-    if (query.matchesCompleteJobChains)
-      for (jobChain ← jobChains) {
-        jobChain.addNonDistributedToOrderStatistics(result)
+  private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): OrderStatistics =
+    toOrderStatistics { result ⇒
+      if (query.matchesAllNonDistributed) {
+        cppProxy.add_non_distributed_to_order_statistics(result)
       }
-    else
-      for (jobChain ← jobChains; node ← jobChain.jobNodes(query)) {
-        node.addNonDistributedToOrderStatistics(result)
-      }
-  }
-
-  private def addDistributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain], result: Array[Int]): Unit = {
-    val sqlClause =
-      if (query.matchesCompleteJobChains)
-        jobChainPathsToSql(jobChains map { _.path })
+      else if (query.matchesCompleteJobChains)
+        for (jobChain ← nonDistributedJobChains) {
+          jobChain.addNonDistributedToOrderStatistics(result)
+        }
       else
-        nodeKeysToSql(query, jobChains map { _.path })
-    if (sqlClause.nonEmpty) {
-      cppProxy.add_distributed_to_order_statistics(sqlClause, result)
+        for (jobChain ← nonDistributedJobChains; node ← jobChain.jobNodes(query)) {
+          node.addNonDistributedToOrderStatistics(result)
+        }
+    }
+
+  private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[OrderStatistics] = {
+    val conditionSqlOption =
+      if (query.matchesCompleteJobChains)
+        jobChains.nonEmpty option databaseOrders.jobChainPathsToSql(jobChains map { _.path })
+      else
+        emptyToNone(databaseOrders.nodeKeysToSql(queryToNodeKeys(query, jobChains map { _.path })))
+    conditionSqlOption match {
+      case Some(conditionSql) ⇒
+        fetchDistributedOrderStatistics(query, conditionSql)
+      case None ⇒
+        Future.successful(OrderStatistics.Zero)
     }
   }
 
-  private def jobChainPathsToSql(jobChainPaths: TraversableOnce[JobChainPath]): String =
-    databaseSubsystem.toInClauseSql(
-      column = "job_chain",
-      jobChainPaths map { o ⇒ quoteSqlString(o.withoutStartingSlash) })
+  private def fetchDistributedOrderStatistics(query: JobChainNodeQuery, conditionSql: String): Future[OrderStatistics] =
+    if (config.as[Boolean]("jobscheduler.master.legacy-cpp-jdbc"))
+      Future.successful(
+        toOrderStatistics { result ⇒
+          cppProxy.add_distributed_to_order_statistics(conditionSql, result)
+        })
+    else
+      jdbcConnectionPool.transactionFuture { connection ⇒
+        DatabaseOrders.fetchDistributedOrderStatistics(connection, databaseOrders.queryToSql(query, conditionSql))
+      }
 
-  private def nodeKeysToSql(query: JobChainNodeQuery, jobChainPaths: TraversableOnce[JobChainPath]): String =
-    (for (jobChainPath ← jobChainPaths) yield {
-      val nodes = jobChain(jobChainPath).jobNodes(query)
-      nodes.nonEmpty option
-        "(" +
-          quoteSqlName("job_chain") +
-          "=" +
-          quoteSqlString(jobChainPath.withoutStartingSlash) +
-          " and " +
-          databaseSubsystem.toInClauseSql(column = "state", nodes map { o ⇒ quoteSqlString(o.nodeId.string) }) +
-        ")"
-    }).flatten mkString " and "
+  private def queryToNodeKeys(query: JobChainNodeQuery, jobChainPaths: TraversableOnce[JobChainPath]): TraversableOnce[NodeKey] =
+    for (jobChainPath ← jobChainPaths;
+          node ← jobChain(jobChainPath).jobNodes(query))
+      yield node.nodeKey
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query.nodeQuery.jobChainQuery) partition { _.isDistributed }

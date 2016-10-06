@@ -23,6 +23,10 @@ object SchedulerThreadFutures {
     else
       schedulerThreadFuture(f)(schedulerThreadCallQueue)
 
+  def requireSchedulerThread(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Unit = {
+    if (!isInSchedulerThread) throw new IllegalStateException("Not in C++ JobScheduler thread")
+  }
+
   def isInSchedulerThread(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) =
     currentThread == schedulerThreadCallQueue.cppThread
 
