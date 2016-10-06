@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.kernel.database
 
+import com.sos.scheduler.engine.common.concurrent.ParallelizationCounter
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import java.lang.Math.max
 import java.nio.file.Files
 import java.nio.file.Files.createTempDirectory
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -31,29 +30,23 @@ final class JdbcConnectionPoolTest extends FreeSpec {
       }
       aFuture await 30.s
       val n = 100
-      val parallel = new AtomicInteger
-      var maximum = 0
-      val lock = new Object
+      val count = new ParallelizationCounter
       val futures = for (_ ← 1 to n) yield
         connectionPool.transactionFuture { connection ⇒
-          lock.synchronized {
-            val i = parallel.incrementAndGet()
-            maximum = max(maximum, i)
+          count {
+            val result = autoClosing(connection.createStatement()) { stmt ⇒
+              stmt.execute("update test set i = i + 1")
+              val resultSet = stmt.executeQuery("select i from test")
+              resultSet.next()
+              resultSet.getInt("i")
+            }
+            connection.commit()
+            result
           }
-          val result = autoClosing(connection.createStatement()) { stmt ⇒
-            stmt.execute("update test set i = i + 1")
-            val resultSet = stmt.executeQuery("select i from test")
-            resultSet.next()
-            resultSet.getInt("i")
-          }
-          connection.commit()
-          parallel.decrementAndGet()
-          result
         }
       assert((futures await 30.s).toSet == (1 to n).toSet)
-      assert(parallel.get == 0)
       assert(connectionPool.poolSize == 10)
-      assert(maximum == connectionPool.poolSize)
+      assert(count.maximum == connectionPool.poolSize)
     }
     for (file ← Files.list(tmpDir)) Files.delete(file)
     Files.delete(tmpDir)
