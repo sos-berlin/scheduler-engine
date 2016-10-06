@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.{RichAny, SwitchStatement}
+import com.sos.scheduler.engine.base.utils.ScalaUtils.RichAny
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.common.concurrent.Parallelizer
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.RichStartElement
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -22,8 +22,7 @@ import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import javax.xml.stream.events.StartElement
 import javax.xml.transform.stream.StreamSource
-import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, blocking}
 import scala.util.control.ControlThrowable
 
 /**
@@ -75,29 +74,25 @@ private[order] final class DatabaseOrders @Inject private(
 }
 
 private[order] object DatabaseOrders {
-  private val ParallelizationTimeout = 10 * 60.s
+  private val OrderOperationTimeout = 10.s  // Deadlock insurance
 
   private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String, parallelizeBelowOrderXmlSize: Int)(implicit ec: ExecutionContext): OrderStatistics = {
-    val parallelization = sys.runtime.availableProcessors
     autoClosing(connection.prepareStatement(sqlStmt)) { stmt ⇒
       val resultSet = stmt.executeQuery()
-      fetchDistributedOrderStatistics(resultSet, parallelization, parallelizeBelowOrderXmlSize = parallelizeBelowOrderXmlSize)
+      fetchDistributedOrderStatistics(resultSet, parallelizeBelowOrderXmlSize = parallelizeBelowOrderXmlSize)
     }
   }
 
-  private def fetchDistributedOrderStatistics(resultSet: ResultSet, parallelization: Int, parallelizeBelowOrderXmlSize: Int)(implicit ec: ExecutionContext): OrderStatistics = {
-    require(parallelization >= 1)
+  private def fetchDistributedOrderStatistics(resultSet: ResultSet, parallelizeBelowOrderXmlSize: Int)(implicit ec: ExecutionContext): OrderStatistics = {
     var result = new OrderStatistics.Mutable
-    var hasNext = resultSet.next()
-    while (hasNext) {
-      val futures = new mutable.ArrayBuffer[Future[OrderStatistics]](parallelization)
-      while (futures.size < parallelization && hasNext) {
+    blocking {
+      val parallel = Parallelizer.to(timeout = OrderOperationTimeout) { o: OrderStatistics ⇒ result += o }
+      while (resultSet.next()) {
         val row = OrderRow(resultSet)
         val clob = resultSet.getClob("ORDER_XML")
-        hasNext = resultSet.next()
         if (clob.length * 2/*UTF-16*/ < parallelizeBelowOrderXmlSize) {
           val orderXml = clob.getSubString(1, clob.length.toInt)
-          futures += Future {
+          parallel {
             val xmlResolved = OrderXmlResolved(new StringReader(orderXml))  // May take longer
             toOrderStatistics(toQueryableOrder(row, xmlResolved))
           }
@@ -106,9 +101,7 @@ private[order] object DatabaseOrders {
           result += toOrderStatistics(toQueryableOrder(row, xmlResolved))
         }
       }
-      for (o ← futures await ParallelizationTimeout) {
-        result += o
-      }
+      parallel.finish()
     }
     result.toImmutable
   }
