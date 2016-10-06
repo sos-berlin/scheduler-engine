@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
@@ -11,7 +10,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toAsyncScriptHtml, toCssLinkHtml}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toCssLinkHtml, toScriptHtml}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute.NeededWebjars
 import java.time.Instant.now
@@ -35,76 +34,88 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected val uris: SchedulerUris
   protected def pageUri: Uri
 
+  private val includer = new HtmlIncluder(uris)
+
   protected def htmlPage(innerBody: Frag*): TypedTag[String] =
     html(lang := "en")(
-      head(htmlHeadFrags),
-      pageBody(innerBody :_*))
+      head(htmlHeadFrag),
+      body(pageBody(innerBody :_*)))
 
-  protected def htmlHeadFrags: Vector[Frag] = {
-    val includer = new HtmlIncluder(uris)
-    Vector(
+  protected def htmlHeadFrag: Frag =
+    seqFrag(
       meta(httpEquiv := "X-UA-Compatible", content := "IE=edge"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
       tags2.title(s"$title · ${schedulerOverview.schedulerId}"),
+      css,
+      javascript,
       link(rel := "icon", "sizes".attr := "64x64", `type` := "image/vnd.microsoft.icon",
-        href := (uris / "api/frontend/common/images/jobscheduler.ico").toString)) ++
-    (NeededWebjars flatMap includer.webjarsToHtml) ++
-    (cssLinks map toCssLinkHtml) ++
-    (scriptLinks map toAsyncScriptHtml)
-  }
+        href := (uris / "api/frontend/common/images/jobscheduler.ico").toString))
+
+  private def css: Frag =
+    (NeededWebjars map includer.cssHtml) ++
+      (cssLinks map toCssLinkHtml)
+
+  private def javascript: Frag =
+    (NeededWebjars map includer.javascriptHtml) ++
+      (scriptLinks map toScriptHtml)
 
   protected def cssLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.css")
   protected def scriptLinks: Vector[Uri] = Vector()
 
-  protected def pageBody(innerBody: Frag*) =
-    body(
-      pageHeader,
+  protected def pageBody(innerBody: Frag*): Frag =
+    seqFrag(
       navbar,
       div(cls := "container", width := "100%")(
         innerBody))
 
-  private def pageHeader: Frag = {
-    import schedulerOverview.{pid, state, version}
-    val jobSchedulerInfoHtml =
-      div(
-        a(href := uris.overview, cls := "inherit-markup")(
-          joinHtml(" · ")(List(
-            emptyToNone(schedulerOverview.schedulerId.string).toList,
-            "JobScheduler"))),
-        joinHtml(" · ")(List(
-          " ", version, " Master",
-          span(whiteSpace.nowrap)(s"PID $pid"),
-          span(whiteSpace.nowrap)(s"$state"))))
-    val timestampHtml =
-      a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
-        span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
-        eventIdToLocalHtml(snapshot.eventId),
-        " ",
-        span(cls := "time-extra")(DefaultZoneId.getId))
-    div(cls := "PageHeader")(
-      div(float.right, paddingLeft := 2.em)(
-        timestampHtml),
-      jobSchedulerInfoHtml)
-  }
+  private def timestampHtml: Frag =
+    a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
+      span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
+      eventIdToLocalHtml(snapshot.eventId, withSubseconds = false),
+      " ",
+      span(cls := "time-extra")(DefaultZoneId.getId))
 
   private def navbar: Frag =
     nav(cls := "navbar navbar-default navbar-static-top")(
       div(cls := "container-fluid")(
         div(cls := "navbar-header")(
           uncollapseButton,
-          a(cls := "navbar-brand", position.relative, top := (-9).px, href := uris.overview, whiteSpace.nowrap)(
-            span(img("width".attr := 40, "height".attr := 40,
-              src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
-            span(" JobScheduler"))),
+          brand),
         div(cls := "collapse navbar-collapse")(
-          ul(cls := "nav navbar-nav ")(
-            navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
-            navBarTab("Job chains"     , uris.jobChain.overviews()),
-            navBarTab("Jobs"           , uris.job.overviews()),
-            navBarTab("Process classes", uris.processClass.overviews()),
-            navBarTab("Events"         , uris.events(limit = 1000, reverse = true))))))
+          menue,
+          div(cls := "navbar-text navbar-right")(
+            timestampHtml))))
 
-  private def uncollapseButton =
+  private def brand: Frag =
+    a(cls := "navbar-brand", position.relative, top := (-9).px, whiteSpace.nowrap, href := uris.overview)(
+      table(
+        tbody(
+          tr(
+            td(rowspan := 2, paddingRight := 1.ex)(
+              img("width".attr := 40, "height".attr := 40, alt := "Rabbit",
+                src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
+            td(
+              span(" JobScheduler \u00a0'", schedulerOverview.schedulerId.string, "'"))),
+          tr(
+            td(fontSize := 13.px)(
+              versionAndStateHtml)))))
+
+  private def versionAndStateHtml: Frag = {
+    import schedulerOverview.{state, version}
+    joinHtml(" · ")(List(
+      s"v$version",
+      span(whiteSpace.nowrap)(s"$state")))
+  }
+
+  private def menue: Frag =
+    ul(cls := "nav navbar-nav ")(
+      navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
+      navBarTab("Job chains"     , uris.jobChain.overviews()),
+      navBarTab("Jobs"           , uris.job.overviews()),
+      navBarTab("Process classes", uris.processClass.overviews()),
+      navBarTab("Events"         , uris.events(limit = 1000, reverse = true)))
+
+  private def uncollapseButton: Frag =
     button(`type` := "button", cls := "navbar-toggle", data("toggle") := "collapse", data("target") := ".navbar-collapse")(
       span(cls := "icon-bar"),
       span(cls := "icon-bar"),
@@ -134,11 +145,11 @@ private[simplegui] object SchedulerHtmlPage {
 
   def midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
-  def eventIdToLocalHtml(eventId: EventId, withDateBefore: Instant = Instant.MAX): Frag = {
+  def eventIdToLocalHtml(eventId: EventId, withDateBefore: Instant = Instant.MAX, withSubseconds: Boolean = true): Frag = {
     val instant = EventId.toInstant(eventId)
     seqFrag(
       instantToHtml(instant, if (instant >= withDateBefore) LocalTimeFormatter else LocalDateTimeFormatter),
-      subsecondsToHtml(instant))
+      withSubseconds option subsecondsToHtml(instant))
   }
 
   def subsecondsToHtml(instant: Instant): Frag =

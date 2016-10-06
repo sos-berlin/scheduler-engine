@@ -3676,9 +3676,20 @@ Process_class* Standard_job::default_process_class_or_null() const {
         :_spooler->process_class_subsystem()->process_class_or_null(_default_process_class_path);
 }
 
-
 Process_class* Standard_job::default_process_class() const {
     return _spooler->process_class_subsystem()->process_class(_default_process_class_path);
+}
+
+bool Standard_job::is_task_ready_for_order(Process_class* process_class) {
+    if (!process_class) {
+        process_class == default_process_class_or_null();
+        if (!process_class) return false;
+    }
+    Z_FOR_EACH_CONST(Task_set, _running_tasks, i) {
+        Task* task = *i;
+        if (task->is_ready_for_order(process_class)) return true;
+    }
+    return false;
 }
 
 //------------------------------------------------------------------------nternal_job::Internal_job

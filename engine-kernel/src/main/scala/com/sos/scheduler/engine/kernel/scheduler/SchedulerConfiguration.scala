@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
-import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.cppproxy.{DatabaseC, SpoolerC}
 import com.typesafe.config.Config
 import java.io.File
 import java.net.{URI, URL}
@@ -49,12 +49,26 @@ trait SchedulerConfiguration {
       Some(SecretString("jobscheduler")),
       Some(SecretString("jobscheduler")))
   }
+
+  def jobHistoryTableName: String
+
+  def tasksTableName: String
+
+  def orderHistoryTableName: String
+
+  def orderStepHistoryTableName: String
+
+  def ordersTableName: String
+
+  def variablesTableName: String
+
+  def clustersTableName: String
 }
 
 object SchedulerConfiguration {
-  lazy val DefaultConfig: Config = Configs.loadResource(JavaResource("com/sos/scheduler/engine/kernel/configuration/defaults.conf"))
+  lazy val DefaultConfig: Config = Configs.loadResource(JavaResource("com/sos/scheduler/engine/kernel/configuration/master.conf"))
 
-  private[kernel] final class Injectable (spoolerC: SpoolerC) extends SchedulerConfiguration {
+  private[kernel] final class Injectable(spoolerC: SpoolerC) extends SchedulerConfiguration {
     private lazy val settingsC = spoolerC.settings
 
     def initialize(): Unit = {
@@ -69,6 +83,13 @@ object SchedulerConfiguration {
       udpPort
       webDirectoryUrlOption
       htmlDirOption
+      jobHistoryTableName
+      tasksTableName
+      orderHistoryTableName
+      orderStepHistoryTableName
+      ordersTableName
+      variablesTableName
+      clustersTableName
     }
 
     lazy val clusterMemberId: ClusterMemberId =
@@ -107,5 +128,13 @@ object SchedulerConfiguration {
       }
 
     lazy val htmlDirOption = emptyToNone(settingsC._html_dir) map { o ⇒ Paths.get(o) }
+
+    lazy val jobHistoryTableName       = settingsC._job_history_tablename
+    lazy val tasksTableName            = settingsC._tasks_tablename
+    lazy val orderHistoryTableName     = settingsC._order_history_tablename
+    lazy val orderStepHistoryTableName = settingsC._order_step_history_tablename
+    lazy val ordersTableName           = settingsC._orders_tablename
+    lazy val variablesTableName        = settingsC._variables_tablename
+    lazy val clustersTableName         = settingsC._clusters_tablename
   }
 }

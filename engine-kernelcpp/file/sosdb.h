@@ -17,6 +17,8 @@
 #   include "../kram/sostimer.h"
 #endif
 
+#include "../zschimmer/java.h"
+
 namespace sos
 {
 
@@ -74,7 +76,7 @@ struct Sos_database_session : Sos_self_deleting
     bool                     is_transaction_used        ()                                      { return _transaction_used; }
     bool                        need_commit_or_rollback ()                                      { return _need_commit_or_rollback; }
 
-    string                      translate_sql           ( const string& sql_statement );
+    string                      transform_sql           ( const string& sql_statement );
     void                        convert_stmt            ( const Const_area& stmt_par, Area* stmt );
     string                      convert_date_or_timestamp( const char**, const char* end );
     string                      convert_texttimestamp   ( const char**, const char* end );
@@ -83,6 +85,7 @@ struct Sos_database_session : Sos_self_deleting
     virtual string              translate_limit         ( const string& stmt, int limit );
     typedef ::stdext::hash_map<string,string> Properties;
     virtual Properties          properties();
+    virtual zschimmer::javabridge::Lightweight_jobject jdbc_connection() const { return NULL; }
 
   protected:
     void                        transaction_begun       ();
@@ -170,7 +173,6 @@ struct Sos_database_file : Abs_file
     const char*                 concat_operator         ()                                      { return c_str( _session->_concat_operator ); }
                                  
     virtual void                put_record              ( const Const_area&  );
-
 
     Fill_zero                  _zero_;
 

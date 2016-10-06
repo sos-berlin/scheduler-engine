@@ -294,6 +294,10 @@ struct Task : Object,
         return _job->path();
     }
 
+    bool is_ready_for_order(Process_class* process_class) const {
+        return _state == Task::s_running_waiting_for_order && _process_class == process_class;
+    }
+
   protected:
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;

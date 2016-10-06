@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
-import com.sos.scheduler.engine.client.web.jobchain.JobChainQueryHttp.directives.jobChainQuery
-import com.sos.scheduler.engine.client.web.order.OrderQueryHttp.directives.orderQuery
+import com.sos.scheduler.engine.client.web.common.QueryHttp
+import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainNodeQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
@@ -34,28 +34,17 @@ trait OrderRoute extends LogRoute {
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    (pathEnd & post) {
-      entity(as[OrderQuery]) { query ⇒
-        parameter("return") {
-          case "OrderStatistics" ⇒ completeTryHtml(client.orderStatistics(query))
-          case _ ⇒ queriedOrders(query)
-        }
-      }
-    } ~
-    testSlash(webServiceContext) {
-      get {
-        //parameter("return" ! "OrderStatistics") {  This accepts URI with no query parameter, too ...
-        parameter("return") {
-          case "OrderStatistics" ⇒
-            jobChainQuery { query ⇒
-              completeTryHtml(client.orderStatistics(query))
-            }
-          case _ ⇒ reject
-        } ~
-        singleOrder ~
-        orderQuery { query ⇒
-          queriedOrders(query)
-        }
+    (testSlash(webServiceContext) | pass) {
+      parameter("return".?) {
+        case Some("OrderStatistics") ⇒
+          jobChainNodeQuery { query ⇒
+            completeTryHtml(client.orderStatistics(query))
+          }
+        case _ ⇒
+          singleOrder ~
+          orderQuery { query ⇒
+            queriedOrders(query)
+          }
       }
     }
 

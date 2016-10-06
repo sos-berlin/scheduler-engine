@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodeP
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.plugin.{AttachableNamespaceXmlPlugin, PluginSubsystem, PluginXmlConfigurable}
 import java.time.Duration
 import org.w3c.dom
@@ -26,8 +27,9 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
   private[kernel] def overview: NodeOverview
 
   protected[kernel] val cppProxy: NodeCI
-
-  private val nodeIdOnce = new SetOnce[NodeId]
+  private lazy val orderSubsystem = injector.instance[OrderSubsystem]
+  private val jobChainPathOnce = new SetOnce[JobChainPath]
+  private val nodeKeyOnce = new SetOnce[NodeKey]
 
   def onCppProxyInvalidated() = close()
 
@@ -43,11 +45,18 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   private[kernel] final def persistentState = new JobChainNodePersistentState(jobChainPath, nodeId, action)
 
-  final def nodeKey = inSchedulerThread { NodeKey(jobChainPath, nodeId) }
+  final lazy val nodeKey = nodeKeyOnce getOrUpdate
+    inSchedulerThread {
+      NodeKey(jobChainPath, NodeId(cppProxy.string_order_state))
+    }
 
-  final def jobChainPath = inSchedulerThread { JobChainPath(cppProxy.job_chain_path) }
+  private[order] def jobChain = orderSubsystem.jobChain(jobChainPath)
 
-  protected[kernel] final def nodeId = nodeIdOnce getOrUpdate NodeId(cppProxy.string_order_state)
+  def jobChainPath = inSchedulerThread {
+    jobChainPathOnce getOrUpdate JobChainPath(cppProxy.job_chain_path)
+  }
+
+  protected[kernel] final def nodeId = nodeKey.nodeId
 
   protected[kernel] final def nextNodeId = NodeId(cppProxy.string_next_state)
 

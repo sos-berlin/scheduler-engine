@@ -46,17 +46,19 @@ extends HasCloser {
   /**
     * @param reverse, true may be slow
     */
-  def when[E <: Event: ClassTag](after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[KeyedEvent[E]]]] =
-    whenAny[E](Set(implicitClass[E]), after = after, reverse = reverse)
+  def when[E <: Event: ClassTag](after: EventId, predicate: Predicate[E] = matchesAll _, reverse: Boolean = false)
+  : Future[Iterator[Snapshot[KeyedEvent[E]]]] =
+    whenAny[E](Set(implicitClass[E]), after = after, predicate, reverse = reverse)
 
-  def whenAny[E <: Event](eventClasses: Set[Class[_ <: E]], after: EventId, reverse: Boolean = false): Future[Iterator[Snapshot[KeyedEvent[E]]]] = {
-    def predicate(e: AnyKeyedEvent) = eventClasses exists { _ isAssignableFrom e.event.getClass }
-    for (snapshot ← whenAnyKeyedEvents(after, predicate, reverse = reverse)) yield
+  def whenAny[E <: Event](eventClasses: Set[Class[_ <: E]], after: EventId, predicate: Predicate[E]  = matchesAll _, reverse: Boolean = false)
+  : Future[Iterator[Snapshot[KeyedEvent[E]]]] = {
+    def pred(e: AnyKeyedEvent) = (eventClasses exists { _ isAssignableFrom e.event.getClass }) && predicate(e.asInstanceOf[KeyedEvent[E]])
+    for (snapshot ← whenAnyKeyedEvents(after, pred, reverse = reverse)) yield
       for (snapshot ← snapshot.value) yield
         snapshot map { _.asInstanceOf[KeyedEvent[E]] }
   }
 
-  private def whenAnyKeyedEvents(after: EventId, predicate: AnyKeyedEvent ⇒ Boolean, reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]] = {
+  private def whenAnyKeyedEvents(after: EventId, predicate: Predicate[Event], reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]] = {
     val promise = Promise[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]]()
     for (Snapshot(eventId, events) ← onEventAvailable(after, events(after, reverse = reverse)))
       try
@@ -108,6 +110,10 @@ extends HasCloser {
 }
 
 object EventCollector {
+  type Predicate[E <: Event] = KeyedEvent[E] ⇒ Boolean
+
+  def matchesAll[E <: Event](e: KeyedEvent[E]) = true
+
   private val KeyEventQueueSizeLimit = 10000
   private val EventQueueSizeLimitPerKey = 100
 

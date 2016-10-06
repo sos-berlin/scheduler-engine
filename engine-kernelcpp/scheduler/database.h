@@ -80,6 +80,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     ptr<Com_variable_set>       properties              ();                                         // Mit "password"
+    string                      transform_sql           (const string& statement);
     Database_lock_syntax        lock_syntax             ();
     void                        open_or_wait_until_opened();
     bool                        try_reopen_after_error  ( const exception&, const string& function);
@@ -95,6 +96,8 @@ struct Database : Object, javabridge::has_proxy<Database>, Abstract_scheduler_ob
     bool last_scheduler_run_failed() const {
         return _last_scheduler_run_failed;
     }
+
+    javabridge::Lightweight_jobject jdbc_connection();
 
     Fill_zero                  _zero_;
     

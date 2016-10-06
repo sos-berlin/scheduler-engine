@@ -10,13 +10,11 @@ object DatabaseConfiguration {
   final case class JdbcClassAndUrl(className: String, url: String)
 }
 
-
 trait JdbcDatabaseConfiguration
 extends DatabaseConfiguration {
   def testJdbcUrl(testName: String, directory: File): String
   def jdbcClassName: String
 }
-
 
 final case class DefaultDatabaseConfiguration(closeDelay: Duration = 0.s, autoServer: Boolean = false)
 extends JdbcDatabaseConfiguration {
@@ -31,6 +29,11 @@ extends JdbcDatabaseConfiguration {
   }
 }
 
+case object InMemoryDatabaseConfiguration
+extends JdbcDatabaseConfiguration {
+  def jdbcClassName = "org.h2.Driver"
+  def testJdbcUrl(testName: String, directory: File) = s"jdbc:h2:mem:scheduler-$testName"
+}
 
 object DefaultDatabaseConfiguration {
   val forJava = new DefaultDatabaseConfiguration

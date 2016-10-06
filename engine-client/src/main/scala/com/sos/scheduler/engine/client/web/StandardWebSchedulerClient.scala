@@ -25,5 +25,5 @@ extends WebSchedulerClient with AutoCloseable {
 }
 
 private object StandardWebSchedulerClient {
-  private val ConfigResource = JavaResource("com/sos/scheduler/engine/client/web/WebServiceClient.conf")
+  private val ConfigResource = JavaResource("com/sos/scheduler/engine/client/web/WebSchedulerClient.conf")
 }

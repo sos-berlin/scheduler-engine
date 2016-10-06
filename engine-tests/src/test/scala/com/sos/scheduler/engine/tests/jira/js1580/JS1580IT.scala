@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1580
 
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
@@ -30,7 +31,7 @@ final class JS1580IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
           transaction(entityManagerFactory) { em ⇒
             val e = em.fetchOption[TaskHistoryEntity]("select t from TaskHistoryEntity t where t.id = :taskId",
               List("taskId" → run.taskId.number))
-            assert(Option(e.get.agentUrl) == expectedAgentUri)
+            assert((Option(e.get.agentUrl) map AgentAddress.apply) == expectedAgentUri)
             true
           }
     futures await TestTimeout

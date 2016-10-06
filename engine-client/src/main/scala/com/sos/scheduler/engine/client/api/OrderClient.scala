@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.api
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
 import scala.collection.immutable
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
@@ -24,5 +24,5 @@ trait OrderClient {
   final def orders[V <: OrderView: OrderView.Companion]: Future[Snapshot[Seq[V]]] =
     ordersBy(OrderQuery.All)
 
-  def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]]
+  def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]]
 }

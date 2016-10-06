@@ -1,14 +1,17 @@
 package com.sos.scheduler.engine.client.web
 
+import akka.util.Timeout
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView, Orders}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -34,17 +37,19 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   import actorRefFactory.dispatcher
 
+  private implicit val timeout = Timeout(3600.s.toFiniteDuration)
+
   protected final def commandUri = uris.command
 
   def uris: SchedulerUris
 
-  private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+  private lazy val nonCachingHttpResponsePipeline =
     addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
     encode(Gzip) ~>
     sendReceive ~>
     decode(Gzip)
 
-  private lazy val jsonNonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+  private lazy val jsonNonCachingHttpResponsePipeline =
     addHeader(Accept(`application/json`)) ~>
     nonCachingHttpResponsePipeline
 
@@ -79,16 +84,16 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def getOrdersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     get[Snapshot[OrdersComplemented[V]]](_.order.complemented[V](query))
 
-  final def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] =
-    post[JobChainQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
+  final def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
+    post[JobChainNodeQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
 
   // JobChain
 
   final def jobChainOverview(jobChainPath: JobChainPath) =
-    get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery.Standard(PathQuery(jobChainPath))))
+    get[Snapshot[JobChainOverview]](_.jobChain.overviews(JobChainQuery(PathQuery(jobChainPath))))
 
   final def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainOverview]]] =
-    query.jobChainPathQuery match {
+    query.pathQuery match {
       case single: PathQuery.SinglePath ⇒
         for (schedulerResponse ← get[Snapshot[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath])))
              yield for (o ← schedulerResponse)
@@ -100,6 +105,14 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.details(jobChainPath))
 
+  // Agent
+
+  final def agentUris: Future[Snapshot[Set[AgentAddress]]] =
+    get[Snapshot[Set[AgentAddress]]](_.agent.agentUris)
+
+  final def agentGet[A: FromResponseUnmarshaller](uri: String): Future[A] =
+    get[A](_.agent.forward(uri))
+
   // Event
 
   final def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
@@ -107,14 +120,14 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   // Basic
 
-  final def getJson(pathUri: String): Future[String] =
-    get[String](_.uriString(pathUri))
+  final def getByUri[A: FromResponseUnmarshaller](relativeUri: String): Future[A] =
+    get[A](_.uriString(relativeUri))
 
-  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String): Future[A] =
-    jsonUnmarshallingPipeline[A].apply(Get(uri(uris)))
-
-  final def get2[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType): Future[A] =
-    unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
+  final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`): Future[A] =
+    if (accept == `application/json`)
+      jsonUnmarshallingPipeline[A].apply(Get(uri(uris)))
+    else
+      unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
 
   private def unmarshallingPipeline[A: FromResponseUnmarshaller](accept: MediaType) =
     addHeader(Accept(accept)) ~> nonCachingHttpResponsePipeline ~> unmarshal[A]

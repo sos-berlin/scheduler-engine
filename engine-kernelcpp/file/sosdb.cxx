@@ -381,7 +381,7 @@ Sos_database_session::Properties Sos_database_session::properties() {
     Properties result;
     result["user"] = _user;
     result["password"] = _password;
-    result["path"] = _db_name;
+    result["url"] = _db_name;
     return result;
 }
 
@@ -555,7 +555,7 @@ void Sos_database_session::execute_direct_single( const Const_area& stmt_par )
 
 //--------------------------------------------------Sos_database_session::convert_date_or_timestamp
 
-string Sos_database_session::convert_date_or_timestamp( const char** pp, const char* p_end )
+string Sos_database_session::convert_date_or_timestamp(const char** pp, const char* p_end)
 {
     const char*& p = *pp;
 
@@ -606,7 +606,7 @@ string Sos_database_session::convert_date_or_timestamp( const char** pp, const c
 
 //------------------------------------------------------Sos_database_session::convert_texttimestamp
 
-string Sos_database_session::convert_texttimestamp( const char** pp, const char* p_end )
+string Sos_database_session::convert_texttimestamp(const char** pp, const char* p_end)
 {
     const char*& p = *pp;
 
@@ -645,7 +645,7 @@ string Sos_database_session::convert_texttimestamp( const char** pp, const char*
 
 //--------------------------------------------------------Sos_database_session::convert_secondsdiff
 
-string Sos_database_session::convert_secondsdiff( const char** pp, const char* p_end )
+string Sos_database_session::convert_secondsdiff(const char** pp, const char* p_end)
 {
     vector<string> args = parse_argumentlist( pp, p_end, 2 );
 
@@ -668,7 +668,7 @@ string Sos_database_session::convert_secondsdiff( const char** pp, const char* p
 
 //---------------------------------------------------------Sos_database_session::parse_argumentlist
 
-vector<string> Sos_database_session::parse_argumentlist( const char** pp, const char* p_end, int n )
+vector<string> Sos_database_session::parse_argumentlist(const char** pp, const char* p_end, int n)
 {
     vector<string> result = vector<string>( n );
     const char*& p = *pp;
@@ -696,7 +696,7 @@ vector<string> Sos_database_session::parse_argumentlist( const char** pp, const 
 
 //-------------------------------------------------------------Sos_database_session::parse_argument
 
-string Sos_database_session::parse_argument( const char** pp, const char* p_end )
+string Sos_database_session::parse_argument(const char** pp, const char* p_end)
 {
     const char*& p = *pp;
     const char* start_arg = p;
@@ -854,9 +854,9 @@ string Sos_database_session::translate_limit( const string& stmt, int limit )
 //    }
 //}
 
-//--------------------------------------------------------------Sos_database_session::translate_sql
+//--------------------------------------------------------------Sos_database_session::transform_sql
 
-string Sos_database_session::translate_sql( const string& sql_statement )
+string Sos_database_session::transform_sql(const string& sql_statement)
 {
     Dynamic_area result;
     convert_stmt( Const_area( sql_statement ), &result );
@@ -865,7 +865,7 @@ string Sos_database_session::translate_sql( const string& sql_statement )
 
 //-----------------------------------------------------------Sos_database_session::convert_stmt
 
-void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_area )
+void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_area ) 
 {
     // Nur das erste Zeichen von _identifier_quote_begin wird berücksichtigt.
     // '"' oder _identifier_quote_begin[ 0 ] im Namen werden nicht berücksichtigt!!! IST VERBOTEN!
@@ -1420,6 +1420,5 @@ void Sos_database_file::put_record( const Const_area& stmt )
     //jz 11.4.97 _session->execute_direct( stmt );
     execute_direct( stmt );
 }
-
 
 } //namespace sos

@@ -113,6 +113,7 @@ struct Order_subsystem_impl : Order_subsystem
     void                        java_for_each_distributed_order(const ArrayListJ& job_chain_paths, const ArrayListJ& order_ids_j, int limit, OrderCallbackJ);
     void                        java_order_callback         (void* callback_context, Order*);
     void                        for_each_distributed_order  (const vector<string>& job_chain_paths, bool has_order_ids, const vector<string>& order_ids, int limit, Order_callback, void*);
+    void                        for_each_distributed_order  (const string& sql_clause, int limit, bool ordered, Order_callback, void*);
 
     bool                        has_any_order               ();
     int                         order_count                 ( Read_transaction* ) const;
@@ -151,7 +152,9 @@ struct Order_subsystem_impl : Order_subsystem
     string                      order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
-    void                        add_non_distributed_to_order_statistics              (jintArray) const;
+    void                        add_non_distributed_to_order_statistics(jintArray) const;
+    void                        add_distributed_to_order_statistics(const string&, jintArray);
+    void                        add_to_statistics           (void*, Order*);
 
     void wake_distributed_order_processing();
 

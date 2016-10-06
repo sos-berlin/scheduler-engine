@@ -7,11 +7,11 @@ import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStatistics, OrderStepStarted, OrderView, Orders}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
@@ -95,8 +95,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
         })
     }
 
-    def orderStatistics(query: JobChainQuery): Future[Snapshot[OrderStatistics]] = {
-      assert(query == JobChainQuery.All)
+    def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] = {
+      assert(query.matchesAll)
       respondWith(TestOrderStatistics)
     }
 
@@ -276,7 +276,7 @@ object OrderRouteTest {
     Vector(
       JobChainOverview(AJobChainPath, FileBasedState.active)),
     Vector(
-      SimpleJobNodeOverview(NodeKey(AJobChainPath, NodeId("100")), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1)),
+      SimpleJobNodeOverview(AJobChainPath, NodeId("100"), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1)),
     Vector(
       JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
         taskLimit = 10, usedTaskCount = 3, obstacles = Set())),

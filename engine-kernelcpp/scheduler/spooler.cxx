@@ -1769,7 +1769,7 @@ void Spooler::load()
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
     modifiable_settings()->set_from_variables(*_variables);
-    _settings->freeze(); // Von Scheduler.java befüllt
+    _settings->freeze(_db); // Von Scheduler.java befüllt
     if (_time_zone_name == "") {
         _time_zone_name = SchedulerJ::defaultTimezoneId();
     }

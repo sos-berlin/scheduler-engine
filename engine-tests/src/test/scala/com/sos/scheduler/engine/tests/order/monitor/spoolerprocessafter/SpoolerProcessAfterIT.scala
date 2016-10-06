@@ -91,7 +91,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
           case KeyedEvent(TaskKey(_, taskId), _) ⇒
             assert(taskId == expectedTaskId, "TaskClosed not for expected task - probably a previous test failed")
         }
-        waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { jobState == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+        waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { jobState == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> due). Wir warten kurz darauf.
       }
 
       def checkAssertions(event: KeyedEvent[MyFinishedEvent]): Unit = {

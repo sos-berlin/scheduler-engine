@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppField}
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression, CppField}
 
 /**
  * @author Joacim Zschimmer
@@ -62,4 +62,25 @@ trait SettingsC extends CppProxy {
   def installed_licence_keys_string: String
 
   def messageTexts: java.util.ArrayList[String]
+
+  @CppField
+  def _job_history_tablename: String
+
+  @CppField
+  def _tasks_tablename: String
+
+  @CppField
+  def _order_history_tablename: String
+
+  @CppField
+  def _order_step_history_tablename: String
+
+  @CppField
+  def _orders_tablename: String
+
+  @CppField
+  def _variables_tablename: String
+
+  @CppField
+  def _clusters_tablename: String
 }

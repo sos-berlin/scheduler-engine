@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainObstacl
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.queries.QueryableJobChain
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, QueryableJobChain}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -147,14 +147,17 @@ with UnmodifiableJobChain {
 
   private val toOrderStatistics = new ToOrderStatistics
 
-  private[kernel] def orderStatistics = toOrderStatistics(addToOrderStatistics)
-
-  private[order] def addToOrderStatistics(statisticsArray: Array[Int]): Unit = {
+  private[order] def addNonDistributedToOrderStatistics(statisticsArray: Array[Int]): Unit = {
     cppProxy.add_non_distributed_to_order_statistics(statisticsArray)
   }
 
-  def jobNodes: immutable.Seq[SimpleJobNode] =
-    nodes collect { case o: SimpleJobNode ⇒ o }
+  def jobNodes(query: JobChainNodeQuery): Iterator[JobNode] =
+    jobNodes.iterator filter { o ⇒ query.matches(o.queryable) }
+
+  lazy val jobNodes: immutable.Seq[JobNode] =
+    inSchedulerThread {
+      nodes collect { case o: JobNode ⇒ o }
+    }
 
   def node(o: NodeId): Node = nodeMap(o)
 
@@ -163,7 +166,7 @@ with UnmodifiableJobChain {
       (nodes map { n ⇒ n.nodeId → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
     }
 
-  private[order] lazy val nodes: Vector[Node] =
+  private[order] lazy val nodes: immutable.Seq[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector
 
   def order(id: OrderId) =
@@ -196,7 +199,7 @@ with UnmodifiableJobChain {
 
   private[kernel] lazy val isDistributed: Boolean = cppProxy.is_distributed
 
-  private def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+  private[order] def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private[kernel] def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
 

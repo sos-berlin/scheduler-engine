@@ -22,12 +22,15 @@ extends JobNode {
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
   lazy val jobPath = JobPath(inSchedulerThread { cppProxy.job_path })
 
+  private[order] def processClassPathOption = jobChain.defaultProcessClassPathOption
+
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 
   override def toString = s"${getClass.getSimpleName}"   //inSchedulerThread $nodeKey $jobPath"
 
   override private[kernel] def overview = SimpleJobNodeOverview(
-    nodeKey,
+    nodeKey.jobChainPath,
+    nodeKey.nodeId,
     nextNodeId = nextNodeId,
     errorNodeId = errorNodeId,
     action = action,

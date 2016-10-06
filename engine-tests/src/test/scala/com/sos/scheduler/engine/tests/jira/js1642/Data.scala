@@ -6,12 +6,12 @@ import com.sos.scheduler.engine.common.utils.IntelliJUtils._
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
-import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, ProcessClassOverview, TaskId, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import java.time.Instant
@@ -52,7 +52,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "3",
       "processClassPath": "",
@@ -76,7 +76,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "4",
       "processClassPath": "",
@@ -100,7 +100,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "not_initialized",
     "nodeId": "100",
     "sourceType": "AdHoc",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "Planned",
       "at": "2038-01-01T11:22:33Z"
     },
@@ -126,7 +126,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "nodeId": "100",
     "sourceType": "Permanent",
-    "processingState" : {
+    "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "5",
       "processClassPath": "",
@@ -151,7 +151,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH),
     obstacles = Set(
       OrderObstacle.FileBasedObstacles(Set(
@@ -162,8 +162,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
-      "TYPE": "Pending",
+    "orderProcessingState" : {
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [
@@ -187,7 +187,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH),
     obstacles = Set(
       OrderObstacle.Suspended,
@@ -199,8 +199,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "fileBasedState": "active",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
-      "TYPE": "Pending",
+    "orderProcessingState" : {
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [
@@ -227,15 +227,15 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.not_initialized,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xb1OrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,1",
     "fileBasedState": "not_initialized",
     "sourceType": "Permanent",
     "nodeId": "100",
-    "processingState" : {
-      "TYPE": "Pending",
+    "orderProcessingState" : {
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],
@@ -247,15 +247,15 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.not_initialized,
     OrderSourceType.AdHoc,
     NodeId("100"),
-    OrderProcessingState.Pending(EPOCH),
+    OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH))
   private val xbAdHocDistributedOrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
     "fileBasedState": "not_initialized",
     "sourceType": "AdHoc",
     "nodeId": "100",
-    "processingState" : {
-      "TYPE": "Pending",
+    "orderProcessingState" : {
+      "TYPE": "Due",
       "at" : "1970-01-01T00:00:00Z"
     },
     "obstacles": [],
@@ -272,15 +272,15 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xb1OrderOverview,
     xbAdHocDistributedOrderOverview)
 
-  val A100NodeOverview = SimpleJobNodeOverview(NodeKey(aJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val A100NodeOverview = SimpleJobNodeOverview(aJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     TestJobPath, orderCount = 3, obstacles = Set(NodeObstacle.Delaying(999999.s)))
-  val B100NodeOverview = SimpleJobNodeOverview(NodeKey(bJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val B100NodeOverview = SimpleJobNodeOverview(bJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     TestJobPath, orderCount = 1)
-  val Xa100NodeOverview = SimpleJobNodeOverview(NodeKey(xaJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
+  val Xa100NodeOverview = SimpleJobNodeOverview(xaJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     XTestJobPath, orderCount = 2,
     obstacles = Set(NodeObstacle.MissingJob(XTestJobPath)))
-  val Xb100NodeOverview = SimpleJobNodeOverview(NodeKey(xbJobChainPath, NodeId("100")), NodeId("END"), NodeId(""),
-    XTestBJobPath, orderCount = 0)
+  val Xb100NodeOverview = SimpleJobNodeOverview(xbJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
+    XTestBJobPath, orderCount = 0, obstacles = Set(NodeObstacle.WaitingForJob))
 
   val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
     taskLimit = 10, usedTaskCount = 3, obstacles = Set())
@@ -421,11 +421,9 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     ]"""
   val UsedNodesJson = """[
     {
-      "TYPE": "SimpleJob",
-      "nodeKey": {
-        "jobChainPath": "/aJobChain",
-        "nodeId": "100"
-      },
+      "TYPE": "Job",
+      "jobChainPath": "/aJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/test",
@@ -439,11 +437,9 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ]
     },
     {
-      "TYPE": "SimpleJob",
-      "nodeKey": {
-        "jobChainPath": "/bJobChain",
-        "nodeId": "100"
-      },
+      "TYPE": "Job",
+      "jobChainPath": "/bJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/test",
@@ -452,11 +448,9 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "obstacles": []
     },
     {
-      "TYPE": "SimpleJob",
-      "nodeKey": {
-        "jobChainPath": "/xFolder/x-aJobChain",
-        "nodeId": "100"
-      },
+      "TYPE": "Job",
+      "jobChainPath": "/xFolder/x-aJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/xFolder/test",
@@ -470,17 +464,19 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ]
     },
     {
-      "TYPE": "SimpleJob",
-      "nodeKey": {
-        "jobChainPath": "/xFolder/x-bJobChain",
-        "nodeId": "100"
-      },
+      "TYPE": "Job",
+      "jobChainPath": "/xFolder/x-bJobChain",
+      "nodeId": "100",
       "nextNodeId": "END",
       "errorNodeId": "",
       "jobPath": "/xFolder/test-b",
       "action": "process",
       "orderCount": 0,
-      "obstacles": []
+      "obstacles": [
+        {
+          "TYPE": "WaitingForJob"
+        }
+      ]
     }
   ]"""
   val UsedJobsJson = """[

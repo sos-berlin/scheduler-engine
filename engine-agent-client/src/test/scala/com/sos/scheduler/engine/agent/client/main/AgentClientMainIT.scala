@@ -40,7 +40,7 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
   "main" in {
     val output = mutable.Buffer[String]()
     val commandYaml = """{ $TYPE: Terminate, sigtermProcesses: true, sigkillProcessesAfter: 10 }"""
-    AgentClientMain.run(List(agent.localUri, commandYaml, "/"), o ⇒ output += o)
+    AgentClientMain.run(List(agent.localUri.string, commandYaml, "/"), o ⇒ output += o)
     assert(output.size == 3)
     assert(output(0) == "{}")
     assert(output(1) == "---")
@@ -53,7 +53,7 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
   "main with Agent URI only checks wether Agent is responding (it is)" in {
     val output = mutable.Buffer[String]()
     assertResult(0) {
-      AgentClientMain.run(List(agent.localUri), o ⇒ output += o)
+      AgentClientMain.run(List(agent.localUri.string), o ⇒ output += o)
     }
     assert(output == List("JobScheduler Agent is responding"))
   }

@@ -37,42 +37,15 @@ with JobPersistence {
 
   def stringToPath(o: String) = JobPath(o)
 
+  private[kernel] def isReadyForOrderIn(processClassPathOption: Option[ProcessClassPath]) =
+    (processClassPathOption flatMap processClassSubsystem.fileBasedOption exists { o ⇒ cppProxy.is_task_ready_for_order(o.cppProxy.cppReference) }) ||
+      obstacles.isEmpty
+
   private[kernel] def overview = {
     val state = this.state
     val isInPeriod = this.isInPeriod
     val taskLimit = this.taskLimit
     val runningTasksCount = this.runningTasksCount
-    val obstacles: Set[JobObstacle] = {
-      import JobObstacle._
-      val builder = Set.newBuilder[JobObstacle]
-      emptyToNone(fileBasedObstacles) match {
-        case Some(o) ⇒
-          builder += FileBasedObstacles(o)
-        case None ⇒
-          if (state == JobState.stopped) builder += Stopped
-          else if (!IsGoodState(state)) builder += BadState(state)
-          if (runningTasksCount >= taskLimit) builder += TaskLimitReached(taskLimit)
-          if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
-      }
-      unavailableLockPaths switch {
-        case o if o.nonEmpty ⇒ builder += WaitingForLocks(o)
-      }
-      if (waitingForProcessClass) {
-        builder += WaitingForProcessClass
-      }
-      defaultProcessClassPathOption switch {
-        case Some(path) ⇒
-          processClassSubsystem.fileBasedOption(path) switch {
-            //case None ⇒ Set(ProcessClassObstacle.Missing)
-            case Some(processClass) ⇒
-              val o = processClass.obstacles
-              if (o.nonEmpty) {
-                builder += ProcessClassObstacles(o)
-              }
-          }
-      }
-      builder.result
-    }
     JobOverview(
       path,
       fileBasedState,
@@ -81,7 +54,35 @@ with JobPersistence {
       isInPeriod = isInPeriod,
       taskLimit = taskLimit,
       usedTaskCount = runningTasksCount,
-      obstacles)
+      obstacles(state, isInPeriod, taskLimit, runningTasksCount))
+  }
+
+  private def obstacles: Set[JobObstacle] = obstacles(state, isInPeriod, taskLimit, runningTasksCount)
+
+  private def obstacles(state: JobState, isInPeriod: Boolean, taskLimit: Int, runningTaskCount: Int): Set[JobObstacle] = {
+    import JobObstacle._
+    val builder = Set.newBuilder[JobObstacle]
+    emptyToNone(fileBasedObstacles) match {
+      case Some(o) ⇒
+        builder += FileBasedObstacles(o)
+      case None ⇒
+        if (state == JobState.stopped) builder += Stopped
+        else if (!IsGoodState(state)) builder += BadState(state)
+        if (runningTasksCount >= taskLimit) builder += TaskLimitReached(taskLimit)
+        if (!isInPeriod) builder += NoRuntime(nextPossibleStartInstantOption)
+    }
+    unavailableLockPaths switch {
+      case o if o.nonEmpty ⇒ builder += WaitingForLocks(o)
+    }
+    if (waitingForProcessClass) {
+      builder += WaitingForProcessClass
+    }
+    for (path ← defaultProcessClassPathOption;
+         processClass ← processClassSubsystem.fileBasedOption(path);
+         o = processClass.obstacles if o.nonEmpty) {
+      builder += ProcessClassObstacles(o)
+    }
+    builder.result
   }
 
   private[kernel] def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
@@ -102,7 +103,7 @@ with JobPersistence {
 
   def stateText = inSchedulerThread { cppProxy.state_text }
 
-  def waitingForProcessClass: Boolean = inSchedulerThread { cppProxy.waiting_for_process }
+  private[kernel] def waitingForProcessClass: Boolean = cppProxy.waiting_for_process
 
   protected def nextPossibleStartInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_possible_start_millis)

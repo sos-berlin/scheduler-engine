@@ -190,6 +190,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean is_permanently_stopped__native(long cppReference);
 
 
+    @Override public boolean is_task_ready_for_order(long p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_task_ready_for_order__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_task_ready_for_order__native(long cppReference, long p0);
+
+
     @Override public boolean is_to_be_removed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

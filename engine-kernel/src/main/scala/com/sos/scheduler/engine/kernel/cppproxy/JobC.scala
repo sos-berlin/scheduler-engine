@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression}
 import com.sos.scheduler.engine.data.job.TaskPersistentState
 import com.sos.scheduler.engine.kernel.job.Job
 
@@ -23,6 +23,9 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
   def enqueue_taskPersistentState(o: TaskPersistentState): Unit
   def waiting_for_process: Boolean
   def unavailable_lock_path_strings: Array[String]
+
+  @CppExpression("$->is_task_ready_for_order((::sos::scheduler::Process_class*)p0)")
+  def is_task_ready_for_order(processClassPtr: Long): Boolean
 }
 
 object JobC {

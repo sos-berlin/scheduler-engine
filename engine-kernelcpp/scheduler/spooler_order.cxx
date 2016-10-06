@@ -656,6 +656,15 @@ void Order_subsystem_impl::for_each_distributed_order(
     Order_callback callback, 
     void* callback_context) 
 {
+    S sql_clause;
+    sql_clause << job_chains_in_clause(job_chain_paths);
+    if (has_order_ids) {
+        sql_clause << " and " << string_in_clause("id", order_ids);
+    }
+    for_each_distributed_order(sql_clause, limit, true, callback, callback_context);
+}
+
+void Order_subsystem_impl::for_each_distributed_order(const string& sql_clause, int limit, bool ordered, Order_callback callback, void* callback_context) {
     if (db() && !db()->is_in_transaction()) {
         Read_transaction ta(db());
         S select_sql;
@@ -664,13 +673,13 @@ void Order_subsystem_impl::for_each_distributed_order(
         select_sql << order_select_database_columns << ", `job_chain`, `occupying_cluster_member_id` " << 
             "  from " << db()->_orders_tablename <<
             "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
-              " and `distributed_next_time` is not null "
-              " and " << job_chains_in_clause(job_chain_paths);
-        if (has_order_ids) {
-            select_sql << " and " << string_in_clause("id", order_ids);
+            " and `distributed_next_time` is not null";
+        if (!sql_clause.empty()) {
+            select_sql << " and (" << sql_clause << ")";
         }
-        select_sql << "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
-
+        if (ordered) {
+            select_sql << "  order by `job_chain`, `state`, `distributed_next_time`, `priority`, `ordering`";
+        }
         for (Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); !result_set.eof();) {
             Record record = result_set.get_record();
             ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
@@ -956,6 +965,23 @@ void Order_subsystem_impl::add_non_distributed_to_order_statistics(jintArray res
         order->add_to_statistics(now, result_size, result);
     }
     jenv->ReleaseIntArrayElements(resultJ, result, 0);
+}
+
+void Order_subsystem_impl::add_distributed_to_order_statistics(const string& sql_clause, jintArray resultJ) {
+    javabridge::Env jenv;
+    jboolean is_copy = false;
+    jint* result = jenv->GetIntArrayElements(resultJ, &is_copy);
+    if (!result) jenv.throw_java("GetIntArrayElements");
+    Time now = Time::now();
+    int result_size = jenv->GetArrayLength(resultJ);
+    assert(result_size == order_statistics_array_size);
+    for_each_distributed_order(sql_clause, INT_MAX, false, &Order_subsystem_impl::add_to_statistics, result);
+    jenv->ReleaseIntArrayElements(resultJ, result, 0);
+}
+
+void Order_subsystem_impl::add_to_statistics(void* callback_context, Order* order) {
+    jint* result = (jint*)callback_context;
+    order->add_to_statistics(Time::now(), order_statistics_array_size, result);
 }
 
 //-----------------------------------------------------------------Order_subsystem_impl::dom_element
@@ -1587,6 +1613,25 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
     element.appendChild( order_queue()->dom_element( document, show_what | show_orders ) );
 
     return element;
+}
+
+void Order_queue_node::add_non_distributed_to_order_statistics(jintArray resultJ) const {
+    javabridge::Env jenv;
+    jboolean is_copy = false;
+    jint* result = jenv->GetIntArrayElements(resultJ, &is_copy);
+    if (!result) jenv.throw_java("GetIntArrayElements");
+    Time now = Time::now();
+    int result_size = jenv->GetArrayLength(resultJ);
+    Z_FOR_EACH_CONST(Order_queue::Queue, _order_queue->_queue, it) {
+        const Order* order = *it;
+        order->add_to_statistics(now, result_size, result);
+    }
+    jenv->ReleaseIntArrayElements(resultJ, result, 0);
+}
+
+void Order_queue_node::add_to_statistics(void* callback_context, Order* order) {
+    jint* result = (jint*)callback_context;
+    order->add_to_statistics(Time::now(), order_statistics_array_size, result);
 }
 
 //-------------------------------------------------------------------------------Job_node::Job_node
@@ -4817,7 +4862,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* o
                 }
                 catch( exception& x ) 
                 { 
-                    Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() );
+                    Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() << "\n" );
                     ok = false;      // Jemand hat wohl den Datensatz gelöscht.  
                                      // Wenn nicht, dann gibt's eine Schleife! Auftrag ungültig machen?
                 }

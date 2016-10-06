@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
+import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -48,7 +48,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
 
-final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
+final class SchedulerModule(spoolerC: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
 extends ScalaAbstractModule
 with HasCloser {
 
@@ -56,17 +56,17 @@ with HasCloser {
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
-    bindInstance(cppProxy)
+    bindInstance(spoolerC)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
-    provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
+    provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, spoolerC, schedulerThread) }
     bindInstance(controllerBridge.getEventBus: SchedulerEventBus)
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
-    bindInstance(cppProxy.log.getSister: PrefixLog )
-    provideCppSingleton { new SchedulerId(cppProxy.id) }
-    provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
-    provideCppSingleton { cppProxy.variables.getSister: VariableSet }
+    bindInstance(spoolerC.log.getSister: PrefixLog )
+    provideCppSingleton { new SchedulerId(spoolerC.id) }
+    provideCppSingleton { new ClusterMemberId(spoolerC.cluster_member_id) }
+    provideCppSingleton { spoolerC.variables.getSister: VariableSet }
     lateBoundCppSingletons += classOf[MessageCodeHandler]
     lateBoundCppSingletons += classOf[ZoneId]
     bindSubsystems()
@@ -74,20 +74,24 @@ with HasCloser {
   }
 
   private def bindSubsystems(): Unit = {
-    provideCppSingleton[Folder_subsystemC] { cppProxy.folder_subsystem }
-    provideCppSingleton[Job_subsystemC] { cppProxy.job_subsystem }
-    provideCppSingleton[Lock_subsystemC] { cppProxy.lock_subsystem }
-    provideCppSingleton[Order_subsystemC] { cppProxy.order_subsystem }
-    provideCppSingleton[Process_class_subsystemC] { cppProxy.process_class_subsystem }
-    provideCppSingleton[Schedule_subsystemC] { cppProxy.schedule_subsystem }
-    provideCppSingleton[Task_subsystemC] { cppProxy.task_subsystem }
-    provideCppSingleton[Standing_order_subsystemC] { cppProxy.standing_order_subsystem }
+    provideCppSingleton[Folder_subsystemC] { spoolerC.folder_subsystem }
+    provideCppSingleton[Job_subsystemC] { spoolerC.job_subsystem }
+    provideCppSingleton[Lock_subsystemC] { spoolerC.lock_subsystem }
+    provideCppSingleton[Order_subsystemC] { spoolerC.order_subsystem }
+    provideCppSingleton[Process_class_subsystemC] { spoolerC.process_class_subsystem }
+    provideCppSingleton[Schedule_subsystemC] { spoolerC.schedule_subsystem }
+    provideCppSingleton[Task_subsystemC] { spoolerC.task_subsystem }
+    provideCppSingleton[Standing_order_subsystemC] { spoolerC.standing_order_subsystem }
   }
 
   private def provideCppSingleton[A <: AnyRef : ClassTag](provider: ⇒ A) = {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideJdbcConnectionPool(o: DatabaseSubsystem, stcq: SchedulerThreadCallQueue): JdbcConnectionPool =
+    new JdbcConnectionPool(() ⇒ o.cppProperties).closeWithCloser
 
   @Provides @Singleton
   private def provideDirectSchedulerCollector(o: DirectSchedulerClient): DirectOrderClient = o
@@ -108,13 +112,15 @@ with HasCloser {
       StandingOrderSubsystem))
 
   @Provides @Singleton
-  private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
-    databaseSubsystem.newEntityManagerFactory()
+  private def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem)(implicit stcq: SchedulerThreadCallQueue): EntityManagerFactory =
+    inSchedulerThread {
+      databaseSubsystem.newEntityManagerFactory()
+    }
 
   @Provides @Singleton
-  private def provideDatabaseSubsystem(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue) =
+  private def provideDatabaseSubsystem(implicit stcq: SchedulerThreadCallQueue) =
     new DatabaseSubsystem(() ⇒ inSchedulerThread {
-      cppProxy.db.properties.getSister.toMap
+      spoolerC.db
     })
 
   @Provides @Singleton
@@ -126,19 +132,24 @@ with HasCloser {
     new CommandSubsystem(asJavaIterable(commandHandlers(List(pluginSubsystem))))
 
   @Provides @Singleton
-  private def provideMessageCodeHandler(spoolerC: SpoolerC): MessageCodeHandler =
-    MessageCodeHandler.fromCodeAndTextStrings(spoolerC.settings.messageTexts)
+  private def provideMessageCodeHandler(spoolerC: SpoolerC)(implicit stcq: SchedulerThreadCallQueue): MessageCodeHandler =
+    inSchedulerThread {
+      MessageCodeHandler.fromCodeAndTextStrings(spoolerC.settings.messageTexts)
+    }
 
   @Provides @Singleton
-  private def licenseKeyStrings(spoolerC: SpoolerC): immutable.Iterable[LicenseKeyString] =
-    Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
+  private def licenseKeyStrings(spoolerC: SpoolerC)(implicit stcq: SchedulerThreadCallQueue): immutable.Iterable[LicenseKeyString] =
+    inSchedulerThread {
+      Splitter.on(' ').omitEmptyStrings.splitToList(spoolerC.settings.installed_licence_keys_string).toVector.distinct map LicenseKeyString.apply
+    }
 
   @Provides @Singleton
-  private def zoneId: ZoneId = {
-    val state = cppProxy.state_name
-    if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
-    ZoneId of cppProxy.time_zone_name
-  }
+  private def zoneId(implicit stcq: SchedulerThreadCallQueue): ZoneId =
+    inSchedulerThread {
+      val state = spoolerC.state_name
+      if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
+      ZoneId of spoolerC.time_zone_name
+    }
 
   @Provides @Singleton
   private def actorSystem(config: Config): ActorSystem = {
@@ -152,9 +163,11 @@ with HasCloser {
   }
 
   @Provides @Singleton
-  private def config(conf: SchedulerConfiguration): Config =
-    Configs.parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf") withFallback
-      SchedulerConfiguration.DefaultConfig
+  private def config(conf: SchedulerConfiguration)(implicit stcq: SchedulerThreadCallQueue): Config =
+    inSchedulerThread {
+      Configs.parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf") withFallback
+        SchedulerConfiguration.DefaultConfig
+    }
 
   @Provides @Singleton
   private def executionContext(actorSystem: ActorSystem): ExecutionContext = actorSystem.dispatcher

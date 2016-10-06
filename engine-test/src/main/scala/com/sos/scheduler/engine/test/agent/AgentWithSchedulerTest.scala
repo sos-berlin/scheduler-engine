@@ -27,7 +27,7 @@ trait AgentWithSchedulerTest extends HasCloser with ScalaSchedulerTest {
     agent
   }
   protected final lazy val agentUri = agent.localUri
-  protected final lazy val agentClient: AgentClient = instance[SchedulerAgentClientFactory].apply(agent.localUri)
+  protected final lazy val agentClient: AgentClient = instance[SchedulerAgentClientFactory].apply(agentUri)
 
   protected def newAgentConfiguration(): AgentConfiguration = newAgentConfiguration(None)
 

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -36,10 +37,14 @@ final class ApiRouteTest extends org.scalatest.FreeSpec with ScalatestRouteTest 
   protected def orderSubsystem = throw new NotImplementedError
 
   protected def taskSubsystem = throw new NotImplementedError
-
   protected def orderStatisticsChangedSource = throw new NotImplementedError
 
+
   protected def prefixLog = null
+
+  protected def isKnownAgentUriFuture(uri: AgentAddress) = throw new NotImplementedError
+
+  protected def toAgentClient = throw new NotImplementedError
 
   override protected def afterAll() = {
     actorSystem.shutdown()

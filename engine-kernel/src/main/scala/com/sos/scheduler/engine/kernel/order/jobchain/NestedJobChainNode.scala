@@ -19,14 +19,14 @@ extends Node {
 
   private[kernel] override def overview =
     NestedJobChainNodeOverview(
-      nodeKey,
+      nodeKey.jobChainPath,
+      nodeKey.nodeId,
       nextNodeId = nextNodeId,
       errorNodeId = errorNodeId,
       nestedJobChainPath = nestedJobChainPath)
 
   private[kernel] def nestedJobChainPath = JobChainPath(cppProxy.nested_job_chain_path)
 }
-
 
 object NestedJobChainNode {
   final class Type extends SisterType[NestedJobChainNode, Nested_job_chain_nodeC] {

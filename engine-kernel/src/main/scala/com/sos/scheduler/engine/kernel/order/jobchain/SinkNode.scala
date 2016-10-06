@@ -21,17 +21,19 @@ extends JobNode {
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
   lazy val jobPath = JobPath(inSchedulerThread { cppProxy.job_path })
 
-  private[kernel] def overview = SinkNodeOverview(nodeKey, nextNodeId, errorNodeId, action, jobPath, orderCount, obstacles)
+  private[order] def processClassPathOption = jobChain.fileWatchingProcessClassPathOption
+
+  private[kernel] def overview = SinkNodeOverview(nodeKey.jobChainPath, nodeKey.nodeId, nextNodeId, errorNodeId, jobPath, action, orderCount, obstacles)
 
   private[kernel] def orderQueue: OrderQueue = cppProxy.order_queue.getSister
 
-  private[kernel] def isDeletingFile: Boolean = cppProxy.file_order_sink_remove()
+  private[kernel] def isDeletingFile: Boolean = cppProxy.file_order_sink_remove
 
-  private[kernel] def moveFileTo: String = cppProxy.file_order_sink_move_to()
+  private[kernel] def moveFileTo: String = cppProxy.file_order_sink_move_to
 }
 
-private object SinkNode {
-  final class Type extends SisterType[SinkNode, Sink_nodeC] {
+object SinkNode {
+  object Type extends SisterType[SinkNode, Sink_nodeC] {
     def sister(proxy: Sink_nodeC, context: Sister): SinkNode = {
       val injector = context.asInstanceOf[HasInjector].injector
       new SinkNode(proxy, injector)

@@ -1,9 +1,10 @@
-jQuery(function() {
+function startOrderStatisticsChangedListener(path) {
+  var tryAgainTimeoutSeconds = 10
   var keys = [
     "total",
     "notPlanned",
     "planned",
-    "pending",
+    "due",
     "running",
     "inTask",
     "inProcess",
@@ -37,9 +38,10 @@ jQuery(function() {
   document.addEventListener("visibilitychange", documentVisibilityChanged, false);
 
   function get(lastEventId) {
+    var requestedAt = new Date()
     jQuery.ajax({
       dataType: 'json',
-      url: "/jobscheduler/master/api/event/?return=OrderStatisticsChanged&after=" + lastEventId
+      url: "/jobscheduler/master/api/event" + path + "?return=OrderStatisticsChanged&after=" + lastEventId
     })
     .done(function(snapshot) {
       refreshElem.style.visibility = "hidden";
@@ -72,7 +74,8 @@ jQuery(function() {
     })
     .fail(function() {
       showRefreshing();
-      setTimeout(function() { get(lastEventId); }, 5000);
+      var duration = tryAgainTimeoutSeconds - Math.max(0, new Date().getSeconds() - requestedAt.getSeconds());
+      setTimeout(function() { get(lastEventId); }, duration * 1000);
     });
   }
 
@@ -82,4 +85,4 @@ jQuery(function() {
   }
 
   get(0);
-});
+}

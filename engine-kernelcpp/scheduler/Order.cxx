@@ -13,6 +13,7 @@ using namespace job_chain;
 //---------------------------------------------------------------------------------------------const
 
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
+extern const int order_statistics_array_size = 12;
 extern const string scheduler_file_order_path_variable_name = "scheduler_file_path";
 const string scheduler_file_order_agent_variable_name = "scheduler_file_remote_scheduler";
 
@@ -1678,6 +1679,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _is_in_database  &&  _job_chain_path != ""  &&  !_job_chain )
             result.setAttribute( "in_database_only", "yes" );
 
+        result.setAttribute("order_source_type", is_file_based() ? "Permanent" : is_file_order() ? "FileOrder" : "AdHoc");  // Since v1.11. Used in Scala to speed up XML parsing (JS-1642)
+
         if( show_what.is_set( show_payload )  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
             xml::Element_ptr payload_element = result.append_new_element( "payload" );
@@ -1709,16 +1712,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     //    if( _period.repeat() < Time::never ||
     //        _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <schedule>
     //}
-
-    if( show_what.is_set( show_log )  ||  show_what.is_set( show_for_database_only ) )
-    {
-        Show_what log_show_what = show_what;
-        if( show_what.is_set( show_for_database_only ) )  log_show_what |= show_log;
-
-        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", _spooler->truncate_head(*log) );     // Protokoll aus der Datenbank
-        else
-        if( _log )  result.appendChild( _log->dom_element( dom_document, log_show_what ) );
-    }
 
     if( show_what.is_set( show_payload | show_for_database_only )  &&  _payload_xml_string != "" )
     {
@@ -1779,6 +1772,16 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     }
 
     result.setAttribute_optional( "end_state", _end_state.as_string() );
+
+    if (show_what.is_set(show_log) || show_what.is_set(show_for_database_only)) {
+        // Append <log> at end such that all more relevant informations can be parsed before this potentially big element (JS-1642)
+        Show_what log_show_what = show_what;
+        if( show_what.is_set( show_for_database_only ) )  log_show_what |= show_log;
+
+        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", _spooler->truncate_head(*log) );     // Protokoll aus der Datenbank
+        else
+        if( _log )  result.appendChild( _log->dom_element( dom_document, log_show_what ) );
+    }
 
     return result;
 }
@@ -3545,7 +3548,7 @@ void Order::add_to_statistics(Time now, int result_size, jint* result) const {
     }
     if (suspended()) result[8]++;
     if (is_on_blacklist()) result[9]++;
-    if (has_base_file()) result[10]++;
+    if (is_file_based()) result[10]++;
     if (is_file_order()) result[11]++;
 }
 

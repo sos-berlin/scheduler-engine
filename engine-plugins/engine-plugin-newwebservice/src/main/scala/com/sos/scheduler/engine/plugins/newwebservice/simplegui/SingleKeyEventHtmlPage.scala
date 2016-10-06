@@ -47,15 +47,16 @@ extends SchedulerHtmlPage {
           tr(
             th("Timestamp"),
             th("Event"),
-            th, th, th
-          )
-        ),
+            th,
+            th,
+            th)),
         tbody(
-          (eventSnapshot map eventToTr).toVector))))
+          eventSnapshot map eventToTr))))
 
   private def eventToTr(eventSnapshot: Snapshot[Event]): Frag =
     tr(
-      td(whiteSpace.nowrap)(eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
+      td(whiteSpace.nowrap)(
+        eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
       eventToTds(eventSnapshot.value))
 
   private def eventToTds(event: Event): Frag = {
@@ -66,7 +67,7 @@ extends SchedulerHtmlPage {
         case `eventName` ⇒ ""
         case string ⇒ string stripPrefix s"$eventName(" stripSuffix ")"
       }
-      td(colspan := 4, withoutEventName)
+      td(colspan := 3, withoutEventName)
     }
 
     event match {
@@ -74,24 +75,22 @@ extends SchedulerHtmlPage {
         seqFrag(
           td(eventName),
           event match {
-            case OrderFinished(nodeId: NodeId)        ⇒ td(nodeId) :: Nil
+            case OrderFinished(nodeId: NodeId)        ⇒ td(nodeId)
             case OrderNodeChanged(nodeId, fromNodeId) ⇒ td(nodeId) :: td("← ", fromNodeId) :: Nil
-            case OrderSetBack(nodeId)                 ⇒ td(nodeId) :: Nil
-            case OrderStepEnded(stateTransition)      ⇒ td(stateTransition.toString) :: Nil
+            case OrderSetBack(nodeId)                 ⇒ td(nodeId)
+            case OrderStepEnded(stateTransition)      ⇒ td(colspan := 3)(stateTransition.toString)
             case OrderStepStarted(nodeId, taskId)     ⇒ td(nodeId) :: td(taskId) :: Nil
             case _ ⇒ unknownEventToTds(event)
           })
       case event: Logged ⇒
-        seqFrag(td(), td(event.level.toString), td(colspan := 4)(event.message))
+        td :: td(event.level.toString) :: td(colspan := 2)(event.message) :: Nil
       case _ ⇒
-        seqFrag(td(eventName), unknownEventToTds(event))
+        td(eventName) :: unknownEventToTds(event) :: Nil
     }
   }
-
 }
 
 object SingleKeyEventHtmlPage {
-
   import scala.language.implicitConversions
 
   def singleKeyEventToHtmlPage(key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =

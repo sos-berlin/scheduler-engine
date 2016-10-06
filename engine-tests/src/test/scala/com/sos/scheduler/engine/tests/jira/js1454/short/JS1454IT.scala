@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1454.short
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -29,7 +30,8 @@ final class JS1454IT extends FreeSpec with ScalaSchedulerTest {
     logCategories = s"$KeepAliveLogCategory")
 
   "Busy communication may suppress keep-alive" in {
-    writeConfigurationFile(ProcessClassPath("/test-agent"), ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort")))
+    writeConfigurationFile(ProcessClassPath("/test-agent"),
+      ProcessClassConfiguration(agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort"))))
     withEventPipe { events ⇒
       runJob(JobPath("/test-busy"))
       val keepaliveCount = events.queued[InfoLogged] count { _.event.codeOption contains MessageCode("SCHEDULER-727") }  // scheduler.agent.keep_alive=TEST floods the line with keep-alive spaces

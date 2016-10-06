@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.agent.client.TextAgentClient
 import com.sos.scheduler.engine.common.commandline.CommandLineArguments
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import scala.util.control.NonFatal
 
 /**
@@ -43,7 +43,7 @@ object AgentClientMain {
 
   private def parseArgs(args: Seq[String]) =
     CommandLineArguments.parse(args) { arguments ⇒
-      val agentUri = arguments.keylessValue(0) stripSuffix "/"
+      val agentUri = AgentAddress.normalized(arguments.keylessValue(0))
       val operations = arguments.keylessValues.tail map {
         case url if url startsWith "/" ⇒ Get(url)
         case "-" ⇒ StdinCommand

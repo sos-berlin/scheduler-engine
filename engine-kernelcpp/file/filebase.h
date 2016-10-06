@@ -33,7 +33,7 @@ struct Record_not_found_error : Xc { Record_not_found_error() : Xc( "D311" ) {} 
 
 //----------------------------------------------------------------------------------------Dbms_kind
 
-enum Dbms_kind
+enum Dbms_kind   // See also DbmsKind.java
 {
     dbms_unknown,
     dbms_access,

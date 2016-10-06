@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -48,7 +49,7 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
     mainArguments = List(s"-tcp-port=$tcpPort"))
 
   private val oldAgentSetting = Setting(
-    () ⇒ ProcessClassConfiguration(agentUris = List(s"127.0.0.1:$tcpPort"), processMaximum = Some(1000)),
+    () ⇒ ProcessClassConfiguration(agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort")), processMaximum = Some(1000)),
     shellTaskMaximum = OldAgentTaskParallelCount)
   private val newAgentSetting = Setting(
     () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)),

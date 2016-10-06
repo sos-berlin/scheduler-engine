@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.agent.data.web
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.web.AgentUris._
+import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.tunnel.data.TunnelId
 import spray.http.Uri
 import spray.http.Uri.Path
@@ -11,9 +12,9 @@ import spray.http.Uri.Path
  *
  * @author Joacim Zschimmer
  */
-final class AgentUris private(agentUriString: String) {
+final class AgentUris private(agentUri: AgentAddress) {
 
-  private val prefixedUri = Uri(s"$agentUriString/$AgentUriConstantPrefix")
+  val prefixedUri = Uri(s"$agentUri/$AgentUriConstantPrefix")
 
   def overview = uriString(Api)
 
@@ -21,7 +22,7 @@ final class AgentUris private(agentUriString: String) {
 
   def fileExists(filePath: String): String =
     (withPath("api/fileExists") withQuery ("file" → filePath)).toString()
-  
+
   object task {
     def overview = uriString(s"$Api/task")
 
@@ -51,7 +52,7 @@ final class AgentUris private(agentUriString: String) {
     u.copy(path = Path(s"${prefixedUri.path}/${stripLeadingSlash(uri.path.toString())}"))
   }
 
-  override def toString = agentUriString
+  override def toString = agentUri.string
 }
 
 object AgentUris {
@@ -59,7 +60,9 @@ object AgentUris {
   private val Api = "api"
   val LicenseKeyHeaderName = "X-JobScheduler-LicenseKey"
 
-  def apply(agentUri: String) = new AgentUris(agentUri stripSuffix "/")
+  def apply(address: AgentAddress): AgentUris = new AgentUris(address)
+
+  def apply(agentUri: String) = new AgentUris(AgentAddress.normalized(agentUri))
 
   private def stripLeadingSlash(o: String) =
     o match {

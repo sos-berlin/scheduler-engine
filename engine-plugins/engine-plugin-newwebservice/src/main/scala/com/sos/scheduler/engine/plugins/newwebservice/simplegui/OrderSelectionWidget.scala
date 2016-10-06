@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
@@ -20,20 +21,20 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
       table(
         tbody(
           tr(
-            td(cls := "OrderSelection-Header", colspan := 2)(
+            td(cls := "OrderSelection-Header", colspan := 4)(
               "Show only ...")),
           tr(
-            td(cls := "OrderSelection-Boolean", rowspan := 2)(
+            td(cls := "OrderSelection-Boolean")(
               booleanCheckBoxes),
-            td(cls := "OrderSelection-Enum", rowspan := 2)(
+            td(cls := "OrderSelection-Enum")(
               orderSourceTypesHtml),
-            td(cls := "OrderSelection-Enum", rowspan := 2)(
+            td(cls := "OrderSelection-Enum")(
               orderProcessingStatesHtml,
               orIsSuspendedHtml),
             td(cls := "OrderSelection-LimitPerNode")(
               limitPerNodeInputHtml(query.notInTaskLimitPerNode))),
           tr(
-            td(cls := "OrderSelection-LimitPerNode-Submit")(
+            td(cls := "OrderSelection-LimitPerNode-Submit", colspan := 4)(
               button(`type` := "submit")(
                 StringFrag("Show"))))))))
 
@@ -41,7 +42,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
     for ((key, valueOption) ← List(OrderQuery.IsSuspendedName → query.isSuspended,
                                    OrderQuery.IsSetbackName → query.isSetback,
                                    OrderQuery.IsBlacklistedName → query.isBlacklisted,
-                                   JobChainQuery.IsDistributedName → query.isDistributed))
+                                   JobChainQuery.IsDistributedName → query.jobChainQuery.isDistributed))
       yield List(
         labeledDoubleCheckbox(key, valueOption, checkedMeans = true),
         StringFrag(" "),
@@ -103,7 +104,7 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
           attrs.value := limitPerNode map { _.toString } getOrElse "")))
 
   private def javascript = {
-    val orderJson = JsObject(query.toUriPathAndParameters._2 mapValues JsString.apply).toString
+    val orderJson = JsObject(toPathAndParameters(query)._2 mapValues JsString.apply).toString
     s"""function reloadPage(change) {
       window.location.href = orderQueryToUrl($orderJson, change);
     }"""

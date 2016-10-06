@@ -10,7 +10,7 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
     private volatile long cppReference = nullCppReference;
     private SISTER sister = null;
 
-    protected final long cppReference() {
+    public final long cppReference() {
         long result = cppReference;
         if (result == nullCppReference)
             throw new CppProxyInvalidatedException("Using reference to destroyed C++ object: "+ this);
@@ -39,7 +39,7 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
         return sister;
     }
 
-    @Override public final boolean hasSister() { 
+    @Override public final boolean hasSister() {
         return sister != null;
     }
 

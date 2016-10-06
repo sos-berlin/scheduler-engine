@@ -7,6 +7,7 @@
 #include "com__sos__scheduler__engine__kernel__order__jobchain__OrderQueueNode.h"
 #include "java__lang__String.h"
 #include "org__w3c__dom__Element.h"
+#include "scala__Option.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
 
@@ -19,6 +20,7 @@ struct JobNode__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method;
     ::zschimmer::javabridge::Method const _orderCount____method;
     ::zschimmer::javabridge::Method const _orderStateTransitionToState__J__method;
+    ::zschimmer::javabridge::Method const _processClassPathOption____method;
     ::zschimmer::javabridge::Method const _processConfigurationDomElement__Lorg_w3c_dom_Element_2__method;
 
     static const ::zschimmer::javabridge::class_factory< JobNode__class > class_factory;
@@ -32,6 +34,7 @@ JobNode__class::JobNode__class(const string& class_name) :
     ,_onOrderStepEnded__Lcom_sos_scheduler_engine_kernel_order_Order_2I__method(this, "onOrderStepEnded", "(Lcom/sos/scheduler/engine/kernel/order/Order;I)V")
     ,_orderCount____method(this, "orderCount", "()I")
     ,_orderStateTransitionToState__J__method(this, "orderStateTransitionToState", "(J)Ljava/lang/String;")
+    ,_processClassPathOption____method(this, "processClassPathOption", "()Lscala/Option;")
     ,_processConfigurationDomElement__Lorg_w3c_dom_Element_2__method(this, "processConfigurationDomElement", "(Lorg/w3c/dom/Element;)V"){}
 
 JobNode__class::~JobNode__class() {}
@@ -81,6 +84,14 @@ jint JobNode::orderCount() const {
     JobNode__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_orderStateTransitionToState__J__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::scala::Option JobNode::processClassPathOption() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    JobNode__class* cls = _class.get();
+    ::javaproxy::scala::Option result;
+    result.steal_local_ref(cls->_processClassPathOption____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

@@ -70,13 +70,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
 
     void require_role(Role) const;
     void require_role(Role, const string& info) const;
-
-    void freeze() { 
-        _freezed = true; 
-        if (_use_old_microscheduling_for_jobs) {
-            Z_LOG2("scheduler", "_use_old_microscheduling_for_jobs\n");
-        }
-    }
+    void freeze(const Database* database);
 
     bool is_freezed() const {
         return _freezed; 
@@ -107,6 +101,13 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     string                     _web_directory;    // For JettyPlugin
     int                        _classic_agent_keep_alive_duration;
     bool _pause_after_failure;
+    string _job_history_tablename;
+    string _tasks_tablename;
+    string _order_history_tablename;
+    string _order_step_history_tablename;
+    string _orders_tablename;
+    string _variables_tablename;
+    string _clusters_tablename;
 };
 
 }} //namespace sos::scheduler
