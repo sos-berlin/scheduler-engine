@@ -48,7 +48,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
 
-final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
+final class SchedulerModule(spoolerC: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
 extends ScalaAbstractModule
 with HasCloser {
 
@@ -56,17 +56,17 @@ with HasCloser {
 
   def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
-    bindInstance(cppProxy)
+    bindInstance(spoolerC)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
-    provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
+    provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, spoolerC, schedulerThread) }
     bindInstance(controllerBridge.getEventBus: SchedulerEventBus)
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
-    bindInstance(cppProxy.log.getSister: PrefixLog )
-    provideCppSingleton { new SchedulerId(cppProxy.id) }
-    provideCppSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
-    provideCppSingleton { cppProxy.variables.getSister: VariableSet }
+    bindInstance(spoolerC.log.getSister: PrefixLog )
+    provideCppSingleton { new SchedulerId(spoolerC.id) }
+    provideCppSingleton { new ClusterMemberId(spoolerC.cluster_member_id) }
+    provideCppSingleton { spoolerC.variables.getSister: VariableSet }
     lateBoundCppSingletons += classOf[MessageCodeHandler]
     lateBoundCppSingletons += classOf[ZoneId]
     bindSubsystems()
@@ -74,14 +74,14 @@ with HasCloser {
   }
 
   private def bindSubsystems(): Unit = {
-    provideCppSingleton[Folder_subsystemC] { cppProxy.folder_subsystem }
-    provideCppSingleton[Job_subsystemC] { cppProxy.job_subsystem }
-    provideCppSingleton[Lock_subsystemC] { cppProxy.lock_subsystem }
-    provideCppSingleton[Order_subsystemC] { cppProxy.order_subsystem }
-    provideCppSingleton[Process_class_subsystemC] { cppProxy.process_class_subsystem }
-    provideCppSingleton[Schedule_subsystemC] { cppProxy.schedule_subsystem }
-    provideCppSingleton[Task_subsystemC] { cppProxy.task_subsystem }
-    provideCppSingleton[Standing_order_subsystemC] { cppProxy.standing_order_subsystem }
+    provideCppSingleton[Folder_subsystemC] { spoolerC.folder_subsystem }
+    provideCppSingleton[Job_subsystemC] { spoolerC.job_subsystem }
+    provideCppSingleton[Lock_subsystemC] { spoolerC.lock_subsystem }
+    provideCppSingleton[Order_subsystemC] { spoolerC.order_subsystem }
+    provideCppSingleton[Process_class_subsystemC] { spoolerC.process_class_subsystem }
+    provideCppSingleton[Schedule_subsystemC] { spoolerC.schedule_subsystem }
+    provideCppSingleton[Task_subsystemC] { spoolerC.task_subsystem }
+    provideCppSingleton[Standing_order_subsystemC] { spoolerC.standing_order_subsystem }
   }
 
   private def provideCppSingleton[A <: AnyRef : ClassTag](provider: ⇒ A) = {
@@ -120,7 +120,7 @@ with HasCloser {
   @Provides @Singleton
   private def provideDatabaseSubsystem(implicit stcq: SchedulerThreadCallQueue) =
     new DatabaseSubsystem(() ⇒ inSchedulerThread {
-      cppProxy.db
+      spoolerC.db
     })
 
   @Provides @Singleton
@@ -146,9 +146,9 @@ with HasCloser {
   @Provides @Singleton
   private def zoneId(implicit stcq: SchedulerThreadCallQueue): ZoneId =
     inSchedulerThread {
-      val state = cppProxy.state_name
+      val state = spoolerC.state_name
       if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
-      ZoneId of cppProxy.time_zone_name
+      ZoneId of spoolerC.time_zone_name
     }
 
   @Provides @Singleton

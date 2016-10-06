@@ -143,6 +143,20 @@ void Settings::set(int number, const string& value) {
     }
 }
 
+void Settings::freeze(const Database* database) { 
+    _freezed = true; 
+    if (_use_old_microscheduling_for_jobs) {
+        Z_LOG2("scheduler", "_use_old_microscheduling_for_jobs\n");
+    }
+    _job_history_tablename        = database->_job_history_tablename;
+    _tasks_tablename              = database->_tasks_tablename;
+    _order_history_tablename      = database->_order_history_tablename;
+    _order_step_history_tablename = database->_order_step_history_tablename;
+    _orders_tablename             = database->_orders_tablename;
+    _variables_tablename          = database->_variables_tablename;
+    _clusters_tablename           = database->_clusters_tablename;
+}
+
 //---------------------------------------------------------------------------Settings::require_role
 
 void Settings::require_role(Role role) const {

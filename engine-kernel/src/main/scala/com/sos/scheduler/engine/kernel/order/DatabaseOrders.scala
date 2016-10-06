@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, QueryableOrder}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import java.io.Reader
 import java.sql
 import java.sql.ResultSet
@@ -23,7 +24,11 @@ import javax.xml.transform.stream.StreamSource
   * @author Joacim Zschimmer
   */
 @Singleton
-private[order] final class DatabaseOrders @Inject private(schedulerId: SchedulerId, databaseSubsystem: DatabaseSubsystem, jdbcConnectionPool: JdbcConnectionPool) {
+private[order] final class DatabaseOrders @Inject private(
+  schedulerId: SchedulerId,
+  databaseSubsystem: DatabaseSubsystem,
+  schedulerConfiguration: SchedulerConfiguration,
+  jdbcConnectionPool: JdbcConnectionPool) {
 
   def jobChainPathsToSql(jobChainPaths: TraversableOnce[JobChainPath]): String =
     databaseSubsystem.toInClauseSql(
@@ -39,7 +44,7 @@ private[order] final class DatabaseOrders @Inject private(schedulerId: Scheduler
           quoteSqlString(jobChainPath.withoutStartingSlash) +
           " and " +
           databaseSubsystem.toInClauseSql(column = "state", nodeKeys map { o ⇒ quoteSqlString(o.nodeId.string) }) +
-          ")"
+        ")"
     }).flatten mkString " and "
 
   def queryToSql(query: JobChainNodeQuery, conditionSql: String, ordered: Boolean = false): String = {
@@ -47,9 +52,9 @@ private[order] final class DatabaseOrders @Inject private(schedulerId: Scheduler
     select ++= "select "
     val limit = Int.MaxValue
     if (limit < Int.MaxValue) select ++= s"%limit($limit) "
-    select ++= "`ID`, `JOB_CHAIN`, `STATE`, `DISTRIBUTED_NEXT_TIME`, `OCCUPYING_CLUSTER_MEMBER_ID`, `ORDER_XML` "
+    select ++= "`ID`, `JOB_CHAIN`, `STATE`, `DISTRIBUTED_NEXT_TIME`, `OCCUPYING_CLUSTER_MEMBER_ID`, `ORDER_XML`"
     select ++= " from "
-    select ++= "SCHEDULER_ORDERS"
+    select ++= schedulerConfiguration.ordersTableName
     select ++= "  where `SPOOLER_ID`="
     select ++= DatabaseSubsystem.quoteSqlString(schedulerId.string.substitute("", "-"))
     select ++= " and `DISTRIBUTED_NEXT_TIME` is not null"
@@ -71,19 +76,19 @@ private[order] object DatabaseOrders {
     autoClosing(connection.prepareStatement(sqlStmt)) { stmt ⇒
       val resultSet = stmt.executeQuery()
       while (resultSet.next()) {
-        val (row, xmlResolved) = readRow(resultSet)
-        addToOrderStatistics(toQueryableOrder(row, xmlResolved), result)
+        addRowToOrderStatistics(resultSet, result)
       }
       result.toImmutable
     }
   }
 
-  private def readRow(resultSet: ResultSet) = {
+  private def addRowToOrderStatistics(resultSet: ResultSet, result: OrderStatistics.Mutable): Unit = {
+    val row = OrderRow(resultSet)
     val clob = resultSet.getClob("ORDER_XML")
     val xmlResolved = autoClosing(clob.getCharacterStream) { reader ⇒
       OrderXmlResolved(reader)
     }
-    (OrderRow(resultSet), xmlResolved)
+    addToOrderStatistics(toQueryableOrder(row, xmlResolved), result)
   }
 
   private def toQueryableOrder(row: OrderRow, xmlResolved: OrderXmlResolved): QueryableOrder =
