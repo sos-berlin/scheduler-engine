@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.base.utils.ScalaUtils.{RichAny, SwitchStatement}
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.RichStartElement
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
@@ -19,9 +20,11 @@ import java.sql
 import java.sql.ResultSet
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
+import javax.xml.stream.events.StartElement
 import javax.xml.transform.stream.StreamSource
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.ControlThrowable
 
 /**
   * @author Joacim Zschimmer
@@ -160,39 +163,60 @@ private[order] object DatabaseOrders {
     sourceType: OrderSourceType)
 
   private[order] object OrderXmlResolved {
-    def apply(reader: Reader): OrderXmlResolved =
-      ScalaXMLEventReader.parseDocument(new StreamSource(reader), ignoreUnknown = true) { eventReader ⇒
+    def apply(reader: Reader): OrderXmlResolved = {
+      var orderSourceType: OrderSourceType = null
+      var isSuspended = false
+      var isBlacklisted = false
+      var isTouched = false
+      var isSetback = false
+      object Completed extends ControlThrowable
+      val config = ScalaXMLEventReader.Config(ignoreUnknown = true)
+      try ScalaXMLEventReader.parseDocument(new StreamSource(reader), config = config) { eventReader ⇒
         import eventReader._
-        parseElement("order") {
-          var orderSourceType = OrderSourceType.AdHoc
-          val isSuspended = attributeMap.as[Boolean]("suspended", false)
-          val isBlacklisted = attributeMap.as[Boolean]("on_blacklist", false)
-          val isSetback = attributeMap contains "setback"
-          val isTouched = attributeMap.as[Boolean]("touched", false)
-          forEachStartElement {
-            case "file_based" ⇒ parseElement() {
-              if (attributeMap contains "last_write_time") {
-                orderSourceType = OrderSourceType.Permanent
+        parseElement("order", withAttributeMap = false) {
+          peek.asStartElement.attributes map { o ⇒ o.getName.getLocalPart → o.getValue } foreach {
+            case ("suspended"        , value) ⇒ isSuspended   = value.toBoolean
+            case ("on_blacklist"     , value) ⇒ isBlacklisted = value.toBoolean
+            case ("touched"          , value) ⇒ isTouched     = value.toBoolean
+            case ("setback"          , _    ) ⇒ isSetback = true
+            case ("order_source_type", value) ⇒ orderSourceType = OrderSourceType.valueOf(value)
+            case _ ⇒
+          }
+          if (orderSourceType != null) throw Completed
+          eat[StartElement]
+          while (peek.isStartElement) {
+            peek.asStartElement.getName.toString match {
+              case "file_based" ⇒ parseElement() {
+                if (orderSourceType == null && attributeMap.contains("last_write_time")) {
+                  orderSourceType = OrderSourceType.Permanent
+                }
               }
-            }
-            case "params" ⇒ parseElement() {
-              forEachStartElement {
-                case "param" ⇒ parseElement() {
-                if (attributeMap.get("name") == Some(Order.FilePathParameterName)) {
-                    orderSourceType = OrderSourceType.FileOrder
+              case "params" ⇒ parseElement() {
+                forEachStartElement {
+                  case "param" ⇒ parseElement() {
+                    if (attributeMap.get("name") == Some(Order.FilePathParameterName)) {
+                      orderSourceType = OrderSourceType.FileOrder
+                    }
                   }
                 }
               }
+              case _ ⇒ ignoreElement()
             }
+            if (orderSourceType != null) throw Completed
           }
-          new OrderXmlResolved(
-            isSuspended = isSuspended,
-            isBlacklisted = isBlacklisted,
-            isSetback = isSetback,
-            isTouched = isTouched,
-            sourceType = orderSourceType)
         }
       }
+      catch { case Completed ⇒ }
+      if (orderSourceType == null) {
+        orderSourceType = OrderSourceType.AdHoc
+      }
+      new OrderXmlResolved(
+        isSuspended = isSuspended,
+        isBlacklisted = isBlacklisted,
+        isSetback = isSetback,
+        isTouched = isTouched,
+        sourceType = orderSourceType)
+    }
   }
 
   private def resolveDatabaseDistributedNextTime(distributedNextTime: Option[Instant]) =

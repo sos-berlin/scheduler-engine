@@ -57,27 +57,18 @@ final class DatabaseOrdersTest extends FreeSpec {
     "Speed test" - {
       val textSize = 4*1000*1000
       for ((lineCount, lineLength, iterations) ← Array(
-        (1, textSize, 100),
-        (textSize, 1, 100),
+        (1, textSize, 10000),
+        (textSize, 1, 10000),
         (1, 100, 10000)))
       {
         s"$lineCount lines with $lineLength characters each" in {
           val text = ("X" * (lineLength - 1) + "\n") * lineCount
           val orderXml =
-            <order suspended="true" setback="2016-10-04T11:22:33Z" touched="true" on_blacklist="true">
+            <order suspended="true" setback="2016-10-04T11:22:33Z" touched="true" on_blacklist="true" order_source_type="FileOrder">
               <file_based last_write_time="2016-10-04T11:22:33Z"/>
-              <params>
-                <param name="a" value="A"/>
-                <param name="b" value="B"/>
-                <param name="c" value="C"/>
-                <param name="d" value="D"/>
-                <param name="e" value="E"/>
-                <param name="f" value="F"/>
-                <param name="g" value="G"/>
-                <param name="h" value="H"/>
-                <param name="i" value="I"/>
-                <param name="j" value="J"/>
-              </params>
+              <params>{
+                for (i ← 1 to 10) yield <param name={s"NAME-$i"} value={s"VALUE-$i"}/>
+              }</params>
               <log>{text}</log>
             </order>.toString
           for (_ ← 1 to 5) Stopwatch.measureTime(iterations, s"XML(${lineCount}x$lineLength)") {

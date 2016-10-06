@@ -110,7 +110,7 @@ private[js1642] trait SpeedTests {
         }
 
         "OrderStatistics" in {
-          for (_ ← 1 to 10) {
+          for (_ ← 1 to 20) {
             val stopwatch = new Stopwatch
             val Snapshot(_, orderStatistics: OrderStatistics) = webSchedulerClient.orderStatistics(JobChainQuery.All) await TestTimeout
             logger.info("OrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
