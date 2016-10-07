@@ -37,7 +37,7 @@ class FailableSelector[Failable, Result](
       }
       val t = functionToFutureTimedCall[Unit](now + delay, functionWithToString(toString) {
         selected = Some(failable)
-        catchInFuture { callbacks.apply(failable).withThisStackTrace } onComplete {
+        catchInFuture { callbacks.apply(failable).appendCurrentStackTrace } onComplete {
           case Success(Success(result)) ⇒
             failables.clearFailure(failable)
             promise.success(failable → result)
@@ -57,7 +57,7 @@ class FailableSelector[Failable, Result](
       })
       callQueue.add(t)
       timedCall = t
-      for (throwable ← t.future.withThisStackTrace.failed) {
+      for (throwable ← t.future.appendCurrentStackTrace.failed) {
         val x = throwable match {
           case _: TimedCall.CancelledException ⇒ new CancelledException
           case _ ⇒ throwable

@@ -131,7 +131,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     private def start(after: EventId): Unit = {
-      (for (Snapshot(_, eventSnapshots) ← webSchedulerClient.events[Event](after).withThisStackTrace) yield {
+      (for (Snapshot(_, eventSnapshots) ← webSchedulerClient.events[Event](after).appendCurrentStackTrace) yield {
         this.webEvents ++= eventSnapshots filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
         if (!stopping) {
           start(after = eventSnapshots.last.eventId)

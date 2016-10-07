@@ -33,7 +33,7 @@ extends AutoCloseable {
         apiProcessConfiguration,
         agentUri = agent.address,
         Some(agent.httpHeartbeatTiming getOrElse HttpHeartbeatTiming.Default))
-      .withThisStackTrace
+      .appendCurrentStackTrace
       future map Success.apply recover {
         case e @ (_: spray.can.Http.ConnectionException | _: AskTimeoutException) ⇒
           warningCall.call(e)

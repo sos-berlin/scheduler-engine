@@ -3,11 +3,11 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.sos.scheduler.engine.agent.data.commands.RequestFileOrderSourceContent
+import com.sos.scheduler.engine.base.utils.StackTraces._
 import com.sos.scheduler.engine.client.agent.CppFileOrderSourceClient._
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.Tries._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.agent.AgentAddress
@@ -52,7 +52,7 @@ final class CppFileOrderSourceClient private(
         logger.debug(s"Closed, response is ignored")
       } else {
         val forCpp: Try[java.util.List[String]] = completion map { _.files map { _.path } }
-        try inSchedulerThread { resultCppCall.call(forCpp.withThisStackTrace) }
+        try inSchedulerThread { resultCppCall.call(forCpp.appendCurrentStackTrace) }
         catch {
           case t: CppProxyInvalidatedException ⇒ logger.trace(s"Ignored: $t")  // Okay if C++ object (Directory_file_order_source) has been closed
           case t: CallQueue.ClosedException ⇒ logger.trace(s"Ignored: $t")  // Okay if JobScheduler has been closed
