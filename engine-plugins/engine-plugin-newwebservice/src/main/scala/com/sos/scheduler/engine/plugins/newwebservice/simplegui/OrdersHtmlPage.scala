@@ -190,7 +190,7 @@ extends SchedulerHtmlPage {
     val rowCssClass = orderToTrClass(order) getOrElse (if (order.orderProcessingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := rowCssClass)(
       td(orderKeyToA(order.orderKey)(order.orderKey.id.string)),
-      td(div(cls := "visible-lg-block")(order.sourceType.toString)),
+      td(div(cls := "visible-lg-block")(order.orderSourceType.toString)),
       td(order.startedAt map instantWithDurationToHtml),
       td(processingStateHtml, occupyingMemberHtml),
       td(obstaclesHtml))

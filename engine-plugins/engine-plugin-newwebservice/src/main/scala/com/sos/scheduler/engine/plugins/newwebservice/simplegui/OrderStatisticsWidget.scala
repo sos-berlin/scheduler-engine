@@ -33,7 +33,7 @@ final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, t
         "planned" → q.copy(isOrderProcessingState = Some(Set(classOf[Planned]))),
         "due" → q.copy(isOrderProcessingState = Some(Set(classOf[Due])))),
       List(
-        "running" → q.copy(isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback]))),
+        "started" → q.copy(isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback]))),
         "inTask" → q.copy(isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember]))),
         "inProcess" → q.copy(isOrderProcessingState = Some(Set(classOf[InTaskProcess])))),
       List(

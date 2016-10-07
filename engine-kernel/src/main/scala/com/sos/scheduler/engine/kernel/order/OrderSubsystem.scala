@@ -239,7 +239,7 @@ FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobCh
       notPlanned = statisticsArray(1),
       planned = statisticsArray(2),
       due = statisticsArray(3),
-      running = statisticsArray(4),
+      started = statisticsArray(4),
       inTask = statisticsArray(5),
       inProcess = statisticsArray(6),
       setback = statisticsArray(7),

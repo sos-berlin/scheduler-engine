@@ -110,7 +110,7 @@ private[order] object DatabaseOrders {
     QueryableOrder.Standard(
       orderKey = row.orderKey,
       nodeId = row.nodeId,
-      sourceType = xmlResolved.sourceType,
+      orderSourceType = xmlResolved.sourceType,
       isSuspended = xmlResolved.isSetback,
       isSetback = xmlResolved.isSetback,
       isBlacklisted = xmlResolved.isBlacklisted,
@@ -231,11 +231,11 @@ private[order] object DatabaseOrders {
       due         = toInt(order.orderProcessingStateClass == classOf[Due]),
       inProcess   = toInt(order.orderProcessingStateClass == InTaskProcess.getClass),
       setback     = toInt(order.orderProcessingStateClass == classOf[Setback]),
-      running     = toInt(classOf[Started] isAssignableFrom order.orderProcessingStateClass),
+      started     = toInt(classOf[Started] isAssignableFrom order.orderProcessingStateClass),
       inTask      = toInt(classOf[InTask] isAssignableFrom order.orderProcessingStateClass),
       suspended   = toInt(order.isSuspended),
       blacklisted = toInt(order.isBlacklisted),
-      permanent   = toInt(order.sourceType == OrderSourceType.Permanent),
-      fileOrder   = toInt(order.sourceType == OrderSourceType.FileOrder))
+      permanent   = toInt(order.orderSourceType == OrderSourceType.Permanent),
+      fileOrder   = toInt(order.orderSourceType == OrderSourceType.FileOrder))
   }
 }

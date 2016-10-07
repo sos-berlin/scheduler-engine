@@ -72,7 +72,7 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
       }
     }
     inSchedulerThread {
-      for (_ ← 1 to m) measureTime(n, "sourceType") {
+      for (_ ← 1 to m) measureTime(n, "orderSourceType") {
         order.sourceType
       }
     }
@@ -118,7 +118,7 @@ private[engine] final class OrderTester @Inject private(orderSubsystem: OrderSub
       }
     }
     inSchedulerThread {
-      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).sourceType") {
+      for (_ ← 1 to m) measureTime(n, s"(${orders.size} Orders).orderSourceType") {
         for (o ← orders) o.sourceType
       }
     }

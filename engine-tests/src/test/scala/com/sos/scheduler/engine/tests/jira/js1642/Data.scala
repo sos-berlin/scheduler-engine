@@ -50,7 +50,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val a1OrderOverviewJson = s"""{
     "path": "/aJobChain,1",
     "fileBasedState": "active",
-    "sourceType": "Permanent",
+    "orderSourceType": "Permanent",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
@@ -74,7 +74,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val a2OrderOverviewJson = s"""{
     "path": "/aJobChain,2",
     "fileBasedState": "active",
-    "sourceType": "Permanent",
+    "orderSourceType": "Permanent",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
@@ -99,7 +99,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/aJobChain,ÅD-HÖC",
     "fileBasedState": "not_initialized",
     "nodeId": "100",
-    "sourceType": "AdHoc",
+    "orderSourceType": "AdHoc",
     "orderProcessingState" : {
       "TYPE": "Planned",
       "at": "2038-01-01T11:22:33Z"
@@ -125,7 +125,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/bJobChain,1",
     "fileBasedState": "active",
     "nodeId": "100",
-    "sourceType": "Permanent",
+    "orderSourceType": "Permanent",
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "5",
@@ -160,7 +160,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val xa1OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,1",
     "fileBasedState": "active",
-    "sourceType": "Permanent",
+    "orderSourceType": "Permanent",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -197,7 +197,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val xa2OrderOverviewJson = """{
     "path": "/xFolder/x-aJobChain,2",
     "fileBasedState": "active",
-    "sourceType": "Permanent",
+    "orderSourceType": "Permanent",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -232,7 +232,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val xb1OrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,1",
     "fileBasedState": "not_initialized",
-    "sourceType": "Permanent",
+    "orderSourceType": "Permanent",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -252,7 +252,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val xbAdHocDistributedOrderOverviewJson = """{
     "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
     "fileBasedState": "not_initialized",
-    "sourceType": "AdHoc",
+    "orderSourceType": "AdHoc",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",

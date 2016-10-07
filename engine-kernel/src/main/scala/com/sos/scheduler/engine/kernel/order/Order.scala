@@ -50,7 +50,7 @@ with OrderPersistence {
     private def flags = cppProxy.java_fast_flags
     def isSuspended = CppFastFlags.isSuspended(flags)
     def isSetback = CppFastFlags.isSetback(flags)
-    def sourceType = Order.this.sourceType
+    def orderSourceType = Order.this.sourceType
     def orderKey = Order.this.orderKey
     def isBlacklisted = CppFastFlags.isBlacklisted(flags)
     def orderProcessingStateClass = processingState(cppProxy.java_fast_flags, nextStepAtOption = nextStepAtOption).getClass
