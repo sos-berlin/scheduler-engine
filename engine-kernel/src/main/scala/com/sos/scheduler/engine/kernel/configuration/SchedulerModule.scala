@@ -166,6 +166,7 @@ with HasCloser {
   private def config(conf: SchedulerConfiguration)(implicit stcq: SchedulerThreadCallQueue): Config =
     inSchedulerThread {
       parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf")
+        .withFallback(parseConfigIfExists(conf.mainConfigurationDirectory / "master.conf"))
         .withFallback(SchedulerConfiguration.DefaultConfig)
     }
 
