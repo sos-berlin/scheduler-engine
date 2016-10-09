@@ -13,11 +13,5 @@ class WebServicesModule extends AbstractModule {
 
 object WebServicesModule {
   private val services = immutable.Seq(
-    classOf[CommandService],
-    classOf[EventsService],
-    classOf[FolderService],
-    classOf[JobService],
-    classOf[JobsService],
-    classOf[RootService],
-    classOf[TasksService])
+    classOf[CommandService])
 }
