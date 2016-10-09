@@ -7,7 +7,7 @@ import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
 import com.sos.scheduler.engine.common.async.StandardCallQueue
-import com.sos.scheduler.engine.common.configutils.Configs
+import com.sos.scheduler.engine.common.configutils.Configs.parseConfigIfExists
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -90,8 +90,8 @@ with HasCloser {
   }
 
   @Provides @Singleton
-  private def provideJdbcConnectionPool(o: DatabaseSubsystem, stcq: SchedulerThreadCallQueue): JdbcConnectionPool =
-    new JdbcConnectionPool(() ⇒ o.cppProperties).closeWithCloser
+  private def provideJdbcConnectionPool(config: Config, databaseSubsystem: DatabaseSubsystem, executionContext: ExecutionContext): JdbcConnectionPool =
+    new JdbcConnectionPool(config, () ⇒ databaseSubsystem.cppProperties)(executionContext).closeWithCloser
 
   @Provides @Singleton
   private def provideDirectSchedulerCollector(o: DirectSchedulerClient): DirectOrderClient = o
@@ -165,8 +165,8 @@ with HasCloser {
   @Provides @Singleton
   private def config(conf: SchedulerConfiguration)(implicit stcq: SchedulerThreadCallQueue): Config =
     inSchedulerThread {
-      Configs.parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf") withFallback
-        SchedulerConfiguration.DefaultConfig
+      parseConfigIfExists(conf.mainConfigurationDirectory / "private/private.conf")
+        .withFallback(SchedulerConfiguration.DefaultConfig)
     }
 
   @Provides @Singleton

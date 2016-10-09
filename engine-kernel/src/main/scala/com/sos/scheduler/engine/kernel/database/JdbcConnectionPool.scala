@@ -1,66 +1,73 @@
 package com.sos.scheduler.engine.kernel.database
 
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAny
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.concurrent.ThrottledExecutionContext
+import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.kernel.database.JdbcConnectionPool._
+import com.typesafe.config.Config
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import java.sql
-import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor}
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.Try
+import java.util.Properties
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future, blocking}
 
 /**
   * @author Joacim Zschimmer
   */
-final class JdbcConnectionPool(cppPropertiesLazy: () ⇒ CppDatabaseProperties)
+final class JdbcConnectionPool(config: Config, cppPropertiesLazy: () ⇒ CppDatabaseProperties)(implicit ec: ExecutionContext)
 extends HasCloser {
 
-  private lazy val (dataSource, sqlExecutionContext) = { // Create connection pool only when needed
-    val dataSource = closer.register(newConnectionPool(cppPropertiesLazy()))
-    val executorService = newThreadPoolExecutor(dataSource.getMaximumPoolSize) withCloser {
-      _.shutdownNow()
-    }
-    val sqlExecutionContext = ExecutionContext.fromExecutorService(executorService, t ⇒ logger.warn(s"Future died with $t", t))
-    (dataSource, sqlExecutionContext)
-  }
+  private lazy val dataSource  = closer.register(newConnectionPool(config, cppPropertiesLazy()))  // Create connection pool only when needed
+  // Good: Two implicits make ExecutionContext ambiguous, so we have to use it explicitly.
+  private implicit lazy val throttledExecutionContext: ExecutionContext = new ThrottledExecutionContext(dataSource.getMaximumPoolSize)(ec)
 
   def poolSize = dataSource.getMaximumPoolSize
 
-  def transactionFuture[A](body: sql.Connection ⇒ A): Future[A] = {
-    val promise = Promise[A]()
+  def readOnly[A](body: sql.Connection ⇒ A): Future[A] =
+    future { connection ⇒
+      connection.setReadOnly(true)
+      body(connection)
+    }
+
+  def future[A](body: sql.Connection ⇒ A): Future[A] =
     Future {
-      val connection = dataSource.getConnection
-      try promise complete Try { body(connection) }
-      finally connection.close()  // After promise completion
-    } (sqlExecutionContext)
-    promise.future
-  }
+      blocking {
+        val connection = dataSource.getConnection
+        try body(connection)
+        finally connection.close()  // After promise completion
+      }
+    } (throttledExecutionContext)
 }
 
 object JdbcConnectionPool {
-  private val logger = Logger(getClass)
-  private val ThreadKeepAlive = 10.s
-
-  private def newConnectionPool(cppProperties: CppDatabaseProperties): HikariDataSource = {
-    // System property "hikaricp.configurationFile" may designate a properties file with configuration defaults.
-    val config = new HikariConfig
-    config.setJdbcUrl(cppProperties.url)
-    for (o ← cppProperties.driverClassName) config.setDriverClassName(o)
-    for (o ← cppProperties.user) config.setUsername(o)
-    for (o ← cppProperties.password) config.setPassword(o.string)
-    config.setAutoCommit(false)
-    new HikariDataSource(config)
+  private def newConnectionPool(globalConfig: Config, cppProperties: CppDatabaseProperties): HikariDataSource = {
+    new HikariDataSource(toHikariConfig(globalConfig, cppProperties))
   }
 
-  private def newThreadPoolExecutor(threadLimit: Int) = {
-    val result = new ThreadPoolExecutor(  // Similar to Executors.newFixedThreadPool(threadLimit)
-      threadLimit,
-      threadLimit,
-      ThreadKeepAlive.toMillis, MILLISECONDS,  // Long.MAX_VALUE TimeUnit.NANOSECONDS effectively disables idle threads from ever terminating prior to shut down.
-      new LinkedBlockingQueue[Runnable])
-    result.allowCoreThreadTimeOut(true)
+  private def toHikariConfig(config: Config, cppProperties: CppDatabaseProperties): HikariConfig =
+    // Additionally, system property "hikaricp.configurationFile" may designate a properties file with configuration defaults.
+    new HikariConfig(keyValuesToProperties(
+      Map("autoCommit" → "false") ++
+      configToStringMap(config.getConfig("hikari")) ++
+      cppPropertiesToHikari(cppProperties)))
+
+  // Exception, if an entry is not convertible to a string
+  private def configToStringMap(config: Config): Map[String, String] =
+    (for (e ← config.entrySet) yield e.getKey → config.getString(e.getKey))
+    .toMap
+
+  private def cppPropertiesToHikari(cppProperties: CppDatabaseProperties): Map[String, String] = {
+    val result = mutable.Buffer[(String, String)]()
+    result += "jdbcUrl" → cppProperties.url
+    for (o ← cppProperties.driverClassName) result += "driverClassName" → o
+    for (o ← cppProperties.user)            result += "username" → o
+    for (o ← cppProperties.password)        result += "password" → o.string
+    result.toMap
+  }
+
+  private def keyValuesToProperties(map: TraversableOnce[(String, String)]): Properties = {
+    val result = new Properties()
+    for ((key, value) ← map) result.setProperty(key, value)
     result
   }
 }

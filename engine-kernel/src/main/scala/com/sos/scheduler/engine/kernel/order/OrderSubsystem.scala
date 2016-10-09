@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.order
 import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.PerKeyLimiter
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
@@ -106,7 +105,7 @@ extends FileBasedSubsystem {
     else {
       val parallelizeBelowOrderXmlSize = min(Int.MaxValue,
         config.getMemorySize("jobscheduler.master.parallelize-below-order-xml-size").toBytes).toInt
-      jdbcConnectionPool.transactionFuture { connection ⇒
+      jdbcConnectionPool.readOnly { connection ⇒
         DatabaseOrders.fetchDistributedOrderStatistics(
           connection,
           databaseOrders.queryToSql(query, conditionSql),
