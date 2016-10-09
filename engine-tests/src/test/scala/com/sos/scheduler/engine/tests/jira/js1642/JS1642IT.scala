@@ -38,7 +38,7 @@ import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils.jobChainOverview
-import com.sos.scheduler.engine.test.configuration.{DatabaseConfiguration, DefaultDatabaseConfiguration, HostwareDatabaseConfiguration, InMemoryDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, InMemoryDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import com.sos.scheduler.engine.tests.jira.js1642.JS1642IT._
@@ -71,8 +71,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       if (sys.props contains "test.mysql")
         HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=jobscheduler -password=jobscheduler jdbc:mysql://127.0.0.1/jobscheduler")
       else
-        DefaultDatabaseConfiguration()))
-        //InMemoryDatabaseConfiguration))
+        InMemoryDatabaseConfiguration))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private lazy val taskSubsystem = instance[TaskSubsystemClient]
   private lazy val eventCollector = instance[EventCollector]
@@ -340,7 +339,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   }
 
   "orderStatistics" - {
-    "/" in {
+    def testAllOrderStatistics() {
       val orderStatistics: OrderStatistics = fetchWebAndDirect {
         _.orderStatistics(JobChainQuery.All)
       }
@@ -357,6 +356,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         blacklisted = 0,
         permanent = 6,
         fileOrder = 0))
+    }
+
+    "/" in {
+      testAllOrderStatistics()
+    }
+
+    val parallelFactor = 1000
+    s"$parallelFactor simultaneously requests" in {
+      (for (_ ← 1 to parallelFactor) yield Future { testAllOrderStatistics() }) await TestTimeout
     }
 
     s"$xFolderPath" in {

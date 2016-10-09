@@ -23,7 +23,6 @@ import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import com.typesafe.config.Config
-import java.lang.Math.min
 import javax.inject.{Inject, Provider, Singleton}
 import javax.persistence.EntityManagerFactory
 import scala.collection.{immutable, mutable}
@@ -102,16 +101,10 @@ extends FileBasedSubsystem {
         toOrderStatistics { result ⇒
           cppProxy.add_distributed_to_order_statistics(conditionSql, result)
         })
-    else {
-      val parallelizeBelowOrderXmlSize = min(Int.MaxValue,
-        config.getMemorySize("jobscheduler.master.parallelize-below-order-xml-size").toBytes).toInt
+    else
       jdbcConnectionPool.readOnly { connection ⇒
-        DatabaseOrders.fetchDistributedOrderStatistics(
-          connection,
-          databaseOrders.queryToSql(query, conditionSql),
-          parallelizeBelowOrderXmlSize = parallelizeBelowOrderXmlSize )
+        DatabaseOrders.fetchDistributedOrderStatistics(connection, databaseOrders.queryToSql(query, conditionSql))
       }
-    }
 
   private def queryToNodeKeys(query: JobChainNodeQuery, jobChainPaths: TraversableOnce[JobChainPath]): TraversableOnce[NodeKey] =
     for (jobChainPath ← jobChainPaths;

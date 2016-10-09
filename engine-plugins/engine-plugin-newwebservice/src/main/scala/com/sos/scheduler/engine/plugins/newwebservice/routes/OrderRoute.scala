@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
-import com.sos.scheduler.engine.client.web.common.QueryHttp
 import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainNodeQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
