@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.database
 
-import com.sos.scheduler.engine.common.concurrent.ParallelizationCounter
+import com.sos.scheduler.engine.common.concurrent.ParallelismCounter
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
@@ -30,7 +30,7 @@ final class JdbcConnectionPoolTest extends FreeSpec {
       }
       aFuture await 30.s
       val n = 100
-      val count = new ParallelizationCounter
+      val count = new ParallelismCounter
       val futures = for (_ ← 1 to n) yield
         connectionPool.transactionFuture { connection ⇒
           count {
