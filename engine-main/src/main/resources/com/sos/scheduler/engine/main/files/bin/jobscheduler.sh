@@ -18,12 +18,12 @@ declare SCHEDULER_DATA
 
 declare -a javaOptions=()
 declare -a engineOptions=()
-tcpPort=4444
+httpPort=4444
 
 for arg in "$@"; do
     case $arg in
-        -tcp-port=*)
-            tcpPort="${arg#*=}"
+        -http-port=*)
+            httpPort="${arg#*=}"
             shift
             ;;
         *)
@@ -33,8 +33,8 @@ for arg in "$@"; do
     esac
 done
 
-if [ -n "$tcpPort" ]; then
-    engineOptions+=("-tcp-port=$tcpPort")
+if [ -n "$httpPort" ]; then
+    engineOptions+=("-http-port=$httpPort")
 fi
 
 declare jarDir

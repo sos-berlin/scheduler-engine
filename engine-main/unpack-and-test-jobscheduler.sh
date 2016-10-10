@@ -16,7 +16,7 @@ tar xzf "$engineMainDir"/target/engine-main-bin.tar.gz
 unset SOS_INI
 unset SCHEDULER_HOME
 export SCHEDULER_DATA='$SCHEDULER_HOME/data'  # Not substituted
-engine/bin/jobscheduler.sh -tcp-port= -cmd='<order job_chain="/test" id="TEST"/>' &
+engine/bin/jobscheduler.sh -http-port= -cmd='<order job_chain="/test" id="TEST"/>' &
 enginePid=$!
 (
     i=0

@@ -39,10 +39,11 @@ extends Plugin {
   override def onPrepare() = runWithSprayWebServer()
 
   private def runWithSprayWebServer(): Unit = {
-    val httpPort = schedulerConfiguration.httpPortOption getOrElse { throw new IllegalArgumentException("Missing -http-port=") }
-    val httpAddress = new InetSocketAddress("0.0.0.0", httpPort)
-    val webServer = new EngineWebServer(httpAddress, myInjector)
-    closer.registerAutoCloseable(webServer)
-    webServer.start() await 60.s
+    for (httpPort ← schedulerConfiguration.httpPortOption) {
+      val httpAddress = new InetSocketAddress("0.0.0.0", httpPort)
+      val webServer = new EngineWebServer(httpAddress, myInjector)
+      closer.registerAutoCloseable(webServer)
+      webServer.start() await 60.s
+    }
   }
 }
