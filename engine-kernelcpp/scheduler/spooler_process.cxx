@@ -326,7 +326,8 @@ struct Abstract_api_process : virtual Api_process, virtual Abstract_process {
 
 struct Dummy_process : Abstract_process {
     public: Dummy_process(Spooler* spooler, Prefix_log* log, const Api_process_configuration& conf) :
-        Abstract_process(spooler, log, conf) 
+        Abstract_process(spooler, log, conf),
+        _running_since(Time::now())
     {}
 
     public: bool async_continue() {
@@ -345,6 +346,12 @@ struct Dummy_process : Abstract_process {
         return time::never_double; 
     }
 
+    public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
+        xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
+        process_element.setAttribute("running_since", _running_since.xml_value());
+        return process_element;
+    }
+
     public: string obj_name() const {
         return short_name();
     }
@@ -352,6 +359,8 @@ struct Dummy_process : Abstract_process {
     public: string short_name() const {
         return "Dummy_process";
     }
+
+    private: const Time _running_since;
 };
 
 
