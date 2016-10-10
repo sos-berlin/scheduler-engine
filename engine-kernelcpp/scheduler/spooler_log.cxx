@@ -1090,7 +1090,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 
     string my_prefix = _task? _task->obj_name() : _prefix;
     if (_spooler && _spooler->_java_subsystem && _spooler->schedulerJ())
-        _spooler->schedulerJ().log(my_prefix, level, line_par);
+        _spooler->schedulerJ().log(my_prefix, level, line);
 
     {
         ptr<cache::Request> request = _spooler->_log_file_cache->request(this);
