@@ -714,7 +714,11 @@ void Prefix_log::close()
     if (_spooler && _spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
         _spooler->_log_file_cache->remove(this);
     close_file();
-    if (!_closed && typed_java_sister()) typed_java_sister().onClosed();
+    try {
+        if (!_closed && typed_java_sister()) typed_java_sister().onClosed();
+    } catch (const exception& x) {
+        Z_LOG2("scheduler", Z_FUNCTION << " " << x.what() << "\n");
+    }
     _log = NULL;
 
     if( _remove_after_close )
