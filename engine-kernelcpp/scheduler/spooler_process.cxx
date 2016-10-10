@@ -44,7 +44,7 @@ struct Abstract_process : virtual Process {
 
     public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what&) {
         xml::Element_ptr process_element = document.createElement( "process" );
-        process_element.setAttribute_optional("job", _configuration._job_name);
+        process_element.setAttribute_optional("job", _configuration._job_path);
         if (_configuration._task_id) {
             process_element.setAttribute("task", _configuration._task_id);
             process_element.setAttribute("task_id", _configuration._task_id);          // VERALTET!
@@ -400,8 +400,8 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         parameters.push_back(object_server::Parameter("param", "-java-options=" + _configuration._java_options + " " + spooler()->settings()->_job_java_options));
         parameters.push_back(object_server::Parameter("param", "-java-classpath=" + _configuration._java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_classpath));
         parameters.push_back(object_server::Parameter("param", "-O"));
-        if (!_configuration._job_name.empty())
-            parameters.push_back(object_server::Parameter("param", "-job=" + _configuration._job_name));
+        if (!_configuration._job_path.empty())
+            parameters.push_back(object_server::Parameter("param", "-job=" + _configuration._job_path));
         if (_configuration._task_id)
             parameters.push_back(object_server::Parameter("param", "-task-id=" + as_string(_configuration._task_id)));
         if (!log_filename().empty())
