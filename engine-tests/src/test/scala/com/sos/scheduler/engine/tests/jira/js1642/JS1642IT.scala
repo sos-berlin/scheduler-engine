@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedStat
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
@@ -442,10 +443,28 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
-  def fetchWebAndDirect[A](body: SchedulerClient ⇒ Future[Snapshot[A]]): A =
+  "processClass" - {
+    "processClassOverview" - {
+      "ProcessClassOverview All" in {
+        val processClassOverviews: immutable.Seq[ProcessClassOverview] = fetchWebAndDirect {
+          _.processClasses[ProcessClassOverview]
+        }
+        assert(processClassOverviews.toSet == Set(DefaultProcessClassOverview, TestProcessClassOverview))
+      }
+    }
+
+    "ProcessClassDetailed" in {
+      val processClassDetailed: ProcessClassDetailed = fetchWebAndDirect {
+        _.processClass[ProcessClassDetailed](TestProcessClassPath)
+      }
+      assert(processClassDetailed == TestProcessClassDetailed)
+    }
+  }
+
+  private def fetchWebAndDirect[A](body: SchedulerClient ⇒ Future[Snapshot[A]]): A =
     fetchWebAndDirectEqualized[A](body, identity)
 
-  def fetchWebAndDirectEqualized[A](body: SchedulerClient ⇒ Future[Snapshot[A]], equalize: A ⇒ A): A = {
+  private def fetchWebAndDirectEqualized[A](body: SchedulerClient ⇒ Future[Snapshot[A]], equalize: A ⇒ A): A = {
     val a: A = awaitContent(body(webSchedulerClient))
     assert(equalize(a) == equalize(awaitContent(body(directSchedulerClient))))
     a

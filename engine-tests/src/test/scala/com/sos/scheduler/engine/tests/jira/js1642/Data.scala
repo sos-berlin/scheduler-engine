@@ -7,11 +7,11 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeKey, NodeObstacle, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeObstacle, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import java.time.Instant
@@ -22,6 +22,24 @@ import spray.json._
   * @author Joacim Zschimmer
   */
 private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
+
+  val DefaultProcessClassOverview = ProcessClassOverview(
+    ProcessClassPath.Default,
+    FileBasedState.active,
+    processLimit = 30,
+    usedProcessCount = 0)
+
+  val TestProcessClassPath = ProcessClassPath("/test")
+  val TestProcessClassOverview = ProcessClassOverview(
+    TestProcessClassPath,
+    FileBasedState.active,
+    processLimit = 30,
+    usedProcessCount = 3)
+
+  val TestProcessClassDetailed = ProcessClassDetailed(
+    TestProcessClassOverview,
+    agents = Nil)
+
   val aJobChainOverview = JobChainOverview(aJobChainPath, FileBasedState.active)
   val bJobChainOverview = JobChainOverview(bJobChainPath, FileBasedState.active)
   val xaJobChainOverview = JobChainOverview(xaJobChainPath, FileBasedState.active,
@@ -44,7 +62,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.InTaskProcess(TaskId(3), ProcessClassPath.Default, since = taskIdToStartedAt(TaskId(3)), agentUri = None),
+    OrderProcessingState.InTaskProcess(TaskId(3), TestProcessClassPath, since = taskIdToStartedAt(TaskId(3)), agentUri = None),
     historyId = Some(OrderHistoryId(2)),
     nextStepAt = Some(EPOCH))
   private val a1OrderOverviewJson = s"""{
@@ -55,7 +73,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "3",
-      "processClassPath": "",
+      "processClassPath": "/test",
       "since": "${taskIdToStartedAt(TaskId(3))}"
     },
     "historyId": 2,
@@ -68,7 +86,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.InTaskProcess(TaskId(4), ProcessClassPath.Default, since = taskIdToStartedAt(TaskId(4)), agentUri = None),
+    OrderProcessingState.InTaskProcess(TaskId(4), TestProcessClassPath, since = taskIdToStartedAt(TaskId(4)), agentUri = None),
     historyId = Some(OrderHistoryId(3)),
     nextStepAt = Some(EPOCH))
   private val a2OrderOverviewJson = s"""{
@@ -79,7 +97,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "4",
-      "processClassPath": "",
+      "processClassPath": "/test",
       "since": "${taskIdToStartedAt(TaskId(4))}"
     },
     "historyId": 3,
@@ -117,7 +135,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     FileBasedState.active,
     OrderSourceType.Permanent,
     NodeId("100"),
-    OrderProcessingState.InTaskProcess(TaskId(5), ProcessClassPath.Default, since = taskIdToStartedAt(TaskId(5)), agentUri = None),
+    OrderProcessingState.InTaskProcess(TaskId(5), TestProcessClassPath, since = taskIdToStartedAt(TaskId(5)), agentUri = None),
     historyId = Some(OrderHistoryId(4)),
     nextStepAt = Some(EPOCH),
     obstacles = Set(OrderObstacle.FileBasedObstacles(Set(FileBasedObstacle.Replaced()))))
@@ -129,7 +147,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
       "taskId": "5",
-      "processClassPath": "",
+      "processClassPath": "/test",
       "since": "${taskIdToStartedAt(TaskId(5))}"
     },
     "historyId": 4,
@@ -282,8 +300,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val Xb100NodeOverview = SimpleJobNodeOverview(xbJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     XTestBJobPath, orderCount = 0, obstacles = Set(NodeObstacle.WaitingForJob))
 
-  val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
-    taskLimit = 10, usedTaskCount = 3, obstacles = Set())
+  val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = Some(TestProcessClassPath),
+    JobState.running, isInPeriod = true, taskLimit = 10, usedTaskCount = 3, obstacles = Set())
   val XTestBJobOverview = JobOverview(XTestBJobPath, FileBasedState.incomplete, defaultProcessClassPath = Some(ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS")),
     JobState.loaded, isInPeriod = false,
     taskLimit = 1, usedTaskCount = 0,
@@ -312,11 +330,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       XTestJobOverview,
       XTestBJobOverview),
     Vector(
-      TaskOverview(TaskId(3), TestJobPath, TaskState.running, Some(ProcessClassPath.Default)),
-      TaskOverview(TaskId(4), TestJobPath, TaskState.running, Some(ProcessClassPath.Default)),
-      TaskOverview(TaskId(5), TestJobPath, TaskState.running, Some(ProcessClassPath.Default))),
+      TaskOverview(TaskId(3), TestJobPath, TaskState.running, Some(TestProcessClassPath)),
+      TaskOverview(TaskId(4), TestJobPath, TaskState.running, Some(TestProcessClassPath)),
+      TaskOverview(TaskId(5), TestJobPath, TaskState.running, Some(TestProcessClassPath))),
     Vector(
-      ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
+      TestProcessClassOverview)
   )
 
   val ExpectedSuspendedOrdersComplemented = ExpectedOrdersComplemented.copy(
@@ -325,7 +343,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     usedTasks = Nil,
     usedJobs = Vector(
       XTestJobOverview),
-    usedProcessClasses = Nil,
+    usedProcessClasses = Vector(
+      TestProcessClassOverview),
     usedNodes = Vector(
       A100NodeOverview,
       Xa100NodeOverview))
@@ -486,6 +505,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "taskLimit": 10,
       "state": "running",
       "isInPeriod": true,
+      "defaultProcessClassPath": "/test",
       "usedTaskCount": 3,
       "obstacles": []
     },
@@ -524,27 +544,27 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "taskId": "3",
       "jobPath": "/test",
       "state": "running",
-      "processClassPath": "",
+      "processClassPath": "/test",
       "obstacles": []
     },
     {
       "taskId": "4",
       "jobPath": "/test",
       "state": "running",
-      "processClassPath": "",
+      "processClassPath": "/test",
       "obstacles": []
     },
     {
       "taskId": "5",
       "jobPath": "/test",
       "state": "running",
-      "processClassPath": "",
+      "processClassPath": "/test",
       "obstacles": []
     }
   ]"""
   val UsedProcessClassesJson = """[
     {
-      "path": "",
+      "path": "/test",
       "fileBasedState": "active",
       "processLimit": 30,
       "usedProcessCount": 3,

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import scala.language.reflectiveCalls
 import spray.http.Uri
@@ -131,24 +131,17 @@ final class SchedulerUris private(schedulerUriString: String) {
   }
 
   object processClass {
-    def overviews(): String = uriString(Uri.Path(s"api/processClass/"))
-//    def overviews(query: ProcessClassQuery = ProcessClassQuery.All): String = {
+    def view[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): String = {
+      val subpath = PathQueryHttp.toUriPath(PathQuery(processClassPath))
+      uriString(Uri.Path(s"api/processClass$subpath"), "return" → implicitly[ProcessClassView.Companion[V]].name)
+    }
+
+    def views[V <: ProcessClassView: ProcessClassView.Companion](): String =
+      uriString(Uri.Path(s"api/processClass/"), "return" → implicitly[ProcessClassView.Companion[V]].name)
 //      val subpath = ProcessClassQueryHttp.toUriPath(query)
-//      require(subpath endsWith "/", "ProcessClassQuery must denote folder, terminated by a slash")
+//      require(!subpath.endsWith("/"), "Invalid ProcessClassPath has trailing slash")
 //      uriString(Uri(path = Uri.Path(s"api/processClass$subpath")))  // Default with trailing slash: query = Uri.Query("return" → "ProcessClassOverview")))
 //    }
-
-    def overview(processClassPath: ProcessClassPath): String = {
-      val subpath = PathQueryHttp.toUriPath(PathQuery(processClassPath))
-      require(!subpath.endsWith("/"), "Invalid ProcessClassPath has trailing slash")
-      uriString(Uri.Path(s"api/processClass$subpath"), "return" → "ProcessClassOverview")
-    }
-
-    def details(processClassPath: ProcessClassPath): String = {
-      val subpath = PathQueryHttp.toUriPath(PathQuery(processClassPath))
-      require(!subpath.endsWith("/"), "Invalid ProcessClassPath has trailing slash")
-      uriString(Uri.Path(s"api/processClass$subpath"))  // Default without trailing slash: query = Uri.Query("return" → "ProcessClassDetailed")))
-    }
   }
 
   object task {

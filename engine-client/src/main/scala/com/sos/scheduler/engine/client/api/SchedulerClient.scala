@@ -4,7 +4,9 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView
+import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import scala.collection.immutable
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.reflect.ClassTag
@@ -28,11 +30,12 @@ with ProcessClassClient {
 //  def jobOverviews: Future[Snapshot[Seq[JobOverview]]]
 //
 //  def jobOverview(jobPath: JobPath): Future[Snapshot[JobOverview]]
-//
-//  def processClassOverviews: Future[Snapshot[Seq[ProcessClassOverview]]]
-//
-//  def processClassOverview(processClassPath: ProcessClassPath): Future[Snapshot[ProcessClassOverview]]
-//
+
+
+  def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]]
+
+  def processClasses[V <: ProcessClassView: ProcessClassView.Companion]: Future[Snapshot[immutable.Seq[V]]]
+
 //  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]]
 
   def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]]

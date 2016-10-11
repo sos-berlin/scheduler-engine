@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -93,7 +93,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       nodeOverviews,
       (jobs map { _.overview }).sorted,
       (tasks map { _.overview }).sorted,
-      (processClasses map { _.overview }).sorted)
+      (processClasses map { _.view[ProcessClassOverview] }).sorted)
   }
 
   def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
@@ -133,24 +133,19 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       jobSubsystem.job(jobPath).overview
     }
 
-//  def processClassDetaileds: Future[Snapshot[Vector[ProcessClassDetailed]]] =
-//    respondWith {
-//      processClassSubsystem.fileBaseds map { _.detailed }
-//    }
-
-//  def processClassDetailed(processClassPath: ProcessClassPath): Future[Snapshot[ProcessClassDetailed]] =
-//    respondWith {
-//      processClassSubsystem.processClass(processClassPath).detailed
-//    }
-
-  def processClassOverviews: Future[Snapshot[Vector[ProcessClassOverview]]] =
+  def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =
     respondWithSnapshotFuture {
-      processClassSubsystem.fileBaseds map { _.overview }
+      processClassSubsystem.fileBased(processClassPath).view[V]
     }
 
-  def processClassOverview(processClassPath: ProcessClassPath): Future[Snapshot[ProcessClassOverview]] =
+  def processClasses[V <: ProcessClassView: ProcessClassView.Companion]: Future[Snapshot[immutable.Seq[V]]] =
     respondWithSnapshotFuture {
-      processClassSubsystem.processClass(processClassPath).overview
+      processClassSubsystem.fileBaseds map { _.view[V] }
+    }
+
+  def processClassView[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =
+    respondWithSnapshotFuture {
+      processClassSubsystem.processClass(processClassPath).view[V]
     }
 
   def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]] =

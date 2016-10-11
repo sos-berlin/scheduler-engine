@@ -79,9 +79,7 @@ with TaskRoute {
       }
     } ~
     pathPrefix("processClass") {
-      testSlash(webServiceContext) {
-        processClassRoute
-      }
+      processClassRoute
     } ~
     pathPrefix("task") {
       testSlash(webServiceContext) {

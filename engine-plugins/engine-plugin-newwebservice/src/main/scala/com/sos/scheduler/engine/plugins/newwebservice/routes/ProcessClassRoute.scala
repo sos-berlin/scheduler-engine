@@ -2,13 +2,15 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.web.common.PathQueryHttp.directives.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.common.WebError
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent._
+import spray.http.StatusCodes.BadRequest
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
@@ -26,23 +28,27 @@ trait ProcessClassRoute {
     get {
       parameterMap { parameterMap ⇒
         val returnType = parameterMap.get("return")
-        pathQuery(ProcessClassPath) {
-          case single: PathQuery.SinglePath ⇒ singleProcessClassRoute(single.as[ProcessClassPath], returnType)
-          case query ⇒ multipleProcessClasssRoute(/*ProcessClassQuery.Standard(query), */returnType)
+        testSlash(webServiceContext) {
+          pathQuery(ProcessClassPath) {
+            case single: PathQuery.SinglePath ⇒ singleProcessClassRoute(single.as[ProcessClassPath], returnType)
+            case PathQuery.All ⇒ multipleProcessClassRoute(returnType)
+            case query ⇒ complete(BadRequest → WebError("PathQuery is not yet suppported")) // multipleProcessClassRoute(/*ProcessClassQuery.Standard(query), */returnType)
+          }
         }
       }
     }
 
   private def singleProcessClassRoute(processClassPath: ProcessClassPath, returnType: Option[String]): Route =
     returnType match {
-      case Some("ProcessClassOverview") | None ⇒ completeTryHtml(client.processClassOverview(processClassPath))
-    //case Some("ProcessClassDetailed") | None ⇒ completeTryHtml(client.processClassDetails(processClassPath))
+      case Some("ProcessClassOverview")        ⇒ completeTryHtml(client.processClassView[ProcessClassOverview](processClassPath))
+      case Some("ProcessClassDetailed") | None ⇒ completeTryHtml(client.processClassView[ProcessClassDetailed](processClassPath))
       case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
     }
 
-  private def multipleProcessClasssRoute(/*query: ProcessClassQuery, */returnType: Option[String]): Route =
+  private def multipleProcessClassRoute(/*query: ProcessClassQuery, */returnType: Option[String]): Route =
     returnType match {
-      case Some("ProcessClassOverview") | None ⇒ completeTryHtml(client.processClassOverviews)
+      case Some("ProcessClassOverview") | None ⇒ completeTryHtml(client.processClasses[ProcessClassOverview])
+      case Some("ProcessClassDetailed")        ⇒ completeTryHtml(client.processClasses[ProcessClassDetailed])
       case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
     }
 }

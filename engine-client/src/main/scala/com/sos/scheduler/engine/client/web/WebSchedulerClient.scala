@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView, Orders}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scala.collection.immutable
@@ -95,15 +96,23 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainOverview]]] =
     query.pathQuery match {
       case single: PathQuery.SinglePath ⇒
-        for (schedulerResponse ← get[Snapshot[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath])))
-             yield for (o ← schedulerResponse)
-          yield Vector(o) // Web service return a single object (not an array), if path denotes a single job chain path
+        for (schedulerResponse ← get[Snapshot[JobChainOverview]](_.jobChain.overview(single.as[JobChainPath]))) yield
+          for (o ← schedulerResponse) yield
+            Vector(o) // Web service returns a single object (not an array), if path designate a single job chain path
       case _ ⇒
         get[Snapshot[immutable.Seq[JobChainOverview]]](_.jobChain.overviews(query))
     }
 
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.details(jobChainPath))
+
+  // ProcessClass
+
+  final def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath) =
+    get[Snapshot[V]](_.processClass.view[V](processClassPath))
+
+  final def processClasses[V <: ProcessClassView: ProcessClassView.Companion] =
+    get[Snapshot[immutable.Seq[V]]](_.processClass.views[V])
 
   // Agent
 

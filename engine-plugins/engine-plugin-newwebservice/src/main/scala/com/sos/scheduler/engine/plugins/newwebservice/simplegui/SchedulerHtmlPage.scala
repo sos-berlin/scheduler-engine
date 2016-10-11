@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.processclass.ProcessClassOverview
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
@@ -112,7 +113,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
       navBarTab("Job chains"     , uris.jobChain.overviews()),
       navBarTab("Jobs"           , uris.job.overviews()),
-      navBarTab("Process classes", uris.processClass.overviews()),
+      navBarTab("Process classes", uris.processClass.views[ProcessClassOverview]),
       navBarTab("Events"         , uris.events(limit = 1000, reverse = true)))
 
   private def uncollapseButton: Frag =

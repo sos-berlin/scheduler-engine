@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassObstacle, ProcessClassOverview, ProcessClassPath}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassObstacle, ProcessClassOverview, ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -99,17 +99,23 @@ extends FileBased {
     finally clients -= client
   }
 
-//  private[kernel] def detailed = ProcessClassDetailed(
-//    overview,
-//    _config.agents map { _.address })
-
   private[kernel] def agentUris: immutable.Seq[AgentAddress] =
     _config.agents map { _.address }
 
   private[kernel] def containsAgentUri(agentUri: AgentAddress) =
     _config.agents exists { _.address == agentUri }
 
-  private[kernel] def overview = ProcessClassOverview(
+  private[kernel] def view[V <: ProcessClassView: ProcessClassView.Companion]: V =
+    implicitly[ProcessClassView.Companion[V]] match {
+      case ProcessClassOverview ⇒ overview.asInstanceOf[V]
+      case ProcessClassDetailed ⇒ detailed.asInstanceOf[V]
+    }
+
+  private def detailed = ProcessClassDetailed(
+    overview,
+    _config.agents map { _.address })
+
+  private def overview = ProcessClassOverview(
     path,
     fileBasedState,
     processLimit = processLimit,
