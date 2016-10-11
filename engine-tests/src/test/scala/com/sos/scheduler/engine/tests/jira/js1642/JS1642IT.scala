@@ -10,22 +10,17 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, KeyedEvent, Snapshot}
-import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedDetailed, FileBasedEvent, FileBasedState, TypedPath, UnknownTypedPath}
+import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedState}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SchedulerState}
@@ -92,6 +87,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "DirectSchedulerClient" → { () ⇒ directSchedulerClient },
     "WebSchedulerClient" → { () ⇒ webSchedulerClient })
 
+  private lazy val eventReader = new EventReader(webSchedulerClient, eventCollector, controller).closeWithCloser
+
+  private lazy val data = new Data(
+    taskIdToStartedAt = (for (taskId ← 3 to 5 map TaskId.apply) yield taskId → taskSubsystem.task(taskId).processStartedAt.get).toMap)
+  import data._
+
   override protected def onSchedulerActivated() = {
     super.onSchedulerActivated()
     eventReader.start()
@@ -101,66 +102,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     startOrderProcessing()
     testEnvironment.fileFromPath(b1OrderKey).append(" ")
     instance[FolderSubsystemClient].updateFolders()   // Replacement is pending
-  }
-
-  override def afterAll() = {
-    eventReader.stop()
-    super.afterAll()
-  }
-
-  private object eventReader {
-    val directEvents = mutable.Buffer[AnyKeyedEvent]()
-    val webEvents = mutable.Buffer[AnyKeyedEvent]()
-    private var stopping = false
-    private var activatedEventId = EventId.BeforeFirst
-
-    def start(): Unit = {
-      activatedEventId = eventCollector.lastEventId  // Web events before Scheduler activation are ignored
-      eventBus.onHot[Event] {
-        case event if SchedulerAnyKeyedEventJsonFormat canSerialize event ⇒
-          if (isPermitted(event)) {
-            directEvents += event
-          }
-      }
-      start(EventId.BeforeFirst)
-    }
-
-    def stop(): Unit = {
-      stopping = true
-    }
-
-    private def start(after: EventId): Unit = {
-      (for (Snapshot(_, eventSnapshots) ← webSchedulerClient.events[Event](after).appendCurrentStackTrace) yield {
-        this.webEvents ++= eventSnapshots filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
-        if (!stopping) {
-          start(after = eventSnapshots.last.eventId)
-        }
-      })
-      .failed foreach { throwable ⇒
-        if (!stopping) {
-          logger.error(s"webSchedulerClient.events: $throwable", throwable)
-          controller.terminateAfterException(throwable)
-        }
-      }
-    }
-
-    private def isPermitted(event: AnyKeyedEvent) =
-      event match {
-        case KeyedEvent(_, FileBasedActivated) ⇒ this.webEvents.nonEmpty   // directEvents miss activation events at start
-        case KeyedEvent(_, e: Logged) ⇒ false
-        case _ ⇒ true
-      }
-
-    def check() = {
-      assert(directEvents.nonEmpty)
-      waitForCondition(5.s, 100.ms) { webEvents.size == directEvents.size }
-      assert(webEvents == directEvents)
-      val untypedPathDirectEvents = directEvents map {
-        case KeyedEvent(key: TypedPath, e: FileBasedEvent) ⇒ KeyedEvent(e)(key.asTyped[UnknownTypedPath])  // Trait TypedPath is not properly deserializable
-        case o ⇒ o
-      }
-      assert(webEvents == untypedPathDirectEvents)
-    }
   }
 
   private def startOrderProcessing() = {
@@ -174,10 +115,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
-  lazy val data = new Data(
-    taskIdToStartedAt = (for (taskId ← 3 to 5 map TaskId.apply) yield taskId → taskSubsystem.task(taskId).processStartedAt.get).toMap)
-  import data._
-
   "overview" in {
     val overview = fetchWebAndDirectEqualized[SchedulerOverview](
       _.overview,
@@ -186,7 +123,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     assert(overview.state == SchedulerState.running)
   }
 
-  "FileBasedDetailed" in {
+  "fileBasedDetailed" in {
     val fileBasedDetailed = fetchWebAndDirectEqualized[FileBasedDetailed](
       _.fileBasedDetailed(a1OrderKey),
       _.copy(sourceXml = None))
@@ -195,147 +132,162 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     assert(fileBasedDetailed.fileModifiedAt.isDefined)
   }
 
-  "orders[OrderOverview]" in {
-    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
-      _.orders[OrderOverview]
+  "order" - {
+    "orders[OrderOverview]" in {
+      val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+        _.orders[OrderOverview]
+      }
+      assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews)
     }
-    assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews)
-  }
 
-  "ordersComplemented" in {
-    val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
-      _.ordersComplemented[OrderOverview]
+    "ordersComplemented" in {
+      val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
+        _.ordersComplemented[OrderOverview]
+      }
+      assert(ordersComplemented.copy(orders = ordersComplemented.orders map normalizeOrderOverview) ==
+        ExpectedOrdersComplemented)
     }
-    assert(ordersComplemented.copy(orders = ordersComplemented.orders map normalizeOrderOverview) ==
-      ExpectedOrdersComplemented)
-  }
 
-  "orderTreeComplemented" in {
-    val treeOverview: OrderTreeComplemented[OrderOverview] = fetchWebAndDirect {
-      _.orderTreeComplementedBy[OrderOverview](OrderQuery.All)
+    "orderTreeComplemented" in {
+      val treeOverview: OrderTreeComplemented[OrderOverview] = fetchWebAndDirect {
+        _.orderTreeComplementedBy[OrderOverview](OrderQuery.All)
+      }
+      assert(treeOverview.copy(orderTree = treeOverview.orderTree mapLeafs normalizeOrderOverview) ==
+        ExpectedOrderTreeComplemented)
     }
-    assert(treeOverview.copy(orderTree = treeOverview.orderTree mapLeafs normalizeOrderOverview) ==
-      ExpectedOrderTreeComplemented)
-  }
 
-  "ordersComplementedBy isSuspended" in {
-    val orderQuery = OrderQuery(isSuspended = Some(true))
-    val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
-      _.ordersComplementedBy[OrderOverview](orderQuery)
+    "ordersComplementedBy isSuspended" in {
+      val orderQuery = OrderQuery(isSuspended = Some(true))
+      val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
+        _.ordersComplementedBy[OrderOverview](orderQuery)
+      }
+      assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
     }
-    assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
-  }
 
-  "ordersComplementedBy query /aJobChain" in {
-    val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain")))
-    val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
-      _.ordersComplementedBy[OrderOverview](query)
-    }
-    assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
-  }
-
-  "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
-    val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain/")))
-    intercept[RuntimeException] {
-      fetchWebAndDirect {
+    "ordersComplementedBy query /aJobChain" in {
+      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain")))
+      val ordersComplemented: OrdersComplemented[OrderOverview] = fetchWebAndDirect {
         _.ordersComplementedBy[OrderOverview](query)
       }
-    } .getMessage should include ("SCHEDULER-161")
-  }
-
-  "ordersComplementedBy query /xFolder/" in {
-    val orderQuery = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder/")))
-    val ordersComplemented = fetchWebAndDirect[OrdersComplemented[OrderOverview]] {
-      _.ordersComplementedBy[OrderOverview](orderQuery)
+      assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey))
     }
-    assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
-  }
 
-  "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
-    val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder")))
-    intercept[RuntimeException] {
-      fetchWebAndDirect {
-        _.ordersComplementedBy[OrderOverview](query)
+    "ordersComplementedBy query /aJobChain/ throws SCHEDULER-161" in {
+      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/aJobChain/")))
+      intercept[RuntimeException] {
+        fetchWebAndDirect {
+          _.ordersComplementedBy[OrderOverview](query)
+        }
+      } .getMessage should include ("SCHEDULER-161")
+    }
+
+    "ordersComplementedBy query /xFolder/" in {
+      val orderQuery = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder/")))
+      val ordersComplemented = fetchWebAndDirect[OrdersComplemented[OrderOverview]] {
+        _.ordersComplementedBy[OrderOverview](orderQuery)
       }
-    } .getMessage should include ("SCHEDULER-161")
-  }
-
-  "orders query OrderId" in {
-    val orderQuery = OrderQuery(orderIds = Some(Set(OneOrderId)))
-    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
-      _.ordersBy[OrderOverview](orderQuery)
+      assert((ordersComplemented.orders map { _.orderKey }).toSet == Set(xa1OrderKey, xa2OrderKey, xb1OrderKey, xbAdHocDistributedOrderKey))
     }
-    assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey))
-  }
 
-  "orders single non-existent, non-distributed OrderKey throws exception" in {
-    assert(!jobChainOverview(aJobChainPath).isDistributed)
-    checkUnknownOrderKeyException(aJobChainPath orderKey "UNKNOWN")
-  }
-
-  "orders single non-existent, distributed OrderKey throws exception" in {
-    assert(jobChainOverview(xbJobChainPath).isDistributed)
-    checkUnknownOrderKeyException(xbJobChainPath orderKey "UNKNOWN")
-  }
-
-  "orders query JobPath" in {
-    val orderQuery = OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(TestJobPath))))
-    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
-      _.ordersBy[OrderOverview](orderQuery)
+    "ordersComplementedBy query /xFolder throws SCHEDULER-161" in {
+      val query = OrderQuery(JobChainQuery(PathQuery[JobChainPath]("/xFolder")))
+      intercept[RuntimeException] {
+        fetchWebAndDirect {
+          _.ordersComplementedBy[OrderOverview](query)
+        }
+      } .getMessage should include ("SCHEDULER-161")
     }
-    assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey))
-  }
 
-  "orders query JobPath of non-existent job, distributed" in {
-    val orderQuery = OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(XTestBJobPath))))
-    val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
-      _.ordersBy[OrderOverview](orderQuery)
-    }
-    assert((orders map { _.orderKey }).toSet == Set(xb1OrderKey, xbAdHocDistributedOrderKey))
-  }
-
-  def checkUnknownOrderKeyException(orderKey: OrderKey): Unit = {
-    val orderQuery = OrderQuery().withOrderKey(orderKey)
-    intercept[RuntimeException] {
-      fetchWebAndDirect {
+    "orders query OrderId" in {
+      val orderQuery = OrderQuery(orderIds = Some(Set(OneOrderId)))
+      val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
         _.ordersBy[OrderOverview](orderQuery)
       }
-    } .getMessage should include ("SCHEDULER-161")
-  }
-
-  "jobChainOverview All" in {
-    val jobChainOverviews: immutable.Seq[JobChainOverview] = fetchWebAndDirect {
-      _.jobChainOverviewsBy(JobChainQuery.All)
+      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey))
     }
-    assert(jobChainOverviews.toSet == Set(
-      JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
-      JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
-      xaJobChainOverview,
-      xbJobChainOverview))
-  }
 
-  "jobChainOverview query" in {
-    val query = JobChainQuery(PathQuery[JobChainPath]("/xFolder/"))
-    val jobChainOverviews: immutable.Seq[JobChainOverview] = fetchWebAndDirect {
-      _.jobChainOverviewsBy(query)
+    "orders single non-existent, non-distributed OrderKey throws exception" in {
+      assert(!jobChainOverview(aJobChainPath).isDistributed)
+      checkUnknownOrderKeyException(aJobChainPath orderKey "UNKNOWN")
     }
-    assert(jobChainOverviews.toSet == Set(
-      xaJobChainOverview,
-      xbJobChainOverview))
-  }
 
-  "jobChainDetailed" in {
-    val jobChainDetailed: JobChainDetailed = fetchWebAndDirect {
-      _.jobChainDetailed(xaJobChainPath)
+    "orders single non-existent, distributed OrderKey throws exception" in {
+      assert(jobChainOverview(xbJobChainPath).isDistributed)
+      checkUnknownOrderKeyException(xbJobChainPath orderKey "UNKNOWN")
     }
-    assert(jobChainDetailed ==
-      JobChainDetailed(
-        xaJobChainOverview,
-        List(
-          Xa100NodeOverview,
-          EndNodeOverview(
-            xaJobChainPath,
-            NodeId("END")))))
+
+    "orders query JobPath" in {
+      val orderQuery = OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(TestJobPath))))
+      val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+        _.ordersBy[OrderOverview](orderQuery)
+      }
+      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey))
+    }
+
+    "orders query JobPath of non-existent job, distributed" in {
+      val orderQuery = OrderQuery(JobChainNodeQuery(jobPaths = Some(Set(XTestBJobPath))))
+      val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+        _.ordersBy[OrderOverview](orderQuery)
+      }
+      assert((orders map { _.orderKey }).toSet == Set(xb1OrderKey, xbAdHocDistributedOrderKey))
+    }
+
+    def checkUnknownOrderKeyException(orderKey: OrderKey): Unit = {
+      val orderQuery = OrderQuery().withOrderKey(orderKey)
+      intercept[RuntimeException] {
+        fetchWebAndDirect {
+          _.ordersBy[OrderOverview](orderQuery)
+        }
+      } .getMessage should include ("SCHEDULER-161")
+    }
+
+    "getOrdersComplementedBy with GET" - {
+      "getOrdersComplementedBy isSuspended" in {
+        val orderQuery = OrderQuery(isSuspended = Some(true))
+        val ordersComplemented = awaitContent(webSchedulerClient.getOrdersComplementedBy[OrderOverview](orderQuery))
+        assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
+        assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
+      }
+    }
+
+    "JSON" - {
+      "overview" in {
+        val overviewString = webSchedulerClient.get[String](_.overview) await TestTimeout
+        testRegexJson(
+          json = overviewString,
+          patternMap = Map(
+            "eventId" → AnyLong,
+            "version" → """\d+\..+""".r,
+            "version" → """.+""".r,
+            "startedAt" → AnyIsoTimestamp,
+            "schedulerId" → "test",
+            "httpPort" → httpPort,
+            "pid" → AnyInt,
+            "state" → "running",
+            "system" → AnyRef,
+            "java" → AnyRef))
+      }
+
+      "orderOverviews" in {
+        val snapshot = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
+        assert((snapshot("orders").asJsArray map normalizeOrderOverviewJson) == ExpectedOrderOverviewsJsArray)
+      }
+
+      "ordersComplemented" in {
+        val ordersComplemented = webSchedulerClient.get[JsObject](_.order.complemented[OrderOverview]()) await TestTimeout
+        val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Snapshot.EventIdJsonName) ++ Map(
+          "orders" → (ordersComplemented("orders").asJsArray map normalizeOrderOverviewJson),
+          "usedTasks" → ordersComplemented("usedTasks").asJsArray,
+          "usedJobs" → ordersComplemented("usedJobs").asJsArray))
+        assert(orderedOrdersComplemented == ExpectedOrdersOrdersComplementedJsObject)
+      }
+
+      "orderTreeComplemented" in {
+        val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented[OrderOverview]) await TestTimeout
+        val normalized = JsObject(tree.fields - Snapshot.EventIdJsonName) deepMapJsObjects normalizeOrderOverviewJson
+        assert(normalized == ExpectedOrderTreeComplementedJsObject)
+      }
+    }
   }
 
   "orderStatistics" - {
@@ -451,6 +403,45 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
+  "jobChain" - {
+    "jobChainOverview" - {
+      "JobChainOverview All" in {
+        val jobChainOverviews: immutable.Seq[JobChainOverview] = fetchWebAndDirect {
+          _.jobChainOverviewsBy(JobChainQuery.All)
+        }
+        assert(jobChainOverviews.toSet == Set(
+          JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
+          JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
+          xaJobChainOverview,
+          xbJobChainOverview))
+      }
+
+      "JobChainOverview query" in {
+        val query = JobChainQuery(PathQuery[JobChainPath]("/xFolder/"))
+        val jobChainOverviews: immutable.Seq[JobChainOverview] = fetchWebAndDirect {
+          _.jobChainOverviewsBy(query)
+        }
+        assert(jobChainOverviews.toSet == Set(
+          xaJobChainOverview,
+          xbJobChainOverview))
+      }
+    }
+
+    "JobChainDetailed" in {
+      val jobChainDetailed: JobChainDetailed = fetchWebAndDirect {
+        _.jobChainDetailed(xaJobChainPath)
+      }
+      assert(jobChainDetailed ==
+        JobChainDetailed(
+          xaJobChainOverview,
+          List(
+            Xa100NodeOverview,
+            EndNodeOverview(
+              xaJobChainPath,
+              NodeId("END")))))
+    }
+  }
+
   def fetchWebAndDirect[A](body: SchedulerClient ⇒ Future[Snapshot[A]]): A =
     fetchWebAndDirectEqualized[A](body, identity)
 
@@ -460,129 +451,83 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     a
   }
 
-  for ((testGroup, getClient) ← setting) testGroup - {
-    lazy val client = getClient()
+  "XML commands" - {
+    for ((testGroup, getClient) ← setting) testGroup - {
+      lazy val client = getClient()
 
-    "command" - {
-      "<show_state> as xml.Elem" in {
-        testValidExecute {
-          client.execute(<show_state/>)
-        }
-        testThrowingExecute {
-          client.execute(<UNKNOWN/>)
-        }
-        testValidExecute {
-          client.uncheckedExecute(<show_state/>)
-        }
-        testUncheckedExecute {
-          client.uncheckedExecute(<UNKNOWN/>)
-        }
-      }
-
-      "<show_state> as String" in {
-        testValidExecute {
-          client.executeXml("<show_state/>")
-        }
-        testValidExecute {
-          client.uncheckedExecuteXml("<show_state/>")
-        }
-        testThrowingExecute {
-          client.executeXml("<UNKNOWN/>")
-        }
-        testUncheckedExecute {
-          client.uncheckedExecuteXml("<UNKNOWN/>")
-        }
-      }
-
-      "<show_state> as ByteString" in {
-        testValidExecute {
-          client.executeXml(ByteString("<show_state/>"))
-        }
-        testValidExecute {
-          client.uncheckedExecuteXml(ByteString("<show_state/>"))
-        }
-        testThrowingExecute {
-          client.executeXml(ByteString("<UNKNOWN/>"))
-        }
-        testUncheckedExecute {
-          client.uncheckedExecuteXml(ByteString("<UNKNOWN/>"))
-        }
-      }
-
-      def testValidExecute(execute: ⇒ Future[String]): Unit = {
-        val response = execute map SafeXML.loadString await TestTimeout
-        val state = response \ "answer" \ "state"
-        assert((state \ "@state").toString == "running")
-        assert((state \ "@ip_address").toString == "127.0.0.1")
-      }
-
-      def testThrowingExecute(execute: ⇒ Future[String]): Unit =
-        intercept[RuntimeException] {
-          controller.toleratingErrorCodes(_ ⇒ true) {
-            execute await TestTimeout
+      "command" - {
+        "<show_state> as xml.Elem" in {
+          testValidExecute {
+            client.execute(<show_state/>)
+          }
+          testThrowingExecute {
+            client.execute(<UNKNOWN/>)
+          }
+          testValidExecute {
+            client.uncheckedExecute(<show_state/>)
+          }
+          testUncheckedExecute {
+            client.uncheckedExecute(<UNKNOWN/>)
           }
         }
 
-      def testUncheckedExecute(execute: ⇒ Future[String]): Unit = {
-        val response = controller.toleratingErrorCodes(_ ⇒ true) {
-          execute map SafeXML.loadString await TestTimeout
+        "<show_state> as String" in {
+          testValidExecute {
+            client.executeXml("<show_state/>")
+          }
+          testValidExecute {
+            client.uncheckedExecuteXml("<show_state/>")
+          }
+          testThrowingExecute {
+            client.executeXml("<UNKNOWN/>")
+          }
+          testUncheckedExecute {
+            client.uncheckedExecuteXml("<UNKNOWN/>")
+          }
         }
-        assert((response \ "answer" \ "ERROR" \ "@code").toString.nonEmpty)
-      }
 
-      "Speed test <show_state>" in {
-        Stopwatch.measureTime(10, "<show_state what='orders'>") {
-          client.executeXml("<show_state what='orders'/>") map SafeXML.loadString await TestTimeout
+        "<show_state> as ByteString" in {
+          testValidExecute {
+            client.executeXml(ByteString("<show_state/>"))
+          }
+          testValidExecute {
+            client.uncheckedExecuteXml(ByteString("<show_state/>"))
+          }
+          testThrowingExecute {
+            client.executeXml(ByteString("<UNKNOWN/>"))
+          }
+          testUncheckedExecute {
+            client.uncheckedExecuteXml(ByteString("<UNKNOWN/>"))
+          }
+        }
+
+        def testValidExecute(execute: ⇒ Future[String]): Unit = {
+          val response = execute map SafeXML.loadString await TestTimeout
+          val state = response \ "answer" \ "state"
+          assert((state \ "@state").toString == "running")
+          assert((state \ "@ip_address").toString == "127.0.0.1")
+        }
+
+        def testThrowingExecute(execute: ⇒ Future[String]): Unit =
+          intercept[RuntimeException] {
+            controller.toleratingErrorCodes(_ ⇒ true) {
+              execute await TestTimeout
+            }
+          }
+
+        def testUncheckedExecute(execute: ⇒ Future[String]): Unit = {
+          val response = controller.toleratingErrorCodes(_ ⇒ true) {
+            execute map SafeXML.loadString await TestTimeout
+          }
+          assert((response \ "answer" \ "ERROR" \ "@code").toString.nonEmpty)
+        }
+
+        "Speed test <show_state>" in {
+          Stopwatch.measureTime(10, "<show_state what='orders'>") {
+            client.executeXml("<show_state what='orders'/>") map SafeXML.loadString await TestTimeout
+          }
         }
       }
-    }
-  }
-
-  "GET" - {
-    "getOrdersComplementedBy isSuspended" in {
-      val orderQuery = OrderQuery(isSuspended = Some(true))
-      val ordersComplemented = awaitContent(webSchedulerClient.getOrdersComplementedBy[OrderOverview](orderQuery))
-      assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
-      assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
-    }
-  }
-
-  "JSON" - {
-    "overview" in {
-      val overviewString = webSchedulerClient.get[String](_.overview) await TestTimeout
-      testRegexJson(
-        json = overviewString,
-        patternMap = Map(
-          "eventId" → AnyLong,
-          "version" → """\d+\..+""".r,
-          "version" → """.+""".r,
-          "startedAt" → AnyIsoTimestamp,
-          "schedulerId" → "test",
-          "httpPort" → httpPort,
-          "pid" → AnyInt,
-          "state" → "running",
-          "system" → AnyRef,
-          "java" → AnyRef))
-    }
-
-    "orderOverviews" in {
-      val snapshot = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
-      assert((snapshot("orders").asJsArray map normalizeOrderOverviewJson) == ExpectedOrderOverviewsJsArray)
-    }
-
-    "ordersComplemented" in {
-      val ordersComplemented = webSchedulerClient.get[JsObject](_.order.complemented[OrderOverview]()) await TestTimeout
-      val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Snapshot.EventIdJsonName) ++ Map(
-        "orders" → (ordersComplemented("orders").asJsArray map normalizeOrderOverviewJson),
-        "usedTasks" → ordersComplemented("usedTasks").asJsArray,
-        "usedJobs" → ordersComplemented("usedJobs").asJsArray))
-      assert(orderedOrdersComplemented == ExpectedOrdersOrdersComplementedJsObject)
-    }
-
-    "orderTreeComplemented" in {
-      val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented[OrderOverview]) await TestTimeout
-      val normalized = JsObject(tree.fields - Snapshot.EventIdJsonName) deepMapJsObjects normalizeOrderOverviewJson
-      assert(normalized == ExpectedOrderTreeComplementedJsObject)
     }
   }
 
@@ -617,56 +562,64 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     assert(jsObject.fields("version") == JsString(directOverview.version))
   }
 
-  "Web service error behavior" - {
+  "Error behavior" - {
     "jobscheduler/master/api/ERROR-500" in {
-      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString(s"TEST/ERROR-500")) await TestTimeout }
-        .response.status shouldEqual InternalServerError
+      val e = intercept[UnsuccessfulResponseException] {
+        webSchedulerClient.get[String](_.uriString(s"TEST/ERROR-500")) await TestTimeout
+      }
+      assert(e.response.status == InternalServerError)
     }
 
     "jobscheduler/master/api/UNKNOWN" in {
-      intercept[UnsuccessfulResponseException] { webSchedulerClient.get[String](_.uriString("TEST/UNKNOWN")) await TestTimeout }
-        .response.status shouldEqual NotFound
+      val e = intercept[UnsuccessfulResponseException] {
+        webSchedulerClient.get[String](_.uriString("TEST/UNKNOWN")) await TestTimeout
+      }
+      assert(e.response.status == NotFound)
     }
   }
 
-  "OrderStatisticsChanged" in {
-    val aSnapshot = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
-    val aStatistics = aSnapshot.value.head.value.event.orderStatistics
+  "Events" - {
+    "OrderStatisticsChanged" in {
+      val aSnapshot = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
+      val aStatistics = aSnapshot.value.head.value.event.orderStatistics
 
-    val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aSnapshot.eventId)
-    scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
-    val bSnapshot = bFuture await TestTimeout
-    val bStatistics = bSnapshot.value.head.value.event.orderStatistics
-    assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
+      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aSnapshot.eventId)
+      scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
+      val bSnapshot = bFuture await TestTimeout
+      val bStatistics = bSnapshot.value.head.value.event.orderStatistics
+      assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
 
-    val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bSnapshot.eventId)
-    scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
-    val cSnapshot = cFuture await TestTimeout
-    val cStatistics = cSnapshot.value.head.value.event.orderStatistics
-    assert(cStatistics == aStatistics)
+      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bSnapshot.eventId)
+      scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
+      val cSnapshot = cFuture await TestTimeout
+      val cStatistics = cSnapshot.value.head.value.event.orderStatistics
+      assert(cStatistics == aStatistics)
+    }
+
+    "events" in {
+      eventReader.check()
+    }
   }
 
-  "events" in {
-    eventReader.check()
-  }
+  "Speed tests" - {
+    for ((testGroup, getClient) ← setting) testGroup - {
+      lazy val client = getClient()
 
-  for ((testGroup, getClient) ← setting) testGroup - {
-    lazy val client = getClient()
+      "orders[OrderOverview] speed" in {
+        Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
+          client.orders[OrderOverview] await TestTimeout
+        }
+      }
 
-    "orders[OrderOverview] speed" in {
-      Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
-        client.orders[OrderOverview] await TestTimeout
+      "ordersComplemented speed" in {
+        Stopwatch.measureTime(50, "ordersComplemented") {
+          client.ordersComplemented[OrderOverview] await TestTimeout
+        }
       }
     }
 
-    "ordersComplemented speed" in {
-      Stopwatch.measureTime(50, "ordersComplemented") {
-        client.ordersComplemented[OrderOverview] await TestTimeout
-      }
-    }
+    addOptionalSpeedTests()
   }
-
-  addOptionalSpeedTests()
 
   private def awaitContent[A](future: Future[Snapshot[A]]): A =
     (future await TestTimeout).value
@@ -674,7 +627,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
 object JS1642IT {
   intelliJuseImports(JsObjectMarshaller)
-  private val logger = Logger(getClass)
 
   private def normalizeOrderOverview(o: OrderOverview) = o.copy(startedAt = None)
 
