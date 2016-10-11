@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.client.api.ProcessClassClient
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.common.WebError
-import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
@@ -61,7 +60,7 @@ trait AgentRoute {
       case Success(response) ⇒
         complete(response)
       case Failure(e: UnsuccessfulResponseException) ⇒
-        complete(BadRequest → ForwardingError(e.response.status.intValue, e.getMessage))
+        complete(e.response.status → WebError(e.getMessage))
       case Failure(throwable) ⇒
         complete(BadRequest → WebError(throwable.toString))
     }
