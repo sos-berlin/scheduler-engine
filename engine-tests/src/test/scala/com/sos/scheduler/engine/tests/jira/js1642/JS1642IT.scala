@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
+import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedState}
@@ -46,8 +47,9 @@ import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
 import scala.concurrent.{ExecutionContext, Future}
 import spray.http.MediaTypes.{`text/html`, `text/richtext`}
-import spray.http.StatusCodes.{InternalServerError, NotAcceptable, NotFound}
+import spray.http.StatusCodes.{BadRequest, InternalServerError, NotAcceptable, NotFound}
 import spray.httpx.UnsuccessfulResponseException
+import spray.httpx.unmarshalling.PimpedHttpResponse
 import spray.json._
 
 /**
@@ -249,6 +251,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         assert(ordersComplemented == awaitContent(directSchedulerClient.ordersComplementedBy[OrderOverview](orderQuery)))
         assert(ordersComplemented == ExpectedSuspendedOrdersComplemented)
       }
+    }
+
+
+    "jobscheduler/master/api/order/MISSING-JOB-CHAIN,1" in {
+      val e = intercept[UnsuccessfulResponseException] {
+        webSchedulerClient.get[String](_.uriString("api/order/MISSING-JOB-CHAIN,1")) await TestTimeout
+      }
+      assert(e.response.status == BadRequest)
+      assert(e.response.as[String] == Right("SCHEDULER-161 There is no JobChain '/MISSING-JOB-CHAIN'"))
     }
 
     "JSON" - {

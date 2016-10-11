@@ -149,14 +149,24 @@ with TaskRoute {
 object ApiRoute {
   private val logger = Logger(getClass)
 
-  private val ApiExceptionHandler = ExceptionHandler {
-    case NonFatal(t) ⇒
-      logger.warn(t.toString, t)
-      // This is an internal API, we expose internal error messages !!!
-      completeWithError(BadRequest, t.toSimplifiedString)
+  private val ApiExceptionHandler = {
+    val ErrorCodePattern = """(SCHEDULER|SOS)-\d+ .*""".r
+    ExceptionHandler {
+      case NonFatal(t) ⇒
+        // This is an internal API, we expose internal error messages !!!
+        val message =
+          if (ErrorCodePattern.pattern.matcher(t.getMessage).matches) {
+            logger.debug(t.toString, t)
+            t.getMessage
+          } else {
+            logger.warn(t.toString, t)
+            t.toSimplifiedString
+          }
+        completeWithError(BadRequest, message)
+    }
   }
 
   private val ApiRejectionHandler = RejectionHandler {
-    case ValidationRejection(message, _) :: _ ⇒ complete(BadRequest → message)
+    case ValidationRejection(message, _) :: _ ⇒ completeWithError(BadRequest, message)
   }
 }
