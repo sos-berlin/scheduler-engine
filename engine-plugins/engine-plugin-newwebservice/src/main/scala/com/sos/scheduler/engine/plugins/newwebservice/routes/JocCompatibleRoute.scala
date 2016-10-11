@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passSome
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passIf
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.cpp.CppHttpRoute
 import java.nio.file.Path
 import spray.http.StatusCodes._

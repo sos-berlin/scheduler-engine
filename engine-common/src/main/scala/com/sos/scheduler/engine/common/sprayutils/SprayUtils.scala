@@ -1,8 +1,9 @@
-package com.sos.scheduler.engine.plugins.newwebservice.common
+package com.sos.scheduler.engine.common.sprayutils
 
 import shapeless.{::, HNil}
 import spray.http.HttpHeaders.Accept
-import spray.http.MediaType
+import spray.http.{MediaType, StatusCode}
+import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._
 import spray.routing._
 
@@ -21,6 +22,12 @@ object SprayUtils {
     }
   }
 
+  def completeWithError(status: StatusCode, message: String) =
+    mapRequestContext(_.withContentNegotiationDisabled) {
+      complete(isMarshallable(status → message))
+    }
+
+
   def accept(mediaType: MediaType): Directive0 =
     mapInnerRoute { route ⇒
       headerValueByType[Accept]() {
@@ -29,6 +36,9 @@ object SprayUtils {
       }
     }
 
+  /**
+    * Passes x iff argument is Some(x).
+    */
   def passSome[A](option: Option[A]): Directive1[A] =
     new Directive1[A] {
       def happly(inner: (A :: HNil) ⇒ Route) =
@@ -38,6 +48,9 @@ object SprayUtils {
         }
     }
 
+  /**
+    * Passes x iff argument is true.
+    */
   def passIf(condition: Boolean): Directive0 =
     mapInnerRoute { inner ⇒
       if (condition)

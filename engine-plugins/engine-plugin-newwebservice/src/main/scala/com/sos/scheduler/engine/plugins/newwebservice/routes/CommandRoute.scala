@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.CommandClient
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{completeWithError, emptyParameterMap}
 import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.kernel.DirectCommandClient._
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import scala.concurrent.ExecutionContext
 import spray.http.HttpEntity
 import spray.http.StatusCodes._
@@ -36,7 +36,7 @@ trait CommandRoute {
               val elem = SafeXML.loadString(command)  // Verify valid XML
               complete(client.uncheckedExecute(elem) map XmlString.apply)
             } else
-              complete((Forbidden, "Only a read-only command is allowed"))
+              completeWithError(Forbidden, "Only a read-only command is allowed")
           }
         }
       }

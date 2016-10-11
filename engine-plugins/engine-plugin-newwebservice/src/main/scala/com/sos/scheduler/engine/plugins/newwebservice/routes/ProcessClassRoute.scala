@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.web.common.PathQueryHttp.directives.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.common.WebError
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -13,6 +13,7 @@ import scala.concurrent._
 import spray.http.StatusCodes.BadRequest
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
+import spray.routing.directives.BasicDirectives.{mapRequestContext ⇒ _}
 import spray.routing.{Route, ValidationRejection}
 
 /**
@@ -32,7 +33,8 @@ trait ProcessClassRoute {
           pathQuery(ProcessClassPath) {
             case single: PathQuery.SinglePath ⇒ singleProcessClassRoute(single.as[ProcessClassPath], returnType)
             case PathQuery.All ⇒ multipleProcessClassRoute(returnType)
-            case query ⇒ complete(BadRequest → WebError("PathQuery is not yet suppported")) // multipleProcessClassRoute(/*ProcessClassQuery.Standard(query), */returnType)
+            case query ⇒
+              completeWithError(BadRequest, "PathQuery is not yet suppported") // multipleProcessClassRoute(/*ProcessClassQuery.Standard(query), */returnType)
           }
         }
       }

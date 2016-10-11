@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils.passIf
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passIf
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.htmlPreferred
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes._

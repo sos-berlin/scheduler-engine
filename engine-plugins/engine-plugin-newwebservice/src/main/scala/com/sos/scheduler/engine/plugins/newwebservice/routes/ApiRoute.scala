@@ -4,7 +4,7 @@ import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.common.WebError
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
@@ -153,10 +153,10 @@ object ApiRoute {
     case NonFatal(t) ⇒
       logger.warn(t.toString, t)
       // This is an internal API, we expose internal error messages !!!
-      complete(BadRequest → WebError(t.toSimplifiedString))
+      completeWithError(BadRequest, t.toSimplifiedString)
   }
 
   private val ApiRejectionHandler = RejectionHandler {
-    case ValidationRejection(message, _) :: _ ⇒ complete(BadRequest → WebError(message))
+    case ValidationRejection(message, _) :: _ ⇒ complete(BadRequest → message)
   }
 }

@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
@@ -81,7 +80,7 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
   "Unknown agent" in {
     Get(s"/api/agent/https://unknown:5555/jobscheduler/agent/api") ~> Accept(`application/json`) ~> route ~> check {
       assert(status == BadRequest)
-      assert(responseAs[WebError.Simple] == WebError("Unknown Agent"))
+      assert(responseAs[String] == "Unknown Agent")
     }
   }
 

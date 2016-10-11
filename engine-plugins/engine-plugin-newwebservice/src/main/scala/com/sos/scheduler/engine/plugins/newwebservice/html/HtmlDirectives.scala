@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passIf
 import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.plugins.newwebservice.common.SprayUtils._
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions

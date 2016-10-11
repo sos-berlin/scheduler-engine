@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAu
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -47,8 +46,7 @@ final class JS1666IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         webSchedulerClient.agentGet[AgentOverview](alienAgentUris.overview) await TestTimeout
       }
       assert(e.response.status == BadRequest)
-      val Right(webError) = e.response.as[WebError]
-      assert(webError.message == "Unknown Agent")
+      assert(e.response.as[String] == Right("Unknown Agent"))
     }
 
     "Forbidden path" in {
@@ -56,8 +54,7 @@ final class JS1666IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         webSchedulerClient.agentGet[AgentOverview](s"$agentUri/jobscheduler/FORBIDDEN") await TestTimeout
       }
       assert(e.response.status == Forbidden)
-      val Right(webError) = e.response.as[WebError]
-      assert(webError.message == "Forbidden Agent URI: /jobscheduler/FORBIDDEN")
+      assert(e.response.as[String] == Right("Forbidden Agent URI: /jobscheduler/FORBIDDEN"))
     }
 
     "AgentOverview" in {
@@ -107,8 +104,7 @@ final class JS1666IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
         webSchedulerClient.agentGet[AgentOverview](s"$agentUri/jobscheduler/FORBIDDEN") await TestTimeout
       }
       assert(e.response.status == Forbidden)
-      val Right(webError) = e.response.as[WebError]
-      assert(webError.message == "Forbidden Agent URI: /jobscheduler/FORBIDDEN")
+      assert(e.response.as[String] == Right("Forbidden Agent URI: /jobscheduler/FORBIDDEN"))
     }
 
     "/api/agent/(agentUri)/jobscheduler/agent/api" in {

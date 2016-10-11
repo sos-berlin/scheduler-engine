@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.client.web.common
 
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}
@@ -58,7 +58,7 @@ object QueryHttp {
     }
 
   private[common] val PathExceptionHandler = ExceptionHandler {
-    case e: CppException if e.getCode == "SCHEDULER-161" ⇒ complete(NotFound → WebError(e.getMessage))
-    case e: NoSuchElementException if e.getMessage startsWith "SCHEDULER-161" + " " ⇒ complete(NotFound → WebError(e.getMessage))
+    case e: CppException if e.getCode == "SCHEDULER-161" ⇒ completeWithError(NotFound, e.getMessage)
+    case e: NoSuchElementException if e.getMessage startsWith "SCHEDULER-161" + " " ⇒ completeWithError(NotFound, e.getMessage)
   }
 }

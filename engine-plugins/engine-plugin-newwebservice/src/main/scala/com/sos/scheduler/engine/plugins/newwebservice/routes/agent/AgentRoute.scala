@@ -4,8 +4,8 @@ import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.client.api.ProcessClassClient
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
@@ -44,10 +44,10 @@ trait AgentRoute {
             // The remainder of the URI is interpreted as the complete URI of an Agent
             val (agentUri, tailUri) = splitIntoAgentUriAndTail(requestContext.unmatchedPath, requestContext.request.uri.query)
             if (!isAllowedTailUri(tailUri))
-              complete(Forbidden → WebError(s"Forbidden Agent URI: $tailUri"))
+              completeWithError(Forbidden, s"Forbidden Agent URI: $tailUri")
             else
               onSuccess(isKnownAgentUriFuture(agentUri)) {
-                case false ⇒ complete(BadRequest → WebError("Unknown Agent"))
+                case false ⇒ completeWithError(BadRequest, "Unknown Agent")
                 case true ⇒ forwardTo(requestContext.request, toAgentClient(agentUri), tailUri)
               }
           }
@@ -60,9 +60,9 @@ trait AgentRoute {
       case Success(response) ⇒
         complete(response)
       case Failure(e: UnsuccessfulResponseException) ⇒
-        complete(e.response.status → WebError(e.getMessage))
+        completeWithError(e.response.status, e.getMessage)
       case Failure(throwable) ⇒
-        complete(BadRequest → WebError(throwable.toString))
+        completeWithError(BadRequest, throwable.toString)
     }
 }
 
