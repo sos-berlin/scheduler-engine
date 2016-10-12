@@ -12,8 +12,8 @@
 
 // Die numerische Dateiversion einer Windows-Datei (bei uns VER_PRODUCTVERSION) hat vier Zahlen
 
-#define VER_PRODUCTVERSION       1,10,6
-#define VER_PRODUCTVERSION_STR  "1.10.6-SNAPSHOT" VER_PRODUCTVERSION_TAIL
+#define VER_PRODUCTVERSION       1,11,0
+#define VER_PRODUCTVERSION_STR  "1.11.0-SNAPSHOT" VER_PRODUCTVERSION_TAIL
 
 #ifdef _DEBUG
 #   define VER_PRODUCTVERSION_DEBUG " (Debug)"
