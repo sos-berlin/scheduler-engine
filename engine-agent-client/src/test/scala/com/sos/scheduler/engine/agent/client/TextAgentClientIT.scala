@@ -7,11 +7,11 @@ import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{Command, Terminate}
 import com.sos.scheduler.engine.agent.test.{AgentConfigDirectoryProvider, AgentTest}
-import com.sos.scheduler.engine.agent.web.auth.SimpleUserPassAuthenticator
 import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.auth.{Account, UserAndPassword}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.sprayutils.web.auth.SimpleUserPassAuthenticator
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.agent.AgentAddress
