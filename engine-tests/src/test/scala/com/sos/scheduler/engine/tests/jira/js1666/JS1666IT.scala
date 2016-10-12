@@ -79,24 +79,18 @@ final class JS1666IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 
     "/api/agent/FORBIDDEN-URI/jobscheduler/agent/api" in {
       val e = intercept[UnsuccessfulResponseException] {
-        webSchedulerClient.getByUri[JsObject](s"api/agent/http://example.com:5555/jobscheduler/agent/api") await TestTimeout
+        webSchedulerClient.getByUri[String](s"api/agent/http://example.com:5555/jobscheduler/agent/api") await TestTimeout
       }
       assert(e.response.status == BadRequest)
-      assert(e.response.as[JsObject] == Right(
-        """{
-          "message": "Unknown Agent"
-        }""".parseJson))
+      assert(e.response.as[String] == Right("Unknown Agent"))
     }
 
     "/api/agent/(agentUri)/jobscheduler/FORBIDDEN" in {
       val e = intercept[UnsuccessfulResponseException] {
-        webSchedulerClient.getByUri[JsObject](s"api/agent/$agentUri/jobscheduler/FORBIDDEN") await TestTimeout
+        webSchedulerClient.getByUri[String](s"api/agent/$agentUri/jobscheduler/FORBIDDEN") await TestTimeout
       }
       assert(e.response.status == Forbidden)
-      assert(e.response.as[JsObject] == Right(
-        """{
-          "message": "Forbidden Agent URI: /jobscheduler/FORBIDDEN"
-        }""".parseJson))
+      assert(e.response.as[String] == Right("Forbidden Agent URI: /jobscheduler/FORBIDDEN"))
     }
 
     "Forbidden path" in {
