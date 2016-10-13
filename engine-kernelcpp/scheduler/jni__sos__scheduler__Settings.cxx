@@ -102,16 +102,33 @@ static jstring JNICALL _1html_1dir(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jint JNICALL _1http_1port(JNIEnv* jenv, jobject, jlong cppReference)
+static jstring JNICALL _1http_1port(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
         ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_http_port()");
-        return (o_->_http_port);
+        return env.jstring_from_string(o_->_http_port);
     }
     catch(const exception& x) {
         env.set_java_exception(x);
-        return jint();
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jstring JNICALL _1https_1port(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::_https_port()");
+        return env.jstring_from_string(o_->_https_port);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
     }
 }
 
@@ -479,7 +496,8 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"_clusters_tablename__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1clusters_1tablename },
     { (char*)"_db_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1db_1name },
     { (char*)"_html_dir__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1html_1dir },
-    { (char*)"_http_port__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1http_1port },
+    { (char*)"_http_port__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1http_1port },
+    { (char*)"_https_port__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1https_1port },
     { (char*)"_job_history_tablename__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1history_1tablename },
     { (char*)"_job_java_classpath__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1java_1classpath },
     { (char*)"_job_java_options__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1java_1options },

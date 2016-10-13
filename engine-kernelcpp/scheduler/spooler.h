@@ -608,6 +608,7 @@ struct Spooler : Object,
     bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
   //int                        _priority_max;               // <config priority_max=...>
     bool                       _http_port_as_option_set;
+    bool                       _https_port_as_option_set;
     int                        _tcp_port;                   // <config tcp=...>
     bool                       _tcp_port_as_option_set;
     int                        _udp_port;                   // <config udp=...>

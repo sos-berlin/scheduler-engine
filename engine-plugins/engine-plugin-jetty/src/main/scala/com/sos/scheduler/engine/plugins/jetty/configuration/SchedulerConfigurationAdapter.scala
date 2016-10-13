@@ -27,7 +27,7 @@ object SchedulerConfigurationAdapter {
 
     def result =
       parseElement("plugin.config") {
-        val portOption = port(attributeMap get "port", schedulerConfiguration.httpPortOption)
+        val portOption = port(attributeMap get "port", schedulerConfiguration.httpPortOption map { _.toInt })
         val children = forEachStartElement {
           case "loginService" ⇒ parseLoginService()
         }

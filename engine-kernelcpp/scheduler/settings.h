@@ -48,7 +48,9 @@ enum Setting_name {
 
     setting_web_directory = 16,   // For JettyPlugin
 
-    setting_pause_after_failure = 17
+    setting_pause_after_failure = 17,
+
+    setting_https_port = 18
 };
 
 
@@ -96,7 +98,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     bool                       _use_old_microscheduling_for_tasks;
     bool                       _always_create_database_tables;  // For tests only to suppress java error messages
     std::set<Role>             _roles;
-    int                        _http_port;
+    string                     _http_port;
     int _remote_scheduler_connect_retry_delay;
     string                     _web_directory;    // For JettyPlugin
     int                        _classic_agent_keep_alive_duration;
@@ -108,6 +110,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     string _orders_tablename;
     string _variables_tablename;
     string _clusters_tablename;
+    string _https_port;
 };
 
 }} //namespace sos::scheduler

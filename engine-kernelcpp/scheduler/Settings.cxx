@@ -120,9 +120,7 @@ void Settings::set(int number, const string& value) {
             break;
         }
         case setting_http_port: {
-            int port = as_int(value);
-            if (port < 1 || port > 65535) z::throw_xc("SCHEDULER-391", "http-port", value, "1-65535");
-            _http_port = port;
+            _http_port = value == "0" ? "" : value;
             break;
         }
         case settings_remote_scheduler_connect_retry_delay: {
@@ -135,6 +133,10 @@ void Settings::set(int number, const string& value) {
         }
         case setting_pause_after_failure: {
             _pause_after_failure = as_bool(value);
+            break;
+        }
+        case setting_https_port: {
+            _https_port = value == "0" ? "" : value;
             break;
         }
 

@@ -35,7 +35,11 @@ public enum CppSettingName {
     agentConnectRetryDelay(15),
 
     /** For JettyPlugin: Base directory for files beneath URL "/jobscheduler/". */
-    WebDirectoryUrl(16);  // For JettyPlugin
+    WebDirectoryUrl(16),  // For JettyPlugin
+
+    PauseAfterFailure(17),
+
+    HttpsPort(18);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

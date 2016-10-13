@@ -22,7 +22,7 @@ import scala.collection.JavaConversions._
 @RunWith(classOf[JUnitRunner])
 final class SchedulerConfigurationAdapterTest extends FreeSpec {
 
-  private val httpPortSchedulerConfiguration = mockSchedulerConfiguration(httpPort = Some(1111))
+  private val httpPortSchedulerConfiguration = mockSchedulerConfiguration(httpPort = Some("1111"))
   private val emptySchedulerConfiguration = mockSchedulerConfiguration()
 
   "HTTP port" - {
@@ -85,7 +85,7 @@ final class SchedulerConfigurationAdapterTest extends FreeSpec {
 private object SchedulerConfigurationAdapterTest {
   private def toDomElement(e: xml.Elem) = loadXml(e.toString()).getDocumentElement
 
-  private def mockSchedulerConfiguration(httpPort: Option[Int] = None): SchedulerConfiguration =
+  private def mockSchedulerConfiguration(httpPort: Option[String] = None): SchedulerConfiguration =
     mock[SchedulerConfiguration] sideEffect { o ⇒
       when(o.httpPortOption) thenReturn httpPort
       when(o.webDirectoryUrlOption) thenReturn None

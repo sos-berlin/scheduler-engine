@@ -90,10 +90,12 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native java.lang.String _html_dir__native(long cppReference);
 
 
-    @Override public int _http_port() {
+    @Override public java.lang.String _http_port() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return _http_port__native(cppReference());
+            java.lang.String result = _http_port__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
@@ -101,7 +103,23 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
         }
     }
 
-    private static native int _http_port__native(long cppReference);
+    private static native java.lang.String _http_port__native(long cppReference);
+
+
+    @Override public java.lang.String _https_port() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = _https_port__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String _https_port__native(long cppReference);
 
 
     @Override public java.lang.String _job_history_tablename() {

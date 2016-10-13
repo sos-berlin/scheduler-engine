@@ -881,9 +881,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
-
-    if (int o = _settings->_http_port)
-        state_element.setAttribute("http_port", o);
+    state_element.setAttribute_optional("http_port", _settings->_http_port);
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
 
@@ -1361,7 +1359,7 @@ void Spooler::send_cmd()
         throw;
     }
 
-    if (_settings->_http_port) {
+    if (_settings->_http_port != "") {
         send_cmd_via_http();
     } else {
         send_cmd_via_tcp();
@@ -1431,7 +1429,8 @@ void Spooler::send_cmd_via_tcp() {
 
 void Spooler::send_cmd_via_http() {
     string host = !_ip_address.is_empty() ? _ip_address.as_string() : "127.0.0.1";
-    string uri = S() << "http://" << host << ":" <<_settings->_http_port << "/";
+    string host_port = strchr(_settings->_http_port.c_str(), ':') ? _settings->_http_port : host + ":" + _settings->_http_port;
+    string uri = S() << "http://" << host_port << "/";
     java_subsystem()->schedulerJ().sendCommandAndReplyToStout(uri, _send_cmd_xml_bytes);
 }
 
@@ -1591,8 +1590,12 @@ void Spooler::read_command_line_arguments()
             if( opt.flag      ( "reuse-port"       ) )  _reuse_addr = opt.set();
             else
             if (opt.with_value( "http-port")) { 
-                modifiable_settings()->set(setting_http_port, as_string(opt.as_int())); 
+                modifiable_settings()->set(setting_http_port, opt.value()); 
                 _http_port_as_option_set = true;
+            } else
+            if (opt.with_value( "https-port")) { 
+                modifiable_settings()->set(setting_https_port, opt.value()); 
+                _https_port_as_option_set = true;
             } else
             if( opt.with_value( "tcp-port"         ) )  _tcp_port = opt.as_int(),  _tcp_port_as_option_set = true;
             else

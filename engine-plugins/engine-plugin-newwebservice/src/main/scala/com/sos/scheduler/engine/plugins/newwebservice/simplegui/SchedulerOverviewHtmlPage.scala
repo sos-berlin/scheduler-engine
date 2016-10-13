@@ -28,7 +28,7 @@ final class SchedulerOverviewHtmlPage private(
 extends SchedulerHtmlPage {
 
   protected val schedulerOverview = snapshot.value
-  import schedulerOverview.{httpPort, java, pid, startedAt, state, system}
+  import schedulerOverview.{httpPort, httpsPort, java, pid, startedAt, state, system}
 
   override protected def cssLinks = super.cssLinks ++ List(
     uris / "api/frontend/common/OrderStatisticsWidget.css",
@@ -119,6 +119,8 @@ extends SchedulerHtmlPage {
         instantWithDurationToHtml(startedAt)),
       for (o ← httpPort) yield
         div(s" HTTP port $o"),
+      for (o ← httpsPort) yield
+        div(s" HTTPS port $o"),
       div(s"PID $pid"),
       div(b(state.toString)))
 

@@ -32,7 +32,9 @@ trait SchedulerConfiguration {
 
   def schedulerId: SchedulerId
 
-  def httpPortOption: Option[Int]
+  def httpPortOption: Option[String]
+
+  def httpsPortOption: Option[String]
 
   def tcpPort: Int
 
@@ -79,6 +81,7 @@ object SchedulerConfiguration {
       logDirectory
       schedulerId
       httpPortOption
+      httpsPortOption
       tcpPort
       udpPort
       webDirectoryUrlOption
@@ -114,7 +117,15 @@ object SchedulerConfiguration {
     lazy val schedulerId: SchedulerId =
       SchedulerId(spoolerC.id)
 
-    lazy val httpPortOption: Option[Int] = someUnless(settingsC._http_port, 0)
+    lazy val httpPortOption: Option[String] = settingsC._http_port match {
+      case "" | "0" ⇒ None
+      case o ⇒ Some(o)
+    }
+
+    lazy val httpsPortOption: Option[String] = settingsC._https_port match {
+        case "" | "0" ⇒ None
+        case o ⇒ Some(o)
+      }
 
     lazy val tcpPort: Int =
       spoolerC.tcp_port

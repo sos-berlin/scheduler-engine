@@ -302,6 +302,7 @@ with HasCloser {
       startedAt = startedAt,
       schedulerId = schedulerConfiguration.schedulerId,
       httpPort = schedulerConfiguration.httpPortOption,
+      httpsPort = schedulerConfiguration.httpsPortOption,
       udpPort = schedulerConfiguration.udpPort,
       pid = cppProxy.pid,
       state = SchedulerState.ofCppName(cppProxy.state_name),
