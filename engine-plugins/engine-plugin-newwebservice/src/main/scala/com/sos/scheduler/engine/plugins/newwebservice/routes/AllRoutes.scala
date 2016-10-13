@@ -17,7 +17,6 @@ import spray.routing.Route
 trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with TestRoute {
 
   protected implicit def actorRefFactory: ActorRefFactory
-  protected final def executionContext = actorRefFactory.dispatcher
   protected final val webServiceContext = new WebServiceContext(htmlEnabled = webjarsExists)
 
   final def route: Route =

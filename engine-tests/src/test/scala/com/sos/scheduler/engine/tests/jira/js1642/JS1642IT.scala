@@ -273,7 +273,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
             "version" → """.+""".r,
             "startedAt" → AnyIsoTimestamp,
             "schedulerId" → "test",
-            "httpPort" → httpPort,
+            "httpPort" → httpPort.toString,
             "pid" → AnyInt,
             "state" → "running",
             "system" → AnyRef,

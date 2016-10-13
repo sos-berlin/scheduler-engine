@@ -1,32 +1,29 @@
 package com.sos.scheduler.engine.plugins.newwebservice
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
 import com.sos.scheduler.engine.common.sprayutils.web.SprayWebServer
-import java.net.InetSocketAddress
+import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 
 /**
  * @author Joacim Zschimmer
  */
 final class EngineWebServer(
-  httpAddress: InetSocketAddress,
-  injector: Injector)(
-  implicit
+  protected val bindings: immutable.Iterable[WebServerBinding],
+  gateKeeperConfiguration: GateKeeper.Configuration,
+  injector: Injector)
+  (implicit
     protected val actorSystem: ActorSystem,
     protected val executionContext: ExecutionContext)
 extends SprayWebServer {
 
-  protected val bindings = List(WebServerBinding.Http(httpAddress))
-
-  protected def newRouteActorRef(binding: WebServerBinding): ActorRef =
-    binding match {
-      case WebServerBinding.Http(address) ⇒
-        actorSystem.actorOf(
-          WebServiceActor.props(injector),
-          name = SprayWebServer.actorName("EngineWebServer", binding))
-      case _ ⇒
-        throw new UnsupportedOperationException
-    }
+  protected def newRouteActorRef(binding: WebServerBinding) =
+    actorSystem.actorOf(
+      WebServiceActor.props(
+        new GateKeeper(gateKeeperConfiguration, isUnsecuredHttp = binding.isUnsecuredHttp),
+        injector),
+      name = SprayWebServer.actorName("EngineWebServer", binding))
 }

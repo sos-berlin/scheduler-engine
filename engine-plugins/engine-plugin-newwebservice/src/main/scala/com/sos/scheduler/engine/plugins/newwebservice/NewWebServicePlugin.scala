@@ -2,14 +2,19 @@ package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Injector, Provides}
+import com.sos.scheduler.engine.common.internet.IP._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
+import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
+import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
-import com.sos.scheduler.engine.kernel.plugin.{Plugin, PluginSubsystem, Plugins, UseGuiceModule}
+import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins, UseGuiceModule}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
-import java.net.InetSocketAddress
+import com.typesafe.config.Config
 import javax.inject.{Inject, Named, Singleton}
 import org.w3c.dom.Element
 import scala.concurrent.ExecutionContext
@@ -19,9 +24,10 @@ import scala.concurrent.ExecutionContext
  */
 @UseGuiceModule(classOf[NewWebServiceModule])
 final class NewWebServicePlugin @Inject private(
-  pluginSubsystem: PluginSubsystem,
   @Named(Plugins.configurationXMLName) pluginElement: Element,
   schedulerConfiguration: SchedulerConfiguration,
+  gateKeeperConfiguration: GateKeeper.Configuration,
+  config: Config,
   schedulerInjector: Injector)
   (implicit
     actorSystem: ActorSystem,
@@ -39,11 +45,21 @@ extends Plugin {
   override def onPrepare() = runWithSprayWebServer()
 
   private def runWithSprayWebServer(): Unit = {
-    for (httpPort ← schedulerConfiguration.httpPortOption) {
-      val httpAddress = new InetSocketAddress("0.0.0.0", httpPort)
-      val webServer = new EngineWebServer(httpAddress, myInjector)
+    val bindings = (httpBinding ++ httpsBinding).toList
+    if (bindings.nonEmpty) {
+      val webServer = new EngineWebServer(bindings, gateKeeperConfiguration, myInjector)
       closer.registerAutoCloseable(webServer)
       webServer.start() await 60.s
     }
   }
+
+  private def httpBinding = for (o ← schedulerConfiguration.httpPortOption) yield
+    WebServerBinding.Http(StringToServerInetSocketAddress(o))
+
+  private def httpsBinding = for (o ← schedulerConfiguration.httpsPortOption) yield
+    WebServerBinding.Https(StringToServerInetSocketAddress(o), newKeyStoreReference())
+
+  private def newKeyStoreReference() = KeystoreReference.fromSubConfig(
+    config.getConfig("jobscheduler.master.https.keystore"),
+    configDirectory = schedulerConfiguration.mainConfigurationDirectory)
 }

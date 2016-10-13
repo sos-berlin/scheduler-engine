@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
+import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
@@ -88,6 +89,10 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideGateKeeperConfiguration(config: Config): GateKeeper.Configuration =
+    GateKeeper.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.auth"))
 
   @Provides @Singleton
   private def provideJdbcConnectionPool(config: Config, databaseSubsystem: DatabaseSubsystem, executionContext: ExecutionContext): JdbcConnectionPool =
