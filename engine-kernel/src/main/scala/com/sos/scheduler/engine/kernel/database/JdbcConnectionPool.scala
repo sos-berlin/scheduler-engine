@@ -21,7 +21,7 @@ extends HasCloser {
   // Good: Two implicits make ExecutionContext ambiguous, so we have to use it explicitly.
   private implicit lazy val throttledExecutionContext: ExecutionContext = new ThrottledExecutionContext(dataSource.getMaximumPoolSize)(ec)
 
-  def poolSize = dataSource.getMaximumPoolSize
+  def maximumPoolSize = dataSource.getMaximumPoolSize
 
   def readOnly[A](body: sql.Connection ⇒ A): Future[A] =
     future { connection ⇒
@@ -34,7 +34,7 @@ extends HasCloser {
       blocking {
         val connection = dataSource.getConnection
         try body(connection)
-        finally connection.close()  // After promise completion
+        finally connection.close()
       }
     } (throttledExecutionContext)
 }
@@ -44,9 +44,9 @@ object JdbcConnectionPool {
     new HikariDataSource(toHikariConfig(globalConfig, cppProperties))
   }
 
-  private def toHikariConfig(config: Config, cppProperties: CppDatabaseProperties): HikariConfig =
+  private def toHikariConfig(config: Config, cppProperties: CppDatabaseProperties) =
     // Additionally, system property "hikaricp.configurationFile" may designate a properties file with configuration defaults.
-    new HikariConfig(keyValuesToProperties(
+    new HikariConfig(toProperties(
       Map("autoCommit" → "false") ++
       configToStringMap(config.getConfig("hikari")) ++
       cppPropertiesToHikari(cppProperties)))
@@ -65,7 +65,7 @@ object JdbcConnectionPool {
     result.toMap
   }
 
-  private def keyValuesToProperties(map: TraversableOnce[(String, String)]): Properties = {
+  private def toProperties(map: TraversableOnce[(String, String)]): Properties = {
     val result = new Properties()
     for ((key, value) ← map) result.setProperty(key, value)
     result
