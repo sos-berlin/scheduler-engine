@@ -27,7 +27,7 @@ final class KeyedEventQueue(sizeLimit: Int) {
 
   def hasAfter(after: EventId) = queue.navigableKeySet.higher(after) != null
 
-  def events(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
+  def after(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
     queue.navigableKeySet.tailSet(after, false).iterator map { eventId ⇒
       //if (after != 0 && after < queue.firstKey) ... events lost
       //if (after > lastRemovedEventId) ... TODO cancel iterator if queue.remove() has been called
