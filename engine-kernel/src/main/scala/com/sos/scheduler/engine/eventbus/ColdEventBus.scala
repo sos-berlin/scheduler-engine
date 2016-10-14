@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.eventbus
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.eventbus.ColdEventBus.logger
+import com.sos.scheduler.engine.eventbus.ColdEventBus._
 import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory
 import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import scala.collection.JavaConversions._
@@ -29,7 +29,7 @@ final class ColdEventBus extends AbstractEventBus with Runnable {
       val call = poll(wait)
       if (call == null)
         return
-      if (logger.isTraceEnabled) logger.trace(s"dispatch $call")
+      logger.trace(s"dispatch $call")
       dispatchCall(call)
     }
   }

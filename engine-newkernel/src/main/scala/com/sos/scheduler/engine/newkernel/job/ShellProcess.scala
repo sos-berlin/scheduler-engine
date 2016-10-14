@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import ShellProcess._
 import com.google.common.base.Preconditions.checkState
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.newkernel.job.ShellProcess._
 import com.sos.scheduler.engine.newkernel.utils.{ThreadService, TimedCallHolder}
 import java.io.File
 import java.nio.charset.Charset
@@ -36,7 +36,7 @@ extends AutoCloseable {
     process = processBuilder.start()
 
     stdLoggers = Seq(process.getInputStream, process.getErrorStream) map {
-      o => new ThreadService(new InputStreamLogger(o, Charset.defaultCharset, logger.delegate))
+      o => new ThreadService(new InputStreamLogger(o, Charset.defaultCharset, logger.underlying))
     }
     for (o <- stdLoggers) o.start()
   }

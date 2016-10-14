@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.dotnet
 
+import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
@@ -20,7 +21,7 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
 
   private lazy val dotnetEnvironment = new DotnetEnvironment(temporaryDirectory) sideEffect { o ⇒
     onClose {
-      ignoreException(logger.debug) {
+      ignoreException(logger.asLazy.debug) {
         o.close()
       }
     }

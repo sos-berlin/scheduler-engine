@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1163
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
+import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
 import com.sos.scheduler.engine.common.process.Processes.newTemporaryShellFile
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
@@ -111,7 +112,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             assert(jobOverview(jobPath).state == JobState.stopped)
             val normalizedReturnCode = results(jobPath).returnCode.normalized
             if (setting == universalAgentSetting && jobPath == StandardJobPath)
-              ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
+              ignoreException(logger.asLazy.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
                 assert(normalizedReturnCode == setting.returnCode(SIGKILL))
               }
             else
@@ -206,7 +207,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
             val normalizedReturnCode = results(jobPath).returnCode
             if (setting == universalAgentSetting && jobPath == IgnoringJobPath) {
               val expected = setting.returnCode(SIGKILL)
-              ignoreException(logger.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
+              ignoreException(logger.asLazy.error) {  // Sometimes the connection is closed before JobScheduler can be notified about process termination ??? Then we get ReturnCode(1)
                 assert(normalizedReturnCode == expected)
               }
             } else

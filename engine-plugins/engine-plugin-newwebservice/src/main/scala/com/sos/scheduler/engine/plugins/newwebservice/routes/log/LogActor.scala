@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef}
 import akka.spray._
 import akka.util.ByteString
 import com.sos.scheduler.engine.base.exceptions.StandardPublicException
+import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.common.utils.Exceptions._
@@ -42,9 +43,9 @@ extends Actor {
   private val logSubscription = new LogSubscription {
     def onStarted() = {}
 
-    def onClosed() = logException(logger.warn) { self ! End }   // File should be closed now to allow JobScheduler on Windows to close it !!!
+    def onClosed() = logException(logger.asLazy.warn) { self ! End }   // File should be closed now to allow JobScheduler on Windows to close it !!!
 
-    def onLogged() = logException(logger.warn) { signalChunk() }
+    def onLogged() = logException(logger.asLazy.warn) { signalChunk() }
   }
 
   override def preStart() = {
@@ -65,7 +66,7 @@ extends Actor {
       if (responder == null) {
         marshallingContext.handleError(throwableOnce getOrElse { new StandardPublicException("Error while reading log") })
       } else {
-        logException(logger.debug) {  // Jetty's AsyncContinuation
+        logException(logger.asLazy.debug) {  // Jetty's AsyncContinuation
           responder ! ChunkedMessageEnd
         }
       }

@@ -6,6 +6,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.cpp
 import akka.actor._
 import akka.util.ByteString
 import com.sos.scheduler.engine.base.exceptions.StandardPublicException
+import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.common.utils.Exceptions.logException
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
@@ -54,7 +55,7 @@ extends Actor with ActorLogging {
       if (responder == null) {
         marshallingContext.handleError(throwableOnce getOrElse { new StandardPublicException("Error while expecting response from JobScheduler (C++)") })
       } else {
-        logException(logger.debug) {  // Jetty's AsyncContinuation
+        logException(logger.asLazy.debug) {  // Jetty's AsyncContinuation
           responder ! ChunkedMessageEnd
         }
       }
@@ -128,7 +129,7 @@ object ChunkingActor {
     private val callbackOnce = new SetOnce[() ⇒ Unit]
 
     val schedulerHttpResponse = new SchedulerHttpResponse {
-      def onNextChunkIsReady() = for (callback ← callbackOnce) logException(logger.warn) { callback() }
+      def onNextChunkIsReady() = for (callback ← callbackOnce) logException(logger.asLazy.warn) { callback() }
     }
 
     def onChunkIsReady(callback: ⇒ Unit) = callbackOnce := { () ⇒ callback }
