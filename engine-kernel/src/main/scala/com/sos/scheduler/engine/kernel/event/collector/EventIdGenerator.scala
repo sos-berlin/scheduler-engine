@@ -1,16 +1,18 @@
 package com.sos.scheduler.engine.kernel.event.collector
 
-import com.sos.scheduler.engine.data.event.EventId
+import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import java.lang.System._
 import java.util.concurrent.atomic.AtomicLong
+import javax.inject.{Inject, Singleton}
 import scala.annotation.tailrec
 
 /**
   * @author Joacim Zschimmer
   */
-private[collector] final class UniqueTimestampedIdIterator extends Iterator[EventId] {
+@Singleton
+final class EventIdGenerator @Inject extends Iterator[EventId] {
 
-  private val lastResult = new AtomicLong(0)
+  private val lastResult = new AtomicLong(EventId.BeforeFirst)
 
   def last: EventId = lastResult.get
 
@@ -26,4 +28,6 @@ private[collector] final class UniqueTimestampedIdIterator extends Iterator[Even
     else
       next()
   }
+
+  def newSnapshot[A](a: A) = Snapshot(next(), a)
 }

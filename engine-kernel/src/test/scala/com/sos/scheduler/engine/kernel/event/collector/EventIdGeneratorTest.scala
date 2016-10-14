@@ -16,11 +16,11 @@ import scala.concurrent.Future
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class UniqueTimestampedIdIteratorTest extends FreeSpec {
+final class EventIdGeneratorTest extends FreeSpec {
 
   "test" in {
     val eventIds: mutable.Map[EventId, Unit] = new ConcurrentHashMap[EventId, Unit]
-    val uniqueTimestampedIdIterator = new UniqueTimestampedIdIterator
+    val uniqueTimestampedIdIterator = new EventIdGenerator
     val n = 100000
     (for (_ ← 1 to n) yield
       Future {

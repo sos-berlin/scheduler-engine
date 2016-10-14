@@ -20,9 +20,10 @@ import scala.reflect.ClassTag
 final class EventCollectorTest extends FreeSpec {
 
   private val eventBus = new SchedulerEventBus
+  private val eventIdGenerator = new EventIdGenerator
 
   "events" in {
-    autoClosing(new EventCollector(eventBus)) { eventCollector ⇒
+    autoClosing(new EventCollector(eventIdGenerator, eventBus)) { eventCollector ⇒
       assert(eventCollector.events(after = EventId.BeforeFirst).isEmpty)
       eventBus.publish(KeyedEvent(A1)("1"))
       eventBus.publish(KeyedEvent(A1)("2"))
@@ -34,7 +35,7 @@ final class EventCollectorTest extends FreeSpec {
   }
 
   "when" in {
-    autoClosing(new EventCollector(eventBus)) { eventCollector ⇒
+    autoClosing(new EventCollector(eventIdGenerator, eventBus)) { eventCollector ⇒
       val anyFuture = eventCollector.when[Event](after = EventId.BeforeFirst)
       val bFuture = eventCollector.when[BEvent](after = EventId.BeforeFirst)
       assert(!anyFuture.isCompleted)
@@ -48,14 +49,14 @@ final class EventCollectorTest extends FreeSpec {
   }
 
   "whenForKey" in {
-    autoClosing(new EventCollector(eventBus)) { eventCollector ⇒
+    autoClosing(new EventCollector(eventIdGenerator, eventBus)) { eventCollector ⇒
       eventBus.publish(KeyedEvent(A1)("1"))
       eventBus.publish(KeyedEvent(B1)("1"))
       eventBus.publish(KeyedEvent(A2)("1"))
       eventBus.publish(KeyedEvent(A2)("2"))
       eventBus.publish(KeyedEvent(B2)("1"))
       def eventsForKey[E <: Event: ClassTag](key: E#Key) =
-        eventCollector.whenForKey[E](key, after = EventId.BeforeFirst).successValue.value.toVector map { _.value }
+        (eventCollector.whenForKey[E](key, after = EventId.BeforeFirst) await 1.s).toVector map { _.value }
       assert(eventsForKey[AEvent]("1") == Vector(A1, A2))
       assert(eventsForKey[AEvent]("2") == Vector(A2))
       assert(eventsForKey[BEvent]("1") == Vector(B1, B2))

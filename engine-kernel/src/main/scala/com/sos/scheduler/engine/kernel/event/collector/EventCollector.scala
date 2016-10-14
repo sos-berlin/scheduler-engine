@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Keyed
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector._
 import javax.inject.{Inject, Singleton}
-import scala.collection.concurrent
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.reflect.ClassTag
 
@@ -15,73 +14,88 @@ import scala.reflect.ClassTag
   * @author Joacim Zschimmer
   */
 @Singleton
-final class EventCollector @Inject()(eventBus: SchedulerEventBus)(implicit ec: ExecutionContext)
+final class EventCollector @Inject()(eventIdGenerator: EventIdGenerator, eventBus: SchedulerEventBus)(implicit ec: ExecutionContext)
 extends HasCloser {
-
-  private val ids = new UniqueTimestampedIdIterator
 
   @volatile
   private var eventArrivedPromise = Promise[Unit]()
-  @volatile
-  private var eventArrivedPromiseUsed = false
-
   private val keyedEventQueue = new KeyedEventQueue(sizeLimit = KeyEventQueueSizeLimit)
-  private val keyToEventQueue = new concurrent.TrieMap[Any, EventQueue]()
+  //private val keyToEventQueue = new concurrent.TrieMap[Any, EventQueue]()
 
   eventBus.onHot[Event] { case keyedEvent ⇒
-    val eventId = ids.next()
-    keyToEventQueue.getOrElseUpdate(keyedEvent.key, new EventQueue(EventQueueSizeLimitPerKey))
-      .add(Snapshot(eventId, keyedEvent.event))
-    keyedEventQueue.add(Snapshot(eventId, keyedEvent))
+    //keyToEventQueue.getOrElseUpdate(keyedEvent.key, new EventQueue(EventQueueSizeLimitPerKey))
+    //  .add(Snapshot(eventId, keyedEvent.event))
+    keyedEventQueue.add(eventIdGenerator.newSnapshot(keyedEvent))
     val p = eventArrivedPromise
-    //if (eventArrivedPromiseUsed) {
-      eventArrivedPromise = Promise[Unit]()
-    //}
+    eventArrivedPromise = Promise[Unit]()     // Renew only when needed ???
     p.success(())
   }
 
   /**
     * @param reverse, true may be slow
     */
-  def when[E <: Event: ClassTag](after: EventId, predicate: Predicate[E] = matchesAll _, reverse: Boolean = false)
+  def when[E <: Event: ClassTag](
+    after: EventId,
+    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
+    limit: Int = Int.MaxValue,
+    reverse: Boolean = false)
   : Future[Iterator[Snapshot[KeyedEvent[E]]]] =
-    whenAny[E](Set(implicitClass[E]), after = after, predicate, reverse = reverse)
+    whenAny[E](Set(implicitClass[E]), after, predicate, limit, reverse)
 
-  def whenAny[E <: Event](eventClasses: Set[Class[_ <: E]], after: EventId, predicate: Predicate[E]  = matchesAll _, reverse: Boolean = false)
-  : Future[Iterator[Snapshot[KeyedEvent[E]]]] = {
-    def pred(e: AnyKeyedEvent) = (eventClasses exists { _ isAssignableFrom e.event.getClass }) && predicate(e.asInstanceOf[KeyedEvent[E]])
-    for (snapshot ← whenAnyKeyedEvents(after, pred, reverse = reverse)) yield
-      for (snapshot ← snapshot.value) yield
-        snapshot map { _.asInstanceOf[KeyedEvent[E]] }
-  }
+  def whenAny[E <: Event](
+    eventClasses: Set[Class[_ <: E]],
+    after: EventId,
+    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
+    limit: Int = Int.MaxValue,
+    reverse: Boolean = false)
+  : Future[Iterator[Snapshot[KeyedEvent[E]]]] =
+    whenAnyKeyedEvents(
+      after,
+      collect = {
+        case e if eventClasses.exists(_ isAssignableFrom e.event.getClass) && predicate(e.asInstanceOf[KeyedEvent[E]]) ⇒
+          e.asInstanceOf[KeyedEvent[E]]
+      },
+      limit,
+      reverse)
 
-  private def whenAnyKeyedEvents(after: EventId, predicate: AnyKeyedEvent ⇒ Boolean, reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[AnyKeyedEvent]]]] =
-    (for (Snapshot(eventId, eventSnapshots) ← onEventAvailable(after) { events(after, reverse = reverse) }) yield {
-      val filtered = eventSnapshots filter { e ⇒ predicate(e.value) }
-      if (filtered.hasNext)
-        Future.successful(Snapshot(eventId, filtered))
+  def whenForKey[E <: Event: ClassTag](
+    key: E#Key,
+    after: EventId,
+    predicate: E ⇒ Boolean = (_: E) ⇒ true,
+    limit: Int = Int.MaxValue,
+    reverse: Boolean = false)
+  : Future[Iterator[Snapshot[E]]] =
+    whenAnyKeyedEvents(
+      after,
+      collect = {
+        case e if (implicitClass[E] isAssignableFrom e.event.getClass) && e.key == key && predicate(e.event.asInstanceOf[E]) ⇒
+          e.event.asInstanceOf[E]
+      },
+      limit,
+      reverse)
+
+  private def whenAnyKeyedEvents[A](after: EventId, collect: PartialFunction[AnyKeyedEvent, A], limit: Int, reverse: Boolean): Future[Iterator[Snapshot[A]]] =
+    (for (() ← whenEventIsAvailable(after)) yield {
+      val eventSnapshots = events(after, reverse = reverse)
+      var lastEventId = after
+      val filtered =
+        eventSnapshots
+          .map { o ⇒ lastEventId = o.eventId; o }
+          .collect {
+            case snapshot if collect.isDefinedAt(snapshot.value) ⇒ Snapshot(snapshot.eventId, collect(snapshot.value))
+          }
+          .take(limit)
+      if (filtered.nonEmpty || reverse)
+        Future.successful(filtered)
       else
-        whenAnyKeyedEvents(eventId, predicate)  // Filtering has left no event. So we wait for new events.
+        whenAnyKeyedEvents(lastEventId, collect, limit, reverse)  // Filtering has left no event. So we wait for new events.
     }).flatten
 
-  def whenForKey[E <: Event: ClassTag](key: E#Key, after: EventId, reverse: Boolean = false): Future[Snapshot[Iterator[Snapshot[E]]]] =
-    onEventAvailable(after) {
-      events(after, reverse = reverse) collect {
-        case Snapshot(eventId, KeyedEvent(k, event: E @unchecked))
-          if (implicitClass[E] isAssignableFrom event.getClass) && key == k ⇒
-            Snapshot(eventId, event)
-      }
-    }
-
-  private def onEventAvailable[A](after: EventId)(body: ⇒ A): Future[Snapshot[A]] = {
-    def result = Snapshot(newEventId(), body)
+  private def whenEventIsAvailable(after: EventId): Future[Unit] =
     if (keyedEventQueue.hasAfter(after))
-      Future.successful(result)
-    else {
-      //eventArrivedPromiseUsed = true
-      for (() ← eventArrivedPromise.future) yield result
-    }
-  }
+      Future.successful(())
+    else
+      eventArrivedPromise.future
 
   private def events(after: EventId, reverse: Boolean): Iterator[Snapshot[AnyKeyedEvent]] =
     if (reverse) reverseEvents(after) else events(after)
@@ -93,16 +107,11 @@ extends HasCloser {
   private def reverseEvents(after: EventId): Iterator[Snapshot[AnyKeyedEvent]] =
     keyedEventQueue.reverseEvents(after)
 
-  def lastEventId: EventId = ids.last
+  def newSnapshot[A](a: A) = eventIdGenerator.newSnapshot(a)
 
-  def newEventId(): EventId = ids.next()
+  def lastEventId: EventId = eventIdGenerator.last
 }
 
 object EventCollector {
-  type Predicate[E <: Event] = KeyedEvent[E] ⇒ Boolean
-
-  def matchesAll[E <: Event](e: KeyedEvent[E]) = true
-
   private val KeyEventQueueSizeLimit = 10000
-  private val EventQueueSizeLimitPerKey = 100
 }
