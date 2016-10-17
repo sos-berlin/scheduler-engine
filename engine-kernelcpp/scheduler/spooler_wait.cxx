@@ -502,7 +502,7 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
 
     while (isWaiting) {    
         timeoutCounter++;
-        int stepTimeout = calculateStepTimeout(timeoutCounter);  // 1 Millisekunde
+        int stepTimeout = calculateStepTimeout(timeoutCounter);  // 10 Millisekunden
 
         isWaiting = false;
         int blockCount = ( nCount + max_handles - 1 ) / max_handles;
@@ -552,7 +552,7 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
 
 int Wait_handles::calculateStepTimeout(int timeoutCounter)
 {
-    return max (min(timeoutCounter / 10, 1000), 1);
+    return max(min(timeoutCounter * 10, 1000), 10);
 }
 
 string Wait_handles::as_string() 
