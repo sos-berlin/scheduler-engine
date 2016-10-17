@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.base.convert.As._
 import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventSeq, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource
@@ -12,9 +12,9 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.comple
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.keyedEventsToHtmlPage
-import scala.collection.immutable
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
-import scala.math.abs
 import scala.reflect.ClassTag
 import shapeless.{::, HNil}
 import spray.json.DefaultJsonProtocol._
@@ -40,10 +40,15 @@ trait EventRoute extends HasCloser with OrderEventRoute {
   private def otherEventRoute: Route =
     withEventParameters { case EventParameters(returnType, afterEventId, limit) ⇒
       pathSingleSlash {
-        completeTryHtml[immutable.Seq[Snapshot[AnyKeyedEvent]]] {
-          val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
-          client.events[Event](after = afterEventId, limit = abs(limit), reverse = limit < 0)(classTag)
-        }
+        val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
+        if (limit >= 0)
+          completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
+            client.events[Event](after = afterEventId, limit = limit)(classTag)
+          }
+        else
+          completeTryHtml[Seq[Snapshot[AnyKeyedEvent]]] {
+            client.eventsReverse[Event](after = afterEventId, limit = -limit)(classTag)
+          }
       }
     }
 

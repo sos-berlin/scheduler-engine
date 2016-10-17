@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 import com.sos.scheduler.engine.base.convert.As._
 import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.data.event.{KeyedEvent, _}
-import scala.collection.immutable
+import scala.collection.immutable.Seq
 import shapeless.{::, HNil}
 import spray.routing.Directives._
 import spray.routing.{ValidationRejection, _}
@@ -14,10 +14,10 @@ import spray.routing.{ValidationRejection, _}
 private[routes] object EventRoutes {
 
   // Nests a simple Snapshot[NoKeyEvent] into the expected nested type for the event web service.
-  def nestIntoSeqSnapshot[E <: NoKeyEvent](snapshot: Snapshot[E]): Snapshot[immutable.Seq[Snapshot[AnyKeyedEvent]]] = {
+  def nestIntoSeqSnapshot[E <: NoKeyEvent](snapshot: Snapshot[E]): Snapshot[EventSeq[Seq, AnyKeyedEvent]] = {
     val eventId = snapshot.eventId
     val anyKeyedEvent = KeyedEvent(snapshot.value).asInstanceOf[AnyKeyedEvent]
-    Snapshot(eventId, List(Snapshot(eventId, anyKeyedEvent)))
+    Snapshot(eventId, EventSeq.NonEmpty(List(Snapshot(eventId, anyKeyedEvent))))
   }
 
   object withEventParameters extends Directive1[EventParameters] {

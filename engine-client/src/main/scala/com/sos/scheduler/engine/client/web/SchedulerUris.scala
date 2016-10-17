@@ -156,14 +156,22 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   def events =  uriString(Uri.Path("api/event/"))
 
-  def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, reverse: Boolean = false, returnType: String = DefaultEventName) = {
+  def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
-    val lim = if (reverse) -limit else limit
-    uriString(Uri.Path("api/event/"),
-      (returnType != DefaultEventName list ("return" → returnType)) :::
-      (after != EventId.BeforeFirst list ("after" → s"$after")) :::
-      (lim != Int.MaxValue list ("limit" → s"$lim")): _*)
+    events0(after, limit, returnType)
   }
+
+  def eventsReverse(after: EventId = EventId.BeforeFirst, limit: Int, returnType: String = DefaultEventName) = {
+    require(limit > 0, "Limit must not be below zero")
+    events0(after, -limit, returnType)
+  }
+
+  private def events0(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) =
+    uriString(
+      Uri.Path("api/event/"),
+      (returnType != DefaultEventName list ("return" → returnType)) :::
+        (after != EventId.BeforeFirst list ("after" → after.toString)) :::
+        (limit != Int.MaxValue list ("limit" → limit.toString)): _*)
 
   def uriString(path: Uri.Path, parameters: (String, String)*): String =
     resolvePathUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString

@@ -10,20 +10,20 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.scheduler.engine.data.common.WebError
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
+import com.sos.scheduler.engine.data.event.{EventId, EventSeq, Snapshot}
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedState}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
@@ -303,32 +303,34 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   }
 
   "orderStatistics" - {
-    def testAllOrderStatistics() {
-      val orderStatistics: OrderStatistics = fetchWebAndDirect {
-        _.orderStatistics(JobChainQuery.All)
+    def testAllOrderStatisticsFuture(client: SchedulerClient): Future[OrderStatistics] =
+      for (Snapshot(_, orderStatistics: OrderStatistics) ← client.orderStatistics(JobChainQuery.All)) yield {
+        assert(orderStatistics == OrderStatistics(
+          total = 8,
+          notPlanned = 0,
+          planned = 1,
+          due = 4,
+          started = 3,
+          inTask = 3,
+          inProcess = 3,
+          setback = 0,
+          suspended = 2,
+          blacklisted = 0,
+          permanent = 6,
+          fileOrder = 0))
+        orderStatistics
       }
-      assert(orderStatistics == OrderStatistics(
-        total = 8,
-        notPlanned = 0,
-        planned = 1,
-        due = 4,
-        started = 3,
-        inTask = 3,
-        inProcess = 3,
-        setback = 0,
-        suspended = 2,
-        blacklisted = 0,
-        permanent = 6,
-        fileOrder = 0))
-    }
 
     "/" in {
-      testAllOrderStatistics()
+      assert(testAllOrderStatisticsFuture(directSchedulerClient).await(TestTimeout) ==
+        testAllOrderStatisticsFuture(webSchedulerClient).await(TestTimeout))
     }
 
     val parallelFactor = 1000
     s"$parallelFactor simultaneously requests" in {
-      (for (_ ← 1 to parallelFactor) yield Future { testAllOrderStatistics() }) await TestTimeout
+      val stopwatch = new Stopwatch
+      (for (_ ← 1 to parallelFactor) yield testAllOrderStatisticsFuture(webSchedulerClient)) await TestTimeout
+      logger.info(stopwatch.itemsPerSecondString(parallelFactor, "testAllOrderStatistics", "testAllOrderStatistics"))
     }
 
     s"$xFolderPath" in {
@@ -610,19 +612,19 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "Events" - {
     "OrderStatisticsChanged" in {
-      val aSnapshot = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
-      val aStatistics = aSnapshot.value.head.value.event.orderStatistics
+      val Snapshot(aEventId, EventSeq.NonEmpty(aEvents)) = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
+      val aStatistics = aEvents.head.value.event.orderStatistics
 
-      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aSnapshot.eventId)
+      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aEventId)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
-      val bSnapshot = bFuture await TestTimeout
-      val bStatistics = bSnapshot.value.head.value.event.orderStatistics
+      val Snapshot(bEventId, EventSeq.NonEmpty(bEvents)) = bFuture await TestTimeout
+      val bStatistics = bEvents.head.value.event.orderStatistics
       assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
 
-      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bSnapshot.eventId)
+      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bEventId)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
-      val cSnapshot = cFuture await TestTimeout
-      val cStatistics = cSnapshot.value.head.value.event.orderStatistics
+      val Snapshot(cEventId, EventSeq.NonEmpty(cEvents)) = cFuture await TestTimeout
+      val cStatistics = cEvents.head.value.event.orderStatistics
       assert(cStatistics == aStatistics)
     }
 
@@ -657,6 +659,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
 object JS1642IT {
   intelliJuseImports(JsObjectMarshaller)
+  private val logger = Logger(getClass)
 
   private def normalizeOrderOverview(o: OrderOverview) = o.copy(startedAt = None)
 

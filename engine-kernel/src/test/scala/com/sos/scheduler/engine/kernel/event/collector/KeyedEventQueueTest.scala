@@ -16,6 +16,10 @@ final class KeyedEventQueueTest extends FreeSpec {
   private val eventSnapshots = for (i ← 1 to 5) yield Snapshot(EventId(i), KeyedEvent(AEvent(i)))
   eventSnapshots foreach queue.add
 
+  "event stream teared and the first event has been lost" in {
+    assert(queue.after(EventId.BeforeFirst) == None)
+  }
+
   "hasAfter" in {
     assert(queue.hasAfter(EventId.BeforeFirst))
     assert(queue.hasAfter(EventId(1)))
@@ -25,13 +29,12 @@ final class KeyedEventQueueTest extends FreeSpec {
     assert(!queue.hasAfter(EventId(5)))
   }
 
-  "events" in {
-    assert(queue.after(EventId.BeforeFirst).toVector == (eventSnapshots drop 2))
+  "after" in {
     //assert(queue.events(EventId(1)) == None)
-    assert(queue.after(EventId(2)).toVector == (eventSnapshots drop 2))
-    assert(queue.after(EventId(3)).toVector == (eventSnapshots drop 3))
-    assert(queue.after(EventId(4)).toVector == (eventSnapshots drop 4))
-    assert(queue.after(EventId(5)).isEmpty)
+    assert((queue.after(EventId(2)) map { _.toVector }) == Some(eventSnapshots drop 2))
+    assert((queue.after(EventId(3)) map { _.toVector }) == Some(eventSnapshots drop 3))
+    assert((queue.after(EventId(4)) map { _.toVector }) == Some(eventSnapshots drop 4))
+    assert(queue.after(EventId(5)).get.isEmpty)
   }
 
   "reverseEvents" in {

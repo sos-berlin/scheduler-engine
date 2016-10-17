@@ -8,10 +8,10 @@ import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eve
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, NodeKey, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStatistics, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
@@ -23,6 +23,7 @@ import java.time.Instant._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
+import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes.`application/json`
@@ -42,7 +43,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   private lazy val actorSystem = ActorSystem("OrderRoute")
   private val eventBus = new SchedulerEventBus
 
-  protected def orderSubsystem = throw new NotImplementedError()
+  protected def orderSubsystem = throw new NotImplementedError
 
   protected def webServiceContext = new WebServiceContext()
 
@@ -224,7 +225,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"$uri" in {
       for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert((responseAs[Snapshot[Vector[Snapshot[Event]]]].value map { _.value }) == OrderEvents)
+        val EventSeq.NonEmpty(snapshots) = responseAs[EventSeq[Seq, Event]]
+        assert((snapshots map { _.value }) == OrderEvents)
       }
     }
   }
@@ -283,8 +285,7 @@ object OrderRouteTest {
     Vector(
       TaskOverview(TaskId(3), TestJobPath, TaskState.running, Some(ProcessClassPath.Default))),
     Vector(
-      ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3))
-  )
+      ProcessClassOverview(ProcessClassPath.Default, FileBasedState.active, processLimit = 30, usedProcessCount = 3)))
 
   private val DetailedOrdersComplemented = OrdersComplemented[OrderDetailed](
     TestOrderDetaileds,

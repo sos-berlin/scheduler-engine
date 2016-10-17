@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{Event, EventId, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
@@ -38,7 +38,9 @@ with ProcessClassClient {
 
 //  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]]
 
-  def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]]
+  def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
+
+  def eventsReverse[E <: Event: ClassTag](after: EventId, limit: Int): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]]
 
   final def ordersComplemented[V <: OrderView: OrderView.Companion]: Future[Snapshot[OrdersComplemented[V]]] =
     ordersComplementedBy[V](OrderQuery.All)

@@ -14,7 +14,7 @@ final class EventIdGenerator @Inject extends Iterator[EventId] {
 
   private val lastResult = new AtomicLong(EventId.BeforeFirst)
 
-  def last: EventId = lastResult.get
+  def lastUsedEventId: EventId = lastResult.get
 
   def hasNext = true
 

@@ -25,6 +25,7 @@ import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
+import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -89,6 +90,10 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideEventCollectorConfiguration(config: Config): EventCollector.Configuration =
+    EventCollector.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.event"))
 
   @Provides @Singleton
   private def provideGateKeeperConfiguration(config: Config): GateKeeper.Configuration =
