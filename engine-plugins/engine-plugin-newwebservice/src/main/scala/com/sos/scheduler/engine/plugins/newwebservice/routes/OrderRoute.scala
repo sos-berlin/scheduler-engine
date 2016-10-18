@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainNodeQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview, Orders}
@@ -16,9 +18,9 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
+import java.time.Duration
 import scala.concurrent.ExecutionContext
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
-import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
 
@@ -64,13 +66,17 @@ trait OrderRoute extends LogRoute {
 
         case "Event" ⇒
           parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-            implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage(orderKey)
-            completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId))
+            parameter("timeout".as[Duration]) { timeout ⇒
+              implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage(orderKey)
+              completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout))
+            }
           }
 
         case "OrderEvent" ⇒
           parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-            completeTryHtml(client.eventsForKey[OrderEvent](orderKey, after = afterEventId))
+            parameter("timeout".as[Duration]) { timeout ⇒
+              completeTryHtml(client.eventsForKey[OrderEvent](orderKey, after = afterEventId, timeout))
+            }
           }
 
         case o ⇒

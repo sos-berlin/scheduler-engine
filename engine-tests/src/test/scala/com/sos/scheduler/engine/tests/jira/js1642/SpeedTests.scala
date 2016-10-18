@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderStatistics}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1642.Data._
 import com.sos.scheduler.engine.tests.jira.js1642.SpeedTests._
 import org.scalatest.FreeSpec
+import scala.concurrent.ExecutionContext.Implicits.global
 import spray.http.MediaTypes._
 import spray.http.{HttpData, HttpEntity}
 import spray.httpx.unmarshalling.Unmarshaller
@@ -32,6 +33,26 @@ private[js1642] trait SpeedTests {
 
   def addOptionalSpeedTests() {
     for (n ← sys.props.optionAs[Int]("JS1642IT")) {
+      val nonDistributedQuery = OrderQuery(JobChainNodeQuery(JobChainQuery(isDistributed = Some(false))))  // 6 orders ?
+
+      "orders[OrderOverview] speed" in {
+        for (_ ← 1 to 20) {
+          val stopwatch = new Stopwatch
+          val n = 1000
+          (for (_ ← 1 to n) yield webSchedulerClient.get[String](_.order[OrderOverview](nonDistributedQuery))) await TestTimeout
+          logger.info(stopwatch.itemsPerSecondString(n, "OrderOverview"))
+        }
+      }
+
+      "ordersComplemented speed" in {
+        for (_ ← 1 to 20) {
+          val stopwatch = new Stopwatch
+          val n = 1000
+          (for (_ ← 1 to n) yield webSchedulerClient.get[String](_.order.complemented[OrderOverview](nonDistributedQuery))) await TestTimeout
+          logger.info(stopwatch.itemsPerSecondString(n, "OrdersComplemented[OrderOverview]"))
+        }
+      }
+
       "Speed test Order C++ accesses" - {
         "a1OrderKey" in {
           instance[OrderTester].testSpeed(a1OrderKey, 3, 10000)

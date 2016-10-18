@@ -38,33 +38,46 @@ function startOrderStatisticsChangedListener(path) {
   document.addEventListener("visibilitychange", documentVisibilityChanged, false);
 
   function get(lastEventId) {
+    if (lastEventId !== 1*lastEventId) throw Error("Invalid argument lastEventId=" + lastEventId)
     var requestedAt = new Date()
     jQuery.ajax({
       dataType: 'json',
-      url: "/jobscheduler/master/api/event" + path + "?return=OrderStatisticsChanged&after=" + lastEventId
+      url: "/jobscheduler/master/api/event" + path + "?return=OrderStatisticsChanged&timeout=60s&after=" + lastEventId
     })
     .done(function(snapshot) {
       refreshElem.style.visibility = "hidden";
       widgetJq.removeClass('OrderStatistics-error');
-      var events = snapshot.elements;
       timestampValueDom.innerText = new Date(snapshot.eventId / 1000).toTimeString().substring(0, 8);
-      var event = events[0];
-      var stat = event.orderStatistics;
-      for (i in keys) {
-        var key = keys[i];
-        if (stat[key] !== current[key]) {
-          var field = fields[key];
-          field.valueDom.innerText = stat[key].toString();
-          if (typeof current[key] !== "undefined") {  // Not the first change?
-            var style = field.fieldDom.style
-            // 'alt' alternates between 1 and 0 to force the animation to restart
-            var alt = 1 - 1 * style.animationName.substring(style.animationName.length - 1)
-            style.animationName = stat[key] > current[key]? 'OrderStatistics-higher-' + alt : 'OrderStatistics-lower-' + alt;
+      var continueAfterEventId
+      if (snapshot.hasOwnProperty("events")) {
+        if (snapshot.events.length > 0) {
+          var events = snapshot.events;
+          var event = events[0];
+          var stat = event.orderStatistics;
+          for (i in keys) {
+            var key = keys[i];
+            if (stat[key] !== current[key]) {
+              var field = fields[key];
+              field.valueDom.innerText = stat[key].toString();
+              if (typeof current[key] !== "undefined") {  // Not the first change?
+                var style = field.fieldDom.style
+                // 'alt' alternates between 1 and 0 to force the animation to restart
+                var alt = 1 - 1 * style.animationName.substring(style.animationName.length - 1)
+                style.animationName = stat[key] > current[key]? 'OrderStatistics-higher-' + alt : 'OrderStatistics-lower-' + alt;
+              }
+            }
           }
+          current = stat;
+          continueAfterEventId = event.eventId;
+        } else {
+          // No data, timed-out
+          continueAfterEventId = lastEventId
         }
+      } else {
+        // Teared
+        continueAfterEventId = snapshot.lastEventId;
       }
-      current = stat;
-      function getNextEvent() { get(event.eventId); }
+      function getNextEvent() { get(continueAfterEventId); }
       if (document.hidden) {
         showRefreshing();
         delayedGetNextEvent = getNextEvent;

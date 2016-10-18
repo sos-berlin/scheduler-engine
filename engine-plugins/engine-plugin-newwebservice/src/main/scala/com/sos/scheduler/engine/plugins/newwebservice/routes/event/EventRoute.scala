@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
-import com.sos.scheduler.engine.base.convert.As._
 import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventSeq, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -13,6 +14,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.keyedEventsToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import java.time.Duration
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
@@ -33,8 +35,10 @@ trait EventRoute extends HasCloser with OrderEventRoute {
 
   def eventRoute: Route =
     parameter("return".?) {
-      case Some("OrderStatisticsChanged") ⇒ orderPathEventRoute
-      case _ ⇒ otherEventRoute
+      case Some("OrderStatisticsChanged") ⇒
+        orderPathEventRoute
+      case _ ⇒
+        otherEventRoute
     }
 
   private def otherEventRoute: Route =
@@ -42,8 +46,10 @@ trait EventRoute extends HasCloser with OrderEventRoute {
       pathSingleSlash {
         val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
         if (limit >= 0)
-          completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
-            client.events[Event](after = afterEventId, limit = limit)(classTag)
+          parameter("timeout".as[Duration]) { timeout ⇒
+            completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
+              client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
+            }
           }
         else
           completeTryHtml[Seq[Snapshot[AnyKeyedEvent]]] {

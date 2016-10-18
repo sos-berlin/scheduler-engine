@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.client.web.common.PathQueryHttp
 import com.sos.scheduler.engine.common.scalautil.Collections._
+import com.sos.scheduler.engine.common.time.ScalaTime.RichDuration
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
@@ -13,6 +14,7 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
+import java.time.Duration
 import scala.language.reflectiveCalls
 import spray.http.Uri
 
@@ -82,8 +84,8 @@ final class SchedulerUris private(schedulerUriString: String) {
         query = Uri.Query((returnType map { o ⇒ "return" → o }).toMap)))
     }
 
-    def events(orderKey: OrderKey) =
-      uriString(Uri.Path("api/order" + orderKey.string), "return" → "Event")
+    def events(orderKey: OrderKey, timeout: Duration) =
+      uriString(Uri.Path("api/order" + orderKey.string), "timeout" → timeout.toString, "return" → "Event")
 
     private def orderView[V <: OrderView: OrderView.Companion] =
       implicitly[OrderView.Companion[V]]
@@ -154,24 +156,24 @@ final class SchedulerUris private(schedulerUriString: String) {
     def forward(agentUri: String) = uriString(Uri.Path(s"api/agent/$agentUri"))
   }
 
-  def events =  uriString(Uri.Path("api/event/"))
-
-  def events(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
+  def events(after: EventId = EventId.BeforeFirst, timeout: Duration, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
-    events0(after, limit, returnType)
-  }
-
-  def eventsReverse(after: EventId = EventId.BeforeFirst, limit: Int, returnType: String = DefaultEventName) = {
-    require(limit > 0, "Limit must not be below zero")
-    events0(after, -limit, returnType)
-  }
-
-  private def events0(after: EventId = EventId.BeforeFirst, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) =
     uriString(
       Uri.Path("api/event/"),
       (returnType != DefaultEventName list ("return" → returnType)) :::
         (after != EventId.BeforeFirst list ("after" → after.toString)) :::
-        (limit != Int.MaxValue list ("limit" → limit.toString)): _*)
+        (limit != Int.MaxValue list ("limit" → limit.toString)) :::
+        List("timeout" → timeout.toSecondsString): _*)
+  }
+
+  def eventsReverse(after: EventId = EventId.BeforeFirst, limit: Int, returnType: String = DefaultEventName) = {
+    require(limit > 0, "Limit must not be below zero")
+    uriString(
+      Uri.Path("api/event/"),
+      (returnType != DefaultEventName list ("return" → returnType)) :::
+        (after != EventId.BeforeFirst list ("after" → after.toString)) :::
+        (limit != Int.MaxValue list ("limit" → (-limit).toString)): _*)
+  }
 
   def uriString(path: Uri.Path, parameters: (String, String)*): String =
     resolvePathUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString

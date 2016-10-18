@@ -221,7 +221,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (uri ← List(
-      s"$OrderUri/aJobChain,1?return=Event")) {
+      s"$OrderUri/aJobChain,1?return=Event&timeout=60s")) {
     s"$uri" in {
       for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
@@ -232,7 +232,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (uri ← List(
-    s"$OrderUri/?return=OrderStatistics")) {
+    s"$OrderUri/?return=OrderStatistics&timeout=60s")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[Snapshot[OrderStatistics]].value == TestOrderStatistics)

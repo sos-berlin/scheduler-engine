@@ -612,18 +612,18 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "Events" - {
     "OrderStatisticsChanged" in {
-      val Snapshot(aEventId, EventSeq.NonEmpty(aEvents)) = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst) await TestTimeout
+      val Snapshot(aEventId, EventSeq.NonEmpty(aEvents)) = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst, TestTimeout) await TestTimeout
       val aStatistics = aEvents.head.value.event.orderStatistics
 
-      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aEventId)
+      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aEventId, TestTimeout)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
       val Snapshot(bEventId, EventSeq.NonEmpty(bEvents)) = bFuture await TestTimeout
       val bStatistics = bEvents.head.value.event.orderStatistics
       assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
 
-      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bEventId)
+      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bEventId, TestTimeout)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
-      val Snapshot(cEventId, EventSeq.NonEmpty(cEvents)) = cFuture await TestTimeout
+      val Snapshot(_, EventSeq.NonEmpty(cEvents)) = cFuture await TestTimeout
       val cStatistics = cEvents.head.value.event.orderStatistics
       assert(cStatistics == aStatistics)
     }
@@ -634,22 +634,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   }
 
   "Speed tests" - {
-    for ((testGroup, getClient) ← setting) testGroup - {
-      lazy val client = getClient()
-
-      "orders[OrderOverview] speed" in {
-        Stopwatch.measureTime(50, s""""orderOverviews with $OrderCount orders"""") {
-          client.orders[OrderOverview] await TestTimeout
-        }
-      }
-
-      "ordersComplemented speed" in {
-        Stopwatch.measureTime(50, "ordersComplemented") {
-          client.ordersComplemented[OrderOverview] await TestTimeout
-        }
-      }
-    }
-
     addOptionalSpeedTests()
   }
 

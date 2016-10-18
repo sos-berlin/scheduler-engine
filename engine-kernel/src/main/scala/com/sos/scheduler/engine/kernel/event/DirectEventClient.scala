@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.kernel.event.DirectEventClient._
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
+import java.time.Duration
 import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -17,10 +18,11 @@ trait DirectEventClient {
   protected def eventCollector: EventCollector
   protected implicit def executionContext: ExecutionContext
 
-  def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     wrapIntoSnapshot(
       eventCollector.when[E](
         after,
+        timeout,
         keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent),
         limit = limit))
 
@@ -39,11 +41,12 @@ trait DirectEventClient {
       case _ ⇒ true
     }
 
-  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[EventSeq[Seq, E]]] =
+  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, timeout: Duration, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[EventSeq[Seq, E]]] =
     wrapIntoSnapshot(
       eventCollector.whenForKey(
         key,
         after,
+        timeout,
         eventTypedJsonFormat.canSerialize,
         limit = limit,
         reverse = reverse))

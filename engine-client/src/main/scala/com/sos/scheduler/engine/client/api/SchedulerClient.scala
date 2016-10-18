@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOvervie
 import com.sos.scheduler.engine.data.order.OrderView
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import java.time.Duration
 import scala.collection.immutable
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
@@ -38,7 +39,7 @@ with ProcessClassClient {
 
 //  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]]
 
-  def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
+  def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
 
   def eventsReverse[E <: Event: ClassTag](after: EventId, limit: Int): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]]
 

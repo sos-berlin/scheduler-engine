@@ -3,12 +3,15 @@ package com.sos.scheduler.engine.kernel.event.collector
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutureFuture
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector._
 import com.typesafe.config.Config
+import java.time.Duration
+import java.time.Instant.now
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 /**
@@ -38,21 +41,24 @@ extends HasCloser {
 
   def when[E <: Event: ClassTag](
     after: EventId,
+    timeout: Duration,
     predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
     limit: Int = Int.MaxValue)
   : Future[EventSeq[Iterator, KeyedEvent[E]]]
   =
-    whenAny[E](Set(implicitClass[E]), after, predicate, limit)
+    whenAny[E](Set(implicitClass[E]), after, timeout, predicate, limit)
 
   def whenAny[E <: Event](
     eventClasses: Set[Class[_ <: E]],
     after: EventId,
+    timeout: Duration,
     predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
     limit: Int = Int.MaxValue)
   : Future[EventSeq[Iterator, KeyedEvent[E]]]
   =
     whenAnyKeyedEvents(
       after,
+      timeout,
       collect = {
         case e if eventClasses.exists(_ isAssignableFrom e.event.getClass) && predicate(e.asInstanceOf[KeyedEvent[E]]) ⇒
           e.asInstanceOf[KeyedEvent[E]]
@@ -62,6 +68,7 @@ extends HasCloser {
   def whenForKey[E <: Event: ClassTag](
     key: E#Key,
     after: EventId,
+    timeout: Duration,
     predicate: E ⇒ Boolean = (_: E) ⇒ true,
     limit: Int = Int.MaxValue,
     reverse: Boolean = false)
@@ -69,19 +76,29 @@ extends HasCloser {
   =
     whenAnyKeyedEvents(
       after,
+      timeout,
       collect = {
         case e if (implicitClass[E] isAssignableFrom e.event.getClass) && e.key == key && predicate(e.event.asInstanceOf[E]) ⇒
           e.event.asInstanceOf[E]
       },
       limit)
 
-  private def whenAnyKeyedEvents[A](after: EventId, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): Future[EventSeq[Iterator, A]] =
-    (for (() ← sync.whenEventIsAvailable(after)) yield
-      collectEventsSince(after, collect, limit) match {
-        case o @ EventSeq.NonEmpty(collected) ⇒ Future.successful(o)
-        case EventSeq.Empty(lastEventId) ⇒ whenAnyKeyedEvents(lastEventId, collect, limit)
-        case EventSeq.Teared ⇒ Future.successful(EventSeq.Teared)
-    }).flatten
+  private def whenAnyKeyedEvents[A](after: EventId, timeout: Duration, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): Future[EventSeq[Iterator, A]] = {
+    val until = now + timeout
+    def loop(): Future[EventSeq[Iterator, A]] =
+      (for (() ← sync.whenEventIsAvailable(after)) yield
+        collectEventsSince(after, collect, limit) match {
+          case o @ EventSeq.NonEmpty(collected) ⇒
+            Future.successful(o)
+          case EventSeq.Empty(lastEventId) if now < until ⇒
+            loop()
+          case EventSeq.Empty(lastEventId) ⇒
+            Future.successful(EventSeq.Empty(lastEventId))
+          case EventSeq.Teared ⇒
+            Future.successful(EventSeq.Teared)
+      }).flatten
+    loop()
+  }
 
   private def collectEventsSince[A](after: EventId, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): EventSeq[Iterator, A] = {
     require(limit >= 0, "limit must be >= 0")

@@ -14,6 +14,7 @@ import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
+import java.time.Duration
 import scala.collection.immutable
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
@@ -125,8 +126,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   // Event
 
-  final def events[E <: Event: ClassTag](after: EventId, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.events(after = after, limit = limit, returnType = implicitClass[E].getSimpleName))
+  final def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.events(after = after, timeout, limit = limit, returnType = implicitClass[E].getSimpleName))
 
   final def eventsReverse[E <: Event: ClassTag](after: EventId = EventId.BeforeFirst, limit: Int): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
     get[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]](_.eventsReverse(after, limit = limit, returnType = implicitClass[E].getSimpleName))
