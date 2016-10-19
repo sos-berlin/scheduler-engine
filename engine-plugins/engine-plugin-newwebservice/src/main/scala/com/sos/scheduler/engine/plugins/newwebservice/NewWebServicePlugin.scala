@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
-import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
+import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins, UseGuiceModule}
@@ -27,6 +27,7 @@ final class NewWebServicePlugin @Inject private(
   @Named(Plugins.configurationXMLName) pluginElement: Element,
   schedulerConfiguration: SchedulerConfiguration,
   gateKeeperConfiguration: GateKeeper.Configuration,
+  csrf: CSRF,
   config: Config,
   schedulerInjector: Injector)
   (implicit
@@ -47,7 +48,7 @@ extends Plugin {
   private def runWithSprayWebServer(): Unit = {
     val bindings = (httpBinding ++ httpsBinding).toList
     if (bindings.nonEmpty) {
-      val webServer = new EngineWebServer(bindings, gateKeeperConfiguration, myInjector)
+      val webServer = new EngineWebServer(bindings, gateKeeperConfiguration, csrf, myInjector)
       closer.registerAutoCloseable(webServer)
       webServer.start() await 60.s
     }

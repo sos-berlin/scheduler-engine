@@ -25,12 +25,12 @@ import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.MediaTypes._
-import spray.http.StatusCodes.Unauthorized
-import spray.http.{BasicHttpCredentials, HttpRequest, HttpResponse}
+import spray.http.StatusCodes.{Forbidden, Unauthorized}
+import spray.http.{BasicHttpCredentials, HttpRequest, HttpResponse, Uri}
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.UnsuccessfulResponseException
 import spray.httpx.encoding.Gzip
-import spray.httpx.unmarshalling.FromResponseUnmarshaller
+import spray.httpx.unmarshalling.{FromResponseUnmarshaller, PimpedHttpResponse}
 
 /**
  * @author Joacim Zschimmer
@@ -63,25 +63,35 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
   "HTTPS" - {
     lazy val uri = httpsUri
 
-    "Unauthorized due to missing credentials" in {
-      intercept[UnsuccessfulResponseException] {
-        pipeline[HttpResponse](password = None).apply(Get(uri)) await 10.s
+    "Unauthorized request is rejected" - {
+      "due to missing credentials" in {
+        intercept[UnsuccessfulResponseException] {
+          pipeline[HttpResponse](password = None).apply(Get(uri)) await 10.s
+        }
+        .response.status shouldEqual Unauthorized
       }
-      .response.status shouldEqual Unauthorized
+
+      "due to wrong credentials" in {
+        val t = now
+        val e = intercept[UnsuccessfulResponseException] {
+          pipeline[SchedulerOverview](Some("WRONG-PASSWORD")).apply(Get(uri)) await 10.s
+        }
+        assert(now - t > instance[GateKeeper.Configuration].invalidAuthenticationDelay - 50.ms)  // Allow for timer rounding
+        e.response.status shouldEqual Unauthorized
+      }
+
+      addPostTextPlainText(uri)
     }
 
-    "Unauthorized due to wrong credentials" in {
-      val t = now
-      val e = intercept[UnsuccessfulResponseException] {
-        pipeline[SchedulerOverview](Some("WRONG-PASSWORD")).apply(Get(uri)) await 10.s
-      }
-      assert(now - t > instance[GateKeeper.Configuration].invalidAuthenticationDelay - 50.ms)  // Allow for timer rounding
-      e.response.status shouldEqual Unauthorized
-    }
+    "Authorized request" - {
+      val password = Some("TEST-PASSWORD")
 
-    "Authorized" in {
-      val overview = pipeline[SchedulerOverview](Some("TEST-PASSWORD")).apply(Get(uri)) await 10.s
-      assert(overview.schedulerId == SchedulerId("test"))
+      "is accepted" in {
+        val overview = pipeline[SchedulerOverview](password).apply(Get(uri)) await 10.s
+        assert(overview.schedulerId == SchedulerId("test"))
+      }
+
+      addPostTextPlainText(uri, password)
     }
   }
 
@@ -93,11 +103,22 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
       assert(overview.schedulerId == SchedulerId("test"))
     }
 
+    addPostTextPlainText(uri)
+
     "Credentials are ignored" in {
       val overview = pipeline[SchedulerOverview](Some("WRONG-PASSWORD")).apply(Get(uri)) await 10.s
       assert(overview.schedulerId == SchedulerId("test"))
     }
   }
+
+  private def addPostTextPlainText(uri: Uri, password: Option[String] = None): Unit =
+    "POST plain/text is rejected due to CSRF" in {
+      val response = intercept[UnsuccessfulResponseException] {
+        pipeline[HttpResponse](password).apply(Post(uri, "TEXT")) await 10.s
+      } .response
+      assert(response.status == Forbidden)
+      assert(response.as[String].right.get == "HTML form POST is forbidden")
+    }
 }
 
 private object JS1670IT {

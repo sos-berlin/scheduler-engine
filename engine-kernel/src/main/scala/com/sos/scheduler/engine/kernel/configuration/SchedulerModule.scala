@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
-import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
+import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
@@ -90,6 +90,10 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
+
+  @Provides @Singleton
+  private def provideCsrfConfiguration(config: Config): CSRF.Configuration =
+    CSRF.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.webserver.csrf"))
 
   @Provides @Singleton
   private def provideEventCollectorConfiguration(config: Config): EventCollector.Configuration =

@@ -56,7 +56,7 @@ extends HttpServiceActor with AllRoutes with AgentRouteSchedulerAdapter {
   }
 
   override def receive = runRoute(
-    gateKeeper.allows {
+    gateKeeper.restrict {
       completeRoute
     })
 }
