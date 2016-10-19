@@ -61,6 +61,6 @@ extends Plugin {
     WebServerBinding.Https(StringToServerInetSocketAddress(o), newKeyStoreReference())
 
   private def newKeyStoreReference() = KeystoreReference.fromSubConfig(
-    config.getConfig("jobscheduler.master.https.keystore"),
+    config.getConfig("jobscheduler.master.webserver.https.keystore"),
     configDirectory = schedulerConfiguration.mainConfigurationDirectory)
 }

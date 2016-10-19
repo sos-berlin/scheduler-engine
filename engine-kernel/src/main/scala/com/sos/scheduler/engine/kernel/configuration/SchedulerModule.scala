@@ -101,7 +101,7 @@ with HasCloser {
 
   @Provides @Singleton
   private def provideGateKeeperConfiguration(config: Config): GateKeeper.Configuration =
-    GateKeeper.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.auth"))
+    GateKeeper.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.webserver.auth"))
 
   @Provides @Singleton
   private def provideJdbcConnectionPool(config: Config, databaseSubsystem: DatabaseSubsystem, executionContext: ExecutionContext): JdbcConnectionPool =
