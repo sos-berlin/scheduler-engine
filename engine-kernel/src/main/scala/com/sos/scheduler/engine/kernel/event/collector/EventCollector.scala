@@ -94,8 +94,8 @@ extends HasCloser {
             loop()
           case EventSeq.Empty(lastEventId) ⇒
             Future.successful(EventSeq.Empty(lastEventId))
-          case EventSeq.Teared ⇒
-            Future.successful(EventSeq.Teared)
+          case EventSeq.Torn ⇒
+            Future.successful(EventSeq.Torn)
       }).flatten
     loop()
   }
@@ -119,7 +119,7 @@ extends HasCloser {
         else
           EventSeq.Empty(lastEventId)
       case None ⇒
-        EventSeq.Teared
+        EventSeq.Torn
     }
   }
 
@@ -131,7 +131,7 @@ extends HasCloser {
   =
     keyedEventQueue.reverseEvents(after = after)
       .collect {
-        case snapshot if implicitClass[E].isAssignableFrom(snapshot.value.getClass) && predicate(snapshot.value.asInstanceOf[KeyedEvent[E]]) ⇒
+        case snapshot if implicitClass[E].isAssignableFrom(snapshot.value.event.getClass) && predicate(snapshot.value.asInstanceOf[KeyedEvent[E]]) ⇒
           snapshot.asInstanceOf[Snapshot[KeyedEvent[E]]]
       }
       .take(limit)

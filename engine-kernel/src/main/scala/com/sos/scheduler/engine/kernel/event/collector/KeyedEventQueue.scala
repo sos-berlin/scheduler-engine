@@ -33,9 +33,9 @@ final class KeyedEventQueue(sizeLimit: Int) {
 
   /**
     * Returns an Some[Iterator] of events or None if the first requested EventId has gone by.
-    * The Iterator ends with the end of the queue when the queue has teared, if at least one event has been returned.
+    * The Iterator ends with the end of the queue when the queue has torn, if at least one event has been returned.
     * <p>
-    *   None is returned if the queue has teared at its front (`after` < `oldestEventId`).
+    *   None is returned if the queue has torn at its front (`after` < `oldestEventId`).
     */
   def after(after: EventId): Option[Iterator[Snapshot[AnyKeyedEvent]]] = {
     val result = new EventIterator(after, queue.navigableKeySet.tailSet(after, false).iterator map queue.get)

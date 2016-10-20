@@ -35,7 +35,7 @@ final class EventCollectorTest extends FreeSpec {
     }
   }
 
-  "eventCollector.when with teared event stream" in {
+  "eventCollector.when with torn event stream" in {
     autoClosing(new EventCollector(eventIdGenerator, eventBus, EventCollector.Configuration(queueSize = 2))) { eventCollector ⇒
       val anyFuture = eventCollector.when[Event](after = EventId.BeforeFirst, 30.s)
       val bFuture = eventCollector.when[BEvent](after = EventId.BeforeFirst, 30.s)
@@ -56,7 +56,7 @@ final class EventCollectorTest extends FreeSpec {
       val EventSeq.NonEmpty(cEventIterator) = eventCollector.when[BEvent](after = bEvents.last.eventId, 1.s) await 100.ms
       assert((cEventIterator.toList map { _.value }) == List(KeyedEvent(B1)("2")))
 
-      assert((eventCollector.when[BEvent](after = EventId.BeforeFirst, 1.s) await 100.ms) == EventSeq.Teared)
+      assert((eventCollector.when[BEvent](after = EventId.BeforeFirst, 1.s) await 100.ms) == EventSeq.Torn)
     }
   }
 

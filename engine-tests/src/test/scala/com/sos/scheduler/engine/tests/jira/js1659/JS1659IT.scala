@@ -50,7 +50,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
       KeyedEvent(OrderNodeChanged(NodeId("300"), NodeId("200")))(TestOrderKey)))
   }
 
-  "EventSeq.Teared" in {
+  "EventSeq.Torn" in {
     val oldEventId = eventIdGenerator.lastUsedEventId
     // Generate enough events to tear the event stream starting at beforeTestEventId
     for (_ ← 1 to 10) {
@@ -60,7 +60,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
       }
     }
     val snapshot = client.events[Event](after = oldEventId, TestTimeout) await TestTimeout
-    assert(snapshot.value == EventSeq.Teared)
+    assert(snapshot.value == EventSeq.Torn)
   }
 }
 

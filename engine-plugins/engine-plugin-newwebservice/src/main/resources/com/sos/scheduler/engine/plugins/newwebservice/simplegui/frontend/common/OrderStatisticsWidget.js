@@ -49,10 +49,10 @@ function startOrderStatisticsChangedListener(path) {
       widgetJq.removeClass('OrderStatistics-error');
       timestampValueDom.innerText = new Date(snapshot.eventId / 1000).toTimeString().substring(0, 8);
       var continueAfterEventId
-      if (snapshot.hasOwnProperty("events")) {
-        if (snapshot.events.length > 0) {
-          var events = snapshot.events;
-          var event = events[0];
+      if (snapshot.hasOwnProperty("eventSnapshots")) {
+        if (snapshot.eventSnapshots.length > 0) {
+          var eventSnapshots = snapshot.eventSnapshots;
+          var event = eventSnapshots[0];
           var stat = event.orderStatistics;
           for (i in keys) {
             var key = keys[i];

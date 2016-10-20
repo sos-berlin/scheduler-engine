@@ -16,7 +16,7 @@ final class KeyedEventQueueTest extends FreeSpec {
   private val eventSnapshots = for (i ← 1 to 5) yield Snapshot(EventId(i), KeyedEvent(AEvent(i)))
   eventSnapshots foreach queue.add
 
-  "event stream teared and the first event has been lost" in {
+  "event stream is torn - the first event has been lost" in {
     assert(queue.after(EventId.BeforeFirst) == None)
   }
 

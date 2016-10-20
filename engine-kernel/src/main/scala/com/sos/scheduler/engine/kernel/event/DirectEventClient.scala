@@ -56,7 +56,7 @@ trait DirectEventClient {
       eventCollector.newSnapshot(eventSeq match {
         case EventSeq.NonEmpty(events) ⇒ EventSeq.NonEmpty(events.toVector)
         case o: EventSeq.Empty ⇒ o
-        case EventSeq.Teared ⇒ EventSeq.Teared
+        case EventSeq.Torn ⇒ EventSeq.Torn
       })
 }
 
