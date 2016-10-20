@@ -26,7 +26,6 @@ private[routes] object EventRoutes {
         val returnType = parameters.as[String]("return", classOf[Event].getSimpleName)
         val afterEventId = parameters.as[Long]("after", EventId.BeforeFirst)
         val limit = parameters.as[Int]("limit", Int.MaxValue)
-        //val timeout = parameters.optionAs[Int]("timeout") map { o ⇒ Duration.ofSeconds(o) }
         if (limit == 0)
           reject(ValidationRejection(s"Invalid limit=$limit"))
         else
