@@ -90,7 +90,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     "DirectSchedulerClient" → { () ⇒ directSchedulerClient },
     "WebSchedulerClient" → { () ⇒ webSchedulerClient })
 
-  private lazy val eventReader = new EventReader(webSchedulerClient, eventCollector, controller).closeWithCloser
+  private lazy val eventReader = new EventReader(webSchedulerClient, eventCollector.eventIdGenerator, controller).closeWithCloser
 
   private lazy val data = new Data(
     taskIdToStartedAt = (for (taskId ← 3 to 5 map TaskId.apply) yield taskId → taskSubsystem.task(taskId).processStartedAt.get).toMap)
@@ -612,19 +612,22 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "Events" - {
     "OrderStatisticsChanged" in {
-      val Snapshot(_, EventSeq.NonEmpty(aEvents)) = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst, TestTimeout) await TestTimeout
-      val aStatistics = aEvents.head.value.event.orderStatistics
+      val Snapshot(aResponseEventId, EventSeq.NonEmpty(aKeyedEventSnapshots)) = webSchedulerClient.events[OrderStatisticsChanged](after = EventId.BeforeFirst, TestTimeout) await TestTimeout
+      assert(aResponseEventId >= aKeyedEventSnapshots.last.eventId)
+      val aStatistics = aKeyedEventSnapshots.head.value.event.orderStatistics
 
-      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aEvents.last.eventId, TestTimeout)
+      val bFuture = webSchedulerClient.events[OrderStatisticsChanged](after = aKeyedEventSnapshots.last.eventId, TestTimeout)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
-      val Snapshot(_, EventSeq.NonEmpty(bEvents)) = bFuture await TestTimeout
-      val bStatistics = bEvents.head.value.event.orderStatistics
+      val Snapshot(bResponseEventId, EventSeq.NonEmpty(bKeyedEventSnapshots)) = bFuture await TestTimeout
+      assert(bResponseEventId >= bKeyedEventSnapshots.last.eventId)
+      val bStatistics = bKeyedEventSnapshots.head.value.event.orderStatistics
       assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1))
 
-      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bEvents.last.eventId, TestTimeout)
+      val cFuture = webSchedulerClient.events[OrderStatisticsChanged](after = bKeyedEventSnapshots.last.eventId, TestTimeout)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
-      val Snapshot(_, EventSeq.NonEmpty(cEvents)) = cFuture await TestTimeout
-      val cStatistics = cEvents.head.value.event.orderStatistics
+      val Snapshot(cResponseEventId, EventSeq.NonEmpty(cKeyedEventSnapshots)) = cFuture await TestTimeout
+      assert(cResponseEventId >= cKeyedEventSnapshots.last.eventId)
+      val cStatistics = cKeyedEventSnapshots.head.value.event.orderStatistics
       assert(cStatistics == aStatistics)
     }
 

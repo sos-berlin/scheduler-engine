@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eve
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.kernel.event.DirectEventClient._
-import com.sos.scheduler.engine.kernel.event.collector.EventCollector
+import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import java.time.Duration
 import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,6 +16,7 @@ import scala.reflect.ClassTag
   */
 trait DirectEventClient {
   protected def eventCollector: EventCollector
+  protected def eventIdGenerator: EventIdGenerator
   protected implicit def executionContext: ExecutionContext
 
   def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
@@ -27,7 +28,7 @@ trait DirectEventClient {
         limit = limit))
 
   def eventsReverse[E <: Event: ClassTag](after: EventId = EventId.BeforeFirst, limit: Int): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]] =
-    Future.successful(eventCollector.newSnapshot(
+    Future.successful(eventIdGenerator.newSnapshot(
       eventCollector.reverse[E](
           after = after,
           keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent),
@@ -41,23 +42,28 @@ trait DirectEventClient {
       case _ ⇒ true
     }
 
-  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, timeout: Duration, limit: Int = Int.MaxValue, reverse: Boolean = false): Future[Snapshot[EventSeq[Seq, E]]] =
+  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, E]]] =
     wrapIntoSnapshot(
       eventCollector.whenForKey(
         key,
         after,
         timeout,
         eventTypedJsonFormat.canSerialize,
-        limit = limit,
-        reverse = reverse))
+        limit = limit))
 
-  private def wrapIntoSnapshot[E](future: Future[EventSeq[Iterator, E]]): Future[Snapshot[EventSeq[Seq, E]]] =
+  private def wrapIntoSnapshot[E](future: ⇒ Future[EventSeq[Iterator, E]]): Future[Snapshot[EventSeq[Seq, E]]] = {
+    val eventId = eventIdGenerator.next()
     for (eventSeq ← future) yield
-      eventCollector.newSnapshot(eventSeq match {
-        case EventSeq.NonEmpty(events) ⇒ EventSeq.NonEmpty(events.toVector)
-        case o: EventSeq.Empty ⇒ o
-        case EventSeq.Torn ⇒ EventSeq.Torn
-      })
+      eventSeq match {
+        case EventSeq.NonEmpty(iterator) ⇒
+          val events = iterator.toVector
+          Snapshot(math.max(eventId, events.last.eventId), EventSeq.NonEmpty(events))
+        case o: EventSeq.Empty ⇒
+          eventIdGenerator.newSnapshot(o)
+        case EventSeq.Torn ⇒
+          eventIdGenerator.newSnapshot(EventSeq.Torn)
+      }
+  }
 }
 
 object DirectEventClient {

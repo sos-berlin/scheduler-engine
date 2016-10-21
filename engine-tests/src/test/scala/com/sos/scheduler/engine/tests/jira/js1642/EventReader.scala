@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Event
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.log.Logged
-import com.sos.scheduler.engine.kernel.event.collector.EventCollector
+import com.sos.scheduler.engine.kernel.event.collector.EventIdGenerator
 import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.tests.jira.js1642.EventReader._
 import org.scalatest.Matchers._
@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext
 /**
   * @author Joacim Zschimmer
   */
-final class EventReader(webSchedulerClient: WebSchedulerClient, eventCollector: EventCollector, controller: TestSchedulerController)
+final class EventReader(webSchedulerClient: WebSchedulerClient, eventIdGenerator: EventIdGenerator, controller: TestSchedulerController)
   (implicit closer: Closer, ec: ExecutionContext)
 extends AutoCloseable {
 
@@ -31,7 +31,7 @@ extends AutoCloseable {
   private var activatedEventId = EventId.BeforeFirst
 
   def start(): Unit = {
-    activatedEventId = eventCollector.lastUsedEventId  // Web events before Scheduler activation are ignored
+    activatedEventId = eventIdGenerator.lastUsedEventId  // Web events before Scheduler activation are ignored
     eventBus.onHot[Event] {
       case event if SchedulerAnyKeyedEventJsonFormat canSerialize event ⇒
         if (isPermitted(event)) {

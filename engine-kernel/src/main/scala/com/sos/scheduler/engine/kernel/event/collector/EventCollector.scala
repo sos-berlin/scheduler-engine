@@ -19,7 +19,7 @@ import scala.reflect.ClassTag
   */
 @Singleton
 final class EventCollector @Inject()(
-  eventIdGenerator: EventIdGenerator,
+  val eventIdGenerator: EventIdGenerator,
   eventBus: SchedulerEventBus,
   configuration: Configuration = Configuration.Default)
   (implicit ec: ExecutionContext)
@@ -70,8 +70,7 @@ extends HasCloser {
     after: EventId,
     timeout: Duration,
     predicate: E ⇒ Boolean = (_: E) ⇒ true,
-    limit: Int = Int.MaxValue,
-    reverse: Boolean = false)
+    limit: Int = Int.MaxValue)
   : Future[EventSeq[Iterator, E]]
   =
     whenAnyKeyedEvents(
@@ -137,8 +136,6 @@ extends HasCloser {
       .take(limit)
 
   def newSnapshot[A](a: A) = eventIdGenerator.newSnapshot(a)
-
-  def lastUsedEventId: EventId = eventIdGenerator.lastUsedEventId
 }
 
 object EventCollector {

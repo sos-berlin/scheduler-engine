@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
-import com.sos.scheduler.engine.kernel.event.collector.EventCollector
+import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
@@ -36,6 +36,7 @@ final class DirectSchedulerClient @Inject private(
   jobSubsystem: JobSubsystem,
   processClassSubsystem: ProcessClassSubsystem,
   fileBasedSubsystemRegister: FileBasedSubsystem.Register,
+  protected val eventIdGenerator: EventIdGenerator,
   protected val eventCollector: EventCollector)(
   implicit schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val executionContext: ExecutionContext)

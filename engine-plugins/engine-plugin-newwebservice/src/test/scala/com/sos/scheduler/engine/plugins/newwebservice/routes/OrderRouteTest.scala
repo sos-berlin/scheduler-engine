@@ -54,7 +54,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   protected def actorRefFactory = actorSystem
 
   protected val client = new OrderClient with SchedulerOverviewClient with FileBasedClient with DirectEventClient {
-    protected val eventCollector = new EventCollector(new EventIdGenerator, eventBus)
+    protected val eventIdGenerator = new EventIdGenerator
+    protected val eventCollector = new EventCollector(eventIdGenerator, eventBus)
 
     protected def executionContext = OrderRouteTest.this.executionContext
 

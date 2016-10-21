@@ -69,7 +69,7 @@ trait OrderRoute extends LogRoute {
             case Some(eventClass) ⇒
               withEventParameters { case EventParameters(`returnType`, afterEventId, timeout, limit) ⇒
                 implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
-                completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout)(ClassTag(eventClass)))
+                completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout, limit = limit)(ClassTag(eventClass)))
               }
             case None ⇒
               reject(ValidationRejection(s"Invalid parameter return=$returnType"))

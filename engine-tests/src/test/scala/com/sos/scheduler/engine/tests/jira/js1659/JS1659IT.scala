@@ -37,8 +37,9 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
     eventBus.awaiting[OrderSuspended.type](TestOrderKey) {
       scheduler executeXml OrderCommand(TestOrderKey)
     }
-    val Snapshot(_, EventSeq.NonEmpty(snapshots)) = client.events[Event](after = beforeTestEventId, TestTimeout) await TestTimeout
-    val events: Seq[KeyedEvent[Event]] = snapshots map { _.value }
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events[Event](after = beforeTestEventId, TestTimeout) await TestTimeout
+    assert(aEventId >= eventSnapshots.last.eventId)
+    val events: Seq[KeyedEvent[Event]] = eventSnapshots map { _.value }
     assert(events == Seq(
       KeyedEvent(OrderStarted)(TestOrderKey),
       KeyedEvent(OrderStepStarted(NodeId("100"), TaskId.First))(TestOrderKey),
@@ -59,8 +60,9 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
         scheduler executeXml OrderCommand(TestOrderKey)
       }
     }
-    val Snapshot(_, eventSeq) = client.events[Event](after = oldEventId, TestTimeout) await TestTimeout
+    val Snapshot(eventId, eventSeq) = client.events[Event](after = oldEventId, TestTimeout) await TestTimeout
     assert(eventSeq == EventSeq.Torn)
+    assert(eventId >= oldEventId)
   }
 }
 
