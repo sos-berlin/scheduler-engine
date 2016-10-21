@@ -61,7 +61,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       (scriptLinks map toScriptHtml)
 
   protected def cssLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.css")
-  protected def scriptLinks: Vector[Uri] = Vector()
+  protected def scriptLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.js")
 
   protected def pageBody(innerBody: Frag*): Frag =
     seqFrag(

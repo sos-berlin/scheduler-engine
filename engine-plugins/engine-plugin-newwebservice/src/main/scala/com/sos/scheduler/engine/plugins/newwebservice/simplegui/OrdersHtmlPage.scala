@@ -188,8 +188,8 @@ extends SchedulerHtmlPage {
       }
     }
     val rowCssClass = orderToTrClass(order) getOrElse (if (order.orderProcessingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
-    tr(cls := rowCssClass)(
-      td(orderKeyToA(order.orderKey)(order.orderKey.id.string)),
+    tr(cls := s"$rowCssClass clickable", data("href") := uris.order[OrderDetailed](order.orderKey))(
+      td(order.orderKey.id.string),
       td(div(cls := "visible-lg-block")(order.orderSourceType.toString)),
       td(order.startedAt map instantWithDurationToHtml),
       td(processingStateHtml, occupyingMemberHtml),
@@ -203,8 +203,6 @@ extends SchedulerHtmlPage {
   private def queryToA(query: OrderQuery) = hiddenA(uris.order(query, returnType = None))
 
   private def jobChainPathToA(path: JobChainPath) = hiddenA(uris.jobChain.details(path))
-
-  private def orderKeyToA(orderKey: OrderKey) = hiddenA(uris.order[OrderDetailed](orderKey))
 
   private def taskToA(taskId: TaskId) = hiddenA(uris.task.overview(taskId))
 

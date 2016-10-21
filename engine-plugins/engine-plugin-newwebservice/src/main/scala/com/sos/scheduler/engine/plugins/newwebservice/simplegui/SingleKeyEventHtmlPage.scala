@@ -43,7 +43,7 @@ extends SchedulerHtmlPage {
     div(cls := "ContentBox ContentBox-single Padded")(
       h3(key.toString),
       eventSeq match {
-        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=)")
+        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", snapshot.eventId, ")")
         case EventSeq.Empty(eventId) ⇒ p("No events until " + EventId.toString(eventId))
         case EventSeq.NonEmpty(eventSnapshots) ⇒
           table(cls := "SimpleTable")(

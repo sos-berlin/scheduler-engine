@@ -108,3 +108,7 @@ span.time-extra {
 .Padded {
   padding: 0 5px;
 }
+
+.clickable {
+  cursor: pointer;
+}
