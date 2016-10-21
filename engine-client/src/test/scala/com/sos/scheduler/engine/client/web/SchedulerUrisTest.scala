@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview, OrderSourceType}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -182,6 +183,28 @@ final class SchedulerUrisTest extends FreeSpec {
 
   "task.overview" in {
     assert(uris.task.overview(TaskId(123)) == "http://0.0.0.0:1111/jobscheduler/master/api/task/123")
+  }
+
+  "processClass" - {
+    "Single ProcessClassOverview" in {
+      assert(uris.processClass.view[ProcessClassOverview](ProcessClassPath("/TEST")) ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/processClass/TEST?return=ProcessClassOverview")
+    }
+
+    "Single ProcessClassDetailed" in {
+      assert(uris.processClass.view[ProcessClassDetailed](ProcessClassPath("/TEST")) ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/processClass/TEST?return=ProcessClassDetailed")
+    }
+
+    "Multiple ProcessClassOverview" in {
+      assert(uris.processClass.views[ProcessClassOverview]() ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/processClass/?return=ProcessClassOverview")
+    }
+
+    "Multiple ProcessClassDetailed" in {
+      assert(uris.processClass.views[ProcessClassDetailed]() ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/processClass/?return=ProcessClassDetailed")
+    }
   }
 
   "event" in {
