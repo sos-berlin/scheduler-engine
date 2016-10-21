@@ -83,9 +83,7 @@ extends SchedulerHtmlPage {
       case KeyedEvent(_, e: Logged) ⇒
         seqFrag(td, td(e.level.toString), td(e.message))
       case KeyedEvent(key, e) ⇒
-        seqFrag(td(key.toString), td(eventName), td(keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
-      case _ ⇒
-        seqFrag(td, td(eventName), td(keyedEvent.toString stripPrefix s"$eventName(" stripSuffix ")"))
+        seqFrag(td(key.toString), td(eventName), td(keyedEvent.event.toString stripPrefix eventName stripPrefix "(" stripSuffix ")"))
     }
   }
 }

@@ -32,12 +32,10 @@ trait OrderEventRoute extends HasCloser {
   protected def orderPathEventRoute: Route =
     pathQuery(JobChainPath) { query ⇒
       withEventParameters {
-        case EventParameters("OrderStatisticsChanged", afterEventId, limit) ⇒
-          parameter("timeout".as[Duration]) { timeout ⇒
-            completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
-              for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId, timeout, query))
-                yield nestIntoSeqSnapshot(snapshot)
-            }
+        case EventParameters("OrderStatisticsChanged", afterEventId, timeout, limit) ⇒
+          completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
+            for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId, timeout, query))
+              yield nestIntoSeqSnapshot(snapshot)
           }
         case _ ⇒ reject
       }

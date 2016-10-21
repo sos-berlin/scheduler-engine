@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.data.event.{AnyEvent, Event, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.Logged
@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
-import com.sos.scheduler.engine.plugins.newwebservice.html.{HtmlPage, WebServiceContext}
+import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
 import java.time.{Instant, LocalDate}
 import scala.collection.immutable
@@ -23,7 +23,7 @@ import spray.http.Uri
   */
 final class SingleKeyEventHtmlPage private(
   key: Any,
-  protected val snapshot: Snapshot[immutable.Seq[Snapshot[Event]]],
+  protected val snapshot: Snapshot[EventSeq[immutable.Seq, Event]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -31,7 +31,7 @@ extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
 
-  private val eventSnapshot = snapshot.value
+  private val eventSeq = snapshot.value
 
   private implicit def nodeIdToHtml(nodeId: NodeId): Frag = stringFrag(nodeId.toString)
 
@@ -42,16 +42,21 @@ extends SchedulerHtmlPage {
   def wholePage = htmlPage(
     div(cls := "ContentBox ContentBox-single Padded")(
       h3(key.toString),
-      table(cls := "SimpleTable")(
-        thead(
-          tr(
-            th("Timestamp"),
-            th("Event"),
-            th,
-            th,
-            th)),
-        tbody(
-          eventSnapshot map eventToTr))))
+      eventSeq match {
+        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=)")
+        case EventSeq.Empty(eventId) ⇒ p("No events until " + EventId.toString(eventId))
+        case EventSeq.NonEmpty(eventSnapshots) ⇒
+          table(cls := "SimpleTable")(
+            thead(
+              tr(
+                th("Timestamp"),
+                th("Event"),
+                th,
+                th,
+                th)),
+            tbody(
+              eventSnapshots map eventToTr))
+      }))
 
   private def eventToTr(eventSnapshot: Snapshot[Event]): Frag =
     tr(
@@ -93,8 +98,8 @@ extends SchedulerHtmlPage {
 object SingleKeyEventHtmlPage {
   import scala.language.implicitConversions
 
-  def singleKeyEventToHtmlPage(key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-    ToHtmlPage[Snapshot[immutable.Seq[Snapshot[AnyEvent]]]] { (snapshot, pageUri) ⇒
+  def singleKeyEventToHtmlPage[E <: Event](key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+    ToHtmlPage[Snapshot[EventSeq[immutable.Seq, E]]] { (snapshot, pageUri) ⇒
       for (schedulerOverviewSnapshot ← client.overview) yield
         new SingleKeyEventHtmlPage(key, snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
     }

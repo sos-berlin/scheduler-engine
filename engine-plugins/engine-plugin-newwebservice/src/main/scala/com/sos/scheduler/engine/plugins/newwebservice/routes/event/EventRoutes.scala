@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
-import com.sos.scheduler.engine.base.convert.As._
-import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
-import com.sos.scheduler.engine.data.event.{KeyedEvent, _}
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.event._
+import java.time.Duration
 import scala.collection.immutable.Seq
 import shapeless.{::, HNil}
 import spray.routing.Directives._
-import spray.routing.{ValidationRejection, _}
+import spray.routing._
 
 /**
   * @author Joacim Zschimmer
@@ -22,16 +22,23 @@ private[routes] object EventRoutes {
 
   object withEventParameters extends Directive1[EventParameters] {
     def happly(inner: EventParameters :: HNil ⇒ Route) =
-      parameterMap { parameters ⇒
-        val returnType = parameters.as[String]("return", classOf[Event].getSimpleName)
-        val afterEventId = parameters.as[Long]("after", EventId.BeforeFirst)
-        val limit = parameters.as[Int]("limit", Int.MaxValue)
-        if (limit == 0)
-          reject(ValidationRejection(s"Invalid limit=$limit"))
-        else
-          inner(EventParameters(returnType, afterEventId, limit) :: HNil)
+      parameter("return" ? classOf[Event].getSimpleName) { returnType ⇒
+        parameter("after" ? EventId.BeforeFirst) { after ⇒
+          parameter("timeout" ? 0.s) { timeout ⇒
+            parameter("limit" ? Int.MaxValue) { limit ⇒
+              if (limit == 0)
+                reject(ValidationRejection(s"Invalid limit=$limit"))
+              else
+                inner(EventParameters(returnType, after, timeout, limit) :: HNil)
+            }
+          }
+        }
       }
     }
 
-  final case class EventParameters(returnType: String, after: EventId, limit: Int)
+  final case class EventParameters(
+    returnType: String,
+    after: EventId,
+    timeout: Duration,
+    limit: Int)
 }

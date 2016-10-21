@@ -4,8 +4,7 @@ import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, Schedu
 import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainNodeQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{AnyEvent, EventId}
+import com.sos.scheduler.engine.data.event.AnyEvent
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview, Orders}
 import com.sos.scheduler.engine.data.queries.OrderQuery
@@ -15,11 +14,12 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{EventParameters, withEventParameters}
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
-import java.time.Duration
 import scala.concurrent.ExecutionContext
+import scala.reflect.ClassTag
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
@@ -64,23 +64,16 @@ trait OrderRoute extends LogRoute {
         case "FileBasedDetailed" ⇒
           completeTryHtml(client.fileBasedDetailed(orderKey))
 
-        case "Event" ⇒
-          parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-            parameter("timeout".as[Duration]) { timeout ⇒
-              implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage(orderKey)
-              completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout))
-            }
+        case returnType ⇒
+          anyEventJsonFormat.typeNameToClass.get(returnType) match {
+            case Some(eventClass) ⇒
+              withEventParameters { case EventParameters(`returnType`, afterEventId, timeout, limit) ⇒
+                implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
+                completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout)(ClassTag(eventClass)))
+              }
+            case None ⇒
+              reject(ValidationRejection(s"Invalid parameter return=$returnType"))
           }
-
-        case "OrderEvent" ⇒
-          parameter("after" ? EventId.BeforeFirst) { afterEventId ⇒
-            parameter("timeout".as[Duration]) { timeout ⇒
-              completeTryHtml(client.eventsForKey[OrderEvent](orderKey, after = afterEventId, timeout))
-            }
-          }
-
-        case o ⇒
-          reject(ValidationRejection(s"Invalid parameter return=$o"))
       }
     }
 

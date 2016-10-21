@@ -39,14 +39,12 @@ trait EventRoute extends HasCloser with OrderEventRoute {
     }
 
   private def otherEventRoute: Route =
-    withEventParameters { case EventParameters(returnType, afterEventId, limit) ⇒
+    withEventParameters { case EventParameters(returnType, afterEventId, timeout, limit) ⇒
       pathSingleSlash {
         val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
         if (limit >= 0)
-          parameter("timeout" ? 0.s) { timeout ⇒
-            completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
-              client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
-            }
+          completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
+            client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
           }
         else
           completeTryHtml[Seq[Snapshot[AnyKeyedEvent]]] {
