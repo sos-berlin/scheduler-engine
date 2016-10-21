@@ -59,8 +59,8 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
         scheduler executeXml OrderCommand(TestOrderKey)
       }
     }
-    val snapshot = client.events[Event](after = oldEventId, TestTimeout) await TestTimeout
-    assert(snapshot.value == EventSeq.Torn)
+    val Snapshot(_, eventSeq) = client.events[Event](after = oldEventId, TestTimeout) await TestTimeout
+    assert(eventSeq == EventSeq.Torn)
   }
 }
 
