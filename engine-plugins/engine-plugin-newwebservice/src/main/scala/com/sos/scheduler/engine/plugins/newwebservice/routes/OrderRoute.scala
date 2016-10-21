@@ -4,9 +4,9 @@ import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, Schedu
 import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainNodeQuery, orderQuery}
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
-import com.sos.scheduler.engine.data.event.AnyEvent
+import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderEvent, OrderKey, OrderOverview, Orders}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, Orders}
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
@@ -69,7 +70,14 @@ trait OrderRoute extends LogRoute {
             case Some(eventClass) ⇒
               withEventParameters { case EventParameters(`returnType`, afterEventId, timeout, limit) ⇒
                 implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
-                completeTryHtml(client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout, limit = limit)(ClassTag(eventClass)))
+                completeTryHtml {
+                  if (limit >= 0)
+                    client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout, limit = limit)(ClassTag(eventClass))
+                  else
+                    for (responseSnapshot ← client.eventsReverseForKey[AnyEvent](orderKey, after = afterEventId, limit = -limit)(ClassTag(eventClass))) yield
+                      for (events ← responseSnapshot) yield
+                        EventSeq.NonEmpty(events)
+                }
               }
             case None ⇒
               reject(ValidationRejection(s"Invalid parameter return=$returnType"))

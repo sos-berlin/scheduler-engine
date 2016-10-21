@@ -130,8 +130,27 @@ extends HasCloser {
   =
     keyedEventQueue.reverseEvents(after = after)
       .collect {
-        case snapshot if implicitClass[E].isAssignableFrom(snapshot.value.event.getClass) && predicate(snapshot.value.asInstanceOf[KeyedEvent[E]]) ⇒
+        case snapshot if implicitClass[E].isAssignableFrom(snapshot.value.event.getClass) ⇒
           snapshot.asInstanceOf[Snapshot[KeyedEvent[E]]]
+      }
+      .filter(snapshot ⇒ predicate(snapshot.value))
+      .take(limit)
+
+  def reverseForKey[E <: Event: ClassTag](
+    key: E#Key,
+    after: EventId,
+    predicate: E ⇒ Boolean = (_: E) ⇒ true,
+    limit: Int = Int.MaxValue)
+  : Iterator[Snapshot[E]]
+  =
+    keyedEventQueue.reverseEvents(after = after)
+      .collect {
+        case snapshot if implicitClass[E] isAssignableFrom snapshot.value.event.getClass ⇒
+          snapshot.asInstanceOf[Snapshot[KeyedEvent[E]]]
+      }
+      .collect {
+        case Snapshot(eventId, KeyedEvent(`key`, event)) if predicate(event) ⇒
+          Snapshot(eventId, event)
       }
       .take(limit)
 

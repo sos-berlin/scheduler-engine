@@ -51,6 +51,15 @@ trait DirectEventClient {
         eventTypedJsonFormat.canSerialize,
         limit = limit))
 
+  def eventsReverseForKey[E <: Event: ClassTag](key: E#Key, after: EventId, limit: Int = Int.MaxValue): Future[Snapshot[Seq[Snapshot[E]]]] =
+    Future.successful(eventIdGenerator.newSnapshot(
+      eventCollector.reverseForKey(
+        key,
+        after,
+        eventTypedJsonFormat.canSerialize,
+        limit = limit)
+      .toVector))
+
   private def wrapIntoSnapshot[E](future: ⇒ Future[EventSeq[Iterator, E]]): Future[Snapshot[EventSeq[Seq, E]]] = {
     val eventId = eventIdGenerator.next()
     for (eventSeq ← future) yield
