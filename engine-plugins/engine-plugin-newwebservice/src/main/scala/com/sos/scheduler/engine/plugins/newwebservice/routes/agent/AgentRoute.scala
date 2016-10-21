@@ -32,7 +32,7 @@ trait AgentRoute {
   protected implicit def executionContext: ExecutionContext
 
   final def agentRoute: Route =
-    testSlash(webServiceContext) {
+    getRequiresSlash(webServiceContext) {
       get {
         rawPathPrefix(Slash) {
           pathEnd {

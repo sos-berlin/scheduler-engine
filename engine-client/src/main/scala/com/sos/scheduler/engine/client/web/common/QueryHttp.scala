@@ -4,7 +4,8 @@ import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}
 import spray.http.StatusCodes._
@@ -23,6 +24,12 @@ object QueryHttp {
   def jobChainNodeQuery = getOrPost[JobChainNodeQuery]
 
   def orderQuery = getOrPost[OrderQuery]
+
+  def pathQuery[P <: TypedPath: TypedPath.Companion] = {
+    implicit val x = PathQuery.jsonFormat[P]
+    implicit val y = PathQuery.pathAndParameterSerializable[P]
+    getOrPost[PathQuery]
+  }
 
   def getOrPost[A: RootJsonFormat: PathAndParameterSerializable] =
     new Directive1[A] {

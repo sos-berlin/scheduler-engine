@@ -202,7 +202,7 @@ extends SchedulerHtmlPage {
 
   private def queryToA(query: OrderQuery) = hiddenA(uris.order(query, returnType = None))
 
-  private def jobChainPathToA(path: JobChainPath) = hiddenA(uris.jobChain.details(path))
+  private def jobChainPathToA(path: JobChainPath) = hiddenA(uris.jobChain.detailed(path))
 
   private def taskToA(taskId: TaskId) = hiddenA(uris.task.overview(taskId))
 

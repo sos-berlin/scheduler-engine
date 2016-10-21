@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.web.common.PathQueryHttp.directives.pathQuery
+import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent._
@@ -23,7 +23,7 @@ trait JobChainRoute {
   protected implicit def executionContext: ExecutionContext
 
   final def jobChainRoute: Route =
-    get {
+    getRequiresSlash(webServiceContext) {
       parameter("return".?) { returnType ⇒
         pathQuery(JobChainPath) {
           case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)

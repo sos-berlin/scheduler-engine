@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.keyedEventsToHtmlPage
@@ -27,11 +27,13 @@ trait EventRoute extends HasCloser with OrderEventRoute {
   protected implicit def executionContext: ExecutionContext
 
   def eventRoute: Route =
-    parameter("return".?) {
-      case Some("OrderStatisticsChanged") ⇒
-        orderPathEventRoute
-      case _ ⇒
-        otherEventRoute
+    getRequiresSlash(webServiceContext) {
+      parameter("return".?) {
+        case Some("OrderStatisticsChanged") ⇒
+          orderPathEventRoute
+        case _ ⇒
+          otherEventRoute
+      }
     }
 
   private def otherEventRoute: Route =

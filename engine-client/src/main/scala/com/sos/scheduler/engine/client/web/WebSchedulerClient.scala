@@ -106,15 +106,15 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     }
 
   final def jobChainDetailed(jobChainPath: JobChainPath) =
-    get[Snapshot[JobChainDetailed]](_.jobChain.details(jobChainPath))
+    get[Snapshot[JobChainDetailed]](_.jobChain.detailed(jobChainPath))
 
   // ProcessClass
 
   final def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath) =
     get[Snapshot[V]](_.processClass.view[V](processClassPath))
 
-  final def processClasses[V <: ProcessClassView: ProcessClassView.Companion] =
-    get[Snapshot[immutable.Seq[V]]](_.processClass.views[V])
+  final def processClasses[V <: ProcessClassView: ProcessClassView.Companion](query: PathQuery) =
+    get[Snapshot[immutable.Seq[V]]](_.processClass.views[V](query))
 
   // Agent
 

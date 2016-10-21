@@ -36,7 +36,7 @@ trait OrderRoute extends LogRoute {
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    (testSlash(webServiceContext) | pass) {
+    (getRequiresSlash(webServiceContext) | pass) {
       parameter("return".?) {
         case Some("OrderStatistics") ⇒
           jobChainNodeQuery { query ⇒

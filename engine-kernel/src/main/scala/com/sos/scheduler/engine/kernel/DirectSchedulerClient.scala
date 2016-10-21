@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOver
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -139,14 +139,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       processClassSubsystem.fileBased(processClassPath).view[V]
     }
 
-  def processClasses[V <: ProcessClassView: ProcessClassView.Companion]: Future[Snapshot[immutable.Seq[V]]] =
+  def processClasses[V <: ProcessClassView: ProcessClassView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
     respondWithSnapshotFuture {
-      processClassSubsystem.fileBaseds map { _.view[V] }
-    }
-
-  def processClassView[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =
-    respondWithSnapshotFuture {
-      processClassSubsystem.processClass(processClassPath).view[V]
+      processClassSubsystem.fileBasedsBy(query) map { _.view[V] }
     }
 
   def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]] =

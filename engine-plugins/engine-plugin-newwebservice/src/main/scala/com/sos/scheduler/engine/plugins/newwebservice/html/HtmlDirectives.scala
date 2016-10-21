@@ -71,13 +71,16 @@ object HtmlDirectives {
   /**
     * If HTML is requested, trailing slash is missing and request has no query, then redirect to trailing slash, in case of typo.
     */
-  def testSlash(webServiceContext: WebServiceContext): Directive0 =
+  def getRequiresSlash(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒
-      redirectToSlash(webServiceContext) ~
-      unmatchedPath {
-        case path: Uri.Path.Slash ⇒ route
-        case _ ⇒ reject
-      }
+      get {
+        redirectToSlash(webServiceContext) ~
+        unmatchedPath {
+          case path: Uri.Path.Slash ⇒ route
+          case _ ⇒ reject
+        }
+      } ~
+        route
     }
 
   /**

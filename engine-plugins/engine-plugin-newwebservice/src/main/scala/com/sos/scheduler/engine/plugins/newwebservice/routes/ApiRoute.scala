@@ -57,34 +57,28 @@ with TaskRoute {
     }
 
   private def realApiRoute =
-    pathEndElseRedirect(webServiceContext) {
-      get {
+    get {
+      pathEndElseRedirect(webServiceContext) {
         completeTryHtml(client.overview)
       }
     } ~
-    (pathPrefix("command") & pathEnd) {
+    pathPrefix("command") {
       commandRoute
     } ~
     pathPrefix("order") {
       orderRoute
     } ~
     pathPrefix("jobChain") {
-      testSlash(webServiceContext) {
-        jobChainRoute
-      }
+      jobChainRoute
     } ~
     pathPrefix("job") {
-      testSlash(webServiceContext) {
-        jobRoute
-      }
+      jobRoute
     } ~
     pathPrefix("processClass") {
       processClassRoute
     } ~
     pathPrefix("task") {
-      testSlash(webServiceContext) {
-        taskRoute
-      }
+      taskRoute
     } ~
     pathPrefix("scheduler") {
       pathEnd {
@@ -95,55 +89,8 @@ with TaskRoute {
       }
     } ~
     pathPrefix("event") {
-      testSlash(webServiceContext) {
-        eventRoute
-      }
+      eventRoute
     }
-    /*~
-    pathPrefix("subsystems") {
-      subsystemsRoute
-    }
-    */
-
-  /*
-  private def subsystemsRoute: Route =
-    pathEnd {
-      get {
-        complete(fileBasedSubsystemRegister.companions map { _.fileBasedType.cppName })
-      }
-    } ~
-    pathPrefix(Segment) { subsystemName ⇒
-      val subsystem = fileBasedSubsystemRegister.subsystem(FileBasedType.fromCppName(subsystemName))
-      pathEnd {
-        complete {
-          subsystem.filebasedOverviews
-        }
-      } ~
-      path("overview") {
-        detach(()) {
-          complete {
-            subsystem.overview
-          }
-        }
-      } ~
-      path("paths") {
-        detach(()) {
-          complete {
-            subsystem.paths map { _.string }
-          }
-        }
-      } ~
-      path("fileBased" / "detailed") {
-        parameter("path") { fileBasedPath ⇒
-          detach(()) {
-            complete {
-              subsystem.fileBased(subsystem.companion.stringToPath(fileBasedPath)).detailed
-            }
-          }
-        }
-      }
-    }
-    */
 }
 
 object ApiRoute {

@@ -10,6 +10,9 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
+import com.sos.scheduler.engine.data.processclass.ProcessClassView.Companion
+import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
 import org.junit.runner.RunWith
@@ -41,7 +44,11 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
   protected val toAgentClient = (uri: AgentAddress) ⇒ new AgentClient.Standard(uri.string)
 
   protected val client = new ProcessClassClient {
-    override def agentUris = Future.successful(Snapshot(EventId(1), Set(agent.localUri)))
+    def agentUris = Future.successful(Snapshot(EventId(1), Set(agent.localUri)))
+
+    def processClasses[V <: ProcessClassView: Companion](q: PathQuery) = throw new NotImplementedError
+
+    def processClass[V <: ProcessClassView: Companion](processClassPath: ProcessClassPath) = throw new NotImplementedError
   }
   override protected def afterAll() = {
     close()

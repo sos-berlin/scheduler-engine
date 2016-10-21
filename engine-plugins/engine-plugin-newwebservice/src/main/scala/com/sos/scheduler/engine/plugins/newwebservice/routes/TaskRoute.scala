@@ -23,11 +23,13 @@ trait TaskRoute extends LogRoute {
   protected implicit def executionContext: ExecutionContext
 
   def taskRoute: Route =
-    path(IntNumber) { taskNumber ⇒
-      val taskId = TaskId(taskNumber)
-      parameter("return") {
-        case "log" ⇒ logRoute(taskSubsystem.task(taskId).log)
-      } ~
-        completeTryHtml(client.taskOverview(taskId))
+    getRequiresSlash(webServiceContext) {
+      path(IntNumber) { taskNumber ⇒
+        val taskId = TaskId(taskNumber)
+        parameter("return") {
+          case "log" ⇒ logRoute(taskSubsystem.task(taskId).log)
+        } ~
+          completeTryHtml(client.taskOverview(taskId))
+      }
     }
 }
