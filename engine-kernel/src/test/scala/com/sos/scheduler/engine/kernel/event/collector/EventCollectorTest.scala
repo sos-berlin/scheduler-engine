@@ -68,7 +68,7 @@ final class EventCollectorTest extends FreeSpec {
       eventBus.publish(KeyedEvent(A2)("2"))
       eventBus.publish(KeyedEvent(B2)("1"))
       def eventsForKey[E <: Event: ClassTag](key: E#Key) = {
-        val EventSeq.NonEmpty(eventIterator) = eventCollector.whenForKey[E](key, after = EventId.BeforeFirst, 2.s) await 1.s
+        val EventSeq.NonEmpty(eventIterator) = eventCollector.whenForKey[E](key, after = EventId.BeforeFirst, 20.s) await 10.s
         eventIterator.toVector map { _.value }
       }
       assert(eventsForKey[AEvent]("1") == Vector(A1, A2))
