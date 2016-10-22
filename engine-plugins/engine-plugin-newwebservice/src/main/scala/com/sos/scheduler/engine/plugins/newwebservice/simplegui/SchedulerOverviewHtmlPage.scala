@@ -56,13 +56,14 @@ extends SchedulerHtmlPage {
 
   private def systemPropertiesHtml: Frag =
     div(cls := "SystemProperties")(
-      p(
-        "Host ", system.hostname),
+      p("Host ", system.hostname),
       for (o ← system.distribution) yield
         div(o),
       div(
         java.systemProperties.getOrElse("os.name", "") + " " +
-          java.systemProperties.getOrElse("os.version", "")))
+          java.systemProperties.getOrElse("os.version", "")),
+      for (o ← system.cpuModel) yield
+        div(o))
 
   private def cpuAndRamBarsHtml: Option[Frag] =
     try
