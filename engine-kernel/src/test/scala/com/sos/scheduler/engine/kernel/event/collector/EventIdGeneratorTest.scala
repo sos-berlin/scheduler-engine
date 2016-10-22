@@ -21,7 +21,7 @@ final class EventIdGeneratorTest extends FreeSpec {
   "test" in {
     val eventIds: mutable.Map[EventId, Unit] = new ConcurrentHashMap[EventId, Unit]
     val uniqueTimestampedIdIterator = new EventIdGenerator
-    val n = 100000
+    val n = 10000 * sys.runtime.availableProcessors
     (for (_ ← 1 to n) yield
       Future {
         eventIds += uniqueTimestampedIdIterator.next() → ()
