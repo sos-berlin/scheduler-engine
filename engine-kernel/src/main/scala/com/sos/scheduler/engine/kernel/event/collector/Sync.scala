@@ -6,35 +6,32 @@ import scala.concurrent.{Future, Promise}
 /**
   * @author Joacim Zschimmer
   */
-private[collector] abstract class Sync {
+private[collector] final class Sync {
 
-  protected def hasAfter(eventId: EventId): Boolean
-
-  @volatile
-  private var eventArrivedPromise = Promise[Unit]()
-  @volatile
-  private var used = false
+  @volatile private var eventArrivedPromise = Promise[Unit]()
+  @volatile private var promiseUsed = false
+  @volatile private var lastEventId = EventId.BeforeFirst
 
   /** Not to be called concurrently. */
-  final def onNewEvent(): Unit =
+  def onNewEvent(eventId: EventId): Unit =
     synchronized {
-      val p = eventArrivedPromise
-      if (used) {
-        used = false
+      lastEventId = eventId
+      if (promiseUsed) {
+        eventArrivedPromise.trySuccess(())
+        promiseUsed = false
         eventArrivedPromise = Promise[Unit]()
       }
-      p.trySuccess(())
     }
 
-  final def whenEventIsAvailable(after: EventId): Future[Unit] =
-    if (hasAfter(after))
+  def whenEventIsAvailable(after: EventId): Future[Unit] =
+    if (after < lastEventId)
       Future.successful(())
     else
       synchronized {
-        if (hasAfter(after))
+        if (after < lastEventId)
           Future.successful(())
         else {
-          used = true
+          promiseUsed = true
           eventArrivedPromise.future
         }
       }
