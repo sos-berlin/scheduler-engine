@@ -62,8 +62,8 @@ private object JsonStringTest {
   import org.scalatest.Assertions._
 
   private def testRoute(expected: String): Route =
-    entity(as[JsonString]) { xmlString ⇒
-      assert(xmlString.string == expected)
-      complete(xmlString)
+    entity(as[JsonString]) { jsonString ⇒
+      assert(jsonString.string == expected)
+      complete(jsonString)
     }
 }

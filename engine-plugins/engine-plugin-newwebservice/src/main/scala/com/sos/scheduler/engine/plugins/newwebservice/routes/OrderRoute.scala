@@ -16,8 +16,9 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{EventParameters, withEventParameters}
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{KeyedEventsHtmlPage, OrdersHtmlPage, SingleKeyEventHtmlPage}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
@@ -69,7 +70,6 @@ trait OrderRoute extends LogRoute {
           anyEventJsonFormat.typeNameToClass.get(returnType) match {
             case Some(eventClass) ⇒
               withEventParameters { case EventParameters(`returnType`, afterEventId, timeout, limit) ⇒
-                implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
                 completeTryHtml {
                   if (limit >= 0)
                     client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout, limit = limit)(ClassTag(eventClass))
@@ -107,8 +107,25 @@ trait OrderRoute extends LogRoute {
       case Some(OrderDetailed.name) ⇒
         completeTryHtml(client.ordersBy[OrderDetailed](query) map { _ map Orders.apply })
 
-      case Some(o) ⇒
-        reject(ValidationRejection(s"Unknown value for parameter return=$o"))
+      case Some(returnType) ⇒
+        anyEventJsonFormat.typeNameToClass.get(returnType) match {
+          case Some(eventClass) ⇒
+            withEventParameters { case EventParameters(`returnType`, afterEventId, timeout, limit) ⇒
+              import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
+              implicit val toHtmlPage: ToHtmlPage[Snapshot[EventSeq[Seq, AnyKeyedEvent]]] = KeyedEventsHtmlPage.implicits.toHtmlPage
+              completeTryHtml {
+              //complete {
+                if (limit >= 0)
+                  client.events[Event](after = afterEventId, timeout, limit = limit)(ClassTag(eventClass))
+                else
+                  for (responseSnapshot ← client.eventsReverse[Event](after = afterEventId, limit = -limit)(ClassTag(eventClass))) yield
+                    for (events ← responseSnapshot) yield
+                      EventSeq.NonEmpty(events)
+              }
+            }
+          case None ⇒
+            reject(ValidationRejection(s"Invalid parameter return=$returnType"))
+        }
 
       case None ⇒
         htmlPreferred(webServiceContext) {

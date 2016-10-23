@@ -98,7 +98,7 @@ object KeyedEventsHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+    implicit def toHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       ToHtmlPage[Snapshot[EventSeq[Seq, AnyKeyedEvent]]] { (snapshot, pageUri) ⇒
         for (schedulerOverviewSnapshot ← client.overview) yield
           new KeyedEventsHtmlPage(snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)

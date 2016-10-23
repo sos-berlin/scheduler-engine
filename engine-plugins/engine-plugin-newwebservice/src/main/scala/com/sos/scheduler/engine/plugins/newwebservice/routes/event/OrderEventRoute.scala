@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toHtmlPage
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import spray.routing.Directives._

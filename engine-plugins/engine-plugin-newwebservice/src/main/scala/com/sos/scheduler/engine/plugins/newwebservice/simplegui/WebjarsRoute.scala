@@ -27,7 +27,7 @@ trait WebjarsRoute {
     }
 }
 
-private[simplegui] object WebjarsRoute {
+object WebjarsRoute {
   private val LongTimeCaching = `Cache-Control`(`max-age`((30 * 24.h).getSeconds))
   private val WebjarsResourceDirectory = JavaResource("META-INF/resources/webjars")
   private val logger = Logger(getClass)

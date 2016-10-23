@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.web.SchedulerUris
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder._
 import scala.collection.immutable
 import scalatags.Text.all._
 import spray.http.Uri
-import HtmlIncluder._
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 
 /**
   * @author Joacim Zschimmer

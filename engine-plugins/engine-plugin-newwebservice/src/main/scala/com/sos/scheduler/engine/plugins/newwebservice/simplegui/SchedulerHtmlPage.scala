@@ -83,7 +83,7 @@ trait SchedulerHtmlPage extends HtmlPage {
           uncollapseButton,
           brand),
         div(cls := "collapse navbar-collapse")(
-          menue,
+          menu,
           div(cls := "navbar-text navbar-right")(
             timestampHtml))))
 
@@ -108,7 +108,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       span(whiteSpace.nowrap)(s"$state")))
   }
 
-  private def menue: Frag =
+  private def menu: Frag =
     ul(cls := "nav navbar-nav ")(
       navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
       navBarTab("Job chains"     , uris.jobChain.overviews()),

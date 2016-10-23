@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.keyedEventsToHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.toHtmlPage
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 import spray.routing.Directives._
@@ -42,7 +42,7 @@ trait EventRoute extends HasCloser with OrderEventRoute {
         val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
         completeTryHtml {
           if (limit >= 0)
-              client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
+            client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
           else
             for (responseSnapshot ← client.eventsReverse[Event](after = afterEventId, limit = -limit)(classTag)) yield
               for (events ← responseSnapshot) yield

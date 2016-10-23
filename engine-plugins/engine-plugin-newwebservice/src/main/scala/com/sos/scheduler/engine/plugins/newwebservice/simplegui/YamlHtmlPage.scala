@@ -16,7 +16,7 @@ object YamlHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def jsonToYamlHtmlPage[A: RootJsonWriter](implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+    implicit def toHtmlPage[A: RootJsonWriter](implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
       ToHtmlPage[Snapshot[A]] { (snapshot, pageUri) ⇒
         val yamlFuture = Future { snapshot map { o ⇒ YamlPrinter(o.toJson) } }
         for (Snapshot(eventId, schedulerOverview) ← client.overview;

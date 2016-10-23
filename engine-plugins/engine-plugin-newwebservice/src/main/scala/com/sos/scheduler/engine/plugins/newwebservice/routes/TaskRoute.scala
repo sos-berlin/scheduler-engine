@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.toHtmlPage
 import scala.concurrent.ExecutionContext
 import spray.routing.Directives._
 import spray.routing.Route
