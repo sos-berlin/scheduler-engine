@@ -57,6 +57,8 @@
         <module>engine-playground</module>
         <module>engine-plugins</module>
         <module>engine-setup</module>
+        <module>engine-scalajs-frontend</module>
+        <module>engine-scalajs-plugin</module>
         <module>engine-taskserver</module>
         <module>engine-taskserver-moduleapi</module>
         <module>engine-taskserver-dotnet</module>

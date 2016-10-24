@@ -1,0 +1,4 @@
+#! /bin/bash
+
+set -e
+rsync --verbose --archive --delete --exclude="*.class" --exclude="*.sjsir" --include "*.html" target/classes/* ../../out/production/engine-scalajs-frontend/

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Example Scala.js application</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <base href=".."/>
+    <link rel="stylesheet" href="api/frontend/webjars/bootstrap/3.3.6/css/bootstrap.min.css"/>
+  </head>
+  <body>
+    <div>
+      <canvas style="display: block" id="canvas" width="255" height="255"/>
+    </div>
+    <p id="RESPONSE">?</p>
+    <hr/>
+    <p id="orderStatistics">?</p>
+    <hr/>
+    <p id="startedOrders">?</p>
+
+    <script type="text/javascript" src="api/frontend/webjars/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript" src="scalajs/run.js"></script>
+    <!--script type="text/javascript" src="../example-fastopt.js"></script>
+    <script type="text/javascript" src="/workbench.js"></script-->
+    <script type="text/javascript">
+      com.zschimmer.jobscheduler.scalajs.frontend.Start().main(document.getElementById('canvas'));
+    </script>
+  </body>
+</html>
