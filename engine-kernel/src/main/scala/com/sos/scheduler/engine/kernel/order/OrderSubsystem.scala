@@ -118,7 +118,9 @@ extends FileBasedSubsystem {
     var all: Iterator[V] = local ++ distributed
     for (limit ← query.notInTaskLimitPerNode) {
       val perKeyLimiter = new PerKeyLimiter(limit, (o: OrderView) ⇒ o.nodeKey)
-      all = all filter { o ⇒ o.orderProcessingStateClass == classOf[OrderProcessingState.InTask] || perKeyLimiter(o) }
+      all = all filter { o ⇒
+        classOf[OrderProcessingState.InTask].isAssignableFrom(o.orderProcessingStateClass) || perKeyLimiter(o)
+      }
     }
     all.toVector
   }
