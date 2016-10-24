@@ -5,17 +5,17 @@
     <config>
         <jobs>
             <job name="job.1" order="yes" stop_on_error="no" tasks="5">
-                <script language="java" java_class="com.sos.scheduler.engine.tests.jobchain.max_order.DelayingJob" />
+                <script language="java" java_class="sos.spooler.jobs.DelayingJob"/>
                 <run_time once="no"/>
             </job>
 
             <job name="job.2" order="yes" stop_on_error="no" tasks="5">
-                <script language="java" java_class="com.sos.scheduler.engine.tests.jobchain.max_order.DelayingJob" />
+                <script language="java" java_class="sos.spooler.jobs.DelayingJob"/>
                 <run_time once="no"/>
             </job>
 
             <job name="job.3" order="yes" stop_on_error="no" tasks="5">
-                <script language="java" java_class="com.sos.scheduler.engine.tests.jobchain.max_order.DelayingJob" />
+                <script language="java" java_class="sos.spooler.jobs.DelayingJob"/>
                 <run_time once="no"/>
             </job>
         </jobs>
