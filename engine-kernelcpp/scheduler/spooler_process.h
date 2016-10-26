@@ -52,7 +52,6 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual double async_next_gmtime() = 0;
     virtual object_server::Connection* connection() const = 0;
     virtual xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&) = 0;
-    
     virtual bool async_continue() = 0;
 };
 
@@ -186,6 +185,13 @@ struct Process_class : Process_class_configuration,
 
     void set_dom(const xml::Element_ptr&);
 
+    xml::ElementJ java_dom_element() {
+        xml::Document_ptr doc;
+        doc.create();
+        doc.appendChild(doc.createElement("XXX"));
+        return xml::Element_ptr(dom_element(doc, Show_what()));
+    }
+    
     public: bool max_processes_reached() const {
         return used_process_count() >= _max_processes;
     }

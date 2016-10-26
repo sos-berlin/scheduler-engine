@@ -11,7 +11,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     // <editor-fold defaultstate="collapsed" desc="Generated code - DO NOT EDIT">
 
     private Process_classCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        setSister(sisterType.sister(this, context));
+        setSister(com.sos.scheduler.engine.kernel.cppproxy.Process_classC$.MODULE$.sisterType().sister(this, context));
     }
 
     @Override public java.lang.String file() {
@@ -142,6 +142,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Process_classC {
     }
 
     private static native boolean is_visible__native(long cppReference);
+
+
+    @Override public org.w3c.dom.Element java_dom_element() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            org.w3c.dom.Element result = java_dom_element__native(cppReference());
+            checkIsNotReleased(org.w3c.dom.Element.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native org.w3c.dom.Element java_dom_element__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {

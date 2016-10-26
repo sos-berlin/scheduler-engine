@@ -6,12 +6,13 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.xml.DomForScala._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassObstacle, ProcessClassOverview, ProcessClassPath, ProcessClassView}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassObstacle, ProcessClassOverview, ProcessClassPath, ProcessClassView, ProcessDetailed}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -19,7 +20,7 @@ import com.sos.scheduler.engine.kernel.processclass.ProcessClass._
 import com.sos.scheduler.engine.kernel.processclass.agent.{Agent, CppHttpRemoteApiProcessClient}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollection
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import java.time.Duration
+import java.time.{Duration, Instant}
 import org.scalactic.Requirements._
 import org.w3c.dom
 import scala.collection.{immutable, mutable}
@@ -113,7 +114,8 @@ extends FileBased {
 
   private def detailed = ProcessClassDetailed(
     overview,
-    _config.agents map { _.address })
+    _config.agents map { _.address },
+    processes)
 
   private def overview = ProcessClassOverview(
     path,
@@ -139,6 +141,17 @@ extends FileBased {
   private def processLimit: Int = cppProxy.max_processes
   private def usedProcessCount: Int = cppProxy.used_process_count
 
+  private def processes: immutable.Seq[ProcessDetailed] =
+    for (process ← domElement / "processes" / "process") yield
+      ProcessDetailed(
+        jobPath = JobPath(process.getAttribute("job")),
+        taskId = TaskId(emptyToNone(process.getAttribute("task")) map { _.toInt } getOrElse 0),
+        startedAt =  Instant parse process.getAttribute("running_since"),
+        pid = emptyToNone(process.getAttribute("pid")) map { _.toInt },
+        agent = emptyToNone(process.getAttribute("remote_scheduler")) map AgentAddress.apply)
+
+  private def domElement: dom.Element = cppProxy.java_dom_element
+
   def agents: immutable.Seq[Agent] = config.agents
 
   private def config = {
@@ -155,7 +168,7 @@ extends FileBased {
 object ProcessClass {
   private val logger = Logger(getClass)
 
-  final class Type extends SisterType[ProcessClass, Process_classC] {
+  object Type extends SisterType[ProcessClass, Process_classC] {
     def sister(proxy: Process_classC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
       new ProcessClass(

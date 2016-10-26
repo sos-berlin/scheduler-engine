@@ -12,6 +12,7 @@
 
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
+namespace javaproxy { namespace org { namespace w3c { namespace dom { struct Element; }}}}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 

@@ -5,6 +5,7 @@
 #include "com__sos__scheduler__engine__kernel__cppproxy__Process_classC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
+#include "org__w3c__dom__Element.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 

@@ -459,9 +459,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "processClass" - {
     "processClassOverview" - {
       "ProcessClassOverview All" in {
-        val processClassOverviews: immutable.Seq[ProcessClassOverview] = fetchWebAndDirect {
-          _.processClasses[ProcessClassOverview](PathQuery.All)
+        val processClassDetaileds: immutable.Seq[ProcessClassDetailed] = fetchWebAndDirect {
+          _.processClasses[ProcessClassDetailed](PathQuery.All)
         }
+        val processClassOverviews = processClassDetaileds map { _.overview }
         assert(processClassOverviews.toSet == Set(DefaultProcessClassOverview, TestProcessClassOverview))
       }
     }
@@ -470,7 +471,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val processClassDetailed: ProcessClassDetailed = fetchWebAndDirect {
         _.processClass[ProcessClassDetailed](TestProcessClassPath)
       }
-      assert(processClassDetailed == TestProcessClassDetailed)
+      assert(processClassDetailed.copy(processes = Nil) == TestProcessClassDetailed)
     }
   }
 

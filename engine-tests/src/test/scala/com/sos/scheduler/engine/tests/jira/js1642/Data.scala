@@ -38,6 +38,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
 
   val TestProcessClassDetailed = ProcessClassDetailed(
     TestProcessClassOverview,
+    processes = Nil,
     agents = Nil)
 
   val aJobChainOverview = JobChainOverview(aJobChainPath, FileBasedState.active)

@@ -5,10 +5,12 @@ import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath, ProcessClassView, ProcessDetailed}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ProcessClassRouteTest._
+import java.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -37,15 +39,16 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
 
     def processClasses[V <: ProcessClassView: ProcessClassView.Companion](query: PathQuery) =
       implicitly[ProcessClassView.Companion[V]] match {
+
         case ProcessClassOverview ⇒ Future.successful(Snapshot(1,
-            query match {
-              case PathQuery.All ⇒ List(
-                AProcessClassOverview.asInstanceOf[V],
-                BProcessClassOverview.asInstanceOf[V])
-              case PathQuery.FolderTree(FolderPath("/A")) ⇒ List(
-                AProcessClassOverview.asInstanceOf[V])
-              case _ ⇒ fail()
-            }))
+          query match {
+            case PathQuery.All ⇒ List(
+              AProcessClassOverview.asInstanceOf[V],
+              BProcessClassOverview.asInstanceOf[V])
+            case PathQuery.FolderTree(FolderPath("/A")) ⇒ List(
+              AProcessClassOverview.asInstanceOf[V])
+            case _ ⇒ fail()
+          }))
         case _ ⇒ fail()
       }
 
@@ -54,7 +57,9 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
         case ProcessClassOverview ⇒
           assert(processClassPath == AProcessClassOverview.path)
           Future.successful(Snapshot(2, AProcessClassOverview.asInstanceOf[V]))
-        case _ ⇒ fail()
+        case ProcessClassDetailed ⇒
+          assert(processClassPath == AProcessClassOverview.path)
+          Future.successful(Snapshot(2, AProcessClassDetailed.asInstanceOf[V]))
       }
 
     def overview = throw new NotImplementedError
@@ -88,11 +93,11 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
       }
     }
 
-    for (uri ← List(s"$ProcessClassUri/A/PROCESS-CLASS?return=ProcessClassOverview")) {
+    for (uri ← List(s"$ProcessClassUri/A/PROCESS-CLASS?return=ProcessClassDetailed")) {
       s"$uri" in {
         Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-          val snapshot = responseAs[Snapshot[ProcessClassOverview]]
-          assert(snapshot == Snapshot(2, AProcessClassOverview))
+          val snapshot = responseAs[Snapshot[ProcessClassDetailed]]
+          assert(snapshot == Snapshot(2, AProcessClassDetailed))
         }
       }
     }
@@ -147,8 +152,21 @@ object ProcessClassRouteTest {
     ProcessClassPath("/A/PROCESS-CLASS"),
     FileBasedState.active,
     processLimit = 10,
-    usedProcessCount = 9,
+    usedProcessCount = 1,
     obstacles = Set())
+
+  private val AProcessClassDetailed = ProcessClassDetailed(
+    overview = AProcessClassOverview,
+    List(
+      AgentAddress("https://example.com:4445")),
+    List(
+      ProcessDetailed(
+        JobPath("/JOB"),
+        TaskId(333),
+        Instant.parse("2016-10-26T11:22:33.444Z"),
+        Some(4444),
+        Some(AgentAddress("http://AGENT")))))
+
   private val BProcessClassOverview = ProcessClassOverview(
     ProcessClassPath("/B/PROCESS-CLASS"),
     FileBasedState.active,
