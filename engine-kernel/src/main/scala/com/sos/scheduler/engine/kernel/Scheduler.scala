@@ -18,8 +18,8 @@ import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.system.SystemInformations.systemInformation
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.common.xml.NamedChildElements
-import com.sos.scheduler.engine.common.xml.XmlUtils.{childElements, loadXml}
+import com.sos.scheduler.engine.common.xml.DomForScala._
+import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.event.KeyedEvent
@@ -265,8 +265,7 @@ with HasCloser {
   def executeXmlFuture(xml: String): Future[String] =
     uncheckedExecuteXmlFuture(xml) map { result ⇒
       if (result contains "<ERROR") {
-        for (e ← childElements(loadXml(result).getDocumentElement);
-             error ← new NamedChildElements("ERROR", e))
+        for (error ← loadXml(result).getDocumentElement.childElements / "ERROR")
           throw new SchedulerException(error.getAttribute("text"))
       }
       result

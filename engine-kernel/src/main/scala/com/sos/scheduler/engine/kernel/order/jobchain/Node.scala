@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, SetOnce}
-import com.sos.scheduler.engine.common.xml.XmlUtils.nodeListToSeq
+import com.sos.scheduler.engine.common.xml.DomForScala._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainNodePersistentState, JobChainPath, NodeId, NodeKey, NodeOverview}
@@ -35,9 +35,8 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   @ForCpp
   private[kernel] def processConfigurationDomElement(nodeElement: dom.Element): Unit = {
-    val elementPluginOption = nodeListToSeq(nodeElement.getChildNodes) collect {
-      case e: dom.Element ⇒ e → injector.instance[PluginSubsystem].xmlNamespaceToPlugins[AttachableNamespaceXmlPlugin](e.getNamespaceURI)
-    }
+    val elementPluginOption = for (e ← nodeElement.childElements) yield
+      e → injector.instance[PluginSubsystem].xmlNamespaceToPlugins[AttachableNamespaceXmlPlugin](e.getNamespaceURI)
     for ((element, plugins) ← elementPluginOption; plugin ← plugins) {
       plugin.attachPluginXmlConfigurable(this, element)
     }
