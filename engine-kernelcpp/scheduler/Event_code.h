@@ -15,14 +15,14 @@ enum Event_code {
     taskStartedEvent,
     taskClosedEvent,
 
-    orderTouchedEvent,
+    orderStartedEvent,
     orderFinishedEvent,
     orderSuspendedEvent,
     orderResumedEvent,
     orderSetBackEvent,
 
     orderStepStartedEvent,
-    orderNestedTouchedEvent,
+    orderNestedStartedEvent,
     orderNestedFinishedEvent,
 
     // Endemarke:
