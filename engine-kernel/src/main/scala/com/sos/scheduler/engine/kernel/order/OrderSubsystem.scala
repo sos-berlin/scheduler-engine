@@ -50,6 +50,7 @@ extends FileBasedSubsystem {
   type ThisSubsystem = OrderSubsystem
   type ThisFileBased = JobChain
   type ThisFile_basedC = Job_chainC
+  type Path = JobChainPath
 
   val companion = OrderSubsystem
 

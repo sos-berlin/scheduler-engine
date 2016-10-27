@@ -21,6 +21,7 @@ extends FileBasedSubsystem {
   type ThisSubsystem = FolderSubsystem
   type ThisFileBased = Folder
   type ThisFile_basedC = FolderC
+  type Path = FolderPath
 
   val companion = FolderSubsystem
 

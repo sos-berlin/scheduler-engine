@@ -17,6 +17,7 @@ extends FileBasedSubsystem {
   type ThisSubsystem = JobSubsystem
   type ThisFileBased = Job
   type ThisFile_basedC = JobC
+  type Path = JobPath
 
   val companion = JobSubsystem
 

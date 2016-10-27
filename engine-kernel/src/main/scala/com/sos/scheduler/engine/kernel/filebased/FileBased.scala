@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased._
+import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -148,7 +149,7 @@ with EventSource {
   private[kernel] final def replacementOption: Option[Self] = Option(cppProxy.replacement_java.asInstanceOf[Self])
 
   private[kernel] final def missingRequisites: Set[TypedPath] =
-    (cppProxy.missing_requisites_java map TypedPath.fromCppTypedString).toSet
+    (cppProxy.missing_requisites_java map TypedPathRegister.fromCppTypedString).toSet
 
   protected def fixedPathOption = _fixedPath.toOption
 }

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
-import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
+import com.sos.scheduler.engine.kernel.filebased.{FileBased, FileBasedSubsystem}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, JobSubsystemClient}
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
@@ -70,7 +70,7 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
       for (path ← testPaths map { _.asInstanceOf[subsystem.ThisPath] }) {
         def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.not_initialized else FileBasedState.active
         s"fileBased $path" - {
-          lazy val fileBased = subsystem.fileBased(path)
+          lazy val fileBased: FileBased = subsystem.fileBased(path)
           lazy val fileBasedOverview = subsystem.fileBasedOverview(path)
           lazy val fileBasedDetailed = subsystem.fileBasedDetailed(path)
 

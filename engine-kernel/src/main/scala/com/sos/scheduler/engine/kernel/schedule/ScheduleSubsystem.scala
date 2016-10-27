@@ -19,6 +19,7 @@ extends FileBasedSubsystem {
   type ThisSubsystem = ScheduleSubsystem
   type ThisFileBased = Schedule
   type ThisFile_basedC = ScheduleC
+  type Path = SchedulePath
 
   val companion = ScheduleSubsystem
 }

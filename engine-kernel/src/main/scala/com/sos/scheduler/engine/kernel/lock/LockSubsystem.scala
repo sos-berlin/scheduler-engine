@@ -19,6 +19,7 @@ extends FileBasedSubsystem {
   type ThisSubsystem = LockSubsystem
   type ThisFile_basedC = LockC
   type ThisFileBased = Lock
+  type Path = LockPath
 
   val companion = LockSubsystem
 }

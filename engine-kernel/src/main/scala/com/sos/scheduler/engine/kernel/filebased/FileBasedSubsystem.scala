@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaConcurrentHashMap
 import com.sos.scheduler.engine.cplusplus.runtime.HasSister
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased._
+import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -16,22 +17,21 @@ import com.sos.scheduler.engine.kernel.cppproxy.{File_basedC, SubsystemC}
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import scala.collection.{immutable, mutable}
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 
 trait FileBasedSubsystem extends Subsystem {
   self ⇒
 
   type ThisSubsystemClient <: FileBasedSubsystemClient
   type ThisSubsystem <: FileBasedSubsystem
-  type ThisFileBased <: FileBased
+  type Path <: TypedPath
+  type ThisFileBased <: FileBased { type ThisPath = Path }
   type ThisFile_basedC <: File_basedC[ThisFileBased] with HasSister[ThisFileBased]
-  type Path = ThisFileBased#ThisPath
 
   protected def injector: Injector
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue
 
   val companion: FileBasedSubsystem.AbstractCompanion[ThisSubsystemClient, ThisSubsystem, Path, ThisFileBased]
-  lazy val typedPathCompanion = companion.fileBasedType.companion.asInstanceOf[TypedPath.Companion[Path]]
   private val pathOrdering: Ordering[Path] = Ordering by { _.string }
 
   private val _pathToFileBased = new ScalaConcurrentHashMap[Path, ThisFileBased]
@@ -94,7 +94,7 @@ trait FileBasedSubsystem extends Subsystem {
 
   private[kernel] final def fileBasedsBy(query: PathQuery): Vector[ThisFileBased] = {
     (_pathToFileBased.values filter { o ⇒
-      query.matches(o.path)(fileBasedType.companion.asInstanceOf[TypedPath.Companion[o.ThisPath]])
+      query.matches(o.path)(companion.typedPathCompanion)
     }).toVector
   }
 
@@ -122,6 +122,8 @@ object FileBasedSubsystem {
     val clientClass: Class[ThisFileBasedSubsystemClient]
     val pathClass: Class[Path]
     val fileBasedType: FileBasedType
+    def typedPathCompanion: TypedPath.Companion[Path] =
+      TypedPathRegister.classToCompanion(pathClass)
     val stringToPath: String ⇒ Path
 
     override def toString = subsystemClass.getSimpleName

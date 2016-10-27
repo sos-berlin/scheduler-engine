@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.AssignableFrom.assignableFrom
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.eventbus.{EventBus, EventHandlerAnnotated}
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
@@ -55,7 +56,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   @ForCpp
   private[kernel] def changeObjectXmlBytes(typeName: String, pathString: String, xmlBytes: Array[Byte]): Array[Byte] = {
     val typ = FileBasedType.fromInternalCppName(typeName)
-    val path = typ.toPath(pathString)
+    val path = TypedPathRegister.fileBasedTypedToCompanion(typ).apply(pathString)
     var result = xmlBytes
     for (p ← typeToSourceChangingPlugins(typ)) {
       result = p.changeXmlConfiguration(typ, path, xmlBytes)

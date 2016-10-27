@@ -19,6 +19,7 @@ extends FileBasedSubsystem{
   type ThisSubsystem = ProcessClassSubsystem
   type ThisFileBased = ProcessClass
   type ThisFile_basedC = Process_classC
+  type Path = ProcessClassPath
 
   val companion = ProcessClassSubsystem
 

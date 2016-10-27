@@ -25,6 +25,7 @@ extends FileBasedSubsystem {
   type ThisSubsystem = StandingOrderSubsystem
   type ThisFileBased = Order
   type ThisFile_basedC = OrderC
+  type Path = OrderKey
 
   val companion = StandingOrderSubsystem
   private[kernel] def agentClientFactory = agentClientFactoryProvider.get
