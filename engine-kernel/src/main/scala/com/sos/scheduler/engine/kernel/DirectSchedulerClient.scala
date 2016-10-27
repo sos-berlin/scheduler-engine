@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId, TaskOverview}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
@@ -92,7 +92,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       views,
       jobChainOverviews,
       nodeOverviews,
-      (jobs map { _.overview }).sorted,
+      (jobs map { _.view[JobOverview] }).sorted,
       (tasks map { _.overview }).sorted,
       (processClasses map { _.view[ProcessClassOverview] }).sorted)
   }
@@ -124,14 +124,14 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       orderSubsystem.jobChain(jobChainPath).details
     }
 
-  def jobOverviews: Future[Snapshot[Vector[JobOverview]]] =
+  def jobs[V <: JobView: JobView.Companion](query: PathQuery = PathQuery.All): Future[Snapshot[Vector[V]]] =
     respondWithSnapshotFuture {
-      jobSubsystem.fileBaseds map { _.overview }
+      jobSubsystem.fileBasedsBy(query) map { _.view[V] }
     }
 
-  def jobOverview(jobPath: JobPath): Future[Snapshot[JobOverview]] =
+  def job[V <: JobView: JobView.Companion](jobPath: JobPath): Future[Snapshot[V]] =
     respondWithSnapshotFuture {
-      jobSubsystem.job(jobPath).overview
+      jobSubsystem.job(jobPath).view[V]
     }
 
   def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =

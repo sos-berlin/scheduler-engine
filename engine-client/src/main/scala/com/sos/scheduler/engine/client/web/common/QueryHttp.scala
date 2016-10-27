@@ -25,7 +25,7 @@ object QueryHttp {
 
   def orderQuery = getOrPost[OrderQuery]
 
-  def pathQuery[P <: TypedPath: TypedPath.Companion] = {
+  def pathQuery[P <: TypedPath: TypedPath.Companion]: Directive[PathQuery :: HNil] = {
     implicit val x = PathQuery.jsonFormat[P]
     implicit val y = PathQuery.pathAndParameterSerializable[P]
     getOrPost[PathQuery]
