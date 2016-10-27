@@ -91,7 +91,10 @@ object SchedulerTestUtils {
   }
 
   def jobOverview(path: JobPath)(implicit hasInjector: HasInjector): JobOverview =
-    instance[JobSubsystemClient].jobOverview(path)
+    jobView[JobOverview](path)
+
+  def jobView[V <: JobView: JobView.Companion](path: JobPath)(implicit hasInjector: HasInjector): V =
+    instance[JobSubsystemClient].jobView[V](path)
 
   def job(jobPath: JobPath)(implicit hasInjector: HasInjector): Job =
     instance[JobSubsystemClient].job(jobPath)

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.client.web
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
@@ -166,19 +166,12 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "job" - {
-    "overviews" in {
-      assert(uris.job.overviews() == "http://0.0.0.0:1111/jobscheduler/master/api/job/")
-      //intercept[IllegalArgumentException] { uris.job.overviews(JobQuery.Standard(PathQuery("/a"))) }
-  //    assert(uris.job.overviews(JobQuery.Standard(PathQuery("/a/"))) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/")
-  //    intercept[IllegalArgumentException] { uris.job.overviews(JobChainQuery(PathQuery("/a"))) }
+    "JobOverview" in {
+      assert(uris.job[JobOverview](FolderPath("/a")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/?return=JobOverview")
     }
 
-    "overview" in {
-      assert(uris.job.overview(JobPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b?return=JobOverview")
-    }
-
-    "detail" in {
-      assert(uris.job.detailed(JobPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b")
+    "JobDescription" in {
+      assert(uris.job[JobDescription](JobPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b?return=JobDescription")
     }
   }
 

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js995
 
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
-import com.sos.scheduler.engine.data.job.{JobPath, JobState}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
@@ -18,7 +18,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS995IT extends FreeSpec with ScalaSchedulerTest {
 
   "Job soll erst aktiv werden, wenn benoetigter Schedule da ist" in {
-    def job = instance[JobSubsystemClient].jobOverview(testJobPath)
+    def job = instance[JobSubsystemClient].jobView[JobOverview](testJobPath)
     job.state shouldEqual JobState.loaded
     eventBus.awaiting[FileBasedActivated.type](testJobPath) {
       testEnvironment.fileFromPath(testSchedulePath).xml = <schedule name={testSchedulePath.name}/>

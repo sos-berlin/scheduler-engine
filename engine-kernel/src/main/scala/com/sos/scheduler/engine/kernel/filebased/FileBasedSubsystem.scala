@@ -57,12 +57,10 @@ trait FileBasedSubsystem extends Subsystem {
   }
 
   private[kernel] def overview: FileBasedSubsystemOverview =
-    inSchedulerThread {
-      SimpleFileBasedSubsystemOverview(
-        fileBasedType = self.fileBasedType,
-        count = self.count,
-        fileBasedStateCounts = (fileBasedIterator map { _.fileBasedState }).countEquals)
-    }
+    SimpleFileBasedSubsystemOverview(
+      fileBasedType = self.fileBasedType,
+      count = self.count,
+      fileBasedStateCounts = (fileBasedIterator map { _.fileBasedState }).countEquals)
 
   private[kernel] final def count: Int =
     _pathToFileBased.size

@@ -2,9 +2,10 @@ package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import java.time.Duration
 import scala.collection.immutable
 import scala.collection.immutable.Seq
@@ -26,6 +27,10 @@ with ProcessClassClient {
   def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[Seq[JobChainOverview]]]
 
   def jobChainDetailed(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetailed]]
+
+  def job[V <: JobView: JobView.Companion](path: JobPath): Future[Snapshot[V]]
+
+  def jobs[V <: JobView: JobView.Companion](query: PathQuery): Future[Snapshot[Seq[V]]]
 
   def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
 

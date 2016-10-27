@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1049
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobDescription, JobPath}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -32,13 +32,13 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "job.xml in UTF-8" in {
-      job(JobPath("/test-a")).description shouldEqual "å"
+      jobView[JobDescription](JobPath("/test-a")).description shouldEqual "å"
     }
 
     for (j ← JobIncludeSettings; d = j.descriptionInclude; s = j.scriptInclude)
       s"Include $d, $s" in {
         (controller.environment.liveDirectory / d.filename).contentString(d.encoding) shouldEqual d.content
-        job(j.jobPath).description shouldEqual d.content
+        jobView[JobDescription](j.jobPath).description shouldEqual d.content
         job(j.jobPath).scriptText shouldEqual s.content
       }
   }

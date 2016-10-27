@@ -301,7 +301,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val Xb100NodeOverview = SimpleJobNodeOverview(xbJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     XTestBJobPath, orderCount = 0, obstacles = Set(NodeObstacle.WaitingForJob))
 
-  val XTestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = Some(TestProcessClassPath),
+  val TestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = Some(TestProcessClassPath),
     JobState.running, isInPeriod = true, taskLimit = 10, usedTaskCount = 3, obstacles = Set())
   val XTestBJobOverview = JobOverview(XTestBJobPath, FileBasedState.incomplete, defaultProcessClassPath = Some(ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS")),
     JobState.loaded, isInPeriod = false,
@@ -328,7 +328,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       Xa100NodeOverview,
       Xb100NodeOverview),
     Vector(
-      XTestJobOverview,
+      TestJobOverview,
       XTestBJobOverview),
     Vector(
       TaskOverview(TaskId(3), TestJobPath, TaskState.running, Some(TestProcessClassPath)),
@@ -343,7 +343,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     usedJobChains = Vector(aJobChainOverview, xaJobChainOverview),
     usedTasks = Nil,
     usedJobs = Vector(
-      XTestJobOverview),
+      TestJobOverview),
     usedProcessClasses = Vector(
       TestProcessClassOverview),
     usedNodes = Vector(

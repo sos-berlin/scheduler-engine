@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskPersistentState}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
@@ -41,7 +41,13 @@ with JobPersistence {
     (processClassPathOption flatMap processClassSubsystem.fileBasedOption exists { o ⇒ cppProxy.is_task_ready_for_order(o.cppProxy.cppReference) }) ||
       obstacles.isEmpty
 
-  private[kernel] def overview = {
+  private[kernel] def view[V <: JobView: JobView.Companion]: V =
+    implicitly[JobView.Companion[V]] match {
+      case JobOverview ⇒ jobOverview
+      case JobDescription ⇒ jobDescription
+    }
+
+  private def jobOverview: JobOverview = {
     val state = this.state
     val isInPeriod = this.isInPeriod
     val taskLimit = this.taskLimit
@@ -56,6 +62,9 @@ with JobPersistence {
       usedTaskCount = runningTasksCount,
       obstacles(state, isInPeriod, taskLimit, runningTasksCount))
   }
+
+  private def jobDescription: JobDescription =
+    JobDescription(path, description)
 
   private def obstacles: Set[JobObstacle] = obstacles(state, isInPeriod, taskLimit, runningTasksCount)
 
@@ -95,7 +104,7 @@ with JobPersistence {
 
   def title: String = inSchedulerThread { cppProxy.title }
 
-  def description: String = inSchedulerThread { cppProxy.description }
+  private def description: String = cppProxy.description
 
   def scriptText: String = inSchedulerThread { cppProxy.script_text }
 

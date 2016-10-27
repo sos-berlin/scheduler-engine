@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
+import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
@@ -107,6 +108,14 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.detailed(jobChainPath))
+
+  // Job
+
+  def job[V <: JobView: JobView.Companion](path: JobPath) =
+    get[Snapshot[V]](_.job[V](path))
+
+  def jobs[V <: JobView: JobView.Companion](query: PathQuery) =
+    get[Snapshot[immutable.Seq[V]]](_.job[V](query))
 
   // ProcessClass
 

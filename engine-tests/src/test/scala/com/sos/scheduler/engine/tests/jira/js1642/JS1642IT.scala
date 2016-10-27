@@ -20,10 +20,10 @@ import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{EventId, EventSeq, Snapshot}
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedState}
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobState, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview}
+import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
@@ -32,6 +32,7 @@ import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.{FileOrderSinkJobPath, ServiceForwarderJobPath}
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils.jobChainOverview
@@ -453,6 +454,37 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
             EndNodeOverview(
               xaJobChainPath,
               NodeId("END")))))
+    }
+  }
+
+  "job" - {
+    "JobOverview" - {
+      "All" in {
+        val jobOverviews: immutable.Seq[JobOverview] = fetchWebAndDirect {
+          _.jobs[JobOverview](PathQuery.All)
+        }
+        assert(jobOverviews.toSet == Set(
+          TestJobOverview,
+          XTestBJobOverview,
+          JobOverview(FileOrderSinkJobPath, FileBasedState.active, defaultProcessClassPath = None,
+              JobState.pending, isInPeriod = true, taskLimit = 1, usedTaskCount = 0, obstacles = Set()),
+          JobOverview(ServiceForwarderJobPath, FileBasedState.active, defaultProcessClassPath = None,
+              JobState.pending, isInPeriod = true, taskLimit = 1, usedTaskCount = 0, obstacles = Set())))
+      }
+
+      "Single" in {
+        val jobOverview: JobOverview = fetchWebAndDirect {
+          _.job[JobOverview](XTestBJobPath)
+        }
+        assert(jobOverview == XTestBJobOverview)
+      }
+    }
+
+    "JobDescription" in {
+      val jobDescription: JobDescription = fetchWebAndDirect {
+        _.job[JobDescription](XTestBJobPath)
+      }
+      assert(jobDescription == JobDescription(XTestBJobPath, "DESCRIPTION OF /xFolder/test-b"))
     }
   }
 

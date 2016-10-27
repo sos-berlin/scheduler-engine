@@ -89,11 +89,11 @@ extends SchedulerHtmlPage {
       div(paddingTop := 4.px),
       table(cls := "MiniTable")(
         tbody(
-          tr(td(textAlign.right, width := 5.ex)(s"$count")     , td(s"orders")),
-          tr(td(textAlign.right)(s"$inProcessCount")           , td(s"in process")),
-          tr(td(textAlign.right)(s"${ jobPathToOverview.size}"), td(s"jobs")),
-          tr(td(textAlign.right)(s"$suspendedCount")           , td(s"suspended")),
-          tr(td(textAlign.right)(s"$blacklistedCount")         , td(s"blacklisted")))))
+          tr(td(textAlign.right, width := 5.ex)(s"$count")     , td("orders")),
+          tr(td(textAlign.right)(s"$inProcessCount")           , td("in process")),
+          tr(td(textAlign.right)(s"${ jobPathToOverview.size}"), td("job")),
+          tr(td(textAlign.right)(s"$suspendedCount")           , td("suspended")),
+          tr(td(textAlign.right)(s"$blacklistedCount")         , td("blacklisted")))))
   }
 
   private def wholeFolderTreeToHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =

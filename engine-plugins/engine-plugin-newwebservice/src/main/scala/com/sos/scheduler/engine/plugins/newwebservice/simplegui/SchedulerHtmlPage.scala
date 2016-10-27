@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.job.JobOverview
 import com.sos.scheduler.engine.data.processclass.ProcessClassOverview
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -112,7 +113,7 @@ trait SchedulerHtmlPage extends HtmlPage {
     ul(cls := "nav navbar-nav ")(
       navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
       navBarTab("Job chains"     , uris.jobChain.overviews()),
-      navBarTab("Jobs"           , uris.job.overviews()),
+      navBarTab("Jobs"           , uris.job[JobOverview](PathQuery.All)),
       navBarTab("Process classes", uris.processClass.views[ProcessClassOverview](PathQuery.All)),
       navBarTab("Events"         , uris.eventsReverse(limit = 1000)))
 

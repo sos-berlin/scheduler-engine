@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.common.time.TimeoutWithSteps
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.{TaskClosed, TaskId, TaskKey}
+import com.sos.scheduler.engine.data.job.{JobOverview, TaskClosed, TaskId, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
@@ -69,7 +69,7 @@ final class SpoolerProcessAfterIT extends FreeSpec with ScalaSchedulerTest {
     withEventPipe { eventPipe ⇒
       deleteAndWriteConfigurationFile(ProcessClassPath("/test"), <process_class remote_scheduler={agentMode.addressOption().orNull}/>)
       val job = jobSubsystem.job(setting.jobPath)
-      def jobState = jobSubsystem.jobOverview(setting.jobPath).state
+      def jobState = jobSubsystem.jobView[JobOverview](setting.jobPath).state
 
       try {
         val e = execute()

@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime.RichDuration
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
@@ -111,26 +111,11 @@ final class SchedulerUris private(schedulerUriString: String) {
   }
 
   object job {
-    private val pathAndParameterSerializable = PathQuery.pathAndParameterSerializable[JobPath]
+    def apply[V <: JobView: JobView.Companion](path: JobPath): String =
+      apply[V](PathQuery(path))
 
-    def overviews(): String = uriString(Uri.Path(s"api/job/"))
-//    def overviews(query: JobQuery = JobQuery.All): String = {
-//      val subpath = JobQueryHttp.toUriPath(query)
-//      require(subpath endsWith "/", "JobQuery must denote folder, terminated by a slash")
-//      uriString(Uri(path = Uri.Path(s"api/job$subpath")))  // Default with trailing slash: query = Uri.Query("return" → "JobOverview")))
-//    }
-
-    def overview(jobPath: JobPath): String = {
-      val (subpath, parameters) = pathAndParameterSerializable.toPathAndParameters(jobPath)
-      require(!subpath.endsWith("/"), "Invalid JobPath has trailing slash")
-      uriString(Uri.Path(s"api/job$subpath"), parameters + ("return" → "JobOverview"))
-    }
-
-    def detailed(jobPath: JobPath): String = {
-      val (subpath, parameters) = JobChainQuery.pathAndParameterSerializable.toPathAndParameters(PathQuery(jobPath))
-      require(!subpath.endsWith("/"), "PathQuery needs trailing slash here")
-      uriString(Uri.Path(s"api/job$subpath"), parameters)  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetailed")))
-    }
+    def apply[V <: JobView: JobView.Companion](query: PathQuery): String =
+      uriString(Uri.Path("api/job" + query.toUriPath), "return" → JobView.companion[V].name)
   }
 
   object processClass {

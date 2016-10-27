@@ -4,6 +4,7 @@
      order="true"
      process_class="MISSING-PROCESS-CLASS"
 >
+    <description>DESCRIPTION OF /xFolder/test-b</description>
     <lock.use lock="MISSING-LOCK"/>
     <script java_class="com.sos.scheduler.engine.tests.jira.js1642.TestJob"/>
     <monitor.use monitor="MISSING-MONITOR"/>

@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
@@ -171,11 +171,11 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest with HasCloserBefor
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
       val firstJobPath = instance[OrderSubsystemClient].jobChain(jobChainPath).jobNodes.head.jobPath
-      instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.pending
+      instance[JobSubsystemClient].jobView[JobOverview](firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
       eventPipe.nextAny[ErrorLogged].event.codeOption shouldEqual Some(expectedErrorCode)
       eventPipe.next[OrderStepEnded](orderKey).nodeTransition shouldEqual OrderNodeTransition.Keep
-      instance[JobSubsystemClient].jobOverview(firstJobPath).state shouldEqual JobState.stopped
+      instance[JobSubsystemClient].jobView[JobOverview](firstJobPath).state shouldEqual JobState.stopped
     }
   }
 
