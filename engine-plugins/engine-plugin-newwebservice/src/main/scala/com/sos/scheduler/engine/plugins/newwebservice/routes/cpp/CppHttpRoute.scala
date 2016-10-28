@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.cpp
 import akka.actor._
 import com.google.common.base.Charsets._
 import com.google.common.base.Strings.nullToEmpty
+import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.{CppReference, DisposableCppProxyRegister}
@@ -14,10 +15,12 @@ import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration.SchedulerHttpCharset
 import com.sos.scheduler.engine.plugins.newwebservice.routes.cpp.CppHttpRoute._
 import java.net.URLDecoder
-import scala.concurrent.{ExecutionContext, Future, Promise, blocking}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.control.NonFatal
+import scala.util.{Failure, Success}
 import spray.http.HttpHeaders.{`Content-Type`, _}
 import spray.http.MediaTypes.{`application/javascript`, `image/x-icon`, `text/css`, `text/html`, `text/plain`, `text/xml`}
+import spray.http.StatusCodes.InternalServerError
 import spray.http.{ContentType, HttpRequest, StatusCode}
 import spray.httpx.marshalling.Marshaller
 import spray.routing.Directives._
@@ -34,35 +37,47 @@ trait CppHttpRoute {
 
   final def cppHttpRoute: Route =
     requestInstance { request ⇒
-      val schedulerHttpRequest = toSchedulerHttpRequest(request)
-      blocking {
-        inSchedulerThread {
-          val notifier = new ChunkingActor.Notifier
-          val httpResponseRef = disposableCppProxyRegister.reference(
-            spoolerC.java_execute_http_with_security_level(
-              schedulerHttpRequest,
-              notifier.schedulerHttpResponse,
-              SchedulerSecurityLevel.all.cppName))
-          val status = StatusCode.int2StatusCode(httpResponseRef.get.status)
-          val headers = splitHeaders(httpResponseRef.get.header_string)
-          val chunkReaderC = httpResponseRef.get.chunk_reader
-          if (chunkReaderC == null) {
-            dispose(httpResponseRef)
-            complete(status)
-          } else {
-            respondWithStatus(status) {
-              val contentType = cppToContentType(headers)
-              val terminated = Promise[Unit]()
-              terminated.future onComplete { _ ⇒
-                dispose(httpResponseRef)
-              }
-              implicit val marshaller = chunkReaderCMarshaller(notifier, contentType)
-              complete(MarshallingBundle(chunkReaderC, terminated))
-            }
+      val notifier = new ChunkingActor.Notifier
+      onComplete(startCppRequest(request, notifier)) {
+        case Success((status, Some((contentType, marshallingBundle)))) ⇒
+          respondWithStatus(status) {
+            implicit val marshaller = chunkReaderCMarshaller(notifier, contentType)
+            complete(marshallingBundle)
           }
-        }
+        case Success((status, None)) ⇒
+          complete(status)
+        case Failure(t) ⇒
+          logger.warn(t.toString, t)
+          complete(InternalServerError → t.toSimplifiedString)
       }
     }
+
+  private def startCppRequest(request: HttpRequest, notifier: ChunkingActor.Notifier): Future[(StatusCode, Option[(ContentType, MarshallingBundle)])] = {
+    val schedulerHttpRequest = toSchedulerHttpRequest(request)
+    schedulerThreadFuture {
+      val httpResponseRef = disposableCppProxyRegister.reference(
+        spoolerC.java_execute_http_with_security_level(
+          schedulerHttpRequest,
+          notifier.schedulerHttpResponse,
+          SchedulerSecurityLevel.all.cppName))
+      val status = StatusCode.int2StatusCode(httpResponseRef.get.status)
+      val headers = splitHeaders(httpResponseRef.get.header_string)
+      val chunkReaderC = httpResponseRef.get.chunk_reader
+      val marshallingBundleOption =
+        if (chunkReaderC == null) {
+          dispose(httpResponseRef)
+          None
+        } else {
+          val contentType = cppToContentType(headers)
+          val terminated = Promise[Unit]()
+          terminated.future onComplete { _ ⇒
+            dispose(httpResponseRef)
+          }
+          Some((contentType, MarshallingBundle(chunkReaderC, terminated)))
+        }
+      status → marshallingBundleOption
+    }
+  }
 
   private def dispose(ref: CppReference[HttpResponseC]): Future[Unit] =
     try
@@ -158,4 +173,7 @@ object CppHttpRoute {
   private case class MarshallingBundle(
     chunkReaderC: HttpChunkReaderC,
     terminatedPromise: Promise[Unit])
+
+  private sealed trait Result
+  private case class StatusOnly(status: StatusCode) extends Result
 }
