@@ -14,7 +14,7 @@ import com.typesafe.config.Config
 import java.io.File
 import java.net.{URI, URL}
 import java.nio.file.Files._
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
 
 trait SchedulerConfiguration {
 
@@ -41,6 +41,12 @@ trait SchedulerConfiguration {
   def udpPort: Option[Int]
 
   def webDirectoryUrlOption: Option[URL]
+
+  def existingHtmlDirOption: Option[Path] =
+    htmlDirOption match {
+      case Some(dir) if Files.exists(dir) ⇒ Some(dir)
+      case _ ⇒ None
+    }
 
   def htmlDirOption: Option[Path]
 

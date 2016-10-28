@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passSome
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passIf
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
+import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.cpp.CppHttpRoute
 import java.nio.file.Path
 import spray.http.StatusCodes._
@@ -18,10 +17,20 @@ import spray.routing._
 trait JocCompatibleRoute extends CommandRoute with CppHttpRoute {
 
   protected def schedulerConfiguration: SchedulerConfiguration
+  protected def webServiceContext: WebServiceContext
 
   final def jocCompatibleRoute: Route =
-    (pathPrefix("joc") | pathPrefix("operations_gui")) {
-      passSome(schedulerConfiguration.htmlDirOption)(jocRoute)
+    pathPrefix("operations_gui") {
+      schedulerConfiguration.existingHtmlDirOption match {
+        case Some(_) ⇒ redirect("/jobscheduler/joc", TemporaryRedirect)
+        case None ⇒ jocIsNotInstalled
+      }
+    } ~
+    pathPrefix("joc") {
+      schedulerConfiguration.existingHtmlDirOption match {
+        case Some(dir) ⇒ jocRoute(dir)
+        case None ⇒ jocIsNotInstalled
+      }
     } ~
     pathPrefix("engine") {
       (pathPrefix("command") & pathEndOrSingleSlash) {  // SingleSlash for compatibility with JOC 1
@@ -31,6 +40,8 @@ trait JocCompatibleRoute extends CommandRoute with CppHttpRoute {
     pathPrefix("engine-cpp") {
       cppHttpRoute
     }
+
+  private def jocIsNotInstalled = complete(NotFound → "JOC 1 is not installed")
 
   private def jocRoute(directory: Path): Route =
     get {

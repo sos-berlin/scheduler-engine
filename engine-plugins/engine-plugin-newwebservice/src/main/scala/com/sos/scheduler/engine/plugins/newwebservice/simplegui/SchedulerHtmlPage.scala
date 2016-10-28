@@ -84,9 +84,12 @@ trait SchedulerHtmlPage extends HtmlPage {
           uncollapseButton,
           brand),
         div(cls := "collapse navbar-collapse")(
-          menue,
-          div(cls := "navbar-text navbar-right")(
-            timestampHtml))))
+          menu,
+          div(cls := "navbar-text navbar-right", marginBottom := 0)(
+            table(position.relative, top := (-7).px)(
+              tbody(
+                tr(td(textAlign.right, timestampHtml)),
+                tr(td(textAlign.right, letterSpacing := 1.px)("EXPERIMENTAL API VIEWER"))))))))
 
   private def brand: Frag =
     a(cls := "navbar-brand", position.relative, top := (-9).px, whiteSpace.nowrap, href := uris.overview)(
@@ -109,7 +112,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       span(whiteSpace.nowrap)(s"$state")))
   }
 
-  private def menue: Frag =
+  private def menu: Frag =
     ul(cls := "nav navbar-nav ")(
       navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
       navBarTab("Job chains"     , uris.jobChain.overviews()),
