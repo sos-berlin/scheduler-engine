@@ -60,14 +60,13 @@ trait CppHttpRoute {
           schedulerHttpRequest,
           notifier.schedulerHttpResponse,
           SchedulerSecurityLevel.all.cppName))
-      val status = StatusCode.int2StatusCode(httpResponseRef.get.status)
-      val headers = splitHeaders(httpResponseRef.get.header_string)
-      val chunkReaderC = httpResponseRef.get.chunk_reader
-      val marshallingBundleOption =
-        if (chunkReaderC == null) {
+      val statusCode = StatusCode.int2StatusCode(httpResponseRef.get.status)
+      val response = httpResponseRef.get.chunk_reader match {
+        case null ⇒
           dispose(httpResponseRef)
           None
-        } else {
+        case chunkReaderC ⇒
+          val headers = splitHeaders(httpResponseRef.get.header_string)
           val contentType = cppToContentType(headers)
           val terminated = Promise[Unit]()
           terminated.future onComplete { _ ⇒
@@ -75,7 +74,7 @@ trait CppHttpRoute {
           }
           Some((contentType, MarshallingBundle(chunkReaderC, terminated)))
         }
-      status → marshallingBundleOption
+      (statusCode, response)
     }
   }
 
