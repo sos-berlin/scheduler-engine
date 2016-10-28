@@ -18,7 +18,6 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
-import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
@@ -129,12 +128,4 @@ object OrderRoute {
     val word = "([A-Za-z]+)"
     s"$word(?:/$word)?".r
   }
-
-//  private def toOrderViewCompanion(string: String) =
-//    string match {
-//      case "" ⇒ OrderOverview
-//      case _ ⇒ OrderView.Companion.option(string) getOrElse {
-//        throw new RejectionError(ValidationRejection(s"Unknown OrderView: $string"))
-//      }
-//    }
 }
