@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}
-import spray.http.StatusCodes._
+import spray.http.StatusCodes.BadRequest
 import spray.json.RootJsonFormat
 import spray.routing.Directives._
 import spray.routing._
@@ -65,7 +65,9 @@ object QueryHttp {
     }
 
   private[common] val PathExceptionHandler = ExceptionHandler {
-    case e: CppException if e.getCode == "SCHEDULER-161" ⇒ completeWithError(NotFound, e.getMessage)
-    case e: NoSuchElementException if e.getMessage startsWith "SCHEDULER-161" + " " ⇒ completeWithError(NotFound, e.getMessage)
+    case e: CppException if e.getCode == "SCHEDULER-161" ⇒
+      completeWithError(BadRequest, e.getMessage)
+    case e: NoSuchElementException if e.getMessage startsWith "SCHEDULER-161" + " " ⇒
+      completeWithError(BadRequest, e.getMessage)
   }
 }
