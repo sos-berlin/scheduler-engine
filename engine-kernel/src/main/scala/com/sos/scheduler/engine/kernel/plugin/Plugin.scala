@@ -32,6 +32,8 @@ trait Plugin extends HasCloser {
 
   def xmlState: String = ""
 
+  def state: PartialFunction[String, String] = PartialFunction.empty
+
   final def isPrepared = _isPrepared
 
   final def isActive = _isActive

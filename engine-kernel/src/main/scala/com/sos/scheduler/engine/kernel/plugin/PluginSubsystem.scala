@@ -78,6 +78,12 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   private[kernel] def xmlNamespaceToPlugins[A : ClassTag](namespace: String): Option[A] = namespaceToPlugin.get(namespace) collect assignableFrom[A]
 
+  def stateOption(name: String): Option[String] = {
+    val values = for (plugin ← plugins[Plugin]; value ← plugin.state.lift(name)) yield value
+    if (values.size > 1) throw new IllegalStateException(s"Plugin state name '$name' is not unique")
+    values.headOption
+  }
+
   private[plugin] def plugins[A : ClassTag]: immutable.Iterable[A] =
     (classToPluginAdapter.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable
 
