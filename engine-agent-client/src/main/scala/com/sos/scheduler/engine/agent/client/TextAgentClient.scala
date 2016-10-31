@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.TextAgentClient._
 import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.auth.UserAndPassword
+import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.configutils.Configs
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
@@ -43,7 +43,7 @@ extends AutoCloseable {
 
   private val pipeline = {
     val addUserAndPassword: RequestTransformer = userAndPassword match {
-      case Some(UserAndPassword(user, SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
+      case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
       case _ ⇒ identity
     }
     addUserAndPassword ~>

@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.agent.data.commandresponses.EmptyResponse
 import com.sos.scheduler.engine.agent.data.commands.{Command, Terminate}
 import com.sos.scheduler.engine.agent.test.{AgentConfigDirectoryProvider, AgentTest}
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.auth.{Account, UserAndPassword}
+import com.sos.scheduler.engine.common.auth.{User, UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.sprayutils.web.auth.SimpleUserPassAuthenticator
@@ -56,8 +56,8 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
     }
 
     @Provides @Singleton
-    def authenticator(conf: AgentConfiguration)(implicit ec: ExecutionContext): UserPassAuthenticator[Account] =
-      new SimpleUserPassAuthenticator(Set(UserAndPassword(UserName → Password)))
+    def authenticator(conf: AgentConfiguration)(implicit ec: ExecutionContext): UserPassAuthenticator[User] =
+      new SimpleUserPassAuthenticator(Set(UserAndPassword(TestUserId → Password)), Map())
   }
 
   "Unauthorized" in {
@@ -66,7 +66,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
         client.executeCommand("""{ $TYPE: Terminate, sigtermProcesses: true, sigkillProcessesAfter: 10 }""")
       }
     }
-    autoClosing(newTextAgentClient(_ ⇒ (), Some(UserName → SecretString("WRONG-PASSWORD")))) { client ⇒
+    autoClosing(newTextAgentClient(_ ⇒ (), Some(TestUserId → SecretString("WRONG-PASSWORD")))) { client ⇒
       interceptUnauthorized {
         client.executeCommand("""{ $TYPE: Terminate, sigtermProcesses: true, sigkillProcessesAfter: 10 }""")
       }
@@ -75,7 +75,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
 
   "Command" in {
     val output = mutable.Buffer[String]()
-    autoClosing(newTextAgentClient(output += _, Some(UserName → Password))) { client ⇒
+    autoClosing(newTextAgentClient(output += _, Some(TestUserId → Password))) { client ⇒
       client.executeCommand("""{ $TYPE: Terminate, sigtermProcesses: true, sigkillProcessesAfter: 10 }""")
       client.get("")
     }
@@ -90,7 +90,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
 
   "requireIsResponding" in {
     val output = mutable.Buffer[String]()
-    autoClosing(newTextAgentClient(output += _, Some(UserName → Password))) { client ⇒
+    autoClosing(newTextAgentClient(output += _, Some(TestUserId → Password))) { client ⇒
       client.requireIsResponding()
     }
     assert(output == List("JobScheduler Agent is responding"))
@@ -106,7 +106,7 @@ final class TextAgentClientIT extends FreeSpec with BeforeAndAfterAll with HasCl
 
 private object TextAgentClientIT {
   private val ExpectedTerminate = Terminate(sigtermProcesses = true, sigkillProcessesAfter = Some(10.s))
-  private val UserName = "SHA512-USER"
+  private val TestUserId = UserId("SHA512-USER")
   private val Password = SecretString("SHA512-PASSWORD")
 
   private def interceptUnauthorized(body: ⇒ Unit) = {

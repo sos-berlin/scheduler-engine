@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
-import com.sos.scheduler.engine.common.auth.UserAndPassword
+import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.scalautil.ConcurrentMemoizer
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
@@ -29,8 +29,8 @@ final class SchedulerAgentClientFactory @Inject private[client](
 extends (AgentAddress ⇒ AgentClient) {
 
   private val userAndPasswordOption: Option[UserAndPassword] =
-    for (password ← config.optionAs[String]("jobscheduler.master.credentials.password") map SecretString)
-       yield UserAndPassword(conf.schedulerId.string, password)
+    for (password ← config.optionAs[String]("jobscheduler.master.credentials.password") map SecretString.apply)
+       yield UserAndPassword(UserId(conf.schedulerId.string), password)
   private val memoizingAcceptTlsCertificateFor = ConcurrentMemoizer.strict {
     (keystore: KeystoreReference, host: NonEmptyHost, port: Int) ⇒ Https.acceptTlsCertificateFor(keystore, host.address, port)
   }

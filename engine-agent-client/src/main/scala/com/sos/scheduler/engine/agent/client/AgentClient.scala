@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverv
 import com.sos.scheduler.engine.agent.data.web.AgentUris
 import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.common.auth.UserAndPassword
+import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
@@ -52,7 +52,7 @@ trait AgentClient {
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
     else identity
   lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
-    case Some(UserAndPassword(user, SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
+    case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
     case None ⇒ identity
   }
   private lazy val httpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
