@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernel.job
 
+import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
+import com.sos.scheduler.engine.common.auth.UserId
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.SetOnce
@@ -17,6 +19,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.processclass.ProcessClass
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import com.sos.scheduler.engine.kernel.security.AccessTokenRegister
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions
 import java.nio.file.Paths
 import java.time.Instant
@@ -24,15 +27,19 @@ import java.time.Instant
 @ForCpp
 private[engine] final class Task(
   cppProxy: TaskC,
-  taskSubsystem: TaskSubsystem)
+  taskSubsystem: TaskSubsystem,
+  accessTokenRegister: AccessTokenRegister)
 extends UnmodifiableTask with Sister with EventSource {
 
   import taskSubsystem.schedulerThreadCallQueue
   intelliJuseImports(schedulerThreadCallQueue)
 
   private val taskIdOnce = new SetOnce[TaskId]
+  private val webServiceAccessTokenToken = new SetOnce[SecretString]
 
-  def onCppProxyInvalidated(): Unit = {}
+  def onCppProxyInvalidated(): Unit = {
+    webServiceAccessTokenToken foreach accessTokenRegister.remove
+  }
 
   private[kernel] def details = TaskDetailed(
     overview,
@@ -97,6 +104,13 @@ extends UnmodifiableTask with Sister with EventSource {
 
   def log: PrefixLog = inSchedulerThread { cppProxy.log.getSister }
 
+  @ForCpp
+  private def webServiceAccessTokenString: String =
+    webServiceAccessToken.string
+
+  private def webServiceAccessToken: SecretString =
+    webServiceAccessTokenToken getOrUpdate accessTokenRegister.newAccessTokenForUser(UserId.Anonymous)
+
   override def toString = s"Task ${taskIdOnce toStringOr ""}".trim
 }
 
@@ -104,7 +118,7 @@ object Task {
   private[kernel] object Type extends SisterType[Task, TaskC] {
     def sister(proxy: TaskC, context: Sister) = {
       val injector = context.asInstanceOf[HasInjector].injector
-      new Task(proxy, injector.instance[TaskSubsystem])
+      new Task(proxy, injector.instance[TaskSubsystem], injector.instance[AccessTokenRegister])
     }
   }
 }

@@ -19,7 +19,9 @@ final class EngineWebServer(
   (implicit
     protected val actorSystem: ActorSystem,
     protected val executionContext: ExecutionContext)
-extends SprayWebServer {
+extends SprayWebServer with SprayWebServer.HasUri {
+
+  protected def uriPathPrefix = ""
 
   protected def newRouteActorRef(binding: WebServerBinding) =
     actorSystem.actorOf(

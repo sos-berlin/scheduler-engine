@@ -181,7 +181,8 @@ Task::Task(Standard_job* job, Log_level stderr_log_level)
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Duration::eternal ),
     _order_state_transition(Order_state_transition::keep),
-    _stderr_log_level(stderr_log_level)
+    _stderr_log_level(stderr_log_level),
+    _typed_java_sister(java_sister())    
 {
     _log = Z_NEW( Prefix_log( this ) );
 

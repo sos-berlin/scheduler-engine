@@ -37,6 +37,7 @@ import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
+import com.sos.scheduler.engine.kernel.security.AccessTokenRegister
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import com.typesafe.config.Config
@@ -100,8 +101,9 @@ with HasCloser {
     EventCollector.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.event"))
 
   @Provides @Singleton
-  private def provideGateKeeperConfiguration(config: Config): GateKeeper.Configuration =
+  private def provideGateKeeperConfiguration(config: Config, accessTokenRegister: AccessTokenRegister): GateKeeper.Configuration =
     GateKeeper.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.webserver.auth"))
+      .copy(provideAccessTokenValidator = () ⇒ accessTokenRegister.validate)
 
   @Provides @Singleton
   private def provideJdbcConnectionPool(config: Config, databaseSubsystem: DatabaseSubsystem, executionContext: ExecutionContext): JdbcConnectionPool =

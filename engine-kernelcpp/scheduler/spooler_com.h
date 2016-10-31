@@ -498,6 +498,8 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_Params_xml                  ( BSTR );
     STDMETHODIMP            get_Order_params_xml            ( BSTR* );
     STDMETHODIMP            put_Order_params_xml            ( BSTR );
+    STDMETHODIMP            get_Web_service_access_token    (BSTR*);
+
     //STDMETHODIMP            Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* );
     //STDMETHODIMP            Try_lock_non_exclusive_else_call_me_again( BSTR, VARIANT_BOOL* );
 
@@ -610,7 +612,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Supervisor_client           ( spooler_com::Isupervisor_client** );
     STDMETHODIMP            get_Configuration_directory     ( BSTR* );
     STDMETHODIMP            get_Schedule                    ( BSTR, spooler_com::Ischedule** );
-
+    STDMETHODIMP            get_Uri                         (BSTR*);
 
     void                        close                       ()                                      { _spooler = NULL; }
     string                      stdout_path                 ();

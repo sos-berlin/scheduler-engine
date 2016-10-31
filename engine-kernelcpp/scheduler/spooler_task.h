@@ -298,6 +298,14 @@ struct Task : Object,
         return _state == Task::s_running_waiting_for_order && _process_class == process_class;
     }
 
+    public: string web_service_access_token() {
+        return typed_java_sister().webServiceAccessTokenString();
+    }
+
+    public: TaskJ& typed_java_sister() { 
+        return _typed_java_sister; 
+    }
+
   protected:
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;
@@ -466,6 +474,9 @@ struct Task : Object,
     private: ptr<Process_class> _process_class;
     private: bool _has_remote_scheduler;
     Log_level const _stderr_log_level;
+
+    private:
+    TaskJ _typed_java_sister;
 };
 
 //----------------------------------------------------------------------------------------Task_list

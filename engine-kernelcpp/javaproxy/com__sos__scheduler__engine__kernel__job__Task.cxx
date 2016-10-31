@@ -15,6 +15,7 @@ struct Task__class : ::zschimmer::javabridge::Class
     Task__class(const string& class_name);
    ~Task__class();
 
+    ::zschimmer::javabridge::Method const _webServiceAccessTokenString____method;
 
     static const ::zschimmer::javabridge::class_factory< Task__class > class_factory;
 };
@@ -23,7 +24,7 @@ const ::zschimmer::javabridge::class_factory< Task__class > Task__class::class_f
 
 Task__class::Task__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-{}
+    ,_webServiceAccessTokenString____method(this, "webServiceAccessTokenString", "()Ljava/lang/String;"){}
 
 Task__class::~Task__class() {}
 
@@ -42,6 +43,14 @@ Task::~Task() { assign_(NULL); }
 
 
 
+
+::javaproxy::java::lang::String Task::webServiceAccessTokenString() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Task__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_webServiceAccessTokenString____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
 
 
 ::zschimmer::javabridge::Class* Task::java_object_class_() const { return _class.get(); }

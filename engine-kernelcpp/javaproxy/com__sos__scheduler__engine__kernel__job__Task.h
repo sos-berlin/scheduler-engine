@@ -51,6 +51,7 @@ struct Task : ::zschimmer::javabridge::proxy_jobject< Task >, ::javaproxy::java:
     }
   public:
 
+    ::javaproxy::java::lang::String webServiceAccessTokenString() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

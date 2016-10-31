@@ -21,6 +21,11 @@ final class SchedulerUrisTest extends FreeSpec {
 
   private val uris = SchedulerUris("http://0.0.0.0:1111/")
 
+  "/jobscheduler" in {
+    assert(SchedulerUris("http://0.0.0.0:1111/jobscheduler").masterUri == uris.masterUri)
+    assert(SchedulerUris("http://0.0.0.0:1111/xxxx").masterUri == Uri("http://0.0.0.0:1111/xxxx/master/"))
+  }
+
   "overview" in {
     assert(uris.overview == "http://0.0.0.0:1111/jobscheduler/master/api")
   }

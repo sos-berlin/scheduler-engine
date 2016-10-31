@@ -212,6 +212,9 @@ with HasCloser {
     CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line)
   }
 
+  @ForCpp private def uri: String =
+    pluginSubsystem.stateOption(SosSpoolerUriName) getOrElse ""
+
   @ForCpp private def enqueueCall(o: CppCall): Unit = {
     schedulerThreadCallQueue.add(o)
   }
@@ -317,6 +320,9 @@ object Scheduler {
   private val mavenProperties = new MavenProperties(JavaResource("com/sos/scheduler/engine/kernel/maven.properties"))
   private val _defaultTimezoneId = DateTimeZone.getDefault.getID
   val DefaultZoneId = ZoneId.of(_defaultTimezoneId)
+
+  /** Value for API sos.spooler.Spooler#uri */
+  val SosSpoolerUriName = "sos.spooler.Spooler.uri"
 
   @ForCpp
   def defaultTimezoneId: String = _defaultTimezoneId

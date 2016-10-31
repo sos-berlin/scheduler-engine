@@ -2351,6 +2351,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 35, "Params_xml"                , (Com_method_ptr)&Com_task::put_Params_xml         , VT_EMPTY      , { VT_BSTR } }, /* JS-1026 get => put */
     { DISPATCH_PROPERTYGET, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Order_params_xml   , VT_BSTR       },
     { DISPATCH_PROPERTYPUT, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::put_Order_params_xml   , VT_EMPTY      , { VT_BSTR } }, /* JS-421 get => put */
+    { DISPATCH_PROPERTYGET, 37, "Web_service_access_token"  , (Com_method_ptr)&Com_task::get_Web_service_access_token, VT_BSTR  },
     //{ DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
     //{ DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
@@ -3171,6 +3172,15 @@ STDMETHODIMP Com_task::get_Order_params_xml( BSTR* result )
     return hr;
 }
 
+STDMETHODIMP Com_task::get_Web_service_access_token(BSTR* result) {
+    if (!_task) return E_POINTER;
+    try {
+        return String_to_bstr(_task->web_service_access_token(), result);
+    } catch (const exception&  x)  {
+        return _set_excepinfo(x, Z_FUNCTION);
+    }
+}
+
 //-------------------------------------------------------------------Com_task::put_Order_params_xml
 // Für Process_module_instance::fill_process_environment_with_params()
 
@@ -3440,6 +3450,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 39, "Supervisor_client"         , (Com_method_ptr)&Com_spooler::get_Supervisor_client, VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 40, "Configuration_directory"   , (Com_method_ptr)&Com_spooler::get_Configuration_directory, VT_BSTR },
     { DISPATCH_PROPERTYGET, 41, "Schedule"                  , (Com_method_ptr)&Com_spooler::get_Schedule         , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 42, "Uri"                       , (Com_method_ptr)&Com_spooler::get_Uri       , VT_BSTR      },
     {}
 };
 
@@ -4111,8 +4122,6 @@ STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
 
 STDMETHODIMP Com_spooler::get_Schedule( BSTR path_bstr, Ischedule** result )
 {
-    Z_LOGI( Z_FUNCTION << '\n' );
-
     if( !_spooler )  return E_POINTER;
 
     HRESULT hr = S_OK;
@@ -4126,6 +4135,15 @@ STDMETHODIMP Com_spooler::get_Schedule( BSTR path_bstr, Ischedule** result )
     catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
+}
+
+STDMETHODIMP Com_spooler::get_Uri(BSTR* result) {
+    if (!_spooler)  return E_POINTER;
+    try {
+        return String_to_bstr(_spooler->schedulerJ().uri(), result);
+    } catch (const exception&  x)  {
+        return Set_excepinfo(x, Z_FUNCTION);
+    }
 }
 
 //----------------------------------------------------------------------Com_spooler_proxy::_methods

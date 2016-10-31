@@ -20,9 +20,9 @@ import spray.http.Uri
 /**
   * @author Joacim Zschimmer
   */
-final class SchedulerUris private(schedulerUriString: String) {
+final class SchedulerUris private(schedulerUri: Uri) {
 
-  private val rootUri = Uri(s"$schedulerUriString/$Prefix/")
+  private[web] val masterUri = Uri(s"$schedulerUri/master/")
 
   lazy val command = resolvePathUri("api/command")
 
@@ -172,18 +172,27 @@ final class SchedulerUris private(schedulerUriString: String) {
 
   def /(relativeUri: Uri): Uri = resolvePathUri(relativeUri)
 
-  private def resolvePathUri(relativeUri: Uri): Uri = resolveUri(relativeUri, rootUri)
+  private def resolvePathUri(relativeUri: Uri): Uri = resolveUri(relativeUri, masterUri)
 
-  override def toString = s"SchedulerUris($schedulerUriString)"
+  override def toString = s"SchedulerUris($schedulerUri)"
 }
 
 object SchedulerUris {
-  private val Prefix = "jobscheduler/master"
   val DefaultEventName = "Event"
 
-  def apply(schedulerUri: Uri): SchedulerUris = apply(schedulerUri.toString)
+  def apply(schedulerUri: Uri): SchedulerUris = {
+    require(!schedulerUri.isEmpty, "JobScheduler URI is empty")
+    new SchedulerUris(schedulerUri.copy(path = normalizeSchedulerRootPath(schedulerUri.path)))
+  }
 
-  def apply(schedulerUri: String) = new SchedulerUris(schedulerUri stripSuffix "/")
+  private def normalizeSchedulerRootPath(path: Uri.Path): Uri.Path = {
+    val result = path.toString stripSuffix "/" match {
+      case "" ⇒ "/jobscheduler"  // Default prefix
+      case o ⇒ o
+    }
+    Uri.Path(result)
+  }
+
 
   private[web] def resolveUri(uri: Uri, against: Uri) = {
     val scheme = emptyToNone(uri.scheme) getOrElse against.scheme

@@ -416,7 +416,7 @@ library Spooler
         [id(20)]
         HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
 
-        // Nur f�r Itask_proxy
+        // Only for Itask_proxy
         [id(21)]
         HRESULT                 Add_subprocess              ( [in] int Pid, [in] double* timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, 
                                                               [in] VARIANT_BOOL kill_dependants_too, [in,defaultvalue("")] BSTR Title );
@@ -480,6 +480,9 @@ library Spooler
 
         [id(36),propput]
         HRESULT                 Order_params_xml            ( [in] BSTR );
+
+        [id(37), propget]
+        HRESULT                 Web_service_access_token    ([out, retval] BSTR*);
 
         //[id(35)]
         //HRESULT                 Try_lock_else_call_me_again ( [in] BSTR, [out,retval] VARIANT_BOOL* );
@@ -687,6 +690,9 @@ library Spooler
 
         [id(41),propget]        
         HRESULT                 Schedule                ( [in] BSTR, [out,retval] Ischedule** );
+
+        [id(42),propget]
+        HRESULT                 Uri                     ([out, retval] BSTR*);
     }
 
     [

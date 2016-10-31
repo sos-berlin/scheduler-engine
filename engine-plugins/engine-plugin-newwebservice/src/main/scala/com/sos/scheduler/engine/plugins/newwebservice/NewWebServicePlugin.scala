@@ -6,11 +6,13 @@ import com.sos.scheduler.engine.common.internet.IP._
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.scheduler.engine.common.scalautil.SetOnce
 import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
+import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins, UseGuiceModule}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
@@ -42,8 +44,13 @@ extends Plugin {
     @Provides @Singleton
     def newWebServicePluginConfiguration: NewWebServicePluginConfiguration = conf
   })
+  private val uriOnce = new SetOnce[String](name = "NewWebServicePlugin.uri")
 
   override def onPrepare() = runWithSprayWebServer()
+
+  override def state = {
+    case Scheduler.SosSpoolerUriName ⇒ uriOnce()
+  }
 
   private def runWithSprayWebServer(): Unit = {
     val bindings = (httpBinding ++ httpsBinding).toList
@@ -51,6 +58,7 @@ extends Plugin {
       val webServer = new EngineWebServer(bindings, gateKeeperConfiguration, csrf, myInjector)
       closer.registerAutoCloseable(webServer)
       webServer.start() await 60.s
+      uriOnce := webServer.locallyUsableUri.toString
     }
   }
 

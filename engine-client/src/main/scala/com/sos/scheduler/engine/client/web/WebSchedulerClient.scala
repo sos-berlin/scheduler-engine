@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.client.web
 
 import akka.util.Timeout
+import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
@@ -39,6 +41,8 @@ import spray.json.DefaultJsonProtocol._
  */
 trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
+  protected def credentials: Option[UserAndPassword] = None
+
   import actorRefFactory.dispatcher
 
   private implicit val timeout = Timeout(3600.s.toFiniteDuration)
@@ -47,11 +51,17 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   def uris: SchedulerUris
 
-  private lazy val nonCachingHttpResponsePipeline =
-    addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
-    encode(Gzip) ~>
-    sendReceive ~>
-    decode(Gzip)
+  private lazy val nonCachingHttpResponsePipeline = {
+    val credentialsHeader: RequestTransformer = credentials match {
+      case Some(UserAndPassword(UserId(user), SecretString(pass))) ⇒ addCredentials(BasicHttpCredentials(user, pass))
+      case None ⇒ identity
+    }
+    credentialsHeader ~>
+      addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
+      encode(Gzip) ~>
+      sendReceive ~>
+      decode(Gzip)
+  }
 
   private lazy val jsonNonCachingHttpResponsePipeline =
     addHeader(Accept(`application/json`)) ~>
