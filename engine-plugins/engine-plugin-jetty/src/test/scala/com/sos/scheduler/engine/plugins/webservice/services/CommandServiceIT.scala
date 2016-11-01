@@ -26,6 +26,7 @@ final class CommandServiceIT extends FreeSpec with ScalaSchedulerTest with Jetty
   "Execute a command via POST" in {
     postCommand("<show_state><!--äöü--></show_state>") should include ("<state")
     controller.toleratingErrorCodes(_ ⇒ true) {
+      postCommand("<modify_order job_chain='/A' order='äöüß' suspended='no'/>") should include ("SCHEDULER-162  There is no order äöüß in job chain")
       postCommand("<invalid-äöü/>") should include ("invalid-äöü")  // This succeeds with @Produces(Array("text/xml")), too ?
     }
   }
