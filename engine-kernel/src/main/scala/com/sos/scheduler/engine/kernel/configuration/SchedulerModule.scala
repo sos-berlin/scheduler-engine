@@ -102,7 +102,9 @@ with HasCloser {
 
   @Provides @Singleton
   private def provideGateKeeperConfiguration(config: Config, accessTokenRegister: AccessTokenRegister): GateKeeper.Configuration =
-    GateKeeper.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.webserver.auth"))
+    GateKeeper.Configuration.fromSubConfig(
+        authConfig  = config.getConfig("jobscheduler.master.webserver.auth"),
+        usersConfig = config.getConfig("jobscheduler.agent.auth.users"))
       .copy(provideAccessTokenValidator = () ⇒ accessTokenRegister.validate)
 
   @Provides @Singleton
