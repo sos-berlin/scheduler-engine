@@ -7,6 +7,7 @@ import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
 import com.sos.scheduler.engine.common.async.StandardCallQueue
+import com.sos.scheduler.engine.common.auth.EncodedPasswordValidator
 import com.sos.scheduler.engine.common.configutils.Configs.parseConfigIfExists
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
@@ -102,10 +103,10 @@ with HasCloser {
 
   @Provides @Singleton
   private def provideGateKeeperConfiguration(config: Config, accessTokenRegister: AccessTokenRegister): GateKeeper.Configuration =
-    GateKeeper.Configuration.fromSubConfig(
-        authConfig  = config.getConfig("jobscheduler.master.webserver.auth"),
-        usersConfig = config.getConfig("jobscheduler.agent.auth.users"))
-      .copy(provideAccessTokenValidator = () ⇒ accessTokenRegister.validate)
+    GateKeeper.Configuration.fromSubConfig(config.getConfig("jobscheduler.master.webserver.auth"))
+      .copy(
+        providePasswordValidator = () ⇒ EncodedPasswordValidator.fromSubConfig(config.getConfig("jobscheduler.master.auth.users")),
+        provideAccessTokenValidator = () ⇒ accessTokenRegister.validate)
 
   @Provides @Singleton
   private def provideJdbcConnectionPool(config: Config, databaseSubsystem: DatabaseSubsystem, executionContext: ExecutionContext): JdbcConnectionPool =
