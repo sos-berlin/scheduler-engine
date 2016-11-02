@@ -30,8 +30,4 @@ public class EmptySchedulerControllerBridge implements SchedulerControllerBridge
     @Override public final String getName() {
         return EmptySchedulerControllerBridge.class.getSimpleName();
     }
-
-    @Override public final boolean isCppThreadRequired() {
-        return false;
-    }
 }

@@ -15,32 +15,26 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC {
     }
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.TaskC get_task_or_null(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.TaskC result = get_task_or_null__native(cppReference(), p0);
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.TaskC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.TaskC get_task_or_null__native(long cppReference, int p0);
 
 
     @Override public java.lang.String task_log(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = task_log__native(cppReference(), p0);
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String task_log__native(long cppReference, int p0);

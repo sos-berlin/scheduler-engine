@@ -15,124 +15,100 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Nested_job_chain_nodeC {
     }
 
     @Override public long delay() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return delay__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native long delay__native(long cppReference);
 
 
     @Override public java.lang.String job_chain_path() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = job_chain_path__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String job_chain_path__native(long cppReference);
 
 
     @Override public java.lang.String nested_job_chain_path() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = nested_job_chain_path__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String nested_job_chain_path__native(long cppReference);
 
 
     @Override public void set_action_string(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             set_action_string__native(cppReference(), p0);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void set_action_string__native(long cppReference, java.lang.String p0);
 
 
     @Override public java.lang.String string_action() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = string_action__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String string_action__native(long cppReference);
 
 
     @Override public java.lang.String string_error_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = string_error_state__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String string_error_state__native(long cppReference);
 
 
     @Override public java.lang.String string_next_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = string_next_state__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String string_next_state__native(long cppReference);
 
 
     @Override public java.lang.String string_order_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = string_order_state__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String string_order_state__native(long cppReference);

@@ -15,74 +15,59 @@ implements com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC {
     }
 
     @Override public void Release() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             Release__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void Release__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC chunk_reader() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC result = chunk_reader__native(cppReference());
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC chunk_reader__native(long cppReference);
 
 
     @Override public void close() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             close__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void close__native(long cppReference);
 
 
     @Override public java.lang.String header_string() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = header_string__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String header_string__native(long cppReference);
 
 
     @Override public int status() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return status__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native int status__native(long cppReference);

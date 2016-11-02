@@ -15,424 +15,340 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     }
 
     @Override public boolean _always_create_database_tables() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _always_create_database_tables__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _always_create_database_tables__native(long cppReference);
 
 
     @Override public boolean _cluster_restart_after_emergency_abort() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _cluster_restart_after_emergency_abort__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _cluster_restart_after_emergency_abort__native(long cppReference);
 
 
     @Override public java.lang.String _clusters_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _clusters_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _clusters_tablename__native(long cppReference);
 
 
     @Override public java.lang.String _db_name() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _db_name__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _db_name__native(long cppReference);
 
 
     @Override public java.lang.String _html_dir() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _html_dir__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _html_dir__native(long cppReference);
 
 
     @Override public java.lang.String _http_port() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _http_port__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _http_port__native(long cppReference);
 
 
     @Override public java.lang.String _https_port() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _https_port__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _https_port__native(long cppReference);
 
 
     @Override public java.lang.String _job_history_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _job_history_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _job_history_tablename__native(long cppReference);
 
 
     @Override public java.lang.String _job_java_classpath() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _job_java_classpath__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _job_java_classpath__native(long cppReference);
 
 
     @Override public java.lang.String _job_java_options() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _job_java_options__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _job_java_options__native(long cppReference);
 
 
     @Override public boolean _keep_order_content_on_reschedule() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _keep_order_content_on_reschedule__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _keep_order_content_on_reschedule__native(long cppReference);
 
 
     @Override public int _max_length_of_blob_entry() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _max_length_of_blob_entry__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native int _max_length_of_blob_entry__native(long cppReference);
 
 
     @Override public boolean _order_distributed_balanced() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _order_distributed_balanced__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _order_distributed_balanced__native(long cppReference);
 
 
     @Override public java.lang.String _order_history_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _order_history_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _order_history_tablename__native(long cppReference);
 
 
     @Override public java.lang.String _order_step_history_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _order_step_history_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _order_step_history_tablename__native(long cppReference);
 
 
     @Override public java.lang.String _orders_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _orders_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _orders_tablename__native(long cppReference);
 
 
     @Override public int _remote_scheduler_connect_retry_delay() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _remote_scheduler_connect_retry_delay__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native int _remote_scheduler_connect_retry_delay__native(long cppReference);
 
 
     @Override public int _supervisor_configuration_polling_interval() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _supervisor_configuration_polling_interval__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native int _supervisor_configuration_polling_interval__native(long cppReference);
 
 
     @Override public java.lang.String _tasks_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _tasks_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _tasks_tablename__native(long cppReference);
 
 
     @Override public boolean _use_java_persistence() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _use_java_persistence__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _use_java_persistence__native(long cppReference);
 
 
     @Override public boolean _use_old_microscheduling_for_jobs() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _use_old_microscheduling_for_jobs__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _use_old_microscheduling_for_jobs__native(long cppReference);
 
 
     @Override public boolean _use_old_microscheduling_for_tasks() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return _use_old_microscheduling_for_tasks__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean _use_old_microscheduling_for_tasks__native(long cppReference);
 
 
     @Override public java.lang.String _variables_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _variables_tablename__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _variables_tablename__native(long cppReference);
 
 
     @Override public java.lang.String _web_directory() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = _web_directory__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String _web_directory__native(long cppReference);
 
 
     @Override public java.lang.String installed_licence_keys_string() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = installed_licence_keys_string__native(cppReference());
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String installed_licence_keys_string__native(long cppReference);
 
 
     @Override public boolean is_freezed() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return is_freezed__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean is_freezed__native(long cppReference);
 
 
     @Override public java.util.ArrayList messageTexts() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.util.ArrayList result = messageTexts__native(cppReference());
             checkIsNotReleased(java.util.ArrayList.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.util.ArrayList messageTexts__native(long cppReference);
 
 
     @Override public void set(int p0, java.lang.String p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             set__native(cppReference(), p0, p1);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void set__native(long cppReference, int p0, java.lang.String p1);

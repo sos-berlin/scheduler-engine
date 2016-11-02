@@ -37,15 +37,12 @@ final class JavaMethod(m: ProcedureSignature) {
     }
 
     def threadSafeCode = {
-      val threadLock = classOf[CppProxy].getName + ".threadLock"
-      "        " + threadLock + ".lock();\n" +
-        "        try {\n" +
-        code +
-        "        }\n" +
-        "        catch (Exception x) { throw " + classOf[CppProxies].getName + ".propagateCppException(x, this); }\n" +
-        "        finally {\n" +
-        "            " + threadLock + ".unlock();\n" +
-        "        }\n"
+      val cppProxy = classOf[CppProxy].getName + "$.MODULE$"
+      s"""        $cppProxy.requireCppThread();
+         |        try {
+         |$code        }
+         |        catch (Exception x) { throw ${ classOf[CppProxies].getName }.propagateCppException(x, this); }
+         |""".stripMargin
     }
 
     declaration + " {\n" +

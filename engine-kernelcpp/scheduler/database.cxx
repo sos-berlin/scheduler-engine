@@ -6,7 +6,6 @@
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
 #include "../file/sosdb.h"
-#include "Java_thread_unlocker.h"
 
 #ifdef Z_WINDOWS
 #   include <process.h>     // getpid()
@@ -1342,10 +1341,7 @@ bool Database::try_reopen_after_error(const exception& callers_exception, const 
                 _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
                 if (!_spooler->_connection_manager) throw;
 
-                {
-                    Java_thread_unlocker unlocker ( _spooler );   // Damit das JettyPlugin durchkommt. Das ist gefährlich. Wir blockieren irgendwo mitten in der Code-Ausführung und erlauben rekursive Operationen.
-                    _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
-                }
+                _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
                 immediately_reopened = false;
             }
         }

@@ -15,48 +15,39 @@ implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC {
     }
 
     @Override public java.lang.Object jdbc_connection() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.Object result = jdbc_connection__native(cppReference());
             checkIsNotReleased(java.lang.Object.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.Object jdbc_connection__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = properties__native(cppReference());
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties__native(long cppReference);
 
 
     @Override public java.lang.String transform_sql(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.lang.String result = transform_sql__native(cppReference(), p0);
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.lang.String transform_sql__native(long cppReference, java.lang.String p0);

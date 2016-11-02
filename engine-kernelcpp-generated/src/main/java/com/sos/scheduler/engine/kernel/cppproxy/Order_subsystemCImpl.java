@@ -15,150 +15,120 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
     }
 
     @Override public void add_distributed_to_order_statistics(java.lang.String p0, int[] p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             add_distributed_to_order_statistics__native(cppReference(), p0, p1);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void add_distributed_to_order_statistics__native(long cppReference, java.lang.String p0, int[] p1);
 
 
     @Override public void add_non_distributed_to_order_statistics(int[] p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             add_non_distributed_to_order_statistics__native(cppReference(), p0);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void add_non_distributed_to_order_statistics__native(long cppReference, int[] p0);
 
 
     @Override public String[] file_based_paths(boolean p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             String[] result = file_based_paths__native(cppReference(), p0);
             checkIsNotReleased(String[].class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native String[] file_based_paths__native(long cppReference, boolean p0);
 
 
     @Override public int finished_orders_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return finished_orders_count__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native int finished_orders_count__native(long cppReference);
 
 
     @Override public boolean is_empty() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             return is_empty__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native boolean is_empty__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC java_active_file_based(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Job_chainC result = java_active_file_based__native(cppReference(), p0);
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Job_chainC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC java_active_file_based__native(long cppReference, java.lang.String p0);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC java_file_based(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Job_chainC result = java_file_based__native(cppReference(), p0);
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Job_chainC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC java_file_based__native(long cppReference, java.lang.String p0);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC java_file_based_or_null(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Job_chainC result = java_file_based_or_null__native(cppReference(), p0);
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Job_chainC.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC java_file_based_or_null__native(long cppReference, java.lang.String p0);
 
 
     @Override public java.util.ArrayList java_file_baseds() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java.util.ArrayList result = java_file_baseds__native(cppReference());
             checkIsNotReleased(java.util.ArrayList.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native java.util.ArrayList java_file_baseds__native(long cppReference);
 
 
     @Override public void java_for_each_distributed_order(java.util.ArrayList p0, java.util.ArrayList p1, int p2, com.sos.scheduler.engine.kernel.order.OrderCallback p3) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
             java_for_each_distributed_order__native(cppReference(), p0, p1, p2, p3);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
     }
 
     private static native void java_for_each_distributed_order__native(long cppReference, java.util.ArrayList p0, java.util.ArrayList p1, int p2, com.sos.scheduler.engine.kernel.order.OrderCallback p3);

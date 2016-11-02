@@ -512,9 +512,6 @@
     <ClInclude Include="xml_client_connection.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="Java_thread_unlocker.h">
-      <Filter>Header-Dateien</Filter>
-    </ClInclude>
     <ClInclude Include="log_cache_Request.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>

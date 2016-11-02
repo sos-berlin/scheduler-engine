@@ -72,8 +72,6 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     void onLoad() const;
     void onSchedulerLoaded() const;
     void sendCommandAndReplyToStout(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::Local_java_byte_array& p1) const;
-    void threadLock() const;
-    void threadUnlock() const;
     ::javaproxy::java::lang::String uri() const;
     static ::javaproxy::java::lang::String versionCommitHash();
 

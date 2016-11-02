@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxy$;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,12 +14,7 @@ import static com.google.common.collect.Iterables.toArray;
 public class CppScheduler {
     private static final Logger logger = LoggerFactory.getLogger(CppScheduler.class);
     private static final AtomicReference<CppScheduler> onlyInstance = new AtomicReference<CppScheduler>();
-    private final boolean isCppThreadRequired;
     private String name = null;
-
-    public CppScheduler(boolean isCppThreadRequired) {
-        this.isCppThreadRequired = isCppThreadRequired;
-    }
 
     public static void loadModuleFromPath() {
         System.loadLibrary("jobscheduler-engine");
@@ -51,16 +46,14 @@ public class CppScheduler {
     }
 
     private int run2(ImmutableList<String> arguments, String argumentLine, SchedulerControllerBridge controllerBridge) {
-        CppProxy.threadLock.setCppThreadRequired(isCppThreadRequired);
-        CppProxy.threadLock.requireUnlocked();
-        CppProxy.threadLock.startLock();
-        if (logger.isTraceEnabled()) logger.trace(this +" starts");
+        CppProxy$.MODULE$.cppThreadStarted();
+        logger.trace(this +" starts");
         try {
             return runNative(toArray(arguments, String.class), argumentLine, controllerBridge);
         }
         finally {
-            if (logger.isTraceEnabled()) logger.trace(this +" has ended");
-            CppProxy.threadLock.endLock();
+            logger.trace(this +" has ended");
+            CppProxy$.MODULE$.cppThreadEnded();
         }
     }
 

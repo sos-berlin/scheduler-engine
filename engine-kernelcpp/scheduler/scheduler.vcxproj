@@ -495,7 +495,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event_code.h" />
-    <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />
     <ClInclude Include="log_cache_Request_cache.h" />
     <ClInclude Include="Module_monitor.h" />

@@ -16,5 +16,4 @@ public interface SchedulerControllerBridge {
     void onSchedulerActivated();
     void onSchedulerTerminated(int exitCode, @Nullable Throwable t);
     SchedulerEventBus getEventBus();
-    boolean isCppThreadRequired();
 }

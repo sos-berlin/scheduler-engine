@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** Der Scheduler in einem eigenen Thread. */
-class SchedulerThread extends Thread {
+final class SchedulerThread extends Thread {
     private final SchedulerControllerBridge controllerBridge;
     private final CppScheduler cppScheduler;
     private ImmutableList<String> arguments = null;
@@ -15,7 +15,7 @@ class SchedulerThread extends Thread {
 
     SchedulerThread(SchedulerControllerBridge controllerBridge) {
         this.controllerBridge = controllerBridge;
-        cppScheduler = new CppScheduler(controllerBridge.isCppThreadRequired());
+        cppScheduler = new CppScheduler();
         setName("JobScheduler Engine");
     }
 
@@ -23,12 +23,12 @@ class SchedulerThread extends Thread {
         CppScheduler.loadModule(f);
     }
 
-    final void startThread(Iterable<String> args) {
+    void startThread(Iterable<String> args) {
         this.arguments = ImmutableList.copyOf(args);
         start();  // Thread läuft in run()
     }
 
-    @Override public final void run() {
+    @Override public void run() {
         int exitCode = -1;
         Throwable throwable = null;
         try {
@@ -49,7 +49,7 @@ class SchedulerThread extends Thread {
         }
     }
 
-    final int exitCode() {
+    int exitCode() {
         if (isAlive())  throw new IllegalStateException("Thread is still alive");
         return exitCodeAtom.get();
     }

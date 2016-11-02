@@ -92,11 +92,6 @@ with HasCloser {
 
   cppProxy.setSister(this)
 
-  if (controllerBridge eq EmptySchedulerControllerBridge.singleton) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
-    threadLock()
-    onClose { threadUnlock() } //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
-  }
-
   private var pluginSubsystem: PluginSubsystem = null
   private var commandSubsystem: CommandSubsystem = null
   private var databaseSubsystem: DatabaseSubsystem = null
@@ -223,14 +218,6 @@ with HasCloser {
     schedulerThreadCallQueue.tryCancel(o)
   }
 
-  @ForCpp private def threadLock(): Unit = {
-    CppProxy.threadLock.lock()
-  }
-
-  @ForCpp /*private*/ def threadUnlock(): Unit = {
-    CppProxy.threadLock.unlock()
-  }
-
   def terminate(): Unit = {
     if (!isClosed) {
       try
@@ -329,6 +316,7 @@ object Scheduler {
 
   @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
+    CppProxy.cppThreadStarted()  // Needed, when process has been started via C++ (which is the case in production)
     controllerBridge.cppSettings.setSettingsInCpp(cppProxy.modifiable_settings)
     createInjector(DEVELOPMENT, List(   // Must be DEVELOPMENT for some singletons needs the started C++ Scheduler.
       new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),

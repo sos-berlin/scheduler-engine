@@ -20,7 +20,6 @@
 
 #include "../kram/sleep.h"
 #include "../kram/log.h"
-#include "Java_thread_unlocker.h"
 
 namespace sos {
 namespace scheduler {
@@ -410,11 +409,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         wait->set_polling_interval( 0.1 );
 
-        int ret;
-        {
-            Java_thread_unlocker unlocker ( _spooler );
-            ret = wait->wait(until.as_double() - now.as_double());
-        }
+        int ret = wait->wait(until.as_double() - now.as_double());
         return ret > 0;
     }
 
@@ -465,7 +460,6 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
 
 DWORD Wait_handles::myMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, BOOL waitAll, DWORD timeout, DWORD wakeMask) 
 {
-    Java_thread_unlocker unlocker ( _spooler );
     DWORD result = MsgWaitForMultipleObjects(nCount, pHandles, waitAll, timeout, wakeMask);
     return result;
 }

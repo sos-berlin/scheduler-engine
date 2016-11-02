@@ -36,8 +36,6 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _onLoad____method;
     ::zschimmer::javabridge::Method const _onSchedulerLoaded____method;
     ::zschimmer::javabridge::Method const _sendCommandAndReplyToStout__Ljava_lang_String_2_3B__method;
-    ::zschimmer::javabridge::Method const _threadLock____method;
-    ::zschimmer::javabridge::Method const _threadUnlock____method;
     ::zschimmer::javabridge::Method const _uri____method;
     ::zschimmer::javabridge::Static_method const _versionCommitHash____method;
 
@@ -65,8 +63,6 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_onLoad____method(this, "onLoad", "()V")
     ,_onSchedulerLoaded____method(this, "onSchedulerLoaded", "()V")
     ,_sendCommandAndReplyToStout__Ljava_lang_String_2_3B__method(this, "sendCommandAndReplyToStout", "(Ljava/lang/String;[B)V")
-    ,_threadLock____method(this, "threadLock", "()V")
-    ,_threadUnlock____method(this, "threadUnlock", "()V")
     ,_uri____method(this, "uri", "()Ljava/lang/String;")
     ,_versionCommitHash____method(this, "versionCommitHash", "()Ljava/lang/String;"){}
 
@@ -209,18 +205,6 @@ void Scheduler::sendCommandAndReplyToStout(const ::zschimmer::javabridge::proxy_
     parameter_list._jvalues[1].l = p1.get_jbyteArray();
     Scheduler__class* cls = _class.get();
     cls->_sendCommandAndReplyToStout__Ljava_lang_String_2_3B__method.call(get_jobject(), parameter_list);
-}
-
-void Scheduler::threadLock() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Scheduler__class* cls = _class.get();
-    cls->_threadLock____method.call(get_jobject(), parameter_list);
-}
-
-void Scheduler::threadUnlock() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Scheduler__class* cls = _class.get();
-    cls->_threadUnlock____method.call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String Scheduler::uri() const {
