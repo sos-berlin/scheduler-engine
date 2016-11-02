@@ -61,8 +61,7 @@ enum Log_level
     log_debug  = -1,
     log_info   =  0, 
     log_warn   =  1, 
-    log_error  =  2,
-  //log_fatal  =  3
+    log_error  =  2
 };
 
 //--------------------------------------------------------------------------Has_java_class_name

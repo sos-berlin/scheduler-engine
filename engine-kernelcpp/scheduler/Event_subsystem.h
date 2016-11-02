@@ -17,6 +17,7 @@ struct Event_subsystem: Object, Subsystem
 
     virtual void                report                      (const KeyedEventJ&)                         = 0;
     virtual void                report_event_code           (Event_code, const ObjectJ& event_source) = 0;
+    virtual void                report_logged               (Log_level, const string& prefix, const string& message) = 0;
 };
 
 

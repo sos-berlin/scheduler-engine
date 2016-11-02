@@ -203,10 +203,6 @@ with HasCloser {
   @ForCpp private def getEventSubsystem =
     injector.getInstance(classOf[EventSubsystem])
 
-  @ForCpp private def log(prefix: String, level: Int, line: String): Unit = {
-    CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line)
-  }
-
   @ForCpp private def uri: String =
     pluginSubsystem.stateOption(SosSpoolerUriName) getOrElse ""
 

@@ -2,9 +2,11 @@ package com.sos.scheduler.engine.kernel.event
 
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.AnyKeyedEvent
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
 import com.sos.scheduler.engine.eventbus.{EventSource, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.event.EventSubsystem._
+import com.sos.scheduler.engine.kernel.log.CppLogger
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Inject, Singleton}
 
@@ -21,6 +23,11 @@ private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEv
     require(count == CppEventCode.values.length, "C++-Event_code does not match CppEventCode")
   }
 
+  @ForCpp def reportLogged(cppLevel: Int, prefix: String, message: String): Unit = {
+    CppLogger.log(SchedulerLogLevel.ofCpp(cppLevel), prefix, message)
+    eventBus.publish(KeyedEvent(Logged(SchedulerLogLevel.ofCpp(cppLevel), message)))
+  }
+
   @ForCpp private def reportEventClass(cppEventCode: Int, eventSource: AnyRef): Unit = {
     try {
       val o = eventSource.asInstanceOf[EventSource]
@@ -28,7 +35,7 @@ private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEv
       eventBus.publish(e)
     }
     catch {
-      case x: Exception => logger.error(s"EventSubsystem.reportEventClass($cppEventCode):", x)
+      case x: Exception ⇒ logger.error(s"EventSubsystem.reportEventClass($cppEventCode):", x)
     }
   }
 

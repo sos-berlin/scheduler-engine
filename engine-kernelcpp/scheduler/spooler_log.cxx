@@ -1073,6 +1073,8 @@ struct Prefix_log_deny_recursion
 
 void Prefix_log::log2( Log_level level, const string& prefix, const string& line_par, Has_log* log )
 {
+    if (level <= log_none) return;
+
     string line = remove_password( line_par );
     
     if( !_log )  
@@ -1089,8 +1091,6 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 
     Prefix_log_deny_recursion deny_recursion ( this );
 
-
- 
     if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
@@ -1099,17 +1099,18 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     _last[ level ] = line;
 
     string my_prefix = _task? _task->obj_name() : _prefix;
-    if (_spooler && _spooler->_java_subsystem && _spooler->schedulerJ())
-        _spooler->schedulerJ().log(my_prefix, level, line);
-
     {
         ptr<cache::Request> request = _spooler->_log_file_cache->request(this);
         bool log_to_files = level >= log_level();
         _log->log2( level, log_to_files, my_prefix, line, this, _order_log );
     }
 
-    if (_object  &&  javabridge::Vm::is_active())
-        _object->report_event(CppEventFactoryJ::newLoggedEvent(level, line) );
+    if (_object && javabridge::Vm::is_active()) {
+        if (Spooler* sp = _object->spooler())
+            if (Event_subsystem* event_subsystem = sp->event_subsystem()) 
+                if (_spooler->java_subsystem())
+                    event_subsystem->report_logged(level, my_prefix, line);
+    }
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event

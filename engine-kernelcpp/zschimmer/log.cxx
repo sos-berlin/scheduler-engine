@@ -101,7 +101,6 @@ string name_of_log_level( Log_level level )
         case log_info:    return "info";
         case log_warn:    return "warning";
         case log_error:   return "error";
-        case log_fatal:   return "fatal";
         default:          return as_string( level );
     }
 }

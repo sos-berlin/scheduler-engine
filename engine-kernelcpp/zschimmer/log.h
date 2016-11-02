@@ -135,9 +135,7 @@ enum Log_level
     log_debug  = -1,
     log_info   =  0, 
     log_warn   =  1, 
-    log_error  =  2,
-    log_fatal  =  3,
-  //log_none   =  4,        // Nicht loggen 
+    log_error  =  2
 };
 
 //----------------------------------------------------------------------------------------Log_level
@@ -170,7 +168,6 @@ struct Has_log
     void                        info                        ( const string& line )                  { log( log_info  , line ); }
     void                        warn                        ( const string& line )                  { log( log_warn  , line ); }
     void                        error                       ( const string& line )                  { log( log_error , line ); }
-    void                        fatal                       ( const string& line )                  { log( log_fatal , line ); }
 
     void java_log(int level, const string& line) {
         return log((Log_level)level, line);

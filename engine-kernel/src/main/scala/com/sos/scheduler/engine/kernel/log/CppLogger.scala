@@ -1,32 +1,41 @@
 package com.sos.scheduler.engine.kernel.log
 
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import org.slf4j.{Logger, LoggerFactory}
 import com.google.common.base.Splitter
+import com.sos.scheduler.engine.common.log.LogLevel
+import com.sos.scheduler.engine.common.log.LogLevel.LevelLogger
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
 
 object CppLogger {
+  private val logger = LoggerFactory.getLogger("JobScheduler")
+  private val schedulerToLogLevel = Array(
+    LogLevel.None,   // none
+    LogLevel.Trace,  // debug9
+    LogLevel.Trace,  // debug8
+    LogLevel.Trace,  // debug7
+    LogLevel.Trace,  // debug6
+    LogLevel.Trace,  // debug5
+    LogLevel.Trace,  // debug4
+    LogLevel.Debug,  // debug3
+    LogLevel.Debug,  // debug2
+    LogLevel.Debug,  // debug1
+    LogLevel.Info,   // info
+    LogLevel.Warn,   // warning
+    LogLevel.Error)  // error
 
-  def log(prefix: String, level: SchedulerLogLevel, lines: String): Unit = {
-    if (level != SchedulerLogLevel.none) {
-      val logger = LoggerFactory.getLogger("JobScheduler")
-      for (line <- splitLines(lines)) {
+  def log(level: SchedulerLogLevel, prefix: String, lines: String): Unit = {
+    val logLevel = toLogLevel(level)
+    if (logger.isEnabled(logLevel)) {
+      for (line ← splitLines(lines)) {
         val prefixedLine = if (prefix.isEmpty) line else s"($prefix) $line"
-        logLine(logger, level, prefixedLine)
+        logger.logByLevel(logLevel, prefixedLine)
       }
     }
   }
 
-  private def logLine(logger: Logger, level: SchedulerLogLevel, line: String): Unit = {
-    level match {
-      case SchedulerLogLevel.error   => logger.error(line)
-      case SchedulerLogLevel.warning => logger.warn(line)
-      case SchedulerLogLevel.info    => logger.info(line)
-      case SchedulerLogLevel.debug9  => logger.trace(line)
-      case _ =>
-        if (level.cppNumber <= SchedulerLogLevel.debug3.cppNumber) logger.trace(line)
-        else logger.debug(line)
-    }
+  private def toLogLevel(level: SchedulerLogLevel): LogLevel = {
+    schedulerToLogLevel(level.cppNumber - SchedulerLogLevel.none.cppNumber)
   }
 
   private object splitLines {
@@ -40,7 +49,7 @@ object CppLogger {
         Iterable(rightTrim(lines))
     }
   }
-  
+
   private def rightTrim(s: String) = {
     var i = s.length - 1
     if (i >= 0 && s.charAt(i) == '\r') i -= 1

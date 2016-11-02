@@ -17,6 +17,7 @@ struct EventSubsystem__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _checkNumberOfEventCodes__I__method;
     ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method;
     ::zschimmer::javabridge::Method const _reportEventClass__ILjava_lang_Object_2__method;
+    ::zschimmer::javabridge::Method const _reportLogged__ILjava_lang_String_2Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< EventSubsystem__class > class_factory;
 };
@@ -27,7 +28,8 @@ EventSubsystem__class::EventSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_checkNumberOfEventCodes__I__method(this, "checkNumberOfEventCodes", "(I)V")
     ,_report__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method(this, "report", "(Lcom/sos/scheduler/engine/data/event/KeyedEvent;)V")
-    ,_reportEventClass__ILjava_lang_Object_2__method(this, "reportEventClass", "(ILjava/lang/Object;)V"){}
+    ,_reportEventClass__ILjava_lang_Object_2__method(this, "reportEventClass", "(ILjava/lang/Object;)V")
+    ,_reportLogged__ILjava_lang_String_2Ljava_lang_String_2__method(this, "reportLogged", "(ILjava/lang/String;Ljava/lang/String;)V"){}
 
 EventSubsystem__class::~EventSubsystem__class() {}
 
@@ -67,6 +69,15 @@ void EventSubsystem::reportEventClass(jint p0, const ::zschimmer::javabridge::pr
     parameter_list._jvalues[1].l = p1.get_jobject();
     EventSubsystem__class* cls = _class.get();
     cls->_reportEventClass__ILjava_lang_Object_2__method.call(get_jobject(), parameter_list);
+}
+
+void EventSubsystem::reportLogged(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const {
+    ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
+    parameter_list._jvalues[0].i = p0;
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    parameter_list._jvalues[2].l = p2.get_jobject();
+    EventSubsystem__class* cls = _class.get();
+    cls->_reportLogged__ILjava_lang_String_2Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
 }
 
 

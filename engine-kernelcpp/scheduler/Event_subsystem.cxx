@@ -35,6 +35,11 @@ struct Event_subsystem_impl : Event_subsystem
     void                        report                      (const KeyedEventJ&, const ObjectJ&);
     virtual void                report_event_code           (Event_code, const ObjectJ& event_source);
 
+    void report_logged(Log_level level, const string& prefix, const string& message) {
+        if (_eventSubsystemJ) 
+            _eventSubsystemJ.reportLogged((int)level, prefix, message);
+    }
+
 private:
     Fill_zero                  _zero_;
     EventSubsystemJ            _eventSubsystemJ;
