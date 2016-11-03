@@ -5,6 +5,7 @@ import com.google.inject.{AbstractModule, Injector, Provides}
 import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
 import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.sprayutils.WebLogDirectives.handleErrorAndLog
 import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -19,6 +20,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.WebServiceActor._
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRouteSchedulerAdapter
+import com.typesafe.config.Config
 import javax.inject.{Inject, Provider, Singleton}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext
@@ -38,6 +40,7 @@ final class WebServiceActor @Inject private(
   protected val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val disposableCppProxyRegister: DisposableCppProxyRegister,
   protected val orderStatisticsChangedSource: OrderStatisticsChangedSource,
+  config: Config,
   implicit protected val executionContext: ExecutionContext,
   toAgentClientProvider: Provider[SchedulerAgentClientFactory])
 extends HttpServiceActor with AllRoutes with AgentRouteSchedulerAdapter {
@@ -56,8 +59,10 @@ extends HttpServiceActor with AllRoutes with AgentRouteSchedulerAdapter {
   }
 
   override def receive = runRoute(
-    gateKeeper.restrict {
-      completeRoute
+    handleErrorAndLog(subConfig = config.getConfig("jobscheduler.master.webserver")).apply {
+      gateKeeper.restrict {
+        completeRoute
+      }
     })
 }
 
