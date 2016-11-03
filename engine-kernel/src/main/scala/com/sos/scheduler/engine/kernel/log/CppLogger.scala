@@ -29,7 +29,7 @@ object CppLogger {
     if (logger.isEnabled(logLevel)) {
       for (line ← splitLines(lines)) {
         val prefixedLine = if (prefix.isEmpty) line else s"($prefix) $line"
-        logger.logByLevel(logLevel, prefixedLine)
+        logger.log(logLevel, prefixedLine)
       }
     }
   }
