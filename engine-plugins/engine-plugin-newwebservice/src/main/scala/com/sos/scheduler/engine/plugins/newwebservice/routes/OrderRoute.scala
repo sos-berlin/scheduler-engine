@@ -20,6 +20,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.imp
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
+import spray.http.StatusCodes.NotImplemented
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directives._
 import spray.routing.{Route, ValidationRejection}
@@ -65,22 +66,7 @@ trait OrderRoute extends LogRoute {
           completeTryHtml(client.fileBasedDetailed(orderKey))
 
         case returnType ⇒
-          anyEventJsonFormat.typeNameToClass.get(returnType) match {
-            case Some(eventClass) ⇒
-              withEventParameters { case EventParameters(`returnType`, afterEventId, timeout, limit) ⇒
-                implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
-                completeTryHtml {
-                  if (limit >= 0)
-                    client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout, limit = limit)(ClassTag(eventClass))
-                  else
-                    for (responseSnapshot ← client.eventsReverseForKey[AnyEvent](orderKey, after = afterEventId, limit = -limit)(ClassTag(eventClass))) yield
-                      for (events ← responseSnapshot) yield
-                        EventSeq.NonEmpty(events)
-                }
-              }
-            case None ⇒
-              reject(ValidationRejection(s"Invalid parameter return=$returnType"))
-          }
+          orderEvents(orderKey)
       }
     }
 
@@ -106,8 +92,11 @@ trait OrderRoute extends LogRoute {
       case Some(OrderDetailed.name) ⇒
         completeTryHtml(client.ordersBy[OrderDetailed](query) map { _ map Orders.apply })
 
-      case Some(o) ⇒
-        reject(ValidationRejection(s"Unknown value for parameter return=$o"))
+      case Some(returnType) ⇒
+        query.orderKeyOption match {
+          case Some(orderKey) ⇒ orderEvents(orderKey)
+          case _ ⇒ complete(NotImplemented → "This web service only works with OrderQuery designating a single OrderKey")
+        }
 
       case None ⇒
         htmlPreferred(webServiceContext) {
@@ -118,6 +107,24 @@ trait OrderRoute extends LogRoute {
           }
         } ~
           complete(client.orderTreeComplementedBy[OrderOverview](query))
+    }
+
+  private def orderEvents(orderKey: OrderKey): Route =
+    withEventParameters { case EventParameters(returnType, afterEventId, timeout, limit) ⇒
+      anyEventJsonFormat.typeNameToClass.get(returnType) match {
+        case Some(eventClass) ⇒
+          implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
+          completeTryHtml {
+            if (limit >= 0)
+              client.eventsForKey[AnyEvent](orderKey, after = afterEventId, timeout, limit = limit)(ClassTag(eventClass))
+            else
+              for (responseSnapshot ← client.eventsReverseForKey[AnyEvent](orderKey, after = afterEventId, limit = -limit)(ClassTag(eventClass))) yield
+                for (events ← responseSnapshot) yield
+                  EventSeq.NonEmpty(events)
+          }
+        case None ⇒
+          reject(ValidationRejection(s"Unknown value for parameter return=$returnType"))
+      }
     }
 }
 
