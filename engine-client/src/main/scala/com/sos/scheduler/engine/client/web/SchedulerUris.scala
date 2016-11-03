@@ -83,8 +83,12 @@ final class SchedulerUris private(schedulerUri: Uri) {
         query = Uri.Query((returnType map { o ⇒ "return" → o }).toMap)))
     }
 
-    def events(orderKey: OrderKey, timeout: Duration) =
-      uriString(Uri.Path("api/order" + orderKey.string), "timeout" → timeout.toString, "return" → "Event")
+    def events(query: OrderQuery, after: EventId, timeout: Duration, limit: Int, returnType: String = DefaultEventName) = {
+      val (path, parameters) = toPathAndParameters(query)
+      uriString(Uri(
+        path = Uri.Path(s"api/order$path"),
+        query = Uri.Query(parameters + ("after" → after.toString) + ("timeout" → timeout.toString) + ("limit" → limit.toString) + ("return" → returnType))))
+    }
 
     private def orderView[V <: OrderView: OrderView.Companion] =
       implicitly[OrderView.Companion[V]]
@@ -146,7 +150,7 @@ final class SchedulerUris private(schedulerUri: Uri) {
   def events(after: EventId = EventId.BeforeFirst, timeout: Duration, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
     uriString(
-      Uri.Path("api/event/"),
+      Uri.Path("api/event"),
       (returnType != DefaultEventName list ("return" → returnType)) :::
         (after != EventId.BeforeFirst list ("after" → after.toString)) :::
         (limit != Int.MaxValue list ("limit" → limit.toString)) :::
@@ -156,7 +160,7 @@ final class SchedulerUris private(schedulerUri: Uri) {
   def eventsReverse(after: EventId = EventId.BeforeFirst, limit: Int, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
     uriString(
-      Uri.Path("api/event/"),
+      Uri.Path("api/event"),
       (returnType != DefaultEventName list ("return" → returnType)) :::
         (after != EventId.BeforeFirst list ("after" → after.toString)) :::
         (limit != Int.MaxValue list ("limit" → (-limit).toString)): _*)

@@ -207,11 +207,11 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "event" in {
-    assert(uris.events(timeout = 123456.ms) == "http://0.0.0.0:1111/jobscheduler/master/api/event/?timeout=123.456s")
-    assert(uris.events(after = EventId(7), timeout = 1.s) == "http://0.0.0.0:1111/jobscheduler/master/api/event/?after=7&timeout=1s")
-    assert(uris.events(limit = 100, timeout = 100.ms) == "http://0.0.0.0:1111/jobscheduler/master/api/event/?limit=100&timeout=0.1s")
+    assert(uris.events(timeout = 123456.ms) == "http://0.0.0.0:1111/jobscheduler/master/api/event?timeout=123.456s")
+    assert(uris.events(after = EventId(7), timeout = 1.s) == "http://0.0.0.0:1111/jobscheduler/master/api/event?after=7&timeout=1s")
+    assert(uris.events(limit = 100, timeout = 100.ms) == "http://0.0.0.0:1111/jobscheduler/master/api/event?limit=100&timeout=0.1s")
     assert(uris.eventsReverse(after = EventId(7), limit = 100, returnType = "X") ==
-      "http://0.0.0.0:1111/jobscheduler/master/api/event/?return=X&after=7&limit=-100")
+      "http://0.0.0.0:1111/jobscheduler/master/api/event?return=X&after=7&limit=-100")
   }
 
   "resolveUri" in {

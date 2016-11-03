@@ -42,7 +42,7 @@ function startOrderStatisticsChangedListener(path) {
     var requestedAt = new Date()
     jQuery.ajax({
       dataType: 'json',
-      url: "/jobscheduler/master/api/event" + path + "?return=OrderStatisticsChanged&timeout=60s&after=" + lastEventId
+      url: "/jobscheduler/master/api/order" + path + "?return=OrderStatisticsChanged&timeout=60s&after=" + lastEventId
     })
     .done(function(eventSeq) {
       var continueAfterEventId = processEventSeq(eventSeq)

@@ -101,6 +101,9 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
     post[JobChainNodeQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
 
+  final def orderEvents[E <: Event: ClassTag](query: OrderQuery, after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.order.events(query, after = after, timeout, limit = limit, returnType = implicitClass[E].getSimpleName))
+
   // JobChain
 
   final def jobChainOverview(jobChainPath: JobChainPath) =
