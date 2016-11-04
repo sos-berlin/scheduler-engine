@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 object CppLogger {
   private val logger = LoggerFactory.getLogger("JobScheduler")
   private val schedulerToLogLevel = Array(
-    LogLevel.None,   // none
+    LogLevel.LogNone,   // none
     LogLevel.Trace,  // debug9
     LogLevel.Trace,  // debug8
     LogLevel.Trace,  // debug7
