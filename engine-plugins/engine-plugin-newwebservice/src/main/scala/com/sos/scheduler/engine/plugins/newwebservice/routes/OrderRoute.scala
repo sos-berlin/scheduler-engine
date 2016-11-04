@@ -105,8 +105,10 @@ trait OrderRoute extends LogRoute {
         anyEventJsonFormat.typeNameToClass.get(returnType) match {
           case Some(eventClass) ⇒
             query.orderKeyOption match {
-              case Some(orderKey) ⇒ orderEvents(eventClass, orderKey)
-              case None ⇒ completeWithError(NotImplemented, s"return=$returnType is supported only for single OrderKey queries")
+              case Some(orderKey) ⇒
+                orderEvents(eventClass, orderKey)
+              case None ⇒
+                orderEvents(eventClass, query.jobChainQuery.pathQuery)  // Events are only selected by JobChainPath !!!
             }
           case _ ⇒ rejectReturnType(returnType)
         }
@@ -132,6 +134,21 @@ trait OrderRoute extends LogRoute {
           for (responseSnapshot ← client.eventsReverseForKey[AnyEvent](orderKey, after = afterEventId, limit = -limit)(ClassTag(eventClass))) yield
             for (events ← responseSnapshot) yield
               EventSeq.NonEmpty(events)
+      }
+    }
+
+  private def orderEvents(eventClass: Class[_ <: Event], query: PathQuery): Route =
+    withEventParameters { case EventParameters(_, afterEventId, timeout, limit) ⇒
+      completeTryHtml {
+        client.events[Event](
+          after = afterEventId,
+          timeout,
+          predicate = PartialFunction[KeyedEvent[Event], Boolean] {
+            case KeyedEvent(OrderKey(jobChainPath, _), _) ⇒ query.matches(jobChainPath)
+            case _ ⇒ false
+          },
+          limit = limit)(
+          ClassTag(eventClass))
       }
     }
 

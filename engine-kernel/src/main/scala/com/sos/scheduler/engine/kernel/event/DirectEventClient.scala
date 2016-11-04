@@ -19,7 +19,21 @@ trait DirectEventClient {
   protected def eventIdGenerator: EventIdGenerator
   protected implicit def executionContext: ExecutionContext
 
-  def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  def events[E <: Event: ClassTag](
+    after: EventId,
+    timeout: Duration,
+    limit: Int)
+  : Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
+  =
+    events[E](after = after, timeout, predicate = (_: KeyedEvent[E]) ⇒ true, limit = limit)
+
+  def events[E <: Event: ClassTag](
+    after: EventId,
+    timeout: Duration,
+    predicate: KeyedEvent[E] ⇒ Boolean,
+    limit: Int = Int.MaxValue)
+  : Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
+  =
     wrapIntoSnapshot(
       eventCollector.when[E](
         after,
