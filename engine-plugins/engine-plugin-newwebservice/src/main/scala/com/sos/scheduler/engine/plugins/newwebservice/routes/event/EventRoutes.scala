@@ -23,7 +23,7 @@ private[routes] object EventRoutes {
   object withEventParameters extends Directive1[EventParameters] {
     def happly(inner: EventParameters :: HNil ⇒ Route) =
       parameter("return" ? classOf[Event].getSimpleName) { returnType ⇒
-        parameter("after" ? EventId.BeforeFirst) { after ⇒
+        parameter("after".as[EventId]) { after ⇒
           parameter("timeout" ? 0.s) { timeout ⇒
             parameter("limit" ? Int.MaxValue) { limit ⇒
               if (limit == 0)

@@ -2,10 +2,9 @@ package com.sos.scheduler.engine.client.web
 
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.common.scalautil.Collections._
-import com.sos.scheduler.engine.common.time.ScalaTime.RichDuration
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.EventId
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
@@ -147,23 +146,25 @@ final class SchedulerUris private(schedulerUri: Uri) {
     def forward(agentUri: String) = uriString(Uri.Path(s"api/agent/$agentUri"))
   }
 
-  def events(after: EventId = EventId.BeforeFirst, timeout: Duration, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
+  def events(after: EventId, timeout: Duration, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
-    uriString(
-      Uri.Path("api/event"),
-      (returnType != DefaultEventName list ("return" → returnType)) :::
-        (after != EventId.BeforeFirst list ("after" → after.toString)) :::
-        (limit != Int.MaxValue list ("limit" → limit.toString)) :::
-        List("timeout" → timeout.toSecondsString): _*)
+    val params = Vector.build[(String, String)] { builder ⇒
+      if (returnType != DefaultEventName) builder += "return" → returnType
+      if (limit != Int.MaxValue) builder += "limit" → limit.toString
+      if (timeout != 0.s) builder += "timeout" → timeout.toSecondsString
+      builder += "after" → after.toString
+    }
+    uriString(Uri.Path("api/event"), params: _*)
   }
 
   def eventsReverse(after: EventId = EventId.BeforeFirst, limit: Int, returnType: String = DefaultEventName) = {
     require(limit > 0, "Limit must not be below zero")
-    uriString(
-      Uri.Path("api/event"),
-      (returnType != DefaultEventName list ("return" → returnType)) :::
-        (after != EventId.BeforeFirst list ("after" → after.toString)) :::
-        (limit != Int.MaxValue list ("limit" → (-limit).toString)): _*)
+    val params = Vector.build[(String, String)] { builder ⇒
+      if (returnType != DefaultEventName) builder += "return" → returnType
+      if (limit != Int.MaxValue) builder += "limit" → (-limit).toString
+      if (after != EventId.BeforeFirst) builder += "after" → after.toString
+    }
+    uriString(Uri.Path("api/event"), params: _*)
   }
 
   def uriString(path: Uri.Path, parameters: (String, String)*): String =

@@ -224,7 +224,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (uri ← List(
-      s"$OrderUri/aJobChain,1?return=Event&timeout=60s")) {
+      s"$OrderUri/aJobChain,1?return=Event&timeout=60s&after=0")) {
     s"$uri" in {
       for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
@@ -235,7 +235,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (uri ← List(
-      s"$OrderUri?return=Event&timeout=60s")) {
+      s"$OrderUri?return=Event&timeout=60s&after=0")) {
     val jobChainPath = A1OrderKey.jobChainPath
     val orderId = A1OrderKey.id
     val queryJson = JsObject(
