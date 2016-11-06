@@ -10,8 +10,10 @@ import scala.collection.immutable
   */
 final class ModuleFactoryRegister(val moduleFactories: immutable.Seq[ModuleFactory]) {
 
-  def newModule(raw: RawModuleArguments): Module =
-    toModuleArguments(raw).newModule()
+  def newModule(raw: RawModuleArguments): Module = {
+    val factory = moduleFactory(raw)
+    factory.newModule(factory.toModuleArguments(raw))
+  }
 
   def toModuleArguments(raw: RawModuleArguments): ModuleArguments =
     moduleFactory(raw).toModuleArguments(raw)
