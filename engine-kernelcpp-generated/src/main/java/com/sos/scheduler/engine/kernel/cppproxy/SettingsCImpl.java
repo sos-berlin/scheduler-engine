@@ -293,19 +293,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SettingsC {
     private static native java.lang.String _variables_tablename__native(long cppReference);
 
 
-    @Override public java.lang.String _web_directory() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            java.lang.String result = _web_directory__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native java.lang.String _web_directory__native(long cppReference);
-
-
     @Override public java.lang.String installed_licence_keys_string() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

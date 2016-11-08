@@ -9,10 +9,9 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
-import com.sos.scheduler.engine.kernel.cppproxy.{DatabaseC, SpoolerC}
+import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.typesafe.config.Config
 import java.io.File
-import java.net.{URI, URL}
 import java.nio.file.Files._
 import java.nio.file.{Files, Path, Paths}
 
@@ -39,8 +38,6 @@ trait SchedulerConfiguration {
   def tcpPort: Int
 
   def udpPort: Option[Int]
-
-  def webDirectoryUrlOption: Option[URL]
 
   def existingHtmlDirOption: Option[Path] =
     htmlDirOption match {
@@ -90,7 +87,6 @@ object SchedulerConfiguration {
       httpsPortOption
       tcpPort
       udpPort
-      webDirectoryUrlOption
       htmlDirOption
       jobHistoryTableName
       tasksTableName
@@ -137,12 +133,6 @@ object SchedulerConfiguration {
       spoolerC.tcp_port
 
     lazy val udpPort: Option[Int] = someUnless(spoolerC.udp_port, 0)
-
-    lazy val webDirectoryUrlOption: Option[URL] =
-      settingsC._web_directory match {
-        case "" ⇒ None
-        case o ⇒ Some(new URI(o).toURL)
-      }
 
     lazy val htmlDirOption = emptyToNone(settingsC._html_dir) map { o ⇒ Paths.get(o) }
 

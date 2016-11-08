@@ -59,9 +59,6 @@ trait SettingsC extends CppProxy {
   @CppField
   def _remote_scheduler_connect_retry_delay: Int
 
-  @CppField
-  def _web_directory: String
-
   def installed_licence_keys_string: String
 
   def messageTexts: java.util.ArrayList[String]

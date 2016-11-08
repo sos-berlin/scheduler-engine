@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.cpp
 
 import akka.actor._
 import com.google.common.base.Charsets._
-import com.google.common.base.Strings.nullToEmpty
 import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
@@ -25,7 +24,6 @@ import spray.http.{ContentType, HttpRequest, StatusCode}
 import spray.httpx.marshalling.Marshaller
 import spray.routing.Directives._
 import spray.routing._
-import spray.servlet.ServletRequestInfoHeader
 
 trait CppHttpRoute {
 

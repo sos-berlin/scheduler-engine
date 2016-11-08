@@ -14,7 +14,6 @@
     <inceptionYear>2011</inceptionYear>
 
     <modules>
-        <module>engine-plugin-jetty</module>
         <module>engine-plugin-newwebservice</module>
         <module>engine-plugin-node-order</module>
     </modules>

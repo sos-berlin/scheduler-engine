@@ -127,10 +127,6 @@ void Settings::set(int number, const string& value) {
             _remote_scheduler_connect_retry_delay = as_int(value);
             break;
         }
-        case setting_web_directory: {
-            _web_directory = value;
-            break;
-        }
         case setting_pause_after_failure: {
             _pause_after_failure = as_bool(value);
             break;

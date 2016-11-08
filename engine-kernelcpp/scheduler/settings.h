@@ -46,8 +46,6 @@ enum Setting_name {
 
     settings_remote_scheduler_connect_retry_delay = 15,
 
-    setting_web_directory = 16,   // For JettyPlugin
-
     setting_pause_after_failure = 17,
 
     setting_https_port = 18
@@ -100,7 +98,6 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     std::set<Role>             _roles;
     string                     _http_port;
     int _remote_scheduler_connect_retry_delay;
-    string                     _web_directory;    // For JettyPlugin
     int                        _classic_agent_keep_alive_duration;
     bool _pause_after_failure;
     string _job_history_tablename;
