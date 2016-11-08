@@ -21,7 +21,10 @@ object SchedulerDirectives {
             val toPath = implicitly[TypedPath.Companion[A]]
             Try(toPath(normalizePath(toPath, path.toString))) match {
               case Failure(t) ⇒ reject // Without message because the whole route is wrong and the next route should be tried (otherwise 404)
-              case Success(aPath) ⇒ inner(aPath :: HNil)
+              case Success(aPath) ⇒
+                mapRequestContext(_.copy(unmatchedPath = Uri.Path.Empty)) {
+                  inner(aPath :: HNil)
+                }
             }
           case _ ⇒ reject
         }
