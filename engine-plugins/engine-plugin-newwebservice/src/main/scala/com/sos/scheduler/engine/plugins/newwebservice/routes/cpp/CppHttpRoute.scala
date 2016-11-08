@@ -127,14 +127,10 @@ object CppHttpRoute {
   }
 
   private def toFullPathAndQuery(request: HttpRequest): String =
-    request.header[ServletRequestInfoHeader] map { h ⇒
-      Some(nullToEmpty(h.hsRequest.getPathInfo)) ++ Option(h.hsRequest.getQueryString) mkString "?"
-    } orElse {
-      request.header[`Raw-Request-URI`] map { _.value }
-    } map { u ⇒
-      URLDecoder.decode(u, UTF_8.name)
+    request.header[`Raw-Request-URI`] map { h ⇒
+      URLDecoder.decode(h.value, UTF_8.name)
     } getOrElse
-      sys.error("Configuration setting spray.can.server.raw-request-uri-header or spray.servlet.servlet-request-access is needed")
+      sys.error("Configuration setting spray.can.server.raw-request-uri-header is needed")
 
   private def splitHeaders(headers: String): Iterable[(String, String)] =
     headers match {

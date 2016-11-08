@@ -51,21 +51,20 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   def uris: SchedulerUris
 
-  private lazy val nonCachingHttpResponsePipeline = {
+  private lazy val httpResponsePipeline = {
     val credentialsHeader: RequestTransformer = credentials match {
       case Some(UserAndPassword(UserId(user), SecretString(pass))) ⇒ addCredentials(BasicHttpCredentials(user, pass))
       case None ⇒ identity
     }
     credentialsHeader ~>
-      addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
       encode(Gzip) ~>
       sendReceive ~>
       decode(Gzip)
   }
 
-  private lazy val jsonNonCachingHttpResponsePipeline =
+  private lazy val jsonHttpResponsePipeline =
     addHeader(Accept(`application/json`)) ~>
-    nonCachingHttpResponsePipeline
+      httpResponsePipeline
 
   final def overview =
     get[Snapshot[SchedulerOverview]](_.overview)
@@ -156,8 +155,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   // Basic
 
-  final def getByUri[A: FromResponseUnmarshaller](relativeUri: String): Future[A] =
-    get[A](_.uriString(relativeUri))
+  final def getByUri[A: FromResponseUnmarshaller](relativeUri: String, accept: MediaType = `application/json`): Future[A] =
+    get[A](_.uriString(relativeUri), accept)
 
   final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`): Future[A] =
     if (accept == `application/json`)
@@ -166,13 +165,13 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
       unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
 
   private def unmarshallingPipeline[A: FromResponseUnmarshaller](accept: MediaType) =
-    addHeader(Accept(accept)) ~> nonCachingHttpResponsePipeline ~> unmarshal[A]
+    addHeader(Accept(accept)) ~> httpResponsePipeline ~> unmarshal[A]
 
   private final def post[A: Marshaller, B: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, data: A): Future[B] =
     jsonUnmarshallingPipeline[B].apply(Post(uri(uris), data))
 
   private def jsonUnmarshallingPipeline[A: FromResponseUnmarshaller] =
-    jsonNonCachingHttpResponsePipeline ~> unmarshal[A]
+    jsonHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"WebSchedulerClient($uris)"
 }

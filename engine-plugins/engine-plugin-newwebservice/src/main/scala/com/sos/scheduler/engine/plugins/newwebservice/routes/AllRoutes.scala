@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{passIf, passSome}
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.htmlPreferred
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute
 import spray.http.StatusCodes.TemporaryRedirect
 import spray.routing.Directives._
@@ -17,6 +18,10 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
 
   protected implicit def actorRefFactory: ActorRefFactory
   protected final val webServiceContext = new WebServiceContext(htmlEnabled = webjarsExists)
+  private val guiPath: Option[String] = schedulerConfiguration.existingHtmlDirOption match {
+    case Some(_) ⇒ Some(Joc1Path)
+    case None ⇒ webServiceContext.htmlEnabled option ExperimentalGuiPath
+  }
 
   final def route: Route =
     (decompressRequest() & compressResponseIfRequested(())) {
@@ -34,18 +39,12 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
       }
     }
 
-  private def redirectToDefaultGui: Route = {
+  private def redirectToDefaultGui: Route =
     htmlPreferred(webServiceContext) {
-      val guiPath: Option[String] =
-        if (schedulerConfiguration.existingHtmlDirOption.isDefined)
-          Some("/jobscheduler/joc/")
-        else
-          webServiceContext.htmlEnabled option "/jobscheduler/master"
       passSome(guiPath) { path ⇒
         redirect(path, TemporaryRedirect)
       }
     }
-  }
 
   private def masterRoute: Route =
     pathEndOrSingleSlash {
@@ -59,4 +58,9 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
     (passIf(configuration.testMode) & pathPrefix("TEST")) {
       testRoute
     }
+}
+
+object AllRoutes {
+  private val Joc1Path = "/jobscheduler/joc/"
+  private val ExperimentalGuiPath = "/jobscheduler/master"
 }

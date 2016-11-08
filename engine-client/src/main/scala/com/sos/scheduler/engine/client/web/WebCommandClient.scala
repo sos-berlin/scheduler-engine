@@ -31,7 +31,7 @@ trait WebCommandClient extends CommandClient {
   private implicit val timeout = 60.seconds
 
   private lazy val pipeline: HttpRequest ⇒ Future[XmlString] =
-    // JettyPlugin dekomprimiert Request nicht: encode(Gzip) ~>
+    // JettyPlugin (bis v1.10) dekomprimiert Request nicht: encode(Gzip) ~>
     addHeader(Accept(`application/xml`, `text/xml`)) ~>
       sendReceive ~>
       decode(Deflate) ~>

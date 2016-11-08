@@ -23,7 +23,7 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
   private[web] val masterUri = Uri(s"$schedulerUri/master/")
 
-  lazy val command = resolvePathUri("api/command")
+  lazy val command = resolveMasterUri("api/command")
 
   lazy val overview = uriString("api")
 
@@ -168,16 +168,16 @@ final class SchedulerUris private(schedulerUri: Uri) {
   }
 
   def uriString(path: Uri.Path, parameters: (String, String)*): String =
-    resolvePathUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString
+    resolveMasterUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString
 
   def uriString(path: Uri.Path, parameters: Map[String, String]): String =
-    resolvePathUri(Uri(path = path, query = Uri.Query(parameters))).toString
+    resolveMasterUri(Uri(path = path, query = Uri.Query(parameters))).toString
 
-  def uriString(relativeUri: Uri): String = resolvePathUri(relativeUri).toString
+  def uriString(relativeUri: Uri): String = resolveMasterUri(relativeUri).toString
 
-  def /(relativeUri: Uri): Uri = resolvePathUri(relativeUri)
+  def /(relativeUri: Uri): Uri = resolveMasterUri(relativeUri)
 
-  private def resolvePathUri(relativeUri: Uri): Uri = resolveUri(relativeUri, masterUri)
+  private def resolveMasterUri(relativeUri: Uri): Uri = resolveUri(relativeUri, masterUri)
 
   override def toString = s"SchedulerUris($schedulerUri)"
 }
