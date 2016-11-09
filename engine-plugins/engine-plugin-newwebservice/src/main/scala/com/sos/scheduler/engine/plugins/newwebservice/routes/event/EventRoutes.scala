@@ -23,18 +23,22 @@ private[routes] object EventRoutes {
   object withEventParameters extends Directive1[EventParameters] {
     def happly(inner: EventParameters :: HNil ⇒ Route) =
       parameter("return" ? classOf[Event].getSimpleName) { returnType ⇒
-        parameter("after".as[EventId]) { after ⇒
-          parameter("timeout" ? 0.s) { timeout ⇒
-            parameter("limit" ? Int.MaxValue) { limit ⇒
-              if (limit == 0)
-                reject(ValidationRejection(s"Invalid limit=$limit"))
-              else
+        parameter("limit" ? Int.MaxValue) {
+          case 0 ⇒
+            reject(ValidationRejection(s"Invalid limit=0"))
+          case limit if limit > 0 ⇒
+            parameter("after".as[EventId]) { after ⇒
+              parameter("timeout" ? 0.s) { timeout ⇒
                 inner(EventParameters(returnType, after, timeout, limit) :: HNil)
+              }
             }
-          }
+          case limit if limit < 0 ⇒
+            parameter("after" ? EventId.BeforeFirst) { after ⇒
+              inner(EventParameters(returnType, after, 0.s, limit) :: HNil)
+            }
         }
       }
-    }
+  }
 
   final case class EventParameters(
     returnType: String,
