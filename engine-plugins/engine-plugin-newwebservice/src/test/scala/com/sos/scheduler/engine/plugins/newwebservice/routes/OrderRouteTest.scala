@@ -11,9 +11,9 @@ import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStatistics, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.kernel.event.{DirectEventClient, OrderStatisticsChangedSource}
+import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
@@ -55,13 +55,13 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected def actorRefFactory = actorSystem
 
-  protected val client = new OrderClient with SchedulerOverviewClient with FileBasedClient with DirectEventClient {
+  protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
     protected val eventIdGenerator = new EventIdGenerator
     protected val eventCollector = new EventCollector(eventIdGenerator, eventBus)
 
     protected def executionContext = OrderRouteTest.this.executionContext
 
-    def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P): Future[Snapshot[FileBasedDetailed]] =
+    def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]] =
       respondWith {
         assert(path == A1OrderKey)
         A1FileBasedDetailed
@@ -140,15 +140,6 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
         assert(responseAs[Snapshot[Orders[OrderDetailed]]] == Snapshot(TestEventId, Orders(TestOrderDetaileds)))
-      }
-    }
-  }
-
-  for (uri ← List(
-      s"$OrderUri/aJobChain,1?return=FileBasedDetailed")) {
-    s"$uri" in {
-      Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert((responseAs[Snapshot[FileBasedDetailed]] map { _.asTyped[OrderKey] }) == Snapshot(TestEventId, A1FileBasedDetailed))
       }
     }
   }

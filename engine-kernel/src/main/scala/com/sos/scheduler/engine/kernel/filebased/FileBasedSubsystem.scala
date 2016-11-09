@@ -12,12 +12,11 @@ import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.{File_basedC, SubsystemC}
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import scala.collection.{immutable, mutable}
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.ClassTag
 
 trait FileBasedSubsystem extends Subsystem {
   self ⇒
@@ -147,9 +146,14 @@ object FileBasedSubsystem {
 
     private[kernel] def subsystem(t: FileBasedType): FileBasedSubsystem = injector.getInstance(companion(t).subsystemClass)
 
-    private[kernel] def fileBased[P <: TypedPath: TypedPath.Companion](path: P): FileBased = {
-      val c = client(implicitly[TypedPath.Companion[P]])
+    private[kernel] def fileBased[P <: TypedPath](path: P): FileBased = {
+      val c = client(path.companion)
       c.fileBased(path.asInstanceOf[c.ThisPath])
+    }
+
+    private[kernel] def fileBaseds[P <: TypedPath: TypedPath.Companion](query: PathQuery): immutable.Seq[FileBased] = {
+      val c = client(implicitly[TypedPath.Companion[P]])
+      c.fileBaseds(query)
     }
 
 //    def client[P <: TypedPath: TypedPath.Companion]: FileBasedSubsystemClient { type ThisPath = P } =

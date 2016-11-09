@@ -47,7 +47,7 @@ object QueryHttp {
         }
     }
 
-  def pathAndParametersDirective[A: PathAndParameterSerializable] =
+  private def pathAndParametersDirective[A: PathAndParameterSerializable] =
     new Directive1[A] {
       def happly(inner: (A :: HNil) ⇒ Route) =
         unmatchedPath { path ⇒

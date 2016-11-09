@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview}
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, TypedPath}
+import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import scala.collection.immutable
@@ -66,6 +67,9 @@ trait FileBasedSubsystemClient {
     inSchedulerThread {
       subsystem.fileBasedOption(path)
     }
+
+  private[filebased] def fileBaseds[P <: TypedPath: TypedPath.Companion](query: PathQuery) =
+    subsystem.fileBaseds filter { o ⇒ query.matches[P](o.path.asInstanceOf[P]) }
 
 //  private def toClient(_fileBased: companion.ThisFileBased) =
 //    _fileBased.clientOnce getOrUpdate {

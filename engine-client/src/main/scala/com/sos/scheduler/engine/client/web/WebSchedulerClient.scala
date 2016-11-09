@@ -69,10 +69,16 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def overview =
     get[Snapshot[SchedulerOverview]](_.overview)
 
-  final def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P): Future[Snapshot[FileBasedDetailed]] =
-    for (snapshot ← get[Snapshot[FileBasedDetailed]](_.fileBasedDetailed(path))) yield
+  final def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]] =
+    for (snapshot ← get[Snapshot[FileBasedDetailed]](_.fileBased(path, returnType = "FileBasedDetailed"))) yield
       for (fileBasedDetailed ← snapshot) yield
-        fileBasedDetailed.asTyped[P] // Correct TypedPath (instead of UnknownPath)
+        fileBasedDetailed.asTyped[P](path.companion.asInstanceOf[TypedPath.Companion[P]]) // Correct TypedPath (instead of UnknownPath)
+
+  def fileBasedDetaileds[P <: TypedPath: TypedPath.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[FileBasedDetailed]]] =
+    for (snapshot ← get[Snapshot[immutable.Seq[FileBasedDetailed]]](_.fileBaseds(query, returnType = "FileBasedDetailed"))) yield
+      for (seq ← snapshot) yield
+        for (fileBasedDetailed ← seq) yield
+          fileBasedDetailed.asTyped[P](implicitly[TypedPath.Companion[P]]) // Correct TypedPath (instead of UnknownPath)
 
   // Order
 

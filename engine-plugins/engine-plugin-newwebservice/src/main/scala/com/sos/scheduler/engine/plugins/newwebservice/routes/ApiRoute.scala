@@ -24,11 +24,12 @@ import spray.routing.{ExceptionHandler, RejectionHandler, Route, ValidationRejec
   * @author Joacim Zschimmer
   */
 trait ApiRoute
-extends JobChainRoute
-with AgentRoute
+extends AgentRoute
+with AnyFileBasedRoute
 with CommandRoute
 with EventRoute
 with JobRoute
+with JobChainRoute
 with LogRoute
 with FrontEndRoute
 with OrderRoute
@@ -36,7 +37,6 @@ with ProcessClassRoute
 with TaskRoute {
 
   protected def client: DirectSchedulerClient
-  //protected def fileBasedSubsystemRegister: FileBasedSubsystem.Register
   protected def prefixLog: PrefixLog
   protected implicit def executionContext: ExecutionContext
   protected implicit def actorRefFactory: ActorRefFactory
@@ -45,7 +45,12 @@ with TaskRoute {
     handleExceptions(ApiExceptionHandler) {
       handleRejections(ApiRejectionHandler) {
         dontCache {
-          realApiRoute
+          pathPrefix("event") {
+            eventRoute
+          } ~
+          specializedFileBasedRoute ~
+          anyFileBasedRoute ~
+          otherApiRoute
         } ~
         pathPrefix("agent") {
           agentRoute
@@ -56,15 +61,7 @@ with TaskRoute {
       frontEndRoute
     }
 
-  private def realApiRoute =
-    get {
-      pathEndElseRedirect(webServiceContext) {
-        completeTryHtml(client.overview)
-      }
-    } ~
-    pathPrefix("command") {
-      commandRoute
-    } ~
+  private def specializedFileBasedRoute: Route =
     pathPrefix("order") {
       orderRoute
     } ~
@@ -76,6 +73,11 @@ with TaskRoute {
     } ~
     pathPrefix("processClass") {
       processClassRoute
+    }
+
+  private def otherApiRoute =
+    pathPrefix("command") {
+      commandRoute
     } ~
     pathPrefix("task") {
       taskRoute
@@ -88,8 +90,10 @@ with TaskRoute {
         }
       }
     } ~
-    pathPrefix("event") {
-      eventRoute
+    pathEndElseRedirect(webServiceContext) {
+      get {
+        completeTryHtml(client.overview)
+      }
     }
 }
 
@@ -100,7 +104,7 @@ object ApiRoute {
     val ErrorCodePattern = """(SCHEDULER|SOS)-\d+ .*""".r
     ExceptionHandler {
       case NonFatal(t) ⇒
-        // This is an internal API, we expose internal error messages !!!
+        // These are an internally used web services, we expose internal error messages
         val message =
           if (ErrorCodePattern.pattern.matcher(t.getMessage).matches) {
             logger.debug(t.toString, t)

@@ -27,10 +27,14 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
   lazy val overview = uriString("api")
 
-  def fileBasedDetailed[P <: TypedPath: TypedPath.Companion](path: P) = {
-    val companion = implicitly[TypedPath.Companion[P]]
-    uriString(Uri.Path("api/" + companion.fileBasedType.lowerCaseCamelName + path.string), "return" → "FileBasedDetailed")
-  }
+  def fileBasedDetailed[P <: TypedPath](path: P) =
+    uriString(Uri.Path("api/" + path.companion.fileBasedType.lowerCaseCamelName + path.string), "return" → "FileBasedDetailed")
+
+  def fileBased[P <: TypedPath](path: P, returnType: String) =
+    uriString(Uri.Path("api/" + path.companion.fileBasedType.lowerCaseCamelName + path.string), "return" → returnType)
+
+  def fileBaseds[P <: TypedPath: TypedPath.Companion](query: PathQuery, returnType: String) =
+    uriString(Uri.Path("api/" + implicitly[TypedPath.Companion[P]].fileBasedType.lowerCaseCamelName + query.toUriPath), "return" → returnType)
 
   object order {
     def apply[V <: OrderView: OrderView.Companion](orderKey: OrderKey): String =

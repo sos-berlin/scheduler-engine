@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp._
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{asFromStringOptionDeserializer, passSome}
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
@@ -34,7 +34,7 @@ trait OrderRoute extends LogRoute {
 
   protected def orderSubsystem: OrderSubsystemClient
   protected def orderStatisticsChangedSource: OrderStatisticsChangedSource
-  protected implicit def client: OrderClient with SchedulerOverviewClient with FileBasedClient with DirectEventClient
+  protected implicit def client: OrderClient with SchedulerOverviewClient with DirectEventClient
   protected implicit def webServiceContext: WebServiceContext
   protected implicit def executionContext: ExecutionContext
 
@@ -68,14 +68,11 @@ trait OrderRoute extends LogRoute {
       case "OrderDetailed" ⇒
         completeTryHtml(client.order[OrderDetailed](orderKey))
 
-      case "FileBasedDetailed" ⇒
-        completeTryHtml(client.fileBasedDetailed(orderKey))
-
       case returnType ⇒
-        anyEventJsonFormat.typeNameToClass.get(returnType) match {
-          case Some(eventClass) ⇒ orderEvents(eventClass, orderKey)
-          case None ⇒ rejectReturnType(returnType)
-        }
+        passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) { eventClass ⇒
+          orderEvents(eventClass, orderKey)
+        } ~
+          rejectReturnType(returnType)
     }
 
   private def queriedOrders(returnTypeOption: Option[String], query: OrderQuery): Route =
@@ -101,16 +98,15 @@ trait OrderRoute extends LogRoute {
         completeTryHtml(client.ordersBy[OrderDetailed](query) map { _ map Orders.apply })
 
       case Some(returnType) ⇒
-        anyEventJsonFormat.typeNameToClass.get(returnType) match {
-          case Some(eventClass) ⇒
-            query.orderKeyOption match {
-              case Some(orderKey) ⇒
-                orderEvents(eventClass, orderKey)
-              case None ⇒
-                orderEvents(eventClass, query.jobChainQuery.pathQuery)  // Events are only selected by JobChainPath !!!
-            }
-          case _ ⇒ rejectReturnType(returnType)
-        }
+        passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) { eventClass ⇒
+          query.orderKeyOption match {
+            case Some(orderKey) ⇒
+              orderEvents(eventClass, orderKey)
+            case None ⇒
+              orderEvents(eventClass, query.jobChainQuery.pathQuery)  // Events are only selected by JobChainPath !!!
+          }
+        } ~
+          rejectReturnType(returnType)
 
       case None ⇒
         htmlPreferred(webServiceContext) {
@@ -162,7 +158,7 @@ trait OrderRoute extends LogRoute {
   }
 
   private def rejectReturnType(returnType: String) =
-    reject(ValidationRejection(s"Unknown value for parameter return=$returnType"))
+    reject // Misleading, because returnType may be right for an preceding, but rejected route: (ValidationRejection(s"Unknown value for parameter return=$returnType"))
 }
 
 object OrderRoute {
