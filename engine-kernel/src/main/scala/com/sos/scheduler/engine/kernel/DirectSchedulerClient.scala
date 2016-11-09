@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
@@ -45,14 +45,14 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
   def overview: Future[Snapshot[SchedulerOverview]] =
     respondWithSnapshotFuture { scheduler.overview }
 
-  def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]] =
+  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Snapshot[V]] =
     respondWithSnapshotFuture {
-      fileBasedSubsystemRegister.fileBased(path).fileBasedDetailed
+      fileBasedSubsystemRegister.fileBased(path).fileBasedView[V]
     }
 
-  def fileBasedDetaileds[P <: TypedPath: TypedPath.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[FileBasedDetailed]]] =
+  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
     respondWithSnapshotFuture {
-      fileBasedSubsystemRegister.fileBaseds[P](query) map { _.fileBasedDetailed }
+      fileBasedSubsystemRegister.fileBaseds[P](query) map { _.fileBasedView[V] }
     }
 
   def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey) =

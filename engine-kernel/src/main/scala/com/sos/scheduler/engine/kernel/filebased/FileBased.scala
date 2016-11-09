@@ -37,6 +37,12 @@ with EventSource {
 
   protected[this] def cppProxy: File_basedC[_]
 
+  private[kernel] def fileBasedView[V <: FileBasedView: FileBasedView.Companion]: V =
+    implicitly[FileBasedView.Companion[V]] match {
+      case FileBasedOverview ⇒ fileBasedOverview
+      case FileBasedDetailed ⇒ fileBasedDetailed
+    }
+
   private[kernel] def fileBasedDetailed: FileBasedDetailed = {
     val overview = this.fileBasedOverview
     FileBasedDetailed(

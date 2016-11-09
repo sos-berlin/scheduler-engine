@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView, Orders}
@@ -23,8 +23,7 @@ import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 import spray.client.pipelining._
-import spray.http.CacheDirectives.{`no-cache`, `no-store`}
-import spray.http.HttpHeaders.{Accept, `Cache-Control`}
+import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
@@ -69,16 +68,19 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def overview =
     get[Snapshot[SchedulerOverview]](_.overview)
 
-  final def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]] =
-    for (snapshot ← get[Snapshot[FileBasedDetailed]](_.fileBased(path, returnType = "FileBasedDetailed"))) yield
-      for (fileBasedDetailed ← snapshot) yield
-        fileBasedDetailed.asTyped[P](path.companion.asInstanceOf[TypedPath.Companion[P]]) // Correct TypedPath (instead of UnknownPath)
+  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Snapshot[V]] =
+    for (snapshot ← get[Snapshot[V]](_.fileBased(path, returnType = implicitly[FileBasedView.Companion[V]].name))) yield
+      for (view ← snapshot) yield
+        view.asTyped[P](path.companion.asInstanceOf[TypedPath.Companion[P]]).asInstanceOf[V] // Correct TypedPath (instead of UnknownPath)
 
-  def fileBasedDetaileds[P <: TypedPath: TypedPath.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[FileBasedDetailed]]] =
-    for (snapshot ← get[Snapshot[immutable.Seq[FileBasedDetailed]]](_.fileBaseds(query, returnType = "FileBasedDetailed"))) yield
+  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
+    for (snapshot ← get[Snapshot[immutable.Seq[V]]](_.fileBaseds[P](query, returnType = implicitly[FileBasedView.Companion[V]].name))) yield
       for (seq ← snapshot) yield
         for (fileBasedDetailed ← seq) yield
-          fileBasedDetailed.asTyped[P](implicitly[TypedPath.Companion[P]]) // Correct TypedPath (instead of UnknownPath)
+          fileBasedDetailed.asTyped[P](implicitly[TypedPath.Companion[P]]).asInstanceOf[V] // Correct TypedPath (instead of UnknownPath)
+
+  def fileBasedSourceXml[P <: TypedPath, V: FromResponseUnmarshaller](path: P): Future[V] =
+    get[V](_.fileBased(path, returnType = "FileBasedSource"), accept = `application/xml`)
 
   // Order
 

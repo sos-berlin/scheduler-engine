@@ -5,8 +5,14 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
+import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobDescription, JobPath}
+import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.tests.NewWebServicePluginIT._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -105,6 +111,31 @@ final class NewWebServicePluginIT extends FreeSpec with ScalaSchedulerTest {
     assert((client.job[JobDescription](JobPath("/test-umlauts")) await TestTimeout).value.description == descriptionString)
   }
 
+  "FileBasedOverview" in {
+    val Snapshot(_, overview) = client.fileBased[ProcessClassPath, FileBasedOverview](ProcessClassPath.Default) await TestTimeout
+    assert(overview == FileBasedOverview(ProcessClassPath.Default, FileBasedState.active))
+  }
+
+  "FileBasedOverviews" in {
+    val Snapshot(_, overviews) = client.fileBaseds[ProcessClassPath, FileBasedOverview](PathQuery.All) await TestTimeout
+    assert(overviews == Vector(FileBasedOverview(ProcessClassPath.Default, FileBasedState.active)))
+  }
+
+  "FileBasedDetailed" in {
+    val Snapshot(_, detailed) = client.fileBased[ProcessClassPath, FileBasedDetailed](ProcessClassPath.Default) await TestTimeout
+    assert(detailed.overview == FileBasedOverview(ProcessClassPath.Default, FileBasedState.active))
+  }
+
+  "FileBasedDetaileds" in {
+    val Snapshot(_, detaileds) = client.fileBaseds[ProcessClassPath, FileBasedDetailed](PathQuery.All) await TestTimeout
+    assert((detaileds map { _.overview }) == Vector(FileBasedOverview(ProcessClassPath.Default, FileBasedState.active)))
+  }
+
+  "FileBasedSource" in {
+    val x = client.fileBasedSourceXml[JobPath, XmlString](TestUmlautsJobPath) await TestTimeout
+    assert(SafeXML.loadString(x.string) == testEnvironment.fileFromPath(TestUmlautsJobPath).xml)
+  }
+
 //  "Umlauts in job name, Windows only" in {
 //    if (isUnix) pending  // Unix encodes filenames with UTF-8 but JobScheduler decodes then with ISO-8859-1 (see JS-1374)
 //    pending // Jenkins fails due to invalid encoded umlauts in test output: Failed to read test report file ...\TEST-com.sos.scheduler.engine.plugins.webservice.services.EventsServiceIT.xml
@@ -125,6 +156,7 @@ final class NewWebServicePluginIT extends FreeSpec with ScalaSchedulerTest {
 private object NewWebServicePluginIT {
   private val StrippedModifyingCommand = "check_folders"
   private val ModifyingCommand = s"<$StrippedModifyingCommand/>"
+  private val TestUmlautsJobPath = JobPath("/test-umlauts")
 
   private def interceptHttpError(status: StatusCode)(body: ⇒ Unit): Unit = {
     intercept[UnsuccessfulResponseException](body).response.status shouldEqual status

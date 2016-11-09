@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
 import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, TypedPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -11,7 +11,7 @@ import scala.concurrent.Future
   */
 trait FileBasedClient {
 
-  def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]]
+  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Snapshot[V]]
 
-  def fileBasedDetaileds[P <: TypedPath: TypedPath.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[FileBasedDetailed]]]
+  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]]
 }

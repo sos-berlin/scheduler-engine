@@ -129,7 +129,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "fileBasedDetailed" in {
     val fileBasedDetailed = fetchWebAndDirectEqualized[FileBasedDetailed](
-      _.fileBasedDetailed(a1OrderKey),
+      _.fileBased[OrderKey, FileBasedDetailed](a1OrderKey),
       _.copy(sourceXml = None))
     val file = testEnvironment.fileFromPath(a1OrderKey)
     assert(SafeXML.loadString(fileBasedDetailed.sourceXml.get) == file.xml)

@@ -17,8 +17,9 @@ object HasViewCompanionDirectives {
     new Directive1[hasViewCompanion.AnyCompanion[Super]] {
       def happly(inner: (hasViewCompanion.AnyCompanion[Super] :: HNil) ⇒ Route) =
         parameter("return" ? default.name) { returnType ⇒
-          passRight(hasViewCompanion.companion(returnType)) { companion ⇒
-            inner(companion :: HNil)
+          hasViewCompanion.companion(returnType) match {
+            case Right(companion) ⇒ inner(companion :: HNil)
+            case _ ⇒ reject  // Ignore error message and continue with other routes
           }
         }
     }
