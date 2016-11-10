@@ -360,13 +360,13 @@ void Module::init()
         }
         else
 #       endif
-        if( _java_class_name != ""  ||  lcase(_language) == "java" )
+        if (_java_class_name != "" || lcase(_language) == "java" || _language == "jobscheduler_internal")
         {
-            _kind = kind_java;
+            _kind = _language == "jobscheduler_internal" ? kind_java_in_process : kind_java;
         
             if( _language == "" )  _language = "Java";
 
-            if( lcase(_language) != "java" )  z::throw_xc( "SCHEDULER-166" );
+            if (lcase(_language) != "java" && _language != "jobscheduler_internal")  z::throw_xc("SCHEDULER-166");
             if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
         }
         else
@@ -391,6 +391,7 @@ void Module::init()
         case kind_remote:               break;
 
         case kind_java:                 break;
+        case kind_java_in_process:      break;
 
 // JS-498: Vorhandensein von Scriptcode prüfen
         case kind_scripting_engine_java: break;
@@ -441,7 +442,8 @@ ptr<Module_instance> Module::create_instance_impl(Process_class* process_class_o
     Kind kind = remote? kind_remote : _kind;
     switch( kind )
     {
-        case kind_java:              
+        case kind_java:
+        case kind_java_in_process:
         {
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
             result = +p;

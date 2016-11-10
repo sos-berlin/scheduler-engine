@@ -308,6 +308,7 @@ struct Connection : Object,
     friend struct Input_message;
 
 
+    void                        prepare_connection_to_controller();
     int                         send_async              ( const void*, int );
 
     void                        receive                 ( Input_message*, bool* eof = NULL );

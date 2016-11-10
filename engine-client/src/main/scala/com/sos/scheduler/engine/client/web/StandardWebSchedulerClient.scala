@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.client.web
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient._
 import com.sos.scheduler.engine.common.auth.UserAndPassword
+import com.sos.scheduler.engine.common.configutils.Configs
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.typesafe.config.ConfigFactory
 
 /**
   * @author Joacim Zschimmer
@@ -17,9 +17,7 @@ extends WebSchedulerClient with AutoCloseable {
   def this(schedulerUri: String, credentials: Option[UserAndPassword] = None) =
     this(SchedulerUris(schedulerUri), credentials)
 
-  private val actorSystem = ActorSystem(
-    "StandardWebSchedulerClient",
-    ConfigFactory.load(getClass.getClassLoader, ConfigFactory.load(ConfigResource.path)))
+  private val actorSystem = ActorSystem("StandardWebSchedulerClient", Configs.loadResource(ConfigResource))
   protected val actorRefFactory = actorSystem
 
   def close() = {

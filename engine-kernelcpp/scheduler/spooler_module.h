@@ -78,6 +78,7 @@ struct Module : Object
         kind_none,
         kind_process,
         kind_java,
+        kind_java_in_process,
         kind_scripting_engine,
         kind_com,
         kind_remote,            // Nur für Module_instance
@@ -209,7 +210,7 @@ struct Module_instance : Object
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
-    void add_objs(Task* task_or_null);
+    virtual void                add_objs                    (Task* task_or_null);
     virtual void                add_obj                     ( IDispatch*, const string& name );
     IDispatch*                  object                      ( const string& name );
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );

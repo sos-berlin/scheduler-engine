@@ -1044,6 +1044,12 @@ void Connection::async_check_error( const string& text )
     }
 }
 
+void Connection::prepare_connection_to_controller() {
+    listen_on_tcp_port( Ip_address::localhost );
+    _controller_address._host = Ip_address::localhost;
+    _controller_address._port = _tcp_port;
+}
+
 //---------------------------------------------------------------------------Connection::short_name
 
 string Connection::short_name() const
@@ -1224,15 +1230,12 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
     int           argc;
     const char*   argv [100+2];
 
-
-#   ifdef USE_SOCKETPAIR
-        Socket other_socket;
-
-        if( !_controller_address )
-        {
+    Socket other_socket;
+    if (!_controller_address) {
+        #ifdef USE_SOCKETPAIR
             SOCKET socket_pair [2] = { -1, -1 };
     
-            ret = socketpair( PF_UNIX, SOCK_STREAM, 0, socket_pair );
+            int ret = socketpair( PF_UNIX, SOCK_STREAM, 0, socket_pair );
             if( ret == -1 )  check_socket_error( socket_errno(), "socketpair" );
 
             Z_LOG2( "socket", "socketpair() ==> (" << socket_pair[0] << "," << socket_pair[1] << ")\n" );
@@ -1240,19 +1243,10 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
             other_socket.assign( socket_pair[ 1 ] );
             //Z_LOG( "set_except_fd(" << _socket << ")\n" );
             _manager->set_fd( Socket_manager::except_fd, _socket );
-        }
-#   else
-        if( !_controller_address )
-        {
-            listen_on_tcp_port( Ip_address::localhost );
-
-            _controller_address._host = Ip_address::localhost;
-            _controller_address._port = _tcp_port;
-        }
-
-#   endif
-
-
+        #else
+            prepare_connection_to_controller();
+        #endif
+    }
     if( _controller_address )
     {
         args_vector.push_back( S() << "-controller=" << _controller_address._host.ip_string() << ":" 
@@ -1691,6 +1685,9 @@ Connection_to_own_server_thread::~Connection_to_own_server_thread()
 
 void Connection_to_own_server_thread::start_thread( Server_thread* thread )
 {
+    if (!_controller_address) {
+        prepare_connection_to_controller();
+    }
     assert( _controller_address );
     assert( thread->connection() == this );
 

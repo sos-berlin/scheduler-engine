@@ -2686,7 +2686,13 @@ Async_operation* Task::do_step__start()
 
 string Task::message_726() const {
     string a = _module_instance->remote_scheduler_address();
-    return Message_string("SCHEDULER-726", a.empty()? "this JobScheduler '" + _spooler->http_url() + "'" : "remote scheduler " + a);
+    string insertion = 
+        a.empty() ? 
+            "this JobScheduler '" + _spooler->http_url() + "'" + 
+                (_module_instance->_module->_kind == Module::kind_java_in_process ? ", in_process" : "")
+        : 
+            "remote scheduler " + a;
+    return Message_string("SCHEDULER-726", insertion);
 }
 
 //-------------------------------------------------------------------------------Task::do_step__end

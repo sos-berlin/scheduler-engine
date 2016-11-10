@@ -222,7 +222,7 @@ static void create_mini_dump(EXCEPTION_POINTERS* exeption_pointers)
             xcep_info_ptr = &xcep_info;
         }
         (*miniDumpWriteDumpFunction)(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, xcep_info_ptr, NULL, NULL);
-        Z_LOG("Mini dump written\n");  // Gefährlich im Interrupt. Aber jetzt ist sowieso Schluss.
+        Z_LOG("Mini dump 'jobscheduler.dmp' written\n");  // Gefährlich im Interrupt. Aber jetzt ist sowieso Schluss.
     }
 }
 
