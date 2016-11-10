@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1674
 
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -36,6 +37,7 @@ final class JS1674InProcessIT extends FreeSpec with ScalaSchedulerTest {
       assert(now < startedAt + 30.s)
       sleepUntil(t + DelayMaximum)
     }
+    assert(jobRun.result.successValue.returnCode.isSuccess)
   }
 
   "Multiple job starts" in {

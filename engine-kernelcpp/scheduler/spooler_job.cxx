@@ -581,6 +581,7 @@ Standard_job::Standard_job( Scheduler* scheduler, const string& name, const ptr<
 
     _module = module ? module : Z_NEW(Module(_spooler, this, _spooler->include_path(), (Has_log*)NULL, false));
     _module->set_log( _log );
+    _module->set_injectorJ(_spooler->java_subsystem()->injectorJ());
 
     _com_job  = new Com_job( this );
 

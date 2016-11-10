@@ -1614,11 +1614,11 @@ Connection_to_own_server_thread::Server_thread::~Server_thread()
 
 //---------------------------------------Connection_to_own_server_thread::Server_thread::run_server
 
-int Connection_to_own_server_thread::Server_thread::run_server(int keep_alive_timeout)
+int Connection_to_own_server_thread::Server_thread::run_server(jobject injectorJ, int keep_alive_timeout)
 {
     Com_initialize com_initialize;
 
-    _server->simple_server(_connection->_controller_address, keep_alive_timeout);
+    _server->simple_server(_connection->_controller_address, injectorJ, keep_alive_timeout);
 
     return 0;
 }
@@ -4036,7 +4036,7 @@ void Server::server( int server_port )
                 zschimmer::main_pid = getpid();
                 //setsid();  // Brauchen wir das? Damit soll dieser Prozess nicht sterben, wenn der Superserver stirbt. ps zeigt dann leider nicht mehr die schöne Baumstruktur
 
-                Session session ( this, _connection );
+                Session session(this, _connection, (jobject)NULL);
                 session.server_loop();
                 session.close();
                 break;
@@ -4057,7 +4057,7 @@ void Server::server( int server_port )
 
 //----------------------------------------------------------------------------Server::simple_server
 
-void Server::simple_server(const Host_and_port& controller_address, int keep_alive_timeout)
+void Server::simple_server(const Host_and_port& controller_address, jobject injectorJ, int keep_alive_timeout)
 {
     Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << controller_address << "\n");
     ptr<Connection_manager> connection_manager = Z_NEW( Connection_manager );      // Brauchen wir den?
@@ -4067,7 +4067,7 @@ void Server::simple_server(const Host_and_port& controller_address, int keep_ali
     if( controller_address.port() != 0 )  _connection->connect( controller_address );
                                     else  _connection->_socket = as_int( getenv( socket_environment_name.c_str() ) );
    
-    Session session ( this, _connection );
+    Session session(this, _connection, injectorJ);
 
     session.server_loop(keep_alive_timeout);
     session.close();
@@ -4131,7 +4131,7 @@ int Server::main( int argc, char** argv )
     }
     else
     {
-        simple_server(Host_and_port(controller_ip, controller_port), keep_alive_timeout);
+        simple_server(Host_and_port(controller_ip, controller_port), (jobject)NULL, keep_alive_timeout);
     }
 
     return 0;

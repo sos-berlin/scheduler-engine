@@ -406,6 +406,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         //Z_LOG2( "zschimmer", Z_FUNCTION << " java_work_dir  =" << java_work_dir << "\n" );;
         //Z_LOG2( "zschimmer", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
 
+        _server->_module->set_injectorJ(this->_session->injectorJ());
         _server->_module->init();
         _server->_module->_monitors->try_load();
         _server->_module_instance = _server->_module->create_instance((Process_class*)NULL, "", (Task*)NULL);

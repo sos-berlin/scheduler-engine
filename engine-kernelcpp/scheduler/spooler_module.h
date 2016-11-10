@@ -99,6 +99,10 @@ struct Module : Object
     void                        set_xml_string_text_with_includes(const string& xml);
     void                        init0                       ();
     void                        init                        ();
+    
+    void set_injectorJ(jobject injectorJ) {
+        _injectorJ = injectorJ;
+    }
 
     ptr<Module_instance>        create_instance             (Process_class*, const string& remote_scheduler, Task* task_or_null);
     virtual ptr<Module_instance> create_instance_impl       (Process_class*, const string& remote_scheduler, Task* task_or_null);
@@ -153,6 +157,7 @@ struct Module : Object
 
     ptr<Module_monitors>       _monitors;
     ptr<Login>                 _login;
+    InjectorJ                  _injectorJ;
 
     Fill_end                   _end_;
 };

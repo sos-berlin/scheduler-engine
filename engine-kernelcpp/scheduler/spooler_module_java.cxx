@@ -170,9 +170,9 @@ void Java_module_instance::init()
     Local_frame local_frame ( 10 );
     Java_idispatch_stack_frame stack_frame;
 
-
     Module_instance::init();
 
+    assert( _jobject == NULL );
     if( !_java_class )
     {
         string class_name = replace_regex( _module->_java_class_name, "\\.", "/" );
@@ -180,11 +180,16 @@ void Java_module_instance::init()
     }
 
     jmethodID method_id = java_method_id( "<init>()V" );   // Konstruktor
-    if( !method_id )  env.throw_java( "GetMethodID" );
+    if (method_id) {
+        _jobject = env->NewObject(_java_class, method_id);
+    } else 
+    if (_module->_injectorJ) {
+        env->ExceptionClear();
+        _jobject = _module->_injectorJ.getInstance(_java_class.j());
+    } else 
+        env.throw_java("GetMethodID");
     
-    assert( _jobject == NULL );
-    _jobject = env->NewObject( _java_class, method_id );
-    if( !_jobject || env->ExceptionCheck() )  env.throw_java( _module->_java_class_name + " Konstruktor" );
+    if (!_jobject || env->ExceptionCheck())  env.throw_java(_module->_java_class_name + " constructor");
 }
 
 //--------------------------------------------------------------------Java_module_instance::add_obj

@@ -13,6 +13,7 @@
 #include "async.h"
 #include "async_socket.h"
 #include "Login.h"
+#include "Has_proxy.h"
 
 namespace zschimmer {
 
@@ -461,7 +462,7 @@ struct Connection_to_own_server_thread : Connection
                                ~Server_thread           ();
 
       //int                     thread_main             ();
-        int                     run_server              (int keep_alive_timeout);
+        int                     run_server              (jobject injectorJ, int keep_alive_timeout);
         Connection_to_own_server_thread* connection     () const                                    { return _connection; }
 
       protected:
@@ -629,15 +630,17 @@ struct Session : Object
     typedef int64               Id;
 
 
-    Session(Connection* con) : 
+    Session(Connection* con, jobject injectorJ) :
         _zero_(this + 1), 
-        _connection(con) 
+        _connection(con),
+        _injectorJ(injectorJ)
     {}
 
-    Session(Server* server, Connection* con, Id id = 0) : 
+    Session(Server* server, Connection* con, jobject injectorJ, Id id = 0) : 
         _zero_(this + 1), 
         _server(server), 
-        _connection(con) 
+        _connection(con),
+        _injectorJ(injectorJ)
     {}
 
                                ~Session                 ();
@@ -666,6 +669,10 @@ struct Session : Object
     Server*                     server                  () const                                    { return _server; }
     int                         pid                     () const                                    { return _connection? _connection->pid() : 0; }
 
+    jobject injectorJ() const {
+        return _injectorJ;
+    }
+
   private:
     friend struct Server;
     friend struct Proxy;
@@ -692,6 +699,7 @@ struct Session : Object
     Fill_zero                  _zero_;
     Server*                    _server;
     ptr<Connection>            _connection;
+    javabridge::Global_jobject2 _injectorJ;
     Object_table               _object_table;
     bool                       _connection_has_only_this_session;
     ptr<Async_operation>       _sync_operation;
@@ -1011,7 +1019,7 @@ struct Server : Object
 
 
     int                         main                    ( int, char** );
-    void                        simple_server           ( const Host_and_port& controller, int keep_alive_timeout);
+    void                        simple_server           ( const Host_and_port& controller, jobject injectorJ, int keep_alive_timeout);
     void                        server                  ( int server_port );
     
     void                        register_class          ( const CLSID&, Create_instance_function* );
