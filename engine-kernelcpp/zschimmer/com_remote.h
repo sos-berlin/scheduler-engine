@@ -483,6 +483,7 @@ struct Connection_to_own_server_thread : Connection
 
         Fill_zero              _zero_;
         Connection_to_own_server_thread* _connection;
+        double                 _wait_for_termination_poll;
     };
 
 

@@ -1628,7 +1628,8 @@ int Connection_to_own_server_thread::Server_thread::run_server(jobject injectorJ
 Connection_to_own_server_thread::Wait_for_thread_termination::Wait_for_thread_termination( Connection_to_own_server_thread* connection )
 : 
     _zero_(this+1),
-    _connection(connection)
+    _connection(connection),
+    _wait_for_termination_poll(0.01)
 {
     async_continue_( cont_default );
 }
@@ -1645,7 +1646,9 @@ bool Connection_to_own_server_thread::Wait_for_thread_termination::async_continu
     }
     else
     {
-        set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
+        Z_LOG(Z_FUNCTION << " " << _wait_for_termination_poll << "s\n");
+        set_async_delay(_wait_for_termination_poll);
+        _wait_for_termination_poll = min(0.1, _wait_for_termination_poll + 0.02);  // Limit delay to 0.1s
     }
 
     if( _connection->_thread )

@@ -41,7 +41,7 @@ final class JS1674InProcessIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "Multiple job starts" in {
-    Stopwatch.measureTime(10, "InProcessJob") {
+    Stopwatch.measureTime(50, "InProcessJob") {
       val result = runJob(QuickJobPath)
       assert(result.returnCode.isSuccess)
     }
