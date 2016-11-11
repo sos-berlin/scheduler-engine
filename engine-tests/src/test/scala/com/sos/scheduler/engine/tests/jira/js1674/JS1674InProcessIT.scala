@@ -20,9 +20,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1674InProcessIT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val httpPort = findRandomFreeTcpPort()
+  private lazy val List(tcpPort, httpPort) = findRandomFreeTcpPorts(2)  // tcpPort is for scheduler.xml supervisor_client
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-http-port=$httpPort", "-log-level=debug9"),
+    mainArguments = List(s"-tcp-port=$tcpPort", s"-http-port=$httpPort", "-log-level=debug9"),
     database = Some(InMemoryDatabaseConfiguration))
 
   "job language=in_process" in {

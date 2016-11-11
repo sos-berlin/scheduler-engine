@@ -90,4 +90,5 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   def has_any_task: Boolean
   @CppThreadSafe def write_to_scheduler_log(category: String, text: String): Unit
   def time_zone_name: String
+  def supervisor_uri: String
 }

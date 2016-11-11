@@ -569,6 +569,7 @@ struct Spooler : Object,
     Order_subsystem*            subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
 
     supervisor::Supervisor_client_interface* supervisor_client();
+    string                      supervisor_uri              ();
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();

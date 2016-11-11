@@ -289,6 +289,7 @@ with HasCloser {
       httpPort = schedulerConfiguration.httpPortOption,
       httpsPort = schedulerConfiguration.httpsPortOption,
       udpPort = schedulerConfiguration.udpPort,
+      supervisor = schedulerConfiguration.supervisorUriOption,
       pid = cppProxy.pid,
       state = SchedulerState.ofCppName(cppProxy.state_name),
       system = systemInformation(),

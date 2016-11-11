@@ -1255,6 +1255,13 @@ supervisor::Supervisor_client_interface* Spooler::supervisor_client()
     return _supervisor_client;
 }
 
+string Spooler::supervisor_uri() {
+    if (_supervisor_client) {
+        return "tcp://" +_supervisor_client->address();
+    } else
+        return "";
+}
+
 //----------------------------------------------------------------------------Spooler::has_any_task
 
 bool Spooler::has_any_task()

@@ -877,6 +877,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native void stop__native(long cppReference);
 
 
+    @Override public java.lang.String supervisor_uri() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = supervisor_uri__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String supervisor_uri__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC task_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

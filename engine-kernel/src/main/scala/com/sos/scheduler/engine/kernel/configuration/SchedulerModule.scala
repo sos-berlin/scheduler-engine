@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId}
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId, SupervisorUri}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -180,6 +180,10 @@ with HasCloser {
     DeadLetterActor.subscribe(actorSystem)
     actorSystem
   }
+
+  @Provides @Singleton
+  private def provideSupervisorUriOption(conf: SchedulerConfiguration): Option[SupervisorUri] =
+    conf.supervisorUriOption
 
   @Provides @Singleton
   private def config(conf: SchedulerConfiguration)(implicit stcq: SchedulerThreadCallQueue): Config =

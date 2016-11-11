@@ -4,19 +4,25 @@ import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
+import com.sos.scheduler.engine.common.javautils.ScalaInJava.toJavaOptional
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SupervisorUri}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import java.time.ZoneId
-import javax.inject.Inject
+import java.util.Optional
+import javax.inject.{Inject, Provider}
 import org.scalatest.Assertions._
 
 /**
   * @author Joacim Zschimmer
   */
-final class InProcessJob @Inject private(schedulerId: SchedulerId, zoneId: ZoneId, directClient: DirectSchedulerClient)
+final class InProcessJob @Inject private(
+  schedulerId: SchedulerId,
+  zoneId: ZoneId,
+  directClient: DirectSchedulerClient,
+  supervisorUriOptionProvider: Provider[Option[SupervisorUri]])
 extends sos.spooler.Job_impl {
 
   private lazy val webClient = {
@@ -26,6 +32,8 @@ extends sos.spooler.Job_impl {
   private var step = 0
 
   override def spooler_init() = {
+    assert(supervisorUriOptionProvider.get == Some(SupervisorUri("tcp://0.0.0.1:1")))
+    assert(toJavaOptional(supervisorUriOptionProvider.get) == Optional.of(SupervisorUri("tcp://0.0.0.1:1")))  // Java example
     assert(SchedulerId(spooler.id) == schedulerId)
     val overview = readOverview(directClient)
     spooler_log.info(s"zoneId=$zoneId, overview=$overview")

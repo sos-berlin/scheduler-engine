@@ -405,6 +405,10 @@ struct Supervisor_client : Supervisor_client_interface
     void                        set_using_central_configuration()                                   { _is_using_central_configuration = true; }
     bool                        is_using_central_configuration() const                              { return _is_using_central_configuration; }
     Host_and_port               host_and_port               () const                                { return _host_and_port; }
+    
+    const string& address() const { 
+        return _supervisor_address; 
+    }
 
     // IDispatch_implementation
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }

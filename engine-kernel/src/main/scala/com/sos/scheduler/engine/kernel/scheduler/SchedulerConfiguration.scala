@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId, SupervisorUri}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.typesafe.config.Config
 import java.io.File
@@ -30,6 +30,8 @@ trait SchedulerConfiguration {
   def logDirectory: File
 
   def schedulerId: SchedulerId
+
+  def supervisorUriOption: Option[SupervisorUri]
 
   def httpPortOption: Option[String]
 
@@ -83,6 +85,7 @@ object SchedulerConfiguration {
       localConfigurationDirectory
       logDirectory
       schedulerId
+      supervisorUriOption
       httpPortOption
       httpsPortOption
       tcpPort
@@ -118,6 +121,8 @@ object SchedulerConfiguration {
 
     lazy val schedulerId: SchedulerId =
       SchedulerId(spoolerC.id)
+
+    lazy val supervisorUriOption = emptyToNone(spoolerC.supervisor_uri) map SupervisorUri.apply
 
     lazy val httpPortOption: Option[String] = settingsC._http_port match {
       case "" | "0" ⇒ None
