@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp._
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{asFromStringOptionDeserializer, passSome}
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, Orders}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderStatisticsChanged, Orders}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.event.{DirectEventClient, OrderStatisticsChangedSource}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -68,11 +68,8 @@ trait OrderRoute extends LogRoute {
       case "OrderDetailed" ⇒
         completeTryHtml(client.order[OrderDetailed](orderKey))
 
-      case returnType ⇒
-        passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) { eventClass ⇒
-          orderEvents(eventClass, orderKey)
-        } ~
-          rejectReturnType(returnType)
+      case _ ⇒
+        orderEvents(orderKey)
     }
 
   private def queriedOrders(returnTypeOption: Option[String], query: OrderQuery): Route =
@@ -97,16 +94,13 @@ trait OrderRoute extends LogRoute {
       case Some(OrderDetailed.name) ⇒
         completeTryHtml(client.ordersBy[OrderDetailed](query) map { _ map Orders.apply })
 
-      case Some(returnType) ⇒
-        passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) { eventClass ⇒
-          query.orderKeyOption match {
-            case Some(orderKey) ⇒
-              orderEvents(eventClass, orderKey)
-            case None ⇒
-              orderEvents(eventClass, query.jobChainQuery.pathQuery)  // Events are only selected by JobChainPath !!!
-          }
-        } ~
-          rejectReturnType(returnType)
+      case Some(_) ⇒
+        query.orderKeyOption match {
+          case Some(orderKey) ⇒
+            orderEvents(orderKey)
+          case None ⇒
+            orderEvents(query.jobChainQuery.pathQuery)  // Events are only selected by JobChainPath !!!
+        }
 
       case None ⇒
         htmlPreferred(webServiceContext) {
@@ -119,8 +113,8 @@ trait OrderRoute extends LogRoute {
           complete(client.orderTreeComplementedBy[OrderOverview](query))
     }
 
-  private def orderEvents(eventClass: Class[_ <: Event], orderKey: OrderKey): Route =
-    withEventParameters { case EventParameters(_, afterEventId, timeout, limit) ⇒
+  private def orderEvents(orderKey: OrderKey): Route =
+    withEventParameters() { case EventParameters(eventClass, afterEventId, timeout, limit) ⇒
       implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
       completeTryHtml {
         if (limit >= 0)
@@ -132,8 +126,8 @@ trait OrderRoute extends LogRoute {
       }
     }
 
-  private def orderEvents(eventClass: Class[_ <: Event], query: PathQuery): Route =
-    withEventParameters { case EventParameters(_, afterEventId, timeout, limit) ⇒
+  private def orderEvents(query: PathQuery): Route =
+    withEventParameters() { case EventParameters(eventClass, afterEventId, timeout, limit) ⇒
       completeTryHtml {
         client.events[Event](
           after = afterEventId,
@@ -147,18 +141,17 @@ trait OrderRoute extends LogRoute {
       }
     }
 
-  private def orderStatisticsChanged(query: PathQuery): Route =
-    withEventParameters {
-      case EventParameters("OrderStatisticsChanged", afterEventId, timeout, limit) ⇒
+  private def orderStatisticsChanged(query: PathQuery): Route = {
+    val OrderStatisticsChangedClass = classOf[OrderStatisticsChanged]
+    withEventParameters() {
+      case EventParameters(OrderStatisticsChangedClass, afterEventId, timeout, limit) ⇒
         completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
           for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId, timeout, query))
             yield nestIntoSeqSnapshot(snapshot)
         }
       case _ ⇒ reject
+    }
   }
-
-  private def rejectReturnType(returnType: String) =
-    reject // Misleading, because returnType may be right for an preceding, but rejected route: (ValidationRejection(s"Unknown value for parameter return=$returnType"))
 }
 
 object OrderRoute {

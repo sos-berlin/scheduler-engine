@@ -25,8 +25,8 @@ trait EventRoute extends HasCloser {
 
   def eventRoute: Route =
     pathEnd {
-      withEventParameters { case EventParameters(returnType, afterEventId, timeout, limit) ⇒
-        val classTag = ClassTag[Event](SchedulerAnyKeyedEventJsonFormat.typeToClass(returnType))
+      withEventParameters(defaultReturnType = Some("Event")) { case EventParameters(eventClass, afterEventId, timeout, limit) ⇒
+        val classTag = ClassTag[Event](eventClass)
         completeTryHtml {
           if (limit >= 0)
             client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
