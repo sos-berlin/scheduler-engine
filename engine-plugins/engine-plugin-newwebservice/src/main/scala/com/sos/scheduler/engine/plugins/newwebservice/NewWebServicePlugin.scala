@@ -58,7 +58,7 @@ extends Plugin {
       val webServer = new EngineWebServer(bindings, gateKeeperConfiguration, csrf, myInjector)
       closer.registerAutoCloseable(webServer)
       webServer.start() await 60.s
-      uriOnce := webServer.locallyUsableUri.toString
+      uriOnce := webServer.localUri.toString
     }
   }
 
