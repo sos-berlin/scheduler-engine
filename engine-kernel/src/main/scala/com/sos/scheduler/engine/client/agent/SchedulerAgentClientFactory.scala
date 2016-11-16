@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.client.agent
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.agent.client.AgentClient
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.scalautil.ConcurrentMemoizer
@@ -31,20 +30,25 @@ extends (AgentAddress ⇒ AgentClient) {
   private val userAndPasswordOption: Option[UserAndPassword] =
     for (password ← config.optionAs[String]("jobscheduler.master.credentials.password") map SecretString.apply)
        yield UserAndPassword(UserId(conf.schedulerId.string), password)
-  private val memoizingAcceptTlsCertificateFor = ConcurrentMemoizer.strict {
-    (keystore: KeystoreReference, host: NonEmptyHost, port: Int) ⇒ Https.acceptTlsCertificateFor(keystore, host.address, port)
+  private val memoizingHostConnectorSetupFor = ConcurrentMemoizer.strict {
+    (keystore: KeystoreReference, host: NonEmptyHost, port: Int) ⇒
+      Https.toHostConnectorSetup(keystore, host, port)
   }
 
-  def apply(agentUri: AgentAddress): AgentClient = apply(Uri(agentUri.string))
+  def apply(agentUri: AgentAddress): AgentClient =
+    apply(Uri(agentUri.string))
 
   def apply(agentUri: Uri): AgentClient = {
-    (conf.keystoreReferenceOption, agentUri) switch {
+    val hostConnectorSetupOption = (conf.keystoreReferenceOption, agentUri) match {
       case (Some(keystoreRef), Uri("https", Uri.Authority(host: Uri.NonEmptyHost, port, _), _, _, _)) ⇒
-        memoizingAcceptTlsCertificateFor(keystoreRef, host, port)
+        Some(memoizingHostConnectorSetupFor(keystoreRef, host, port))
+      case _ ⇒
+        None
     }
     new AgentClient.Standard(
-      agentUri = agentUri,
-      licenseKeys = SchedulerAgentClientFactory.this.licenseKeys,
-      userAndPasswordOption = SchedulerAgentClientFactory.this.userAndPasswordOption)
+      agentUri,
+      SchedulerAgentClientFactory.this.licenseKeys,
+      hostConnectorSetupOption,
+      SchedulerAgentClientFactory.this.userAndPasswordOption)
   }
 }

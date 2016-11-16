@@ -17,6 +17,8 @@ extends WebSchedulerClient with AutoCloseable {
   def this(schedulerUri: String, credentials: Option[UserAndPassword] = None) =
     this(SchedulerUris(schedulerUri), credentials)
 
+  protected def hostConnectorSetupOption = None  // That means, no HTTPS
+
   private val actorSystem = ActorSystem("StandardWebSchedulerClient", Configs.loadResource(ConfigResource))
   protected val actorRefFactory = actorSystem
 

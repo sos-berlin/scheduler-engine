@@ -14,12 +14,14 @@ import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
+import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import java.time.Duration
 import org.scalactic.Requirements._
 import scala.collection.immutable
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import spray.can.Http.HostConnectorSetup
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
@@ -46,21 +48,22 @@ trait AgentClient {
   val agentUri: Uri
   protected def licenseKeys: immutable.Iterable[LicenseKeyString]
   implicit protected val actorRefFactory: ActorRefFactory
-  protected def userAndPasswordOption: Option[UserAndPassword] = None
+  protected def hostConnectorSetupOption: Option[HostConnectorSetup]
+  protected def userAndPasswordOption: Option[UserAndPassword]
 
   protected lazy val agentUris = AgentUris(agentUri.toString)
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
     else identity
-  lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
+  private lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
     case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
     case None ⇒ identity
   }
-  private lazy val httpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
-    addUserAndPassword ~>
-      addLicenseKeys ~>
+  private lazy val httpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] = {
+    addLicenseKeys ~>
       encode(Gzip) ~>
-      sendReceive ~>
+      agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, RequestTimeout.toFiniteDuration) ~>
       decode(Gzip)
+  }
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>   // Unnecessary ?
@@ -89,11 +92,14 @@ trait AgentClient {
         addHeader(Accept(`application/json`)) ~>
         addLicenseKeys ~>
         encode(Gzip) ~>
-        sendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
+        agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
         decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
     pipeline(Post(agentUris.command, command: Command))
   }
+
+  private[engine] def agentSendReceive(refFactory: ActorRefFactory, executionContext: ExecutionContext, futureTimeout: Timeout): SendReceive =
+    addUserAndPassword ~> extendedSendReceive(futureTimeout, hostConnectorSetupOption)(refFactory, executionContext)
 
   final def fileExists(filePath: String): Future[Boolean] =
     unmarshallingPipeline[JsBoolean].apply(Get(agentUris.fileExists(filePath))) map { _.value }
@@ -125,11 +131,8 @@ trait AgentClient {
       case None ⇒ Future.failed(new IllegalArgumentException(s"URI '${request.uri} does not match $toString"))
     }
 
-
-  private[client] def toCheckedAgentUri(uri: Uri): Option[Uri] = {
-    var u = normalizeAgentUri(uri)
-    checkAgentUri(u)
-  }
+  private[client] def toCheckedAgentUri(uri: Uri): Option[Uri] =
+    checkAgentUri(normalizeAgentUri(uri))
 
   private[client] def normalizeAgentUri(uri: Uri): Uri = {
     val Uri(scheme, authority, path, query, fragment) = uri
@@ -160,7 +163,8 @@ object AgentClient {
   final class Standard(
     val agentUri: Uri,
     protected val licenseKeys: immutable.Iterable[LicenseKeyString] = Nil,
-    override val userAndPasswordOption: Option[UserAndPassword] = None)
+    protected val hostConnectorSetupOption: Option[HostConnectorSetup] = None,
+    protected val userAndPasswordOption: Option[UserAndPassword] = None)
     (implicit protected val actorRefFactory: ActorRefFactory)
   extends AgentClient
 

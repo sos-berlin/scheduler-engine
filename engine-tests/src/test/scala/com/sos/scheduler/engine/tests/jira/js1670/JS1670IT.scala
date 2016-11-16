@@ -4,8 +4,8 @@ import akka.actor.ActorSystem
 import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAny
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.sprayutils.https.Https._
-import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
+import com.sos.scheduler.engine.common.sprayutils.https.{Https, KeystoreReference}
+import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
 import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
@@ -21,6 +21,7 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import spray.can.Http.HostConnectorSetup
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
@@ -45,18 +46,14 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
       s"-https-port=127.0.0.1:$httpsPort"))
   private lazy val httpsUri = s"https://127.0.0.1:$httpsPort/jobscheduler/master/api"
   private implicit lazy val actorSystem = ActorSystem("JS1670IT") withCloser { _.shutdown() }
+  private val httpsSetup = Some(Https.toHostConnectorSetup(ClientKeystoreRef, httpsUri))
 
-  override protected def checkedBeforeAll() = {
-    acceptTlsCertificateFor(ClientKeystoreRef, httpsUri)
-    super.checkedBeforeAll()
-  }
-
-  private def pipeline[A: FromResponseUnmarshaller](password: Option[String]): HttpRequest ⇒ Future[A] =
+  private def pipeline[A: FromResponseUnmarshaller](password: Option[String], setupOption: Option[HostConnectorSetup] = None): HttpRequest ⇒ Future[A] =
     (password map { o ⇒ addCredentials(BasicHttpCredentials("TEST-USER", o)) } getOrElse identity[HttpRequest] _) ~>
     addHeader(Accept(`application/json`)) ~>
     addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
     encode(Gzip) ~>
-    sendReceive ~>
+    extendedSendReceive(60.s.toFiniteDuration, setupOption) ~>
     decode(Gzip) ~>
     unmarshal[A]
 
@@ -66,7 +63,7 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
     "Unauthorized request is rejected" - {
       "due to missing credentials" in {
         intercept[UnsuccessfulResponseException] {
-          pipeline[HttpResponse](password = None).apply(Get(uri)) await 10.s
+          pipeline[HttpResponse](password = None, httpsSetup).apply(Get(uri)) await 10.s
         }
         .response.status shouldEqual Unauthorized
       }
@@ -74,7 +71,7 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
       "due to wrong credentials" in {
         val t = now
         val e = intercept[UnsuccessfulResponseException] {
-          pipeline[SchedulerOverview](Some("WRONG-PASSWORD")).apply(Get(uri)) await 10.s
+          pipeline[SchedulerOverview](Some("WRONG-PASSWORD"), httpsSetup).apply(Get(uri)) await 10.s
         }
         assert(now - t > instance[GateKeeper.Configuration].invalidAuthenticationDelay - 50.ms)  // Allow for timer rounding
         e.response.status shouldEqual Unauthorized
@@ -87,11 +84,11 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
       val password = Some("TEST-PASSWORD")
 
       "is accepted" in {
-        val overview = pipeline[SchedulerOverview](password).apply(Get(uri)) await 10.s
+        val overview = pipeline[SchedulerOverview](password, httpsSetup).apply(Get(uri)) await 10.s
         assert(overview.schedulerId == SchedulerId("test"))
       }
 
-      addPostTextPlainText(uri, password)
+      addPostTextPlainText(uri, password, httpsSetup)
     }
   }
 
@@ -111,10 +108,10 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def addPostTextPlainText(uri: Uri, password: Option[String] = None): Unit =
+  private def addPostTextPlainText(uri: Uri, password: Option[String] = None, setupOption: Option[HostConnectorSetup] = None): Unit =
     "POST plain/text is rejected due to CSRF" in {
       val response = intercept[UnsuccessfulResponseException] {
-        pipeline[HttpResponse](password).apply(Post(uri, "TEXT")) await 10.s
+        pipeline[HttpResponse](password, setupOption).apply(Post(uri, "TEXT")) await 10.s
       } .response
       assert(response.status == Forbidden)
       assert(response.as[String].right.get == "HTML form POST is forbidden")

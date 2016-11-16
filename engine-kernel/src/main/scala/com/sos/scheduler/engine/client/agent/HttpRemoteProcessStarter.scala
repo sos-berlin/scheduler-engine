@@ -38,7 +38,7 @@ final class HttpRemoteProcessStarter @Inject private(
         val tunnelClient = new WebTunnelClient(
           processDescriptor_.tunnelToken,
           AgentUris(agentUri).tunnel(processDescriptor_.tunnelToken.id),
-          agentClient.addUserAndPassword,
+          agentClient.agentSendReceive,
           timing map newHeartbeatRequestor)(
           HttpRemoteProcessStarter.this.actorSystem)
         .closeWithCloser

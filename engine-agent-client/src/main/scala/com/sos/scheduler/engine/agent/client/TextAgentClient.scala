@@ -8,8 +8,8 @@ import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.configutils.Configs
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.yamlToJsValue
-import com.sos.scheduler.engine.common.sprayutils.https.Https.acceptTlsCertificateFor
-import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
+import com.sos.scheduler.engine.common.sprayutils.https.{Https, KeystoreReference}
+import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.agent.AgentAddress
@@ -36,11 +36,7 @@ extends AutoCloseable {
   private implicit val actorSystem = ActorSystem("AgentClient", Configs.loadResource(ConfigurationResource))
   import actorSystem.dispatcher
 
-  keystore match {
-    case Some(ref) ⇒ acceptTlsCertificateFor(ref, uri = agentUri.string)
-    case None ⇒
-  }
-
+  private val hostConnectorSetupOption = keystore/*Option*/ map { o ⇒ Https.toHostConnectorSetup(o, uri = agentUri.string) }
   private val pipeline = {
     val addUserAndPassword: RequestTransformer = userAndPassword match {
       case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
@@ -50,7 +46,7 @@ extends AutoCloseable {
       addHeader(Accept(`text/plain`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
       encode(Gzip) ~>
-      sendReceive ~>
+      extendedSendReceive(60.s.toFiniteDuration, hostConnectorSetupOption) ~>
       decode(Gzip) ~>
       unmarshal[String]
   }

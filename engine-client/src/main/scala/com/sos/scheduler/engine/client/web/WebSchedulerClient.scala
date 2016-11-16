@@ -4,7 +4,9 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.client.web.WebSchedulerClient._
 import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
+import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
@@ -22,6 +24,7 @@ import scala.collection.immutable
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.reflect.ClassTag
+import spray.can.Http.HostConnectorSetup
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Accept
 import spray.http.MediaTypes._
@@ -40,11 +43,11 @@ import spray.json.DefaultJsonProtocol._
  */
 trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
+  protected def hostConnectorSetupOption: Option[HostConnectorSetup]
   protected def credentials: Option[UserAndPassword] = None
 
   import actorRefFactory.dispatcher
 
-  private implicit val timeout = Timeout(3600.s.toFiniteDuration)
 
   protected final def commandUri = uris.command
 
@@ -57,7 +60,7 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     }
     credentialsHeader ~>
       encode(Gzip) ~>
-      sendReceive ~>
+      extendedSendReceive(timeout, hostConnectorSetupOption) ~>
       decode(Gzip)
   }
 
@@ -182,4 +185,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     jsonHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"WebSchedulerClient($uris)"
+}
+
+object WebSchedulerClient {
+  private val timeout = Timeout(3600.s.toFiniteDuration)
 }
