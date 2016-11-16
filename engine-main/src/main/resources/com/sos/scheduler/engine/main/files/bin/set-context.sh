@@ -6,6 +6,8 @@
 # - SCHEDULER_DATA
 # - jarDir
 
+pathSeparator=$(if [ "$OSTYPE" = "cygwin" ]; then echo ";"; else echo ":"; fi)
+
 declare JAVA_HOME
 if [ -z "$JAVA_HOME" ]; then
     export JAVA_HOME=$(dirname $(dirname $(readlink --canonicalize $(which java || kill $$))))

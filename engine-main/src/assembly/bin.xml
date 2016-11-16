@@ -33,6 +33,15 @@
             <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
+            <!-- Provided by maven-dependency-plugin -->
+            <directory>${project.build.directory}/dependency/extra</directory>
+            <outputDirectory>engine/jar/extra</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.outputDirectory}/com/sos/scheduler/engine/main/files/bin</directory>
             <outputDirectory>engine/bin</outputDirectory>
             <fileMode>0755</fileMode>
