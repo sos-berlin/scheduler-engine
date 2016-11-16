@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 import spray.client.pipelining.Get
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.StatusCodes.{BadRequest, Forbidden}
-import spray.http.{HttpHeader, HttpRequest, HttpResponse, Uri}
+import spray.http.{HttpHeader, HttpHeaders, HttpRequest, HttpResponse, Uri}
 import spray.httpx.UnsuccessfulResponseException
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
@@ -47,8 +47,10 @@ trait AgentRoute {
               completeWithError(Forbidden, s"Forbidden Agent URI: $tailUri")
             else
               onSuccess(isKnownAgentUriFuture(agentUri)) {
-                case false ⇒ completeWithError(BadRequest, "Unknown Agent")
-                case true ⇒ forwardTo(requestContext.request, toAgentClient(agentUri), tailUri)
+                case false ⇒
+                  completeWithError(BadRequest, "Unknown Agent")
+                case true ⇒
+                  forwardTo(requestContext.request, toAgentClient(agentUri), tailUri)
               }
           }
         }
@@ -58,7 +60,7 @@ trait AgentRoute {
   private def forwardTo(request: HttpRequest, agentClient: AgentClient, tailUri: Uri): Route =
     onComplete(agentClient[HttpResponse](request.headers filter { o ⇒ isForwardableHeaderClass(o.getClass) }, Get(tailUri))) {
       case Success(response) ⇒
-        complete(response)
+        complete(response.copy(headers = response.headers filterNot { h ⇒ IsIgnoredAgentHeader(h.getClass) }))
       case Failure(e: UnsuccessfulResponseException) ⇒
         completeWithError(e.response.status, e.getMessage)
       case Failure(throwable) ⇒
@@ -83,4 +85,10 @@ object AgentRoute {
     isAllowedPath(uri.path) && uri.query.isEmpty && uri.fragment.isEmpty
 
   private def isAllowedPath = Set(Uri.Path("/jobscheduler/agent/api"))
+
+  private val IsIgnoredAgentHeader: Set[Class[_ <: HttpHeader]] = Set(
+    classOf[HttpHeaders.Server],
+    classOf[HttpHeaders.Date],
+    classOf[HttpHeaders.`Content-Type`],
+    classOf[HttpHeaders.`Content-Length`])
 }
