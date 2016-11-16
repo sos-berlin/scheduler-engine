@@ -13,8 +13,6 @@
     <name>${project.artifactId}</name>
 
     <build>
-        <finalName>${project.groupId}</finalName>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -33,6 +31,7 @@
                                 </includes>
                             </artifactSet>
                             <createDependencyReducedPom>false</createDependencyReducedPom>  <!-- True would not include the needed transitive dependencies -->
+                            <createSourcesJar>true</createSourcesJar>
                         </configuration>
                     </execution>
                 </executions>
@@ -49,31 +48,15 @@
 
     <dependencies>
         <!-- Artefakte, deren Jars in einem Jar zusammengefasst werden. -->
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>engine-kernel</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>engine-kernelcpp-generated</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-cppjava-runtime</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-data</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -83,66 +66,9 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>engine-common</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>engine-persistence</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.enginedoc</groupId>
-            <artifactId>enginedoc-common</artifactId>
-            <version>${enginedoc.version}</version>
-            <scope>runtime</scope>
-        </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-plugin-node-order</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-agent-client</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-agent-data</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-base</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-http-client</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-tunnel-data</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-tunnel</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
