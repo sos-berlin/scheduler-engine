@@ -136,7 +136,10 @@ object TestEnvironment {
   final class AgentEnvironment(directory: Path) {
     val dataDirectory = directory / "agent"
     val logDirectory = dataDirectory / "logs"
-    if (!exists(dataDirectory)) createDirectory(dataDirectory)
-    if (!exists(logDirectory)) createDirectory(logDirectory)
+    val configDirectory = dataDirectory / "config"
+    val privateConfigDirectory = configDirectory / "private"
+    for (dir ← Array(dataDirectory, logDirectory, configDirectory, privateConfigDirectory)) {
+      if (!exists(dir)) createDirectory(dir)
+    }
   }
 }
