@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent}
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollectorTest._
 import org.junit.runner.RunWith
@@ -37,8 +37,8 @@ final class EventCollectorTest extends FreeSpec {
 
   "eventCollector.when with torn event stream" in {
     autoClosing(new EventCollector(eventIdGenerator, eventBus, EventCollector.Configuration(queueSize = 2))) { eventCollector ⇒
-      val anyFuture = eventCollector.when[Event](after = EventId.BeforeFirst, 30.s)
-      val bFuture = eventCollector.when[BEvent](after = EventId.BeforeFirst, 30.s)
+      val anyFuture = eventCollector.when(EventRequest[Event](after = EventId.BeforeFirst, 30.s))
+      val bFuture = eventCollector.when(EventRequest[BEvent](after = EventId.BeforeFirst, 30.s))
       assert(!anyFuture.isCompleted)
       eventBus.publish(KeyedEvent(A1)("1"))
       val EventSeq.NonEmpty(anyEvents) = anyFuture await 100.ms
@@ -53,10 +53,10 @@ final class EventCollectorTest extends FreeSpec {
       // Third event, overflowing the queue
       eventBus.publish(KeyedEvent(B1)("2"))
 
-      val EventSeq.NonEmpty(cEventIterator) = eventCollector.when[BEvent](after = bEvents.last.eventId, 1.s) await 100.ms
+      val EventSeq.NonEmpty(cEventIterator) = eventCollector.when(EventRequest[BEvent](after = bEvents.last.eventId, 1.s)) await 100.ms
       assert((cEventIterator.toList map { _.value }) == List(KeyedEvent(B1)("2")))
 
-      assert((eventCollector.when[BEvent](after = EventId.BeforeFirst, 1.s) await 100.ms) == EventSeq.Torn)
+      assert((eventCollector.when(EventRequest[BEvent](after = EventId.BeforeFirst, 1.s)) await 100.ms) == EventSeq.Torn)
     }
   }
 
@@ -68,7 +68,7 @@ final class EventCollectorTest extends FreeSpec {
       eventBus.publish(KeyedEvent(A2)("2"))
       eventBus.publish(KeyedEvent(B2)("1"))
       def eventsForKey[E <: Event: ClassTag](key: E#Key) = {
-        val EventSeq.NonEmpty(eventIterator) = eventCollector.whenForKey[E](key, after = EventId.BeforeFirst, 20.s) await 10.s
+        val EventSeq.NonEmpty(eventIterator) = eventCollector.whenForKey[E](EventRequest(after = EventId.BeforeFirst, 20.s), key) await 10.s
         eventIterator.toVector map { _.value }
       }
       assert(eventsForKey[AEvent]("1") == Vector(A1, A2))

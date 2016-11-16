@@ -6,10 +6,8 @@ import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.kernel.event.DirectEventClient._
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
-import java.time.Duration
 import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.ClassTag
 
 /**
   * @author Joacim Zschimmer
@@ -19,34 +17,20 @@ trait DirectEventClient {
   protected def eventIdGenerator: EventIdGenerator
   protected implicit def executionContext: ExecutionContext
 
-  def events[E <: Event: ClassTag](
-    after: EventId,
-    timeout: Duration,
-    limit: Int)
-  : Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
-  =
-    events[E](after = after, timeout, predicate = (_: KeyedEvent[E]) ⇒ true, limit = limit)
+  def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    events[E](request, (_: KeyedEvent[E]) ⇒ true)
 
-  def events[E <: Event: ClassTag](
-    after: EventId,
-    timeout: Duration,
-    predicate: KeyedEvent[E] ⇒ Boolean,
-    limit: Int = Int.MaxValue)
-  : Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
-  =
+  def events[E <: Event](request: EventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     wrapIntoSnapshot(
       eventCollector.when[E](
-        after,
-        timeout,
-        keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent),
-        limit = limit))
+        request,
+        keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent)))
 
-  def eventsReverse[E <: Event: ClassTag](after: EventId = EventId.BeforeFirst, limit: Int): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]] =
+  def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]] =
     Future.successful(eventIdGenerator.newSnapshot(
       eventCollector.reverse[E](
-          after = after,
-          keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent),
-          limit = limit)
+          request,
+          keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent))
         .toVector))
 
   private def eventIsSelected(event: Event): Boolean =
@@ -56,22 +40,12 @@ trait DirectEventClient {
       case _ ⇒ true
     }
 
-  def eventsForKey[E <: Event: ClassTag](key: E#Key, after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, E]]] =
-    wrapIntoSnapshot(
-      eventCollector.whenForKey(
-        key,
-        after,
-        timeout,
-        eventTypedJsonFormat.canSerialize,
-        limit = limit))
+  def eventsForKey[E <: Event](request: EventRequest[E], key: E#Key): Future[Snapshot[EventSeq[Seq, E]]] =
+    wrapIntoSnapshot(eventCollector.whenForKey(request, key, eventTypedJsonFormat.canSerialize))
 
-  def eventsReverseForKey[E <: Event: ClassTag](key: E#Key, after: EventId, limit: Int = Int.MaxValue): Future[Snapshot[Seq[Snapshot[E]]]] =
+  def eventsReverseForKey[E <: Event](request: ReverseEventRequest[E], key: E#Key): Future[Snapshot[Seq[Snapshot[E]]]] =
     Future.successful(eventIdGenerator.newSnapshot(
-      eventCollector.reverseForKey(
-        key,
-        after,
-        eventTypedJsonFormat.canSerialize,
-        limit = limit)
+      eventCollector.reverseForKey(request, key, eventTypedJsonFormat.canSerialize)
       .toVector))
 
   private def wrapIntoSnapshot[E](future: ⇒ Future[EventSeq[Iterator, E]]): Future[Snapshot[EventSeq[Seq, E]]] = {

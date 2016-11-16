@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.log.Logged
@@ -46,7 +46,7 @@ extends AutoCloseable {
   }
 
   private def start(after: EventId): Unit = {
-    (for (Snapshot(_, EventSeq.NonEmpty(eventSnapshots)) ← webSchedulerClient.events[Event](after, 600.s).appendCurrentStackTrace) yield {
+    (for (Snapshot(_, EventSeq.NonEmpty(eventSnapshots)) ← webSchedulerClient.events(EventRequest[Event](after, 600.s)).appendCurrentStackTrace) yield {
       this.webEvents ++= eventSnapshots filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
       if (!stopping) {
         start(after = eventSnapshots.last.eventId)

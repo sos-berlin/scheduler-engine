@@ -1,17 +1,14 @@
 package com.sos.scheduler.engine.kernel.event.collector
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutureFuture
 import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, ReverseEventRequest, Snapshot}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector._
 import com.typesafe.config.Config
 import java.lang.System.currentTimeMillis
-import java.time.Duration
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.ClassTag
 
 /**
   * @author Joacim Zschimmer
@@ -37,51 +34,41 @@ extends HasCloser {
     sync.onNewEvent(eventId)
   }
 
-  def when[E <: Event: ClassTag](
-    after: EventId,
-    timeout: Duration,
-    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
-    limit: Int = Int.MaxValue)
+  def when[E <: Event](
+    request: EventRequest[E],
+    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true)
   : Future[EventSeq[Iterator, KeyedEvent[E]]]
   =
-    whenAny[E](Set(implicitClass[E]), after, timeout, predicate, limit)
+    whenAny[E](request, Set[Class[_ <: E]](request.eventClass), predicate)
 
   def whenAny[E <: Event](
+    request: EventRequest[E],
     eventClasses: Set[Class[_ <: E]],
-    after: EventId,
-    timeout: Duration,
-    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
-    limit: Int = Int.MaxValue)
+    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true)
   : Future[EventSeq[Iterator, KeyedEvent[E]]]
   =
     whenAnyKeyedEvents(
-      after,
-      timeout,
+      request,
       collect = {
         case e if eventClasses.exists(_ isAssignableFrom e.event.getClass) && predicate(e.asInstanceOf[KeyedEvent[E]]) ⇒
           e.asInstanceOf[KeyedEvent[E]]
-      },
-      limit)
+      })
 
-  def whenForKey[E <: Event: ClassTag](
+  def whenForKey[E <: Event](
+    request: EventRequest[E],
     key: E#Key,
-    after: EventId,
-    timeout: Duration,
-    predicate: E ⇒ Boolean = (_: E) ⇒ true,
-    limit: Int = Int.MaxValue)
+    predicate: E ⇒ Boolean = (_: E) ⇒ true)
   : Future[EventSeq[Iterator, E]]
   =
     whenAnyKeyedEvents(
-      after,
-      timeout,
+      request,
       collect = {
-        case e if (implicitClass[E] isAssignableFrom e.event.getClass) && e.key == key && predicate(e.event.asInstanceOf[E]) ⇒
+        case e if (request.eventClass isAssignableFrom e.event.getClass) && e.key == key && predicate(e.event.asInstanceOf[E]) ⇒
           e.event.asInstanceOf[E]
-      },
-      limit)
+      })
 
-  private def whenAnyKeyedEvents[A](after: EventId, timeout: Duration, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): Future[EventSeq[Iterator, A]] =
-    whenAnyKeyedEvents2(after, currentTimeMillis + timeout.toMillis, collect, limit)
+  private def whenAnyKeyedEvents[E <: Event, A](request: EventRequest[E], collect: PartialFunction[AnyKeyedEvent, A]): Future[EventSeq[Iterator, A]] =
+    whenAnyKeyedEvents2(request.after, currentTimeMillis + request.timeout.toMillis, collect, request.limit)
 
   private def whenAnyKeyedEvents2[A](after: EventId, until: Long, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): Future[EventSeq[Iterator, A]] =
     (for (() ← sync.whenEventIsAvailable(after)) yield
@@ -119,37 +106,35 @@ extends HasCloser {
     }
   }
 
-  def reverse[E <: Event: ClassTag](
-    after: EventId = EventId.BeforeFirst,
-    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true,
-    limit: Int = Int.MaxValue)
+  def reverse[E <: Event](
+    request: ReverseEventRequest[E],
+    predicate: KeyedEvent[E] ⇒ Boolean = (_: KeyedEvent[E]) ⇒ true)
   : Iterator[Snapshot[KeyedEvent[E]]]
   =
-    keyedEventQueue.reverseEvents(after = after)
+    keyedEventQueue.reverseEvents(after = request.after)
       .collect {
-        case snapshot if implicitClass[E].isAssignableFrom(snapshot.value.event.getClass) ⇒
+        case snapshot if request.eventClass isAssignableFrom snapshot.value.event.getClass ⇒
           snapshot.asInstanceOf[Snapshot[KeyedEvent[E]]]
       }
       .filter(snapshot ⇒ predicate(snapshot.value))
-      .take(limit)
+      .take(request.limit)
 
-  def reverseForKey[E <: Event: ClassTag](
+  def reverseForKey[E <: Event](
+    request: ReverseEventRequest[E],
     key: E#Key,
-    after: EventId,
-    predicate: E ⇒ Boolean = (_: E) ⇒ true,
-    limit: Int = Int.MaxValue)
+    predicate: E ⇒ Boolean = (_: E) ⇒ true)
   : Iterator[Snapshot[E]]
   =
-    keyedEventQueue.reverseEvents(after = after)
+    keyedEventQueue.reverseEvents(after = request.after)
       .collect {
-        case snapshot if implicitClass[E] isAssignableFrom snapshot.value.event.getClass ⇒
+        case snapshot if request.eventClass isAssignableFrom snapshot.value.event.getClass ⇒
           snapshot.asInstanceOf[Snapshot[KeyedEvent[E]]]
       }
       .collect {
         case Snapshot(eventId, KeyedEvent(`key`, event)) if predicate(event) ⇒
           Snapshot(eventId, event)
       }
-      .take(limit)
+      .take(request.limit)
 
   def newSnapshot[A](a: A) = eventIdGenerator.newSnapshot(a)
 }

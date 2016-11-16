@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.event.{Event, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventRequest, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success
@@ -37,7 +37,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
     eventBus.awaiting[OrderSuspended.type](TestOrderKey) {
       scheduler executeXml OrderCommand(TestOrderKey)
     }
-    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events[Event](after = beforeTestEventId, TestTimeout) await TestTimeout
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest[Event](after = beforeTestEventId, TestTimeout)) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
     val events: Seq[KeyedEvent[Event]] = eventSnapshots map { _.value }
     assert(events == Seq(
@@ -60,7 +60,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
         scheduler executeXml OrderCommand(TestOrderKey)
       }
     }
-    val Snapshot(eventId, eventSeq) = client.events[Event](after = oldEventId, TestTimeout) await TestTimeout
+    val Snapshot(eventId, eventSeq) = client.events(EventRequest[Event](after = oldEventId, TestTimeout)) await TestTimeout
     assert(eventSeq == EventSeq.Torn)
     assert(eventId >= oldEventId)
   }

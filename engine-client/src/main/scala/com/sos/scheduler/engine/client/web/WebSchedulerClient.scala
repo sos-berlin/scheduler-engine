@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, ReverseEventRequest, Snapshot}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobPath, JobView}
@@ -155,11 +155,11 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   // Event
 
-  final def events[E <: Event: ClassTag](after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.events(after = after, timeout, limit = limit, returnType = implicitClass[E].getSimpleName))
+  final def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.events(request))
 
-  final def eventsReverse[E <: Event: ClassTag](after: EventId = EventId.BeforeFirst, limit: Int): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
-    get[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]](_.eventsReverse(after, limit = limit, returnType = implicitClass[E].getSimpleName))
+  final def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
+    get[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]](_.eventsReverse(request))
 
   // Basic
 

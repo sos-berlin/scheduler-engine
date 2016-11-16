@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathA
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.EventId
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, ReverseEventRequest}
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -150,23 +150,21 @@ final class SchedulerUris private(schedulerUri: Uri) {
     def forward(agentUri: String) = uriString(Uri.Path(s"api/agent/$agentUri"))
   }
 
-  def events(after: EventId, timeout: Duration, limit: Int = Int.MaxValue, returnType: String = DefaultEventName) = {
-    require(limit > 0, "Limit must not be below zero")
+  def events[E <: Event](request: EventRequest[E]) = {
     val params = Vector.build[(String, String)] { builder ⇒
-      if (returnType != DefaultEventName) builder += "return" → returnType
-      if (limit != Int.MaxValue) builder += "limit" → limit.toString
-      if (timeout != 0.s) builder += "timeout" → timeout.toSecondsString
-      builder += "after" → after.toString
+      if (request.eventClass != classOf[Event]) builder += "return" → request.eventClass.getSimpleName
+      if (request.limit != Int.MaxValue) builder += "limit" → request.limit.toString
+      if (request.timeout != 0.s) builder += "timeout" → request.timeout.toSecondsString
+      builder += "after" → request.after.toString
     }
     uriString(Uri.Path("api/event"), params: _*)
   }
 
-  def eventsReverse(after: EventId = EventId.BeforeFirst, limit: Int, returnType: String = DefaultEventName) = {
-    require(limit > 0, "Limit must not be below zero")
+  def eventsReverse[E <: Event](request: ReverseEventRequest[E]) = {
     val params = Vector.build[(String, String)] { builder ⇒
-      if (returnType != DefaultEventName) builder += "return" → returnType
-      if (limit != Int.MaxValue) builder += "limit" → (-limit).toString
-      if (after != EventId.BeforeFirst) builder += "after" → after.toString
+      if (request.eventClass != classOf[Event]) builder += "return" → request.eventClass.getSimpleName
+      if (request.limit != Int.MaxValue) builder += "limit" → (-request.limit).toString
+      if (request.after != EventId.BeforeFirst) builder += "after" → request.after.toString
     }
     uriString(Uri.Path("api/event"), params: _*)
   }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, ReverseEventRequest, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobOverview
 import com.sos.scheduler.engine.data.processclass.ProcessClassOverview
@@ -118,7 +118,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       navBarTab("Job chains"     , uris.jobChain.overviews()),
       navBarTab("Jobs"           , uris.job[JobOverview](PathQuery.All)),
       navBarTab("Process classes", uris.processClass.views[ProcessClassOverview](PathQuery.All)),
-      navBarTab("Events"         , uris.eventsReverse(limit = 1000)))
+      navBarTab("Events"         , uris.eventsReverse(ReverseEventRequest[Event](limit = 1000))))
 
   private def uncollapseButton: Frag =
     button(`type` := "button", cls := "navbar-toggle", data("toggle") := "collapse", data("target") := ".navbar-collapse")(

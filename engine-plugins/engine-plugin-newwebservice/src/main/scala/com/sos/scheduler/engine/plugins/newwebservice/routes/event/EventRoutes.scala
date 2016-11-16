@@ -4,7 +4,6 @@ import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
-import java.time.Duration
 import scala.collection.immutable.Seq
 import shapeless.{::, HNil}
 import spray.routing.Directives._
@@ -22,9 +21,9 @@ private[routes] object EventRoutes {
     Snapshot(eventId, EventSeq.NonEmpty(List(Snapshot(eventId, anyKeyedEvent))))
   }
 
-  def withEventParameters(defaultReturnType: Option[String] = None): Directive1[EventParameters] =
-    new Directive1[EventParameters] {
-      def happly(inner: EventParameters :: HNil ⇒ Route) =
+  def eventRequest(defaultReturnType: Option[String] = None): Directive1[SomeEventRequest] =
+    new Directive1[SomeEventRequest] {
+      def happly(inner: SomeEventRequest :: HNil ⇒ Route) =
         parameter("return".?) {
           _ orElse defaultReturnType match {
             case Some(returnType) ⇒
@@ -35,24 +34,18 @@ private[routes] object EventRoutes {
                   case limit if limit > 0 ⇒
                     parameter("after".as[EventId]) { after ⇒
                       parameter("timeout" ? 0.s) { timeout ⇒
-                        inner(EventParameters(eventClass, after, timeout, limit) :: HNil)
+                        inner(EventRequest(eventClass, after = after, timeout, limit = limit) :: HNil)
                       }
                     }
                   case limit if limit < 0 ⇒
                     parameter("after" ? EventId.BeforeFirst) { after ⇒
-                      inner(EventParameters(eventClass, after, 0.s, limit) :: HNil)
+                      inner(ReverseEventRequest(eventClass, after = after, limit = -limit) :: HNil)
                     }
                 }
               }
             case None ⇒
               reject
-            }
+          }
         }
     }
-
-  final case class EventParameters(
-    eventClass: Class[_ <: Event],
-    after: EventId,
-    timeout: Duration,
-    limit: Int)
 }

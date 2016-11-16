@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.event
 import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.data.event._
-import com.sos.scheduler.engine.data.filebased.FileBasedEvent
 import com.sos.scheduler.engine.data.order.{OrderEvent, OrderKey, OrderStatistics, OrderStatisticsChanged}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.event.OrderStatisticsChangedSource._
@@ -24,7 +23,7 @@ extends HasCloser {
   protected implicit def executionContext: ExecutionContext
 
   def whenOrderStatisticsChanged(after: EventId, timeout: Duration, query: PathQuery = PathQuery.All): Future[Snapshot[OrderStatisticsChanged]] =
-    for (eventSeq ← eventCollector.whenAny[Event](Set(classOf[OrderEvent], classOf[FileBasedEvent]), after = after, timeout, pathPredicate(query));
+    for (eventSeq ← eventCollector.when(EventRequest[OrderEvent](after = after, timeout), pathPredicate(query));
          snapshot ← orderStatistics(JobChainNodeQuery(JobChainQuery(query, isDistributed = Some(false/*No database access*/)))))
       yield snapshot map OrderStatisticsChanged.apply
 }

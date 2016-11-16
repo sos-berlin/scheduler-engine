@@ -10,7 +10,6 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.KeyedEventsHtmlPage.implicits.keyedEventsToHtmlPage
 import scala.concurrent.ExecutionContext
-import scala.reflect.ClassTag
 import spray.routing.Directives._
 import spray.routing._
 
@@ -25,15 +24,16 @@ trait EventRoute extends HasCloser {
 
   def eventRoute: Route =
     pathEnd {
-      withEventParameters(defaultReturnType = Some("Event")) { case EventParameters(eventClass, afterEventId, timeout, limit) ⇒
-        val classTag = ClassTag[Event](eventClass)
+      eventRequest(defaultReturnType = Some("Event")) { request ⇒
         completeTryHtml {
-          if (limit >= 0)
-            client.events[Event](after = afterEventId, timeout, limit = limit)(classTag)
-          else
-            for (responseSnapshot ← client.eventsReverse[Event](after = afterEventId, limit = -limit)(classTag)) yield
-              for (events ← responseSnapshot) yield
-                EventSeq.NonEmpty(events)
+          request match {
+            case request: EventRequest[_] ⇒
+              client.events(request)
+            case request: ReverseEventRequest[_] ⇒
+              for (responseSnapshot ← client.eventsReverse(request)) yield
+                for (events ← responseSnapshot) yield
+                  EventSeq.NonEmpty(events)
+          }
         }
       }
     }
