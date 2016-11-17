@@ -25,6 +25,7 @@ import org.scalactic.Requirements._
 import org.w3c.dom
 import scala.collection.{immutable, mutable}
 import scala.math.max
+import spray.http.Uri
 
 @ForCpp
 final class ProcessClass private(
@@ -103,8 +104,10 @@ extends FileBased {
   private[kernel] def agentUris: immutable.Seq[AgentAddress] =
     _config.agents map { _.address }
 
-  private[kernel] def containsAgentUri(agentUri: AgentAddress) =
-    _config.agents exists { _.address == agentUri }
+  private[kernel] def containsAgentUri(agentUri: AgentAddress) = {
+    val u = Uri(agentUri.string)
+    _config.agents exists { o ⇒ Uri(o.address.string) == u }  // Compare URIs, not strings
+  }
 
   private[kernel] def view[V <: ProcessClassView: ProcessClassView.Companion]: V =
     implicitly[ProcessClassView.Companion[V]] match {
