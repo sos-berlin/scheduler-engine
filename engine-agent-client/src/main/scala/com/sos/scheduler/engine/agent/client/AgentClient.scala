@@ -88,8 +88,7 @@ trait AgentClient {
   private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
     val timeout = commandDurationToRequestTimeout(command.duration)
     val pipeline =
-      addUserAndPassword ~>
-        addHeader(Accept(`application/json`)) ~>
+      addHeader(Accept(`application/json`)) ~>
         addLicenseKeys ~>
         encode(Gzip) ~>
         agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
