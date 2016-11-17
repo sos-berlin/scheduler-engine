@@ -42,7 +42,7 @@ extends Plugin {
     def configure() = {}
 
     @Provides @Singleton
-    def newWebServicePluginConfiguration: NewWebServicePluginConfiguration = conf
+    def newWebServicePluginConfiguration(): NewWebServicePluginConfiguration = conf
   })
   private val uriOnce = new SetOnce[String](name = "NewWebServicePlugin.uri")
 

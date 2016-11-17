@@ -7,6 +7,7 @@ import com.google.inject.Stage.DEVELOPMENT
 import com.google.inject.{Injector, TypeLiteral}
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
+import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.maven.MavenProperties
@@ -24,7 +25,6 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.{SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
@@ -40,14 +40,16 @@ import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
-import com.sos.scheduler.engine.kernel.log.{CppLogger, PrefixLog}
+import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Result
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
+import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import com.sos.scheduler.engine.main.event.SchedulerClosed
+import com.typesafe.config.Config
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
 import java.time.Instant.now
@@ -65,6 +67,7 @@ import scala.util.control.NonFatal
 @Singleton
 final class Scheduler @Inject private(
     cppProxy: SpoolerC,
+    config: Config,
     controllerBridge: SchedulerControllerBridge,
     schedulerConfiguration: SchedulerConfiguration,
     prefixLog: PrefixLog,
@@ -105,6 +108,19 @@ with HasCloser {
     databaseSubsystem = injector.instance[DatabaseSubsystem]
     executionContext = injector.instance[ExecutionContext]
     catchFileBasedEvents()
+    prepareSettings()
+  }
+
+  private def prepareSettings(): Unit = {
+    val settingsC = cppProxy.modifiable_settings
+    if (settingsC._http_port.isEmpty) {
+      for (httpPort ← config.optionAs[String]("jobscheduler.master.webserver.http.port"))
+        settingsC.set(CppSettingName.HttpPort.number, httpPort)
+    }
+    if (settingsC._https_port.isEmpty) {
+      for (httpPort ← config.optionAs[String]("jobscheduler.master.webserver.https.port"))
+        settingsC.set(CppSettingName.HttpsPort.number, httpPort)
+    }
   }
 
   private def instantiateSubsystems(): Unit = {

@@ -30,7 +30,7 @@ public enum CppSettingName {
 
     roles(13),
 
-    httpPort(14),
+    HttpPort(14),
 
     agentConnectRetryDelay(15),
 
@@ -45,7 +45,7 @@ public enum CppSettingName {
         this.number = number;
     }
 
-    public int getNumber() {
+    public int number() {
         return number;
     }
 }
