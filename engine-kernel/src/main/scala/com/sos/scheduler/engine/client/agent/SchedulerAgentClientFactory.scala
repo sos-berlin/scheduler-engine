@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
 import com.sos.scheduler.engine.common.scalautil.ConcurrentMemoizer
-import com.sos.scheduler.engine.common.scalautil.ScalaUtils.SwitchStatement
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.https.{Https, KeystoreReference}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
@@ -26,21 +25,25 @@ final class SchedulerAgentClientFactory @Inject private[client](
   licenseKeys: immutable.Iterable[LicenseKeyString],
   config: Config) {
 
-  private val memoizingAcceptTlsCertificateFor = ConcurrentMemoizer.strict {
-    (keystore: KeystoreReference, host: NonEmptyHost, port: Int) ⇒ Https.acceptTlsCertificateFor(keystore, host.address, port)
+  private val memoizingHostConnectorSetupFor = ConcurrentMemoizer.strict {
+    (keystore: KeystoreReference, host: NonEmptyHost, port: Int) ⇒
+      Https.toHostConnectorSetup(keystore, host, port)
   }
 
   def apply(agentUri: String): AgentClient = {
-    (conf.keystoreReferenceOption, Uri(agentUri)) switch {
+    val hostConnectorSetupOption_ = (conf.keystoreReferenceOption, Uri(agentUri)) match {
       case (Some(keystoreRef), Uri("https", Uri.Authority(host: Uri.NonEmptyHost, port, _), _, _, _)) ⇒
-        memoizingAcceptTlsCertificateFor(keystoreRef, host, port)
+        Some(memoizingHostConnectorSetupFor(keystoreRef, host, port))
+      case _ ⇒
+        None
     }
     val agentUri_ = agentUri
     new AgentClient {
       val agentUri = agentUri_
       def licenseKeys = SchedulerAgentClientFactory.this.licenseKeys
       val actorRefFactory = SchedulerAgentClientFactory.this.actorSystem
-      override val userAndPasswordOption = config.optionAs[String]("jobscheduler.master.credentials.password") map
+      val hostConnectorSetupOption = hostConnectorSetupOption_
+      val userAndPasswordOption = config.optionAs[String]("jobscheduler.master.credentials.password") map
         SecretString map { UserAndPassword(conf.schedulerId.string, _) }
     }
   }

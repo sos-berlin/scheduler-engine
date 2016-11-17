@@ -13,6 +13,8 @@ final class SimpleAgentClient private(protected[client] val agentUri: String) ex
 
   protected val licenseKeys = Nil
   protected val actorRefFactory = ActorSystem("SimpleAgentClient")
+  protected def hostConnectorSetupOption = None
+  protected def userAndPasswordOption = None
 
   def close() = actorRefFactory.shutdown()
 }

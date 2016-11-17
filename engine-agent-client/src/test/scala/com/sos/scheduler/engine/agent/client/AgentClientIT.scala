@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.agent.client
 
-import akka.actor.ActorSystem
+import akka.actor.ActorRefFactory
 import akka.util.Timeout
 import com.google.common.io.Closer
 import com.google.common.io.Files._
-import com.google.inject.{AbstractModule, Guice, Provides}
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.client.AgentClient.{RequestTimeout, commandDurationToRequestTimeout}
 import com.sos.scheduler.engine.agent.client.AgentClientIT._
@@ -13,7 +12,6 @@ import com.sos.scheduler.engine.agent.data.AgentTaskId
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent}
 import com.sos.scheduler.engine.agent.data.commands.{DeleteFile, MoveFile, RequestFileOrderSourceContent}
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -25,12 +23,10 @@ import java.nio.file.Files
 import java.nio.file.Files._
 import java.nio.file.attribute.FileTime
 import java.time.{Duration, Instant}
-import javax.inject.Singleton
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
-import scala.collection.immutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.matching.Regex
@@ -50,13 +46,10 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
     val conf = AgentConfiguration.forTest().copy(uriPathPrefix = "test")
     new Agent(conf).closeWithCloser
   }
-
-  private val injector = Guice.createInjector(new AbstractModule {
-    def configure() = {}
-    @Provides @Singleton def actorSystem(): ActorSystem = Akkas.newActorSystem("AgentClientIT")(closer)
-    @Provides @Singleton def licenseKeys() = immutable.Iterable(LicenseKeyString("SOS-DEMO-1-D3Q-1AWS-ZZ-ITOT9Q6"))
-  })
-  private lazy val client = injector.instance[AgentClientFactory].apply(agentUri = agent.localUri)
+  private implicit lazy val actorRefFactory: ActorRefFactory = Akkas.newActorSystem("AgentClientIT")(closer)
+  private lazy val client = new AgentClient.Standard(
+    agentUri = agent.localUri,
+    licenseKeys = List(LicenseKeyString("SOS-DEMO-1-D3Q-1AWS-ZZ-ITOT9Q6")))
 
   override def beforeAll() = agent.start() await 10.s
 

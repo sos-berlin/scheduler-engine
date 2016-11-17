@@ -13,12 +13,14 @@ import com.sos.scheduler.engine.common.auth.UserAndPassword
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
+import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import java.time.Duration
 import org.scalactic.Requirements._
 import scala.collection.immutable
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import spray.can.Http.HostConnectorSetup
 import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
@@ -45,22 +47,22 @@ trait AgentClient {
   protected[client] val agentUri: String
   protected def licenseKeys: immutable.Iterable[LicenseKeyString]
   implicit protected val actorRefFactory: ActorRefFactory
-  protected def userAndPasswordOption: Option[UserAndPassword] = None
+  protected def hostConnectorSetupOption: Option[HostConnectorSetup]
+  protected def userAndPasswordOption: Option[UserAndPassword]
 
   protected lazy val agentUris = AgentUris(agentUri)
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
     else identity
-  lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
+  private lazy val addUserAndPassword: RequestTransformer = userAndPasswordOption match {
     case Some(UserAndPassword(user, SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
     case None ⇒ identity
   }
   private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
-    addUserAndPassword ~>
-      addHeader(Accept(`application/json`)) ~>
+    addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>
       addLicenseKeys ~>
       encode(Gzip) ~>
-      sendReceive ~>
+      agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, RequestTimeout.toFiniteDuration) ~>
       decode(Gzip)
 
   final def executeCommand(command: Command): Future[command.Response] = {
@@ -82,15 +84,17 @@ trait AgentClient {
   private def executeRequestFileOrderSourceContent(command: RequestFileOrderSourceContent): Future[FileOrderSourceContent] = {
     val timeout = commandDurationToRequestTimeout(command.duration)
     val pipeline =
-      addUserAndPassword ~>
-        addHeader(Accept(`application/json`)) ~>
+      addHeader(Accept(`application/json`)) ~>
         addLicenseKeys ~>
         encode(Gzip) ~>
-        sendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
+        agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
         decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
     pipeline(Post(agentUris.command, command: Command))
   }
+
+  private[engine] def agentSendReceive(refFactory: ActorRefFactory, executionContext: ExecutionContext, futureTimeout: Timeout): SendReceive =
+    addUserAndPassword ~> extendedSendReceive(futureTimeout, hostConnectorSetupOption)(refFactory, executionContext)
 
   final def fileExists(filePath: String): Future[Boolean] =
     unmarshallingPipeline[JsBoolean].apply(Get(agentUris.fileExists(filePath))) map { _.value }
@@ -117,6 +121,14 @@ object AgentClient {
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
   private val logger = Logger(getClass)
+
+  final class Standard(
+    val agentUri: String,
+    protected val licenseKeys: immutable.Iterable[LicenseKeyString] = Nil,
+    protected val hostConnectorSetupOption: Option[HostConnectorSetup] = None,
+    protected val userAndPasswordOption: Option[UserAndPassword] = None)
+    (implicit protected val actorRefFactory: ActorRefFactory)
+  extends AgentClient
 
   /**
    * The returns timeout for the HTTP request is longer than the expected duration of the request
