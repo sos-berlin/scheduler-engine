@@ -18,7 +18,7 @@ import scala.collection.immutable
  * @author Joacim Zschimmer
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1177IT extends FreeSpec with ClusterTest  {
+final class JS1177IT extends FreeSpec with ClusterTest {
 
   protected def clusterMemberCount = 2
   private lazy val otherScheduler = otherSchedulers(0)
@@ -31,10 +31,10 @@ final class JS1177IT extends FreeSpec with ClusterTest  {
       waitForCondition(TestTimeout, 500.ms) {
         val ports = showHistoryMemberTcpPorts()
         ports.size should (be >= 1 and be <= 2)
-        assert(ports contains ownTcpPort)
+        assert(ports contains ownHttpPort)
         ports.size == 2 && {
           assert(ports.size == 2, "- Two job start history entries expected")
-          assert(ports.toSet == Set(ownTcpPort, otherTcpPorts(0)))
+          assert(ports.toSet == Set(ownHttpPort, otherPorts(0)))
           true
         }
       }

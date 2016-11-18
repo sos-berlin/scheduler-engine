@@ -17,8 +17,8 @@ trait ClusterTest extends ScalaSchedulerTest with SharedDatabaseTest {
   /** Number of members including the own scheduler. */
   protected def clusterMemberCount: Int
 
-  protected lazy val databaseTcpPort :: ownTcpPort :: otherTcpPorts = findRandomFreeTcpPorts(2 + 2 * clusterMemberCount)
-  protected lazy val clusterMainArguments = List(s"-tcp-port=$ownTcpPort", s"-udp-port=$ownTcpPort", "-distributed-orders")
+  protected lazy val databaseTcpPort :: ownTcpPort :: ownHttpPort :: otherPorts = findRandomFreeTcpPorts(2 + 2 * clusterMemberCount)
+  protected lazy val clusterMainArguments = List(s"-tcp-port=$ownTcpPort", s"-udp-port=$ownTcpPort", s"-http-port=$ownHttpPort", "-distributed-orders")
 
   override protected lazy val testConfiguration = TestConfiguration(
     getClass,
@@ -27,8 +27,8 @@ trait ClusterTest extends ScalaSchedulerTest with SharedDatabaseTest {
 
   protected lazy val otherSchedulers: immutable.IndexedSeq[ClusterScheduler] = {
     val newClusterScheduler = instance[ClusterScheduler.Factory]
-    (for (Seq(tcpPort, httpPort) ← otherTcpPorts.toVector grouped 2) yield
-      newClusterScheduler(testEnvironment, controller, databaseConfiguration, tcpPort = tcpPort, httpPort = httpPort)
+    (for (Seq(httpPort, tcpPort) ← otherPorts.toVector grouped 2) yield
+      newClusterScheduler(testEnvironment, controller, databaseConfiguration, httpPort = httpPort, tcpPort = tcpPort)
         .closeWithCloser
     ).toVector
   }

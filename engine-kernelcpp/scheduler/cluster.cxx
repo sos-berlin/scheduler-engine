@@ -2613,8 +2613,21 @@ bool Cluster::is_member_allowed_to_start()
 
 void Cluster::make_cluster_member_id()
 {
+    string interface_and_port = _spooler->settings()->_https_port;
+    if (interface_and_port.empty()) {
+        interface_and_port = _spooler->settings()->_http_port;
+        if (interface_and_port.empty()) {
+            interface_and_port = as_string(_spooler->tcp_port());
+        }
+    }
+    string port_number;
+    if (const char* colon = strchr(interface_and_port.c_str(), ':')) {
+        port_number = colon + 1;
+    } else {
+        port_number = interface_and_port;
+    }
     set_my_member_id( S() << _spooler->id_for_db() 
-                          << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() );
+                          << "/" << _spooler->_complete_hostname << ":" << port_number );
 }
 
 //---------------------------------------------------------------------Cluster::empty_member_record
