@@ -72,15 +72,10 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     get[Snapshot[SchedulerOverview]](_.overview)
 
   def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Snapshot[V]] =
-    for (snapshot ← get[Snapshot[V]](_.fileBased(path, returnType = implicitly[FileBasedView.Companion[V]].name))) yield
-      for (view ← snapshot) yield
-        view.asTyped[P](path.companion.asInstanceOf[TypedPath.Companion[P]]).asInstanceOf[V] // Correct TypedPath (instead of UnknownPath)
+    get[Snapshot[V]](_.fileBased(path, returnType = implicitly[FileBasedView.Companion[V]].name))
 
   def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
-    for (snapshot ← get[Snapshot[immutable.Seq[V]]](_.fileBaseds[P](query, returnType = implicitly[FileBasedView.Companion[V]].name))) yield
-      for (seq ← snapshot) yield
-        for (fileBasedDetailed ← seq) yield
-          fileBasedDetailed.asTyped[P](implicitly[TypedPath.Companion[P]]).asInstanceOf[V] // Correct TypedPath (instead of UnknownPath)
+    get[Snapshot[immutable.Seq[V]]](_.fileBaseds[P](query, returnType = implicitly[FileBasedView.Companion[V]].name))
 
   def fileBasedSourceXml[P <: TypedPath, V: FromResponseUnmarshaller](path: P): Future[V] =
     get[V](_.fileBased(path, returnType = "FileBasedSource"), accept = `application/xml`)
