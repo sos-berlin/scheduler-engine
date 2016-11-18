@@ -55,6 +55,13 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       fileBasedSubsystemRegister.fileBaseds[P](query) map { _.fileBasedView[V] }
     }
 
+  def anyTypeFileBaseds[V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
+    respondWithSnapshotFuture {
+      for (companion ← fileBasedSubsystemRegister.companions;
+           seq ← fileBasedSubsystemRegister.fileBaseds[companion.Path](query)(companion.typedPathCompanion) map { _.fileBasedView[V] })
+        yield seq
+    }
+
   def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey) =
     respondWithSnapshotFuture { orderSubsystem.order(orderKey).view[V] }
 

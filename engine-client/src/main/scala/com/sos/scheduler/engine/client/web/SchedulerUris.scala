@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, ReverseEventRequest}
 import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
@@ -27,14 +28,14 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
   lazy val overview = uriString("api")
 
-  def fileBasedDetailed[P <: TypedPath](path: P) =
-    uriString(Uri.Path("api/" + path.companion.fileBasedType.lowerCaseCamelName + path.string), "return" → "FileBasedDetailed")
-
   def fileBased[P <: TypedPath](path: P, returnType: String) =
     uriString(Uri.Path("api/" + path.companion.fileBasedType.lowerCaseCamelName + path.string), "return" → returnType)
 
   def fileBaseds[P <: TypedPath: TypedPath.Companion](query: PathQuery, returnType: String) =
     uriString(Uri.Path("api/" + implicitly[TypedPath.Companion[P]].fileBasedType.lowerCaseCamelName + query.toUriPath), "return" → returnType)
+
+  def anyTypeFileBaseds(query: PathQuery, returnType: String) =
+    uriString(Uri.Path("api/fileBased" + query.toUriPath), "return" → returnType)
 
   object order {
     def apply[V <: OrderView: OrderView.Companion](orderKey: OrderKey): String =

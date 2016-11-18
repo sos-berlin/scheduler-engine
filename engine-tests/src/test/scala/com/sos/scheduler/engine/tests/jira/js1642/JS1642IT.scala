@@ -19,8 +19,8 @@ import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcp
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{EventId, EventSeq, Snapshot}
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedState}
-import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobState, TaskId}
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, FileBasedState}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
@@ -127,16 +127,27 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     assert(overview.state == SchedulerState.running)
   }
 
-  "fileBasedDetailed" in {
-    val fileBasedDetailed = fetchWebAndDirectEqualized[FileBasedDetailed](
-      _.fileBased[OrderKey, FileBasedDetailed](a1OrderKey),
-      _.copy(sourceXml = None))
-    val file = testEnvironment.fileFromPath(a1OrderKey)
-    assert(SafeXML.loadString(fileBasedDetailed.sourceXml.get) == file.xml)
-    assert(fileBasedDetailed.fileModifiedAt.isDefined)
+  "anyTypeFileBaseds FileBasedOverview" in {
+    val fileBasedOverviews = fetchWebAndDirect[immutable.Seq[FileBasedOverview]](_.anyTypeFileBaseds[FileBasedOverview](xFolderPath))
+    assert(fileBasedOverviews.toSet == Set(
+      FileBasedOverview(JobPath("/xFolder/test-b"), FileBasedState.incomplete),
+      FileBasedOverview(JobChainPath("/xFolder/x-bJobChain"), FileBasedState.active),
+      FileBasedOverview(JobChainPath("/xFolder/x-aJobChain"), FileBasedState.active),
+      FileBasedOverview(OrderKey("/xFolder/x-aJobChain", "2"), FileBasedState.active),
+      FileBasedOverview(OrderKey("/xFolder/x-aJobChain", "1"), FileBasedState.active),
+      FileBasedOverview(OrderKey("/xFolder/x-bJobChain", "1"), FileBasedState.active)))
   }
 
   "order" - {
+    "FileBasedDetailed" in {
+      val fileBasedDetailed = fetchWebAndDirectEqualized[FileBasedDetailed](
+        _.fileBased[OrderKey, FileBasedDetailed](a1OrderKey),
+        _.copy(sourceXml = None))
+      val file = testEnvironment.fileFromPath(a1OrderKey)
+      assert(SafeXML.loadString(fileBasedDetailed.sourceXml.get) == file.xml)
+      assert(fileBasedDetailed.fileModifiedAt.isDefined)
+    }
+
     "orders[OrderOverview]" in {
       val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
         _.orders[OrderOverview]

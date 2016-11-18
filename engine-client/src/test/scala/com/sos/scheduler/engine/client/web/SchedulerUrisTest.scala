@@ -32,9 +32,11 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "fileBasedDetailed" in {
-    assert(uris.fileBasedDetailed(JobChainPath("/FOLDER/TEST")) ==
-      "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/FOLDER/TEST?return=FileBasedDetailed")
-    assert(uris.fileBasedDetailed(JobChainPath("/FOLDER/TEST") orderKey "1") ==
+    assert(uris.anyTypeFileBaseds(FolderPath("/FOLDER"), "FileBasedDetailed") ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/fileBased/FOLDER/?return=FileBasedDetailed")
+    assert(uris.fileBaseds[JobChainPath](FolderPath("/FOLDER"), "FileBasedDetailed") ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/FOLDER/?return=FileBasedDetailed")
+    assert(uris.fileBased(JobChainPath("/FOLDER/TEST") orderKey "1", "FileBasedDetailed") ==
       "http://0.0.0.0:1111/jobscheduler/master/api/order/FOLDER/TEST,1?return=FileBasedDetailed")
   }
 

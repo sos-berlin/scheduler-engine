@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, TypedPath}
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
+import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -34,8 +35,22 @@ trait AnyFileBasedRoute {
   protected implicit def executionContext: ExecutionContext
 
   protected final def anyFileBasedRoute: Route =
+    pathPrefix("fileBased") {
+      anyTypeFileBasedRoute
+    } ~
     pathPrefix(PathTypeMatcher) { typedPathCompanion ⇒
       fileBasedRoute[TypedPath](typedPathCompanion)
+    }
+
+  protected final def anyTypeFileBasedRoute: Route =
+    parameter("return" ? "FileBasedOverview") { returnType ⇒
+      pathQuery[FolderPath].apply { q ⇒
+        returnType match {
+            case "FileBasedOverview" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedOverview](q))
+            case "FileBasedDetailed" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedDetailed](q))
+            case _ ⇒ reject
+          }
+      }
     }
 
   protected final def fileBasedRoute[P <: TypedPath: TypedPath.Companion]: Route =

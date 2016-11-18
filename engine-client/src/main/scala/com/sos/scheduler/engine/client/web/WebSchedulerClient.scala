@@ -77,6 +77,9 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
     get[Snapshot[immutable.Seq[V]]](_.fileBaseds[P](query, returnType = implicitly[FileBasedView.Companion[V]].name))
 
+  def anyTypeFileBaseds[V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
+    get[Snapshot[immutable.Seq[V]]](_.anyTypeFileBaseds(query, returnType = implicitly[FileBasedView.Companion[V]].name))
+
   def fileBasedSourceXml[P <: TypedPath, V: FromResponseUnmarshaller](path: P): Future[V] =
     get[V](_.fileBased(path, returnType = "FileBasedSource"), accept = `application/xml`)
 
