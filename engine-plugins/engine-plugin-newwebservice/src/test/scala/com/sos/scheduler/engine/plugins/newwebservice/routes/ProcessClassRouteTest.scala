@@ -157,6 +157,7 @@ object ProcessClassRouteTest {
 
   private val AProcessClassDetailed = ProcessClassDetailed(
     overview = AProcessClassOverview,
+    selectionMethod = "FixedPriority",
     List(
       AgentAddress("https://example.com:4445")),
     List(

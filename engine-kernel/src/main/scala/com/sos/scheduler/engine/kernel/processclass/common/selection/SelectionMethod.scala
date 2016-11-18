@@ -7,4 +7,7 @@ import scala.collection.immutable
   */
 trait SelectionMethod {
   def newSelector[A](items: immutable.Seq[A]): Selector[A]
+
+  def name: String =
+    getClass.getSimpleName stripSuffix "$"
 }

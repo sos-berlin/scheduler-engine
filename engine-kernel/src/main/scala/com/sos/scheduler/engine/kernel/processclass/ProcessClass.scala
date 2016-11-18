@@ -117,6 +117,7 @@ extends FileBased {
 
   private def detailed = ProcessClassDetailed(
     overview,
+    selectionMethod = _config.selectionMethod.name,
     _config.agents map { _.address },
     processes)
 

@@ -38,6 +38,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
 
   val TestProcessClassDetailed = ProcessClassDetailed(
     TestProcessClassOverview,
+    selectionMethod = "FixedPriority",
     processes = Nil,
     agents = Nil)
 
