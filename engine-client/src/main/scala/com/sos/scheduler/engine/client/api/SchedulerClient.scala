@@ -32,6 +32,8 @@ with ProcessClassClient {
 
   def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
 
+  def eventsByPath[E <: Event](request: EventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]]
+
   def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]]
 
   final def ordersComplemented[V <: OrderView: OrderView.Companion]: Future[Snapshot[OrdersComplemented[V]]] =

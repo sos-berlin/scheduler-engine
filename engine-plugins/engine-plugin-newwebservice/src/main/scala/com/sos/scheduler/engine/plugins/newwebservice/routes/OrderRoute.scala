@@ -113,7 +113,7 @@ trait OrderRoute extends LogRoute {
     }
 
   private def orderEvents(orderKey: OrderKey): Route = {
-    eventRequest() { request ⇒
+    eventRequest(classOf[Event]) { request ⇒
       completeTryHtml {
         implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
         request match {
@@ -129,12 +129,13 @@ trait OrderRoute extends LogRoute {
   }
 
   private def orderEvents(query: PathQuery): Route =
-    eventRequest() {
+    eventRequest(classOf[Event]) {
       case request: EventRequest[_] ⇒
+        val castRequest = request.asInstanceOf[EventRequest[Event]]
         completeTryHtml {
-          client.events[Event](
-            request.asInstanceOf[EventRequest[Event]],
-            predicate = PartialFunction[KeyedEvent[Event], Boolean] {
+          client.eventsByPredicate[Event](
+            castRequest,
+            predicate = {
               case KeyedEvent(OrderKey(jobChainPath, _), _) ⇒ query.matches(jobChainPath)
               case _ ⇒ false
             })
@@ -144,7 +145,7 @@ trait OrderRoute extends LogRoute {
     }
 
   private def orderStatisticsChanged(query: PathQuery): Route = {
-    eventRequest() {
+    eventRequest(classOf[Event]) {
       case EventRequest(eventClass, afterEventId, timeout, limit) if eventClass == classOf[OrderStatisticsChanged] ⇒
         completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
           for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId, timeout, query))

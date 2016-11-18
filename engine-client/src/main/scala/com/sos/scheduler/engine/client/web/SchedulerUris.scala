@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, ReverseEventRequest}
 import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
@@ -151,19 +150,25 @@ final class SchedulerUris private(schedulerUri: Uri) {
     def forward(agentUri: String) = uriString(Uri.Path(s"api/agent/$agentUri"))
   }
 
-  def events[E <: Event](request: EventRequest[E]) = {
-    val params = Vector.build[(String, String)] { builder ⇒
-      if (request.eventClass != classOf[Event]) builder += "return" → request.eventClass.getSimpleName
+  def events[E <: Event](request: EventRequest[E]) =
+    uriString(Uri.Path("api/event"), eventRequestToParameters(request): _*)
+
+  def eventsByPath[E <: Event](request: EventRequest[E], query: PathQuery) = {
+    val (subpath, queryParams) = query.toPathAndParameters[ProcessClassPath]
+    uriString(Uri.Path(s"api/fileBased$subpath"), queryParams.toSeq ++ eventRequestToParameters(request): _*)
+  }
+
+  private def eventRequestToParameters[E <: Event](request: EventRequest[E]): Vector[(String, String)] =
+    Vector.build[(String, String)] { builder ⇒
+      if (request.eventClass != classOf[Event]) builder += "return" → (request.eventClass.getSimpleName stripSuffix "$")
       if (request.limit != Int.MaxValue) builder += "limit" → request.limit.toString
       if (request.timeout != 0.s) builder += "timeout" → request.timeout.toSecondsString
       builder += "after" → request.after.toString
     }
-    uriString(Uri.Path("api/event"), params: _*)
-  }
 
   def eventsReverse[E <: Event](request: ReverseEventRequest[E]) = {
     val params = Vector.build[(String, String)] { builder ⇒
-      if (request.eventClass != classOf[Event]) builder += "return" → request.eventClass.getSimpleName
+      if (request.eventClass != classOf[Event]) builder += "return" → (request.eventClass.getSimpleName stripSuffix "$")
       if (request.limit != Int.MaxValue) builder += "limit" → (-request.limit).toString
       if (request.after != EventId.BeforeFirst) builder += "after" → request.after.toString
     }

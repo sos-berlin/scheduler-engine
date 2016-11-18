@@ -1,20 +1,22 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import AnyFileBasedRoute._
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.client.api.{FileBasedClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.common.sprayutils.XmlString
-import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, TypedPath}
+import com.sos.scheduler.engine.data.event.{EventRequest, EventSeq, ReverseEventRequest, Snapshot}
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedEvent, FileBasedOverview, TypedPath}
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.queries.PathQuery
+import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.AnyFileBasedRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent.ExecutionContext
 import shapeless.{::, HNil}
@@ -29,7 +31,7 @@ import spray.routing._
   */
 trait AnyFileBasedRoute {
 
-  protected implicit def client: FileBasedClient with SchedulerOverviewClient
+  protected implicit def client: FileBasedClient with DirectEventClient with SchedulerOverviewClient
   protected implicit def webServiceContext: WebServiceContext
   protected implicit def actorRefFactory: ActorRefFactory
   protected implicit def executionContext: ExecutionContext
@@ -44,11 +46,25 @@ trait AnyFileBasedRoute {
 
   protected final def anyTypeFileBasedRoute: Route =
     parameter("return" ? "FileBasedOverview") { returnType ⇒
-      pathQuery[FolderPath].apply { q ⇒
+      pathQuery[FolderPath].apply { query ⇒
         returnType match {
-            case "FileBasedOverview" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedOverview](q))
-            case "FileBasedDetailed" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedDetailed](q))
-            case _ ⇒ reject
+          case "FileBasedOverview" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedOverview](query))
+          case "FileBasedDetailed" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedDetailed](query))
+          case _ ⇒
+            eventRequest(classOf[FileBasedEvent]) { request ⇒
+              completeTryHtml {
+                request match {
+                  case request: EventRequest[_] ⇒
+                    val castRequest = request.asInstanceOf[EventRequest[FileBasedEvent]]
+                    client.eventsByPath(castRequest, query)
+                  case request: ReverseEventRequest[_] ⇒
+                    val castRequest = request.asInstanceOf[ReverseEventRequest[FileBasedEvent]]
+                    for (responseSnapshot ← client.eventsReverse(castRequest)) yield
+                      for (events ← responseSnapshot) yield
+                        EventSeq.NonEmpty(events)
+                }
+              }
+            }
           }
       }
     }

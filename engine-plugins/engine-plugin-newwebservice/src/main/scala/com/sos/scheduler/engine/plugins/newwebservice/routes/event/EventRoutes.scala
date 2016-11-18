@@ -21,27 +21,31 @@ private[routes] object EventRoutes {
     Snapshot(eventId, EventSeq.NonEmpty(List(Snapshot(eventId, anyKeyedEvent))))
   }
 
-  def eventRequest(defaultReturnType: Option[String] = None): Directive1[SomeEventRequest] =
-    new Directive1[SomeEventRequest] {
-      def happly(inner: SomeEventRequest :: HNil ⇒ Route) =
+  def eventRequest[E <: Event](eventSuperclass: Class[_ <: E], defaultReturnType: Option[String] = None): Directive1[SomeEventRequest[_ <: E]] =
+    new Directive1[SomeEventRequest[_ <: E]] {
+      def happly(inner: SomeEventRequest[_ <: E] :: HNil ⇒ Route) =
         parameter("return".?) {
           _ orElse defaultReturnType match {
             case Some(returnType) ⇒
-              passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) { eventClass ⇒
-                parameter("limit" ? Int.MaxValue) {
-                  case 0 ⇒
-                    reject(ValidationRejection(s"Invalid limit=0"))
-                  case limit if limit > 0 ⇒
-                    parameter("after".as[EventId]) { after ⇒
-                      parameter("timeout" ? 0.s) { timeout ⇒
-                        inner(EventRequest(eventClass, after = after, timeout, limit = limit) :: HNil)
+              passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) {
+                case eventClass if eventSuperclass isAssignableFrom eventClass ⇒
+                  val eClass = eventClass.asInstanceOf[Class[_ <: E]]
+                  parameter("limit" ? Int.MaxValue) {
+                    case 0 ⇒
+                      reject(ValidationRejection(s"Invalid limit=0"))
+                    case limit if limit > 0 ⇒
+                      parameter("after".as[EventId]) { after ⇒
+                        parameter("timeout" ? 0.s) { timeout ⇒
+                          inner(EventRequest(eClass, after = after, timeout, limit = limit) :: HNil)
+                        }
                       }
-                    }
-                  case limit if limit < 0 ⇒
-                    parameter("after" ? EventId.BeforeFirst) { after ⇒
-                      inner(ReverseEventRequest(eventClass, after = after, limit = -limit) :: HNil)
-                    }
-                }
+                    case limit if limit < 0 ⇒
+                      parameter("after" ? EventId.BeforeFirst) { after ⇒
+                        inner(ReverseEventRequest(eClass, after = after, limit = -limit) :: HNil)
+                      }
+                  }
+                case _ ⇒
+                  reject
               }
             case None ⇒
               reject

@@ -14,12 +14,14 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{EventId, EventSeq, Snapshot}
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, FileBasedState}
+import com.sos.scheduler.engine.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.filebased.{FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState}
+import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderOverview, OrderStatistics, OrderStatisticsChanged, OrderStepStarted}
@@ -130,12 +132,31 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "anyTypeFileBaseds FileBasedOverview" in {
     val fileBasedOverviews = fetchWebAndDirect[immutable.Seq[FileBasedOverview]](_.anyTypeFileBaseds[FileBasedOverview](xFolderPath))
     assert(fileBasedOverviews.toSet == Set(
+      FileBasedOverview(FolderPath("/xFolder"), FileBasedState.active),
       FileBasedOverview(JobPath("/xFolder/test-b"), FileBasedState.incomplete),
       FileBasedOverview(JobChainPath("/xFolder/x-bJobChain"), FileBasedState.active),
       FileBasedOverview(JobChainPath("/xFolder/x-aJobChain"), FileBasedState.active),
       FileBasedOverview(OrderKey("/xFolder/x-aJobChain", "2"), FileBasedState.active),
       FileBasedOverview(OrderKey("/xFolder/x-aJobChain", "1"), FileBasedState.active),
       FileBasedOverview(OrderKey("/xFolder/x-bJobChain", "1"), FileBasedState.active)))
+  }
+
+  "eventsByPath" in {
+    val request = EventRequest[FileBasedAdded.type](after = EventId.BeforeFirst, timeout = 0.s)
+    val query = PathQuery(xFolderPath)
+    fetchWebAndDirect[EventSeq[immutable.Seq, KeyedEvent[FileBasedAdded.type]]](_.eventsByPath[FileBasedAdded.type](request, query)) match {
+      case nonEmpty: EventSeq.NonEmpty[immutable.Seq, KeyedEvent[FileBasedAdded.type]] ⇒
+        assert((nonEmpty.eventSnapshots map { _.value }).toSet ==
+          Set(
+            KeyedEvent(FileBasedAdded)(FolderPath("/xFolder")),
+            KeyedEvent(FileBasedAdded)(JobChainPath("/xFolder/x-aJobChain")),
+            KeyedEvent(FileBasedAdded)(OrderKey("/xFolder/x-aJobChain", "1")),
+            KeyedEvent(FileBasedAdded)(OrderKey("/xFolder/x-aJobChain", "2")),
+            KeyedEvent(FileBasedAdded)(JobChainPath("/xFolder/x-bJobChain")),
+            KeyedEvent(FileBasedAdded)(OrderKey("/xFolder/x-bJobChain", "1")),
+            KeyedEvent(FileBasedAdded)(JobPath("/xFolder/test-b"))))
+      case o ⇒ fail(s"Not expected: $o")
+    }
   }
 
   "order" - {

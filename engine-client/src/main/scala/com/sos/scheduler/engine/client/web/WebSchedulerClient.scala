@@ -159,6 +159,9 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.events(request))
 
+  final def eventsByPath[E <: Event](request: EventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.eventsByPath(request, query))
+
   final def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
     get[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]](_.eventsReverse(request))
 

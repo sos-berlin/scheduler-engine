@@ -3,7 +3,9 @@ package com.sos.scheduler.engine.kernel.event
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
+import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.log.Logged
+import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient._
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import scala.collection.immutable.Seq
@@ -18,13 +20,21 @@ trait DirectEventClient {
   protected implicit def executionContext: ExecutionContext
 
   def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    events[E](request, (_: KeyedEvent[E]) ⇒ true)
+    eventsByPredicate[E](request, _ ⇒ true)
 
-  def events[E <: Event](request: EventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  def eventsByPath[E <: Event](request: EventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    eventsByPredicate[E](
+      request,
+      predicate = {
+        case KeyedEvent(key: TypedPath, _) ⇒ query matchesAnyType key
+        case _ ⇒ false
+      })
+
+  def eventsByPredicate[E <: Event](request: EventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     wrapIntoSnapshot(
       eventCollector.when[E](
         request,
-        keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent)))
+        keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
 
   def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]] =
     Future.successful(eventIdGenerator.newSnapshot(
