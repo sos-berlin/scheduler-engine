@@ -118,7 +118,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       navBarTab("Job chains"     , uris.jobChain.overviews()),
       navBarTab("Jobs"           , uris.job[JobOverview](PathQuery.All)),
       navBarTab("Process classes", uris.processClass.views[ProcessClassOverview](PathQuery.All)),
-      navBarTab("Events"         , uris.eventsReverse(ReverseEventRequest[Event](limit = 1000))))
+      navBarTab("Events"         , uris.events(ReverseEventRequest[Event](limit = 1000))))
 
   private def uncollapseButton: Frag =
     button(`type` := "button", cls := "navbar-toggle", data("toggle") := "collapse", data("target") := ".navbar-collapse")(

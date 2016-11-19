@@ -26,14 +26,7 @@ trait EventRoute extends HasCloser {
     pathEnd {
       eventRequest(classOf[Event], defaultReturnType = Some("Event")) { request ⇒
         completeTryHtml {
-          request match {
-            case request: EventRequest[_] ⇒
-              client.events(request)
-            case request: ReverseEventRequest[_] ⇒
-              for (responseSnapshot ← client.eventsReverse(request)) yield
-                for (events ← responseSnapshot) yield
-                  EventSeq.NonEmpty(events)
-          }
+          client.events(request)
         }
       }
     }

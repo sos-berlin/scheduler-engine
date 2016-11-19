@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
 import com.sos.scheduler.engine.common.sprayutils.XmlString
-import com.sos.scheduler.engine.data.event.{EventRequest, EventSeq, ReverseEventRequest, Snapshot}
+import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedEvent, FileBasedOverview, TypedPath}
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.data.folder.FolderPath
@@ -53,16 +53,7 @@ trait AnyFileBasedRoute {
           case _ ⇒
             eventRequest(classOf[FileBasedEvent]) { request ⇒
               completeTryHtml {
-                request match {
-                  case request: EventRequest[_] ⇒
-                    val castRequest = request.asInstanceOf[EventRequest[FileBasedEvent]]
-                    client.eventsByPath(castRequest, query)
-                  case request: ReverseEventRequest[_] ⇒
-                    val castRequest = request.asInstanceOf[ReverseEventRequest[FileBasedEvent]]
-                    for (responseSnapshot ← client.eventsReverse(castRequest)) yield
-                      for (events ← responseSnapshot) yield
-                        EventSeq.NonEmpty(events)
-                }
+                client.eventsByPath(request, query)
               }
             }
           }

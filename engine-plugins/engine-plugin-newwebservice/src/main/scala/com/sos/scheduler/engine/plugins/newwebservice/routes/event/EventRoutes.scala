@@ -21,15 +21,15 @@ private[routes] object EventRoutes {
     Snapshot(eventId, EventSeq.NonEmpty(List(Snapshot(eventId, anyKeyedEvent))))
   }
 
-  def eventRequest[E <: Event](eventSuperclass: Class[_ <: E], defaultReturnType: Option[String] = None): Directive1[SomeEventRequest[_ <: E]] =
-    new Directive1[SomeEventRequest[_ <: E]] {
-      def happly(inner: SomeEventRequest[_ <: E] :: HNil ⇒ Route) =
+  def eventRequest[E <: Event, EE <: E](eventSuperclass: Class[EE], defaultReturnType: Option[String] = None): Directive1[SomeEventRequest[EE]] =
+    new Directive1[SomeEventRequest[EE]] {
+      def happly(inner: SomeEventRequest[EE] :: HNil ⇒ Route) =
         parameter("return".?) {
           _ orElse defaultReturnType match {
             case Some(returnType) ⇒
               passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) {
                 case eventClass if eventSuperclass isAssignableFrom eventClass ⇒
-                  val eClass = eventClass.asInstanceOf[Class[_ <: E]]
+                  val eClass = eventClass.asInstanceOf[Class[EE]]
                   parameter("limit" ? Int.MaxValue) {
                     case 0 ⇒
                       reject(ValidationRejection(s"Invalid limit=0"))

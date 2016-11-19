@@ -19,10 +19,10 @@ trait DirectEventClient {
   protected def eventIdGenerator: EventIdGenerator
   protected implicit def executionContext: ExecutionContext
 
-  def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  def events[E <: Event](request: SomeEventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     eventsByPredicate[E](request, _ ⇒ true)
 
-  def eventsByPath[E <: Event](request: EventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     eventsByPredicate[E](
       request,
       predicate = {
@@ -30,18 +30,19 @@ trait DirectEventClient {
         case _ ⇒ false
       })
 
-  def eventsByPredicate[E <: Event](request: EventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    wrapIntoSnapshot(
-      eventCollector.when[E](
-        request,
-        keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
-
-  def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[Seq[Snapshot[KeyedEvent[E]]]]] =
-    Future.successful(eventIdGenerator.newSnapshot(
-      eventCollector.reverse[E](
-          request,
-          keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent))
-        .toVector))
+  def eventsByPredicate[E <: Event](request: SomeEventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    request match {
+      case request: EventRequest[E] ⇒
+        wrapIntoSnapshot(
+          eventCollector.when[E](
+            request,
+            keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
+      case request: ReverseEventRequest[E] ⇒
+        reverseEventIteratorToEventSeqSnapshot(
+          eventCollector.reverse[E](
+            request,
+            keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
+  }
 
   private def eventIsSelected(event: Event): Boolean =
     event match {
@@ -71,6 +72,14 @@ trait DirectEventClient {
           eventIdGenerator.newSnapshot(EventSeq.Torn)
       }
   }
+
+  private def reverseEventIteratorToEventSeqSnapshot[E <: Event](iterator: Iterator[Snapshot[KeyedEvent[E]]]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+    wrapIntoSnapshot(
+      Future.successful(
+        if (iterator.nonEmpty)
+          EventSeq.NonEmpty(iterator)
+        else
+          EventSeq.Empty(eventIdGenerator.lastUsedEventId)))  // eventReverse is only for testing purposes
 }
 
 object DirectEventClient {

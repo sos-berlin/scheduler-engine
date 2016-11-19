@@ -215,8 +215,8 @@ final class SchedulerUrisTest extends FreeSpec {
     assert(uris.events(EventRequest[Event](after = EventId(7), timeout = 1.s)) ==
       "http://0.0.0.0:1111/jobscheduler/master/api/event?timeout=1s&after=7")
     assert(uris.events(EventRequest[Event](limit = 100, timeout = 100.ms, after = EventId.BeforeFirst)) ==
-      "http://0.0.0.0:1111/jobscheduler/master/api/event?limit=100&timeout=0.1s&after=0")
-    assert(uris.eventsReverse(ReverseEventRequest[FileBasedEvent](after = EventId(7), limit = 100)) ==
+      "http://0.0.0.0:1111/jobscheduler/master/api/event?timeout=0.1s&limit=100&after=0")
+    assert(uris.events(ReverseEventRequest[FileBasedEvent](after = EventId(7), limit = 100)) ==
       "http://0.0.0.0:1111/jobscheduler/master/api/event?return=FileBasedEvent&limit=-100&after=7")
   }
 

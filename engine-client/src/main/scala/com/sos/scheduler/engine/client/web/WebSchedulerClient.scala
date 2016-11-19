@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, ReverseEventRequest, Snapshot}
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot, SomeEventRequest}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobPath, JobView}
@@ -156,14 +156,11 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   // Event
 
-  final def events[E <: Event](request: EventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  final def events[E <: Event](request: SomeEventRequest[E]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.events(request))
 
-  final def eventsByPath[E <: Event](request: EventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
+  final def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.eventsByPath(request, query))
-
-  final def eventsReverse[E <: Event](request: ReverseEventRequest[E]): Future[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]] =
-    get[Snapshot[immutable.Seq[Snapshot[KeyedEvent[E]]]]](_.eventsReverse(request))
 
   // Basic
 
