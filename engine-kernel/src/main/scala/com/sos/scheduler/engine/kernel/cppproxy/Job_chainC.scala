@@ -17,7 +17,6 @@ trait Job_chainC extends CppProxyWithSister[JobChain] with File_basedC[JobChain]
   def is_distributed: Boolean
   def default_process_class_path: String
   def file_watching_process_class_path: String
-  def add_non_distributed_to_order_statistics(counters: Array[Int]): Unit
 }
 
 object Job_chainC {

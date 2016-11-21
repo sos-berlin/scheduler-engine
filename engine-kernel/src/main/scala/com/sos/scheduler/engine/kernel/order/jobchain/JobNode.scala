@@ -72,10 +72,6 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
     builder.result
   }
 
-  private[order] def addNonDistributedToOrderStatistics(statisticsArray: Array[Int]): Unit = {
-    cppProxy.add_non_distributed_to_order_statistics(statisticsArray)
-  }
-
   private[kernel] final def orderCount: Int = orderQueue.size
 }
 

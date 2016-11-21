@@ -17,7 +17,6 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem.ToOrderStatistics
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain._
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
@@ -143,12 +142,6 @@ with UnmodifiableJobChain {
   private[order] def refersToJob(job: Job): Boolean = nodes exists {
     case n: SimpleJobNode => n.getJob eq job
     case _ => false
-  }
-
-  private val toOrderStatistics = new ToOrderStatistics
-
-  private[order] def addNonDistributedToOrderStatistics(statisticsArray: Array[Int]): Unit = {
-    cppProxy.add_non_distributed_to_order_statistics(statisticsArray)
   }
 
   def jobNodes(query: JobChainNodeQuery): Iterator[JobNode] =

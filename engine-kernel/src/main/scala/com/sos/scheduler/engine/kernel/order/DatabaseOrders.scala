@@ -83,9 +83,9 @@ private[order] object DatabaseOrders {
     blocking {
       var result = new OrderStatistics.Mutable
       while (resultSet.next()) {
-        result += toOrderStatistics(toQueryableOrder(
+        result += toQueryableOrder(
           OrderRow(resultSet),
-          autoClosing(resultSet.getClob("ORDER_XML").getCharacterStream)(OrderXmlResolved.apply)))
+          autoClosing(resultSet.getClob("ORDER_XML").getCharacterStream)(OrderXmlResolved.apply))
       }
       result.toImmutable
     }
@@ -205,22 +205,4 @@ private[order] object DatabaseOrders {
       case Some(ReplacementDatabaseDistributedNextTime) ⇒ None
       case o ⇒ o
     }
-
-  private[order] def toOrderStatistics(order: QueryableOrder): OrderStatistics = {
-    import OrderProcessingState._
-    def toInt(b: Boolean): Int = if (b) 1 else 0
-    OrderStatistics(
-      total       = 1,
-      notPlanned  = toInt(order.orderProcessingStateClass == NotPlanned.getClass),
-      planned     = toInt(order.orderProcessingStateClass == classOf[Planned]),
-      due         = toInt(order.orderProcessingStateClass == classOf[Due]),
-      inProcess   = toInt(order.orderProcessingStateClass == InTaskProcess.getClass),
-      setback     = toInt(order.orderProcessingStateClass == classOf[Setback]),
-      started     = toInt(classOf[Started] isAssignableFrom order.orderProcessingStateClass),
-      inTask      = toInt(classOf[InTask] isAssignableFrom order.orderProcessingStateClass),
-      suspended   = toInt(order.isSuspended),
-      blacklisted = toInt(order.isBlacklisted),
-      permanent   = toInt(order.orderSourceType == OrderSourceType.Permanent),
-      fileOrder   = toInt(order.orderSourceType == OrderSourceType.FileOrder))
-  }
 }

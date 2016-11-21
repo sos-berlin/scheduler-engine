@@ -13,7 +13,6 @@ using namespace job_chain;
 //---------------------------------------------------------------------------------------------const
 
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
-extern const int order_statistics_array_size = 12;
 extern const string scheduler_file_order_path_variable_name = "scheduler_file_path";
 const string scheduler_file_order_agent_variable_name = "scheduler_file_remote_scheduler";
 
@@ -3522,34 +3521,6 @@ string Order::obj_name() const
     if( _title != "" )  result << " " << quoted_string( _title );
 
     return result;
-}
-
-void Order::add_to_statistics(Time now, int result_size, jint* result) const {
-    if (result_size != 12) z::throw_xc(Z_FUNCTION);
-    result[0]++;
-    if (!is_touched()) {
-        Time at = this->at();
-        if (at.is_never()) 
-            result[1]++;  // OrderProcessingState.NotPlanned
-        else
-        if (at.as_time_t() >= now.as_time_t()) 
-            result[2]++;  // OrderProcessingState.Planned
-        else 
-            result[3]++;  // OrderProcessingState.Pending
-    } else {
-        result[4]++;  // OrderProcessingState.Running
-        if (const Task* task = this->task()) {
-            result[5]++;
-            if (!task->step_or_process_started_at().is_zero()) {
-                result[6]++;
-            }
-        }
-        if (is_setback()) result[7]++;
-    }
-    if (suspended()) result[8]++;
-    if (is_on_blacklist()) result[9]++;
-    if (is_file_based()) result[10]++;
-    if (is_file_order()) result[11]++;
 }
 
 //-------------------------------------------------------------------------------------------------

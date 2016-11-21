@@ -10,6 +10,4 @@ abstract class OrderQueueNode extends Node {
   private[kernel] def orderCount: Int
 
   private[kernel] def orderQueue: OrderQueue
-
-  private[order] def addNonDistributedToOrderStatistics(statisticsArray: Array[Int]): Unit
 }

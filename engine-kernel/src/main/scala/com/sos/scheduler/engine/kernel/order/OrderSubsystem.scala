@@ -44,8 +44,6 @@ final class OrderSubsystem @Inject private(
   (implicit executionContext: ExecutionContext)
 extends FileBasedSubsystem {
 
-  import com.sos.scheduler.engine.kernel.order.OrderSubsystem._
-
   type ThisSubsystemClient = OrderSubsystemClient
   type ThisSubsystem = OrderSubsystem
   type ThisFileBased = JobChain
@@ -60,27 +58,29 @@ extends FileBasedSubsystem {
 
   @ForCpp
   private def persistNodeState(node: Node): Unit = {
-    transaction { implicit entityManager =>
+    transaction { implicit entityManager ⇒
       persistentStateStore.store(node.persistentState)
     }
   }
 
-  private val toOrderStatistics = new ToOrderStatistics
-
-  private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): OrderStatistics =
-    toOrderStatistics { result ⇒
-      if (query.matchesAllNonDistributed) {
-        cppProxy.add_non_distributed_to_order_statistics(result)
-      }
-      else if (query.matchesCompleteJobChains)
-        for (jobChain ← nonDistributedJobChains) {
-          jobChain.addNonDistributedToOrderStatistics(result)
-        }
-      else
-        for (jobChain ← nonDistributedJobChains; node ← jobChain.jobNodes(query)) {
-          node.addNonDistributedToOrderStatistics(result)
-        }
+  private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): OrderStatistics = {
+    var result = new OrderStatistics.Mutable
+    for (order ← nonDistributedOrderIteratorBy(query, nonDistributedJobChains)) {
+      result += order.queryable
     }
+    result.toImmutable
+  }
+
+  private def nonDistributedOrderIteratorBy(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Iterator[Order] =
+    if (query.matchesCompleteJobChains)
+      for (jobChain ← jobChains.toIterator;
+           order ← jobChain.orderIterator)
+        yield order
+    else
+      for (jobChain ← jobChains.toIterator;
+           node ← jobChain.jobNodes(query);
+           order ← jobChain.orderIterator)
+        yield order
 
   private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[OrderStatistics] = {
     val conditionSqlOption =
@@ -97,15 +97,9 @@ extends FileBasedSubsystem {
   }
 
   private def fetchDistributedOrderStatistics(query: JobChainNodeQuery, conditionSql: String): Future[OrderStatistics] =
-    if (config.getBoolean("jobscheduler.master.legacy-cpp-jdbc"))
-      Future.successful(
-        toOrderStatistics { result ⇒
-          cppProxy.add_distributed_to_order_statistics(conditionSql, result)
-        })
-    else
-      jdbcConnectionPool.readOnly { connection ⇒
-        DatabaseOrders.fetchDistributedOrderStatistics(connection, databaseOrders.queryToSql(query, conditionSql))
-      }
+    jdbcConnectionPool.readOnly { connection ⇒
+      DatabaseOrders.fetchDistributedOrderStatistics(connection, databaseOrders.queryToSql(query, conditionSql))
+    }
 
   private def queryToNodeKeys(query: JobChainNodeQuery, jobChainPaths: TraversableOnce[JobChainPath]): TraversableOnce[NodeKey] =
     for (jobChainPath ← jobChainPaths;
@@ -225,31 +219,4 @@ FileBasedSubsystem.AbstractCompanion[OrderSubsystemClient, OrderSubsystem, JobCh
 
   val fileBasedType = FileBasedType.JobChain
   val stringToPath = JobChainPath.apply _
-
-  private def newOrderStatisticsArray() = new Array[Int](12)
-
-  private def toOrderStatistics(statisticsArray: Array[Int]) =
-    OrderStatistics(
-      total = statisticsArray(0),
-      notPlanned = statisticsArray(1),
-      planned = statisticsArray(2),
-      due = statisticsArray(3),
-      started = statisticsArray(4),
-      inTask = statisticsArray(5),
-      inProcess = statisticsArray(6),
-      setback = statisticsArray(7),
-      suspended = statisticsArray(8),
-      blacklisted = statisticsArray(9),
-      permanent = statisticsArray(10),
-      fileOrder = statisticsArray(11))
-
-  private[order] final class ToOrderStatistics {
-    private val allocatedArray = newOrderStatisticsArray()
-
-    def apply(addTo: Array[Int] ⇒ Unit): OrderStatistics = {
-      java.util.Arrays.fill(allocatedArray, 0)
-      addTo(allocatedArray)
-      toOrderStatistics(allocatedArray)
-    }
-  }
 }

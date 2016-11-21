@@ -52,7 +52,6 @@ enum Untouched_is_allowed {
 
 
 extern const string scheduler_file_order_path_variable_name;
-extern const int order_statistics_array_size;
 
 //---------------------------------------------------------------------------Order_state_transition
 
@@ -396,7 +395,6 @@ struct Order : Com_order,
     Order_subsystem_impl*       order_subsystem         () const;
     Com_log*                    com_log                 () const                                    { return _com_log; }
 
-    void add_to_statistics(Time now, int size, jint* result) const;
     void db_start_order_history();
     void on_occupied();
     void on_call(const File_exists_call&);
@@ -756,11 +754,8 @@ struct Order_queue_node : Node
     Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause, const Process_class*);
     bool                        is_ready_for_order_processing ();
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
-    void add_non_distributed_to_order_statistics(jintArray) const;
 
   private:
-    void add_to_statistics(void*, Order*);
-
     typedef list< Order_source* >  Order_source_list;
     Order_source_list             _order_source_list;                   // Muss leer sein bei ~Order_queue_node!
     ptr<Order_queue>           _order_queue;
@@ -983,7 +978,6 @@ struct Job_chain : Com_job_chain,
     job_chain::Job_node*        node_from_job               ( Job* );
     vector<javabridge::Has_proxy*> java_nodes();
     vector<javabridge::Has_proxy*> java_orders();
-    void add_non_distributed_to_order_statistics(jintArray) const;
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
     void                        add_order                   ( Order* );
@@ -1237,8 +1231,6 @@ struct Order_subsystem: Object,
     virtual const Bstr& scheduler_file_order_path_variable_name_Bstr() const = 0;
 
     virtual void java_for_each_distributed_order(const ArrayListJ& job_chain_paths, const ArrayListJ& order_ids_j, int per_order_limit, OrderCallbackJ) = 0;
-    virtual void add_non_distributed_to_order_statistics(jintArray) const = 0;
-    virtual void add_distributed_to_order_statistics(const string&, jintArray) = 0;
 };
 
 

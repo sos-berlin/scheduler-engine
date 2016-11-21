@@ -152,9 +152,6 @@ struct Order_subsystem_impl : Order_subsystem
     string                      order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
-    void                        add_non_distributed_to_order_statistics(jintArray) const;
-    void                        add_distributed_to_order_statistics(const string&, jintArray);
-    void                        add_to_statistics           (void*, Order*);
 
     void wake_distributed_order_processing();
 

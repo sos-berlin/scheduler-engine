@@ -14,28 +14,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
         requireContextIsNull(context);
     }
 
-    @Override public void add_distributed_to_order_statistics(java.lang.String p0, int[] p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            add_distributed_to_order_statistics__native(cppReference(), p0, p1);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void add_distributed_to_order_statistics__native(long cppReference, java.lang.String p0, int[] p1);
-
-
-    @Override public void add_non_distributed_to_order_statistics(int[] p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            add_non_distributed_to_order_statistics__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void add_non_distributed_to_order_statistics__native(long cppReference, int[] p0);
-
-
     @Override public String[] file_based_paths(boolean p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
