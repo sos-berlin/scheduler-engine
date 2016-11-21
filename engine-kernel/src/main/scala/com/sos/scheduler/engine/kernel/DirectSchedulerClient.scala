@@ -116,9 +116,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       val localStatistics = orderSubsystem.nonDistributedOrderStatistics(query, localChains)
       (localStatistics, distributedStatisticsFuture)
     } flatMap { snapshot ⇒
-      val Snapshot(eventId, (localStastics, distributedStatisticsFuture)) = snapshot
+      val Snapshot(eventId, (localStatistics, distributedStatisticsFuture)) = snapshot
       for (distributedStatistics ← distributedStatisticsFuture) yield
-        Snapshot(eventId, localStastics + distributedStatistics)
+        Snapshot(eventId, localStatistics + distributedStatistics)
     }
 
   def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]] =

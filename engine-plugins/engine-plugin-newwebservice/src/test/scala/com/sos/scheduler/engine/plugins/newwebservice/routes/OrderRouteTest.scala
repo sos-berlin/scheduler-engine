@@ -315,5 +315,5 @@ object OrderRouteTest {
     OrderStarted,
     OrderStepStarted(NodeId("100"), TaskId(3)))
 
-  private val TestOrderStatistics = OrderStatistics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+  private val TestOrderStatistics = OrderStatistics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 }
