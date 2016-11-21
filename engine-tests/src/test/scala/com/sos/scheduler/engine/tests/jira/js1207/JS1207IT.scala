@@ -46,7 +46,7 @@ final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   /**
-   * @return Map with maxima of simulateneously running orders per jobchain
+   * @return Map with maxima of simulateneously started orders per jobchain
    */
   private def runOrders(outerJobchainPath: JobChainPath, jobchainLimits: Map[JobChainPath, Int], n: Int): Map[JobChainPath, Int] =
     withCloser { implicit closer ⇒
@@ -86,10 +86,10 @@ final class JS1207IT extends FreeSpec with ScalaSchedulerTest {
       }
       awaitSuccess(promise.future)
       for ((jobchainPath, statistics) ← counters) withClue(s"$jobchainPath: ") {
-        statistics.running shouldEqual 0
+        statistics.started shouldEqual 0
         statistics.inStep shouldEqual 0
       }
-      counters.toMap collect { case (path, statistic) if statistic.runningMaximum != 0 ⇒ path → statistic.runningMaximum }
+      counters.toMap collect { case (path, statistic) if statistic.startedMaximum != 0 ⇒ path → statistic.startedMaximum }
     }
 }
 
@@ -101,23 +101,23 @@ private object JS1207IT {
   private val CInnerJobChainPath = JobChainPath("/test-inner-c")
 
   private class Statistic(limit: Int) {
-    var running = 0
-    var runningMaximum = 0
+    var started = 0
+    var startedMaximum = 0
     var inStep = 0
     var inStepMaximum = 0
 
     assertInvariant()
 
     def onStarted(): Unit = {
-      running += 1
-      if (runningMaximum < running) {
-        runningMaximum = running
+      started += 1
+      if (startedMaximum < started) {
+        startedMaximum = started
       }
       assertInvariant()
     }
 
     def onFinished(): Unit = {
-      running -= 1
+      started -= 1
       assertInvariant()
     }
 
@@ -135,13 +135,13 @@ private object JS1207IT {
     }
 
     def assertInvariant(): Unit = {
-      assert(inStep <= running)
-      assert(inStep <= runningMaximum)
+      assert(inStep <= started)
+      assert(inStep <= startedMaximum)
       assert(inStep <= limit)
       assert(inStepMaximum <= limit)
-      assert(running <= runningMaximum)
-      assert(running <= limit, s"Number of running orders ($runningMaximum) exceeds limit ($limit)")
-      assert(runningMaximum <= limit, s"Maximum number of running orders ($runningMaximum) exceeds limit ($limit)")
+      assert(started <= startedMaximum)
+      assert(started <= limit, s"Number of started orders ($startedMaximum) exceeds limit ($limit)")
+      assert(startedMaximum <= limit, s"Maximum number of started orders ($startedMaximum) exceeds limit ($limit)")
     }
   }
 }
