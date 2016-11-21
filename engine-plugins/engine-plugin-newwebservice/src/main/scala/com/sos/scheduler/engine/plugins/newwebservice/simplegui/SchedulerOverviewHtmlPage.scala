@@ -2,12 +2,14 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.toVersionedUriPath
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.instantWithDurationToHtml
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage._
 import java.util.Locale.US
@@ -30,11 +32,8 @@ extends SchedulerHtmlPage {
   protected val schedulerOverview = snapshot.value
   import schedulerOverview.{httpPort, httpsPort, java, pid, startedAt, state, system}
 
-  override protected def cssLinks = super.cssLinks ++ List(
-    uris / "api/frontend/common/OrderStatisticsWidget.css",
-    uris / "api/frontend/schedulerOverview/overview.css")
-  override protected def scriptLinks = super.scriptLinks ++ List(
-    uris / "api/frontend/common/OrderStatisticsWidget.js")
+  override protected def cssPaths = super.cssPaths ++ CssPaths
+  override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
 
   def wholePage =
     htmlPage(
@@ -134,7 +133,7 @@ extends SchedulerHtmlPage {
       span(cls := "input-group input-group-sm")(
         span(cls := "input-group-addon")(
           "XML command: "),
-        input(`type` := "text", autofocus, name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
+        input(`type` := "text", /*autofocus (Enter triggers update),*/ name := "command", value := "s", placeholder := "For example: show_state", cls := "form-control"),
         " ",
         span(cls := "input-group-btn")(
           button(`type` := "submit", cls := "btn btn-primary")(
@@ -144,6 +143,11 @@ extends SchedulerHtmlPage {
 object SchedulerOverviewHtmlPage {
   private val logger = Logger(getClass)
   private val ThinSpace = '\u2009'
+  private val CssPaths = Vector(
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.css")),
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/schedulerOverview/overview.css")))
+  private val ScriptPaths = Vector(
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.js")))
 
   object implicits {
     import scala.language.implicitConversions

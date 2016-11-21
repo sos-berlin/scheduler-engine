@@ -18,8 +18,10 @@ trait FrontEndRoute extends WebjarsRoute {
         webjarsRoute
       } ~
       get {
-        respondWithHeader(ShortTimeCaching) {
-          getFromResourceDirectory(FrontendResourceDirectory.path)
+        parameter("SHA-224".?) { hashOption ⇒
+          respondWithHeader(if (hashOption.isDefined) LongTimeCaching else ShortTimeCaching) {
+            getFromResourceDirectory(FrontendResourceDirectory.path)
+          }
         }
       }
     //}
@@ -28,5 +30,6 @@ trait FrontEndRoute extends WebjarsRoute {
 object FrontEndRoute {
   /** For quicker response, we assume an installation of a changed JobScheduler version takes more than a minute. */
   private val ShortTimeCaching = `Cache-Control`(`max-age`(60))
+  private val LongTimeCaching = `Cache-Control`(`max-age`(24*60*60))
   private val FrontendResourceDirectory = JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend")
 }

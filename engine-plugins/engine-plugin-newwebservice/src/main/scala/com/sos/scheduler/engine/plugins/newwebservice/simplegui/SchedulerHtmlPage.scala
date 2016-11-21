@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.event.{Event, EventId, ReverseEventRequest, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobOverview
@@ -12,7 +13,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toCssLinkHtml, toScriptHtml}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toCssLinkHtml, toScriptHtml, toVersionedUriPath}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute.NeededWebjars
 import java.time.Instant.now
@@ -32,7 +33,7 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   protected def snapshot: Snapshot[Any]
   protected val schedulerOverview: SchedulerOverview
-  protected def title: String = "JobScheduler"
+  protected def pageTitle: String = "JobScheduler"
   protected val uris: SchedulerUris
   protected def pageUri: Uri
 
@@ -47,7 +48,7 @@ trait SchedulerHtmlPage extends HtmlPage {
     seqFrag(
       meta(httpEquiv := "X-UA-Compatible", content := "IE=edge"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
-      tags2.title(s"$title · ${schedulerOverview.schedulerId}"),
+      tags2.title(s"$pageTitle · ${schedulerOverview.schedulerId}"),
       css,
       javascript,
       link(rel := "icon", "sizes".attr := "64x64", `type` := "image/vnd.microsoft.icon",
@@ -55,14 +56,14 @@ trait SchedulerHtmlPage extends HtmlPage {
 
   private def css: Frag =
     (NeededWebjars map includer.cssHtml) ++
-      (cssLinks map toCssLinkHtml)
+      (for (o ← cssPaths) yield toCssLinkHtml(uris / o))
 
   private def javascript: Frag =
     (NeededWebjars map includer.javascriptHtml) ++
-      (scriptLinks map toScriptHtml)
+      (for (o ← scriptPaths) yield toScriptHtml(uris / o))
 
-  protected def cssLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.css")
-  protected def scriptLinks: Vector[Uri] = Vector(uris / "api/frontend/common/common.js")
+  protected def cssPaths: Vector[String] = CssPaths
+  protected def scriptPaths: Vector[String] = ScriptPaths
 
   protected def pageBody(innerBody: Frag*): Frag =
     seqFrag(
@@ -71,7 +72,7 @@ trait SchedulerHtmlPage extends HtmlPage {
         innerBody))
 
   private def timestampHtml: Frag =
-    a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup")(
+    a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup", title := "Click or press Enter to refresh")(
       span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
       eventIdToLocalHtml(snapshot.eventId, withSubseconds = false),
       " ",
@@ -98,7 +99,7 @@ trait SchedulerHtmlPage extends HtmlPage {
           tr(
             td(rowspan := 2, paddingRight := 1.ex)(
               img("width".attr := 40, "height".attr := 40, alt := "Rabbit",
-                src := uris.uriString("api/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))),
+                src := uris.uriString(RabbitPicturePath))),
             td(
               span(" JobScheduler \u00a0'", schedulerOverview.schedulerId.string, "'"))),
           tr(
@@ -137,6 +138,13 @@ trait SchedulerHtmlPage extends HtmlPage {
 private[simplegui] object SchedulerHtmlPage {
   private lazy val nav = "nav".tag[String]
   val OurZoneId = DefaultZoneId
+
+  private val CssPaths = Vector(
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/common.css")))
+  private val ScriptPaths = Vector(
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/common.js")))
+  private val RabbitPicturePath =
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))
 
   def fileBasedStateToHtml(fileBasedState: FileBasedState) =
     span(cls := fileBasedStateToBootstrapTextClass(fileBasedState))(fileBasedState.toString)

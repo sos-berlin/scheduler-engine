@@ -4,17 +4,19 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
+import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderProcessingState._
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.toVersionedUriPath
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
@@ -58,14 +60,9 @@ extends SchedulerHtmlPage {
     .withDefaultValue(Some(span(cls := "text-danger")(stringFrag("Missing Node"))))
   private val orderStatisticsWidget = new OrderStatisticsWidget(uris, query, markActive = true)
 
-  override protected def title = "Orders"
-  override protected def cssLinks = super.cssLinks ++ List(
-    uris / "api/frontend/common/OrderStatisticsWidget.css",
-    uris / "api/frontend/order/OrderSelectionWidget.css",
-    uris / "api/frontend/order/order.css")
-  override protected def scriptLinks = super.scriptLinks ++ List(
-    uris / "api/frontend/common/OrderStatisticsWidget.js",
-    uris / "api/frontend/order/OrderSelectionWidget.js")
+  override protected def pageTitle = "Orders"
+  override protected def cssPaths = super.cssPaths ++ CssPaths
+  override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
 
   def wholePage = {
     htmlPage(
@@ -212,6 +209,13 @@ extends SchedulerHtmlPage {
 object OrdersHtmlPage {
 
   private val Dot = '\u00b7'
+  private val CssPaths = Vector(
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.css")),
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.css")),
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/order.css")))
+  private val ScriptPaths = Vector(
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.js")),
+    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.js")))
 
   def toHtmlPage(
     snapshot: Snapshot[OrdersComplemented[OrderOverview]],
