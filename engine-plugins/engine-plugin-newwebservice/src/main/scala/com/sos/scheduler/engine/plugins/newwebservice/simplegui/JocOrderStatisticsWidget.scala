@@ -7,17 +7,17 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderStatisticsWidget._
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.JocOrderStatisticsWidget._
 import scalatags.Text.all._
 
 /**
   * @author Joacim Zschimmer
   */
-final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, title: String = "", markActive: Boolean = false) {
+final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, title: String = "", markActive: Boolean = false) {
 
   import orderQuery.nodeQuery.jobChainQuery.pathQuery
 
-  private val fieldGroups = {
+  private val fieldGroups: List[List[(String, OrderQuery)]] = {
     import OrderProcessingState._
     import OrderSourceType._
     val q = OrderQuery(pathQuery, notInTaskLimitPerNode = orderQuery.notInTaskLimitPerNode)
@@ -26,20 +26,39 @@ final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, t
         TimestampName → orderQuery),
       List(
         "total" → q,
-        "fileOrder" → q.copy(isOrderSourceType = Some(Set(FileOrder))),
-        "permanent" → q.copy(isOrderSourceType = Some(Set(Permanent)))),
+        "fileOrder" → q.copy(
+          isOrderSourceType = Some(Set(FileOrder))),
+        "permanent" → q.copy(
+          isOrderSourceType = Some(Set(Permanent)))),
       List(
-        "notPlanned" → q.copy(isOrderProcessingState = Some(Set(NotPlanned.getClass))),
-        "planned" → q.copy(isOrderProcessingState = Some(Set(classOf[Planned]))),
-        "due" → q.copy(isOrderProcessingState = Some(Set(classOf[Due])))),
+        "notPlanned" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(NotPlanned.getClass))),
+        "planned" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(classOf[Planned]))),
+        "due" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(classOf[Due])))),
       List(
-        "started" → q.copy(isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback]))),
-        "inTask" → q.copy(isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember]))),
-        "inProcess" → q.copy(isOrderProcessingState = Some(Set(classOf[InTaskProcess])))),
+        "started" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback]))),
+        "inTask" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember]))),
+        "inTaskProcess" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(classOf[InTaskProcess])))),
       List(
-        "setback" → q.copy(isOrderProcessingState = Some(Set(classOf[Setback]))),
-        "suspended" → q.copy(isSuspended = Some(true)),
-        "blacklisted" → q.copy(isBlacklisted = Some(true))))
+        "setback" → q.copy(
+          isSuspended = Some(false),
+          isOrderProcessingState = Some(Set(classOf[Setback]))),
+        "suspended" → q.copy(
+          isSuspended = Some(true)),
+        "blacklisted" → q.copy(
+          isSuspended = Some(false),
+          isBlacklisted = Some(true))))
   }
 
   def html: Frag =
@@ -94,6 +113,6 @@ final class OrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, t
     s"jQuery(function() { startOrderStatisticsChangedListener('${pathQuery.toUriPath}') });"
 }
 
-object OrderStatisticsWidget {
+object JocOrderStatisticsWidget {
   private val TimestampName = "timestamp"
 }

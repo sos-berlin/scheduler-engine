@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.order.OrderPersistentState.{BlacklistDatabaseDistributedNextTime, NeverDatabaseDistributedNextTime, NowDatabaseDistributedNextTime, ReplacementDatabaseDistributedNextTime}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderSourceType, OrderStatistics}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, QueryableOrder}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._
@@ -73,19 +73,19 @@ private[order] final class DatabaseOrders @Inject private(
 }
 
 private[order] object DatabaseOrders {
-  private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String): OrderStatistics =
+  private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String): JocOrderStatistics =
     autoClosing(connection.prepareStatement(sqlStmt)) { stmt ⇒
       val resultSet = stmt.executeQuery()
       fetchDistributedOrderStatistics(resultSet)
     }
 
-  private def fetchDistributedOrderStatistics(resultSet: ResultSet): OrderStatistics = {
+  private def fetchDistributedOrderStatistics(resultSet: ResultSet): JocOrderStatistics = {
     blocking {
-      var result = new OrderStatistics.Mutable
+      var result = new JocOrderStatistics.Mutable
       while (resultSet.next()) {
-        result += toQueryableOrder(
+        result.count(toQueryableOrder(
           OrderRow(resultSet),
-          autoClosing(resultSet.getClob("ORDER_XML").getCharacterStream)(OrderXmlResolved.apply))
+          autoClosing(resultSet.getClob("ORDER_XML").getCharacterStream)(OrderXmlResolved.apply)))
       }
       result.toImmutable
     }

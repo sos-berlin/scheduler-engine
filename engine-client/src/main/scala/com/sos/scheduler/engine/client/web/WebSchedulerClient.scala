@@ -15,7 +15,7 @@ import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderStatistics, OrderView, Orders}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -106,8 +106,8 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def getOrdersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     get[Snapshot[OrdersComplemented[V]]](_.order.complemented[V](query))
 
-  final def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
-    post[JobChainNodeQuery, Snapshot[OrderStatistics]](_.order.statisticsForPost(query), query)
+  final def jocOrderStatistics(query: JobChainNodeQuery): Future[Snapshot[JocOrderStatistics]] =
+    post[JobChainNodeQuery, Snapshot[JocOrderStatistics]](_.order.jocOrderStatisticsForPost(query), query)
 
   final def orderEvents[E <: Event: ClassTag](query: OrderQuery, after: EventId, timeout: Duration, limit: Int = Int.MaxValue): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
     get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.order.events(query, after = after, timeout, limit = limit, returnType = implicitClass[E].getSimpleName))

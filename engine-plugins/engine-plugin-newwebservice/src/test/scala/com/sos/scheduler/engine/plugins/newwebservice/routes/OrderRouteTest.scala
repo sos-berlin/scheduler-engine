@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.client.api.{FileBasedClient, OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
@@ -9,9 +9,9 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdd
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, SimpleJobNodeOverview}
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStatistics, OrderStepStarted, OrderView, Orders}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
@@ -99,7 +99,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
         })
     }
 
-    def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] = {
+    def jocOrderStatistics(query: JobChainNodeQuery): Future[Snapshot[JocOrderStatistics]] = {
       assert(query.matchesAll)
       respondWith(TestOrderStatistics)
     }
@@ -242,10 +242,10 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   for (uri ← List(
-      s"$OrderUri/?return=OrderStatistics&timeout=60s")) {
+      s"$OrderUri/?return=JocOrderStatistics&timeout=60s")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert(responseAs[Snapshot[OrderStatistics]].value == TestOrderStatistics)
+        assert(responseAs[Snapshot[JocOrderStatistics]].value == TestOrderStatistics)
       }
     }
   }
@@ -315,5 +315,7 @@ object OrderRouteTest {
     OrderStarted,
     OrderStepStarted(NodeId("100"), TaskId(3)))
 
-  private val TestOrderStatistics = OrderStatistics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+  private val TestOrderStatistics = {
+    JocOrderStatistics(-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
+  }
 }

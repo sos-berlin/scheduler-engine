@@ -10,10 +10,10 @@ import scala.concurrent.ExecutionContext
   * @author Joacim Zschimmer
   */
 @Singleton
-final class OrderStatisticsChangedSourceInjectible @Inject private(
+final class JocOrderStatisticsChangedSourceInjectible @Inject private(
   protected val eventCollector: EventCollector,
   protected implicit val executionContext: ExecutionContext,
   orderClient: DirectOrderClient)
-extends OrderStatisticsChangedSource {
-  protected def orderStatistics(query: JobChainNodeQuery) = orderClient.orderStatistics(query)
+extends JocOrderStatisticsChangedSource {
+  protected def jocOrderStatistics(query: JobChainNodeQuery) = orderClient.jocOrderStatistics(query)
 }

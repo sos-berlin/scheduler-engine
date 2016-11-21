@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -63,10 +63,10 @@ extends FileBasedSubsystem {
     }
   }
 
-  private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): OrderStatistics = {
-    var result = new OrderStatistics.Mutable
+  private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): JocOrderStatistics = {
+    var result = new JocOrderStatistics.Mutable
     for (order ← nonDistributedOrderIteratorBy(query, nonDistributedJobChains)) {
-      result += order.queryable
+      result.count(order.queryable)
     }
     result.toImmutable
   }
@@ -82,7 +82,7 @@ extends FileBasedSubsystem {
            order ← jobChain.orderIterator)
         yield order
 
-  private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[OrderStatistics] = {
+  private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[JocOrderStatistics] = {
     val conditionSqlOption =
       if (query.matchesCompleteJobChains)
         jobChains.nonEmpty option databaseOrders.jobChainPathsToSql(jobChains map { _.path })
@@ -92,11 +92,11 @@ extends FileBasedSubsystem {
       case Some(conditionSql) ⇒
         fetchDistributedOrderStatistics(query, conditionSql)
       case None ⇒
-        Future.successful(OrderStatistics.Zero)
+        Future.successful(JocOrderStatistics.Zero)
     }
   }
 
-  private def fetchDistributedOrderStatistics(query: JobChainNodeQuery, conditionSql: String): Future[OrderStatistics] =
+  private def fetchDistributedOrderStatistics(query: JobChainNodeQuery, conditionSql: String): Future[JocOrderStatistics] =
     jdbcConnectionPool.readOnly { connection ⇒
       DatabaseOrders.fetchDistributedOrderStatistics(connection, databaseOrders.queryToSql(query, conditionSql))
     }

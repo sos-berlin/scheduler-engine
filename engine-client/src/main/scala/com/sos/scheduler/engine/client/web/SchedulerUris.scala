@@ -64,11 +64,11 @@ final class SchedulerUris private(schedulerUri: Uri) {
     def complementedForPost[V <: OrderView: OrderView.Companion]: String =
       forPost(returnType = Some(s"OrdersComplemented/${orderView.name}"))
 
-    def getStatistics(query: JobChainQuery = JobChainQuery.All): String =
-      forGet(query, returnType = Some("OrderStatistics"))
+    def getJocOrderStatistics(query: JobChainQuery = JobChainQuery.All): String =
+      forGet(query, returnType = Some("JocOrderStatistics"))
 
-    def statisticsForPost(query: JobChainNodeQuery = JobChainNodeQuery.All): String =
-      forPost(returnType = Some("OrderStatistics"))
+    def jocOrderStatisticsForPost(query: JobChainNodeQuery = JobChainNodeQuery.All): String =
+      forPost(returnType = Some("JocOrderStatistics"))
 
     private def forGet[A: PathAndParameterSerializable](query: A, returnType: Option[String]): String = {
       val (path, parameters) = toPathAndParameters(query)

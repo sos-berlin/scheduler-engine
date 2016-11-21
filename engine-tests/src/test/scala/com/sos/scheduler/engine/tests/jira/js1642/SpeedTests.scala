@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.order.{OrderOverview, OrderStatistics}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -91,23 +91,22 @@ private[js1642] trait SpeedTests {
           }
         }
 
-        "OrderStatistics" in {
+        "JocOrderStatistics" in {
           for (_ ← 1 to 5) {
             val stopwatch = new Stopwatch
-            val Snapshot(_, orderStatistics: OrderStatistics) = webSchedulerClient.orderStatistics(JobChainQuery.All) await TestTimeout
-            logger.info("OrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
-            assert(orderStatistics == OrderStatistics(
+            val Snapshot(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
+            logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
+            assert(orderStatistics == JocOrderStatistics(
               total = n + 8,
               notPlanned = 0,
-              notSuspendedNotPlanned = 0,
-              planned = 1,
-              due = n - 3,
+              planned = 0,
+              due = n - 4,
               started = 10,
               inTask = 10,
-              inProcess = 10,
+              inTaskProcess = 10,
+              occupiedByClusterMember = 0,
               setback = 0,
               waitingForResource = 0,
-              notSuspendedWaitingForResource = 0,
               suspended = 2,
               blacklisted = 0,
               permanent = 6,
@@ -133,23 +132,22 @@ private[js1642] trait SpeedTests {
           logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
         }
 
-        "OrderStatistics" in {
+        "JocOrderStatistics" in {
           for (_ ← 1 to 20) {
             val stopwatch = new Stopwatch
-            val Snapshot(_, orderStatistics: OrderStatistics) = webSchedulerClient.orderStatistics(JobChainQuery.All) await TestTimeout
-            logger.info("OrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
-            assert(orderStatistics == OrderStatistics(
+            val Snapshot(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
+            logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
+            assert(orderStatistics == JocOrderStatistics(
               total = 2*n + 8,
               notPlanned = 0,
-              notSuspendedNotPlanned = 0,
-              planned = 1,
-              due = 2*n - 3,
+              planned = 0,
+              due = 2*n - 4,
               started = 10,
               inTask = 10,
-              inProcess = 10,
+              inTaskProcess = 10,
+              occupiedByClusterMember = 0,
               setback = 0,
               waitingForResource = 0,
-              notSuspendedWaitingForResource = 0,
               suspended = 2,
               blacklisted = 0,
               permanent = 6,

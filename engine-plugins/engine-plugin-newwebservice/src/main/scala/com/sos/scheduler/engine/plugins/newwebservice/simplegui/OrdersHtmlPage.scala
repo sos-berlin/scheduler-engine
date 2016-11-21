@@ -58,7 +58,7 @@ extends SchedulerHtmlPage {
         None
     }
     .withDefaultValue(Some(span(cls := "text-danger")(stringFrag("Missing Node"))))
-  private val orderStatisticsWidget = new OrderStatisticsWidget(uris, query, markActive = true)
+  private val orderStatisticsWidget = new JocOrderStatisticsWidget(uris, query, markActive = true)
 
   override protected def pageTitle = "Orders"
   override protected def cssPaths = super.cssPaths ++ CssPaths

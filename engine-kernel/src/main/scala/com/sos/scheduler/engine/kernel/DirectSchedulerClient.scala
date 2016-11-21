@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderStatistics, OrderView}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
@@ -109,7 +109,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       (processClasses map { _.view[ProcessClassOverview] }).sorted)
   }
 
-  def orderStatistics(query: JobChainNodeQuery): Future[Snapshot[OrderStatistics]] =
+  def jocOrderStatistics(query: JobChainNodeQuery): Future[Snapshot[JocOrderStatistics]] =
     respondWithSnapshotFuture {
       val (distriChains, localChains) = orderSubsystem.jobChainsByQuery(query.jobChainQuery) partition { _.isDistributed }
       val distributedStatisticsFuture = orderSubsystem.distributedOrderStatistics(query, distriChains)

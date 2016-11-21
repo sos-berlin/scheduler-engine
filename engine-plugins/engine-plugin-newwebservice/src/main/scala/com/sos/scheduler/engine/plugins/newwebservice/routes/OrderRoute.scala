@@ -8,9 +8,9 @@ import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderKey, OrderOverview, OrderStatisticsChanged, Orders}
+import com.sos.scheduler.engine.data.order.{JocOrderStatisticsChanged, OrderDetailed, OrderKey, OrderOverview, Orders}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
-import com.sos.scheduler.engine.kernel.event.{DirectEventClient, OrderStatisticsChangedSource}
+import com.sos.scheduler.engine.kernel.event.{DirectEventClient, JocOrderStatisticsChangedSource}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -32,7 +32,7 @@ import spray.routing._
 trait OrderRoute extends LogRoute {
 
   protected def orderSubsystem: OrderSubsystemClient
-  protected def orderStatisticsChangedSource: OrderStatisticsChangedSource
+  protected def orderStatisticsChangedSource: JocOrderStatisticsChangedSource
   protected implicit def client: OrderClient with SchedulerOverviewClient with DirectEventClient
   protected implicit def webServiceContext: WebServiceContext
   protected implicit def executionContext: ExecutionContext
@@ -40,11 +40,11 @@ trait OrderRoute extends LogRoute {
   protected final def orderRoute: Route =
     (getRequiresSlash(webServiceContext) | pass) {
       parameter("return".?) {
-        case Some("OrderStatistics") ⇒
+        case Some("JocOrderStatistics") ⇒
           jobChainNodeQuery { query ⇒
-            completeTryHtml(client.orderStatistics(query))
+            completeTryHtml(client.jocOrderStatistics(query))
           }
-        case Some("OrderStatisticsChanged") ⇒
+        case Some("JocOrderStatisticsChanged") ⇒
           pathQuery(JobChainPath)(orderStatisticsChanged)
         case returnTypeOption ⇒
           typedPath(OrderKey) { query ⇒
@@ -146,9 +146,9 @@ trait OrderRoute extends LogRoute {
 
   private def orderStatisticsChanged(query: PathQuery): Route = {
     eventRequest(classOf[Event]) {
-      case EventRequest(eventClass, afterEventId, timeout, limit) if eventClass == classOf[OrderStatisticsChanged] ⇒
+      case EventRequest(eventClass, afterEventId, timeout, limit) if eventClass == classOf[JocOrderStatisticsChanged] ⇒
         completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
-          for (snapshot ← orderStatisticsChangedSource.whenOrderStatisticsChanged(after = afterEventId, timeout, query))
+          for (snapshot ← orderStatisticsChangedSource.whenJocOrderStatisticsChanged(after = afterEventId, timeout, query))
             yield nestIntoSeqSnapshot(snapshot)
         }
       case _ ⇒
