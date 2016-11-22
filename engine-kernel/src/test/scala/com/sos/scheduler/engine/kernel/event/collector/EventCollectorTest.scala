@@ -3,12 +3,13 @@ package com.sos.scheduler.engine.kernel.event.collector
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollectorTest._
 import org.junit.runner.RunWith
-import org.scalatest.FreeSpec
+import org.scalatest.{BeforeAndAfterAll, FreeSpec}
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.ClassTag
@@ -17,13 +18,19 @@ import scala.reflect.ClassTag
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class EventCollectorTest extends FreeSpec {
+final class EventCollectorTest extends FreeSpec with BeforeAndAfterAll {
 
   private val eventBus = new SchedulerEventBus
   private val eventIdGenerator = new EventIdGenerator
+  private lazy val timerService = TimerService()
+
+  override protected def afterAll() = {
+    timerService.close()
+    super.afterAll()
+  }
 
   "eventCollector.after" in {
-    autoClosing(new EventCollector(eventIdGenerator, eventBus)) { eventCollector ⇒
+    autoClosing(new EventCollector(eventIdGenerator, eventBus, timerService)) { eventCollector ⇒
       import eventCollector.keyedEventQueue
       assert(keyedEventQueue.after(after = EventId.BeforeFirst).get.isEmpty)
       eventBus.publish(KeyedEvent(A1)("1"))
@@ -36,7 +43,7 @@ final class EventCollectorTest extends FreeSpec {
   }
 
   "eventCollector.when with torn event stream" in {
-    autoClosing(new EventCollector(eventIdGenerator, eventBus, EventCollector.Configuration(queueSize = 2))) { eventCollector ⇒
+    autoClosing(new EventCollector(eventIdGenerator, eventBus, timerService, EventCollector.Configuration(queueSize = 2))) { eventCollector ⇒
       val anyFuture = eventCollector.when(EventRequest[Event](after = EventId.BeforeFirst, 30.s))
       val bFuture = eventCollector.when(EventRequest[BEvent](after = EventId.BeforeFirst, 30.s))
       assert(!anyFuture.isCompleted)
@@ -61,7 +68,7 @@ final class EventCollectorTest extends FreeSpec {
   }
 
   "eventCollector.whenForKey" in {
-    autoClosing(new EventCollector(eventIdGenerator, eventBus)) { eventCollector ⇒
+    autoClosing(new EventCollector(eventIdGenerator, eventBus, timerService)) { eventCollector ⇒
       eventBus.publish(KeyedEvent(A1)("1"))
       eventBus.publish(KeyedEvent(B1)("1"))
       eventBus.publish(KeyedEvent(A2)("1"))

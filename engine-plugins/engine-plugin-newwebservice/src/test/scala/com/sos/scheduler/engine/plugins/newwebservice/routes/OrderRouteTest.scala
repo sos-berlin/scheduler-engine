@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
@@ -40,8 +41,9 @@ import spray.testkit.ScalatestRouteTest
 @RunWith(classOf[JUnitRunner])
 final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with ScalatestRouteTest with OrderRoute {
 
-  private lazy val actorSystem = ActorSystem("OrderRoute")
   private val eventBus = new SchedulerEventBus
+  private lazy val actorSystem = ActorSystem("OrderRoute")
+  private lazy val timerService = TimerService()
 
   protected def orderSubsystem = throw new NotImplementedError
 
@@ -57,7 +59,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
     protected val eventIdGenerator = new EventIdGenerator
-    protected val eventCollector = new EventCollector(eventIdGenerator, eventBus)
+    protected val eventCollector = new EventCollector(eventIdGenerator, eventBus, timerService)
 
     protected def executionContext = OrderRouteTest.this.executionContext
 
@@ -111,6 +113,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   override protected def afterAll() = {
     actorSystem.shutdown()
+    timerService.close()
     super.afterAll()
   }
 

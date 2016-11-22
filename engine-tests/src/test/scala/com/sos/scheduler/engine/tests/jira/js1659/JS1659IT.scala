@@ -54,7 +54,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   "EventSeq.Torn" in {
     val oldEventId = eventIdGenerator.lastUsedEventId
     // Generate enough events to tear the event stream starting at beforeTestEventId
-    for (_ ← 1 to 10) {
+    for (_ ← 1 to 12) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, action = Some(ModifyOrderCommand.Action.reset))
       eventBus.awaiting[OrderSuspended.type](TestOrderKey) {
         scheduler executeXml OrderCommand(TestOrderKey)

@@ -4,7 +4,6 @@ import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient._
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
@@ -36,20 +35,13 @@ trait DirectEventClient {
         wrapIntoSnapshot(
           eventCollector.when[E](
             request,
-            keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
+            keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
       case request: ReverseEventRequest[E] ⇒
         reverseEventIteratorToEventSeqSnapshot(
           eventCollector.reverse[E](
             request,
-            keyedEvent ⇒ eventIsSelected(keyedEvent.event) && KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
+            keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
   }
-
-  private def eventIsSelected(event: Event): Boolean =
-    event match {
-      //case _: InfoOrHigherLogged ⇒ true
-      case _: Logged ⇒ false
-      case _ ⇒ true
-    }
 
   def eventsForKey[E <: Event](request: EventRequest[E], key: E#Key): Future[Snapshot[EventSeq[Seq, E]]] =
     wrapIntoSnapshot(eventCollector.whenForKey(request, key, eventTypedJsonFormat.canSerialize))

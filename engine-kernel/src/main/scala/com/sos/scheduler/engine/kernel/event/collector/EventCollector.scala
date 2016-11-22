@@ -2,11 +2,15 @@ package com.sos.scheduler.engine.kernel.event.collector
 
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutureFuture
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, ReverseEventRequest, Snapshot}
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector._
 import com.typesafe.config.Config
-import java.lang.System.currentTimeMillis
+import java.time.Instant
+import java.time.Instant.now
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 final class EventCollector @Inject()(
   val eventIdGenerator: EventIdGenerator,
   eventBus: SchedulerEventBus,
+  timerService: TimerService,
   configuration: Configuration = Configuration.Default)
   (implicit ec: ExecutionContext)
 extends HasCloser {
@@ -24,9 +29,9 @@ extends HasCloser {
   private[collector] val keyedEventQueue = new KeyedEventQueue(sizeLimit = configuration.queueSize)
   //private val keyToEventQueue = new concurrent.TrieMap[Any, EventQueue]()
 
-  private val sync = new Sync
+  private val sync = new Sync(timerService)
 
-  eventBus.onHot[Event] { case keyedEvent ⇒
+  eventBus.onHot[Event] { case keyedEvent if isCollectableEvent(keyedEvent.event) ⇒
     //keyToEventQueue.getOrElseUpdate(keyedEvent.key, new EventQueue(EventQueueSizeLimitPerKey))
     //  .add(Snapshot(eventId, keyedEvent.event))
     val eventId = eventIdGenerator.next()
@@ -68,14 +73,14 @@ extends HasCloser {
       })
 
   private def whenAnyKeyedEvents[E <: Event, A](request: EventRequest[E], collect: PartialFunction[AnyKeyedEvent, A]): Future[EventSeq[Iterator, A]] =
-    whenAnyKeyedEvents2(request.after, currentTimeMillis + request.timeout.toMillis, collect, request.limit)
+    whenAnyKeyedEvents2(request.after, now + (request.timeout min MaxTimeout), collect, request.limit)
 
-  private def whenAnyKeyedEvents2[A](after: EventId, until: Long, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): Future[EventSeq[Iterator, A]] =
-    (for (() ← sync.whenEventIsAvailable(after)) yield
+  private def whenAnyKeyedEvents2[A](after: EventId, until: Instant, collect: PartialFunction[AnyKeyedEvent, A], limit: Int): Future[EventSeq[Iterator, A]] =
+    (for (_ ← sync.whenEventIsAvailable(after, until)) yield
       collectEventsSince(after, collect, limit) match {
         case o @ EventSeq.NonEmpty(_) ⇒
           Future.successful(o)
-        case EventSeq.Empty(lastEventId) if currentTimeMillis < until ⇒
+        case EventSeq.Empty(lastEventId) if now < until ⇒
           whenAnyKeyedEvents2(lastEventId, until, collect, limit)
         case EventSeq.Empty(lastEventId) ⇒
           Future.successful(EventSeq.Empty(lastEventId))
@@ -140,6 +145,7 @@ extends HasCloser {
 }
 
 object EventCollector {
+  private val MaxTimeout = 1.h  // Limits open requests, and avoids arithmetic overflow
   final case class Configuration(queueSize: Int)
 
   object Configuration {
@@ -149,4 +155,11 @@ object EventCollector {
       queueSize = config.getInt("queue-size")
     )
   }
+
+  private def isCollectableEvent(event: Event): Boolean =
+    event match {
+      //case _: InfoOrHigherLogged ⇒ true
+      case _: Logged ⇒ false  // We don't want the flood of Logged events
+      case _ ⇒ true
+    }
 }
