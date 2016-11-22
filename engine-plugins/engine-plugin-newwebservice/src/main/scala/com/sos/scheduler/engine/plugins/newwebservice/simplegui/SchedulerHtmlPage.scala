@@ -174,7 +174,7 @@ private[simplegui] object SchedulerHtmlPage {
     else
       seqFrag(
         instantToHtml(instant, LocalDateTimeFormatter),
-        span(cls := "time-extra")(s".${formatDateTime(instant, LocalMillisFormatter)} (${(now - instant).pretty})"))
+        span(cls := "time-extra")(", ", formatDateTime(instant, LocalMillisFormatter), " ", (now - instant).pretty))
 
   private val LocalTimeFormatter = new DateTimeFormatterBuilder()
     .appendValue(HOUR_OF_DAY, 2)

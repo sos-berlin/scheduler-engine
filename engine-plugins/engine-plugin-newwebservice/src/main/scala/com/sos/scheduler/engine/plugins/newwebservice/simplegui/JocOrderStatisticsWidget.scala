@@ -46,7 +46,7 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
           isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback]))),
         "inTask" → q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember]))),
+          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess]))),
         "inTaskProcess" → q.copy(
           isSuspended = Some(false),
           isOrderProcessingState = Some(Set(classOf[InTaskProcess])))),
@@ -85,7 +85,9 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
   private def fields: Frag =
     for (nameGroup ← fieldGroups) yield
       div(cls := "OrderStatistics-fieldGroup")(
-        for ((name, query) ← nameGroup) yield
+        for ((name, rawQuery) ← nameGroup;
+             query = rawQuery.copy(nodeQuery = rawQuery.nodeQuery.copy(jobChainQuery = rawQuery.jobChainQuery.copy(isDistributed = Some(false)))))
+        yield
           div(id := s"order-$name-field", cls := "OrderStatistics-field")(
             a(cls := "inherit-markup", href := uris.order(query, returnType = None))(
               if (name == TimestampName)

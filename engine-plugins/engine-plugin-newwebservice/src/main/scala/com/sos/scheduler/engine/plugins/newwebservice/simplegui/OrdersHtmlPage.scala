@@ -44,7 +44,7 @@ extends SchedulerHtmlPage {
       jobOverview.obstacles.nonEmpty option
         seqFrag(jobOverview.path.toString, ": ", dotJoin(jobOverview.obstacles map { o ⇒ stringFrag(o.toString) }))
     }
-    .withDefault { jobPath ⇒ Some(span(cls := "text-danger")(stringFrag(s"Missing $jobPath"))) }
+    .withDefault { jobPath ⇒ Some(span(cls := "text-danger")(seqFrag("Missing ", jobPath.toString))) }
   private val nodeKeyToOverview: Map[NodeKey, JobNodeOverview] = ordersComplemented.usedNodes toKeyedMap { _.nodeKey }
   private val nodeKeyToObstacleHtml: Map[NodeKey, Option[Frag]] = nodeKeyToOverview.mapValues {
       case node if node.obstacles.nonEmpty ⇒
@@ -88,7 +88,7 @@ extends SchedulerHtmlPage {
         tbody(
           tr(td(textAlign.right, width := 5.ex)(s"$count")     , td("orders")),
           tr(td(textAlign.right)(s"$inProcessCount")           , td("in process")),
-          tr(td(textAlign.right)(s"${ jobPathToOverview.size}"), td("job")),
+          tr(td(textAlign.right)(s"${jobPathToOverview.size}") , td("job")),
           tr(td(textAlign.right)(s"$suspendedCount")           , td("suspended")),
           tr(td(textAlign.right)(s"$blacklistedCount")         , td("blacklisted")))))
   }
@@ -110,7 +110,7 @@ extends SchedulerHtmlPage {
     else
       Vector(
         h2(cls := "Folder Padded")(
-          folderPathToOrdersA(folderPath)(s"Folder ${folderPath.string}"))) ++
+          folderPathToOrdersA(folderPath)("Folder ", folderPath.string))) ++
       folderOrdersToHtml(orders)
 
   private def folderOrdersToHtml(orders: immutable.Seq[OrderOverview]): Vector[Frag] =
@@ -125,7 +125,7 @@ extends SchedulerHtmlPage {
           div(float.right)(
             jobChainPathToA(jobChainPath)("→definition")),
           h3(cls := "JobChain")(
-            jobChainPathToOrdersA(jobChainPath)(s"JobChain ${jobChainPath.string}"),
+            jobChainPathToOrdersA(jobChainPath)("JobChain ", jobChainPath.string),
             span(paddingLeft := 10.px)(" "))),
         nodeOrdersToHtml(jobChainPath, orders)))
 
@@ -134,7 +134,7 @@ extends SchedulerHtmlPage {
       val jobPath = nodeKeyToOverview(NodeKey(jobChainPath, nodeId)).jobPath
       div(cls := "NodeOrders")(
         div(cls := "Padded")(
-          div(cls := "NodeHeadline")(s"Node ${nodeId.string} \u00a0 ${jobPath.string}")),
+          div(cls := "NodeHeadline")("Node ", nodeId.string, " \u00a0 ", jobPath.string)),
         ordersToTable(orders))
     }
 
@@ -153,28 +153,28 @@ extends SchedulerHtmlPage {
   private def orderToTr(order: OrderOverview) = {
     val processingStateHtml: Frag = order.orderProcessingState match {
       case Planned(at) ⇒ instantWithDurationToHtml(at)
-      case Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ List(stringFrag("Due")))
+      case Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ Array(stringFrag("Due")))
       case Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
       case inTask: InTask ⇒
         val taskId = inTask.taskId
-        val jobPath = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath } map { _.string } getOrElse "(unknown job)"
+        val jobPath = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath.string } getOrElse "(unknown job)"
         val taskHtml = seqFrag(
           b(
             span(cls := "visible-lg-inline")(
-              taskToA(taskId)(s"Task $jobPath:${taskId.string}"))))
+              taskToA(taskId)("Task ", jobPath, ":", taskId.string))))
         inTask match {
           case _: WaitingInTask ⇒ seqFrag(taskHtml, " waiting for process")
           case o: InTaskProcess ⇒ seqFrag(taskHtml, " since ", instantWithDurationToHtml(o.since))
        }
       case o ⇒ stringFrag(o.toString)
     }
-    val occupyingMemberHtml = order.occupyingClusterMemberId map { o ⇒ stringFrag(s", occupied by $o") }
+    val occupyingMemberHtml = order.occupyingClusterMemberId map { o ⇒ seqFrag(", occupied by ", o.toString) }
     val nodeObstaclesHtml: Option[Frag] = order.orderProcessingState match {
       case _: InTask ⇒ None
       case _ ⇒ nodeKeyToObstacleHtml(order.nodeKey)
     }
     val obstaclesHtml: Frag = {
-      val orderObstaclesHtml = order.obstacles.toList map { o ⇒ stringFrag(o.toString) }
+      val orderObstaclesHtml = order.obstacles.toVector map { o ⇒ stringFrag(o.toString) }
       val htmls = orderObstaclesHtml ++ nodeObstaclesHtml
       htmls.nonEmpty option {
         val joined = dotJoin(htmls)
