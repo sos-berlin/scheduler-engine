@@ -2620,12 +2620,7 @@ void Cluster::make_cluster_member_id()
             interface_and_port = as_string(_spooler->tcp_port());
         }
     }
-    string port_number;
-    if (const char* colon = strchr(interface_and_port.c_str(), ':')) {
-        port_number = colon + 1;
-    } else {
-        port_number = interface_and_port;
-    }
+    string port_number = Settings::extract_port_number(interface_and_port);
     set_my_member_id( S() << _spooler->id_for_db() 
                           << "/" << _spooler->_complete_hostname << ":" << port_number );
 }
@@ -2712,7 +2707,8 @@ xml::Element_ptr Cluster::my_member_dom_element( const xml::Document_ptr& docume
     if( _orders_are_distributed )  result.setAttribute( "distributed_orders", "yes" );
     if( _spooler->tcp_port()  )  result.setAttribute( "tcp_port", _spooler->tcp_port() );
     if( _spooler->udp_port()  )  result.setAttribute( "udp_port", _spooler->udp_port() );
-
+    result.setAttribute_optional("http_port", _spooler->settings()->_http_port);
+    result.setAttribute_optional("https_port", _spooler->settings()->_https_port);
 
     return result;
 }

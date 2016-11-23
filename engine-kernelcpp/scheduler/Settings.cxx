@@ -181,4 +181,13 @@ string Settings::installed_licence_keys_string() const {
     return join(" ", sos_static_ptr()->_licence->_installed_keys);
 }
 
+string Settings::extract_port_number(const string& interface_and_port) {
+    string port_number;
+    if (const char* colon = strchr(interface_and_port.c_str(), ':')) {
+        return colon + 1;
+    } else {
+        return interface_and_port;
+    }
+}
+
 }} //namespace sos::scheduler

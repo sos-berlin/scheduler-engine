@@ -31,6 +31,8 @@ import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, 
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
+import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.event.collector.EventCollector
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
@@ -67,7 +69,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
   protected lazy val webSchedulerClient = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-http-port=$httpPort", "-distributed-orders", "-suppress-watchdog-thread"),
+    mainArguments = List(s"-http-port=127.0.0.1:$httpPort", "-distributed-orders", "-suppress-watchdog-thread"),
     database = Some(
       if (sys.props contains "test.mysql")
         HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=jobscheduler -password=jobscheduler jdbc:mysql://127.0.0.1/jobscheduler")
@@ -119,6 +121,16 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       assert(event.taskId == expectedTaskId)
       orderKeyToTaskId(orderKey) = event.taskId
     }
+  }
+
+  "http_url" in {
+    assert(inSchedulerThread { instance[SpoolerC].http_url } == s"http://127.0.0.1:$httpPort")
+  }
+
+  "show_state cluster_member" in {
+    val response = scheduler executeXml <show_state what="cluster"/>
+    assert((response.elem \ "answer" \ "state" \ "cluster" \ "cluster_member" \ "@http_url").toString ==
+      s"http://127.0.0.1:$httpPort")
   }
 
   "overview" in {
@@ -311,7 +323,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
             "version" → """.+""".r,
             "startedAt" → AnyIsoTimestamp,
             "schedulerId" → "test",
-            "httpPort" → httpPort.toString,
+            "httpPort" → s"127.0.0.1:$httpPort",
             "pid" → AnyInt,
             "state" → "running",
             "system" → AnyRef,

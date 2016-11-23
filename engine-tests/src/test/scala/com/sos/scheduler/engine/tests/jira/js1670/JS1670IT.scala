@@ -11,6 +11,8 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview}
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1670.JS1670IT._
@@ -56,6 +58,18 @@ final class JS1670IT extends FreeSpec with ScalaSchedulerTest {
     extendedSendReceive(60.s.toFiniteDuration, setupOption) ~>
     decode(Gzip) ~>
     unmarshal[A]
+
+  "show_state http_port" in {
+    assert(((scheduler executeXml <show_state/>).elem \ "answer" \ "state" \ "@http_port").toString == s"127.0.0.1:$httpPort")
+  }
+
+  "show_state https_port" in {
+    assert(((scheduler executeXml <show_state/>).elem \ "answer" \ "state" \ "@https_port").toString == s"127.0.0.1:$httpsPort")
+  }
+
+  "http_url" in {
+    assert(inSchedulerThread { instance[SpoolerC].http_url } == s"https://127.0.0.1:$httpsPort")
+  }
 
   "HTTPS" - {
     lazy val uri = httpsUri

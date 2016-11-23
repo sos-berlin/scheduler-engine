@@ -844,10 +844,14 @@ void Spooler::set_id( const string& id )
 
 string Spooler::http_url() const
 {
-    S result;
-
-    if( _tcp_port )  
-    {
+    if (!settings()->_https_port.empty()) {
+        return "https://" + interface_and_port_to_uri_authority(settings()->_https_port);
+    } else
+    if (!settings()->_http_port.empty()) {
+        return "http://" + interface_and_port_to_uri_authority(settings()->_http_port);
+    } else
+    if (_tcp_port) {
+        S result;
         result << "http://";
         if (_ip_address_as_option_set) {
             if (_ip_address.ip_string() == "127.0.0.1")
@@ -858,9 +862,21 @@ string Spooler::http_url() const
         else result << _complete_hostname;
 
         result << ":" << _tcp_port;
-    }
+        return result;
+    } else
+        return "";
+}
 
-    return result;
+string Spooler::interface_and_port_to_uri_authority(const string& interface_and_port) const {
+    string host = _complete_hostname;
+    const char* s = interface_and_port.c_str();
+    if (const char* colon = strchr(s, ':')) {
+        string iface = string(s, colon - s);
+        if (iface != "0.0.0.0") {
+            host = iface;
+        }
+    } 
+    return host + ":" + Settings::extract_port_number(interface_and_port);
 }
 
 //-----------------------------------------------------------------------Spooler::state_dom_element
@@ -882,6 +898,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
     state_element.setAttribute_optional("http_port", _settings->_http_port);
+    state_element.setAttribute_optional("https_port", _settings->_https_port);
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
 

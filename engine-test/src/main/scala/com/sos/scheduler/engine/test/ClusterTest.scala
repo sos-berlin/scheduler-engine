@@ -17,12 +17,12 @@ trait ClusterTest extends ScalaSchedulerTest with SharedDatabaseTest {
   /** Number of members including the own scheduler. */
   protected def clusterMemberCount: Int
 
-  protected lazy val databaseTcpPort :: ownTcpPort :: ownHttpPort :: otherPorts = findRandomFreeTcpPorts(2 + 2 * clusterMemberCount)
-  protected lazy val clusterMainArguments = List(s"-tcp-port=$ownTcpPort", s"-udp-port=$ownTcpPort", s"-http-port=$ownHttpPort", "-distributed-orders")
+  protected lazy val databaseTcpPort :: ownHttpPort :: otherPorts = findRandomFreeTcpPorts(2 + 2 * clusterMemberCount)
+  private lazy val ownUdpPort = ownHttpPort  // Cluster uses HTTP port number as UDP post number to to suspend order. See JS-1227 (JS1227IT)
 
-  override protected lazy val testConfiguration = TestConfiguration(
+  override protected final lazy val testConfiguration = TestConfiguration(
     getClass,
-    mainArguments = clusterMainArguments,
+    mainArguments = List(s"-udp-port=$ownUdpPort", s"-http-port=127.0.0.1:$ownHttpPort", "-distributed-orders"),
     database = Some(databaseConfiguration))
 
   protected lazy val otherSchedulers: immutable.IndexedSeq[ClusterScheduler] = {

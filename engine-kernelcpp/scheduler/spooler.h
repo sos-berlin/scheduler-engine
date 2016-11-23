@@ -581,7 +581,7 @@ struct Spooler : Object,
     //void                        on_call                     (const Reload_scheduler_call&);
     //void                        on_call                     (const Terminate_scheduler_call&);
     //void                        on_call                     (const Let_run_terminate_and_restart_scheduler_call&);
-
+    string                      interface_and_port_to_uri_authority(const string& interface_and_port) const;
 
   private:
     Fill_zero                  _zero_;

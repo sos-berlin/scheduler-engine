@@ -79,6 +79,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     ArrayListJ messageTexts() const;
 
     string installed_licence_keys_string() const;
+    static string extract_port_number(const string& interface_and_port);
 
     Fill_zero                  _zero_;
     bool                       _freezed;       // Some, not all, settings can be changed at runtime
