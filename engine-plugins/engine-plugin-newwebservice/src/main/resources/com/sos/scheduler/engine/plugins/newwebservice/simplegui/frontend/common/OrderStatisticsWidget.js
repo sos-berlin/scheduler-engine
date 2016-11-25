@@ -1,4 +1,6 @@
-function startOrderStatisticsChangedListener(path) {
+var jocOrderStatisticsWidget = (function() {
+  var widgetJq;
+  var refreshElem;
   var tryAgainTimeoutSeconds = 10
   var keys = [
     "total",
@@ -14,53 +16,77 @@ function startOrderStatisticsChangedListener(path) {
     "permanent",
     "fileOrder"];
   var fields = {};
-  var i, key;
-  for (i in keys) {
-    key = keys[i];
-    fields[key] = {
-      fieldDom: document.getElementById('order-' + key + "-field"),
-      valueDom: document.getElementById('order-' + key + "-value")
-    }
-  }
-  var timestampValueDom = document.getElementById('order-timestamp-value');
-  var refreshElem = document.getElementById('OrderStatistics-refresh');
-  var widgetJq = $('#OrderStatistics');
-  var current = {}
-  var delayedGetNextEvent = null;
+  var timestampValueDom;
+  var current = {};
+  var paused = false;
+  var urlPrefix;
+  var lastEventId = 0;
+  var ajax = null;
 
-  function documentVisibilityChanged() {
-    if (!document.hidden && delayedGetNextEvent) {
-      var f = delayedGetNextEvent;
-      delayedGetNextEvent = null;
-      f();
-    }
-  }
-  document.addEventListener("visibilitychange", documentVisibilityChanged, false);
-
-  function getNext(lastEventId) {
-    if (lastEventId !== 1*lastEventId) throw Error("Invalid argument lastEventId=" + lastEventId)
-    var requestedAt = new Date()
-    jQuery.ajax({
-      dataType: 'json',
-      url: "/jobscheduler/master/api/order" + path + "?return=JocOrderStatisticsChanged&timeout=60s&after=" + lastEventId
-    })
-    .done(function(eventSeq) {
-      var continueAfterEventId = processEventSeq(eventSeq)
-      function f() {
-        getNext(continueAfterEventId);
+  function start(path) {
+    urlPrefix = "/jobscheduler/master/api/order" + path + "?return=JocOrderStatisticsChanged&timeout=60s&after=";
+    widgetJq = $('#OrderStatistics');
+    refreshElem = document.getElementById('OrderStatistics-refresh');
+    var i, key;
+    for (i in keys) {
+      key = keys[i];
+      fields[key] = {
+        fieldDom: document.getElementById('order-' + key + "-field"),
+        valueDom: document.getElementById('order-' + key + "-value")
       }
-      if (document.hidden) {
-        showRefreshing();
-        delayedGetNextEvent = f;
-      } else {
-        setTimeout(f, 500);
+    }
+    timestampValueDom = document.getElementById('order-timestamp-value');
+    document.addEventListener("visibilitychange", documentVisibilityChanged, false);
+
+    return {
+      getNext: getNext,
+      togglePause: togglePause
+    }
+  }
+
+  function getNext() {
+    var requestedAt = new Date()
+    ajax = jQuery.ajax({
+      dataType: 'json',
+      url: urlPrefix + lastEventId
+    });
+    ajax.done(function(eventSeq) {
+      ajax = null;
+      if (!paused) {
+        lastEventId = processEventSeq(eventSeq)
+        if (!document.hidden) {
+          setTimeout(getNext, 500);
+        }
       }
     })
     .fail(function() {
-      showRefreshing();
-      var duration = tryAgainTimeoutSeconds - Math.max(0, new Date().getSeconds() - requestedAt.getSeconds());
-      setTimeout(function() { getNext(lastEventId); }, duration * 1000);
+      ajax = null;
+      if (!paused) {
+        showRefreshing();
+        var duration = tryAgainTimeoutSeconds - Math.max(0, new Date().getSeconds() - requestedAt.getSeconds());
+        setTimeout(getNext, duration * 1000);
+      }
     });
+  }
+
+  function togglePause() {
+    paused = !paused
+    if (paused) {
+      hideRefreshing();
+      widgetJq.addClass('OrderStatistics-paused');
+    } else {
+      widgetJq.removeClass('OrderStatistics-paused');
+      if (!ajax) {
+        showRefreshing();
+        getNext();
+      }
+    }
+  }
+
+  function documentVisibilityChanged() {
+    if (!document.hidden && !ajax) {
+      getNext();
+    }
   }
 
   function processEventSeq(eventSeq) {
@@ -73,15 +99,14 @@ function startOrderStatisticsChangedListener(path) {
         current = orderStatistics;
         return eventSnapshot.eventId;
       case "Empty":  // Timed-out
-        return lastEventId;
-      case "Torn":
         return eventSeq.lastEventId;
+      case "Torn":
+        return 0;
     }
   }
 
   function showNewEvent(eventId) {
-    refreshElem.style.visibility = "hidden";
-    widgetJq.removeClass('OrderStatistics-error');
+    hideRefreshing()
     timestampValueDom.innerText = new Date(eventId / 1000).toTimeString().substring(0, 8);
   }
 
@@ -106,5 +131,21 @@ function startOrderStatisticsChangedListener(path) {
     widgetJq.addClass('OrderStatistics-error');
   }
 
-  getNext(0);
-}
+  function hideRefreshing() {
+    refreshElem.style.visibility = "hidden";
+    widgetJq.removeClass('OrderStatistics-error');
+  }
+
+  return (function() {
+    var state;
+    return {
+      start: function(path) {
+        state = start(path);
+        state.getNext();
+      },
+      togglePause: function() {
+        state.togglePause();
+      }
+    }
+  })();
+})()

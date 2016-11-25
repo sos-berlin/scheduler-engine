@@ -126,7 +126,7 @@ extends SchedulerHtmlPage {
 
   private def orderStatistics: Frag =
     div(clear.both, marginTop := 1.em, marginBottom := 2.em)(
-      new JocOrderStatisticsWidget(uris, OrderQuery.All, title = "JocOrderStatistics").html)
+      new JocOrderStatisticsWidget(uris, OrderQuery.All, caption = "JocOrderStatistics").html)
 
   private def commandInput: Frag =
     form(action := "api/command", method := "get", clear.both)(

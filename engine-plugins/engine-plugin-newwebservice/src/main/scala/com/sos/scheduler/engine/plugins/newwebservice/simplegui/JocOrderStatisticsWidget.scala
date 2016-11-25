@@ -13,7 +13,7 @@ import scalatags.Text.all._
 /**
   * @author Joacim Zschimmer
   */
-final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, title: String = "", markActive: Boolean = false) {
+final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery, caption: String = "", markActive: Boolean = false) {
 
   import orderQuery.nodeQuery.jobChainQuery.pathQuery
 
@@ -74,11 +74,11 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
 
   private def header: Frag = {
     val path = pathQuery.typedPath[JobChainPath]
-    (title.nonEmpty || path != FolderPath.Root) option
+    (caption.nonEmpty || path != FolderPath.Root) option
       div(cls := "OrderStatistics-Header")(
-        title != "" option
+        caption != "" option
           a(cls := "inherit-markup", href := uris.order(orderQuery, returnType = None))(
-            title),
+            caption),
         path != FolderPath.Root option seqFrag(" ", path.companion.name, " ", path.string))
   }
 
@@ -89,6 +89,8 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
              query = rawQuery.copy(nodeQuery = rawQuery.nodeQuery.copy(jobChainQuery = rawQuery.jobChainQuery.copy(isDistributed = Some(false)))))
         yield
           div(id := s"order-$name-field", cls := "OrderStatistics-field")(
+            name == TimestampName option
+              span(id := "OrderStatistics-pause", cls := "glyphicon glyphicon-pause", title := "Pause", onclick := "jocOrderStatisticsWidget.togglePause()"),
             a(cls := "inherit-markup", href := uris.order(query, returnType = None))(
               if (name == TimestampName)
                 timestampField
@@ -112,7 +114,7 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
   }
 
   private def javascript =
-    s"jQuery(function() { startOrderStatisticsChangedListener('${pathQuery.toUriPath}') });"
+    s"jQuery(function() { jocOrderStatisticsWidget.start('${pathQuery.toUriPath}') });"
 }
 
 object JocOrderStatisticsWidget {
