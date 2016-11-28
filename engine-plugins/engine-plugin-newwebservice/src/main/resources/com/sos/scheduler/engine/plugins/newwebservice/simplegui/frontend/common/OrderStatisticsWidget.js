@@ -1,7 +1,7 @@
 var jocOrderStatisticsWidget = (function() {
   var widgetJq;
   var refreshElem;
-  var tryAgainTimeoutSeconds = 10
+  var tryAgainTimeoutSeconds = 10;
   var keys = [
     "total",
     "notPlanned",
@@ -28,7 +28,7 @@ var jocOrderStatisticsWidget = (function() {
     widgetJq = $('#OrderStatistics');
     refreshElem = document.getElementById('OrderStatistics-refresh');
     var i, key;
-    for (i in keys) {
+    for (i in keys) if (keys.hasOwnProperty(i)) {
       key = keys[i];
       fields[key] = {
         fieldDom: document.getElementById('order-' + key + "-field"),
@@ -45,7 +45,7 @@ var jocOrderStatisticsWidget = (function() {
   }
 
   function getNext() {
-    var requestedAt = new Date()
+    var requestedAt = new Date();
     ajax = jQuery.ajax({
       dataType: 'json',
       url: urlPrefix + lastEventId
@@ -53,7 +53,7 @@ var jocOrderStatisticsWidget = (function() {
     ajax.done(function(eventSeq) {
       ajax = null;
       if (!paused) {
-        lastEventId = processEventSeq(eventSeq)
+        lastEventId = processEventSeq(eventSeq);
         if (!document.hidden) {
           setTimeout(getNext, 500);
         }
@@ -70,7 +70,7 @@ var jocOrderStatisticsWidget = (function() {
   }
 
   function togglePause() {
-    paused = !paused
+    paused = !paused;
     if (paused) {
       hideRefreshing();
       widgetJq.addClass('OrderStatistics-paused');
@@ -84,18 +84,18 @@ var jocOrderStatisticsWidget = (function() {
   }
 
   function documentVisibilityChanged() {
-    if (!document.hidden && !ajax) {
+    if (!paused && !document.hidden && !ajax) {
       getNext();
     }
   }
 
   function processEventSeq(eventSeq) {
-    showNewEvent(eventSeq.eventId)
+    showNewEvent(eventSeq.eventId);
     switch (eventSeq.TYPE) {
       case "NonEmpty":
-        var eventSnapshot = eventSeq.eventSnapshots[0]
+        var eventSnapshot = eventSeq.eventSnapshots[0];
         var orderStatistics = eventSnapshot.orderStatistics;
-        showOrderStatistics(orderStatistics)
+        showOrderStatistics(orderStatistics);
         current = orderStatistics;
         return eventSnapshot.eventId;
       case "Empty":  // Timed-out
@@ -106,20 +106,20 @@ var jocOrderStatisticsWidget = (function() {
   }
 
   function showNewEvent(eventId) {
-    hideRefreshing()
+    hideRefreshing();
     timestampValueDom.innerText = new Date(eventId / 1000).toTimeString().substring(0, 8);
   }
 
   function showOrderStatistics(orderStatistics) {
-    for (i in keys) {
+    for (var i in keys) if (keys.hasOwnProperty(i)) {
       var key = keys[i];
       if (orderStatistics[key] !== current[key]) {
         var field = fields[key];
         field.valueDom.innerText = orderStatistics[key].toString();
         if (typeof current[key] !== "undefined") {  // Not the first change?
-          var style = field.fieldDom.style
+          var style = field.fieldDom.style;
           // 'alt' alternates between 1 and 0 to force the animation to restart
-          var alt = 1 - 1 * style.animationName.substring(style.animationName.length - 1)
+          var alt = 1 - 1 * style.animationName.substring(style.animationName.length - 1);
           style.animationName = orderStatistics[key] > current[key]? 'OrderStatistics-higher-' + alt : 'OrderStatistics-lower-' + alt;
         }
       }
@@ -148,4 +148,4 @@ var jocOrderStatisticsWidget = (function() {
       }
     }
   })();
-})()
+})();

@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{EmptyFrag, seqFrag}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
 import scala.collection.immutable.Seq
@@ -74,15 +74,15 @@ extends SchedulerHtmlPage {
           td(eventName),
           event match {
             case OrderFinished(nodeId: NodeId) ⇒ td(nodeId)
-            case OrderNestedFinished ⇒ seqFrag()
-            case OrderNestedStarted ⇒ seqFrag()
+            case OrderNestedFinished ⇒ EmptyFrag
+            case OrderNestedStarted ⇒ EmptyFrag
             case OrderNodeChanged(nodeId, fromNodeId) ⇒ seqFrag(td(nodeId), td("← ", fromNodeId))
-            case OrderResumed ⇒ seqFrag()
+            case OrderResumed ⇒ EmptyFrag
             case OrderSetBack(nodeId) ⇒ td(nodeId)
             case OrderStepEnded(stateTransition) ⇒ td(stateTransition.toString)
             case OrderStepStarted(nodeId, taskId) ⇒ seqFrag(td(nodeId), td(taskId))
-            case OrderSuspended ⇒ seqFrag()
-            case OrderStarted ⇒ seqFrag()
+            case OrderSuspended ⇒ EmptyFrag
+            case OrderStarted ⇒ EmptyFrag
             case _ ⇒ td(colspan := 3, event.toString)
           })
       case KeyedEvent(_, e: Logged) ⇒

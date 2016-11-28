@@ -144,7 +144,7 @@ trait OrderRoute extends LogRoute {
         reject
     }
 
-  private def orderStatisticsChanged(query: PathQuery): Route = {
+  private def orderStatisticsChanged(query: PathQuery): Route =
     eventRequest(classOf[Event]) {
       case EventRequest(eventClass, afterEventId, timeout, limit) if eventClass == classOf[JocOrderStatisticsChanged] ⇒
         completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
@@ -154,7 +154,6 @@ trait OrderRoute extends LogRoute {
       case _ ⇒
         reject
     }
-  }
 }
 
 object OrderRoute {

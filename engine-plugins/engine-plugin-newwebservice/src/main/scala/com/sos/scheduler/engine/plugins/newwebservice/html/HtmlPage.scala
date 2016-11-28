@@ -16,23 +16,25 @@ trait HtmlPage {
 }
 
 object HtmlPage {
+  val EmptyFrag: Frag = SeqFrag[Frag](Nil)
   private val logger = Logger(getClass)
 
-  implicit val marshaller = Marshaller.of[HtmlPage](`text/html`) { (htmlPage, contentType, ctx) ⇒
-    try {
-      val sb = new StringBuilder(10000)
-      sb.append("<!DOCTYPE html>")
-      htmlPage.wholePage.writeTo(sb)
-      ctx.marshalTo(HttpEntity(contentType, sb.toString))
-    } catch {
-      case e: OutOfMemoryError ⇒
-        logger.error(e.toString)
-        throw new RuntimeException(e.toString, e)  // Too avoid termination of Akka
+  implicit val marshaller: Marshaller[HtmlPage] =
+    Marshaller.of[HtmlPage](`text/html`) { (htmlPage, contentType, ctx) ⇒
+      try {
+        val sb = new StringBuilder(10000)
+        sb.append("<!DOCTYPE html>")
+        htmlPage.wholePage.writeTo(sb)
+        ctx.marshalTo(HttpEntity(contentType, sb.toString))
+      } catch {
+        case e: OutOfMemoryError ⇒
+          logger.error(e.toString)
+          throw new RuntimeException(e.toString, e)  // To avoid termination of Akka
+      }
     }
-  }
 
   def joinHtml(glue: Frag)(elements: Iterable[Frag]): Frag =
-    elements reduce { (a, b) ⇒ seqFrag(Vector(a, glue, b)) }
+    elements reduce { (a, b) ⇒ seqFrag(a, glue, b) }
 
-  def seqFrag(frags: Frag*) = SeqFrag(frags)
+  def seqFrag(frags: Frag*): Frag = SeqFrag(frags)
 }

@@ -14,14 +14,14 @@ import com.sos.scheduler.engine.data.order.OrderProcessingState._
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{EmptyFrag, joinHtml, seqFrag}
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.toVersionedUriPath
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
 import scala.collection.immutable
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text.all._
 import spray.http.Uri
 
@@ -93,57 +93,55 @@ extends SchedulerHtmlPage {
           tr(td(textAlign.right)(s"$blacklistedCount")         , td("blacklisted")))))
   }
 
-  private def wholeFolderTreeToHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
+  private def wholeFolderTreeToHtml(tree: FolderTree[OrderOverview]): Frag =
     if (tree.isEmpty)
-      List(div(cls := "Padded", paddingTop := 4.em)(
-        "No order meets selection criteria."))
+      div(cls := "Padded", paddingTop := 4.em)(
+        "No order meets selection criteria.")
     else
       folderTreeToHtml(tree)
 
-  private def folderTreeToHtml(tree: FolderTree[OrderOverview]): immutable.Seq[Frag] =
-    folderToHtml(tree.path, tree.leafs) ++
-    (for (folder ← tree.subfolders; o ← folderTreeToHtml(folder)) yield o)
+  private def folderTreeToHtml(tree: FolderTree[OrderOverview]): Frag =
+    seqFrag(
+      folderToHtml(tree.path, tree.leafs),
+      for (folder ← tree.subfolders) yield folderTreeToHtml(folder))
 
   private def folderToHtml(folderPath: FolderPath, orders: immutable.Seq[OrderOverview]) =
     if (orders.isEmpty)
-      Nil
+      EmptyFrag
     else
-      Vector(
+      seqFrag(
         h2(cls := "Folder Padded")(
-          folderPathToOrdersA(folderPath)("Folder ", folderPath.string))) ++
-      folderOrdersToHtml(orders)
+          folderPathToOrdersA(folderPath)("Folder ", folderPath.string)),
+        folderOrdersToHtml(orders))
 
-  private def folderOrdersToHtml(orders: immutable.Seq[OrderOverview]): Vector[Frag] =
-    for ((jobChainPath, jobChainOrders) ← orders retainOrderGroupBy { _.orderKey.jobChainPath };
-         o ← jobChainOrdersToHtml(jobChainPath, jobChainOrders))
-      yield o
+  private def folderOrdersToHtml(orders: immutable.Seq[OrderOverview]): Frag =
+    for ((jobChainPath, jobChainOrders) ← orders retainOrderGroupBy { _.orderKey.jobChainPath })
+      yield jobChainOrdersToHtml(jobChainPath, jobChainOrders)
 
   private def jobChainOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]) =
-    List(
-      div(cls := "ContentBox JobChain", clear.both)(
-        div(cls := "Padded")(
-          div(float.right)(
-            jobChainPathToA(jobChainPath)("→definition")),
-          h3(cls := "JobChain")(
-            jobChainPathToOrdersA(jobChainPath)("JobChain ", jobChainPath.string),
-            span(paddingLeft := 10.px)(" "))),
-        nodeOrdersToHtml(jobChainPath, orders)))
+    div(cls := "ContentBox JobChain", clear.both)(
+      div(cls := "Padded")(
+        div(float.right)(
+          jobChainPathToA(jobChainPath)("→definition")),
+        h3(cls := "JobChain")(
+          jobChainPathToOrdersA(jobChainPath)("JobChain ", jobChainPath.string),
+          span(paddingLeft := 10.px)(" "))),
+      nodeOrdersToHtml(jobChainPath, orders))
 
-  private def nodeOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]): Vector[Frag] =
+  private def nodeOrdersToHtml(jobChainPath: JobChainPath, orders: immutable.Seq[OrderOverview]): Frag = {
     for ((nodeId, orders) ← orders retainOrderGroupBy { _.nodeId }) yield {
       val jobPath = nodeKeyToOverview(NodeKey(jobChainPath, nodeId)).jobPath
       div(cls := "NodeOrders")(
-        div(cls := "Padded")(
-          div(cls := "NodeHeadline")("Node ", nodeId.string, " \u00a0 ", jobPath.string)),
+        div(cls := "Padded NodeHeadline")("Node ", nodeId.string, " \u00a0 Job ", jobPath.string),
         ordersToTable(orders))
     }
+  }
 
   private def ordersToTable(orders: immutable.Seq[OrderOverview]): Frag =
     table(cls := "table table-condensed table-hover")(
       thead(
         tr(
           th("OrderId"),
-          th(div(cls := "visible-lg-block")("SourceType")),
           th("Started"),
           th("OrderProcessingState"),
           th("Obstacles"))),
@@ -153,18 +151,15 @@ extends SchedulerHtmlPage {
   private def orderToTr(order: OrderOverview) = {
     val processingStateHtml: Frag = order.orderProcessingState match {
       case Planned(at) ⇒ instantWithDurationToHtml(at)
-      case Due(at) ⇒ joinHtml(" ")((at != EPOCH list instantWithDurationToHtml(at)) ++ Array(stringFrag("Due")))
-      case Setback(at) ⇒ seqFrag("Set back until ", instantWithDurationToHtml(at))
+      case Due(at) ⇒ seqFrag("Due", if (at == EPOCH) EmptyFrag else seqFrag(" since ", instantWithDurationToHtml(at)))
+      case Setback(at) ⇒ seqFrag("Setback, next try ", instantWithDurationToHtml(at))
       case inTask: InTask ⇒
         val taskId = inTask.taskId
         val jobPath = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath.string } getOrElse "(unknown job)"
-        val taskHtml = seqFrag(
-          b(
-            span(cls := "visible-lg-inline")(
-              taskToA(taskId)("Task ", jobPath, ":", taskId.string))))
+        val taskHtml = b(taskToA(taskId)("Task ", taskId.string))
         inTask match {
-          case _: WaitingInTask ⇒ seqFrag(taskHtml, " waiting for process")
-          case o: InTaskProcess ⇒ seqFrag(taskHtml, " since ", instantWithDurationToHtml(o.since))
+          case _: WaitingInTask ⇒ seqFrag(taskHtml, " WaitingInTask")
+          case o: InTaskProcess ⇒ seqFrag(taskHtml, " InTaskProcess since ", shortInstantWithDurationToHtml(o.since))
        }
       case o ⇒ stringFrag(o.toString)
     }
@@ -187,7 +182,6 @@ extends SchedulerHtmlPage {
     val rowCssClass = orderToTrClass(order) getOrElse (if (order.orderProcessingState.isWaiting && nodeObstaclesHtml.nonEmpty) "warning" else "")
     tr(cls := s"$rowCssClass clickable", data("href") := uris.order[OrderDetailed](order.orderKey))(
       td(order.orderKey.id.string),
-      td(div(cls := "visible-lg-block")(order.orderSourceType.toString)),
       td(order.startedAt map instantWithDurationToHtml),
       td(processingStateHtml, occupyingMemberHtml),
       td(obstaclesHtml))
@@ -223,7 +217,7 @@ object OrdersHtmlPage {
     query: OrderQuery,
     client: SchedulerOverviewClient,
     webServiceContext: WebServiceContext)
-    (implicit ec: ExecutionContext)
+    (implicit ec: ExecutionContext): Future[OrdersHtmlPage]
   =
     for (schedulerOverviewResponse ← client.overview) yield
       new OrdersHtmlPage(snapshot, pageUri, query, schedulerOverviewResponse.value, webServiceContext.uris)

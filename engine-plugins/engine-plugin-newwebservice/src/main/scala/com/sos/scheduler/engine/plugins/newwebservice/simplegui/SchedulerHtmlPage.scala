@@ -48,7 +48,7 @@ trait SchedulerHtmlPage extends HtmlPage {
     seqFrag(
       meta(httpEquiv := "X-UA-Compatible", content := "IE=edge"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
-      tags2.title(s"$pageTitle · ${schedulerOverview.schedulerId}"),
+      tags2.title(pageTitle, " · ", schedulerOverview.schedulerId.string),
       css,
       javascript,
       link(rel := "icon", "sizes".attr := "64x64", `type` := "image/vnd.microsoft.icon",
@@ -114,7 +114,7 @@ trait SchedulerHtmlPage extends HtmlPage {
   }
 
   private def menu: Frag =
-    ul(cls := "nav navbar-nav ")(
+    ul(cls := "nav navbar-nav")(
       navBarTab("Orders"         , uris.order(OrderQuery.All, returnType = None)),
       navBarTab("Job chains"     , uris.jobChain.overviews()),
       navBarTab("Jobs"           , uris.job[JobOverview](PathQuery.All)),
@@ -146,17 +146,19 @@ private[simplegui] object SchedulerHtmlPage {
   private val RabbitPicturePath =
     toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))
 
-  def fileBasedStateToHtml(fileBasedState: FileBasedState) =
+  def fileBasedStateToHtml(fileBasedState: FileBasedState): Frag =
     span(cls := fileBasedStateToBootstrapTextClass(fileBasedState))(fileBasedState.toString)
 
-  def fileBasedStateToBootstrapTextClass(o: FileBasedState) = o match {
-    case FileBasedState.active ⇒ "text-success"
-    case FileBasedState.incomplete ⇒ "text-danger"
-    case FileBasedState.undefined ⇒ "text-danger"
-    case _ ⇒ ""
-  }
+  def fileBasedStateToBootstrapTextClass(o: FileBasedState): String =
+    o match {
+      case FileBasedState.active ⇒ "text-success"
+      case FileBasedState.incomplete ⇒ "text-danger"
+      case FileBasedState.undefined ⇒ "text-danger"
+      case _ ⇒ ""
+    }
 
-  def midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
+  def midnightInstant: Instant =
+    Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
   def eventIdToLocalHtml(eventId: EventId, withDateBefore: Instant = Instant.MAX, withSubseconds: Boolean = true): Frag = {
     val instant = EventId.toInstant(eventId)
@@ -166,7 +168,7 @@ private[simplegui] object SchedulerHtmlPage {
   }
 
   def subsecondsToHtml(instant: Instant): Frag =
-    span(cls := "time-extra")(s".${formatDateTime(instant, LocalMillisFormatter)}")
+    span(cls := "time-extra")(".", formatDateTime(instant, LocalMillisFormatter))
 
   def instantWithDurationToHtml(instant: Instant): Frag =
     if (instant == Instant.EPOCH)
@@ -174,7 +176,15 @@ private[simplegui] object SchedulerHtmlPage {
     else
       seqFrag(
         instantToHtml(instant, LocalDateTimeFormatter),
-        span(cls := "time-extra")(", ", formatDateTime(instant, LocalMillisFormatter), " ", (now - instant).pretty))
+        span(cls := "time-extra")(".", formatDateTime(instant, LocalMillisFormatter), " (", (now - instant).pretty), ")")
+
+  def shortInstantWithDurationToHtml(instant: Instant): Frag =
+    if (instant == Instant.EPOCH)
+      "immediately"
+    else
+      seqFrag(
+        instantToHtml(instant, ShortLocalTimeFormatter),
+        span(cls := "time-extra")(" (", (now - instant).pretty), ")")
 
   private val LocalTimeFormatter = new DateTimeFormatterBuilder()
     .appendValue(HOUR_OF_DAY, 2)
@@ -188,6 +198,12 @@ private[simplegui] object SchedulerHtmlPage {
     .append(ISO_LOCAL_DATE)
     .appendLiteral(' ')
     .append(LocalTimeFormatter)
+    .toFormatter
+
+  private val ShortLocalTimeFormatter = new DateTimeFormatterBuilder()
+    .appendValue(HOUR_OF_DAY, 2)
+    .appendLiteral(':')
+    .appendValue(MINUTE_OF_HOUR, 2)
     .toFormatter
 
   private val LocalMillisFormatter = new DateTimeFormatterBuilder()
@@ -205,7 +221,7 @@ private[simplegui] object SchedulerHtmlPage {
   private def instantToHtml(instant: Instant, formatter: DateTimeFormatter) =
     StringFrag(formatDateTime(instant, formatter))
 
-  def localDateTimeWithZoneToHtml(instant: Instant) =
+  def localDateTimeWithZoneToHtml(instant: Instant): Frag =
     raw(formatDateTime(instant, LocalDateTimeWithZoneFormatter))
 
   private def formatDateTime(instant: Instant, formatter: DateTimeFormatter): String =

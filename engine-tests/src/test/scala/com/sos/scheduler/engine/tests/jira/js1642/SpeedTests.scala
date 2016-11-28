@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderOverview}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderDetailed, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.tests.jira.js1642.SpeedTests._
 import org.scalatest.FreeSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import spray.http.MediaTypes._
-import spray.http.{HttpData, HttpEntity}
+import spray.http.{HttpData, HttpEntity, Uri}
 import spray.httpx.unmarshalling.Unmarshaller
 
 /**
@@ -79,7 +79,7 @@ private[js1642] trait SpeedTests {
           logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
         }
 
-        "OrdersComplemented" in {
+        "OrdersComplemented/OrdersOverview" in {
           for (_ ← 1 to 40) {
             val stopwatch = new Stopwatch
             implicit val fastUnmarshaller = Unmarshaller[HttpData](`application/json`) {
@@ -87,7 +87,31 @@ private[js1642] trait SpeedTests {
             }
             webSchedulerClient.get[HttpData](_.order.complemented[OrderOverview](OrderQuery(JobChainQuery(isDistributed = Some(false))))) await TestTimeout
             val s = stopwatch.itemsPerSecondString(n, "order")
-            logger.info(s"OrdersComplemented $testName: $s")
+            logger.info(s"OrdersComplemented/OrderOverview $testName: $s")
+          }
+        }
+
+        "OrdersComplemented/OrdersDetailed" in {
+          for (_ ← 1 to 40) {
+            val stopwatch = new Stopwatch
+            implicit val fastUnmarshaller = Unmarshaller[HttpData](`application/json`) {
+              case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
+            }
+            webSchedulerClient.get[HttpData](_.order.complemented[OrderDetailed](OrderQuery(JobChainQuery(isDistributed = Some(false))))) await TestTimeout
+            val s = stopwatch.itemsPerSecondString(n, "order")
+            logger.info(s"OrdersComplemented/OrderDetailed $testName: $s")
+          }
+        }
+
+        "OrderHtmlPage" in {
+          for (_ ← 1 to 40) {
+            val stopwatch = new Stopwatch
+            implicit val fastUnmarshaller = Unmarshaller[HttpData](`text/html`) {
+              case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
+            }
+            webSchedulerClient.get[HttpData](_.uriString(Uri.Path("api/order/"), "isDistributed" → "false"), accept = `text/html`) await TestTimeout
+            val s = stopwatch.itemsPerSecondString(n, "order")
+            logger.info(s"OrderHtmlPage $testName: $s")
           }
         }
 
