@@ -31,6 +31,5 @@
 }
 
 .OrderSelection-LimitPerNode-Submit {
-  vertical-align: bottom;
-  text-align: right
+  padding-left: 1ex;
 }

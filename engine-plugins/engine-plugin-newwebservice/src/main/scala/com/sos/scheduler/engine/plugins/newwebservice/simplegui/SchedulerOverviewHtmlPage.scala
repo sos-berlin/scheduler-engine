@@ -117,11 +117,11 @@ extends SchedulerHtmlPage {
       div(
         "Started at ",
         instantWithDurationToHtml(startedAt)),
-      for (o ← httpPort) yield
-        div(s" HTTP port $o"),
-      for (o ← httpsPort) yield
-        div(s" HTTPS port $o"),
-      div(s"PID $pid"),
+      //for (o ← httpPort) yield
+      //  div(s" HTTP port $o"),
+      //for (o ← httpsPort) yield
+      //  div(s" HTTPS port $o"),
+      //div(s"PID $pid"),
       div(b(state.toString)))
 
   private def orderStatistics: Frag =

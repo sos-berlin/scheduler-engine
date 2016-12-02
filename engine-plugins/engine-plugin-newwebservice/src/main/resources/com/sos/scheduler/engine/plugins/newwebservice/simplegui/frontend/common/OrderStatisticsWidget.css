@@ -64,6 +64,8 @@
 .OrderStatistics-fieldGroup {
   float: left;
   white-space: nowrap;
+  margin-right: 3px;
+  margin-bottom: 0.5ex;
 }
 
 .OrderStatistics-field {
@@ -75,8 +77,7 @@
   border-radius: 3px;
   float: left;
   width: 14ex;
-  margin-top: 2px;
-  margin-right: 1ex;
+  margin: 2px 0.5ex 0 0.5ex;
 }
 
 .OrderStatistics-field-Active {
@@ -118,4 +119,14 @@
 
 .OrderStatistics-paused #OrderStatistics-pause {
   color: red;
+}
+
+.OrderStatistics-value {
+  position: absolute;
+}
+
+.OrderStatistics-bar {
+  height: 1.4em;
+  border-bottom: #ff00ff solid 1px;
+  /*background-color: #ffffea;*/
 }

@@ -10,6 +10,7 @@ var jocOrderStatisticsWidget = (function() {
     "started",
     "inTask",
     "inTaskProcess",
+    "waitingForResource",
     "setback",
     "suspended",
     "blacklisted",
@@ -32,7 +33,8 @@ var jocOrderStatisticsWidget = (function() {
       key = keys[i];
       fields[key] = {
         fieldDom: document.getElementById('order-' + key + "-field"),
-        valueDom: document.getElementById('order-' + key + "-value")
+        valueDom: document.getElementById('order-' + key + "-value"),
+        barDom: document.getElementById('order-' + key + "-bar")
       }
     }
     timestampValueDom = document.getElementById('order-timestamp-value');
@@ -115,7 +117,10 @@ var jocOrderStatisticsWidget = (function() {
       var key = keys[i];
       if (orderStatistics[key] !== current[key]) {
         var field = fields[key];
-        field.valueDom.innerText = orderStatistics[key].toString();
+        var total = orderStatistics.total;
+        var value = orderStatistics[key];
+        field.valueDom.innerText = value.toString();
+        field.barDom.style.width = total === 0 ? "0%" : Math.floor(value / total * 100 + 0.5) + "%";
         if (typeof current[key] !== "undefined") {  // Not the first change?
           var style = field.fieldDom.style;
           // 'alt' alternates between 1 and 0 to force the animation to restart

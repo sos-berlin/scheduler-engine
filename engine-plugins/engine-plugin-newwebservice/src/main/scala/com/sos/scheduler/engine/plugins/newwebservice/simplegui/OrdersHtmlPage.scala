@@ -70,7 +70,7 @@ extends SchedulerHtmlPage {
       div(float.right)(
         orderSelectionStatistics),
       div(float.right)(
-        new OrderSelectionWidget(query).html),
+        new OrderSelectionWidget(queryToUri, query).html),
       div(clear.both)(
         query.jobChainQuery.pathQuery match {
           case single: PathQuery.SinglePath ⇒ div(jobChainOrdersToHtml(single.as[JobChainPath], ordersComplemented.orders))
@@ -187,11 +187,15 @@ extends SchedulerHtmlPage {
       td(obstaclesHtml))
   }
 
-  private def folderPathToOrdersA(path: FolderPath) = queryToA(query.copy(nodeQuery = JobChainNodeQuery(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path)))))
+  private def folderPathToOrdersA(path: FolderPath) =
+    queryToA(query.copy(nodeQuery = JobChainNodeQuery(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path)))))
 
-  private def jobChainPathToOrdersA(path: JobChainPath) = queryToA(query.copy(nodeQuery = JobChainNodeQuery(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path)))))
+  private def jobChainPathToOrdersA(path: JobChainPath) =
+    queryToA(query.copy(nodeQuery = JobChainNodeQuery(jobChainQuery = query.jobChainQuery.copy(pathQuery = PathQuery(path)))))
 
-  private def queryToA(query: OrderQuery) = hiddenA(uris.order(query, returnType = None))
+  private def queryToA(query: OrderQuery) = hiddenA(queryToUri(query))
+
+  private def queryToUri(query: OrderQuery) = uris.order(query, returnType = None)
 
   private def jobChainPathToA(path: JobChainPath) = hiddenA(uris.jobChain.detailed(path))
 

@@ -17,48 +17,51 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
 
   import orderQuery.nodeQuery.jobChainQuery.pathQuery
 
-  private val fieldGroups: List[List[(String, OrderQuery)]] = {
+  private val fieldGroups: List[List[(String, String, OrderQuery)]] = {
     import OrderProcessingState._
     import OrderSourceType._
     val q = OrderQuery(pathQuery, notInTaskLimitPerNode = orderQuery.notInTaskLimitPerNode)
     List(  // Best layout in small window if groups have same size
       List(
-        TimestampName → orderQuery),
+        (TimestampName, TimestampName, orderQuery)),
       List(
-        "total" → q,
-        "fileOrder" → q.copy(
-          isOrderSourceType = Some(Set(FileOrder))),
-        "permanent" → q.copy(
-          isOrderSourceType = Some(Set(Permanent)))),
+        ("total", "total", q),
+        ("fileOrder", "fileOrder", q.copy(
+          isOrderSourceType = Some(Set(FileOrder)))),
+        ("permanent", "permanent", q.copy(
+          isOrderSourceType = Some(Set(Permanent))))),
       List(
-        "notPlanned" → q.copy(
+        ("notPlanned", "notPlanned", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(NotPlanned.getClass))),
-        "planned" → q.copy(
+          isOrderProcessingState = Some(Set(NotPlanned.getClass)))),
+        ("planned", "planned", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[Planned]))),
-        "due" → q.copy(
+          isOrderProcessingState = Some(Set(classOf[Planned])))),
+        ("due", "due", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[Due])))),
+          isOrderProcessingState = Some(Set(classOf[Due]))))),
       List(
-        "started" → q.copy(
+        ("started", "started", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback]))),
-        "inTask" → q.copy(
+          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess], classOf[OccupiedByClusterMember], WaitingForResource.getClass, classOf[Setback])))),
+        ("inTask", "inTask", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess]))),
-        "inTaskProcess" → q.copy(
+          isOrderProcessingState = Some(Set(classOf[WaitingInTask], classOf[InTaskProcess])))),
+        ("inTaskProcess", "inProcess", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[InTaskProcess])))),
+          isOrderProcessingState = Some(Set(classOf[InTaskProcess]))))),
       List(
-        "setback" → q.copy(
+        ("waitingForResource", "waiting", q.copy(
           isSuspended = Some(false),
-          isOrderProcessingState = Some(Set(classOf[Setback]))),
-        "suspended" → q.copy(
-          isSuspended = Some(true)),
-        "blacklisted" → q.copy(
+          isOrderProcessingState = Some(Set(WaitingForResource.getClass)))),
+        ("setback", "setback", q.copy(
           isSuspended = Some(false),
-          isBlacklisted = Some(true))))
+          isOrderProcessingState = Some(Set(classOf[Setback])))),
+        ("suspended", "suspended", q.copy(
+          isSuspended = Some(true))),
+        ("blacklisted", "blacklisted", q.copy(
+          isSuspended = Some(false),
+          isBlacklisted = Some(true)))))
   }
 
   def html: Frag =
@@ -67,7 +70,7 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
       raw("<script type='text/javascript'>" + javascript + "</script>"))
 
   private def onlyHtml: Frag =
-    div(id := "OrderStatistics", cls := "ContentBox")(
+    div(id := "OrderStatistics")(
       header,
       fields,
       div(clear.left))
@@ -84,8 +87,8 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
 
   private def fields: Frag =
     for (nameGroup ← fieldGroups) yield
-      div(cls := "OrderStatistics-fieldGroup")(
-        for ((name, rawQuery) ← nameGroup;
+      div(cls := "OrderStatistics-fieldGroup ContentBox")(
+        for ((name, displayName, rawQuery) ← nameGroup;
              query = rawQuery.copy(nodeQuery = rawQuery.nodeQuery.copy(jobChainQuery = rawQuery.jobChainQuery.copy(isDistributed = Some(false)))))
         yield
           div(id := s"order-$name-field", cls := "OrderStatistics-field")(
@@ -95,18 +98,21 @@ final class JocOrderStatisticsWidget(uris: SchedulerUris, orderQuery: OrderQuery
               if (name == TimestampName)
                 timestampField
               else
-                valueField(name, query))))
+                valueField(name, displayName, query))))
 
   private def timestampField: Frag =
     seqFrag(
       span(id := "order-timestamp-value"),
       span(id := "OrderStatistics-refresh", cls := "glyphicon glyphicon-refresh"))
 
-  private def valueField(name: String, query: OrderQuery) = {
-    val frag = seqFrag(
-      name,
-      "\u2009",
-      span(id := s"order-$name-value"))
+  private def valueField(name: String, displayName: String, query: OrderQuery) = {
+    val frag =
+      div(
+        span(cls := "OrderStatistics-value")(
+          displayName,
+          "\u2009",
+          span(id := s"order-$name-value")),
+        div(id := s"order-$name-bar", cls := "OrderStatistics-bar", width := 0))
     if (markActive && query == orderQuery)
       span(cls := "OrderStatistics-field-Active")(frag)
     else

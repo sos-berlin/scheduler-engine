@@ -2,18 +2,21 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
-import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery}
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
+import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{EmptyFrag, seqFrag}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderSelectionWidget._
 import scalatags.Text.all._
 import scalatags.Text.attrs
+import spray.http.Uri
 import spray.json._
 
 /**
   * @author Joacim Zschimmer
   */
-private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
+private[simplegui] final class OrderSelectionWidget(queryToUri: OrderQuery ⇒ String, query: OrderQuery) {
 
   def html: Frag = seqFrag(
     raw(s"<script type='text/javascript'>$javascript</script>"),
@@ -32,11 +35,8 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
               orderProcessingStatesHtml,
               orIsSuspendedHtml),
             td(cls := "OrderSelection-LimitPerNode")(
-              limitPerNodeInputHtml(query.notInTaskLimitPerNode))),
-          tr(
-            td(cls := "OrderSelection-LimitPerNode-Submit", colspan := 4)(
-              button(`type` := "submit")(
-                StringFrag("Show"))))))))
+              limitPerNodeInputHtml(query.notInTaskLimitPerNode),
+              deepFoldersHtml))))))
 
   private def booleanCheckBoxes =
     for ((key, valueOption) ← List(OrderQuery.IsSuspendedName → query.isSuspended,
@@ -101,7 +101,27 @@ private[simplegui] final class OrderSelectionWidget(query: OrderQuery) {
           width := 9.ch,
           `type` := "number",
           attrs.min := 0,
-          attrs.value := limitPerNode map { _.toString } getOrElse "")))
+          attrs.value := limitPerNode map { _.toString } getOrElse ""),
+        span(cls := "OrderSelection-LimitPerNode-Submit", colspan := 4)(
+          button(`type` := "submit")(
+            StringFrag("Show")))))
+
+  private def deepFoldersHtml =
+    query.jobChainQuery.pathQuery match {
+      case pathQuery: PathQuery.Folder ⇒
+        val name = "isRecursive"
+        val checked = pathQuery.isRecursive
+        val q = for (b ← Array(false, true)) yield
+          queryToUri(query.copy(nodeQuery = query.nodeQuery.copy(jobChainQuery = query.jobChainQuery.copy(pathQuery = query.jobChainQuery.pathQuery.withRecursive(b)))))
+        val onClick = s"javascript:window.location.href = document.getElementsByName('$name')[0].checked ? '${q(1)}' : '${q(0)}'"
+        div(marginTop := 1.em)(
+          label(
+            input(attrs.name := name, `type` := "checkbox", checked option attrs.checked,
+              attrs.onclick := onClick),
+            span(position.relative, top := (-2).px)(
+              boldIf(checked)("nested folders"))))
+      case o ⇒ EmptyFrag
+    }
 
   private def javascript = {
     val orderJson = JsObject(toPathAndParameters(query)._2 mapValues JsString.apply).toString
