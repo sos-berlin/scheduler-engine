@@ -14,6 +14,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.End_nodeC {
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public int action() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return action__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int action__native(long cppReference);
+
+
     @Override public long delay() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -47,19 +58,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.End_nodeC {
     }
 
     private static native void set_action_string__native(long cppReference, java.lang.String p0);
-
-
-    @Override public java.lang.String string_action() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            java.lang.String result = string_action__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native java.lang.String string_action__native(long cppReference);
 
 
     @Override public java.lang.String string_error_state() {

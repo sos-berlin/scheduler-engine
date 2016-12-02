@@ -2,11 +2,14 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.data.event.{AnyEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{events, singleKeyEvents}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent._
 import spray.json.DefaultJsonProtocol._
@@ -36,12 +39,19 @@ trait JobChainRoute {
     returnType match {
       case Some("JobChainOverview") ⇒ completeTryHtml(client.jobChainOverview(jobChainPath))
       case Some("JobChainDetailed") | None ⇒ completeTryHtml(client.jobChainDetailed(jobChainPath))
-      case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
+      case Some(o) ⇒ singleKeyEvents[AnyEvent](jobChainPath)
     }
 
   private def multipleJobChainsRoute(query: JobChainQuery, returnType: Option[String]): Route =
     returnType match {
-      case Some("JobChainOverview") | None ⇒ completeTryHtml(client.jobChainOverviewsBy(query))
-      case Some(o) ⇒ reject(ValidationRejection(s"Not allowed return=$o"))
+      case Some("JobChainOverview") | None ⇒
+        completeTryHtml(client.jobChainOverviewsBy(query))
+      case Some(o) ⇒
+        events[Event](
+          predicate = {
+            case KeyedEvent(jobChainPath: JobChainPath, _) ⇒ query.pathQuery.matches(jobChainPath)
+            case _ ⇒ false
+          })
+
     }
 }

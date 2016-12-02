@@ -115,6 +115,11 @@ final class SchedulerUris private(schedulerUri: Uri) {
       require(!subpath.endsWith("/"), "Invalid JobChainPath has trailing slash")
       uriString(Uri.Path(s"api/jobChain$subpath"), parameters)  // Default without trailing slash: query = Uri.Query("return" → "JobChainDetailed")))
     }
+
+    def events[E <: Event](query: JobChainQuery, eventRequest: SomeEventRequest[E]): String = {
+      val (subpath, parameters) = query.toPathAndParameters
+      uriString(Uri.Path(s"api/jobChain$subpath"), parameters ++ eventRequestToParameters(eventRequest))
+    }
   }
 
   object job {
@@ -123,6 +128,11 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
     def apply[V <: JobView: JobView.Companion](query: PathQuery): String =
       uriString(Uri.Path("api/job" + query.toUriPath), "return" → JobView.companion[V].name)
+
+    def events[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]): String = {
+      val (subpath, parameters) = query.toPathAndParameters[JobPath]
+      uriString(Uri.Path(s"api/job$subpath"), parameters ++ eventRequestToParameters(eventRequest))
+    }
   }
 
   object processClass {
@@ -142,6 +152,9 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
   object task {
     def overview(taskId: TaskId) = uriString(Uri.Path("api/task") / taskId.string)
+
+    def events[E <: Event](taskId: TaskId, eventRequest: SomeEventRequest[E]): String =
+      uriString(Uri.Path(s"api/task/${taskId.number}"), eventRequestToParameters(eventRequest): _*)
   }
 
   object agent {

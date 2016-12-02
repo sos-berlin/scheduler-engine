@@ -12,8 +12,10 @@ import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent, Snapshot, SomeEventRequest}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
+import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
-import com.sos.scheduler.engine.data.job.{JobPath, JobView}
+import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
@@ -130,6 +132,14 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.detailed(jobChainPath))
 
+  final def jobChainEvents[E <: Event](jobChainPath: JobChainPath, eventRequest: SomeEventRequest[E]) =
+    get[Snapshot[EventSeq[Seq, E]]](_.jobChain.events(jobChainPath, eventRequest))
+
+  final def jobChainEventsBy[E <: Event](query: JobChainQuery, eventRequest: SomeEventRequest[E]) = {
+    require(!query.pathQuery.isInstanceOf[PathQuery.SinglePath], "SinglePath not allowed here")  // Because it would return E, not KeyedEvent[E].
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.jobChain.events(query, eventRequest))
+  }
+
   // Job
 
   def job[V <: JobView: JobView.Companion](path: JobPath) =
@@ -137,6 +147,15 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   def jobs[V <: JobView: JobView.Companion](query: PathQuery) =
     get[Snapshot[immutable.Seq[V]]](_.job[V](query))
+
+  def jobEvents[E <: Event](jobPath: JobPath, eventRequest: SomeEventRequest[E]) =
+    get[Snapshot[EventSeq[Seq, E]]](_.job.events(PathQuery(jobPath), eventRequest))
+
+  def jobEventsBy[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]) =
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.job.events(query, eventRequest))
+
+  def taskEvents[E <: Event](taskId: TaskId, eventRequest: SomeEventRequest[E]) =
+    get[Snapshot[EventSeq[Seq, E]]](_.task.events(taskId, eventRequest))
 
   // ProcessClass
 

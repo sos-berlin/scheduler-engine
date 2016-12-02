@@ -187,23 +187,6 @@ static jboolean JNICALL is_1file_1based_1reread(JNIEnv* jenv, jobject, jlong cpp
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jboolean JNICALL is_1stopped(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::is_stopped()");
-        return (o_->is_stopped());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jboolean();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
 static jboolean JNICALL is_1to_1be_1removed(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -457,22 +440,6 @@ static void JNICALL set_1force_1file_1reread(JNIEnv* jenv, jobject, jlong cppRef
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static void JNICALL set_1stopped__Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::set_stopped()");
-        (o_->set_stopped(p0 != 0));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
 static jobject JNICALL source_1xml_1bytes(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -483,6 +450,23 @@ static jobject JNICALL source_1xml_1bytes(JNIEnv* jenv, jobject, jlong cppRefere
     catch(const exception& x) {
         env.set_java_exception(x);
         return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jint JNICALL state(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::state()");
+        return (o_->state());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
     }
 }
 
@@ -499,7 +483,6 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"is_distributed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1distributed },
     { (char*)"is_file_based__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based },
     { (char*)"is_file_based_reread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based_1reread },
-    { (char*)"is_stopped__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1stopped },
     { (char*)"is_to_be_removed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1to_1be_1removed },
     { (char*)"is_visible__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1visible },
     { (char*)"java_nodes__native", (char*)"(J)[Ljava/lang/Object;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1nodes },
@@ -515,8 +498,8 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"remove__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::remove },
     { (char*)"replacement_java__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/filebased/FileBased;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::replacement_1java },
     { (char*)"set_force_file_reread__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1force_1file_1reread },
-    { (char*)"set_stopped__native", (char*)"(JZ)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1stopped__Z },
-    { (char*)"source_xml_bytes__native", (char*)"(J)[B", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::source_1xml_1bytes }
+    { (char*)"source_xml_bytes__native", (char*)"(J)[B", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::source_1xml_1bytes },
+    { (char*)"state__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::state }
 };
 
 namespace zschimmer { namespace javabridge { 

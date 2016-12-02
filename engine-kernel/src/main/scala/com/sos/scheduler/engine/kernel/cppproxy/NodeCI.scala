@@ -7,7 +7,7 @@ trait NodeCI {
   def string_order_state: String
   def string_next_state: String
   def string_error_state: String
-  def string_action: String
+  def action: Int
   def set_action_string(o: String): Unit
   @CppExpression("$->delay().millis()")
   def delay: Long

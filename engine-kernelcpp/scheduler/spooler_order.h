@@ -884,11 +884,12 @@ struct Job_chain : Com_job_chain,
 {
     enum State      // Kann wegfallen, denn file_based_state() hat dieselbe Funktion
     {
-        s_under_construction,   // add_node() gesperrt, add_order() frei
-        s_initialized,          
-        s_loaded,               // Aus Datenbank geladen
-        s_active,               // in Betrieb
-        s_closed                
+        jc_under_construction,   // add_node() gesperrt, add_order() frei
+        jc_initialized,          
+        jc_loaded,               // Aus Datenbank geladen
+        jc_running,
+        jc_stopped,
+        jc_closed                
     };
 
     //---------------------------------------------------------------------------------------------
@@ -934,11 +935,18 @@ struct Job_chain : Com_job_chain,
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
-    void                    set_stopped                     ( bool );
     void                        wake_orders                 ();
     void                    set_state                       ( const State& );
     State                       state                       () const                                { return _state; }
     string                      state_name                  () const;
+    
+    bool is_loaded_or_active() const { 
+        return _state == jc_loaded || is_active();
+    }
+
+    bool is_active() const { 
+        return _state == jc_running || _state == jc_stopped; 
+    }
 
     void                    set_title                       ( const string& title )                 { _title = title; }
     string                      title                       () const                                { return _title; }
@@ -1037,7 +1045,7 @@ struct Job_chain : Com_job_chain,
     bool                        is_ready_for_order_processing() const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
-    bool                        is_stopped                  () const                                { return _is_stopped; }
+    bool                        is_stopped                  () const                                { return _state == jc_stopped; }
 
     public: const Absolute_path& default_process_class_path() const {
         return _default_process_class_path;

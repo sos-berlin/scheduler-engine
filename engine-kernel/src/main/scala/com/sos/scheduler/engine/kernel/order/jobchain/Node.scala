@@ -42,7 +42,7 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
     }
   }
 
-  private[kernel] final def persistentState = new JobChainNodePersistentState(jobChainPath, nodeId, action)
+  private[kernel] final def persistentState = JobChainNodePersistentState(jobChainPath, nodeId, action)
 
   final lazy val nodeKey = nodeKeyOnce getOrUpdate
     inSchedulerThread {
@@ -61,7 +61,7 @@ abstract class Node extends Sister with PluginXmlConfigurable with HasCloser {
 
   protected[kernel] final def errorNodeId = NodeId(cppProxy.string_error_state)
 
-  final def action = inSchedulerThread { JobChainNodeAction.ofCppName(cppProxy.string_action) }
+  final def action = inSchedulerThread { JobChainNodeAction.values()(cppProxy.action) }
 
   final def action_=(o: JobChainNodeAction): Unit = inSchedulerThread { cppProxy.set_action_string(o.toCppName) }
 

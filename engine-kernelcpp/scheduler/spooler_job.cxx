@@ -3154,6 +3154,7 @@ void Standard_job::set_state( State new_state )
     if( new_state == s_pending  ||  new_state == s_running )  _is_permanently_stopped = false;
 
     database_record_store();
+    report_event_code(jobStateChanged, java_sister());
 }
 
 //----------------------------------------------------------------------Standard_job::set_state_cmd

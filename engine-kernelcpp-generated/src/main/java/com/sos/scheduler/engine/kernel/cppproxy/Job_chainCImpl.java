@@ -132,17 +132,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native boolean is_file_based_reread__native(long cppReference);
 
 
-    @Override public boolean is_stopped() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            return is_stopped__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native boolean is_stopped__native(long cppReference);
-
-
     @Override public boolean is_to_be_removed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -326,17 +315,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native void set_force_file_reread__native(long cppReference);
 
 
-    @Override public void set_stopped(boolean p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            set_stopped__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void set_stopped__native(long cppReference, boolean p0);
-
-
     @Override public byte[] source_xml_bytes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -348,6 +326,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     }
 
     private static native byte[] source_xml_bytes__native(long cppReference);
+
+
+    @Override public int state() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return state__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int state__native(long cppReference);
 
 
     // </editor-fold>

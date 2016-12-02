@@ -10,8 +10,7 @@ trait Job_chainC extends CppProxyWithSister[JobChain] with File_basedC[JobChain]
   def order(orderId: String): OrderC
   def order_or_null(orderID: String): OrderC
   def java_orders: Array[AnyRef]
-  def is_stopped: Boolean
-  def set_stopped(o: Boolean): Unit
+  def state: Int
   def max_orders: Int
   def remove(): Unit
   def is_distributed: Boolean

@@ -2473,9 +2473,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
     job_chain->assert_is_loaded();
 
     // Sollte mit assert_is_loaded() überflüssig geworden sein:
-    if( job_chain->state() != Job_chain::s_loaded  &&
-        job_chain->state() != Job_chain::s_active  )  z::throw_xc( "SCHEDULER-151" );
-      //job_chain->state() != Job_chain::s_stopped
+    if (!job_chain->is_loaded_or_active()) z::throw_xc("SCHEDULER-151");
 
     if( _outer_job_chain_path == ""  &&  !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // Prüfen
 

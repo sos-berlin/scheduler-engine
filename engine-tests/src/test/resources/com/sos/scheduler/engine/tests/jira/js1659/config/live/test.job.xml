@@ -2,5 +2,5 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
     order="true"
 >
-    <script java_class="com.sos.scheduler.engine.test.jobs.EmptyOrderJob"/>
+    <script language="shell">exit 0</script>
 </job>

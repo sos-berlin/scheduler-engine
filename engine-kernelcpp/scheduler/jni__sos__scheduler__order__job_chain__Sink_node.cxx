@@ -17,6 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jint JNICALL action(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::job_chain::Sink_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Sink_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Sink_node::action()");
+        return (o_->action());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jlong JNICALL delay(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -135,23 +152,6 @@ static void JNICALL set_1action_1string__Ljava_lang_String_2(JNIEnv* jenv, jobje
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL string_1action(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::order::job_chain::Sink_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Sink_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Sink_node::string_action()");
-        return env.jstring_from_string(o_->string_action());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jstring();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
 static jstring JNICALL string_1error_1state(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -202,6 +202,7 @@ static jstring JNICALL string_1order_1state(JNIEnv* jenv, jobject, jlong cppRefe
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"action__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::action },
     { (char*)"delay__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::delay },
     { (char*)"file_order_sink_move_to__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1order_1sink_1move_1to },
     { (char*)"file_order_sink_remove__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1order_1sink_1remove },
@@ -209,7 +210,6 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"job_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1path },
     { (char*)"order_queue__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Order_queueC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order_1queue },
     { (char*)"set_action_string__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1action_1string__Ljava_lang_String_2 },
-    { (char*)"string_action__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1action },
     { (char*)"string_error_state__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1error_1state },
     { (char*)"string_next_state__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1next_1state },
     { (char*)"string_order_state__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1order_1state }

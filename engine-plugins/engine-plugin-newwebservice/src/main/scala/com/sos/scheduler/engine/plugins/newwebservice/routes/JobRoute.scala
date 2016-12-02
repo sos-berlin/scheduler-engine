@@ -3,15 +3,18 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.web.common.HasViewCompanionDirectives.viewReturnParameter
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.data.event.{AnyEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{events, singleKeyEvents}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent._
+import spray.routing.Directives._
 import spray.json.DefaultJsonProtocol._
-import spray.routing.Route
+import spray.routing._
 
 /**
   * @author Joacim Zschimmer
@@ -30,15 +33,21 @@ trait JobRoute {
       }
     }
 
-  private def singleJobRoute(jobPath: JobPath) =
+  private def singleJobRoute(jobPath: JobPath): Route =
     viewReturnParameter(JobView, default = JobOverview) { implicit viewCompanion ⇒
       val future = client.job(jobPath)
       completeTryHtml(future)
-    }
+    } ~
+    singleKeyEvents[AnyEvent](jobPath)
 
-  private def multipleJobsRoute(query: PathQuery) =
+  private def multipleJobsRoute(query: PathQuery): Route =
     viewReturnParameter(JobView, default = JobOverview) { implicit viewCompanion ⇒
       val future = client.jobs(query)
       completeTryHtml(future)
-    }
+    } ~
+    events[Event](
+      predicate = {
+        case KeyedEvent(jobPath: JobPath, _) ⇒ query.matches(jobPath)
+        case _ ⇒ false
+      })
 }

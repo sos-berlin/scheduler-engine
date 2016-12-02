@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction.next_state
-import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainObstacle, JobChainOverview, JobChainPath, JobChainPersistentState, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainObstacle, JobChainOverview, JobChainPath, JobChainPersistentState, JobChainState, NodeId}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -73,7 +73,7 @@ with UnmodifiableJobChain {
       emptyToNone(fileBasedObstacles) switch {
         case Some(o) ⇒ builder += FileBasedObstacles(o)
       }
-      if (isStopped) {
+      if (state == JobChainState.stopped) {
         builder += Stopped
       }
       orderLimitOption switch {
@@ -93,18 +93,6 @@ with UnmodifiableJobChain {
   private implicit def entityManagerFactory: EntityManagerFactory =
     injector.getInstance(classOf[EntityManagerFactory])
 
-  @ForCpp
-  private def loadPersistentState(): Unit = {
-    transaction { implicit entityManager =>
-      for (persistentState <- nodeStore.fetchAll(path); node <- nodeMap.get(persistentState.nodeId)) {
-        node.action = persistentState.action
-      }
-      for (persistentState <- persistentStateStore.tryFetch(path)) {
-        isStopped = persistentState.isStopped
-      }
-    }
-  }
-
   @ForCpp private def persistState(): Unit = {
     transaction { implicit entityManager =>
       persistentStateStore.store(persistentState)
@@ -119,7 +107,7 @@ with UnmodifiableJobChain {
   }
 
   private def persistentState =
-    JobChainPersistentState(path, isStopped)
+    JobChainPersistentState(path, state == JobChainState.stopped)
 
   private def persistentStateStore =
     injector.getInstance(classOf[HibernateJobChainStore])
@@ -128,7 +116,9 @@ with UnmodifiableJobChain {
     injector.getInstance(classOf[HibernateJobChainNodeStore])
 
   @ForCpp
-  private def onNextStateActionChanged(): Unit = cppPredecessors.invalidate()
+  private def onNextStateActionChanged(): Unit = {
+    cppPredecessors.invalidate()
+  }
 
   /** All NodeId, which are skipped to given orderStateString */
   @ForCpp
@@ -178,11 +168,8 @@ with UnmodifiableJobChain {
   private[order] def orderIterator(orderIds: Iterable[OrderId]): Iterator[Order] =
     orderIds.toIterator flatMap orderOption
 
-  private def isStopped = cppProxy.is_stopped
-
-  private def isStopped_=(o: Boolean): Unit = {
-    cppProxy.set_stopped(o)
-  }
+  private[kernel] def state: JobChainState =
+    JobChainState.values()(cppProxy.state)
 
   private lazy val orderLimitOption: Option[Int] = someUnless(cppProxy.max_orders, none = Int.MaxValue)
 

@@ -7,6 +7,10 @@ public enum CppEventCode {
     fileBasedRemovedEvent,
     fileBasedReplacedEvent,
 
+    jobChainNodeActionChanged,
+    jobChainStateChanged,
+    jobStateChanged,
+
     taskStartedEvent,
     taskClosedEvent,
 

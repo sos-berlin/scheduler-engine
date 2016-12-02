@@ -4,9 +4,9 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, ReverseEventRequest}
 import com.sos.scheduler.engine.data.filebased.FileBasedEvent
 import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobEvent, JobOverview, JobPath, TaskEvent, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{JobChainEvent, OrderDetailed, OrderOverview, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
 import org.junit.runner.RunWith
@@ -171,6 +171,11 @@ final class SchedulerUrisTest extends FreeSpec {
     "detail" in {
       assert(uris.jobChain.detailed(JobChainPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b")
     }
+
+    "events" in {
+      assert(uris.jobChain.events(JobChainPath("/a/b"), EventRequest[JobChainEvent](after = 7, 1.s)) ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b?return=JobChainEvent&timeout=1s&after=7")
+    }
   }
 
   "job" - {
@@ -181,10 +186,22 @@ final class SchedulerUrisTest extends FreeSpec {
     "JobDescription" in {
       assert(uris.job[JobDescription](JobPath("/a/b")) == "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b?return=JobDescription")
     }
+
+    "events" in {
+      assert(uris.job.events(PathQuery(JobPath("/a/b")), EventRequest[JobEvent](after = 7, 1.s)) ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b?return=JobEvent&timeout=1s&after=7")
+    }
   }
 
-  "task.overview" in {
-    assert(uris.task.overview(TaskId(123)) == "http://0.0.0.0:1111/jobscheduler/master/api/task/123")
+  "task" - {
+    "overview" in {
+      assert(uris.task.overview(TaskId(123)) == "http://0.0.0.0:1111/jobscheduler/master/api/task/123")
+    }
+
+    "events" in {
+      assert(uris.task.events(TaskId(123), EventRequest[TaskEvent](after = 7, 1.s)) ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/task/123?return=TaskEvent&timeout=1s&after=7")
+    }
   }
 
   "processClass" - {

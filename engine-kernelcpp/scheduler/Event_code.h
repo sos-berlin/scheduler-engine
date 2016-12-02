@@ -12,6 +12,10 @@ enum Event_code {
     fileBasedRemovedEvent,
     fileBasedReplacedEvent,
 
+    jobChainNodeActionChanged,
+    jobChainStateChanged,
+    jobStateChanged,
+
     taskStartedEvent,
     taskClosedEvent,
 

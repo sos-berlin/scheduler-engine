@@ -53,7 +53,6 @@ struct JobChain : ::zschimmer::javabridge::proxy_jobject< JobChain >, ::javaprox
 
     ::javaproxy::java::util::ArrayList cppSkippedStates(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void deletePersistentState() const;
-    void loadPersistentState() const;
     void onNextStateActionChanged() const;
     void persistState() const;
 

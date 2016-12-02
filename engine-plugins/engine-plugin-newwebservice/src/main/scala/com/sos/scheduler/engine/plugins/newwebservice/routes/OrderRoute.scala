@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.{OrdersHtmlPage, SingleKeyEventHtmlPage}
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
@@ -68,7 +68,7 @@ trait OrderRoute extends LogRoute {
         completeTryHtml(client.order[OrderDetailed](orderKey))
 
       case _ ⇒
-        orderEvents(orderKey)
+        singleKeyEvents[AnyEvent](orderKey)
     }
 
   private def queriedOrders(returnTypeOption: Option[String], query: OrderQuery): Route =
@@ -96,7 +96,7 @@ trait OrderRoute extends LogRoute {
       case Some(_) ⇒
         query.orderKeyOption match {
           case Some(orderKey) ⇒
-            orderEvents(orderKey)
+            singleKeyEvents[AnyEvent](orderKey)
           case None ⇒
             orderEvents(query.jobChainQuery.pathQuery)  // Events are only selected by JobChainPath !!!
         }
@@ -112,37 +112,12 @@ trait OrderRoute extends LogRoute {
           complete(client.orderTreeComplementedBy[OrderOverview](query))
     }
 
-  private def orderEvents(orderKey: OrderKey): Route = {
-    eventRequest(classOf[Event]) { request ⇒
-      completeTryHtml {
-        implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](orderKey)
-        request match {
-          case request: EventRequest[_] ⇒
-            client.eventsForKey[AnyEvent](request.asInstanceOf[EventRequest[AnyEvent]], orderKey)
-          case request: ReverseEventRequest[_] ⇒
-            for (responseSnapshot ← client.eventsReverseForKey[AnyEvent](request.asInstanceOf[ReverseEventRequest[AnyEvent]], orderKey)) yield
-              for (events ← responseSnapshot) yield
-                EventSeq.NonEmpty(events)
-        }
-      }
-    }
-  }
-
   private def orderEvents(query: PathQuery): Route =
-    eventRequest(classOf[Event]) {
-      case request: EventRequest[_] ⇒
-        val castRequest = request.asInstanceOf[EventRequest[Event]]
-        completeTryHtml {
-          client.eventsByPredicate[Event](
-            castRequest,
-            predicate = {
-              case KeyedEvent(OrderKey(jobChainPath, _), _) ⇒ query.matches(jobChainPath)
-              case _ ⇒ false
-            })
-        }
-      case _ ⇒
-        reject
-    }
+    events[Event](
+      predicate = {
+        case KeyedEvent(OrderKey(jobChainPath, _), _) ⇒ query.matches(jobChainPath)
+        case _ ⇒ false
+      })
 
   private def orderStatisticsChanged(query: PathQuery): Route =
     eventRequest(classOf[Event]) {
