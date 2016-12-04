@@ -9,7 +9,7 @@ h3.JobChain {
 
 .OrderSelectionStatistics {
   margin-bottom: 1em;
-  background-color: white;
+  background-color: #f9d186;
   padding: 0 4px 4px 4px;
 }
 
@@ -33,6 +33,7 @@ h3.JobChain {
 .Order-Suspended {
   background-color: #eaf6ff;
 }
+
 .Order-WaitingInTask {
   background-color: #FFFFC0;
 }

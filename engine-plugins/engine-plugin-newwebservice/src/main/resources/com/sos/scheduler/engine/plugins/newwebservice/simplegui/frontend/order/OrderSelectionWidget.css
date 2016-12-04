@@ -1,35 +1,45 @@
 .OrderSelection {
-  margin-bottom: 1em;
-  margin-right: 20px;
-  background-color: #f9d186;
-  line-height: 1em;
-  padding: 0 4px 4px 4px;
+  display: none;
 }
 
-.OrderSelection-Header {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
+@media (min-width: 600px) {
+  .OrderSelection {
+    display: inherit;
+    margin-bottom: 1em;
+    margin-right: 10px;
+    background-color: #f9d186;
+    padding: 0 4px 4px 4px;
+  }
 
-.OrderSelection-Boolean {
-  padding-right: 6px;
-}
+  .OrderSelection-Header {
+    padding-top: 4px;
+    font-weight: bold;
+  }
 
-.OrderSelection-Enum {
-  padding-left: 6px;
-  padding-right: 6px;
-  border-left: 1px solid #aaa;
-  line-height: 10px;
-}
+  .OrderSelection table > tbody > tr > td {
+    line-height: 1em;
+  }
 
-.OrderSelection-LimitPerNode {
-  padding-top: 4px;
-  padding-left: 6px;
-  padding-right: 6px;
-  border-left: 1px solid #aaa;
-  vertical-align: top;
-}
+  .OrderSelection-Boolean {
+    padding-right: 6px;
+  }
 
-.OrderSelection-LimitPerNode-Submit {
-  padding-left: 1ex;
+  .OrderSelection-Enum {
+    padding-left: 6px;
+    padding-right: 6px;
+    border-left: 1px solid #aaa;
+    line-height: 10px;
+  }
+
+  .OrderSelection-LimitPerNode {
+    padding-top: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-left: 1px solid #aaa;
+    vertical-align: top;
+  }
+
+  .OrderSelection-LimitPerNode-Submit {
+    padding-left: 1ex;
+  }
 }

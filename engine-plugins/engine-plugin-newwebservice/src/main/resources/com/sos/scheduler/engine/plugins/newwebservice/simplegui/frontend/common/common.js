@@ -1,6 +1,9 @@
 jQuery(document).ready(function($) {
     $(".clickable").click(function() {
-      window.location = $(this).data("href");
+      var href = $(this).data("href");
+      if (typeof href !== "undefined") {
+        window.location = $(this).data("href");
+      }
     });
     $("body").bind('keypress', function keyPressed(e) {
         if ((e.keyCode || e.which) == 13) {

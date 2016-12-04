@@ -58,7 +58,6 @@ extends SchedulerHtmlPage {
         None
     }
     .withDefaultValue(Some(span(cls := "text-danger")(stringFrag("Missing Node"))))
-  private val orderStatisticsWidget = new JocOrderStatisticsWidget(uris, query, markActive = true)
 
   override protected def pageTitle = "Orders"
   override protected def cssPaths = super.cssPaths ++ CssPaths
@@ -66,7 +65,8 @@ extends SchedulerHtmlPage {
 
   def wholePage = {
     htmlPage(
-      orderStatisticsWidget.html,
+      div(float.left)(
+        orderStatisticsWidget.html),
       div(float.right)(
         orderSelectionStatistics),
       div(float.right)(
@@ -79,12 +79,15 @@ extends SchedulerHtmlPage {
         }))
   }
 
+  private def orderStatisticsWidget = new JocOrderStatisticsWidget(uris, query, markActive = true)
+
   private def orderSelectionStatistics = {
     val statistics = new OrderOverview.Statistics(ordersComplemented.orders)
     import statistics.{blacklistedCount, count, inProcessCount, suspendedCount}
     div(cls := "ContentBox OrderSelectionStatistics")(
       div(paddingTop := 4.px),
       table(cls := "MiniTable")(
+        thead(tr(th, th(cls := "BoxHeader")("Showed"))),
         tbody(
           tr(td(textAlign.right, width := 5.ex)(s"$count")     , td("orders")),
           tr(td(textAlign.right)(s"$inProcessCount")           , td("in process")),

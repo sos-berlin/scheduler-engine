@@ -17,7 +17,6 @@ import scala.concurrent.Future
 import scala.math.round
 import scala.util.control.NonFatal
 import scalatags.Text.all._
-import scalatags.text.Frag
 import spray.http.Uri
 
 /**
@@ -30,16 +29,19 @@ final class SchedulerOverviewHtmlPage private(
 extends SchedulerHtmlPage {
 
   protected val schedulerOverview = snapshot.value
-  import schedulerOverview.{httpPort, httpsPort, java, pid, startedAt, state, system}
+  import schedulerOverview.{java, startedAt, state, system}
 
   override protected def cssPaths = super.cssPaths ++ CssPaths
   override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
 
   def wholePage =
     htmlPage(
-      systemInformationHtml,
-      schedulerInfoHtml,
-      orderStatistics,
+      div(float.left, marginRight := 2.em)(
+        schedulerInfoHtml),
+      div(float.right)(
+        systemInformationHtml),
+      div(float.left)(
+        orderStatistics),
       commandInput)
 
   private def systemInformationHtml =
@@ -98,7 +100,6 @@ extends SchedulerHtmlPage {
       div("Java " + java.systemProperties.getOrElse("java.version", "")),
       for (o ← java.systemProperties.get("java.vendor")) yield div(s"($o)"))
 
-
   private def javaBarsHtml(memory: JavaInformation.Memory): Frag = {
     import memory.{free, maximum, reserve, used}
     div(cls := "SystemBar")(
@@ -116,17 +117,11 @@ extends SchedulerHtmlPage {
     div(cls := "SchedulerOverview")(
       div(
         "Started at ",
-        instantWithDurationToHtml(startedAt)),
-      //for (o ← httpPort) yield
-      //  div(s" HTTP port $o"),
-      //for (o ← httpsPort) yield
-      //  div(s" HTTPS port $o"),
-      //div(s"PID $pid"),
-      div(b(state.toString)))
+        instantWithDurationToHtml(startedAt),
+        " · ", b(state.toString)))
 
   private def orderStatistics: Frag =
-    div(clear.both, marginTop := 1.em, marginBottom := 2.em)(
-      new JocOrderStatisticsWidget(uris, OrderQuery.All, caption = "JocOrderStatistics").html)
+    new JocOrderStatisticsWidget(uris, OrderQuery.All).html
 
   private def commandInput: Frag =
     form(action := "api/command", method := "get", clear.both)(

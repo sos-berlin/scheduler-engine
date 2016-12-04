@@ -1,3 +1,32 @@
+#OrderStatistics {
+  padding-bottom: 2px;
+  margin-bottom: 1em;
+}
+
+.OrderStatistics-Header {
+  font-weight: bold;
+  padding-top: 4px;
+  padding-left: 2px;
+}
+
+.OrderStatistics-pause {
+  cursor: pointer;
+}
+
+.OrderStatistics-pause:hover {
+  color: inherit;
+  text-decoration: line-through;
+}
+
+#OrderStatistics-pause {
+  cursor: pointer;
+}
+
+.OrderStatistics-paused #OrderStatistics-pause {
+  text-decoration: line-through;
+  color: red;
+}
+
 @keyframes OrderStatistics-rotate {
   from {
     transform: rotate(0deg);
@@ -7,21 +36,12 @@
   }
 }
 
-#OrderStatistics {
-  padding-bottom: 2px;
-  margin-bottom: 1em;
-}
-
-.OrderStatistics-error {
-  color: #a0a0a0;
-}
-
-.OrderStatistics-paused {
-}
-
-.OrderStatistics-Header {
-  font-weight: bold;
-  padding: 2px;
+#OrderStatistics-refresh {
+  visibility: hidden;
+  animation-name: OrderStatistics-rotate;
+  animation-duration: 3s;
+  animation-iteration-count: 0;
+  animation-timing-function: linear;
 }
 
 /* Every @keyframes twice to allow restart of animation by changing animation-name. */
@@ -65,27 +85,36 @@
   float: left;
   white-space: nowrap;
   margin-right: 3px;
-  margin-bottom: 0.5ex;
+  margin-bottom: 3px;
+}
+
+.OrderStatistics-fieldGroup-total, .OrderStatistics-fieldGroup-not-started, .OrderStatistics-fieldGroup-stalled {
+}
+
+.OrderStatistics-fieldGroup-started {
+  color: #004486;
+}
+
+.OrderStatistics-error,
+.OrderStatistics-error .OrderStatistics-fieldGroup-total,
+.OrderStatistics-error .OrderStatistics-fieldGroup-started,
+.OrderStatistics-error .OrderStatistics-fieldGroup-not-started,
+.OrderStatistics-error .OrderStatistics-fieldGroup-stalled {
+  color: #a0a0a0;
 }
 
 .OrderStatistics-field {
   animation-duration: 3s;
   animation-iteration-count: 1;
   animation-timing-function: linear;
-  /* For background-color appearance: */
-  padding: 2px;
+  padding-top: 2px;
   border-radius: 3px;
-  float: left;
   width: 14ex;
-  margin: 2px 0.5ex 0 0.5ex;
+  margin: 0 0.5ex 0 0.5ex;
 }
 
 .OrderStatistics-field-Active {
   font-weight: bold;
-}
-
-#order-timestamp-value {
-  padding-right: 1ex;
 }
 
 .OrderStatistics-higher {
@@ -102,31 +131,17 @@
   animation-timing-function: linear;
 }
 
-#OrderStatistics-refresh {
-  visibility: hidden;
-  position: relative;
-  top: 1px;
-  animation-name: OrderStatistics-rotate;
-  animation-duration: 3s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-}
-
-#OrderStatistics-pause {
-  cursor: pointer;
-  padding-right: 1ex;
-}
-
-.OrderStatistics-paused #OrderStatistics-pause {
-  color: red;
-}
-
 .OrderStatistics-value {
   position: absolute;
+  width: 14ex;
+  height: 18px;
+}
+
+table.OrderStatistics-value tbody tr td:nth-of-type(2) {
+  text-align: right;
 }
 
 .OrderStatistics-bar {
-  height: 1.4em;
+  height: 18px;
   border-bottom: #ff00ff solid 1px;
-  /*background-color: #ffffea;*/
 }

@@ -83,8 +83,23 @@ table.SimpleTable > thead > tr > th {
   border-bottom: #ccc solid 1px;
 }
 
+.BoxHeader {
+  padding-top: 4px;
+  padding-bottom: 0.5em;
+}
+
 a.inherit-markup {
   color: inherit;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+a.inherit-markup:hover,
+.clickable:hover {
+  color: #0093ff;
+  text-decoration: inherit;
 }
 
 label {
@@ -109,6 +124,3 @@ span.time-extra {
   padding: 0 5px;
 }
 
-.clickable {
-  cursor: pointer;
-}

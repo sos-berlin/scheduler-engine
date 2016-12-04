@@ -2,15 +2,12 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, OrderQuery, PathQuery}
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{EmptyFrag, seqFrag}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrderSelectionWidget._
 import scalatags.Text.all._
 import scalatags.Text.attrs
-import spray.http.Uri
 import spray.json._
 
 /**
@@ -24,7 +21,7 @@ private[simplegui] final class OrderSelectionWidget(queryToUri: OrderQuery ⇒ S
       table(
         tbody(
           tr(
-            td(cls := "OrderSelection-Header", colspan := 4)(
+            th(cls := "BoxHeader OrderSelection-Header", colspan := 4)(
               "Show only ...")),
           tr(
             td(cls := "OrderSelection-Boolean")(

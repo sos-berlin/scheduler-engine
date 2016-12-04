@@ -1,7 +1,8 @@
 var jocOrderStatisticsWidget = (function() {
   var widgetJq;
+  var liveElem;
   var refreshElem;
-  var tryAgainTimeoutSeconds = 10;
+  var tryAgainTimeoutSeconds = 1;
   var keys = [
     "total",
     "notPlanned",
@@ -27,6 +28,7 @@ var jocOrderStatisticsWidget = (function() {
   function start(path) {
     urlPrefix = "/jobscheduler/master/api/order" + path + "?return=JocOrderStatisticsChanged&timeout=60s&after=";
     widgetJq = $('#OrderStatistics');
+    liveElem = document.getElementById('OrderStatistics-live');
     refreshElem = document.getElementById('OrderStatistics-refresh');
     var i, key;
     for (i in keys) if (keys.hasOwnProperty(i)) {
@@ -60,6 +62,7 @@ var jocOrderStatisticsWidget = (function() {
           setTimeout(getNext, 500);
         }
       }
+      tryAgainTimeoutSeconds = 1;
     })
     .fail(function() {
       ajax = null;
@@ -67,6 +70,7 @@ var jocOrderStatisticsWidget = (function() {
         showRefreshing();
         var duration = tryAgainTimeoutSeconds - Math.max(0, new Date().getSeconds() - requestedAt.getSeconds());
         setTimeout(getNext, duration * 1000);
+        tryAgainTimeoutSeconds = Math.min(60, tryAgainTimeoutSeconds + 2);
       }
     });
   }
@@ -133,11 +137,15 @@ var jocOrderStatisticsWidget = (function() {
 
   function showRefreshing() {
     refreshElem.style.visibility = "inherit";
+    liveElem.style.visibility = "hidden";
+    refreshElem.style.animationIterationCount = "infinite";
     widgetJq.addClass('OrderStatistics-error');
   }
 
   function hideRefreshing() {
     refreshElem.style.visibility = "hidden";
+    refreshElem.style.animationIterationCount = 0;  // Switch off CPU usage
+    liveElem.style.visibility = "inherit";
     widgetJq.removeClass('OrderStatistics-error');
   }
 
