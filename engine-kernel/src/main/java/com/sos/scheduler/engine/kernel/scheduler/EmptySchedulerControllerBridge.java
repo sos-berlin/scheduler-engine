@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.scheduler;
 
+import com.google.inject.Injector;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
@@ -30,4 +31,6 @@ public class EmptySchedulerControllerBridge implements SchedulerControllerBridge
     @Override public final String getName() {
         return EmptySchedulerControllerBridge.class.getSimpleName();
     }
+
+    @Override public void setInjector(Injector injector) {}
 }

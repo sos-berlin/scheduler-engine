@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS578IT extends FunSuite with ScalaSchedulerTest {
-  private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystemClient])
+  private lazy val orderSubsystem = injector.getInstance(classOf[OrderSubsystemClient])
 
   test("<modify_order at='now'/>") {
     val eventPipe = controller.newEventPipe()

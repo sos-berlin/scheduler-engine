@@ -23,5 +23,8 @@ trait DelegatingSchedulerController extends SchedulerController {
 
   final def eventBus =
     delegate.eventBus
+
+  final def injector =
+    delegate.injector
 }
 

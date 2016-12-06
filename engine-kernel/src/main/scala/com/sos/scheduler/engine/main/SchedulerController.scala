@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.main
 
+import com.google.inject.Injector
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import java.time.Duration
 
@@ -25,4 +26,6 @@ trait SchedulerController extends AutoCloseable {
   def exitCode: Int
 
   def eventBus: SchedulerEventBus
+
+  def injector: Injector
 }

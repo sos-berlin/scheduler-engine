@@ -150,7 +150,7 @@ with HasInjector {
   }
 
   private def checkForErrorLogLine(): Unit = {
-    val lastErrorLine = _scheduler.injector.instance[PrefixLog].lastByLevel(SchedulerLogLevel.error)
+    val lastErrorLine = injector.instance[PrefixLog].lastByLevel(SchedulerLogLevel.error)
     if (!lastErrorLine.isEmpty) sys.error("Test terminated after error log line: " + lastErrorLine)
   }
 
@@ -173,8 +173,6 @@ with HasInjector {
 
   final def instance[A : ClassTag]: A = injector.instance[A]
 
-  final def injector = scheduler.injector
-
   /** Eine Exception in runnable beendet den Scheduler. */
   def newThread(runnable: Runnable) =
     new Thread {
@@ -191,7 +189,7 @@ with HasInjector {
   /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
   def newEventPipe(): EventPipe = new EventPipe(eventBus, TestTimeout)
 
-  def withEventPipe[A](body: EventPipe ⇒ A) = autoClosing(newEventPipe)(body)
+  def withEventPipe[A](body: EventPipe ⇒ A) = autoClosing(newEventPipe())(body)
 
   def isStarted =
     delegate.isStarted

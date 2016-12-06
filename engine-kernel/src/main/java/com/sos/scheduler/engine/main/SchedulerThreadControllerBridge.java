@@ -1,17 +1,19 @@
 package com.sos.scheduler.engine.main;
 
+import com.google.inject.Injector;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerClosed$;
+import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
-import com.sos.scheduler.engine.data.scheduler.SchedulerClosed$;
-import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import javax.annotation.Nullable;
 import scala.Option;
 import static com.sos.scheduler.engine.main.BridgeState.active;
 import static com.sos.scheduler.engine.main.BridgeState.terminated;
+import static java.util.Objects.requireNonNull;
 
 final class SchedulerThreadControllerBridge implements SchedulerControllerBridge, EventHandlerAnnotated {
     private final SchedulerThreadController schedulerThreadController;
@@ -19,6 +21,7 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
     private final CppSettings cppSettings;
     private final SchedulerStateBridge stateBridge = new SchedulerStateBridge();
     private volatile boolean terminateSchedulerWhenPossible = false;
+    private Injector injector = null;
 
     SchedulerThreadControllerBridge(SchedulerThreadController c, SchedulerEventBus eventBus, CppSettings cppSettings) {
         this.schedulerThreadController = c;
@@ -60,6 +63,15 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
 
     @Override public SchedulerEventBus getEventBus() {
         return eventBus;
+    }
+
+    public Injector injector() {
+        if (injector == null) throw new IllegalStateException("Injector has not yet been created");
+        return injector;
+    }
+
+    @Override public void setInjector(Injector injector) {
+        this.injector = injector;
     }
 
     @HotEventHandler public void handleEvent(KeyedEvent<SchedulerClosed$> e) {

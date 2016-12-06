@@ -25,10 +25,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
-import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerOverview, SchedulerState}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerOverview, SchedulerInitiated, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -330,13 +330,16 @@ object Scheduler {
   @ForCpp
   def defaultTimezoneId: String = _defaultTimezoneId
 
-  @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
+  @ForCpp def newInjector(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String): Injector = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
     CppProxy.cppThreadStarted()  // Needed, when process has been started via C++ (which is the case in production)
     controllerBridge.cppSettings.setSettingsInCpp(cppProxy.modifiable_settings)
-    createInjector(DEVELOPMENT, List(   // Must be DEVELOPMENT for some singletons needs the started C++ Scheduler.
+    val injector = createInjector(DEVELOPMENT, List(   // Must be DEVELOPMENT for some singletons needs the started C++ Scheduler.
       new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),
       PluginModule(configurationXml)))
+    controllerBridge.setInjector(injector)
+    injector.instance[EventBus].publish(SchedulerInitiated)
+    injector
   }
 
   @ForCpp

@@ -26,6 +26,8 @@ final class SchedulerThreadController(val name: String, cppSettings: CppSettings
   private val thread = new SchedulerThread(controllerBridge)
   private var _isStarted: Boolean = false
 
+  def injector = controllerBridge.injector
+
   def loadModule(cppModuleFile: File): Unit =
     SchedulerThread.loadModule(cppModuleFile)
 

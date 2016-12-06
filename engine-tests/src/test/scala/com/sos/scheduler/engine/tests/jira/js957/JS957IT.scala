@@ -67,7 +67,7 @@ final class JS957IT extends FreeSpec {
       <show_order job_chain={RepeatOrderKey.jobChainPath.string} order={RepeatOrderKey.id.string} what="source"/>
 
   private def repeatOrder(implicit controller: TestSchedulerController) =
-    controller.scheduler.injector.getInstance(classOf[OrderSubsystemClient]).order(RepeatOrderKey)
+    controller.injector.getInstance(classOf[OrderSubsystemClient]).order(RepeatOrderKey)
 }
 
 

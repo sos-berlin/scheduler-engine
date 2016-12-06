@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.main;
 
+import com.google.inject.Injector;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -16,4 +17,5 @@ public interface SchedulerControllerBridge {
     void onSchedulerActivated();
     void onSchedulerTerminated(int exitCode, @Nullable Throwable t);
     SchedulerEventBus getEventBus();
+    void setInjector(Injector injector);
 }
