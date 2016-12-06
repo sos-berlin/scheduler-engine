@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobEvent, JobPath, JobState, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskEvent, TaskId, TaskKey, TaskStarted}
@@ -15,6 +14,7 @@ import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success
 import com.sos.scheduler.engine.data.order.{JobChainEvent, JobChainNodeActionChanged, JobChainStateChanged, OrderNodeChanged, OrderNodeTransition, OrderStarted, OrderStepEnded, OrderStepStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.data.scheduler.{SchedulerEvent, SchedulerState, SchedulerStateChanged}
+import com.sos.scheduler.engine.data.scheduler.SchedulerInitiated
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
@@ -41,9 +41,8 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val beforeTestEventId = eventIdGenerator.lastUsedEventId
 
   override protected def checkedBeforeAll() = {
-    eventBus.onHot[SchedulerStateChanged] {
-      case KeyedEvent(NoKey, SchedulerStateChanged(SchedulerState.loading)) ⇒
-        instance[EventCollector]  // Start collection of events before Scheduler, to have the very first events available.
+    eventBus.onHot[SchedulerInitiated.type] {
+      case _ ⇒ instance[EventCollector]  // Start collection of events before Scheduler, to have the very first events available.
     }
     super.checkedBeforeAll()
   }
@@ -179,7 +178,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   "EventSeq.Torn" in {
     val oldEventId = eventIdGenerator.lastUsedEventId
     // Generate enough events to tear the event stream starting at beforeTestEventId
-    for (_ ← 1 to 2) {
+    for (_ ← 1 to 3) {
       scheduler executeXml ModifyOrderCommand(TestOrderKey, action = Some(ModifyOrderCommand.Action.reset))
       eventBus.awaiting[OrderSuspended.type](TestOrderKey) {
         scheduler executeXml OrderCommand(TestOrderKey)
