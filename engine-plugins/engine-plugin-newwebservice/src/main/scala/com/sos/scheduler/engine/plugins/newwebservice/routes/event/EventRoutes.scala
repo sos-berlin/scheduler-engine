@@ -1,16 +1,13 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event._
-import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat._
+import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
@@ -20,7 +17,6 @@ import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 import shapeless.{::, HNil}
-import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing._
 
@@ -57,8 +53,8 @@ private[routes] object EventRoutes {
     (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
   : Route =
     eventRequest(implicitClass[E]) {
-      case request: EventRequest[_] ⇒
-        val castRequest = request.asInstanceOf[EventRequest[E]]
+      case request: SomeEventRequest[_] ⇒
+        val castRequest = request.asInstanceOf[SomeEventRequest[E]]
         completeTryHtml {
           client.eventsByPredicate[E](castRequest, predicate = predicate)
         }
@@ -66,15 +62,15 @@ private[routes] object EventRoutes {
         reject
     }
 
-  def eventRequest[E <: Event, EE <: E](eventSuperclass: Class[EE], defaultReturnType: Option[String] = None): Directive1[SomeEventRequest[EE]] =
-    new Directive1[SomeEventRequest[EE]] {
-      def happly(inner: SomeEventRequest[EE] :: HNil ⇒ Route) =
+  def eventRequest[E <: Event](eventSuperclass: Class[E], defaultReturnType: Option[String] = None): Directive1[SomeEventRequest[E]] =
+    new Directive1[SomeEventRequest[E]] {
+      def happly(inner: SomeEventRequest[E] :: HNil ⇒ Route) =
         parameter("return".?) {
           _ orElse defaultReturnType match {
             case Some(returnType) ⇒
               passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) {
                 case eventClass if eventSuperclass isAssignableFrom eventClass ⇒
-                  val eClass = eventClass.asInstanceOf[Class[EE]]
+                  val eClass = eventClass.asInstanceOf[Class[E]]
                   parameter("limit" ? Int.MaxValue) {
                     case 0 ⇒
                       reject(ValidationRejection(s"Invalid limit=0"))
