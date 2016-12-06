@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.main.event.SchedulerClosed
+import com.sos.scheduler.engine.data.scheduler.SchedulerClosed
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import java.nio.file.Path

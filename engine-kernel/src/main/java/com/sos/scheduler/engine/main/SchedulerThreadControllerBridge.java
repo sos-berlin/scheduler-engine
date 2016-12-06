@@ -6,9 +6,8 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
-import com.sos.scheduler.engine.main.event.SchedulerClosed$;
-import com.sos.scheduler.engine.main.event.SchedulerReadyEvent$;
-import com.sos.scheduler.engine.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerClosed$;
+import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import javax.annotation.Nullable;
 import scala.Option;
 import static com.sos.scheduler.engine.main.BridgeState.active;
@@ -45,7 +44,6 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
 
     @Override public void onSchedulerStarted(Scheduler scheduler) {
         stateBridge.setStateStarted(scheduler);
-        eventBus.publish(KeyedEvent.of(SchedulerReadyEvent$.MODULE$));
         if (terminateSchedulerWhenPossible)  scheduler.terminate();
     }
 
@@ -56,7 +54,7 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
     @Override public void onSchedulerTerminated(int exitCode, @Nullable Throwable t) {
         if (t != null) schedulerThreadController.setThrowable(t);
         stateBridge.setState(terminated);
-        eventBus.publish(KeyedEvent.of(new TerminatedEvent(exitCode, Option.apply(t))));
+        eventBus.publish(KeyedEvent.of(new SchedulerTerminatedEvent(exitCode, Option.apply(t))));
         eventBus.dispatchEvents();
     }
 

@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedRemoved$;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
-import com.sos.scheduler.engine.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -81,7 +81,7 @@ public final class JS655IT extends SchedulerTest {
             if (e.key().equals(rightJobChainPath)) {
                 gate.put(jobChainRemoved);
             }
-        } else if (TerminatedEvent.class.isAssignableFrom(e.event().getClass())) {
+        } else if (SchedulerTerminatedEvent.class.isAssignableFrom(e.event().getClass())) {
             gate.put(terminated);
         }
     }

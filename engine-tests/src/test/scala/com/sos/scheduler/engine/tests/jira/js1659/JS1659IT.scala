@@ -6,15 +6,17 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.event.{Event, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
+import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobEvent, JobPath, JobState, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskEvent, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, JobChainState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success
 import com.sos.scheduler.engine.data.order.{JobChainEvent, JobChainNodeActionChanged, JobChainStateChanged, OrderNodeChanged, OrderNodeTransition, OrderStarted, OrderStepEnded, OrderStepStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.queries.PathQuery
+import com.sos.scheduler.engine.data.scheduler.{SchedulerEvent, SchedulerState, SchedulerStateChanged}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
-import com.sos.scheduler.engine.kernel.event.collector.EventIdGenerator
+import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -37,6 +39,22 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   private val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
   private lazy val eventIdGenerator = instance[EventIdGenerator]
   private lazy val beforeTestEventId = eventIdGenerator.lastUsedEventId
+
+  override protected def checkedBeforeAll() = {
+    eventBus.onHot[SchedulerStateChanged] {
+      case KeyedEvent(NoKey, SchedulerStateChanged(SchedulerState.loading)) ⇒
+        instance[EventCollector]  // Start collection of events before Scheduler, to have the very first events available.
+    }
+    super.checkedBeforeAll()
+  }
+
+  "SchedulerEvent" in {
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest[SchedulerEvent](after = EventId.BeforeFirst, TestTimeout)) await TestTimeout
+    val events: Seq[KeyedEvent[SchedulerEvent]] = eventSnapshots map { _.value }
+    assert(events == List(
+      KeyedEvent(SchedulerStateChanged(SchedulerState.starting)),
+      KeyedEvent(SchedulerStateChanged(SchedulerState.running))))
+  }
 
   "/api/event EventSeq.NonEmpty" in {
     beforeTestEventId

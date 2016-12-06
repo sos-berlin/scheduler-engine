@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.schedulertest
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
-import com.sos.scheduler.engine.main.event.{MainEvent, SchedulerClosed, SchedulerReadyEvent, TerminatedEvent}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerEvent, SchedulerState, SchedulerStateChanged, SchedulerTerminatedEvent}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -19,19 +19,21 @@ import scala.collection.mutable
 final class SchedulerTestIT extends FreeSpec with ScalaSchedulerTest {
 
   private implicit val unusedCloser = Closer.create()
-  private val receivedEvents = mutable.Buffer[MainEvent]()
+  private val receivedEvents = mutable.Buffer[SchedulerEvent]()
 
-  eventBus.onHot[MainEvent] {
+  eventBus.onHot[SchedulerEvent] {
     case KeyedEvent(NoKey, e) ⇒ receivedEvents += e
   }
 
   "SchedulerReadyEvent" in {
-    assert(receivedEvents == List(SchedulerReadyEvent))
+    assert(receivedEvents == List(
+      SchedulerStateChanged(SchedulerState.starting),
+      SchedulerStateChanged(SchedulerState.running)))
   }
 
   "controller.terminate, .close()" in {
     eventBus.awaiting[SchedulerClosed.type](NoKey) {
-      eventBus.awaiting[TerminatedEvent](NoKey) {
+      eventBus.awaiting[SchedulerTerminatedEvent](NoKey) {
         controller.terminateScheduler()
         controller.close()
       }

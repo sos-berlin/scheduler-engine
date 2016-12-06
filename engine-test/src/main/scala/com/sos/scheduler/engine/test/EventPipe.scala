@@ -5,9 +5,9 @@ import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent, Event}
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent
 import com.sos.scheduler.engine.eventbus._
-import com.sos.scheduler.engine.main.event.TerminatedEvent
 import com.sos.scheduler.engine.test.EventPipe._
 import java.time.Duration
 import java.time.Instant.now
@@ -63,8 +63,8 @@ extends EventHandlerAnnotated with HasCloser {
       tryPoll(until - now()) match {
         case None ⇒
           throw new TimeoutException(s"Expected event '$expectedName' has not arrived within ${timeout.pretty}")
-        case Some(KeyedEvent(_, e: TerminatedEvent)) ⇒
-          sys.error(s"Expected event '$expectedName' has not arrived before ${classOf[TerminatedEvent].getName} has arrived")
+        case Some(KeyedEvent(_, e: SchedulerTerminatedEvent)) ⇒
+          sys.error(s"Expected event '$expectedName' has not arrived before ${classOf[SchedulerTerminatedEvent].getName} has arrived")
         case Some(e: AnyKeyedEvent) if (expectedEventClass isAssignableFrom e.event.getClass) && evalPredicateIfDefined[E](predicate, e.asInstanceOf[KeyedEvent[E]]) ⇒
           e.asInstanceOf[KeyedEvent[E]]
         case _ ⇒

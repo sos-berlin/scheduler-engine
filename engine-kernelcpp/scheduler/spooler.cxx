@@ -1344,6 +1344,7 @@ void Spooler::set_state( State state )
     {
         log_show_state();
     }
+    Scheduler_object::report_event(CppEventFactoryJ::newSchedulerStateChanged(_state));
 }
 
 //------------------------------------------------------------------------------Spooler::state_name

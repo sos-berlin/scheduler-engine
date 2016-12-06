@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderNodeChanged;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.TestEnvironment;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
@@ -84,7 +84,7 @@ public final class JS644IT extends SchedulerTest {
         if (OrderNodeChanged.class.isAssignableFrom(e.event().getClass())) {
             threadGate.put(true);
         } else
-        if (TerminatedEvent.class.isAssignableFrom(e.event().getClass())) {
+        if (SchedulerTerminatedEvent.class.isAssignableFrom(e.event().getClass())) {
             threadGate.put(false);
         }
     }

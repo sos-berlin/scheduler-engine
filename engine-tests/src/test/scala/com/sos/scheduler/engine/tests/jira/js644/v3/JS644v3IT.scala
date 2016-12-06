@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinished
-import com.sos.scheduler.engine.main.event.TerminatedEvent
+import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js644.v3.JS644v3IT._
 import java.io.File
@@ -62,7 +62,7 @@ final class JS644v3IT extends FreeSpec with ScalaSchedulerTest {
       gate.put(true)
   }
 
-  eventBus.on[TerminatedEvent] { case _ ⇒
+  eventBus.on[SchedulerTerminatedEvent] { case _ ⇒
     lowerCaseGate.put(false)
   }
 }

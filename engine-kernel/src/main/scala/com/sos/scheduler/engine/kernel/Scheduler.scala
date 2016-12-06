@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
-import com.sos.scheduler.engine.data.scheduler.{SchedulerOverview, SchedulerState}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
@@ -48,7 +48,6 @@ import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
-import com.sos.scheduler.engine.main.event.SchedulerClosed
 import com.typesafe.config.Config
 import java.io.ByteArrayInputStream
 import java.lang.Thread.currentThread
@@ -311,7 +310,7 @@ with HasCloser {
       udpPort = schedulerConfiguration.udpPort,
       supervisor = schedulerConfiguration.supervisorUriOption,
       pid = cppProxy.pid,
-      state = SchedulerState.ofCppName(cppProxy.state_name),
+      state = SchedulerState.values()(cppProxy.state),
       system = systemInformation(),
       java = JavaInformation())
 

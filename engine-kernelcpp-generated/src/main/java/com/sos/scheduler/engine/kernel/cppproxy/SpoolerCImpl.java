@@ -853,17 +853,15 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native void start__native(long cppReference);
 
 
-    @Override public java.lang.String state_name() {
+    @Override public int state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
-            java.lang.String result = state_name__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
+            return state__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
     }
 
-    private static native java.lang.String state_name__native(long cppReference);
+    private static native int state__native(long cppReference);
 
 
     @Override public void stop() {

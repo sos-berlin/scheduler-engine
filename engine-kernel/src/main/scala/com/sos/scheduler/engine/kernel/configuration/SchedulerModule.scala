@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId, SupervisorUri}
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId, SchedulerState, SupervisorUri}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
@@ -165,8 +165,8 @@ with HasCloser {
   @Provides @Singleton
   private def zoneId(implicit stcq: SchedulerThreadCallQueue): ZoneId =
     inSchedulerThread {
-      val state = spoolerC.state_name
-      if (Set("none", "loading")(state)) throw new IllegalStateException(s"ZoneId while state=$state")
+      val state = SchedulerState.values()(spoolerC.state)
+      if (Set(SchedulerState.none, SchedulerState.loading)(state)) throw new IllegalStateException(s"ZoneId while state=$state")
       ZoneId of spoolerC.time_zone_name
     }
 

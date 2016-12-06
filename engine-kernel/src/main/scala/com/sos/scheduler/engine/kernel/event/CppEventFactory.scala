@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdd
 import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
+import com.sos.scheduler.engine.data.scheduler.{SchedulerState, SchedulerStateChanged}
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.event.CppEventCode._
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -88,4 +89,7 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 
   @ForCpp def newTaskEndedEvent(taskId: Int, jobPath: String, returnCode: Int): AnyKeyedEvent =
     KeyedEvent(TaskEnded(ReturnCode(returnCode)))(TaskKey(JobPath(jobPath), TaskId(taskId)))
+
+  @ForCpp def newSchedulerStateChanged(statusCode: Int): AnyKeyedEvent =
+    SchedulerStateChanged(SchedulerState.values()(statusCode))
 }

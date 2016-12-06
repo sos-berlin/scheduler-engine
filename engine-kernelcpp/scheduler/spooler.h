@@ -327,7 +327,7 @@ struct Spooler : Object,
                  Abstract_scheduler_object,
                  javabridge::has_proxy<Spooler>
 {
-    enum State
+    enum State  // Align with Java SchedulerState !
     {
         s_none,
         s_stopped,

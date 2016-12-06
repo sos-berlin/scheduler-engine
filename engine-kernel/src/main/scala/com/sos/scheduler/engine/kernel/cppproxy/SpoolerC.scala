@@ -21,7 +21,7 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   def hostname_complete: String
   def include_path: String
   def temp_dir: String
-  def state_name: String
+  def state: Int
   def pid: Int
   def log_directory: String
   def is_service: Boolean
