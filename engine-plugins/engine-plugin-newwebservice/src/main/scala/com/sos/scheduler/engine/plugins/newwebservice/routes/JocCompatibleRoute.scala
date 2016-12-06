@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.passIf
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{passIf, pathSegments}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.cpp.CppHttpRoute
@@ -20,24 +20,24 @@ trait JocCompatibleRoute extends CommandRoute with CppHttpRoute {
   protected def webServiceContext: WebServiceContext
 
   final def jocCompatibleRoute: Route =
-    pathPrefix("operations_gui") {
+    pathSegments("operations_gui") {
       schedulerConfiguration.existingHtmlDirOption match {
         case Some(_) ⇒ redirect("/jobscheduler/joc", TemporaryRedirect)
         case None ⇒ jocIsNotInstalled
       }
     } ~
-    pathPrefix("joc") {
+    pathSegments("joc") {
       schedulerConfiguration.existingHtmlDirOption match {
         case Some(dir) ⇒ jocRoute(dir)
         case None ⇒ jocIsNotInstalled
       }
     } ~
-    pathPrefix("engine") {
-      (pathPrefix("command") & pathEndOrSingleSlash) {  // SingleSlash for compatibility with JOC 1
+    pathSegments("engine") {
+      (pathSegments("command") & pathEndOrSingleSlash) {  // SingleSlash for compatibility with JOC 1
         untypedPostCommandRoute
       }
     } ~
-    pathPrefix("engine-cpp") {
+    pathSegments("engine-cpp") {
       cppHttpRoute
     }
 

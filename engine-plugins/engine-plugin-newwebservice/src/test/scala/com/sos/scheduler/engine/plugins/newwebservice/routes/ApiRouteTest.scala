@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import org.junit.runner.RunWith
@@ -9,7 +10,6 @@ import scala.concurrent.ExecutionContext
 import spray.http.HttpHeaders.{Accept, Location}
 import spray.http.MediaTypes._
 import spray.http.{MediaRanges, StatusCodes, Uri}
-import spray.routing.Directives._
 import spray.testkit.ScalatestRouteTest
 
 /**
@@ -51,7 +51,7 @@ final class ApiRouteTest extends org.scalatest.FreeSpec with ScalatestRouteTest 
     super.afterAll()
   }
 
-  def route = pathPrefix("test" / "api") {
+  def route = pathSegments("test/api") {
     apiRoute
   }
 

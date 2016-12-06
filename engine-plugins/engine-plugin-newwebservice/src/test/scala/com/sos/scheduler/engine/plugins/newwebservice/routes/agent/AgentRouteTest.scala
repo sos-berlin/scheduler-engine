@@ -7,11 +7,12 @@ import com.sos.scheduler.engine.agent.views.AgentOverview
 import com.sos.scheduler.engine.client.api.ProcessClassClient
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
-import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.processclass.ProcessClassView.Companion
+import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
@@ -58,7 +59,7 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
 
   private def route =
     compressResponseIfRequested(()) {
-      pathPrefix("api" / "agent") {
+      pathSegments("api/agent") {
         agentRoute
       }
     }

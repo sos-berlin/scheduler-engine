@@ -7,6 +7,7 @@ import akka.util.Timeout
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.Marshalling.marshalToHttpResponse
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -132,7 +133,7 @@ object IdempotenceTest {
     }
 
     private def route =
-      pathPrefix("test") {
+      pathSegments("test") {
         post {
           entity(as[Data]) { data ⇒
             idempotence {

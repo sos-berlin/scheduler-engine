@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
@@ -14,7 +13,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.imp
 import scala.concurrent._
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
-import spray.routing.{Route, ValidationRejection}
+import spray.routing.Route
 
 /**
   * @author Joacim Zschimmer
@@ -52,6 +51,5 @@ trait JobChainRoute {
             case KeyedEvent(jobChainPath: JobChainPath, _) ⇒ query.pathQuery.matches(jobChainPath)
             case _ ⇒ false
           })
-
     }
 }

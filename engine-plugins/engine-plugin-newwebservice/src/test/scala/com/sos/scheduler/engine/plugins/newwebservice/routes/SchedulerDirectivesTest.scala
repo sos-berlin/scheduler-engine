@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
@@ -18,17 +19,17 @@ final class SchedulerDirectivesTest extends FreeSpec with ScalatestRouteTest {
 
   "typedPath" - {
     val route =
-      pathPrefix("job") {
+      pathSegments("job") {
         typedPath(JobPath) { path ⇒
           complete(path.toString)
         }
       } ~
-      pathPrefix("folder") {
+      pathSegments("folder") {
         typedPath(FolderPath) { path ⇒
           complete(path.toString)
         }
       } ~
-      pathPrefix("order") {
+      pathSegments("order") {
         typedPath(OrderKey) { orderKey ⇒
           complete(orderKey.toString)
         }

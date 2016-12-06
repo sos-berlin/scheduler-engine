@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.{ProcessClassClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.FileBasedState
@@ -20,7 +21,6 @@ import spray.http.MediaTypes.`application/json`
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.marshalling.BasicMarshallers._
 import spray.json.DefaultJsonProtocol._
-import spray.routing.Directives._
 import spray.routing.Route
 import spray.testkit.ScalatestRouteTest
 
@@ -70,7 +70,7 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
   protected implicit def executionContext = ExecutionContext.global
 
   private def route: Route =
-    pathPrefix("api" / "processClass") {
+    pathSegments("api/processClass") {
       processClassRoute
     }
 

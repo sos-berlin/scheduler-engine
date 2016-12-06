@@ -4,7 +4,7 @@ import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{completeWithError, pathSegments}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
@@ -45,44 +45,44 @@ with TaskRoute {
     handleExceptions(ApiExceptionHandler) {
       handleRejections(ApiRejectionHandler) {
         dontCache {
-          pathPrefix("event") {
+          pathSegments("event") {
             eventRoute
           } ~
           specializedFileBasedRoute ~
           anyFileBasedRoute ~
           otherApiRoute
         } ~
-        pathPrefix("agent") {
+        pathSegments("agent") {
           agentRoute
         }
       }
     } ~
-    pathPrefix("frontend") {
+    pathSegments("frontend") {
       frontEndRoute
     }
 
   private def specializedFileBasedRoute: Route =
-    pathPrefix("order") {
+    pathSegments("order") {
       orderRoute
     } ~
-    pathPrefix("jobChain") {
+    pathSegments("jobChain") {
       jobChainRoute
     } ~
-    pathPrefix("job") {
+    pathSegments("job") {
       jobRoute
     } ~
-    pathPrefix("processClass") {
+    pathSegments("processClass") {
       processClassRoute
     }
 
   private def otherApiRoute =
-    pathPrefix("command") {
+    pathSegments("command") {
       commandRoute
     } ~
-    pathPrefix("task") {
+    pathSegments("task") {
       taskRoute
     } ~
-    pathPrefix("scheduler") {
+    pathSegments("scheduler") {
       pathEnd {
         parameter("return") {
           case "log" ⇒ logRoute(prefixLog)

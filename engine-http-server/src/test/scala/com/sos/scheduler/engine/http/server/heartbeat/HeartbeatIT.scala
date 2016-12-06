@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.ToYamlString
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
@@ -195,7 +196,7 @@ object HeartbeatIT {
     }
 
     private def route: Route =
-      (pathPrefix("test") & path(Segment)) { id: String ⇒
+      (pathSegments("test") & path(Segment)) { id: String ⇒
         post {
           val heartbeatService = idToHeartbeatService.getOrElseUpdate(id, new HeartbeatService)
           heartbeatService.continueHeartbeat(timeout ⇒ logger.info(s"Client-side heartbeat ${timeout.pretty}")) ~

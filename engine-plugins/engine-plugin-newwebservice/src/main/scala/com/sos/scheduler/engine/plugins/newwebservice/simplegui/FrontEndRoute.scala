@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.FrontEndRoute._
 import spray.http.CacheDirectives.`max-age`
@@ -14,7 +15,7 @@ trait FrontEndRoute extends WebjarsRoute {
 
   final def frontEndRoute: Route =
     //"Route responses other than HttpResponse or Rejections cannot be cached ": cache(routeCache()) {  // Cache slow Jar reads
-      pathPrefix("webjars") {
+      pathSegments("webjars") {
         webjarsRoute
       } ~
       get {

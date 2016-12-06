@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.web.common
 
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.{fromPathAndParameters, toPathAndParameters}
-import com.sos.scheduler.engine.client.web.common.QueryHttp.orderQuery
-import com.sos.scheduler.engine.client.web.common.QueryHttp.jobChainQuery
+import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainQuery, orderQuery}
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -24,7 +24,7 @@ final class QueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
   "JobChainQuery" - {
     def route(expected: ⇒ JobChainQuery) =
-      pathPrefix("prefix") {
+      pathSegments("prefix") {
         jobChainQuery { query: JobChainQuery ⇒
           assert(query == expected)
           complete(OK)
@@ -87,7 +87,7 @@ final class QueryHttpTest extends FreeSpec with ScalatestRouteTest {
 
   "OrderQuery" - {
     def route(expected: ⇒ OrderQuery) =
-      pathPrefix("prefix") {
+      pathSegments("prefix") {
         orderQuery { query ⇒
           assert(query == expected)
           complete(OK)

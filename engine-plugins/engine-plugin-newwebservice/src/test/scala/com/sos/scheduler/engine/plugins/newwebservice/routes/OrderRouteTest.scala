@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event._
@@ -31,7 +32,6 @@ import spray.http.MediaTypes.`application/json`
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 import spray.json._
-import spray.routing.Directives._
 import spray.routing.Route
 import spray.testkit.ScalatestRouteTest
 
@@ -118,7 +118,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
   }
 
   private def route: Route =
-    pathPrefix("api" / "order") {
+    pathSegments("api/order") {
       orderRoute
     }
 
