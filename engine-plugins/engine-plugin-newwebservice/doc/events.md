@@ -198,6 +198,11 @@ Ein `Event` kann ein `FileBasedEvent` oder `OrderEvent` sein
 
 Die Events sollten sich selbst erklären.
 
+* [SchedulerEvent](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/main/scala/com/sos/scheduler/engine/data/scheduler/SchedulerEvent.scala)
+([JSON](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/test/scala/com/sos/scheduler/engine/data/scheduler/SchedulerEventTest.scala))
+    * SchedulerStateChanged(SchedulerState)
+    * SchedulerClosed
+
 * [FileBased](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/main/scala/com/sos/scheduler/engine/data/filebased/FileBasedEvent.scala)
 ([JSON](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/test/scala/com/sos/scheduler/engine/data/filebased/FileBasedEventTest.scala))
     * FileBasedAdded
@@ -207,14 +212,25 @@ Die Events sollten sich selbst erklären.
 
 * [OrderEvent](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/main/scala/com/sos/scheduler/engine/data/order/OrderEvent.scala)
 ([JSON](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/test/scala/com/sos/scheduler/engine/data/order/OrderEventTest.scala))
-    * OrderStarted(nodeId, taskId)
-    * OrderFinished(nodeId
+    * OrderStarted(NodeId, TaskId)
+    * OrderFinished(NodeId)
     * OrderStepStarted
-    * OrderStepEnded(nodeTransisition)
-    * OrderSetBack(nodeId)
-    * OrderNodeChanged(nodeId, fromNodeId)
+    * OrderStepEnded(NodeTransisition)
+    * OrderSetBack(NodeId)
+    * OrderNodeChanged(NodeId, from: NodeId)
     * OrderSuspended
     * OrderResumed
+
+* [JobChainEvent](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/main/scala/com/sos/scheduler/engine/data/order/JobChainEvent.scala)
+([JSON](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/test/scala/com/sos/scheduler/engine/data/order/JobChainEventTest.scala))
+    * JobChainStateChanged(JobChainState)
+    * JobChainNodeActionChanged(NodeId, JobChainNodeAction)
+
+* [TaskEvent](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/main/scala/com/sos/scheduler/engine/data/job/TaskEvent.scala)
+([JSON](https://github.com/sos-berlin/scheduler-engine/blob/master/engine-data/src/test/scala/com/sos/scheduler/engine/data/job/TaskEventTest.scala))
+    * TaskStarted
+    * TaskEnded(ReturnCode)
+    * TaskClosed
 
 Einige Events haben Parameter.
 Zum Beispiel kommt `OrderStepStarted` mit NodeId und TaskId (Felder `nodeId` und `taskId`).
