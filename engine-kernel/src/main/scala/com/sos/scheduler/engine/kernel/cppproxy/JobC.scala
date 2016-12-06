@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.cppproxy
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression}
 import com.sos.scheduler.engine.data.job.TaskPersistentState
-import com.sos.scheduler.engine.kernel.job.Job
+import com.sos.scheduler.engine.kernel.job.{Job, Task}
 
 @CppClass(clas = "sos::scheduler::Job", directory = "scheduler", include = "spooler.h")
 trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
@@ -26,6 +26,8 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
 
   @CppExpression("$->is_task_ready_for_order((::sos::scheduler::Process_class*)p0)")
   def is_task_ready_for_order(processClassPtr: Long): Boolean
+
+  def java_tasks: java.util.ArrayList[Task]
 }
 
 object JobC {

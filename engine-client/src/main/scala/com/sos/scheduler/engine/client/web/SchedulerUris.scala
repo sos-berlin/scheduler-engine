@@ -154,7 +154,12 @@ final class SchedulerUris private(schedulerUri: Uri) {
     def overview(taskId: TaskId) = uriString(Uri.Path("api/task") / taskId.string)
 
     def events[E <: Event](taskId: TaskId, eventRequest: SomeEventRequest[E]): String =
-      uriString(Uri.Path(s"api/task/${taskId.number}"), eventRequestToParameters(eventRequest): _*)
+      uriString(Uri.Path(s"api/task"), ("taskId" → taskId.string) +: eventRequestToParameters(eventRequest): _*)
+
+    def eventsBy[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]): String = {
+      val (subpath, parameters) = query.toPathAndParameters[JobPath]
+      uriString(Uri.Path(s"api/task$subpath"), eventRequestToParameters(eventRequest): _*)
+    }
   }
 
   object agent {

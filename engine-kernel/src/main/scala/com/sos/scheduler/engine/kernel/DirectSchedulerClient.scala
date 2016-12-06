@@ -161,6 +161,13 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       taskSubsystem.task(taskId).overview
     }
 
+  def taskOverviews(query: PathQuery): Future[Snapshot[immutable.Seq[TaskOverview]]] =
+    respondWithSnapshotFuture {
+      for (job ← jobSubsystem.fileBasedsBy(query);
+           task ← job.tasks) yield
+        task.overview
+    }
+
   def agentUris: Future[Snapshot[Set[AgentAddress]]] =
     respondWithSnapshotFuture {
       (for (processClass ← processClassSubsystem.fileBaseds;

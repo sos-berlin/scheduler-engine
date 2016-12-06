@@ -200,7 +200,12 @@ final class SchedulerUrisTest extends FreeSpec {
 
     "events" in {
       assert(uris.task.events(TaskId(123), EventRequest[TaskEvent](after = 7, 1.s)) ==
-        "http://0.0.0.0:1111/jobscheduler/master/api/task/123?return=TaskEvent&timeout=1s&after=7")
+        "http://0.0.0.0:1111/jobscheduler/master/api/task?taskId=123&return=TaskEvent&timeout=1s&after=7")
+    }
+
+    "eventsBy" in {
+      assert(uris.task.eventsBy(PathQuery(JobPath("/folder/job")), EventRequest[TaskEvent](after = 7, 1.s)) ==
+        "http://0.0.0.0:1111/jobscheduler/master/api/task/folder/job?return=TaskEvent&timeout=1s&after=7")
     }
   }
 

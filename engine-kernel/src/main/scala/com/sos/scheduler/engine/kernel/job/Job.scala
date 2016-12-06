@@ -17,6 +17,8 @@ import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import java.time.Instant
+import scala.collection.JavaConversions._
+import scala.collection.immutable
 
 @ForCpp
 final class Job(
@@ -111,6 +113,9 @@ with JobPersistence {
   private[kernel] def state = JobState.valueOf(cppProxy.state_name)
 
   def stateText = inSchedulerThread { cppProxy.state_text }
+
+  private[kernel] def tasks: immutable.Seq[Task] =
+    cppProxy.java_tasks.toVector
 
   private[kernel] def waitingForProcessClass: Boolean = cppProxy.waiting_for_process
 

@@ -157,6 +157,9 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   def taskEvents[E <: Event](taskId: TaskId, eventRequest: SomeEventRequest[E]) =
     get[Snapshot[EventSeq[Seq, E]]](_.task.events(taskId, eventRequest))
 
+  def taskEventsBy[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]) =
+    get[Snapshot[EventSeq[Seq, KeyedEvent[E]]]](_.task.eventsBy(query, eventRequest))
+
   // ProcessClass
 
   final def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath) =

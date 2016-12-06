@@ -163,6 +163,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual int max_tasks() const = 0;
     virtual int running_tasks_count() const = 0;
     virtual bool is_task_ready_for_order(Process_class*) = 0;
+    virtual ArrayListJ java_tasks() const = 0;
 
   private:
     Fill_zero                  _zero_;
@@ -413,6 +414,8 @@ struct Standard_job : Job
     }
 
     public: bool is_task_ready_for_order(Process_class*);
+
+    public: ArrayListJ java_tasks() const;
 
   private:
     void                        set_log                     ();

@@ -187,6 +187,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean is_visible__native(long cppReference);
 
 
+    @Override public java.util.ArrayList java_tasks() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.util.ArrayList result = java_tasks__native(cppReference());
+            checkIsNotReleased(java.util.ArrayList.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.util.ArrayList java_tasks__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

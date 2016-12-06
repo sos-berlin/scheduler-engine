@@ -35,7 +35,7 @@ private[routes] object EventRoutes {
   def singleKeyEvents[E <: Event: ClassTag](key: E#Key, defaultReturnType: Option[String] = None)
     (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
   : Route =
-    eventRequest(implicitClass[E]) { request ⇒
+    eventRequest(implicitClass[E], defaultReturnType = defaultReturnType) { request ⇒
       completeTryHtml {
         implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](key)
         request match {
@@ -52,7 +52,7 @@ private[routes] object EventRoutes {
   def events[E <: Event: ClassTag](predicate: KeyedEvent[E] ⇒ Boolean, defaultReturnType: Option[String] = None)
     (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
   : Route =
-    eventRequest(implicitClass[E]) {
+    eventRequest(implicitClass[E], defaultReturnType = defaultReturnType) {
       case request: SomeEventRequest[_] ⇒
         val castRequest = request.asInstanceOf[SomeEventRequest[E]]
         completeTryHtml {
@@ -69,28 +69,31 @@ private[routes] object EventRoutes {
           _ orElse defaultReturnType match {
             case Some(returnType) ⇒
               passSome(anyEventJsonFormat.typeNameToClass.get(returnType)) {
-                case eventClass if eventSuperclass isAssignableFrom eventClass ⇒
-                  val eClass = eventClass.asInstanceOf[Class[E]]
-                  parameter("limit" ? Int.MaxValue) {
-                    case 0 ⇒
-                      reject(ValidationRejection(s"Invalid limit=0"))
-                    case limit if limit > 0 ⇒
-                      parameter("after".as[EventId]) { after ⇒
-                        parameter("timeout" ? 0.s) { timeout ⇒
-                          inner(EventRequest(eClass, after = after, timeout, limit = limit) :: HNil)
-                        }
-                      }
-                    case limit if limit < 0 ⇒
-                      parameter("after" ? EventId.BeforeFirst) { after ⇒
-                        inner(ReverseEventRequest(eClass, after = after, limit = -limit) :: HNil)
-                      }
-                  }
-                case _ ⇒
-                  reject
+                case eventClass_ if eventSuperclass isAssignableFrom eventClass_ ⇒ eventRequestRoute(eventClass_, inner)
+                case eventClass_ if eventClass_ isAssignableFrom eventSuperclass ⇒ eventRequestRoute(eventSuperclass, inner)
+                case _ ⇒ reject
               }
             case None ⇒
               reject
           }
         }
     }
+
+  private def eventRequestRoute[E <: Event](eventClass: Class[_ <: E], inner: SomeEventRequest[E] :: HNil ⇒ Route): Route = {
+    val eClass = eventClass.asInstanceOf[Class[E]]
+    parameter("limit" ? Int.MaxValue) {
+      case 0 ⇒
+        reject(ValidationRejection(s"Invalid limit=0"))
+      case limit if limit > 0 ⇒
+        parameter("after".as[EventId]) { after ⇒
+          parameter("timeout" ? 0.s) { timeout ⇒
+            inner(EventRequest(eClass, after = after, timeout, limit = limit) :: HNil)
+          }
+        }
+      case limit if limit < 0 ⇒
+        parameter("after" ? EventId.BeforeFirst) { after ⇒
+          inner(ReverseEventRequest(eClass, after = after, limit = -limit) :: HNil)
+        }
+    }
+  }
 }

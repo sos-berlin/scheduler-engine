@@ -1818,6 +1818,17 @@ void Standard_job::remove_running_task( Task* task )
         _call_register.call<Below_max_tasks_call>();
 }
 
+ArrayListJ Standard_job::java_tasks() const {
+    ArrayListJ result = ArrayListJ::new_instance(_running_tasks.size() + _task_queue->_queue.size());
+    Z_FOR_EACH_CONST(Task_set, _running_tasks, i) {
+        result.add((*i)->java_sister());
+    }
+    Z_FOR_EACH_CONST(Task_queue::Queue, _task_queue->_queue, i) {
+        result.add((*i)->java_sister());
+    }
+    return result;
+}
+
 //---------------------------------------------------------------------------------Job::start_task
 
 ptr<Task> Job::start_task(Com_variable_set* params, const string& task_name, const Time& at)

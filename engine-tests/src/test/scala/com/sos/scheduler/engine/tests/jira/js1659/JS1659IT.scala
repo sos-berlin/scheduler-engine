@@ -133,16 +133,30 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
       JobStateChanged(JobState.pending)))
   }
 
-//  "/api/task/3" in {
-//    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
-//      client.taskEvents[TaskEvent](TaskKey1.taskId, EventRequest(after = beforeTestEventId, 0.s)) await TestTimeout
-//    assert(aEventId >= eventSnapshots.last.eventId)
-//    val events: Seq[TaskEvent] = eventSnapshots map { _.value }
-//    assert(events == Seq(
-//      TaskStarted,
-//      TaskEnded(ReturnCode(0)),
-//      TaskClosed))
-//  }
+  "/api/task/" in {
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
+      client.taskEventsBy[TaskEvent](PathQuery.All, EventRequest(after = beforeTestEventId, 0.s)) await TestTimeout
+    assert(aEventId >= eventSnapshots.last.eventId)
+    val events: Seq[KeyedEvent[TaskEvent]] = eventSnapshots map { _.value }
+    assert(events == Seq(
+      KeyedEvent(TaskStarted)(TaskKey1),
+      KeyedEvent(TaskEnded(ReturnCode(0)))(TaskKey1),
+      KeyedEvent(TaskClosed)(TaskKey1),
+      KeyedEvent(TaskStarted)(TaskKey2),
+      KeyedEvent(TaskEnded(ReturnCode(0)))(TaskKey2),
+      KeyedEvent(TaskClosed)(TaskKey2)))
+  }
+
+  "/api/task&taskId=3" in {
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
+      client.taskEvents[TaskEvent](TaskKey1.taskId, EventRequest(after = beforeTestEventId, 0.s)) await TestTimeout
+    assert(aEventId >= eventSnapshots.last.eventId)
+    val events: Seq[TaskEvent] = eventSnapshots map { _.value }
+    assert(events == Seq(
+      TaskStarted,
+      TaskEnded(ReturnCode(0)),
+      TaskClosed))
+  }
 
   "EventSeq.Torn" in {
     val oldEventId = eventIdGenerator.lastUsedEventId

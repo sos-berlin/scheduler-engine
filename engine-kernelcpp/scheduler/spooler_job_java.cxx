@@ -253,6 +253,7 @@ struct Java_job : Job {
     int running_tasks_count() const { throw_xc("NOT-IMPLEMENTED"); }
     vector<string> unavailable_lock_path_strings() const { throw_xc("NOT-IMPLEMENTED"); }
     bool is_task_ready_for_order(Process_class*) { throw_xc("NOT-IMPLEMENTED"); }
+    ArrayListJ java_tasks() const { throw_xc("NOT-IMPLEMENTED"); }
 };
 
 ptr<Job> new_java_job(Spooler* spooler) {
