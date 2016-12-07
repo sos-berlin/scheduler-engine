@@ -46,7 +46,7 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
         val task = eventSource.asInstanceOf[Task]
         KeyedEvent(TaskClosed)(task.taskKey)
 
-      case `orderTouchedEvent` ⇒
+      case `orderStartedEvent` ⇒
         KeyedEvent(OrderStarted)(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderFinishedEvent` ⇒

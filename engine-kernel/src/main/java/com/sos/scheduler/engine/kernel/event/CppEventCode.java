@@ -14,12 +14,13 @@ public enum CppEventCode {
     taskStartedEvent,
     taskClosedEvent,
 
-    orderTouchedEvent,
+    orderStartedEvent,
     orderFinishedEvent,
     orderSuspendedEvent,
     orderResumedEvent,
     orderSetBackEvent,
 
+    orderWaitingInTask,
     orderStepStartedEvent,
     orderNestedTouchedEvent,
     orderNestedFinishedEvent

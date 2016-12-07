@@ -1456,6 +1456,9 @@ bool Task::do_something()
                                         task_subsystem()->try_to_free_process(this, _process_class);     // Beendet eine Task in s_running_waiting_for_order
                                     }
                                     set_state_direct( s_waiting_for_process );
+                                    if (_order) {
+                                        report_event_code(orderWaitingInTask, _order->java_sister());
+                                    }
                                 }
                             } else {
                                 process_class()->remove_requestor(this);

@@ -25,6 +25,7 @@ enum Event_code {
     orderResumedEvent,
     orderSetBackEvent,
 
+    orderWaitingInTask,
     orderStepStartedEvent,
     orderNestedStartedEvent,
     orderNestedFinishedEvent,
