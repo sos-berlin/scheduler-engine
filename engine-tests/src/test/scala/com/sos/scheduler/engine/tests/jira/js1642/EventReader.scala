@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1642
 
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.client.web.WebSchedulerClient
+import com.sos.scheduler.engine.common.event.EventIdGenerator
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -10,7 +11,6 @@ import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, Event
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.log.Logged
-import com.sos.scheduler.engine.kernel.event.collector.EventIdGenerator
 import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.tests.jira.js1642.EventReader._
 import org.scalatest.Matchers._

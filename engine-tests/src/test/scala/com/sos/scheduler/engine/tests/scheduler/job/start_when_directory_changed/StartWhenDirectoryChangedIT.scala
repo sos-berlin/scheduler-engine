@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.{Stop, Unstop}
 import com.sos.scheduler.engine.test.EventPipe.TimeoutException
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{logger ⇒ _, _}
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.StartWhenDirectoryChangedIT._
 import java.nio.file.Files.{delete, exists, move}

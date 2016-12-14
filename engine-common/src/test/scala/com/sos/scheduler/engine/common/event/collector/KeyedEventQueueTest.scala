@@ -1,7 +1,7 @@
-package com.sos.scheduler.engine.kernel.event.collector
+package com.sos.scheduler.engine.common.event.collector
 
+import com.sos.scheduler.engine.common.event.collector.KeyedEventQueueTest._
 import com.sos.scheduler.engine.data.event.{EventId, KeyedEvent, NoKeyEvent, Snapshot}
-import com.sos.scheduler.engine.kernel.event.collector.KeyedEventQueueTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -14,6 +14,7 @@ final class KeyedEventQueueTest extends FreeSpec {
 
   private val queue = new KeyedEventQueue(3)
   private val eventSnapshots = for (i ← 1 to 5) yield Snapshot(EventId(i), KeyedEvent(AEvent(i)))
+
   eventSnapshots foreach queue.add
 
   "event stream is torn - the first event has been lost" in {

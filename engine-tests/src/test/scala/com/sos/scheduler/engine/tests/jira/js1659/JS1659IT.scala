@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1659
 
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
+import com.sos.scheduler.engine.common.event.EventIdGenerator
+import com.sos.scheduler.engine.common.event.collector.EventCollector
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -13,10 +15,8 @@ import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath,
 import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success
 import com.sos.scheduler.engine.data.order.{JobChainEvent, JobChainNodeActionChanged, JobChainStateChanged, OrderNodeChanged, OrderNodeTransition, OrderStarted, OrderStepEnded, OrderStepStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.queries.PathQuery
-import com.sos.scheduler.engine.data.scheduler.{SchedulerEvent, SchedulerState, SchedulerStateChanged}
-import com.sos.scheduler.engine.data.scheduler.SchedulerInitiated
+import com.sos.scheduler.engine.data.scheduler.{SchedulerEvent, SchedulerInitiated, SchedulerState, SchedulerStateChanged}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
-import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

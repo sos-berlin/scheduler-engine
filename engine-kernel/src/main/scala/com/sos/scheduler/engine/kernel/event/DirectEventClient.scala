@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.kernel.event
 
+import com.sos.scheduler.engine.common.event.EventIdGenerator
+import com.sos.scheduler.engine.common.event.collector.EventCollector
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eventTypedJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient._
-import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future}
 

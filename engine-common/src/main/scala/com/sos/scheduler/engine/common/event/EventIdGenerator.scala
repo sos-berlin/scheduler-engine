@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.event.collector
+package com.sos.scheduler.engine.common.event
 
 import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import java.lang.System._

@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
-import com.sos.scheduler.engine.data.job.TaskId._
 import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.scheduler.engine.data.job.TaskId._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEvent, TaskId, TaskKey}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
@@ -14,9 +14,9 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.e
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent.ExecutionContext
+import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing.Route
-import spray.json.DefaultJsonProtocol._
 
 /**
   * @author Joacim Zschimmer

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.event.collector
+package com.sos.scheduler.engine.common.event.collector
 
 import com.google.common.collect.{AbstractIterator ⇒ GuavaIterator}
 import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean

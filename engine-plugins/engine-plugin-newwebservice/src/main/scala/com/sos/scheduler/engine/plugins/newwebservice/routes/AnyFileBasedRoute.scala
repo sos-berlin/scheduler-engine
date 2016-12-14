@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.client.api.{FileBasedClient, SchedulerOverviewCl
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{completeWithError, pathSegments}
-import com.sos.scheduler.engine.common.sprayutils.{SprayUtils, XmlString}
+import com.sos.scheduler.engine.common.sprayutils.XmlString
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedEvent, FileBasedOverview, TypedPath}
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister

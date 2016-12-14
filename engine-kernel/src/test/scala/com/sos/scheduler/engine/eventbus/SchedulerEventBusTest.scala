@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
 import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent, NoKeyEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBusTest._
 import org.junit.runner.RunWith
