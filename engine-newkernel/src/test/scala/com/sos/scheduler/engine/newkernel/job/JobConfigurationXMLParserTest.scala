@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.newkernel.job
 
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.getCommonXMLInputFactory
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.newkernel.job.JobConfigurationXMLParserTest._
 import org.joda.time.DateTimeZone
@@ -12,7 +11,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JobConfigurationXMLParserTest extends FunSuite {
-  lazy val inputFactory = getCommonXMLInputFactory()
 
   test("parse") {
     val xml =
@@ -21,7 +19,7 @@ final class JobConfigurationXMLParserTest extends FunSuite {
         <script language="shell">exit 0</script>
       </new_job>
       .toString()
-    val jobConfiguration = JobConfigurationXMLParser.parseString(xml, inputFactory, DateTimeZone.getDefault)
+    val jobConfiguration = JobConfigurationXMLParser.parseString(xml, DateTimeZone.getDefault)
     assert(jobConfiguration.title == "TITLE")
     assert(jobConfiguration.script.asInstanceOf[ShellScript].text == "exit 0")
   }
@@ -35,7 +33,7 @@ final class JobConfigurationXMLParserTest extends FunSuite {
       </new_job>
       .toString()
     val stopwatch = new Stopwatch()
-    for (i <- 1 to n) JobConfigurationXMLParser.parseString(xml, inputFactory, DateTimeZone.getDefault)
+    for (i <- 1 to n) JobConfigurationXMLParser.parseString(xml, DateTimeZone.getDefault)
     logger.debug(s"${n*1000 / stopwatch.elapsedMs} XMLs/s")
   }
 }

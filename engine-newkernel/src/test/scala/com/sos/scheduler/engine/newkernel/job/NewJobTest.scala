@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.newkernel.job
 
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.getCommonXMLInputFactory
 import com.sos.scheduler.engine.data.event.AnyKeyedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskStarted}
 import com.sos.scheduler.engine.eventbus.{EventHandler, EventHandlerAnnotated, SchedulerEventBus}
@@ -16,7 +15,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class NewJobTest extends FunSuite with EventHandlerAnnotated {
-  lazy val inputFactory = getCommonXMLInputFactory()
   val callQueue = new StandardCallQueue
   val callRunner = new CallRunner(callQueue)
 
@@ -35,7 +33,7 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
     val eventBus = new SchedulerEventBus
     eventBus.registerAnnotated(this)
     withService(new ThreadService(eventBus)) {
-      val jobConfiguration = JobConfigurationXMLParser.parseString(xml, inputFactory, DateTimeZone.getDefault)
+      val jobConfiguration = JobConfigurationXMLParser.parseString(xml, DateTimeZone.getDefault)
       val job = new NewJob(jobPath, jobConfiguration, eventBus, callQueue)
       job.activate()
       callRunner.run()

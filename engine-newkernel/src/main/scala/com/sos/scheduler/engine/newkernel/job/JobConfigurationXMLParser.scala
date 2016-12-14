@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.newkernel.job
 
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.oldruntime.OldScheduleXMLParser
-import javax.xml.stream.XMLInputFactory
 import javax.xml.transform.Source
 import org.joda.time.DateTimeZone
 
@@ -35,11 +34,11 @@ class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: ScalaXMLEve
 }
 
 object JobConfigurationXMLParser {
-  def parseString(xml: String, inputFactory: XMLInputFactory, timeZone: DateTimeZone): JobConfiguration =
-    ScalaXMLEventReader.parseString(xml, inputFactory)(parseWithReader(timeZone))
+  def parseString(xml: String, timeZone: DateTimeZone): JobConfiguration =
+    ScalaXMLEventReader.parseString(xml)(parseWithReader(timeZone))
 
-  def parseDocument(source: Source, inputFactory: XMLInputFactory, timeZone: DateTimeZone): JobConfiguration =
-    ScalaXMLEventReader.parseDocument(source, inputFactory)(parseWithReader(timeZone))
+  def parseDocument(source: Source, timeZone: DateTimeZone): JobConfiguration =
+    ScalaXMLEventReader.parseDocument(source)(parseWithReader(timeZone))
 
   def parseWithReader(timeZone: DateTimeZone)(reader: ScalaXMLEventReader) =
     new JobConfigurationXMLParser(timeZone, reader).parse()
