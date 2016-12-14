@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
 import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{JocOrderStatisticsChanged, OrderDetailed, OrderKey, OrderOverview, Orders}
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
@@ -18,8 +17,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
+import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable

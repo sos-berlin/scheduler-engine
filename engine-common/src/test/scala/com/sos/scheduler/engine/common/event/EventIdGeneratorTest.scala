@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.event.collector
+package com.sos.scheduler.engine.common.event
 
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._

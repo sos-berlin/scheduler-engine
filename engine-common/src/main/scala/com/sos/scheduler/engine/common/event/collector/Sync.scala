@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.event.collector
+package com.sos.scheduler.engine.common.event.collector
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
@@ -18,7 +18,6 @@ private[collector] final class Sync(timerService: TimerService) {
   @volatile private var promiseUsed = false
   @volatile private var lastEventId = EventId.BeforeFirst
 
-  /** Not to be called concurrently. */
   def onNewEvent(eventId: EventId): Unit =
     synchronized {
       lastEventId = eventId

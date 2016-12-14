@@ -1,12 +1,12 @@
-package com.sos.scheduler.engine.kernel.event.collector
+package com.sos.scheduler.engine.common.event.collector
 
+import com.sos.scheduler.engine.common.event.collector.SyncTest._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.event.{NoKeyEvent, Snapshot}
-import com.sos.scheduler.engine.kernel.event.collector.SyncTest._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

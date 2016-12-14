@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernel
 
 import com.sos.scheduler.engine.client.api.SchedulerClient
+import com.sos.scheduler.engine.common.event.EventIdGenerator
+import com.sos.scheduler.engine.common.event.collector.EventCollector
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
@@ -14,7 +16,6 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
-import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobSubsystem, TaskSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobNode
@@ -185,6 +186,6 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
     directOrSchedulerThreadFuture {
       // We are in control of the scheduler thread. No hot scheduler events may occur now.
       // eventCollector.newEventId returns a good EventId usable for the event web service.
-      eventCollector.newSnapshot(content)
+      eventIdGenerator.newSnapshot(content)
     }
 }

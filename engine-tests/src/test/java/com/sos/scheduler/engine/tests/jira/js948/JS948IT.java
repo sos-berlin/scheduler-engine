@@ -1,16 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js948;
 
-import static org.junit.Assert.assertEquals;
-
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.data.job.TaskKey;
-import org.junit.Test;
-
-import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author ss

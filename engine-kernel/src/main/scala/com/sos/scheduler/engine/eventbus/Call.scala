@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 
 private[eventbus] final case class Call private[eventbus](keyedEvent: KeyedEvent[Event], subscription: EventSubscription) {
 

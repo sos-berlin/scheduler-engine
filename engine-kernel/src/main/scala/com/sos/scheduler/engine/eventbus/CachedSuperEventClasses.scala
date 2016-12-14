@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.data.event._
+import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.eventbus.CachedSuperEventClasses._
 import scala.collection.mutable
 

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.newkernel.job
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.getCommonXMLInputFactory
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.data.event.AnyKeyedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskStarted}
 import com.sos.scheduler.engine.eventbus.{EventHandler, EventHandlerAnnotated, SchedulerEventBus}
 import com.sos.scheduler.engine.newkernel.job.NewJobTest._

@@ -2,20 +2,17 @@ package com.sos.scheduler.engine.tests.jira.js887;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-
 import static com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;

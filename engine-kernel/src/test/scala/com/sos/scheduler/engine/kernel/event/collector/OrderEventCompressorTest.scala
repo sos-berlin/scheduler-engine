@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.event.collector
 
-import OrderEventCompressorTest._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved}

@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.common.event.EventIdGenerator
+import com.sos.scheduler.engine.common.event.collector.EventCollector
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
@@ -16,7 +18,7 @@ import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, Process
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
-import com.sos.scheduler.engine.kernel.event.collector.{EventCollector, EventIdGenerator}
+import com.sos.scheduler.engine.kernel.event.collector.EventBusEventCollector
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
 import java.nio.file.Paths
@@ -59,7 +61,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
     protected val eventIdGenerator = new EventIdGenerator
-    protected val eventCollector = new EventCollector(eventIdGenerator, eventBus, timerService)
+    protected val eventCollector = new EventBusEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)
 
     protected def executionContext = OrderRouteTest.this.executionContext
 
