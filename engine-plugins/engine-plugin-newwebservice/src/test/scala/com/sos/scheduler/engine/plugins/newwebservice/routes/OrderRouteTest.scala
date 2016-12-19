@@ -18,7 +18,7 @@ import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, Process
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
-import com.sos.scheduler.engine.kernel.event.collector.EventBusEventCollector
+import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollector
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
 import java.nio.file.Paths
@@ -61,7 +61,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
     protected val eventIdGenerator = new EventIdGenerator
-    protected val eventCollector = new EventBusEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)
+    protected val eventCollector = new SchedulerEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)
 
     protected def executionContext = OrderRouteTest.this.executionContext
 

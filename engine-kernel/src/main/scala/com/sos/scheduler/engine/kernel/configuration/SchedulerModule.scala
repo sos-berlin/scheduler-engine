@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.common.auth.EncodedPasswordValidator
 import com.sos.scheduler.engine.common.configutils.Configs.parseConfigIfExists
-import com.sos.scheduler.engine.common.event.EventIdGenerator
 import com.sos.scheduler.engine.common.event.collector.EventCollector
 import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
@@ -28,7 +27,7 @@ import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
-import com.sos.scheduler.engine.kernel.event.collector.EventBusEventCollector
+import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollector
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -65,9 +64,10 @@ with HasCloser {
     bindInstance(spoolerC)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
+    bind(classOf[EventCollector]) to classOf[SchedulerEventCollector] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, spoolerC, schedulerThread) }
     bindInstance(controllerBridge.getEventBus: SchedulerEventBus)
-    provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
+    provideSingleton { SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
     bindInstance(spoolerC.log.getSister: PrefixLog )
     provideCppSingleton { new SchedulerId(spoolerC.id) }
@@ -94,16 +94,6 @@ with HasCloser {
     lateBoundCppSingletons += implicitClass[A]
     provideSingleton(provider)
   }
-
-  @Provides @Singleton
-  private def provideEventCollector(
-    eventIdGenerator: EventIdGenerator,
-    timerService: TimerService,
-    eventBus: SchedulerEventBus,
-    configuration: EventCollector.Configuration,
-    executionContext: ExecutionContext)
-  : EventCollector =
-    new EventBusEventCollector(eventIdGenerator, timerService, eventBus, configuration)(executionContext)
 
   @Provides @Singleton
   private def provideCsrfConfiguration(config: Config): CSRF.Configuration =

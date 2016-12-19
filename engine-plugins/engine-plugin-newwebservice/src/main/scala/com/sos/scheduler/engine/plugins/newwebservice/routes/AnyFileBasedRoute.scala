@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import akka.actor.ActorRefFactory
 import com.sos.scheduler.engine.client.api.{FileBasedClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
+import com.sos.scheduler.engine.common.event.collector.EventDirectives._
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{completeWithError, pathSegments}
 import com.sos.scheduler.engine.common.sprayutils.XmlString
@@ -16,7 +17,6 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AnyFileBasedRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
-import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent.ExecutionContext
 import shapeless.{::, HNil}

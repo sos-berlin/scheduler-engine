@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.kernel.event.collector.EventBusEventCollector._
+import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollector._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
   * @author Joacim Zschimmer
   */
 @Singleton
-final class EventBusEventCollector @Inject()(
+final class SchedulerEventCollector @Inject()(
   protected val eventIdGenerator: EventIdGenerator,
   protected val timerService: TimerService,
   protected val eventBus: SchedulerEventBus,
@@ -28,7 +28,7 @@ extends EventCollector with HasCloser
   }
 }
 
-object EventBusEventCollector {
+object SchedulerEventCollector {
 
   private def isCollectableEvent(event: Event): Boolean =
     event match {

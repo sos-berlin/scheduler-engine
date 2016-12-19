@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp._
+import com.sos.scheduler.engine.common.event.collector.EventDirectives._
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
 import com.sos.scheduler.engine.data.event._

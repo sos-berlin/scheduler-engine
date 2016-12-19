@@ -31,48 +31,26 @@ trait DirectEventClient {
       })
 
   def eventsByPredicate[E <: Event](request: SomeEventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    request match {
-      case request: EventRequest[E] ⇒
-        wrapIntoSnapshot(
-          eventCollector.when[E](
-            request,
-            keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
-      case request: ReverseEventRequest[E] ⇒
-        reverseEventIteratorToEventSeqSnapshot(
-          eventCollector.reverse[E](
-            request,
-            keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent)))
-  }
+    eventCollector.wrapInSnapshot {
+      eventCollector.byPredicate[E](
+        request,
+        keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent))
+    }
+
+  def eventsByKeyAndPredicate[E <: Event](request: EventRequest[E], key: E#Key): Future[Snapshot[EventSeq[Seq, E]]] =
+    eventCollector.wrapInSnapshot {
+      eventCollector.byKeyAndPredicate(request, key, eventTypedJsonFormat.canSerialize)
+    }
 
   def eventsForKey[E <: Event](request: EventRequest[E], key: E#Key): Future[Snapshot[EventSeq[Seq, E]]] =
-    wrapIntoSnapshot(eventCollector.whenForKey(request, key, eventTypedJsonFormat.canSerialize))
+    eventCollector.wrapInSnapshot {
+      eventCollector.whenForKey(request, key, eventTypedJsonFormat.canSerialize)
+    }
 
   def eventsReverseForKey[E <: Event](request: ReverseEventRequest[E], key: E#Key): Future[Snapshot[Seq[Snapshot[E]]]] =
     Future.successful(eventIdGenerator.newSnapshot(
       eventCollector.reverseForKey(request, key, eventTypedJsonFormat.canSerialize)
       .toVector))
-
-  private def wrapIntoSnapshot[E](future: ⇒ Future[EventSeq[Iterator, E]]): Future[Snapshot[EventSeq[Seq, E]]] = {
-    val eventId = eventIdGenerator.next()
-    for (eventSeq ← future) yield
-      eventSeq match {
-        case EventSeq.NonEmpty(iterator) ⇒
-          val events = iterator.toVector
-          Snapshot(math.max(eventId, events.last.eventId), EventSeq.NonEmpty(events))
-        case o: EventSeq.Empty ⇒
-          eventIdGenerator.newSnapshot(o)
-        case EventSeq.Torn ⇒
-          eventIdGenerator.newSnapshot(EventSeq.Torn)
-      }
-  }
-
-  private def reverseEventIteratorToEventSeqSnapshot[E <: Event](iterator: Iterator[Snapshot[KeyedEvent[E]]]): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    wrapIntoSnapshot(
-      Future.successful(
-        if (iterator.nonEmpty)
-          EventSeq.NonEmpty(iterator)
-        else
-          EventSeq.Empty(eventIdGenerator.lastUsedEventId)))  // eventReverse is only for testing purposes
 }
 
 object DirectEventClient {
