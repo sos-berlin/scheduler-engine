@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.commandline.CommandLineArguments
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.agent.AgentAddress
+import scala.io
 import scala.util.control.NonFatal
 
 /**
