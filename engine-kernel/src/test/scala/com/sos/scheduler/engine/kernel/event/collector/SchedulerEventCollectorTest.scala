@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.event.{Event, EventRequest, EventSeq, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.kernel.event.collector.EventBusEventCollectorTest._
+import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollectorTest._
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class EventBusEventCollectorTest extends FreeSpec with BeforeAndAfterAll {
+final class SchedulerEventCollectorTest extends FreeSpec with BeforeAndAfterAll {
 
   private val eventBus = new SchedulerEventBus
   private val eventIdGenerator = new EventIdGenerator
@@ -31,7 +31,7 @@ final class EventBusEventCollectorTest extends FreeSpec with BeforeAndAfterAll {
   }
 
   "test" in {
-    autoClosing(new EventBusEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)) { eventCollector ⇒
+    autoClosing(new SchedulerEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)) { eventCollector ⇒
       val aEventId = eventIdGenerator.lastUsedEventId
       eventCollector.when[AEvent.type](EventRequest(aEventId, timeout = 0.s)) await 1.s shouldEqual
         EventSeq.Empty(aEventId)
@@ -46,7 +46,7 @@ final class EventBusEventCollectorTest extends FreeSpec with BeforeAndAfterAll {
   }
 }
 
-object EventBusEventCollectorTest {
+object SchedulerEventCollectorTest {
   private object AEvent extends Event {
     type Key = String
   }
