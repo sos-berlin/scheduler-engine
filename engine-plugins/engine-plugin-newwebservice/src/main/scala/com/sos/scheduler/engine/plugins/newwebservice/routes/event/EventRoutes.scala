@@ -38,7 +38,6 @@ private[routes] object EventRoutes {
     eventRequest(implicitClass[E], defaultReturnType = defaultReturnType) { request ⇒
       completeTryHtml {
         implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](key)
-        client
         request match {
           case request: EventRequest[_] ⇒
             client.eventsForKey[AnyEvent](request.asInstanceOf[EventRequest[AnyEvent]], key)
