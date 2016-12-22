@@ -47,7 +47,7 @@ final class AgentClientIT extends FreeSpec with ScalaFutures with BeforeAndAfter
     new Agent(conf).closeWithCloser
   }
   private implicit lazy val actorRefFactory: ActorRefFactory = Akkas.newActorSystem("AgentClientIT")(closer)
-  private lazy val client = new AgentClient.Standard(
+  private lazy val client = AgentClient(
     agentUri = agent.localUri.string,
     licenseKeys = List(LicenseKeyString("SOS-DEMO-1-D3Q-1AWS-ZZ-ITOT9Q6")))
 

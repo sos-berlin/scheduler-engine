@@ -45,7 +45,7 @@ extends (AgentAddress ⇒ AgentClient) {
       case _ ⇒
         None
     }
-    new AgentClient.Standard(
+    AgentClient(
       agentUri,
       SchedulerAgentClientFactory.this.licenseKeys,
       hostConnectorSetupOption,

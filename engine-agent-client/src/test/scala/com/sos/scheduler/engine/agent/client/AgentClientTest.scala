@@ -15,7 +15,7 @@ import spray.http.{HttpResponse, Uri}
 final class AgentClientTest extends FreeSpec {
 
   private val agentUri = Uri("https://example.com:9999")
-  private val agentClient = new AgentClient.Standard(agentUri)(null: ActorRefFactory)
+  private val agentClient = AgentClient(agentUri)(null: ActorRefFactory)
 
   "toCheckedAgentUri, checkAgentUri and apply, failing" - {
     for ((uri, None) ← Setting ) s"$uri" in {

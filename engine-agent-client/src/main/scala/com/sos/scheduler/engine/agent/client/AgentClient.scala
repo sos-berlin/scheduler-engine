@@ -159,7 +159,16 @@ object AgentClient {
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
   private val logger = Logger(getClass)
 
-  final class Standard(
+  def apply(
+    agentUri: Uri,
+    licenseKeys: immutable.Iterable[LicenseKeyString] = Nil,
+    hostConnectorSetupOption: Option[HostConnectorSetup] = None,
+    userAndPasswordOption: Option[UserAndPassword] = None)
+    (implicit actorRefFactory: ActorRefFactory)
+  : AgentClient =
+    new Standard(agentUri, licenseKeys, hostConnectorSetupOption, userAndPasswordOption)
+
+  private class Standard(
     val agentUri: Uri,
     protected val licenseKeys: immutable.Iterable[LicenseKeyString] = Nil,
     protected val hostConnectorSetupOption: Option[HostConnectorSetup] = None,

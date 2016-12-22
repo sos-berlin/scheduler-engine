@@ -37,12 +37,12 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
 
   private implicit lazy val actorSystem = ActorSystem("OrderRoute")
 
-  private lazy val agentClient = new AgentClient.Standard(agent.localUri.string)
+  private lazy val agentClient = AgentClient(agent.localUri.string)
   protected def isKnownAgentUriFuture(uri: AgentAddress) = Future.successful(uri == agent.localUri)
   protected val webServiceContext = new WebServiceContext()
   protected def actorRefFactory = actorSystem
   protected def executionContext = actorSystem.dispatcher
-  protected val toAgentClient = (uri: AgentAddress) ⇒ new AgentClient.Standard(uri.string)
+  protected val toAgentClient = (uri: AgentAddress) ⇒ AgentClient(uri.string)
 
   protected val client = new ProcessClassClient {
     def agentUris = Future.successful(Snapshot(EventId(1), Set(agent.localUri)))
