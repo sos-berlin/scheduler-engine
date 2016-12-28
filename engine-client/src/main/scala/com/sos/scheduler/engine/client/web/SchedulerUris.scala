@@ -4,8 +4,7 @@ import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
 import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.common.scalautil.Collections._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, ReverseEventRequest, SomeEventRequest}
+import com.sos.scheduler.engine.data.event.{Event, EventId, SomeEventRequest}
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -118,7 +117,7 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
     def events[E <: Event](query: JobChainQuery, eventRequest: SomeEventRequest[E]): String = {
       val (subpath, parameters) = query.toPathAndParameters
-      uriString(Uri.Path(s"api/jobChain$subpath"), parameters ++ eventRequestToParameters(eventRequest))
+      uriString(Uri.Path(s"api/jobChain$subpath"), parameters ++ eventRequest.toQueryParameters)
     }
   }
 
@@ -131,7 +130,7 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
     def events[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]): String = {
       val (subpath, parameters) = query.toPathAndParameters[JobPath]
-      uriString(Uri.Path(s"api/job$subpath"), parameters ++ eventRequestToParameters(eventRequest))
+      uriString(Uri.Path(s"api/job$subpath"), parameters ++ eventRequest.toQueryParameters)
     }
   }
 
@@ -153,12 +152,12 @@ final class SchedulerUris private(schedulerUri: Uri) {
   object task {
     def overview(taskId: TaskId) = uriString(Uri.Path("api/task") / taskId.string)
 
-    def events[E <: Event](taskId: TaskId, eventRequest: SomeEventRequest[E]): String =
-      uriString(Uri.Path(s"api/task"), ("taskId" → taskId.string) +: eventRequestToParameters(eventRequest): _*)
+    def events[E <: Event](taskId: TaskId, request: SomeEventRequest[E]): String =
+      uriString(Uri.Path(s"api/task"), ("taskId" → taskId.string) +: request.toQueryParameters: _*)
 
-    def eventsBy[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]): String = {
+    def eventsBy[E <: Event](query: PathQuery, request: SomeEventRequest[E]): String = {
       val (subpath, parameters) = query.toPathAndParameters[JobPath]
-      uriString(Uri.Path(s"api/task$subpath"), eventRequestToParameters(eventRequest): _*)
+      uriString(Uri.Path(s"api/task$subpath"), request.toQueryParameters: _*)
     }
   }
 
@@ -168,27 +167,17 @@ final class SchedulerUris private(schedulerUri: Uri) {
     def forward(agentUri: String) = uriString(Uri.Path(s"api/agent/$agentUri"))
   }
 
-  def events[E <: Event](request: SomeEventRequest[E]) =
-    uriString(Uri.Path("api/event"), eventRequestToParameters(request): _*)
+  object events {
+    private val DefaultParam = "return" → "Event"
+
+    def apply[E <: Event](request: SomeEventRequest[E]) =
+      uriString(Uri.Path("api/event"), request.toQueryParameters filter DefaultParam.!= : _*)
+  }
 
   def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery) = {
     val (subpath, queryParams) = query.toPathAndParameters[ProcessClassPath]
-    uriString(Uri.Path(s"api/fileBased$subpath"), queryParams.toSeq ++ eventRequestToParameters(request): _*)
+    uriString(Uri.Path(s"api/fileBased$subpath"), queryParams.toSeq ++ request.toQueryParameters: _*)
   }
-
-  private def eventRequestToParameters[E <: Event](request: SomeEventRequest[E]): Vector[(String, String)] =
-    Vector.build[(String, String)] { builder ⇒
-      if (request.eventClass != classOf[Event]) builder += "return" → (request.eventClass.getSimpleName stripSuffix "$")
-      request match {
-        case request: EventRequest[E] ⇒
-          if (request.timeout != 0.s) builder += "timeout" → request.timeout.toSecondsString
-          if (request.limit != Int.MaxValue) builder += "limit" → request.limit.toString
-          builder += "after" → request.after.toString
-        case request: ReverseEventRequest[E] ⇒
-          if (request.limit != Int.MaxValue) builder += "limit" → (-request.limit).toString
-          if (request.after != EventId.BeforeFirst) builder += "after" → request.after.toString
-        }
-    }
 
   def uriString(path: Uri.Path, parameters: (String, String)*): String =
     resolveMasterUri(Uri(path = path, query = Uri.Query(parameters: _*))).toString
