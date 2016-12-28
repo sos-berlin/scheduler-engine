@@ -31,19 +31,19 @@ trait DirectEventClient {
       })
 
   def eventsByPredicate[E <: Event](request: SomeEventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Snapshot[EventSeq[Seq, KeyedEvent[E]]]] =
-    eventCollector.wrapInSnapshot {
+    eventIdGenerator.wrapInSnapshot {
       eventCollector.byPredicate[E](
         request,
         keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent))
     }
 
   def eventsByKeyAndPredicate[E <: Event](request: EventRequest[E], key: E#Key): Future[Snapshot[EventSeq[Seq, E]]] =
-    eventCollector.wrapInSnapshot {
+    eventIdGenerator.wrapInSnapshot {
       eventCollector.byKeyAndPredicate(request, key, eventTypedJsonFormat.canSerialize)
     }
 
   def eventsForKey[E <: Event](request: EventRequest[E], key: E#Key): Future[Snapshot[EventSeq[Seq, E]]] =
-    eventCollector.wrapInSnapshot {
+    eventIdGenerator.wrapInSnapshot {
       eventCollector.whenForKey(request, key, eventTypedJsonFormat.canSerialize)
     }
 

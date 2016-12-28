@@ -43,9 +43,9 @@ import spray.testkit.ScalatestRouteTest
 @RunWith(classOf[JUnitRunner])
 final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with ScalatestRouteTest with OrderRoute {
 
-  private val eventBus = new SchedulerEventBus
   private lazy val actorSystem = ActorSystem("OrderRoute")
-  private lazy val timerService = TimerService()
+  private implicit val eventBus = new SchedulerEventBus
+  private implicit lazy val timerService = TimerService()
 
   protected def orderSubsystem = throw new NotImplementedError
 
@@ -61,8 +61,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected val client = new OrderClient with SchedulerOverviewClient with DirectEventClient {
     protected val eventIdGenerator = new EventIdGenerator
-    protected val eventCollector = new SchedulerEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)
-
+    protected val eventCollector = new SchedulerEventCollector(EventCollector.Configuration.ForTest, eventIdGenerator)
     protected def executionContext = OrderRouteTest.this.executionContext
 
     def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]] =

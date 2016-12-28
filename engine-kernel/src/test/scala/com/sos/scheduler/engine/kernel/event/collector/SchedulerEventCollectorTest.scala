@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -21,9 +22,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @RunWith(classOf[JUnitRunner])
 final class SchedulerEventCollectorTest extends FreeSpec with BeforeAndAfterAll {
 
-  private val eventBus = new SchedulerEventBus
   private val eventIdGenerator = new EventIdGenerator
-  private lazy val timerService = TimerService()
+  private implicit val eventBus = new SchedulerEventBus
+  private implicit lazy val timerService = TimerService()
 
   override protected def afterAll() = {
     timerService.close()
@@ -31,7 +32,8 @@ final class SchedulerEventCollectorTest extends FreeSpec with BeforeAndAfterAll 
   }
 
   "test" in {
-    autoClosing(new SchedulerEventCollector(eventIdGenerator, timerService, eventBus, EventCollector.Configuration.ForTest)) { eventCollector ⇒
+    autoClosing(new SchedulerEventCollector(EventCollector.Configuration.ForTest, eventIdGenerator))
+    { eventCollector ⇒
       val aEventId = eventIdGenerator.lastUsedEventId
       eventCollector.when[AEvent.type](EventRequest(aEventId, timeout = 0.s)) await 1.s shouldEqual
         EventSeq.Empty(aEventId)
