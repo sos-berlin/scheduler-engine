@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.test
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.filebased.{FileBasedTypes, TypedPath}
 import com.sos.scheduler.engine.test.TestEnvironmentFiles._
 import com.sos.scheduler.engine.test.util.JavaResourceResolver._
 import java.io.File
@@ -25,7 +25,7 @@ private class TestEnvironmentFiles(
   private def destination(relPath: String) =
     if (Subdirectories exists relPath.startsWith)
       directory
-    else if (TypedPath.extensions exists relPath.endsWith)
+    else if (TypedPathExtensions exists relPath.endsWith)
       directory / "config" / "live"
     else
       directory / "config"
@@ -71,6 +71,9 @@ object TestEnvironmentFiles {
   private val KnownExtensions = Set(".xml", ".ini", ".dtd", ".js", ".txt")
   private val Subdirectories = Vector("config", "agent")
   private val DefaultConfigResource = JavaResource("com/sos/scheduler/engine/test/files")
+  private val TypedPathExtensions = FileBasedTypes.forFiles map { _.filenameExtension } ensuring {
+    _ == Set(".job.xml", ".job_chain.xml", ".lock.xml", ".monitor.xml", ".process_class.xml", ".order.xml", ".schedule.xml")
+  }
 
   def copy(
       configJavaResource: JavaResource,
