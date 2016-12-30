@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import java.time.Duration
+import org.jetbrains.annotations.TestOnly
 import org.scalactic.Requirements._
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -58,24 +59,27 @@ trait AgentClient {
     case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
     case None ⇒ identity
   }
-  private lazy val httpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] = {
+  private def httpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] = {
     addLicenseKeys ~>
       encode(Gzip) ~>
-      agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, RequestTimeout.toFiniteDuration) ~>
+      agentSendReceive(timeout.toFiniteDuration) ~>
       decode(Gzip)
   }
-  private lazy val nonCachingHttpResponsePipeline: HttpRequest ⇒ Future[HttpResponse] =
+  private def jsonHttpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>   // Unnecessary ?
-      httpResponsePipeline
+      httpResponsePipeline(timeout)
+
+  private def unmarshallingPipeline[A: FromResponseUnmarshaller](timeout: Duration) =
+    jsonHttpResponsePipeline(timeout) ~> unmarshal[A]
 
   final def executeCommand(command: Command): Future[command.Response] = {
     logger.debug(s"Execute $command")
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
-      case command: StartTask ⇒ unmarshallingPipeline[StartTaskResponse].apply(Post(agentUris.command, command: Command))
+      case command: StartTask ⇒ unmarshallingPipeline[StartTaskResponse](RequestTimeout).apply(Post(agentUris.command, command: Command))
       case (_: DeleteFile | _: MoveFile | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
-        unmarshallingPipeline[EmptyResponse.type].apply(Post(agentUris.command, command: Command))
+        unmarshallingPipeline[EmptyResponse.type](RequestTimeout).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] } recover {
       case e: UnsuccessfulResponseException if e.response.status == InternalServerError ⇒
@@ -91,17 +95,17 @@ trait AgentClient {
       addHeader(Accept(`application/json`)) ~>
         addLicenseKeys ~>
         encode(Gzip) ~>
-        agentSendReceive(actorRefFactory, actorRefFactory.dispatcher, timeout) ~>
+        agentSendReceive(timeout) ~>
         decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
     pipeline(Post(agentUris.command, command: Command))
   }
 
-  private[engine] def agentSendReceive(refFactory: ActorRefFactory, executionContext: ExecutionContext, futureTimeout: Timeout): SendReceive =
-    addUserAndPassword ~> extendedSendReceive(futureTimeout, hostConnectorSetupOption)(refFactory, executionContext)
+  private[engine] def agentSendReceive(futureTimeout: Timeout)(implicit ec: ExecutionContext): SendReceive =
+    addUserAndPassword ~> extendedSendReceive(futureTimeout, hostConnectorSetupOption)(actorRefFactory, ec)
 
   final def fileExists(filePath: String): Future[Boolean] =
-    unmarshallingPipeline[JsBoolean].apply(Get(agentUris.fileExists(filePath))) map { _.value }
+    unmarshallingPipeline[JsBoolean](RequestTimeout).apply(Get(agentUris.fileExists(filePath))) map { _.value }
 
   object task {
     final def overview: Future[TaskHandlerOverview] = get[TaskHandlerOverview](_.task.overview)
@@ -111,17 +115,20 @@ trait AgentClient {
     final def apply(id: AgentTaskId): Future[TaskOverview] = get[TaskOverview](_.task(id))
   }
 
-  final def get[A: FromResponseUnmarshaller](uri: AgentUris ⇒ String): Future[A] =
-    unmarshallingPipeline[A].apply(Get(uri(agentUris)))
+  final def get[A: FromResponseUnmarshaller](uri: AgentUris ⇒ String, timeout: Duration = RequestTimeout): Future[A] =
+    unmarshallingPipeline[A](RequestTimeout).apply(Get(uri(agentUris)))
 
-  final def apply[A: FromResponseUnmarshaller](request: HttpRequest): Future[A] =
+  @TestOnly
+  private[client] final def sendReceive[A: FromResponseUnmarshaller](request: HttpRequest, timeout: Duration = RequestTimeout): Future[A] =
     withCheckedAgentUri(request) { request ⇒
-      unmarshallingPipeline[A].apply(request)
+      unmarshallingPipeline[A](timeout).apply(request)
     }
 
-  final def apply[A: FromResponseUnmarshaller](headers: List[HttpHeader], request: HttpRequest): Future[A] =
+  final def sendReceiveWithHeaders[A: FromResponseUnmarshaller]
+    (request: HttpRequest, headers: List[HttpHeader], timeout: Duration = RequestTimeout)
+  : Future[A] =
     withCheckedAgentUri(request) { request ⇒
-      (addHeaders(headers) ~> httpResponsePipeline ~> unmarshal[A]).apply(request)
+      (addHeaders(headers) ~> httpResponsePipeline(timeout) ~> unmarshal[A]).apply(request)
     }
 
   private def withCheckedAgentUri[A](request: HttpRequest)(body: HttpRequest ⇒ Future[A]): Future[A] =
@@ -146,8 +153,6 @@ trait AgentClient {
     myAgentUri == agentUri && uri.path.toString.startsWith(agentUris.prefixedUri.path.toString) option
       uri
   }
-
-  private def unmarshallingPipeline[A: FromResponseUnmarshaller] = nonCachingHttpResponsePipeline ~> unmarshal[A]
 
   override def toString = s"AgentClient($agentUri)"
 }

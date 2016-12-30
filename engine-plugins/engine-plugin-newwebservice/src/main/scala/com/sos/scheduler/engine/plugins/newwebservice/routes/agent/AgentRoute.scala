@@ -58,7 +58,7 @@ trait AgentRoute {
     }
 
   private def forwardTo(request: HttpRequest, agentClient: AgentClient, tailUri: Uri): Route =
-    onComplete(agentClient[HttpResponse](request.headers filter { o ⇒ isForwardableHeaderClass(o.getClass) }, Get(tailUri))) {
+    onComplete(agentClient.sendReceiveWithHeaders[HttpResponse](Get(tailUri), request.headers filter { o ⇒ isForwardableHeaderClass(o.getClass) })) {
       case Success(response) ⇒
         complete(response.copy(headers = response.headers filterNot { h ⇒ IsIgnoredAgentHeader(h.getClass) }))
       case Failure(e: UnsuccessfulResponseException) ⇒

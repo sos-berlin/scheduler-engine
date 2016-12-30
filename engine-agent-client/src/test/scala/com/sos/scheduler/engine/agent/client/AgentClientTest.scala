@@ -21,8 +21,8 @@ final class AgentClientTest extends FreeSpec {
     for ((uri, None) ← Setting ) s"$uri" in {
       assert(agentClient.checkAgentUri(uri) == None)
       assert(agentClient.toCheckedAgentUri(uri) == None)
-      assert(agentClient.apply[HttpResponse](Get(uri)).failed.value.get.get.getMessage contains "does not match")
-      assert(agentClient.apply[HttpResponse](headers = Nil, Get(uri)).failed.value.get.get.getMessage contains "does not match")
+      assert(agentClient.sendReceive[HttpResponse](Get(uri)).failed.value.get.get.getMessage contains "does not match")
+      assert(agentClient.sendReceiveWithHeaders[HttpResponse](Get(uri), headers = Nil).failed.value.get.get.getMessage contains "does not match")
     }
   }
 
