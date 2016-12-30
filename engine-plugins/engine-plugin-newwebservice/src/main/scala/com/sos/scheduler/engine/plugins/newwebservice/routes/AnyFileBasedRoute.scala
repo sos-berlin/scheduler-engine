@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AnyFileBasedRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import scala.concurrent.ExecutionContext
 import shapeless.{::, HNil}
 import spray.http.StatusCodes.BadRequest
@@ -51,7 +52,7 @@ trait AnyFileBasedRoute {
           case "FileBasedOverview" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedOverview](query))
           case "FileBasedDetailed" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedDetailed](query))
           case _ ⇒
-            eventRequest(classOf[FileBasedEvent]) { request ⇒
+            eventRequest(classOf[FileBasedEvent]).apply { request ⇒
               completeTryHtml {
                 client.eventsByPath(request, query)
               }

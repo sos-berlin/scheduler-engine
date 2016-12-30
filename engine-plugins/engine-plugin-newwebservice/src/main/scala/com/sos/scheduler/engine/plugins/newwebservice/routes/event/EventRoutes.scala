@@ -35,7 +35,7 @@ private[routes] object EventRoutes {
   def singleKeyEvents[E <: Event: ClassTag](key: E#Key, defaultReturnType: Option[String] = None)
     (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
   : Route =
-    eventRequest(implicitClass[E], defaultReturnType = defaultReturnType) { request ⇒
+    eventRequest(implicitClass[E], defaultReturnType = defaultReturnType).apply { request ⇒
       completeTryHtml {
         implicit val toHtmlPage = SingleKeyEventHtmlPage.singleKeyEventToHtmlPage[AnyEvent](key)
         request match {
@@ -52,7 +52,7 @@ private[routes] object EventRoutes {
   def events[E <: Event: ClassTag](predicate: KeyedEvent[E] ⇒ Boolean, defaultReturnType: Option[String] = None)
     (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
   : Route =
-    eventRequest(implicitClass[E], defaultReturnType = defaultReturnType) {
+    eventRequest(implicitClass[E], defaultReturnType = defaultReturnType).apply {
       case request: SomeEventRequest[_] ⇒
         val castRequest = request.asInstanceOf[SomeEventRequest[E]]
         completeTryHtml {

@@ -24,7 +24,7 @@ trait EventRoute extends HasCloser {
 
   def eventRoute: Route =
     pathEnd {
-      eventRequest(classOf[Event], defaultReturnType = Some("Event")) { request ⇒
+      eventRequest(classOf[Event], defaultReturnType = Some("Event")).apply { request ⇒
         completeTryHtml {
           client.events(request)
         }
