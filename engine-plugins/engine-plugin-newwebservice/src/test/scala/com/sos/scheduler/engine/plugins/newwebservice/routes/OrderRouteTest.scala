@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient
 import com.sos.scheduler.engine.common.event.EventIdGenerator
 import com.sos.scheduler.engine.common.event.collector.EventCollector
 import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event._
@@ -45,7 +46,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   private lazy val actorSystem = ActorSystem("OrderRoute")
   private implicit val eventBus = new SchedulerEventBus
-  private implicit lazy val timerService = TimerService()
+  private implicit lazy val timerService = TimerService(idleTimeout = Some(1.s))
 
   protected def orderSubsystem = throw new NotImplementedError
 
