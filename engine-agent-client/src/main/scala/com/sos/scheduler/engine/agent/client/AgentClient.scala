@@ -52,6 +52,7 @@ trait AgentClient {
   protected def hostConnectorSetupOption: Option[HostConnectorSetup]
   protected def userAndPasswordOption: Option[UserAndPassword]
 
+  private lazy val logger = Logger.withPrefix(classOf[AgentClient], agentUri.toString)
   protected lazy val agentUris = AgentUris(agentUri.toString)
   private lazy val addLicenseKeys: RequestTransformer = if (licenseKeys.nonEmpty) addHeader(AgentUris.LicenseKeyHeaderName, licenseKeys mkString " ")
     else identity
@@ -162,7 +163,6 @@ object AgentClient {
 
   val RequestTimeout = 60.s
   //private val RequestTimeoutMaximum = Int.MaxValue.ms  // Limit is the number of Akka ticks, where a tick can be as short as 1ms (see akka.actor.LightArrayRevolverScheduler.checkMaxDelay)
-  private val logger = Logger(getClass)
 
   def apply(
     agentUri: Uri,
