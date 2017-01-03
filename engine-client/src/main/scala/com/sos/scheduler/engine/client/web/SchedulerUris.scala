@@ -27,10 +27,10 @@ final class SchedulerUris private(schedulerUri: Uri) {
   lazy val overview = uriString("api")
 
   def fileBased[P <: TypedPath](path: P, returnType: String) =
-    uriString(Uri.Path("api/" + path.companion.fileBasedType.lowerCaseCamelName + path.string), "return" → returnType)
+    uriString(Uri.Path("api/" + path.companion.lowerCaseCamelName + path.string), "return" → returnType)
 
   def fileBaseds[P <: TypedPath: TypedPath.Companion](query: PathQuery, returnType: String) =
-    uriString(Uri.Path("api/" + implicitly[TypedPath.Companion[P]].fileBasedType.lowerCaseCamelName + query.toUriPath), "return" → returnType)
+    uriString(Uri.Path("api/" + implicitly[TypedPath.Companion[P]].lowerCaseCamelName + query.toUriPath), "return" → returnType)
 
   def anyTypeFileBaseds(query: PathQuery, returnType: String) =
     uriString(Uri.Path("api/fileBased" + query.toUriPath), "return" → returnType)
