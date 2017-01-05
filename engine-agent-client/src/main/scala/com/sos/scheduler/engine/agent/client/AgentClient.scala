@@ -60,19 +60,6 @@ trait AgentClient {
     case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
     case None ⇒ identity
   }
-  private def httpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] = {
-    addLicenseKeys ~>
-      encode(Gzip) ~>
-      agentSendReceive(timeout.toFiniteDuration) ~>
-      decode(Gzip)
-  }
-  private def jsonHttpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] =
-    addHeader(Accept(`application/json`)) ~>
-      addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>   // Unnecessary ?
-      httpResponsePipeline(timeout)
-
-  private def unmarshallingPipeline[A: FromResponseUnmarshaller](timeout: Duration) =
-    jsonHttpResponsePipeline(timeout) ~> unmarshal[A]
 
   final def executeCommand(command: Command): Future[command.Response] = {
     logger.debug(s"Execute $command")
@@ -94,16 +81,10 @@ trait AgentClient {
     val timeout = commandDurationToRequestTimeout(command.duration)
     val pipeline =
       addHeader(Accept(`application/json`)) ~>
-        addLicenseKeys ~>
-        encode(Gzip) ~>
         agentSendReceive(timeout) ~>
-        decode(Gzip) ~>
         unmarshal[FileOrderSourceContent]
     pipeline(Post(agentUris.command, command: Command))
   }
-
-  private[engine] def agentSendReceive(futureTimeout: Timeout)(implicit ec: ExecutionContext): SendReceive =
-    addUserAndPassword ~> extendedSendReceive(futureTimeout, hostConnectorSetupOption)(actorRefFactory, ec)
 
   final def fileExists(filePath: String): Future[Boolean] =
     unmarshallingPipeline[JsBoolean](RequestTimeout).apply(Get(agentUris.fileExists(filePath))) map { _.value }
@@ -131,6 +112,24 @@ trait AgentClient {
     withCheckedAgentUri(request) { request ⇒
       (addHeaders(headers) ~> httpResponsePipeline(timeout) ~> unmarshal[A]).apply(request)
     }
+
+  private def unmarshallingPipeline[A: FromResponseUnmarshaller](timeout: Duration) =
+    jsonHttpResponsePipeline(timeout) ~> unmarshal[A]
+
+  private def jsonHttpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] =
+    addHeader(Accept(`application/json`)) ~>
+      addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>   // Unnecessary ?
+      httpResponsePipeline(timeout)
+
+  private def httpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] =
+      agentSendReceive(timeout.toFiniteDuration)
+
+  private[engine] def agentSendReceive(futureTimeout: Timeout)(implicit ec: ExecutionContext): SendReceive =
+    addUserAndPassword ~>
+      addLicenseKeys ~>
+      encode(Gzip) ~>
+      extendedSendReceive(futureTimeout, hostConnectorSetupOption)(actorRefFactory, ec) ~>
+      decode(Gzip)
 
   private def withCheckedAgentUri[A](request: HttpRequest)(body: HttpRequest ⇒ Future[A]): Future[A] =
     toCheckedAgentUri(request.uri) match {
