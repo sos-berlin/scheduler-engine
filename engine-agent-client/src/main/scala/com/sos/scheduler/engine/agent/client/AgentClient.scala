@@ -4,7 +4,7 @@ import akka.actor.ActorRefFactory
 import akka.util.Timeout
 import com.sos.scheduler.engine.agent.client.AgentClient._
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, StartTaskResponse}
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, FileOrderSourceContent, LoginResponse, StartTaskResponse}
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskOverview}
 import com.sos.scheduler.engine.agent.data.web.AgentUris
@@ -17,7 +17,9 @@ import com.sos.scheduler.engine.common.sprayutils.SimpleTypeSprayJsonSupport._
 import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
+import com.sos.scheduler.engine.data.session.SessionToken
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicReference
 import org.jetbrains.annotations.TestOnly
 import org.scalactic.Requirements._
 import scala.collection.immutable
@@ -27,7 +29,7 @@ import spray.client.pipelining._
 import spray.http.CacheDirectives.{`no-cache`, `no-store`}
 import spray.http.HttpHeaders.{Accept, `Cache-Control`}
 import spray.http.MediaTypes._
-import spray.http.StatusCodes.InternalServerError
+import spray.http.StatusCodes.{Forbidden, InternalServerError, Unauthorized}
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.UnsuccessfulResponseException
@@ -60,13 +62,27 @@ trait AgentClient {
     case Some(UserAndPassword(UserId(user), SecretString(password))) ⇒ addCredentials(BasicHttpCredentials(user, password))
     case None ⇒ identity
   }
+  private val sessionTokenRef = new AtomicReference[Option[SessionToken]](None)
 
   final def executeCommand(command: Command): Future[command.Response] = {
     logger.debug(s"Execute $command")
     val response = command match {
       case command: RequestFileOrderSourceContent ⇒ executeRequestFileOrderSourceContent(command)
       case command: StartTask ⇒ unmarshallingPipeline[StartTaskResponse](RequestTimeout).apply(Post(agentUris.command, command: Command))
-      case (_: DeleteFile | _: MoveFile | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
+      case Login ⇒
+        for (response ← unmarshallingPipeline[LoginResponse](RequestTimeout, SessionAction.Login).apply(Post(agentUris.command, command: Command))) yield {
+          setSessionToken(response.sessionToken)
+          response
+        }
+      case Logout ⇒
+        val tokenOption = sessionTokenRef.get
+        val whenResponded = unmarshallingPipeline[EmptyResponse.type](RequestTimeout, SessionAction.Logout(tokenOption))
+          .apply(Post(agentUris.command, command: Command))
+        for (response ← whenResponded) yield {
+          sessionTokenRef.compareAndSet(tokenOption, None)  // Changes nothing in case of a concurrent successful Login
+          response
+        }
+      case (_: DeleteFile | _: MoveFile | NoOperation | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
         unmarshallingPipeline[EmptyResponse.type](RequestTimeout).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] } recover {
@@ -113,23 +129,48 @@ trait AgentClient {
       (addHeaders(headers) ~> httpResponsePipeline(timeout) ~> unmarshal[A]).apply(request)
     }
 
-  private def unmarshallingPipeline[A: FromResponseUnmarshaller](timeout: Duration) =
-    jsonHttpResponsePipeline(timeout) ~> unmarshal[A]
-
-  private def jsonHttpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] =
+  private def unmarshallingPipeline[A: FromResponseUnmarshaller](timeout: Duration, sessionAction: SessionAction = SessionAction.Default) =
     addHeader(Accept(`application/json`)) ~>
       addHeader(`Cache-Control`(`no-cache`, `no-store`)) ~>   // Unnecessary ?
-      httpResponsePipeline(timeout)
+      httpResponsePipeline(timeout, sessionAction) ~>
+      unmarshal[A]
 
-  private def httpResponsePipeline(timeout: Duration): HttpRequest ⇒ Future[HttpResponse] =
-      agentSendReceive(timeout.toFiniteDuration)
+  private def httpResponsePipeline(timeout: Duration, sessionAction: SessionAction = SessionAction.Default): HttpRequest ⇒ Future[HttpResponse] =
+    agentSendReceive(timeout.toFiniteDuration, sessionAction)
 
   private[engine] def agentSendReceive(futureTimeout: Timeout)(implicit ec: ExecutionContext): SendReceive =
-    addUserAndPassword ~>
-      addLicenseKeys ~>
+    agentSendReceive(futureTimeout, SessionAction.Default)
+
+  private def agentSendReceive(futureTimeout: Timeout, sessionAction: SessionAction)(implicit ec: ExecutionContext): SendReceive = {
+    addSessionCredentials(sessionAction) ~>
       encode(Gzip) ~>
       extendedSendReceive(futureTimeout, hostConnectorSetupOption)(actorRefFactory, ec) ~>
       decode(Gzip)
+  }
+
+  private def addSessionCredentials(sessionAction: SessionAction): RequestTransformer =
+    sessionAction match {
+      case SessionAction.Default ⇒ sessionTokenRef.get match {
+        case o: Some[SessionToken] ⇒
+          sessionTokenRequestTransformer(o)  // In session: Server should have credentials (see login)
+        case None ⇒
+          addUserAndPassword ~> addLicenseKeys  // No session: transfer credentials with every request
+      }
+      case SessionAction.Login ⇒
+        sessionTokenRequestTransformer(sessionTokenRef.get) ~>  // Logout optional previous session
+          addUserAndPassword ~> addLicenseKeys
+      case SessionAction.Logout(sessionTokenOption) ⇒
+        sessionTokenRequestTransformer(sessionTokenOption)
+    }
+
+  private def sessionTokenRequestTransformer(sessionTokenOption: Option[SessionToken]): RequestTransformer =
+    sessionTokenOption map { token ⇒ addHeader(SessionToken.HeaderName, token.secret.string) } getOrElse identity
+
+  private[client] def setSessionToken(sessionToken: SessionToken): Unit =
+    sessionTokenRef.set(Some(sessionToken))
+
+  def hasSession: Boolean =
+    sessionTokenRef.get.nonEmpty
 
   private def withCheckedAgentUri[A](request: HttpRequest)(body: HttpRequest ⇒ Future[A]): Future[A] =
     toCheckedAgentUri(request.uri) match {
@@ -186,5 +227,18 @@ object AgentClient {
   private[client] def commandDurationToRequestTimeout(duration: Duration): Timeout = {
     require(duration >= 0.s)
     Timeout((duration + RequestTimeout).toFiniteDuration)
+  }
+
+  def sessionIsPossiblyLost(t: Throwable): Boolean =
+    t match {
+      case t: UnsuccessfulResponseException if t.response.status == Unauthorized || t.response.status == Forbidden ⇒ true
+      case _ ⇒ false
+    }
+
+  private sealed trait SessionAction
+  private object SessionAction {
+    case object Default extends SessionAction
+    final case object Login extends SessionAction
+    final case class Logout(sessionTokenOption: Option[SessionToken]) extends SessionAction
   }
 }
