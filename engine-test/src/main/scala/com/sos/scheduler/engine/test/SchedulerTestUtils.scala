@@ -209,10 +209,10 @@ object SchedulerTestUtils {
         val promise = Promise[(OrderFinished, Map[String, String])]()
         lazy val subscription: EventSubscription = EventSubscription[OrderFinished] {
           case KeyedEvent(`orderKey`, event) ⇒
-            eventBus.unregisterHot(subscription)
+            eventBus.unsubscribeHot(subscription)
             promise.success((event, orderDetailed(orderKey).variables))
         }
-        eventBus.registerHot(subscription)
+        eventBus.subscribeHot(subscription)
         promise.future
       }
       val result = for ((finishedEvent, variables) ← whenFinished) yield OrderRunResult(orderKey, finishedEvent.nodeId, variables)

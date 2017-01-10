@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.eventbus
 
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventBus.logger
 import com.sos.scheduler.engine.eventbus.annotated.HotMethodEventSubscriptionFactory
 import javax.annotation.Nullable
-import org.slf4j.LoggerFactory
-import scala.collection.JavaConversions._
 
 final class HotEventBus extends AbstractEventBus {
 
@@ -22,7 +21,7 @@ final class HotEventBus extends AbstractEventBus {
       dispatchNonrecursiveEvent(e, calls)
   }
 
-  private def handleRecursiveEvent(e: KeyedEvent[Event]) {
+  private def handleRecursiveEvent(e: KeyedEvent[Event]): Unit = {
     try
       // Kein log().error(), sonst gibt es wieder eine Rekursion
       sys.error(s"HotEventBus.publish($e): ignoring the event triggered by handling the event '$currentEvent'")
@@ -31,7 +30,7 @@ final class HotEventBus extends AbstractEventBus {
     }
   }
 
-  private def dispatchNonrecursiveEvent(e: KeyedEvent[Event], calls: Iterable[Call]) {
+  private def dispatchNonrecursiveEvent(e: KeyedEvent[Event], calls: Iterable[Call]): Unit = {
     currentEvent = e
     try for (c ← calls) dispatchCall(c)
     finally currentEvent = null
@@ -39,5 +38,5 @@ final class HotEventBus extends AbstractEventBus {
 }
 
 object HotEventBus {
-  private val logger = LoggerFactory.getLogger(classOf[HotEventBus])
+  private val logger = Logger(getClass)
 }

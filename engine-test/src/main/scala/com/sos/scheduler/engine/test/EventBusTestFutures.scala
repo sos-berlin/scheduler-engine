@@ -51,9 +51,9 @@ object EventBusTestFutures {
         lazy val eventSubscription: EventSubscription = EventSubscription[E] {
           case e if predicate(e) ⇒
             promise.trySuccess(e)
-            delegate unregister eventSubscription
+            delegate unsubscribe eventSubscription
         }
-        delegate register eventSubscription
+        delegate subscribe eventSubscription
         promise.future
       }
     }
