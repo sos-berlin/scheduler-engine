@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.data.event.AnyKeyedEvent
+import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 
 /**
  * @author Joacim Zschimmer
@@ -11,10 +11,13 @@ trait EventBus {
 
   def unregisterAnnotated(o: EventHandlerAnnotated): Unit
 
-  def register(o: EventSubscription): Unit
+  def subscribe(o: EventSubscription): Unit
 
-  def unregister(o: EventSubscription): Unit
+  def unsubscribe(o: EventSubscription): Unit
 
   def publish(e: AnyKeyedEvent): Unit
+
+  final def publishJava[E <: Event](e: KeyedEvent[E]): Unit =
+    publish(e)
 }
 

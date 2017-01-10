@@ -29,24 +29,24 @@ trait AbstractEventBus extends EventBus {
   }
 
   private def registerAll(subscribers: Iterable[EventSubscription]): Unit = {
-    for (s ← subscribers) register(s)
+    for (s ← subscribers) subscribe(s)
   }
 
   private def unregisterAll(subscribers: Iterable[EventSubscription]): Unit = {
-    for (s ← subscribers) unregister(s)
+    for (s ← subscribers) unsubscribe(s)
   }
 
-  final def register(s: EventSubscription): Unit = {
+  final def subscribe(s: EventSubscription): Unit = {
     synchronized {
       subscriptionRegister.put(s.eventClass, s)
     }
   }
 
-  final def unregister(s: EventSubscription): Unit = {
+  final def unsubscribe(s: EventSubscription): Unit = {
     val ok = synchronized {
       subscriptionRegister.remove(s.eventClass, s)
     }
-    if (!ok) logger.debug(s"unregister unknown '$s'")
+    if (!ok) logger.debug(s"unsubscribe unknown '$s'")
   }
 
   final def isSubscribed: Boolean = !synchronized { subscriptionRegister.isEmpty }

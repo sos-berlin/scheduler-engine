@@ -57,18 +57,18 @@ final class SchedulerEventBus extends EventBus with Runnable {
     })
 
   private def subscribeClosable[E <: Event: ClassTag](whichEventBus: EventBus, subscription: EventSubscription)(implicit closer: Closer): Unit = {
-    whichEventBus.register(subscription)
+    whichEventBus.subscribe(subscription)
     closer.onClose {
-      whichEventBus.unregister(subscription)
+      whichEventBus.unsubscribe(subscription)
     }
   }
-  def register(s: EventSubscription): Unit = coldEventBus.register(s)
+  def subscribe(s: EventSubscription): Unit = coldEventBus.subscribe(s)
 
-  def unregister(s: EventSubscription): Unit = coldEventBus.unregister(s)
+  def unsubscribe(s: EventSubscription): Unit = coldEventBus.unsubscribe(s)
 
-  def registerHot(s: EventSubscription): Unit = hotEventBus.register(s)
+  def subscribeHot(s: EventSubscription): Unit = hotEventBus.subscribe(s)
 
-  def unregisterHot(s: EventSubscription): Unit = hotEventBus.unregister(s)
+  def unsubscribeHot(s: EventSubscription): Unit = hotEventBus.unsubscribe(s)
 
   def isSubscribed = hotEventBus.isSubscribed || coldEventBus.isSubscribed
 
