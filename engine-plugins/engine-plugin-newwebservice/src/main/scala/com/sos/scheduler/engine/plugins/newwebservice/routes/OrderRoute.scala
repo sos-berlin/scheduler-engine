@@ -120,8 +120,8 @@ trait OrderRoute extends LogRoute {
       })
 
   private def orderStatisticsChanged(query: PathQuery): Route =
-    eventRequest(classOf[Event]).apply {
-      case EventRequest(eventClass, afterEventId, timeout, _/*limit*/) if eventClass == classOf[JocOrderStatisticsChanged] ⇒
+    eventRequest[Event].apply {
+      case EventRequest(eventClasses, afterEventId, timeout, _/*limit*/) if eventClasses == Set(classOf[JocOrderStatisticsChanged]) ⇒
         completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
           for (snapshot ← orderStatisticsChangedSource.whenJocOrderStatisticsChanged(after = afterEventId, timeout, query))
             yield nestIntoSeqSnapshot(snapshot)

@@ -48,7 +48,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "SchedulerEvent" in {
-    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest[SchedulerEvent](after = EventId.BeforeFirst, TestTimeout)) await TestTimeout
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest.only[SchedulerEvent](after = EventId.BeforeFirst, TestTimeout)) await TestTimeout
     val events: Seq[KeyedEvent[SchedulerEvent]] = eventSnapshots map { _.value }
     assert(events == List(
       KeyedEvent(SchedulerStateChanged(SchedulerState.starting)),
@@ -66,7 +66,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml OrderCommand(TestOrderKey)
     }
     waitForCondition(10.s, 10.ms)(SchedulerTestUtils.jobOverview(TestJobPath).state == JobState.pending)
-    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest[Event](after = beforeTestEventId, TestTimeout)) await TestTimeout
+    val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest.only[Event](after = beforeTestEventId, TestTimeout)) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
     val events: Seq[KeyedEvent[Event]] = eventSnapshots map { _.value }
     assert(events == Seq(
@@ -99,7 +99,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "/api/jobChain/" in {
-    val eventRequest = EventRequest[JobChainEvent](after = beforeTestEventId, 0.s)
+    val eventRequest = EventRequest.only[JobChainEvent](after = beforeTestEventId, 0.s)
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
       client.jobChainEventsBy(PathQuery(FolderPath.Root), eventRequest) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
@@ -112,7 +112,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "/api/jobChain/test" in {
-    val eventRequest = EventRequest[JobChainEvent](after = beforeTestEventId, 0.s)
+    val eventRequest = EventRequest.only[JobChainEvent](after = beforeTestEventId, 0.s)
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
       client.jobChainEvents(TestJobChainPath, eventRequest) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
@@ -125,7 +125,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "/api/job/" in {
-    val eventRequest = EventRequest[JobEvent](after = beforeTestEventId, 0.s)
+    val eventRequest = EventRequest.only[JobEvent](after = beforeTestEventId, 0.s)
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
       client.jobEventsBy(FolderPath.Root, eventRequest) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
@@ -138,7 +138,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "/api/job/test" in {
-    val eventRequest = EventRequest[JobEvent](after = beforeTestEventId, 0.s)
+    val eventRequest = EventRequest.only[JobEvent](after = beforeTestEventId, 0.s)
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
       client.jobEvents(TestJobPath, eventRequest) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
@@ -152,7 +152,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
 
   "/api/task/" in {
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
-      client.taskEventsBy[TaskEvent](PathQuery.All, EventRequest(after = beforeTestEventId, 0.s)) await TestTimeout
+      client.taskEventsBy(PathQuery.All, EventRequest.only[TaskEvent](after = beforeTestEventId, 0.s)) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
     val events: Seq[KeyedEvent[TaskEvent]] = eventSnapshots map { _.value }
     assert(events == Seq(
@@ -166,7 +166,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
 
   "/api/task&taskId=3" in {
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) =
-      client.taskEvents[TaskEvent](TaskKey1.taskId, EventRequest(after = beforeTestEventId, 0.s)) await TestTimeout
+      client.taskEvents(TaskKey1.taskId, EventRequest.only[TaskEvent](after = beforeTestEventId, 0.s)) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
     val events: Seq[TaskEvent] = eventSnapshots map { _.value }
     assert(events == Seq(
@@ -184,7 +184,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
         scheduler executeXml OrderCommand(TestOrderKey)
       }
     }
-    val Snapshot(eventId, eventSeq) = client.events(EventRequest[Event](after = oldEventId, TestTimeout)) await TestTimeout
+    val Snapshot(eventId, eventSeq) = client.events(EventRequest.only[Event](after = oldEventId, TestTimeout)) await TestTimeout
     assert(eventSeq == EventSeq.Torn)
     assert(eventId >= oldEventId)
   }

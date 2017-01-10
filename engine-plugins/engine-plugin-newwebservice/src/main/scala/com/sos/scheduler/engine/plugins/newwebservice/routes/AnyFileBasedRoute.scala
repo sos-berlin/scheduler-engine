@@ -52,7 +52,7 @@ trait AnyFileBasedRoute {
           case "FileBasedOverview" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedOverview](query))
           case "FileBasedDetailed" ⇒ completeTryHtml(client.anyTypeFileBaseds[FileBasedDetailed](query))
           case _ ⇒
-            eventRequest(classOf[FileBasedEvent]).apply { request ⇒
+            eventRequest[FileBasedEvent].apply { request ⇒
               completeTryHtml {
                 client.eventsByPath(request, query)
               }

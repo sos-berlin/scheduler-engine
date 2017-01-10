@@ -23,7 +23,7 @@ extends HasCloser {
   protected implicit def executionContext: ExecutionContext
 
   def whenJocOrderStatisticsChanged(after: EventId, timeout: Duration, query: PathQuery = PathQuery.All): Future[Snapshot[JocOrderStatisticsChanged]] =
-    for (eventSeq ← eventCollector.when(EventRequest[OrderEvent](after = after, timeout), pathPredicate(query));
+    for (eventSeq ← eventCollector.when(EventRequest.only[OrderEvent](after = after, timeout), pathPredicate(query));
          snapshot ← jocOrderStatistics(JobChainNodeQuery(JobChainQuery(query, isDistributed = Some(false/*No database access*/)))))
       yield snapshot map JocOrderStatisticsChanged.apply
 }
