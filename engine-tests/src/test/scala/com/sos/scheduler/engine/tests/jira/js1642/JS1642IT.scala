@@ -162,7 +162,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   }
 
   "eventsByPath" in {
-    val request = EventRequest[FileBasedAdded.type](after = EventId.BeforeFirst, timeout = 0.s)
+    val request = EventRequest.only[FileBasedAdded.type](after = EventId.BeforeFirst, timeout = 0.s)
     val query = PathQuery(xFolderPath)
     fetchWebAndDirect[EventSeq[immutable.Seq, KeyedEvent[FileBasedAdded.type]]](_.eventsByPath[FileBasedAdded.type](request, query)) match {
       case nonEmpty: EventSeq.NonEmpty[immutable.Seq, KeyedEvent[FileBasedAdded.type]] ⇒
