@@ -202,6 +202,9 @@ Task::Task(Standard_job* job, Log_level stderr_log_level)
     Z_DEBUG_ONLY( _job_name = job->name(); )
 
     _params = new Com_variable_set();
+    if (_job->module()->kind() == Module::kind_process) {
+        _params->merge(_spooler->_variables);  // JS-1681
+    }
     _params->merge( job->_default_params );
 
     _environment = new Com_variable_set();
