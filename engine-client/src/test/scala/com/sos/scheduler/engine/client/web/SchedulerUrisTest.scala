@@ -173,7 +173,7 @@ final class SchedulerUrisTest extends FreeSpec {
     }
 
     "events" in {
-      assert(uris.jobChain.events(JobChainPath("/a/b"), EventRequest.only[JobChainEvent](after = 7, 1.s)) ==
+      assert(uris.jobChain.events(JobChainPath("/a/b"), EventRequest.singleClass[JobChainEvent](after = 7, 1.s)) ==
         "http://0.0.0.0:1111/jobscheduler/master/api/jobChain/a/b?return=JobChainEvent&timeout=PT1S&after=7")
     }
   }
@@ -188,7 +188,7 @@ final class SchedulerUrisTest extends FreeSpec {
     }
 
     "events" in {
-      assert(uris.job.events(PathQuery(JobPath("/a/b")), EventRequest.only[JobEvent](after = 7, 1.s)) ==
+      assert(uris.job.events(PathQuery(JobPath("/a/b")), EventRequest.singleClass[JobEvent](after = 7, 1.s)) ==
         "http://0.0.0.0:1111/jobscheduler/master/api/job/a/b?return=JobEvent&timeout=PT1S&after=7")
     }
   }
@@ -199,12 +199,12 @@ final class SchedulerUrisTest extends FreeSpec {
     }
 
     "events" in {
-      assert(uris.task.events(TaskId(123), EventRequest.only[TaskEvent](after = 7, 1.s)) ==
+      assert(uris.task.events(TaskId(123), EventRequest.singleClass[TaskEvent](after = 7, 1.s)) ==
         "http://0.0.0.0:1111/jobscheduler/master/api/task?taskId=123&return=TaskEvent&timeout=PT1S&after=7")
     }
 
     "eventsBy" in {
-      assert(uris.task.eventsBy(PathQuery(JobPath("/folder/job")), EventRequest.only[TaskEvent](after = 7, 1.s)) ==
+      assert(uris.task.eventsBy(PathQuery(JobPath("/folder/job")), EventRequest.singleClass[TaskEvent](after = 7, 1.s)) ==
         "http://0.0.0.0:1111/jobscheduler/master/api/task/folder/job?return=TaskEvent&timeout=PT1S&after=7")
     }
   }
@@ -232,11 +232,11 @@ final class SchedulerUrisTest extends FreeSpec {
   }
 
   "event" in {
-    assert(uris.events(EventRequest.only[Event](timeout = 123456.ms, after = 111222333444555666L)) ==
+    assert(uris.events(EventRequest.singleClass[Event](timeout = 123456.ms, after = 111222333444555666L)) ==
       "http://0.0.0.0:1111/jobscheduler/master/api/event?timeout=PT2M3.456S&after=111222333444555666")
-    assert(uris.events(EventRequest.only[Event](after = EventId(7), timeout = 1.s)) ==
+    assert(uris.events(EventRequest.singleClass[Event](after = EventId(7), timeout = 1.s)) ==
       "http://0.0.0.0:1111/jobscheduler/master/api/event?timeout=PT1S&after=7")
-    assert(uris.events(EventRequest.only[Event](limit = 100, timeout = 100.ms, after = EventId.BeforeFirst)) ==
+    assert(uris.events(EventRequest.singleClass[Event](limit = 100, timeout = 100.ms, after = EventId.BeforeFirst)) ==
       "http://0.0.0.0:1111/jobscheduler/master/api/event?timeout=PT0.1S&limit=100&after=0")
     assert(uris.events(ReverseEventRequest[FileBasedEvent](after = EventId(7), limit = 100)) ==
       "http://0.0.0.0:1111/jobscheduler/master/api/event?return=FileBasedEvent&limit=-100&after=7")
