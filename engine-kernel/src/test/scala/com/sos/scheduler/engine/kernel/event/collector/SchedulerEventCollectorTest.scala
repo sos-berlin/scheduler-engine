@@ -34,11 +34,11 @@ final class SchedulerEventCollectorTest extends FreeSpec with BeforeAndAfterAll 
     autoClosing(new SchedulerEventCollector(EventCollector.Configuration.ForTest, eventIdGenerator))
     { eventCollector ⇒
       val aEventId = eventIdGenerator.lastUsedEventId
-      eventCollector.when(EventRequest.only[AEvent.type](aEventId, timeout = 0.s)) await 1.s shouldEqual
+      eventCollector.when(EventRequest.singleClass[AEvent.type](aEventId, timeout = 0.s)) await 1.s shouldEqual
         EventSeq.Empty(aEventId)
       val event = KeyedEvent(AEvent)("1")
       eventBus.publish(event)
-      eventCollector.when(EventRequest.only[AEvent.type](aEventId, timeout = 0.s)) await 1.s match {
+      eventCollector.when(EventRequest.singleClass[AEvent.type](aEventId, timeout = 0.s)) await 1.s match {
         case EventSeq.NonEmpty(snapshots) ⇒
           assert((snapshots.toList map { _.value }) == List(event))
         case _ ⇒ fail()
