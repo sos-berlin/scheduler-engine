@@ -4,7 +4,6 @@
 
 #include "com__sos__scheduler__engine__newkernel__job__CppNewJob.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
-#include "com__sos__scheduler__engine__data__job__TaskId.h"
 #include "com__sos__scheduler__engine__data__job__TaskPersistentState.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
@@ -59,7 +58,6 @@ struct CppNewJob__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _setStateText__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _setXmlBytes___3B__method;
     ::zschimmer::javabridge::Method const _signalEarlierOrder__JLjava_lang_String_2Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _startTask__Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2JZLjava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _stateString____method;
     ::zschimmer::javabridge::Method const _stop____method;
     ::zschimmer::javabridge::Method const _stopSimply____method;
@@ -109,7 +107,6 @@ CppNewJob__class::CppNewJob__class(const string& class_name) :
     ,_setStateText__Ljava_lang_String_2__method(this, "setStateText", "(Ljava/lang/String;)V")
     ,_setXmlBytes___3B__method(this, "setXmlBytes", "([B)V")
     ,_signalEarlierOrder__JLjava_lang_String_2Ljava_lang_String_2__method(this, "signalEarlierOrder", "(JLjava/lang/String;Ljava/lang/String;)V")
-    ,_startTask__Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2JZLjava_lang_String_2Ljava_lang_String_2__method(this, "startTask", "(Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;JZLjava/lang/String;Ljava/lang/String;)Lcom/sos/scheduler/engine/data/job/TaskId;")
     ,_stateString____method(this, "stateString", "()Ljava/lang/String;")
     ,_stop____method(this, "stop", "()V")
     ,_stopSimply____method(this, "stopSimply", "()V")
@@ -385,20 +382,6 @@ void CppNewJob::signalEarlierOrder(jlong p0, const ::zschimmer::javabridge::prox
     parameter_list._jvalues[2].l = p2.get_jobject();
     CppNewJob__class* cls = _class.get();
     cls->_signalEarlierOrder__JLjava_lang_String_2Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
-
-::javaproxy::com::sos::scheduler::engine::data::job::TaskId CppNewJob::startTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Variable_setC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Variable_setC >& p1, jlong p2, jboolean p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p4, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p5) const {
-    ::zschimmer::javabridge::raw_parameter_list<6> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    parameter_list._jvalues[1].l = p1.get_jobject();
-    parameter_list._jvalues[2].j = p2;
-    parameter_list._jvalues[3].z = p3;
-    parameter_list._jvalues[4].l = p4.get_jobject();
-    parameter_list._jvalues[5].l = p5.get_jobject();
-    CppNewJob__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::data::job::TaskId result;
-    result.steal_local_ref(cls->_startTask__Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2JZLjava_lang_String_2Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
 }
 
 ::javaproxy::java::lang::String CppNewJob::stateString() const {

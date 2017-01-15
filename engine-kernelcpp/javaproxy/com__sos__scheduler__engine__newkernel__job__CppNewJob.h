@@ -11,7 +11,6 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskId; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskPersistentState; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Job_nodeC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct SpoolerC; }}}}}}}
@@ -92,7 +91,6 @@ struct CppNewJob : ::zschimmer::javabridge::proxy_jobject< CppNewJob >, ::javapr
     void setStateText(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void setXmlBytes(const ::zschimmer::javabridge::Local_java_byte_array& p0) const;
     void signalEarlierOrder(jlong p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
-    ::javaproxy::com::sos::scheduler::engine::data::job::TaskId startTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Variable_setC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Variable_setC >& p1, jlong p2, jboolean p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p4, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p5) const;
     ::javaproxy::java::lang::String stateString() const;
     void stop() const;
     void stopSimply() const;

@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__data__job__TaskPersistentState.h"
-#include "com__sos__scheduler__engine__data__job__TaskId.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 #include "org__joda__time__ReadableInstant.h"
@@ -19,7 +18,7 @@ struct TaskPersistentState__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _enqueueTimeMillis____method;
     ::zschimmer::javabridge::Method const _parametersXml____method;
     ::zschimmer::javabridge::Method const _startTimeMillis____method;
-    ::zschimmer::javabridge::Method const _taskId____method;
+    ::zschimmer::javabridge::Method const _taskIdNumber____method;
     ::zschimmer::javabridge::Method const _xml____method;
 
     static const ::zschimmer::javabridge::class_factory< TaskPersistentState__class > class_factory;
@@ -33,7 +32,7 @@ TaskPersistentState__class::TaskPersistentState__class(const string& class_name)
     ,_enqueueTimeMillis____method(this, "enqueueTimeMillis", "()J")
     ,_parametersXml____method(this, "parametersXml", "()Ljava/lang/String;")
     ,_startTimeMillis____method(this, "startTimeMillis", "()J")
-    ,_taskId____method(this, "taskId", "()Lcom/sos/scheduler/engine/data/job/TaskId;")
+    ,_taskIdNumber____method(this, "taskIdNumber", "()I")
     ,_xml____method(this, "xml", "()Ljava/lang/String;"){}
 
 TaskPersistentState__class::~TaskPersistentState__class() {}
@@ -82,12 +81,10 @@ jlong TaskPersistentState::startTimeMillis() const {
     return cls->_startTimeMillis____method.long_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::com::sos::scheduler::engine::data::job::TaskId TaskPersistentState::taskId() const {
+jint TaskPersistentState::taskIdNumber() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     TaskPersistentState__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::data::job::TaskId result;
-    result.steal_local_ref(cls->_taskId____method.jobject_call(get_jobject(), parameter_list));
-    return result;
+    return cls->_taskIdNumber____method.int_call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String TaskPersistentState::xml() const {

@@ -196,9 +196,7 @@
     <ClCompile Include="scala__Option.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__data__job__TaskId.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
+    
 
 
 

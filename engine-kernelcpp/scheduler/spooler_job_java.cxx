@@ -176,7 +176,7 @@ struct Java_job : Job {
     // *** TASK ***
 
     ptr<Task> start_task_(Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) {
-        _cppNewJobJ.startTask(params->java_proxy_jobject(), environment? environment->java_proxy_jobject() : NULL, at.millis(), force, task_name, web_service_name);
+        //_cppNewJobJ.startTask(params->java_proxy_jobject(), environment? environment->java_proxy_jobject() : NULL, at.millis(), force, task_name, web_service_name);
         return NULL;
     }
 

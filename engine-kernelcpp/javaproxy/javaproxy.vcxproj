@@ -243,7 +243,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils.cxx" />
     <ClCompile Include="scala__Option.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__data__job__TaskId.cxx" />
+    
     <ClCompile Include="org__joda__time__Duration.cxx" />
     <ClCompile Include="org__joda__time__base__AbstractDuration.cxx" />
     <ClCompile Include="org__joda__time__base__BaseDuration.cxx" />

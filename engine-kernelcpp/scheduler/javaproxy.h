@@ -4,7 +4,6 @@
 #include "../javaproxy/java__lang__Class.h"
 #include "../javaproxy/com__google__inject__Injector.h"
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskId.h"
 #include "../javaproxy/com__sos__scheduler__engine__data__job__TaskPersistentState.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__CppEventFactory.h"

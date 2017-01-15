@@ -1858,7 +1858,7 @@ ptr<Task> Standard_job::start_task_(Com_variable_set* params, Com_variable_set* 
 //--------------------------------------------------------Standard_job::enqueue_taskPersistentState
 
 void Standard_job::enqueue_taskPersistentState(const TaskPersistentStateJ& taskPersistentStateJ) {
-    int task_id = taskPersistentStateJ.taskId().number();
+    int task_id = taskPersistentStateJ.taskIdNumber();
     Time start_at = Time::of_millis(taskPersistentStateJ.startTimeMillis());
     _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string(time_zone_name()) : "period" ) );
 
