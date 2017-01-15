@@ -121,7 +121,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
   private case class OnReturnCode(returnCodes: RangeSet, toNodeIdOption: Option[NodeId], callbacks: immutable.Seq[Callback])
 
   private def returnCodeToOnReturnCode(onReturnCodes: immutable.Seq[OnReturnCode])(returnCode: ReturnCode): Option[OnReturnCode] =
-    onReturnCodes collectFirst { case o if o.returnCodes contains returnCode.toInt ⇒ o }
+    onReturnCodes collectFirst { case o if o.returnCodes contains returnCode.number ⇒ o }
 
   private sealed trait ReturnCodeAction
 

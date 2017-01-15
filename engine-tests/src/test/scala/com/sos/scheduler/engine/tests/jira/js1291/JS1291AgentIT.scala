@@ -290,7 +290,7 @@ object JS1291AgentIT {
         (SchedulerVariables map variableToEcho).mkString + s"""
           |echo !STDOUT AGENT ECHO
           |echo !STDERR AGENT ECHO >&2
-          |exit ${TestReturnCode.toInt}
+          |exit ${TestReturnCode.number}
           |""".stripMargin
       }</script>
     </job>
