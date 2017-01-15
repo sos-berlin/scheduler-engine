@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.nodeorder
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.xml.VariableSets
+import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey}
@@ -46,7 +47,7 @@ extends JobChainNodeNamespaceXmlPlugin {
     val eventReader = new ScalaXMLEventReader(xmlEventReader)
     import eventReader._
     val addOrder = parseElement("add_order") {
-      val jobChainPath = JobChainPath.makeAbsolute(defaultFolder = jobNode.jobChainPath.parent, path = attributeMap("job_chain"))
+      val jobChainPath = FolderPath.parentOf(jobNode.jobChainPath) resolve[JobChainPath] attributeMap("job_chain")
       val idPattern = attributeMap.getOrElse("id", "")
       if (jobChainPath == jobNode.jobChainPath && idPattern.isEmpty)
         throw new IllegalArgumentException(s"${this.getClass.getName} <add_order job_chain='$jobChainPath'> without attribute id= must not denote the own job_chain")
