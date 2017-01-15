@@ -24,7 +24,7 @@ import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
 import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
+import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, TypedPath}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerInitiated, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
@@ -132,11 +132,11 @@ with HasCloser {
 
   private def catchFileBasedEvents(): Unit = {
     val subsystemCompanions = injector.instance[FileBasedSubsystem.Register].companions
-    val subsystemMap: Map[FileBasedType, FileBasedSubsystem] =
-      subsystemCompanions.map { o ⇒ o.fileBasedType → injector.getInstance(o.subsystemClass) } .toMap
+    val subsystemMap: Map[TypedPath.AnyCompanion, FileBasedSubsystem] =
+      subsystemCompanions.map { o ⇒ o.typedPathCompanion → injector.getInstance(o.subsystemClass) } .toMap
     eventBus.onHot[FileBasedEvent] {
       case KeyedEvent(path, event) ⇒
-        for (subsystem ← subsystemMap.get(path.fileBasedType)) {
+        for (subsystem ← subsystemMap.get(path.companion)) {
           subsystem.onFileBasedEvent(KeyedEvent(event)(path))
         }
     }

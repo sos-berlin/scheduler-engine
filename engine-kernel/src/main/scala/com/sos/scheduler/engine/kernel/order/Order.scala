@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
+import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderHistoryId, OrderId, OrderKey, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType, OrderView}
@@ -154,8 +154,6 @@ with OrderPersistence {
     variables = variables)
 
   def stringToPath(o: String) = OrderKey(o)
-
-  def fileBasedType = FileBasedType.Order
 
   private[order] def sourceType: OrderSourceType =
     sourceTypeOnce getOrUpdate toOrderSourceType(isFileBased = cppProxy.is_file_based, isFileOrder = cppProxy.is_file_order)

@@ -10,7 +10,6 @@ import com.sos.scheduler.engine.common.xml.DomForScala._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassObstacle, ProcessClassOverview, ProcessClassPath, ProcessClassView, ProcessDetailed}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
@@ -46,8 +45,6 @@ extends FileBased {
   private[this] val clients = mutable.HashSet[CppHttpRemoteApiProcessClient]()
 
   def stringToPath(o: String) = ProcessClassPath(o)
-
-  def fileBasedType = FileBasedType.ProcessClass
 
   def onCppProxyInvalidated(): Unit = {
     for (c ← clients) logger.error(s"CppHttpRemoteApiProcessClient has not been removed: $c")

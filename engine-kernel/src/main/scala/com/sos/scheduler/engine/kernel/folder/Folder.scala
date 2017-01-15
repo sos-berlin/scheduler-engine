@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.folder
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.cppproxy.FolderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -17,8 +16,6 @@ extends FileBased {
   type ThisPath = FolderPath
 
   def stringToPath(o: String) = FolderPath(o)
-
-  def fileBasedType = FileBasedType.Folder
 
   def onCppProxyInvalidated(): Unit = {}
 }

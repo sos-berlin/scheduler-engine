@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.lock
 
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.kernel.cppproxy.LockC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
@@ -18,14 +17,7 @@ extends FileBased {
 
   def stringToPath(o: String) = LockPath(o)
 
-  def fileBasedType = FileBasedType.Lock
-
   def onCppProxyInvalidated(): Unit = {}
-
-//  def obstacles: Set[LockObstacle] = {
-//    val builder = Set.newBuilder[LockObstacle]
-//    builder.result
-//  }
 }
 
 object Lock {

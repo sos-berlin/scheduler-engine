@@ -40,7 +40,7 @@ trait FileBasedSubsystem extends Subsystem {
 
   private[kernel] def onFileBasedEvent(e: KeyedEvent[FileBasedEvent]): Unit = {
     val path = e.key.asInstanceOf[Path]
-    assert(e.key.fileBasedType == fileBasedType)
+    assert(e.key.companion == companion.typedPathCompanion)
     assert(path.getClass == companion.pathClass, s"${path.getClass} is not expected ${companion.getClass}")
     e.event match {
       case FileBasedAdded ⇒
@@ -141,10 +141,11 @@ object FileBasedSubsystem {
     val pathClass = implicitClass[Path]
   }
 
-  final class Register private(injector: Injector, typeToCompanion: Map[FileBasedType, Companion]) {
-    val companions = typeToCompanion.values.toImmutableSeq
+  final class Register private(injector: Injector, typedPathToCompanion: Map[TypedPath.AnyCompanion, Companion]) {
+    val companions = typedPathToCompanion.values.toImmutableSeq
 
-    private[kernel] def subsystem(t: FileBasedType): FileBasedSubsystem = injector.getInstance(companion(t).subsystemClass)
+    private[kernel] def subsystem(t: FileBasedType): FileBasedSubsystem =
+      injector.getInstance(typedPathToCompanion(TypedPathRegister.fileBasedTypedToCompanion(t)).subsystemClass)
 
     private[kernel] def fileBased[P <: TypedPath](path: P): FileBased = {
       val c = client(path.companion)
@@ -160,17 +161,13 @@ object FileBasedSubsystem {
 //      client(implicitly[TypedPath.Companion[P]])
 //        .asInstanceOf[FileBasedSubsystemClient { type ThisPath = P }]
 
-    def client(o: TypedPath.AnyCompanion): FileBasedSubsystemClient = client(o.fileBasedType)
-
-    def client(t: FileBasedType): FileBasedSubsystemClient = client(companion(t))
+    def client(o: TypedPath.AnyCompanion): FileBasedSubsystemClient = client(typedPathToCompanion(o))
 
     def client(o: FileBasedSubsystem.Companion): FileBasedSubsystemClient = injector.getInstance(o.clientClass)
-
-    def companion(t: FileBasedType): Companion = typeToCompanion(t)
   }
 
   object Register {
     def apply(injector: Injector, descriptions: immutable.Seq[Companion]) =
-      new Register(injector, descriptions toKeyedMap { _.fileBasedType })
+      new Register(injector, descriptions toKeyedMap { _.typedPathCompanion })
   }
 }

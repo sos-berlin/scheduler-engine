@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.{JobDescription, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
@@ -34,8 +33,6 @@ with JobPersistence {
   type ThisPath = JobPath
 
   def onCppProxyInvalidated(): Unit = {}
-
-  def fileBasedType = FileBasedType.Job
 
   def stringToPath(o: String) = JobPath(o)
 

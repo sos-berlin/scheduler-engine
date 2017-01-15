@@ -89,8 +89,6 @@ with EventSource {
     builder.result
   }
 
-  def fileBasedType: FileBasedType
-
   private[kernel] def fileBasedState = FileBasedState.values()(cppProxy.file_based_state)
 
   private def fileBasedErrorMessageOption: Option[String] =
