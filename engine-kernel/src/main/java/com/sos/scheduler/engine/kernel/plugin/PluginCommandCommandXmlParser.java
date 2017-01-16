@@ -5,8 +5,7 @@ import com.sos.scheduler.engine.kernel.command.SingleCommandXmlParser;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.w3c.dom.Element;
 import scala.collection.IndexedSeq;
-
-import static com.sos.scheduler.engine.common.xml.XmlUtils.elementsXPath;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.elementsXPath;
 
 class PluginCommandCommandXmlParser extends SingleCommandXmlParser {
     private final PluginSubsystem subsystem;
@@ -30,7 +29,7 @@ class PluginCommandCommandXmlParser extends SingleCommandXmlParser {
         return childElements.iterator().next();
     }
 
-    static final class NotASingleSubcommandException extends SchedulerException {
+    private static final class NotASingleSubcommandException extends SchedulerException {
         private NotASingleSubcommandException(String cmdName) {
             super("Command " + cmdName + " has not exactly one subcommand");
         }

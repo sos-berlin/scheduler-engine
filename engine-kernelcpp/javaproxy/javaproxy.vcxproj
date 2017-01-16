@@ -294,6 +294,7 @@
     
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderCallback.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__event__KeyedEvent.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__common__xml__CppXmlUtils.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

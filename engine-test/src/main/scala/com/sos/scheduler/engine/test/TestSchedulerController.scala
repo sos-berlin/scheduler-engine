@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.{autoClosing, closeOnError}
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.log.{ErrorLogged, SchedulerLogLevel}

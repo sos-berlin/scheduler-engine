@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.stringXPath;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml;
 import static org.junit.Assert.assertTrue;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-782'>JS-782</a> */

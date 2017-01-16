@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.processclass
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.domElementToStaxSource
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.processclass.Configuration._

@@ -12,10 +12,6 @@
 
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
-namespace javaproxy { namespace org { namespace w3c { namespace dom { struct Document; }}}}
-namespace javaproxy { namespace org { namespace w3c { namespace dom { struct Element; }}}}
-namespace javaproxy { namespace org { namespace w3c { namespace dom { struct Node; }}}}
-namespace javaproxy { namespace org { namespace w3c { namespace dom { struct NodeList; }}}}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace common { namespace xml { 
@@ -53,17 +49,9 @@ struct XmlUtils : ::zschimmer::javabridge::proxy_jobject< XmlUtils >, ::javaprox
     }
   public:
 
-    static bool booleanXmlAttribute(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jboolean p2);
-    static jint intXmlAttribute(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
-    static ::javaproxy::org::w3c::dom::Document loadXml(const ::zschimmer::javabridge::Local_java_byte_array& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
-    static ::javaproxy::org::w3c::dom::Document newDocument();
-    static ::javaproxy::java::lang::String rawXmlToString(const ::zschimmer::javabridge::Local_java_byte_array& p0);
-    static ::javaproxy::java::lang::String sanitize(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    static ::javaproxy::java::lang::String toXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, jboolean p1);
-    static string toXmlBytes(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jboolean p2);
-    static ::javaproxy::java::lang::String xmlAttribute(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2);
-    static ::javaproxy::org::w3c::dom::Node xpathNode(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
-    static ::javaproxy::org::w3c::dom::NodeList xpathNodeList(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
+    static ::javaproxy::java::lang::String removeXmlProlog(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
+    static ::javaproxy::java::lang::String xmlBytesToString(const ::zschimmer::javabridge::Local_java_byte_array& p0);
+    static bool xmlStringToBoolean(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

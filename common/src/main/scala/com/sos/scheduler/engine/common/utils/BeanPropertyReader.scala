@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.common.utils
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.utils.BeanPropertyReader._
 import scala.reflect.ClassTag

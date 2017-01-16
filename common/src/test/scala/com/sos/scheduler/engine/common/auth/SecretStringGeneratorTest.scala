@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.common.auth
 
 import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.auth.SecretStringGenerator._
+import com.sos.scheduler.engine.common.auth.SecretStringGenerator.newSecretString
 import com.sos.scheduler.engine.common.auth.SecretStringGeneratorTest._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._

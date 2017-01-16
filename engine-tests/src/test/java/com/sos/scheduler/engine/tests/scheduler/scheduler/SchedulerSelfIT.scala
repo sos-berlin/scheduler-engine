@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.scheduler
 
-import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils.interceptSchedulerError
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.inject.Guice._
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml
 import com.sos.scheduler.engine.kernel.plugin.PluginAdapterTest._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -65,7 +64,6 @@ final class PluginAdapterTest extends FunSuite {
 }
 
 private object PluginAdapterTest {
-  private val logger = Logger(getClass)
   private val pluginConfiguration = new PluginConfiguration(classOf[MockPlugin].getName, None)
   private val errorPluginConfiguration = new PluginConfiguration(classOf[ErrorMockPlugin].getName, None)
 }

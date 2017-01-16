@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.inject.Module
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.cast
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.xml.XmlUtils._
+import com.sos.scheduler.engine.common.xml.CppXmlUtils._
 import com.sos.scheduler.engine.kernel.plugin.PluginConfiguration._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import org.w3c.dom.Element

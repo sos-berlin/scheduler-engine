@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.common.guice
 
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{AbstractModule, Provider}
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import scala.reflect.ClassTag
 

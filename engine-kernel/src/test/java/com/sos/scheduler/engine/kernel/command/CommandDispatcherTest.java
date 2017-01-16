@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.command;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
-import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

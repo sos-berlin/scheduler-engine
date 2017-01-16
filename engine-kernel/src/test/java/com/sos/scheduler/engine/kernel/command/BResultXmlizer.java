@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.command;
 
 import org.w3c.dom.Element;
 
-import static com.sos.scheduler.engine.common.xml.XmlUtils.newDocument;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.newDocument;
 
 class BResultXmlizer extends GenericResultXmlizer<BResult> {
     static final BResultXmlizer singleton = new BResultXmlizer();

@@ -1,13 +1,9 @@
 package com.sos.scheduler.engine.common.sprayutils
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.cast
+import java.nio.charset.StandardCharsets.UTF_8
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
-
-//import spray.http.ContentTypes._
-//import spray.http.ContentTypes.`application/json`
-import java.nio.charset.StandardCharsets.UTF_8
 import spray.http.MediaTypes._
 import spray.http.{ContentTypes, HttpEntity}
 import spray.httpx.marshalling.Marshaller

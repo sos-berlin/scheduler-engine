@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.xmlElemToStaxSource
+import com.sos.scheduler.engine.common.scalautil.xmls.XmlSources.xmlElemToSource
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
@@ -75,7 +75,7 @@ final class ConfigurationTest extends FreeSpec {
     }
 
     def check(elem: xml.Elem, configuration: Configuration) = {
-      assert(Configuration.parse(xmlElemToStaxSource(elem)) == configuration)
+      assert(Configuration.parse(elem) == configuration)
     }
   }
 }

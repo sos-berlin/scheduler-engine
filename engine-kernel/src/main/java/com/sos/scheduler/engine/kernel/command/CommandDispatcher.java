@@ -1,13 +1,11 @@
 package com.sos.scheduler.engine.kernel.command;
 
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import org.w3c.dom.Element;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.toXml;
+import org.w3c.dom.Element;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.toXml;
 
 
 public class CommandDispatcher {
@@ -28,7 +26,7 @@ public class CommandDispatcher {
         List<CommandExecutor> executors = new ArrayList<CommandExecutor>();
         List<CommandXmlParser> parsers = new ArrayList<CommandXmlParser>();
         List<ResultXmlizer> xmlizers = new ArrayList<ResultXmlizer>();
-        
+
         for (CommandHandler handler: handlers) {
             if (handler instanceof CommandExecutor)
                 executors.add((CommandExecutor)handler);

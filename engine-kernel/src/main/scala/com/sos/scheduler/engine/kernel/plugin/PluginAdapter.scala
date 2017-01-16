@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.plugin
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Injector}
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.xml.XmlUtils.xmlQuoted
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.xmlQuoted
 import com.sos.scheduler.engine.kernel.command.{CommandDispatcher, HasCommandHandlers}
 import com.sos.scheduler.engine.kernel.plugin.PluginAdapter._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException

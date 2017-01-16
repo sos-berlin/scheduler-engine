@@ -10,9 +10,9 @@ import com.sos.scheduler.engine.test.util.What;
 import java.io.StringWriter;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.writeXmlTo;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.stringXPath;
+import static com.sos.scheduler.engine.common.xml.CppXmlUtils.writeXmlTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

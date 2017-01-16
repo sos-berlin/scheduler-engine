@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
 import akka.util.ByteString
-import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import javax.inject.{Inject, Singleton}

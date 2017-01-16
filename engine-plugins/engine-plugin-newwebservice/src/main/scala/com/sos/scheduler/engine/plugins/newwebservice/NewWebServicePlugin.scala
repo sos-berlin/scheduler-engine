@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
 import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
 import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.xml.XmlUtils.toXml
+import com.sos.scheduler.engine.common.xml.CppXmlUtils.toXml
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins, UseGuiceModule}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration

@@ -13,6 +13,7 @@ object XmlSources {
   implicit def stringToSource(o: String): Source =
     new StreamSource(new StringReader(o))
 
+  /** Slow */
   implicit def xmlElemToSource(o: xml.Elem): Source =
     new StreamSource(new StringReader(o.toString))
 

@@ -7,8 +7,8 @@
 #include <stdarg.h>
 
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/com__sos__scheduler__engine__common__xml__XmlUtils.h"
-typedef ::javaproxy::com::sos::scheduler::engine::common::xml::XmlUtils XmlUtilsJ;
+#include "../javaproxy/com__sos__scheduler__engine__common__xml__CppXmlUtils.h"
+typedef ::javaproxy::com::sos::scheduler::engine::common::xml::CppXmlUtils CppXmlUtilsJ;
 
 using namespace javaproxy::org::w3c::dom;
 using namespace std;
@@ -56,7 +56,7 @@ string name_of_node_type( const NodeType& n )
 //-----------------------------------------------------------------------------Document_ptr::create
 
 Document_ptr& Document_ptr::create() { 
-    assign(XmlUtilsJ::newDocument());
+    assign(CppXmlUtilsJ::newDocument());
     return *this;
 }
 
@@ -84,7 +84,7 @@ bool Document_ptr::try_load_xml_bytes( const string& xml_text, const string& enc
 void Document_ptr::load_xml_bytes(const string& xml_text, const string& encoding)
 {
     javabridge::Local_java_byte_array array(xml_text);
-    assign(XmlUtilsJ::loadXml(array, encoding));
+    assign(CppXmlUtilsJ::loadXml(array, encoding));
 }
 
 //--------------------------------------------------------------------Document_ptr::load_xml_string
@@ -105,21 +105,21 @@ Element_ptr Document_ptr::createElement( const string& tagName ) const
 
 Text_ptr Document_ptr::createTextNode(const string& text) const
 { 
-    return Text_ptr(_documentJ.createTextNode(XmlUtilsJ::sanitize(text)));
+    return Text_ptr(_documentJ.createTextNode(CppXmlUtilsJ::sanitize(text)));
 }
 
 //----------------------------------------------------------------------Document_ptr::createComment
 
 Comment_ptr Document_ptr::createComment(const string& text) const            
 { 
-    return Comment_ptr(_documentJ.createComment(XmlUtilsJ::sanitize(text)));
+    return Comment_ptr(_documentJ.createComment(CppXmlUtilsJ::sanitize(text)));
 }
 
 //-----------------------------------------------------------------Document_ptr::createCDATASection
 
 CDATASection_ptr Document_ptr::createCDATASection(const string& text) const            
 { 
-    return CDATASection_ptr(_documentJ.createCDATASection(XmlUtilsJ::sanitize(text)));
+    return CDATASection_ptr(_documentJ.createCDATASection(CppXmlUtilsJ::sanitize(text)));
 }
 
 //--------------------------------------------------------Document_ptr::createProcessingInstruction
@@ -363,28 +363,28 @@ string Simple_node_ptr::xml_bytes_without_prolog( const string& encoding, bool i
 
 string Simple_node_ptr::xml_bytes(const string& encoding, bool indented) const
 {
-    return XmlUtilsJ::toXmlBytes(Simple_node_ptr::ref(), encoding, indented);
+    return CppXmlUtilsJ::toXmlBytes(Simple_node_ptr::ref(), encoding, indented);
 }
 
 //----------------------------------------------------------------------Simple_node_ptr::xml_string
 
 string Simple_node_ptr::xml_string(bool indent) const
 {
-    return XmlUtilsJ::toXml(Simple_node_ptr::ref(), indent);
+    return CppXmlUtilsJ::toXml(Simple_node_ptr::ref(), indent);
 }
 
 //--------------------------------------------------------------------Simple_node_ptr::select_nodes
 
 Node_list Simple_node_ptr::select_nodes( const string& xpath_expression ) const
 {
-    return _nodeJ? NodeList(XmlUtilsJ::xpathNodeList(_nodeJ, xpath_expression)) : NodeList();
+    return _nodeJ? NodeList(CppXmlUtilsJ::xpathNodeList(_nodeJ, xpath_expression)) : NodeList();
 }
 
 //---------------------------------------------------------------------Simple_node_ptr::select_node
 
 Simple_node_ptr Simple_node_ptr::select_node( const string& xpath_expression ) const
 {
-    return _nodeJ? XmlUtilsJ::xpathNode(_nodeJ, xpath_expression) : NULL;
+    return _nodeJ? CppXmlUtilsJ::xpathNode(_nodeJ, xpath_expression) : NULL;
 }
 
 //------------------------------------------------------------------------Simple_node_ptr::has_node
@@ -428,7 +428,7 @@ Simple_node_ptr Node_list::get( int i ) const
 
 void Element_ptr::setAttribute( const string& name, const char* value ) const   
 { 
-    _elementJ.setAttribute(name, XmlUtilsJ::sanitize(value));
+    _elementJ.setAttribute(name, CppXmlUtilsJ::sanitize(value));
 }
 
 //------------------------------------------------------------------------Element_ptr::getAttribute
