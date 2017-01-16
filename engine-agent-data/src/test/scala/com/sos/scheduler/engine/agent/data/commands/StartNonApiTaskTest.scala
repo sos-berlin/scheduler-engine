@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.TaskId
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -20,7 +20,7 @@ final class StartNonApiTaskTest extends FreeSpec {
   }
 
   "JSON maximum" in {
-    val obj = StartNonApiTask(Some(StartTask.Meta(JobPath("/folder/test"), TaskId(123))))
+    val obj = StartNonApiTask(Some(StartTask.Meta(job = "/folder/test", TaskId(123))))
     val json =
       """{
         "$TYPE": "StartNonApiTask",

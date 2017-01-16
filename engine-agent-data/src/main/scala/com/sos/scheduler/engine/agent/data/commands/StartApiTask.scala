@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
 import com.sos.scheduler.engine.agent.data.commands.StartTask.Meta
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import spray.json.DefaultJsonProtocol._
 
 /**

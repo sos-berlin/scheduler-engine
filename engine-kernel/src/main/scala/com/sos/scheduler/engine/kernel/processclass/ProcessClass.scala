@@ -183,7 +183,7 @@ object ProcessClass {
 
   private def apiProcessConfiguration(c: Api_process_configurationC) = {
     new ApiProcessConfiguration(
-      meta = StartTask.Meta(JobPath(c._job_path), TaskId(c._task_id)),
+      meta = StartTask.Meta(job = c._job_path, TaskId(c._task_id)),
       hasApi = c._has_api,
       javaOptions = c._java_options.trim,
       javaClasspath = c._java_classpath.trim)
