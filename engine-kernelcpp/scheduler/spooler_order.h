@@ -228,7 +228,7 @@ struct Order : Com_order,
     string                      initial_state_string    () const                                    { return _initial_state.as_string(); }
     void                        reset                   ();
 
-    void                    set_end_state               ( const State& );
+    void                    set_end_state               (const State&, bool with_original = false);
     const State&                end_state               ()                                          { return _end_state; }
     string                      end_state_string        ()                                          { return _end_state.as_string(); }
 
@@ -418,6 +418,7 @@ struct Order : Com_order,
     string                     _last_error;
     bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
     State                      _end_state;
+    State                      _original_end_state;
 
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     string                     _state_text;

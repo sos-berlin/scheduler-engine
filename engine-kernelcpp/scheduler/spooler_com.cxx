@@ -5613,7 +5613,7 @@ STDMETHODIMP Com_order::put_End_state( VARIANT* state )
     {
         if( !_order )  return E_POINTER;
 
-        _order->set_end_state( *state );
+        _order->set_end_state(*state, /*with_original=*/!_order->is_touched());
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

@@ -1488,7 +1488,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
-    if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
+    bool has_original_end_state = element.hasAttribute("original_end_state");
+    if (has_original_end_state) set_end_state(element.getAttribute("original_end_state"), true);
+    if (element.hasAttribute("end_state")) set_end_state(element.getAttribute("end_state"), /*with_original=*/!has_original_end_state);
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_touched = element.bool_getAttribute( "touched" );
     if (_is_touched) {
@@ -1778,8 +1780,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         e2.setAttribute( "state"    , _outer_job_chain_state.as_string() );
     }
     
-    result.setAttribute_optional( "end_state", _end_state.as_string() );
-
+    result.setAttribute_optional("original_end_state", _original_end_state.as_string());
+    result.setAttribute_optional("end_state", _end_state.as_string());
     return result;
 }
 
@@ -2300,13 +2302,16 @@ void Order::reset()
 
 //-----------------------------------------------------------------------------Order::set_end_state
 
-void Order::set_end_state( const State& end_state )                  
+void Order::set_end_state(const State& end_state, bool with_original)
 { 
     if( !end_state.is_null_or_empty_string() )
     {
         if( Job_chain* job_chain = this->job_chain() )  job_chain->referenced_node_from_state( end_state );       // Prüfen
     }
 
+    if (with_original) {
+        _original_end_state = end_state;
+    }
     _end_state = end_state;
     _order_xml_modified = true;
 }
@@ -3016,6 +3021,7 @@ void Order::check_for_replacing_or_removing_with_distributed(When_to_act when_to
 
 void Order::prepare_for_next_roundtrip() {
     _last_error = "";
+    _end_state = _original_end_state;
     if (is_in_folder()) {
         if (!_spooler->settings()->_keep_order_content_on_reschedule) {
             restore_initial_settings();

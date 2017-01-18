@@ -20,15 +20,15 @@ import org.scalatest.junit.JUnitRunner
 final class JS1662IT extends FreeSpec with ScalaSchedulerTest {
 
   "Unchanged end NodeId" in {
-    expectOrdersFinishAt(ConfiguredEndNodeIds) {
-      scheduler executeXml ModifyOrderCommand(_, suspended = Some(false))
+    expectOrdersFinishAt(ConfiguredEndNodeIds) { orderKey ⇒
+      scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
     }
-    expectOrdersFinishAt(ConfiguredEndNodeIds) {
-      scheduler executeXml ModifyOrderCommand(_, at = Some(ModifyOrderCommand.NowAt))
+    expectOrdersFinishAt(ConfiguredEndNodeIds) { orderKey ⇒
+      scheduler executeXml ModifyOrderCommand(orderKey, at = Some(ModifyOrderCommand.NowAt))
     }
   }
 
-  "Changed end NodeId is not reset at end" in {
+  "Changed end NodeId is reset when order has been carried out" in {
     scheduler executeXml <job_chain_node.modify job_chain="/test" state="200" action="stop"/>
     eventBus.awaitingEvent[OrderStateChangedEvent](e ⇒ e.orderKey == TestOrderKeys(0) && e.state == OrderState("200")) {
       eventBus.awaitingEvent[OrderStateChangedEvent](e ⇒ e.orderKey == TestOrderKeys(1) && e.state == OrderState("200")) {
@@ -43,15 +43,13 @@ final class JS1662IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml <job_chain_node.modify job_chain="/test" state="200" action="process"/>
     }
     // Second run of same orders, to check its end NodeIds
-    //awaitOrdersFinishAt(OriginalEndNodeIds) {
-    expectOrdersFinishAt(List(ChangedEndNodeId, ChangedEndNodeId)) {
+    expectOrdersFinishAt(ConfiguredEndNodeIds) {
       scheduler executeXml ModifyOrderCommand(_, at = Some(ModifyOrderCommand.NowAt))
     }
   }
 
-  "Changed end NodeId is not reset by command" in {
-    //awaitOrdersFinishAt(OriginalEndNodeIds) {
-    expectOrdersFinishAt(List(ChangedEndNodeId, ChangedEndNodeId)) { orderKey ⇒
+  "Changed end NodeId when order is reset by command" in {
+    expectOrdersFinishAt(ConfiguredEndNodeIds) { orderKey ⇒
       scheduler executeXml ModifyOrderCommand(orderKey, endState = Some(ChangedEndNodeId))
       scheduler executeXml ModifyOrderCommand(orderKey, action = Some(ModifyOrderCommand.Action.reset))
       scheduler executeXml ModifyOrderCommand(orderKey, at = Some(ModifyOrderCommand.NowAt))
