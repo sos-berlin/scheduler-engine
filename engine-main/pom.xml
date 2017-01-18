@@ -157,15 +157,12 @@
                                 <fail message="Missing file ${project.build.directory}/dependency/${engineJarFilename}">
                                     <condition>
                                         <not>
-                                            <available file="${project.build.directory}/dependency/${engineJarFilename}"/>
+                                            <available file="${project.build.directory}/dependency/${engineJarFilename}" />
                                         </not>
                                     </condition>
                                 </fail>
                                 <delete verbose="true">
-                                    <fileset dir="${project.build.directory}/dependency"
-                                             excludes="com.sos-berlin.jobscheduler.engine.engine-jar-${project.version}.jar"
-                                             includes="com.sos-berlin.jobscheduler.engine.engine-*.jar
-                                                       com.sos-berlin.jobscheduler.enginedoc.enginedoc-*.jar"/>
+                                    <fileset dir="${project.build.directory}/dependency" excludes="com.sos-berlin.jobscheduler.engine.engine-jar-${project.version}.jar" includes="com.sos-berlin.jobscheduler.engine.engine-*.jar com.sos-berlin.jobscheduler.enginedoc.enginedoc-*.jar" />
                                 </delete>
                             </target>
                         </configuration>
