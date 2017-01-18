@@ -33,7 +33,7 @@ final class SchemaIT
   test("-use-xml-schema") {
     runScheduler(activate = false) { controller =>
       val e = intercept[Exception] { controller.activateScheduler("-use-xml-schema="+ new File(controller.environment.configDirectory, "test-xsd.xml")) }
-      e.getMessage should include ("cvc-elt.1.a: Cannot find the declaration")   // Das ist wegen Spooler::configuration_for_single_job_script
+      e.getMessage should include ("Cannot find the declaration")   // Das ist wegen Spooler::configuration_for_single_job_script
     }
   }
 }
