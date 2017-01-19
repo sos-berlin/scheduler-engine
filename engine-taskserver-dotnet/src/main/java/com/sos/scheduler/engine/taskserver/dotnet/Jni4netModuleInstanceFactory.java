@@ -4,8 +4,6 @@ import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleInstanceFactor
 import com.sos.scheduler.engine.taskserver.dotnet.api.DotnetModuleReference;
 import com.sos.scheduler.engine.taskserver.dotnet.api.TaskContext;
 import java.nio.file.Path;
-import sos.spooler.Job_impl;
-import sos.spooler.Monitor_impl;
 
 public final class Jni4netModuleInstanceFactory implements
         DotnetModuleInstanceFactory {
@@ -33,9 +31,9 @@ public final class Jni4netModuleInstanceFactory implements
             throws Exception {
         DotnetApiImpl dotnetObject = new DotnetApiImpl(dotnetBridge, reference, taskContext);
 
-        if (Job_impl.class.isAssignableFrom(clazz)) {
+        if (sos.spooler.IJob_impl.class.isAssignableFrom(clazz)) {
             return (T)new DotnetJob(taskContext, dotnetObject);
-        } else if (Monitor_impl.class.isAssignableFrom(clazz)) {
+        } else if (sos.spooler.IMonitor_impl.class.isAssignableFrom(clazz)) {
             return (T)new DotnetMonitor(dotnetObject);
         } else {
             throw new IllegalArgumentException("Unsupported " + clazz);
