@@ -45,7 +45,7 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
         new sos.spooler.Job(spoolerJobInvoker),
         new sos.spooler.Spooler(spoolerInvoker))
 
-      val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, dotnetModuleReference)
+      val job = instanceFactory.newInstance(classOf[sos.spooler.IJob_impl], taskContext, dotnetModuleReference)
       job.spooler_init()
       val e = intercept[Exception] {
         job.spooler_process()
@@ -72,7 +72,7 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
         new sos.spooler.Task(spoolerTaskInvoker),
         new sos.spooler.Job(spoolerJobInvoker),
         new sos.spooler.Spooler(spoolerInvoker))
-      val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, dotnetModuleReference)
+      val job = instanceFactory.newInstance(classOf[sos.spooler.IJob_impl], taskContext, dotnetModuleReference)
       job.spooler_init()
       val result = job.spooler_process()
       assert(result)

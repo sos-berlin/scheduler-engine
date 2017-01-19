@@ -6,7 +6,7 @@ package com.sos.scheduler.engine.taskserver.dotnet.api
 trait DotnetModuleInstanceFactory extends AutoCloseable {
 
   /**
-    * @tparam A [[sos.spooler.Job_impl]] or a [[sos.spooler.Monitor_impl]]
+    * @tparam A [[sos.spooler.IJob_impl]] or a [[sos.spooler.IMonitor_impl]]
     */
   @throws[Exception]
   def newInstance[A](clazz: Class[A], taskContext: TaskContext, reference: DotnetModuleReference): A
