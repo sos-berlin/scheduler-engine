@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.javatest;
 
 import com.google.common.base.Throwables;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
-import com.sos.scheduler.engine.data.event.custom.VariablesCustomEvent;
+import com.sos.scheduler.engine.data.events.custom.VariablesCustomEvent;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.JavaEventSubscription;
