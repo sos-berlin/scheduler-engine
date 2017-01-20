@@ -96,12 +96,12 @@
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-agent-client</artifactId>
+            <artifactId>agent-client_${scala.binaryVersion}</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-tunnel</artifactId>
+            <artifactId>tunnel_${scala.binaryVersion}</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

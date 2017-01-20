@@ -71,7 +71,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>engine-agent-test</artifactId>
+            <artifactId>agent-test_${scala.binaryVersion}</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

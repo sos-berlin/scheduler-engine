@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
-            <artifactId>engine-agent-test</artifactId>
+            <artifactId>agent-test_${scala.binaryVersion}</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
