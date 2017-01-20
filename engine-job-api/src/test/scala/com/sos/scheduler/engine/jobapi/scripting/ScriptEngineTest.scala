@@ -9,7 +9,7 @@ import org.scalatest.{FreeSpec, OneInstancePerTest}
 @RunWith(classOf[JUnitRunner])
 final class ScriptEngineTest extends FreeSpec with OneInstancePerTest {
 
-  private val engine = new ScriptEngineManager().getEngineByName("JavaScript")
+  private val engine = new ScriptEngineManager(null).getEngineByName("JavaScript")
 
   "testBinding" in {
     val bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE)
