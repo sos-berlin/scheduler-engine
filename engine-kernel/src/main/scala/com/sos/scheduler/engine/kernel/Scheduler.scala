@@ -151,10 +151,10 @@ with HasCloser {
       eventBus.publish(KeyedEvent(SchedulerClosed))
       eventBus.dispatchEvents()
       schedulerThreadCallQueue.close()
-      try databaseSubsystem.close() catch { case NonFatal(t) ⇒
+      if (databaseSubsystem != null) try databaseSubsystem.close() catch { case NonFatal(t) ⇒
         logger.error(s"databaseSubsystem.close(): $t", t)
       }
-      try pluginSubsystem.close() catch { case NonFatal(t) ⇒
+      if (pluginSubsystem != null) try pluginSubsystem.close() catch { case NonFatal(t) ⇒
         logger.error(s"pluginSubsystem.close(): $t", t)
       }
     }
