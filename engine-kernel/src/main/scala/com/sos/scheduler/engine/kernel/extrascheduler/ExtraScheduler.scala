@@ -60,7 +60,7 @@ extends AutoCloseable with HasCloser {
   private def startProcess(): Process = {
     val httpArgs = httpPort map { o ⇒ s"-http-port=$o" }
     val tcpArgs = tcpAddressOption.toList flatMap { case SchedulerAddress(interface, port) ⇒ List(s"-tcp-port=$port", s"-ip-address=$interface") }
-    val processBuilder = new ProcessBuilder(args ++ httpArgs ++ tcpArgs)
+    val processBuilder = new ProcessBuilder(args ++ httpArgs ++ tcpArgs :+ "-log-to-stderr" :+ "-stderr-level=info")
     if (OperatingSystem.isUnix) {
       val name = operatingSystem.getDynamicLibraryEnvironmentVariableName
       val previous = nullToEmpty(System.getenv(name))
