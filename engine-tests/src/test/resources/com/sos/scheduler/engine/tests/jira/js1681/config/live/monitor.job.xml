@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <params>
+        <param name="JOB" value="JOB-VALUE"/>
+    </params>
+    <script language="shell">
+        :;if false; then :
+        @echo off
+        goto WINDOWS
+        fi
+
+        echo SCHEDULER_PARAM_JOB=$SCHEDULER_PARAM_JOB
+        echo SCHEDULER_PARAM_GLOBAL=$SCHEDULER_PARAM_GLOBAL
+        exit
+
+        :WINDOWS
+        echo SCHEDULER_PARAM_JOB=%SCHEDULER_PARAM_JOB%
+        echo SCHEDULER_PARAM_GLOBAL=%SCHEDULER_PARAM_GLOBAL%
+    </script>
+    <monitor>
+        <script java_class="com.sos.scheduler.engine.tests.jira.js1681.TestMonitor"/>
+    </monitor>
+</job>
