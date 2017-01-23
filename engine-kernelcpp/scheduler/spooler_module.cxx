@@ -668,6 +668,9 @@ void Module_instance::fill_process_environment()
 
     if( _module->kind() == Module::kind_process )
     {
+        Z_FOR_EACH_CONST(Com_variable_set::Map, _spooler->_variables->_map, v) {
+            _process_environment->set_var(ucase(_module->_process_shell_variable_prefix + v->second->name()), v->second->string_value());
+        }
         string dir = _spooler->_configuration_directories[ confdir_local ];
         
         if( string_ends_with( dir, "/" ) ||
