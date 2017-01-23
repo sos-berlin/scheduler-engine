@@ -1,7 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1483
 
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyParameterIsMissingException
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -22,12 +25,14 @@ import org.scalatest.junit.JUnitRunner
 final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   "Without a license key, Agent runs one task at a time - JS-1482" in {
-    runJob(TestJobPath)
-    sleep(100.ms)  // Sometimes the task has not been closed before the next start ???
-    runJob(TestJobPath)
-    sleep(100.ms)
-    runJob(TestJobPath)
-    sleep(100.ms)
+    (for (_ ← 1 to 10) yield startJob(TestJobPath).result) await TestTimeout
+  }
+
+  if (sys.props contains "test.speed") "Speed test" in {
+    val n = 1000
+    val stopwatch = new Stopwatch
+    (for (_ ← 1 to n) yield startJob(TestJobPath).result) await (n / 1000 + 1) * TestTimeout
+    logger.info(stopwatch.itemsPerSecondString(n, "job"))
   }
 
   "Task start failure due to missing license key is stated in Job.state_text" in {
@@ -46,6 +51,7 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 }
 
 private object JS1483IT {
+  private val logger = Logger(getClass)
   private val TestJobPath = JobPath("/test")
   private val SleepJobPath = JobPath("/test-sleep")
 }
