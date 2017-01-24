@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1564
 
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -28,6 +29,6 @@ final class JS1564IT extends FreeSpec with ScalaSchedulerTest {
     runs += startOrder(JobChainPath("/test-a") orderKey "3")
     runs += startOrder(JobChainPath("/test-b") orderKey "4")
     runs += startOrder(JobChainPath("/test-b") orderKey "5")
-    awaitResults(runs map { _.finished })
+    runs map { _.finished } await TestTimeout
   }
 }
