@@ -1386,6 +1386,11 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
             if( other_socket != SOCKET_ERROR )
                 set_environment_variable( socket_environment_name, as_string( other_socket ) );
 
+            if (_ld_library_path_set) {
+                errno = 0;
+                int error = setenv("LD_LIBRARY_PATH", _ld_library_path.c_str(), 1);
+                if (error) throw_errno(errno, "setenv", "LD_LIBRARY_PATH");
+            }
 #           ifdef Z_HPUX
                 set_environment_variable( "LD_PRELOAD", _ld_preload );
 #           endif

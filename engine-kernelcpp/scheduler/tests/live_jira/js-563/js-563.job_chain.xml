@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
-<job_chain orders_recoverable="yes"
-           visible="yes">
-    <job_chain_node state="error"
-                    job="js-563-error"/>
-</job_chain>

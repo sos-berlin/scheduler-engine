@@ -1,9 +1,0 @@
-<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
->
- 
-    <job_chain_node.job_chain state="AAA" job_chain="job_chain.nested.A" error_state="CCC"/>
-    <job_chain_node.job_chain state="BBB" job_chain="job_chain.nested.B"/>
-    <job_chain_node.job_chain state="CCC" job_chain="job_chain.nested.C"/>
-    <job_chain_node.end       state="finished"/>
-                
-</job_chain>
