@@ -66,7 +66,7 @@ final class JS1455IT extends FreeSpec with ScalaSchedulerTest {
 
   private def checkSchedulerLog(): Unit = {
     assert(schedulerLogAsString contains "{scheduler}")
-    assert(schedulerLogAsString contains "{scheduler.wait}")
+    //assert(schedulerLogAsString contains "{scheduler.wait}")
   }
 
   private def schedulerLogAsString = testEnvironment.schedulerLog.contentString
