@@ -96,6 +96,8 @@ volatile int                    ctrl_c_pressed_handled              = 0;
     volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
 #endif
 
+bool                            static_ld_library_path_changed      = false;
+string                          static_original_ld_library_path     = "";               // Inhalt der Umgebungsvariablen LD_LIBRARY_PATH
 #ifdef Z_HPUX
     string                      static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
@@ -1641,6 +1643,8 @@ void Spooler::read_command_line_arguments()
             if( opt.flag      ( "distributed-orders"     ) )  _cluster_configuration._orders_are_distributed = opt.set();
             else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
+            else
+            if( opt.with_value( "test-env"               ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
@@ -3937,14 +3941,28 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                 if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
                 else
-                if( opt.with_value( "env"              ) )  
+                if( opt.with_value( "test-env"         ) )  // To allow the JVM test framework to change the process' environment variable LD_LIBRARY_PATH
                 {
                     string value = opt.value();
                     size_t eq = value.find( '=' ); if( eq == string::npos )  z::throw_xc( "SCHEDULER-318", value );
                     string name = value.substr( 0, eq );
                     value = value.substr( eq + 1 );
                     set_environment_variable( name, value );
-
+                }
+                else
+                if( opt.with_value( "env"              ) )  
+                {
+                    string value = opt.value();
+                    size_t eq = value.find( '=' ); if( eq == string::npos )  z::throw_xc( "SCHEDULER-318", value );
+                    string name = value.substr( 0, eq );
+                    value = value.substr( eq + 1 );
+                    if (name == "LD_LIBRARY_PATH" && !scheduler::static_ld_library_path_changed) {
+                        scheduler::static_ld_library_path_changed = true;
+                        if (const char* value = getenv("LD_LIBRARY_PATH")) {
+                            scheduler::static_original_ld_library_path = value;  // This is the original environment variable
+                        }
+                    }
+                    set_environment_variable( name, value );
 #                   ifdef Z_HPUX
                         if( name == "LD_PRELOAD" )  scheduler::static_ld_preload = value;
 #                   endif
@@ -4150,6 +4168,13 @@ int sos_main( int argc, char** argv )
     _argc = argc;
     _argv = argv;
 
+    bool has_ld_library_path = false;
+    string ld_library_path;
+    if (const char* o = getenv("LD_LIBRARY_PATH")) {
+        ld_library_path = o;
+        has_ld_library_path = true;
+    }
+
     int ret = sos::spooler_main( argc, argv, "", (jobject)NULL );
 
 
@@ -4169,6 +4194,17 @@ int sos_main( int argc, char** argv )
 
 #   endif
 
+    if (has_ld_library_path) {
+        // Restore for multiple calls by integration tests
+        set_environment_variable("LD_LIBRARY_PATH", ld_library_path);
+    } else {
+        #if defined Z_WINDOWS
+            set_environment_variable("LD_LIBRARY_PATH", "");
+        #else
+            unsetenv("LD_LIBRARY_PATH");
+        #endif
+    }
+ 
     return ret;
 }
 

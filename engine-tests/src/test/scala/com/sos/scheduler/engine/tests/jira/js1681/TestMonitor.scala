@@ -10,6 +10,7 @@ final class TestMonitor extends sos.spooler.Monitor_impl {
       if (sys.env isDefinedAt "SCHEDULER_PARAM_JOB") sys.error("Environment variable SCHEDULER_PARAM_JOB is known in monitor process")
       if (sys.env isDefinedAt "SCHEDULER_PARAM_GLOBAL") sys.error("Environment variable SCHEDULER_PARAM_GLOBAL is known in monitor process")
     }
+    spooler_log.info(s"LD_LIBRARY_PATH(monitor)=${sys.env.get("LD_LIBRARY_PATH")}")  // Some() or None
   	true
   }
 }

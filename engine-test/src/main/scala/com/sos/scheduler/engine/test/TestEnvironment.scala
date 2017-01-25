@@ -72,8 +72,8 @@ extends HasCloser {
       s"-log-dir=${logDirectory.getPath}",
       s"-log=$logCategoriesPrefix+$schedulerLog",   // "+" (append) in case some ExtraScheduler has been started before
       "-ip-address=127.0.0.1",
-      s"-env=JAVA_HOME=${sys.props("java.home")}",
-      if (OperatingSystem.isUnix) "-env=" + libraryPathEnv(cppBinaries.directory) else "",
+      s"-test-env=JAVA_HOME=${sys.props("java.home")}",
+      if (OperatingSystem.isUnix) "-test-env=" + libraryPathEnv(cppBinaries.directory) else "",
       s"-config=${configDirectory / "scheduler.xml"}",
       s"-configuration-directory=$liveDirectory"
     ) filter { _.nonEmpty }
