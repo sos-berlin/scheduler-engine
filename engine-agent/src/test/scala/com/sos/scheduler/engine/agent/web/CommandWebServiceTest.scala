@@ -25,7 +25,7 @@ import spray.json._
 @RunWith(classOf[JUnitRunner])
 final class CommandWebServiceTest extends FreeSpec with WebServiceTest with CommandWebService {
 
-  protected implicit def executionContext = actorRefFactory.dispatcher
+  protected implicit def executionContext = system.dispatcher
   override protected val uriPathPrefix = "test"
 
   protected def executeCommand(command: Command, meta: CommandMeta) =
