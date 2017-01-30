@@ -13,7 +13,7 @@ public class Js674IT extends SchedulerTest {
 
 
 //    @Test public void test() throws Exception {
-//        if (OperatingSystem.isUnix) {   // Sollte der Windows-Scheduler die Cygwin-bash starten, wenn das Skript mit "#! /bin/bash" beginnt?
+//        if (OperatingSystem.isUnix) {   // Sollte der Windows-Scheduler die Cygwin-bash starten, wenn das Skript mit "#!/usr/bin/env bash" beginnt?
 //            MyEventSubscriber eventSubscriber = new MyEventSubscriber();
 //            controller().subscribeEvents(eventSubscriber);
 //            controller().runScheduler(myTimeout);
