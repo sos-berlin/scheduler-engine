@@ -38,7 +38,7 @@ if [ -n "$httpPort" ]; then
 fi
 
 declare jarDir
-. "$(cd "$(dirname "$0")" && pwd || kill $$)/set-context.sh"
+. "$(cd "$(dirname -- "$0")" && pwd || kill $$)/set-context.sh"
 export SCHEDULER_HOME SCHEDULER_DATA
 
 configDirectory="$SCHEDULER_DATA"/config

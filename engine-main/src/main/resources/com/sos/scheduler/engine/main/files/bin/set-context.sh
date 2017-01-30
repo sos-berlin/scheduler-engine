@@ -15,7 +15,7 @@ fi
 
 declare SCHEDULER_HOME
 if [ -z "$SCHEDULER_HOME" ]; then :
-    SCHEDULER_HOME=$(cd "$(dirname "$0")/.." && pwd || kill $$)
+    SCHEDULER_HOME=$(cd "$(dirname -- "$0")/.." && pwd || kill $$)
 fi
 
 declare OSTYPE

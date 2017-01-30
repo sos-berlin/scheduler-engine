@@ -2,7 +2,7 @@
 set -e
 
 dir="/tmp/jobscheduler-smoke-test"
-engineMainDir=$(cd "$(dirname "$0")"; pwd)
+engineMainDir=$(cd "$(dirname -- "$0")"; pwd)
 
 if [ -e "$dir" ]; then
     echo DELETING TEMPORARY DIRECTORY $dir
