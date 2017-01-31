@@ -364,9 +364,6 @@ void Sos_database_session::open( Sos_database_file* first_file )
             _execute_direct( "SET DATEFORMAT 'ymd'" );
         } catch( const exception& ) {}
         try {
-            _execute_direct( "SET LOCK WAIT 3" );
-        } catch( const exception& ) {}
-        try {
             _execute_direct( "SET TEXTSIZE 2048000" );
         } catch( const exception& ) {}
     }
