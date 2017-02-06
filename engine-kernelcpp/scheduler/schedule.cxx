@@ -1794,12 +1794,11 @@ void Period::print( ostream& s ) const
 
 xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document ) const
 {
-    xml::Element_ptr result;
+    xml::Element_ptr result = dom_document.createElement( "period" );
 
     if( _single_start )
     {
-        result =  dom_document.createElement( "at" );
-        result.setAttribute( "at", _begin.xml_value( time::without_ms ) );
+        result.setAttribute( "single_start", _begin.xml_value( time::without_ms ) );
     }
     else
     {

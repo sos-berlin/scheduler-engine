@@ -17,8 +17,8 @@ final class SubstituteScheduleIT extends FunSuite with ScalaSchedulerTest {
   test("Schedule with substitute") {
     val response = scheduler executeXml <show_calendar from="2030-01-01T00:00:00" before="2030-01-07T00:00:00"/>
     val dateTimes = response.elem.descendant collect {
-      case e: xml.Elem if e.label == "at" && e.attributeText("job") == jobPath.string =>
-        val t = e.attributeText("at")
+      case e: xml.Elem if e.label == "period" && e.attributeText("job") == jobPath.string =>
+        val t = e.attributeText("single_start")
         ISODateTimeFormat.dateOptionalTimeParser.parseDateTime(t).toDateTime(DateTimeZone.getDefault)
     }
     dateTimes should equal (List(
