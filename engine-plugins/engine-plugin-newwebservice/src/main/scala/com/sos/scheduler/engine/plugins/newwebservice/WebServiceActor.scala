@@ -60,7 +60,7 @@ extends HttpServiceActor with AllRoutes with AgentRouteSchedulerAdapter {
 
   override def receive = runRoute(
     handleErrorAndLog(subConfig = config.getConfig("jobscheduler.master.webserver")).apply {
-      gateKeeper.restrict.apply {
+      gateKeeper.restrict.apply { _ ⇒
         completeRoute
       }
     })
