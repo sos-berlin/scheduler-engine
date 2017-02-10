@@ -51,8 +51,6 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  private lazy val tcpPort = findRandomFreeTcpPort()
-  override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val killScriptCallsDir = createTempDirectory("kill-script-calls-")  // Contains an empty file for every call of kill script
   private lazy val killScriptFile = newTemporaryShellFile("TEST") sideEffect { _.contentString =
     if (isWindows) "@echo off\n" + s"""echo >"$killScriptCallsDir/%*"""" + "\n"
@@ -69,8 +67,7 @@ final class JS1163IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
   private var killTime: Instant = null
 
   private val universalAgentSetting = new UniversalAgentSetting(agentUri = () ⇒ agentUri)
-  private val classicAgentSetting = new ClassicAgentSetting(tcpPort = () ⇒ tcpPort)
-  private val settings = List(NoAgentSetting, universalAgentSetting, classicAgentSetting)
+  private val settings = List(NoAgentSetting, universalAgentSetting)
 
   "Universal Agent unregisters task after normal termination" in {
     requireNoTasksAreRegistered()
@@ -274,7 +271,9 @@ private[js1163] object JS1163IT {
     override final def toString = name
   }
 
-  private trait CppReturnCode {
+  private object NoAgentSetting extends Setting {
+    def name = "Without agent"
+    def agentUriOption = None
     def returnCode(signal: ProcessSignal): ReturnCode =
       if (isWindows) {
         require(signal == SIGKILL)
@@ -282,11 +281,6 @@ private[js1163] object JS1163IT {
       }
       else
         ReturnCode(signal)
-  }
-
-  private object NoAgentSetting extends Setting with CppReturnCode {
-    def name = "Without agent"
-    def agentUriOption = None
   }
 
   private class UniversalAgentSetting(agentUri: () ⇒ AgentAddress) extends Setting {
@@ -301,10 +295,5 @@ private[js1163] object JS1163IT {
         ReturnCode(signal.value)  // SIGKILL -> 9, SIGTERM -> 15
       else
         ReturnCode(signal)  // SIGKILL -> 137, SIGTERM -> 143
-  }
-
-  private class ClassicAgentSetting(tcpPort: () ⇒ Int) extends Setting with CppReturnCode {
-    def name = "With TCP classic agent"
-    def agentUriOption = Some(AgentAddress(s"127.0.0.1:${tcpPort()}"))
   }
 }

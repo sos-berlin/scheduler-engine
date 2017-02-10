@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout
 
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.stdout.StdoutIT._
 import java.time.Instant.now
@@ -21,10 +19,6 @@ import org.scalatest.junit.JUnitRunner
  */
 @RunWith(classOf[JUnitRunner])
 final class StdoutIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
-
-  private lazy val tcpPort = findRandomFreeTcpPort()
-  override protected lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort"))
 
   private lazy val processClasses = Map(
     "Local" → { () ⇒ <process_class name="test" replace="true"/> },

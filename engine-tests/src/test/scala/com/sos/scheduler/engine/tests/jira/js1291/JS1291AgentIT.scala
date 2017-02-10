@@ -8,8 +8,6 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -22,7 +20,6 @@ import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConf
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT._
 import java.nio.file.Files
@@ -44,18 +41,11 @@ import scala.concurrent.Promise
 final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   import controller.{newEventPipe, toleratingErrorCodes, toleratingErrorLogged}
-  private lazy val tcpPort = findRandomFreeTcpPort()
-  override protected lazy val testConfiguration = TestConfiguration(getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort"))
 
-  private val oldAgentSetting = Setting(
-    () ⇒ ProcessClassConfiguration(agentUris = List(AgentAddress(s"127.0.0.1:$tcpPort")), processMaximum = Some(1000)),
-    shellTaskMaximum = OldAgentTaskParallelCount)
   private val newAgentSetting = Setting(
     () ⇒ ProcessClassConfiguration(agentUris = List(agentUri), processMaximum = Some(1000)),
     shellTaskMaximum = NewAgentShellTaskParallelCount)
   List(
-    "With TCP C++ Agent" → oldAgentSetting,
     "With Universal Agent" → newAgentSetting)
   .foreach { case (testGroupName, setting) ⇒
     testGroupName - {
@@ -220,7 +210,6 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
 
 object JS1291AgentIT {
   private val CpuIs64bit = sys.props("os.arch") contains "64"  // This is to detect low memory 32 bit operating system
-  private val OldAgentTaskParallelCount = 10
   private val NewAgentShellTaskParallelCount = if (CpuIs64bit) 100 else 20
   private val JavaTaskParallelCount = if (CpuIs64bit) 10 else 3
   private val TestProcessClassPath = ProcessClassPath("/test")
