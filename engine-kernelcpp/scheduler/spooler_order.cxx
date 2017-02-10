@@ -732,7 +732,11 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
                 ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
                 order->load_record( job_chain_path, record );
                 order->load_order_xml_blob( &ta );
-
+                order->load_run_time_blob(&ta);
+                order->schedule_use()->try_load();
+                if (order->schedule_use()->is_defined()) {
+                    order->schedule_use()->next_period(Time::now(), schedule::wss_next_any_start);
+                }
                 order->append_calendar_dom_elements( element, options );
             }
             catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
