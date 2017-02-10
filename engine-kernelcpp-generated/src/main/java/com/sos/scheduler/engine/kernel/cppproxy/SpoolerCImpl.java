@@ -654,6 +654,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native void log_show_state__native(long cppReference);
 
 
+    @Override public java.util.List mailDefaults() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.util.List result = mailDefaults__native(cppReference());
+            checkIsNotReleased(java.util.List.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.util.List mailDefaults__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.SettingsC modifiable_settings() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

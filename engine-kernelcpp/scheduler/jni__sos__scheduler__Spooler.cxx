@@ -910,6 +910,23 @@ static void JNICALL log_1show_1state(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL mailDefaults(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::mailDefaults()");
+        return (o_->_mail_defaults.to_java()).local_ref();
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL modifiable_1settings(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1430,6 +1447,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },
     { (char*)"log_directory__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log_1directory },
     { (char*)"log_show_state__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log_1show_1state },
+    { (char*)"mailDefaults__native", (char*)"(J)Ljava/util/List;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::mailDefaults },
     { (char*)"modifiable_settings__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/SettingsC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::modifiable_1settings },
     { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name },
     { (char*)"name_is_valid__native", (char*)"(JLjava/lang/String;)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name_1is_1valid__Ljava_lang_String_2 },

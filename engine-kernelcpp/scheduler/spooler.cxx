@@ -1535,6 +1535,8 @@ void Spooler::read_ini_file()
     _mail_defaults.set( "cc"       ,            read_profile_string( _factory_ini, "spooler", "log_mail_cc"      ) );
     _mail_defaults.set( "bcc"      ,            read_profile_string( _factory_ini, "spooler", "log_mail_bcc"     ) );
     _mail_defaults.set( "subject"  ,            read_profile_string( _factory_ini, "spooler", "log_mail_subject" ) );
+    _mail_defaults.set("mail_on_error", _mail_on_error ? "1" : "0");  // Only for Java
+    _mail_defaults.set("mail_on_warning", _mail_on_warning ? "1" : "0");  // Only for Java
 
     _subprocess_own_process_group_default = read_profile_bool( _factory_ini, "spooler", "subprocess.own_process_group", _subprocess_own_process_group_default );
     _log_collect_within = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 ));
