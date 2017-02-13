@@ -28,11 +28,12 @@ public class TestPlugin extends AbstractPlugin {
         }
 
         Map<String, String> mailDefaults = mapAsJavaMap(scheduler.mailDefaults());
-        assert(mailDefaults.get("mail_on_error").equals("1"/*true*/));
+        assert(mailDefaults.get("mail_on_error").equals("1"/*true*/));  // Or "0" for false
         assert(mailDefaults.get("mail_on_warning").equals("1"/*true*/));
         assert(mailDefaults.get("smtp").equals("TEST-SMTP"));
-      //assert(mailDefaults.get("user").equals(TEST-USER"));
-      //assert(mailDefaults.get("password").equals(TEST-PASSWORD"));
+        assert(mailDefaults.get("mail.smtp.port").equals("2525"));
+        assert(mailDefaults.get("mail.smtp.user").equals("TEST-USER"));
+        assert(mailDefaults.get("mail.smtp.password").equals("TEST-PASSWORD"));
         assert(mailDefaults.get("to").equals("TEST-TO"));
         assert(mailDefaults.get("from").equals("TEST-FROM"));
         assert(mailDefaults.get("from_name").startsWith("Scheduler "));
@@ -41,6 +42,6 @@ public class TestPlugin extends AbstractPlugin {
         assert(mailDefaults.get("cc").equals("TEST-CC"));
         assert(mailDefaults.get("subject").equals("TEST-SUBJECT"));
         assert(mailDefaults.get("queue_dir").equals("TEST-QUEUE-DIR"));
-        assert(mailDefaults.get("queue_only").equals("0"));
+        assert(mailDefaults.get("queue_only").equals("0"/*false*/));
     }
 }
